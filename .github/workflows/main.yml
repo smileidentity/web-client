@@ -1,0 +1,43 @@
+name: Cypress Tests
+
+on:
+  push:
+    tags: v[1-9]+.[0-9]+.[0-9]+*
+    branches: main
+
+jobs:
+  test_build_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          build: npm ci
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          build: npm run build
+          start: npm start
+      - name: Get Version
+        if: startsWith( github.ref, 'refs/tags/v' )
+        id: get_version
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Set Destination
+        if: startsWith( github.ref, 'refs/tags/v' )
+        id: set_destination
+        env:
+          TAG: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          echo ::set-output name=DEST_DIR::$( echo "js/$TAG" )
+      - name: Publish to CDN
+        if: startsWith( github.ref, 'refs/tags/v' )
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js'
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR }}

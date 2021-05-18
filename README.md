@@ -6,6 +6,8 @@ library built to enable us capture selfies and liveness images for use with Smil
 
 It works in concert with our [server-side libraries](https://docs.smileidentity.com/products/core-libraries).
 
+Here's an [example full-stack integration](https://glitch.com/edit/#!/smart-camera-web-demo-node) using our [NodeJS Server-Side Library](https://www.npmjs.com/package/smile-identity-core)
+
 ## Installation
 
 We support installation through NPM and by adding a script tag from our CDN
@@ -26,6 +28,10 @@ import '@smile_identity/smart-camera-web'
 <script src="https://cdn.smileidentity.com/js/<version>/smart-camera-web.js"></script>
 ```
 
+We use semantic versioning. As such, an example of a valid link will be:
+```html
+<script src="https://cdn.smileidentity.com/js/v1.0.0-beta.2/smart-camera-web.js"></script>
+```
 ## Usage
 
 After installing, and importing if required, you can use the web-component by

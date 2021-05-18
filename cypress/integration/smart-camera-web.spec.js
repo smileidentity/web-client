@@ -62,7 +62,7 @@ context('SmartCameraWeb', () => {
       .click();
 
     cy
-      .wait(8000);
+      .wait(4000);
 
     cy
       .get('smart-camera-web')
@@ -129,7 +129,7 @@ context('SmartCameraWeb', () => {
       .click();
 
     cy
-      .wait(8000);
+      .wait(4000);
 
     cy
       .get('smart-camera-web')
@@ -164,7 +164,7 @@ context('SmartCameraWeb', () => {
       .click();
 
     cy
-      .wait(8000);
+      .wait(4000);
 
     cy
       .get('smart-camera-web')

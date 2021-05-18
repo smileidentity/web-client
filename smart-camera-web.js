@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.1';
+const VERSION = '1.0.0-beta.2';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -63,6 +63,7 @@ template.innerHTML = `
 
   img {
     max-width: 100%;
+    max-height: 35vh;
     transform: scaleX(-1);
   }
 
@@ -116,7 +117,7 @@ template.innerHTML = `
   }
 
   .flow > * + * {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 
   .button {
@@ -249,12 +250,19 @@ template.innerHTML = `
       <a href='https://smileidentity.com' class='powered-by text-transform-uppercase'>
         <span class='logo-mark'>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-            <path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
+            <symbol id="logo-mark">
+              <path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
+            </symbol>
+            <use href="#logo-mark" />
           </svg>
         </span>
         <span>Powered By</span>
         <span class='company'>Smile Identity</span>
       </a>
+    </p>
+
+    <p>
+      We need access to your camera so that we can take selfie and proof-of-life images.
     </p>
 
     <button id='request-camera-access' class='button button--primary | center' type='button'>
@@ -271,7 +279,7 @@ template.innerHTML = `
       <a href='https://smileidentity.com' class='powered-by text-transform-uppercase'>
         <span class='logo-mark'>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-            <path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
+            <use href="#logo-mark" />
           </svg>
         </span>
         <span>Powered By</span>
@@ -280,7 +288,7 @@ template.innerHTML = `
     </p>
 
     <div class='video-container'>
-      <svg width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="#17A3DC" stroke-width="7.13965"/>
       </svg>
       <p id='smile-cta' class='color-gray'>SMILE</p>
@@ -334,7 +342,7 @@ template.innerHTML = `
       <a href='https://smileidentity.com' class='powered-by text-transform-uppercase'>
         <span class='logo-mark'>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-            <path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
+            <use href="#logo-mark" />
           </svg>
         </span>
         <span>Powered By</span>
@@ -444,6 +452,7 @@ class SmartCameraWeb extends HTMLElement {
 
     this.videoContainer = this.shadowRoot.querySelector('.video-container');
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
+    this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
     this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
     this.reviewImage = this.shadowRoot.querySelector('#review-image');
 
@@ -462,7 +471,7 @@ class SmartCameraWeb extends HTMLElement {
       this._reStartImageCapture();
     });
 
-    this._videoStreamDurationInMS = 7600;
+    this._videoStreamDurationInMS = 3800;
     this._imageCaptureIntervalInMS = 200;
 
     this._data = {
@@ -485,6 +494,26 @@ class SmartCameraWeb extends HTMLElement {
 
   _startImageCapture() {
     this.startImageCapture.disabled = true;
+
+    /**
+     * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
+     */
+    // NOTE: initialise image outline
+    const imageOutlineLength = this.imageOutline.getTotalLength();
+    // Clear any previous transition
+    this.imageOutline.style.transition = 'none';
+    // Set up the starting positions
+    this.imageOutline.style.strokeDasharray = imageOutlineLength + ' ' + imageOutlineLength;
+    this.imageOutline.style.strokeDashoffset = imageOutlineLength;
+    // Trigger a layout so styles are calculated & the browser
+    // picks up the starting position before animating
+    this.imageOutline.getBoundingClientRect();
+    // Define our transition
+    this.imageOutline.style.transition =
+      `stroke-dashoffset ${this._videoStreamDurationInMS / 1000}s ease-in-out`;
+    // Go!
+    this.imageOutline.style.strokeDashoffset = '0';
+
     this.smileCTA.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
 
     this._imageCaptureInterval = setInterval(() => {
@@ -496,37 +525,33 @@ class SmartCameraWeb extends HTMLElement {
     }, this._videoStreamDurationInMS);
   }
 
-  _capturePOLPhoto() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 160;
-    canvas.height = 160;
-
+  _drawImage(canvas) {
     const context = canvas.getContext('2d');
 
-    const aspectRatio = this._video.videoWidth / this._video.videoHeight;
+    const imageDimension = 240;
 
-    // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
-    if (aspectRatio > 1) {
-      context.drawImage(
-        this._video,
-        ((this._video.videoWidth - this._video.videoHeight) / 2), 0,
-        this._video.videoHeight, this._video.videoHeight,
-        0, 0,
-        canvas.width, canvas.height
-      );
-    } else if (aspectRatio < 1) {
-      context.drawImage(
-        this._video,
-        0, ((this._video.videoHeight - this._video.videoWidth) / 2),
-        this._video.videoWidth, this._video.videoWidth,
-        0, 0,
-        canvas.width, canvas.height
-      );
-    } else {
-      context.drawImage(this._video, 0, 0, canvas.width, canvas.height);
-    }
+    const xCenterOfImage = this._video.videoWidth / 2;
+    const yCenterOfImage = this._video.videoHeight / 2
 
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    context.drawImage(
+      this._video,
+      (xCenterOfImage - (imageDimension / 2)), (yCenterOfImage - (imageDimension / 2)),
+      imageDimension, imageDimension,
+      0, 0,
+      canvas.width, canvas.height
+    );
+
+    return context;
+  }
+
+  _capturePOLPhoto() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 144;
+    canvas.height = 144;
+
+    const contextWithImage = this._drawImage(canvas);
+
+    const imageData = contextWithImage.getImageData(0, 0, canvas.width, canvas.height);
     let data = imageData.data;
 
     for (let i = 0; i < data.length; i += 4) {
@@ -539,21 +564,20 @@ class SmartCameraWeb extends HTMLElement {
       data[i + 2] = brightness;
     }
 
-    context.putImageData(imageData, 0, 0);
+    contextWithImage.putImageData(imageData, 0, 0);
 
     this._rawImages.push(canvas.toDataURL('image/jpeg'));
   }
 
   _captureReferencePhoto() {
     const canvas = document.createElement('canvas');
-    canvas.width = this._video.videoWidth;
-    canvas.height = this._video.videoHeight;
+    canvas.width = 480;
+    canvas.height = 480;
 
-    const context = canvas.getContext('2d');
-    context.drawImage(this._video, 0, 0, canvas.width, canvas.height);
+    const context = this._drawImage(canvas);
+
     const image = canvas.toDataURL('image/jpeg');
 
-    // TODO: figure out how to display reference image at completion of capture
     this._referenceImage = image;
 
     this._data.images.push({

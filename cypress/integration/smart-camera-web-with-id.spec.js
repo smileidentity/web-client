@@ -9,7 +9,7 @@ let app;
 
 context('SmartCameraWeb', () => {
 	beforeEach(() => {
-		cy.visit('/');
+		cy.visit('/capture-id');
 	});
 
 	it('should find the button to request-camera-access', () => {
@@ -142,7 +142,7 @@ context('SmartCameraWeb', () => {
 			.should('not.be.visible');
 	});
 
-	it('should switch from the review screen to the thanks screen on clicking "Yes, use this one"', () => {
+	it('should switch from the review screen to the id camera screen on clicking "Yes, use this one"', () => {
 		cy
 			.get('smart-camera-web')
 			.shadow()
@@ -170,6 +170,150 @@ context('SmartCameraWeb', () => {
 			.find('#review-screen')
 			.should('not.be.visible');
 
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen')
+			.should('be.visible');
+	});
+
+	it('should capture a photo when "capture-id-image" is clicked, and move to the "id-review-screen"', () => {
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-camera-access')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#start-image-capture')
+			.click();
+
+		cy
+			.wait(4000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#select-selfie')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#capture-id-image')
+			.click();
+
+		cy
+			.wait(2000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen')
+			.should('not.be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-review-screen')
+			.should('be.visible');
+	});
+
+	it('should switch from the id review screen back to the camera screen on clicking the "Re-Capture" icon', () => {
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-camera-access')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#start-image-capture')
+			.click();
+
+		cy
+			.wait(4000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#select-selfie')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#capture-id-image')
+			.click();
+
+		cy
+			.wait(2000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#re-capture-id-image')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-review-screen')
+			.should('not.be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen')
+			.should('be.visible');
+	});
+
+	it('should switch from the review screen to the id camera screen on clicking the "Approve" icon', () => {
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-camera-access')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#start-image-capture')
+			.click();
+
+		cy
+			.wait(4000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#select-selfie')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#capture-id-image')
+			.click();
+
+		cy
+			.wait(2000);
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#select-id-image')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-review-screen')
+			.should('not.be.visible');
 
 		cy
 			.get('smart-camera-web')

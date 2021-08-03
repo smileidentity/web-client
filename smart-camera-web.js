@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.3';
+const VERSION = '1.0.0-beta.4';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -505,6 +505,85 @@ template.innerHTML = `
 	</div>
 </div>
 
+<div hidden id='back-of-id-camera-screen' class='flow center'>
+	<h1>Take Back of ID Card Photo</h1>
+	<div class='section | flow'>
+		<p>
+			<a href='https://smileidentity.com' class='powered-by text-transform-uppercase'>
+				<span class='logo-mark'>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+						<use href="#logo-mark" />
+					</svg>
+				</span>
+				<span>Powered By</span>
+				<span class='company'>Smile Identity</span>
+			</a>
+		</p>
+
+		<div class='id-video-container'>
+			<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
+				<use href='#image-frame' />
+			</svg>
+
+			<div class='actions'>
+				<button id='capture-back-of-id-image' class='button icon-btn | center' type='button'>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="60" width="60">
+						<circle cx="30" cy="30" r="27" stroke="currentColor" stroke-width="3" />
+					</svg>
+					<span class='visually-hidden'>Capture</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div hidden id='back-of-id-review-screen' class='flow center'>
+	<h1>Review Back of ID Card Photo</h1>
+	<div class='section | flow'>
+		<p>
+			<a href='https://smileidentity.com' class='powered-by text-transform-uppercase'>
+				<span class='logo-mark'>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+						<use href="#logo-mark" />
+					</svg>
+				</span>
+				<span>Powered By</span>
+				<span class='company'>Smile Identity</span>
+			</a>
+		</p>
+
+		<div class='id-video-container'>
+			<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
+				<use href='#image-frame' />
+			</svg>
+
+			<div class='actions'>
+				<button id='select-back-of-id-image' class='button icon-btn' type='button'>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
+						<circle cx="20.5" cy="20.5" r="20" stroke="#fff"/>
+						<path d="M12.3 20.5l6.15 6.15 12.3-12.3" stroke="#fff" stroke-width="3.075" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span class='visually-hidden'>Accept Image</span>
+				</button>
+				<button id='re-capture-back-of-id-image' class='button icon-btn' type='button'>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
+						<path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
+					</svg>
+					<span class='visually-hidden'>Re-Capture</span>
+				</button>
+			</div>
+
+			<img
+				alt='your ID card'
+				id='back-of-id-review-image'
+				src=''
+				width='396'
+				height='259'
+			/>
+		</div>
+	</div>
+</div>
+
 <div hidden id='thanks-screen' class='flow center'>
 	<div class='section | flow'>
 		<h1>Thank you</h1>
@@ -529,6 +608,13 @@ class SmartCameraWeb extends HTMLElement {
 		super();
 
 		this.attachShadow({ mode: 'open' });
+		this.activeScreen = null;
+	}
+
+	setActiveScreen(element) {
+		this.activeScreen.hidden = true;
+		element.hidden = false;
+		this.activeScreen = element;
 	}
 
 	connectedCallback() {
@@ -562,8 +648,7 @@ class SmartCameraWeb extends HTMLElement {
 
 		this._data.partner_params.permissionGranted = true;
 
-		this.requestScreen.hidden = true;
-		this.cameraScreen.hidden = false;
+		this.setActiveScreen(this.cameraScreen);
 
 		this._stream = stream;
 		this._video = video;
@@ -582,7 +667,12 @@ class SmartCameraWeb extends HTMLElement {
 			video.src = window.URL.createObjectURL(stream);
 		}
 
-		this.IDCameraScreen.querySelector('.id-video-container').appendChild(video);
+		if (this.activeScreen === this.IDCameraScreen) {
+			this.IDCameraScreen.querySelector('.id-video-container').appendChild(video);
+		} else {
+			this.backOfIDCameraScreen.querySelector('.id-video-container').appendChild(video);
+		}
+
 		this._IDStream = stream;
 		this._IDVideo = video;
 	}
@@ -635,12 +725,16 @@ class SmartCameraWeb extends HTMLElement {
 		this.errorMessage = this.shadowRoot.querySelector('#error');
 
 		this.captureID = this.hasAttribute('capture-id');
+		this.captureBackOfID = this.getAttribute('capture-id') === 'back';
 
 		this.requestScreen = this.shadowRoot.querySelector('#request-screen');
+		this.activeScreen = this.requestScreen;
 		this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
 		this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
 		this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
 		this.IDReviewScreen = this.shadowRoot.querySelector('#id-review-screen');
+		this.backOfIDCameraScreen = this.shadowRoot.querySelector('#back-of-id-camera-screen');
+		this.backOfIDReviewScreen = this.shadowRoot.querySelector('#back-of-id-review-screen');
 		this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
 
 		this.videoContainer = this.shadowRoot.querySelector('.video-container');
@@ -648,13 +742,17 @@ class SmartCameraWeb extends HTMLElement {
 		this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
 		this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
 		this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
+		this.captureBackOfIDImage = this.shadowRoot.querySelector('#capture-back-of-id-image');
 		this.reviewImage = this.shadowRoot.querySelector('#review-image');
 		this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
+		this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-image');
 
 		this.reStartImageCapture = this.shadowRoot.querySelector('#restart-image-capture');
 		this.reCaptureIDImage = this.shadowRoot.querySelector('#re-capture-id-image');
+		this.reCaptureBackOfIDImage = this.shadowRoot.querySelector('#re-capture-back-of-id-image');
 		this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
 		this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
+		this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
 
 		this.startImageCapture.addEventListener('click', () => {
 			this._startImageCapture();
@@ -668,7 +766,15 @@ class SmartCameraWeb extends HTMLElement {
 			this._selectIDImage();
 		});
 
+		this.selectBackOfIDImage.addEventListener('click', () => {
+			this._selectIDImage(true);
+		});
+
 		this.captureIDImage.addEventListener('click', () => {
+			this._captureIDImage();
+		});
+
+		this.captureBackOfIDImage.addEventListener('click', () => {
 			this._captureIDImage();
 		});
 
@@ -677,6 +783,10 @@ class SmartCameraWeb extends HTMLElement {
 		});
 
 		this.reCaptureIDImage.addEventListener('click', () => {
+			this._reCaptureIDImage();
+		});
+
+		this.reCaptureBackOfIDImage.addEventListener('click', () => {
 			this._reCaptureIDImage();
 		});
 
@@ -743,7 +853,11 @@ class SmartCameraWeb extends HTMLElement {
 
 		const image = canvas.toDataURL('image/jpeg');
 
-		this.IDReviewImage.src = image;
+		if (this.activeScreen === this.IDCameraScreen) {
+			this.IDReviewImage.src = image;
+		} else {
+			this.backOfIDReviewImage.src = image;
+		}
 
 		this._data.images.push({
 			image_type_id: 3,
@@ -752,8 +866,11 @@ class SmartCameraWeb extends HTMLElement {
 
 		this._stopIDVideoStream();
 
-		this.IDCameraScreen.hidden = true;
-		this.IDReviewScreen.hidden = false;
+		if (this.activeScreen === this.IDCameraScreen) {
+			this.setActiveScreen(this.IDReviewScreen);
+		} else {
+			this.setActiveScreen(this.backOfIDReviewScreen);
+		}
 	}
 
 	_drawImage(canvas, video = this._video) {
@@ -871,8 +988,7 @@ class SmartCameraWeb extends HTMLElement {
 			image: this._rawImages[imageIndex].split(',')[1],
 		})));
 
-		this.cameraScreen.hidden = true;
-		this.reviewScreen.hidden = false;
+		this.setActiveScreen(this.reviewScreen);
 	}
 
 	_stopIDVideoStream(stream = this._IDStream) {
@@ -896,14 +1012,18 @@ class SmartCameraWeb extends HTMLElement {
 		if (!this.captureID) {
 			this._publishSelectedImages();
 		} else {
-			this.reviewScreen.hidden = true;
-			this.IDCameraScreen.hidden = false;
+			this.setActiveScreen(this.IDCameraScreen);
 			this._startIDCamera();
 		}
 	}
 
-	_selectIDImage() {
-		this._publishSelectedImages();
+	_selectIDImage(backOfIDCaptured = false) {
+		if (!this.captureBackOfID || backOfIDCaptured) {
+			this._publishSelectedImages();
+		} else {
+			this.setActiveScreen(this.backOfIDCameraScreen);
+			this._startIDCamera();
+		}
 	}
 
 	_publishSelectedImages() {
@@ -911,17 +1031,10 @@ class SmartCameraWeb extends HTMLElement {
 			new CustomEvent('imagesComputed', { detail: this._data })
 		);
 
-		if (!this.captureID) {
-			this.reviewScreen.hidden = true;
-		} else {
-			this.IDReviewScreen.hidden = true;
-		}
-
-		this.thanksScreen.hidden = false;
+		this.setActiveScreen(this.thanksScreen);
 	}
 
 	async _reStartImageCapture() {
-		this.reviewScreen.hidden = true;
 		this.startImageCapture.disabled = false;
 
 		this._data.images = [];
@@ -939,12 +1052,14 @@ class SmartCameraWeb extends HTMLElement {
 	}
 
 	async _reCaptureIDImage() {
-		this.IDReviewScreen.hidden = true;
-		this.IDCameraScreen.hidden = false;
+		if (this.activeScreen === this.IDReviewScreen) {
+			this.setActiveScreen(this.IDCameraScreen);
+		} else {
+			this.setActiveScreen(this.backOfIDCameraScreen);
+		}
 
-		this._data.images = this._data.images.filter(
-			(imageObject) => imageObject.image_type_id !== 3
-		);
+		// NOTE: removes the last element in the list
+		this._data.images.pop();
 
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({

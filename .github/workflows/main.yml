@@ -35,7 +35,7 @@ jobs:
         env:
           TAG: ${{ steps.get_version.outputs.VERSION }}
         run: |
-          echo ::set-output name=DEST_DIR::$( echo "$TAG" )
+          echo ::set-output name=DEST_DIR::$( echo "inline/$TAG" )
       - name: Publish to CDN
         if: startsWith( github.ref, 'refs/tags/v' )
         uses: jakejarvis/s3-sync-action@v0.5.1

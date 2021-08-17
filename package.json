@@ -4,6 +4,7 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
+		"build": "npx nyc instrument --compact=false script.js instrumented",
 		"start": "npx serve -p 8000",
 		"test": "npx cypress run"
 	},

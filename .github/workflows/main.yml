@@ -40,7 +40,7 @@ jobs:
         if: startsWith( github.ref, 'refs/tags/v' )
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
-          args: --follow-symlinks --delete --exclude '*' --include 'inline.js' --include 'iframe.html'
+          args: --follow-symlinks --delete --exclude '*' --include 'script.js' --include 'iframe.html'
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

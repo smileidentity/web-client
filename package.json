@@ -13,8 +13,7 @@
 		"url": "git+https://github.com/smileidentity/hosted-web-integration.git"
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "tams sokari <tams@smileidentity.com>",
 	"bugs": {
 		"url": "https://github.com/smileidentity/hosted-web-integration/issues"
 	},

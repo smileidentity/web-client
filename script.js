@@ -2,7 +2,10 @@
 
 function getSiteURL() {
 	var currentScriptSrc = document.currentScript.src;
-	const qualifiedURL = currentScriptSrc.split('/script.js')[0];
+
+	const qualifiedURL = currentScriptSrc.split('script.js')[0];
+
+	if (qualifiedURL.includes('instrumented') return '';
 
 	return qualifiedURL;
 }
@@ -14,7 +17,7 @@ const config = {
 function createIframe() {
 	var iframe = document.createElement('iframe');
 
-	iframe.setAttribute('src', `${config.siteURL}/iframe.html`);
+	iframe.setAttribute('src', `${config.siteURL}iframe.html`);
 	iframe.setAttribute('id', 'iframe');
 	iframe.setAttribute('name', 'smile-identity-hosted-integration');
 	iframe.setAttribute('frameborder', '0');

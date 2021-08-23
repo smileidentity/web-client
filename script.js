@@ -8,7 +8,9 @@ function getSiteURL() {
 
 		qualifiedURL = currentScriptSrc.split('script.js')[0];
 
-		if (qualifiedURL.includes('instrumented') return '';
+		if (qualifiedURL.includes('instrumented') {
+			return '';
+		}
 	}
 
 	return qualifiedURL;

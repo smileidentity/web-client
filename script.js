@@ -1,11 +1,15 @@
 'use strict';
 
 function getSiteURL() {
-	var currentScriptSrc = document.currentScript.src;
+	let qualifiedURL = '';
 
-	const qualifiedURL = currentScriptSrc.split('script.js')[0];
+	if (document.currentScript) {
+		var currentScriptSrc = document.currentScript.src;
 
-	if (qualifiedURL.includes('instrumented') return '';
+		qualifiedURL = currentScriptSrc.split('script.js')[0];
+
+		if (qualifiedURL.includes('instrumented') return '';
+	}
 
 	return qualifiedURL;
 }

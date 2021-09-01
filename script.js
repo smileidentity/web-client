@@ -24,7 +24,6 @@ function createIframe() {
 	iframe.setAttribute('name', 'smile-identity-hosted-integration');
 	iframe.setAttribute('frameborder', '0');
 	iframe.setAttribute('allow', 'camera; geolocation; encrypted-media;');
-	iframe.setAttribute('sandbox', 'allow-forms allow-same-origin allow-scripts');
 	iframe.setAttribute('allowtransparency', 'true');
 
 	iframe.style.width = '100vw';

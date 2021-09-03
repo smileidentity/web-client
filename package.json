@@ -1,0 +1,26 @@
+{
+	"name": "@smile_identity/web-page",
+	"version": "1.0.0",
+	"description": "Self Hosted Integration for Smile Identity on the Web",
+	"main": "inline.js",
+	"scripts": {
+		"build": "npx nyc instrument --compact=false script.js instrumented",
+		"start": "npx serve -p 8000",
+		"test": "npx cypress run"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/smileidentity/hosted-web-integration.git"
+	},
+	"keywords": [],
+	"author": "tams sokari <tams@smileidentity.com>",
+	"bugs": {
+		"url": "https://github.com/smileidentity/hosted-web-integration/issues"
+	},
+	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
+	"devDependencies": {
+		"@cypress/code-coverage": "3.9.10",
+		"cypress": "8.3.0",
+		"serve": "12.0.0"
+	}
+}

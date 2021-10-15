@@ -181,6 +181,16 @@
 				-moz-appearance: none;
 			}
 
+			button:hover:not([disabled]),
+			button:focus:not([disabled]) {
+				transform: scale(1.02);
+			}
+
+			[disabled] {
+				cursor: not-allowed;
+				filter: opacity(.7);
+			}
+
 			.flow {
 			}
 
@@ -284,7 +294,7 @@
 					Enter Details
 				</h1>
 
-				<progress max='100'></progress>
+				<progress hidden max='100'></progress>
 
 				<form name='user-details' class='flow'>
 					<div class="input-group flow">

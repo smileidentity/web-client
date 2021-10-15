@@ -275,27 +275,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	async function createZip() {
 		const zip = new JSZip();
 
-		const file_images = images.map((image, i) => {
-			var file_name;
-			if (image.image_type_id === 2) {
-				file_name = 'SID_Preview_Full';
-			} else if (image.image_type_id === 6) {
-				file_name = `SID_000${i}`;
-			} else if (image.image_type_id === 3) {
-				file_name = `SID_ID_Card`;
-			}
-
-			zip.file(`${file_name}.jpeg`, `${image.image}`, { base64: true });
-
-			return {
-				image_type_id: image.image_type_id,
-				image: '',
-				file: file_name
-			}
-		});
-
-		images = file_images;
-
 		zip.file('info.json', JSON.stringify({
 			package_information: {
 				"apiVersion": {

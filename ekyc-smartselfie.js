@@ -254,10 +254,23 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 				case 'getUploadURL failed':
 				case 'uploadFile failed':
 				default:
+					displayErrorMessage(error);
 					console.error(`SmileIdentity - ${error.name}: ${error.cause}`);
 			}
 		}
 	};
+
+	function displayErrorMessage(error) {
+		const error = document.createElement('p');
+
+		p.textContent = error.message;
+		p.style.color = 'red';
+		p.style.fontSize = '2rem';
+		p.style.textAlign = 'center';
+
+		const main = document.querySelector('main');
+		main.prepend(error);
+	}
 
 	async function createZip() {
 		const zip = new JSZip();
@@ -329,6 +342,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		try {
 			const response = await fetch(URL, fetchConfig);
 			const json = await response.json();
+
+			if (json.error) throw new Error(json.error);
 
 			return json.upload_url;
 		} catch (error) {

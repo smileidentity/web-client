@@ -261,7 +261,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	};
 
 	function displayErrorMessage(error) {
-		const error = document.createElement('p');
+		const p = document.createElement('p');
 
 		p.textContent = error.message;
 		p.style.color = 'red';
@@ -269,7 +269,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		p.style.textAlign = 'center';
 
 		const main = document.querySelector('main');
-		main.prepend(error);
+		main.prepend(p);
 	}
 
 	async function createZip() {

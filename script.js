@@ -35,6 +35,7 @@ var SmileIdentity = function () {
 
 		iframe.style.width = '100vw';
 		iframe.style.height = '100vh';
+		iframe.style.position = 'absolute';
 
 		document.body.appendChild(iframe);
 	}

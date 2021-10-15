@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8' />
+		<title>
+			SmileIdentity - Enhanced KYC with SmartSelfie
+		</title>
+		<meta name='viewport' content='width=device-width, initial-scale=1' />
+		<link rel="preconnect" href="https://fonts.gstatic.com"> 
+
+		<style>
+			:root {
+				--flow-space: 1rem;
+			}
+
+			*, ::after, ::before {
+				box-sizing: border-box
+			}
+
+			blockquote, body, dd, dl, figure, h1, h2, h3, h4, p {
+				margin: 0
+			}
+
+			ol[role=list], ul[role=list] {
+				list-style: none
+			}
+
+			html:focus-within {
+				scroll-behavior: smooth
+			}
+
+			a:not([class]) {
+				text-decoration-skip-ink: auto
+			}
+
+			img, picture {
+				max-width: 100%;
+				display: block
+			}
+
+			button, input, select, textarea {
+				font: inherit
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				html:focus-within {
+					scroll-behavior:auto
+				}
+
+				*, ::after, ::before {
+					animation-duration: 0s !important;
+					animation-iteration-count: 1 !important;
+					transition-duration: 0s !important;
+					scroll-behavior:auto !important
+				}
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			html {
+				font-family: 'Nunito Sans', sans-serif;
+			}
+
+			body {
+				min-height: 100vh;
+				text-rendering: optimizeSpeed;
+				background: #E5E5E5;
+				color: #1c2334;
+				line-height: 1.5;
+				display: flex;
+				flex-direction: column;
+				position: relative;
+			}
+
+			main {
+				width: 100%;
+				max-width: 40rem;
+				background: #ffffff;
+				border-radius: 2rem;
+				padding: 2rem;
+				overflow-y: scroll;
+				position: absolute;
+			}
+
+			@media screen and (min-width: 40rem) {
+				main {
+					padding: 2rem 5rem;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+				}
+			}
+
+			@media screen and (min-width: 80rem) {
+				main {
+					max-height: 80%;
+				}
+			}
+
+			h1 {
+				font-size: 1.5rem;
+				font-weight: 600;
+			}
+
+			form {
+				--flow-space: 4rem;
+			}
+
+			form > * {
+				--flow-space: 1.5rem;
+			}
+
+			fieldset {
+				border: none;
+				margin-left: 0;
+				margin-right: 0;
+				padding: 0;
+			}
+
+			label,
+			input,
+			select,
+			textarea {
+				--flow-space: .5rem;
+				display: block;
+				width: 100%;
+			}
+
+			label, legend {
+				color: black;
+				font-weight: 500;
+				padding: 0;
+			}
+/*
+			label.required:after {
+				content: '*';
+				display: inline-block;
+				color: red;
+			}
+			*/
+
+			input,
+			textarea {
+				border: 1px solid #d1d8d6;
+				border-radius: .5rem;
+				padding: .75rem 1rem;
+			}
+
+			input {
+				height: 3rem;
+			}
+
+			textarea {
+				min-height: 10rem;
+			}
+
+			button[data-type='primary'] {
+				--flow-space: 3rem;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(46.64deg, #031532 -0.41%, #114482 122.81%,
+					#02060B 122.81%);
+				border: none;
+				color: #ffffff;
+				cursor: pointer;
+				border-radius: 2rem;
+				font-size: 20px;
+				font-weight: 500;
+				line-height: 1;
+				letter-spacing: .05ch;
+				padding: 1rem 2.5rem;
+				text-decoration: none;
+				text-align: center;
+				width: 100%;
+				transition: background 250ms ease-in-out,
+										transform 150ms ease;
+				-webkit-appearance: none;
+				-moz-appearance: none;
+			}
+
+			.flow {
+			}
+
+			.flow > * + * {
+				margin-top: var(--flow-space);
+			}
+
+			.center {
+				text-align: center;
+			}
+
+			.split-pair {
+				overflow: hidden;
+			}
+
+			.split-pair > * + * {
+				margin-top: var(--flow-space);
+			}
+
+			@media screen and (min-width: 45em) {
+				.split-pair {
+					display: flex;
+					align-items: center;
+					gap: 2rem;
+				}
+
+				.split-pair[data-variant='start'] {
+					align-items: start;
+				}
+
+				.split-pair > * {
+					flex-grow: 1;
+					flex-basis: 50%;
+				}
+
+				.split-pair > * + * {
+					margin-top: 0;
+				}
+			}
+
+			.input-group {
+				--flow-space: 1.5rem;
+			}
+
+			#error,
+			.validation-message {
+				color: red;
+				text-transform: capitalize;
+			}
+
+			.dob {
+				--flow-space: 1rem;
+				display: flex;
+				gap: 1rem;
+			}
+
+			@media screen and (min-width: 40rem) {
+				.dob {
+					gap: 2rem;
+				}
+			}
+
+			.credits {
+				--flow-space: 2rem;
+				color: #636670;
+				font-size: .75rem;
+			}
+
+			.company-name {
+				text-transform: uppercase;
+				letter-spacing: .1rem;
+				border-left: 1px solid #cecece;
+				margin-left: .75rem;
+				padding-left: .75rem;
+				display: inline-flex;
+				align-items: center;
+			}
+
+			.company-name svg {
+				margin-right: .5rem;
+			}
+		</style>
+	</head>
+	<body>
+		<noscript>
+			<h1>
+				Sorry, it appears JavaScript is not supported at this time in your
+				browser
+			</h1>
+			<p>
+				Please enable JavaScript to verify your identity online with SmileIdentity
+			</p>
+		</noscript>
+
+		<main>
+			<smart-camera-web hidden>
+			</smart-camera-web>
+
+			<section hidden id='id-info' class='flow'>
+				<h1 class='center'>
+					Enter Details
+				</h1>
+
+				<progress max='100'></progress>
+
+				<form name='user-details' class='flow'>
+					<div class="input-group flow">
+						<label class='required' for="id_number">
+							ID Number
+						</label>
+
+						<input aria-required='true' id="id_number" name="id_number"
+							placeholder=''/>
+					</div>
+
+					<fieldset hidden id='names' class="split-pair" data-variant="start">
+						<div class="input-group flow">
+							<label class="required" for="first_name">
+								First Name
+							</label>
+
+							<input aria-required="true" id="first_name" name="first_name" placeholder="Jane" required="" type="text">
+						</div>
+
+						<div class="input-group flow">
+							<label class="required" for="last_name">
+								Last Name
+							</label>
+
+							<input aria-required="true" id="last_name" name="last_name" placeholder="Momodu" required="" type="text">
+						</div>
+					</fieldset>
+
+					<fieldset hidden id='dob' class='flow'>
+						<legend>
+							Date of Birth
+						</legend>
+
+						<div class='dob'>
+							<div class="input-group flow">
+								<label class="required" for="day">
+									Day
+								</label>
+
+								<input aria-required="true" id="day" name="day" placeholder="31" required="" type="text">
+							</div>
+
+							<div class="input-group flow">
+								<label class="required" for="last_name">
+									Month
+								</label>
+
+								<input aria-required="true" id="month" name="month"
+								placeholder="10" required="" type="text">
+							</div>
+
+							<div class="input-group flow">
+								<label class="required" for="year">
+									Year
+								</label>
+
+								<input aria-required="true" id="year" name="year"
+								placeholder="2000" required="" type="text">
+							</div>
+						</div>
+					</fieldset>
+
+					<button data-type='primary' type='button' id='submitForm'>
+						Continue
+						<svg width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+
+					<p class='center credits'>
+						<span>Powered by:</span>
+						<span class='company-name'>
+							<svg width="8" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.665 3.999V2.822c0-1.653-.887-2.604-2.454-2.604-1.566
+								0-2.427.951-2.427 2.604v.3c0 .076.052.126.13.126.079
+								0 .13-.05.13-.126v-.3c0-.876.288-2.329 2.167-2.329 1.88 0 2.167
+								1.453 2.167 2.329v1.177H1.653c-.47 0-.861.376-.861.826l.183
+								3.581c0 .451.391.827.861.827h4.516c.47
+								0 .861-.376.861-.827l.183-3.556A.902.902 0 0 0 6.666 4ZM6.9
+								8.38c0 .326-.26.551-.574.551h-4.49a.568.568 0 0 1-.574-.55L1.079
+								4.8c0-.3.261-.55.574-.55H6.51c.313 0 .574.25.574.55L6.9 8.381Z"
+								fill="#000"/>
+								<path d="M2.156 6.829c1.149 1.001 2.558.876 3.733 0 .156-.126-.079-.35-.235-.226-1.044.777-2.271.877-3.29 0-.13-.125-.365.075-.208.226Z" fill="#17A3DC"/>
+							</svg>
+							Smile Identity
+						</span>
+					</p>
+				</form>
+			</section>
+
+			<script src='/ekyc-smartselfie.js'>
+			</script>
+			<script async
+							src='/consent-screen.js'>
+			</script>
+			<script async
+							src='https://cdn.smileidentity.com/js/v1.0.0-beta.4/smart-camera-web.js'>
+			</script>
+			<script async
+							src='/libs/validate.min.js'>
+			</script>
+			<script async
+							src='/libs/jszip.min.js'>
+			</script>
+		</main>
+	</body>
+</html>

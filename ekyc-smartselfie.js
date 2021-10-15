@@ -353,9 +353,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-		let data = new FormData();
-		data.append('file', file);
-
 		let request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
@@ -379,6 +376,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		};
 
 		request.setRequestHeader("Content-type", "application/zip");
-		request.send(data);
+		request.send(file);
 	}
 }();

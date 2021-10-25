@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.4';
+const VERSION = '1.0.0-beta.5';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -263,7 +263,6 @@ template.innerHTML = `
 		min-height: 100%;
 		clip-path: ellipse(101px 118px);
 		transform: scaleX(-1) translateX(50%) translateY(-50%);
-		z-index: -1;
 	}
 
 	.id-video-container .image-frame {
@@ -632,7 +631,8 @@ class SmartCameraWeb extends HTMLElement {
 	}
 
 	handleSuccess(stream) {
-		const video = document.createElement('video');
+		const videoExists = !!this.videoContainer.querySelector('video');
+		const video = videoExists ? this.videoContainer.querySelector('video') : document.createElement('video');
 		const videoTracks = stream.getVideoTracks();
 
 		video.autoplay = true;
@@ -644,7 +644,7 @@ class SmartCameraWeb extends HTMLElement {
 			video.src = window.URL.createObjectURL(stream);
 		}
 
-		this.videoContainer.appendChild(video);
+		if (!videoExists) this.videoContainer.prepend(video);
 
 		this._data.partner_params.permissionGranted = true;
 
@@ -655,8 +655,16 @@ class SmartCameraWeb extends HTMLElement {
 	}
 
 	handleIDStream(stream) {
-		const video = document.createElement('video');
 		const videoTracks = stream.getVideoTracks();
+		const videoExists = this.activeScreen === this.IDCameraScreen ?
+			!!this.IDCameraScreen.querySelector('video') :
+			!!this.backOfIDCameraScreen.querySelector('video');
+
+		const video = videoExists ? (
+			this.activeScreen === this.IDCameraScreen ?
+				this.IDCameraScreen.querySelector('video') :
+				this.backOfIDCameraScreen.querySelector('video')
+			) : document.createElement('video');
 
 		video.autoplay = true;
 		video.playsInline = true;
@@ -667,10 +675,12 @@ class SmartCameraWeb extends HTMLElement {
 			video.src = window.URL.createObjectURL(stream);
 		}
 
-		if (this.activeScreen === this.IDCameraScreen) {
-			this.IDCameraScreen.querySelector('.id-video-container').appendChild(video);
-		} else {
-			this.backOfIDCameraScreen.querySelector('.id-video-container').appendChild(video);
+		if (!videoExists) {
+			if (this.activeScreen === this.IDCameraScreen) {
+				this.IDCameraScreen.querySelector('.id-video-container').appendChild(video);
+			} else {
+				this.backOfIDCameraScreen.querySelector('.id-video-container').appendChild(video);
+			}
 		}
 
 		this._IDStream = stream;

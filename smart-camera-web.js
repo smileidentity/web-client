@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.5';
+const VERSION = '1.0.0-beta.6';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -238,6 +238,7 @@ template.innerHTML = `
 	.video-container,
 	.id-video-container {
 		position: relative;
+		z-index: 1;
 		width: 100%;
 	}
 
@@ -265,19 +266,27 @@ template.innerHTML = `
 		transform: scaleX(-1) translateX(50%) translateY(-50%);
 	}
 
+	.id-video-container {
+		min-height: calc((2 * 10rem) + 198px);
+	}
+
 	.id-video-container .image-frame {
 		border-width: 10rem 1rem;
 		border-color: rgba(0, 0, 0, 0.7);
 		border-style: solid;
 		height: auto;
 		max-width: 90%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 2;
 	}
 
 	.id-video-container video {
 		max-width: 100%;
 		max-height: 98%;
 		transform: translateX(-50%) translateY(-50%);
-		z-index: -1;
+		z-index: 1;
 	}
 
 	.id-video-container img {
@@ -287,7 +296,6 @@ template.innerHTML = `
 		transform: translateX(-50%) translateY(-50%);
 		max-width: 90%;
 		max-height: 260px;
-		z-index: -1;
 	}
 
 	#id-review-screen .image-frame {
@@ -301,6 +309,7 @@ template.innerHTML = `
 		padding: 1rem;
 		position: absolute;
 		width: 90%;
+		z-index: 2;
 	}
 </style>
 
@@ -677,9 +686,9 @@ class SmartCameraWeb extends HTMLElement {
 
 		if (!videoExists) {
 			if (this.activeScreen === this.IDCameraScreen) {
-				this.IDCameraScreen.querySelector('.id-video-container').appendChild(video);
+				this.IDCameraScreen.querySelector('.id-video-container').prepend(video);
 			} else {
-				this.backOfIDCameraScreen.querySelector('.id-video-container').appendChild(video);
+				this.backOfIDCameraScreen.querySelector('.id-video-container').prepend(video);
 			}
 		}
 

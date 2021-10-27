@@ -57,7 +57,7 @@ import '@smile_identity/smart-camera-web'
 
 We use semantic versioning. As such, an example of a valid link will be:
 ```html
-<script src="https://cdn.smileidentity.com/js/v1.0.0-beta.3/smart-camera-web.js"></script>
+<script src="https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js"></script>
 ```
 ### Usage
 
@@ -135,7 +135,7 @@ Here's a sample:
 ```js
 {
   partner_params: {
-    libraryVersion: "1.0.0-beta.3",
+    libraryVersion: "1.0.0-beta.7",
     permissionGranted: true
   },
   images: [

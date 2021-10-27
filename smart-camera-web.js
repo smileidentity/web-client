@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.6';
+const VERSION = '1.0.0-beta.7';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -879,7 +879,7 @@ class SmartCameraWeb extends HTMLElement {
 		}
 
 		this._data.images.push({
-			image_type_id: 3,
+			image_type_id: this.activeScreen === this.IDCameraScreen ? 3 : 7,
 			image: image.split(',')[1]
 		});
 

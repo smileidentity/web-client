@@ -27,7 +27,7 @@ var SmileIdentity = function () {
 		var iframe = document.createElement('iframe');
 
 		iframe.setAttribute('src', `${config.siteURL}${getIFrameURL(productName)}`);
-		iframe.setAttribute('id', 'iframe');
+		iframe.setAttribute('id', 'smile-identity-hosted-integration');
 		iframe.setAttribute('name', 'smile-identity-hosted-integration');
 		iframe.setAttribute('frameborder', '0');
 		iframe.setAttribute('allow', 'camera; geolocation; encrypted-media; fullscreen');
@@ -40,6 +40,28 @@ var SmileIdentity = function () {
 		iframe.style.backgroundColor = 'rgba(0, 0, 0, .75)';
 
 		document.body.appendChild(iframe);
+	}
+
+	function closeIFrame(config) {
+		const iframe = document.querySelector('#smile-identity-hosted-integration');
+
+		iframe.remove();
+
+		if (config.onClose) {
+			config.onClose();
+		}
+	}
+
+	function handleSuccess(config) {
+		if (config.onSuccess) {
+			config.onSuccess();
+		}
+	}
+
+	function handleConsentRejection(config) {
+		if (config.onError) {
+			config.onError();
+		}
 	}
 
 	const countriesAndIDTypes = {
@@ -105,6 +127,24 @@ var SmileIdentity = function () {
 
 			setTimeout(() => publishConfigToIFrame(config), 2000);
 			saveConfig(config);
+
+			window.addEventListener('message', (event) => {
+				const data = event.data;
+
+				switch (data) {
+					case 'SmileIdentity::Close':
+						return closeIFrame(config);
+						break;
+					case 'SmileIdentity::Success':
+						return handleSuccess(config);
+						break;
+					case 'SmileIdentity::ConsentDenied':
+						return handleConsentRejection(config);
+						break;
+					default:
+						return;
+					}
+				}, false);
 		}
 	}
 

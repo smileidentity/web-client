@@ -70,7 +70,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			console.log(event);
+			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			closeWindow();
 		}, false);
 
 		const main = document.querySelector('main');
@@ -372,6 +373,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		request.onreadystatechange = function() {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
 				setActiveScreen(CompleteScreen);
+				window.setTimeout(closeWindow, 2000);
 			}
 			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
 				throw new Error('uploadZip failed', { cause: request });
@@ -403,5 +405,9 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function closeWindow() {
 		window.parent.postMessage('SmileIdentity::Close', '*');
+	}
+
+	function onSuccess() {
+		window.parent.postMessage('SmileIdentity::Success', '*');
 	}
 }();

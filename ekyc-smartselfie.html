@@ -66,7 +66,6 @@
 			body {
 				min-height: 100vh;
 				text-rendering: optimizeSpeed;
-				background: #E5E5E5;
 				color: #1c2334;
 				line-height: 1.5;
 				display: flex;
@@ -82,6 +81,7 @@
 				padding: 2rem;
 				overflow-y: scroll;
 				position: absolute;
+				max-height: 100vh;
 			}
 
 			@media screen and (min-width: 40rem) {
@@ -100,8 +100,12 @@
 			}
 
 			h1 {
-				font-size: 1.5rem;
+				font-size: 2.25rem;
 				font-weight: 600;
+			}
+
+			section {
+				position: relative;
 			}
 
 			form {
@@ -133,7 +137,8 @@
 				font-weight: 500;
 				padding: 0;
 			}
-/*
+
+			/*
 			label.required:after {
 				content: '*';
 				display: inline-block;
@@ -273,6 +278,13 @@
 				margin-right: .5rem;
 			}
 		</style>
+
+		<script
+						src='consent-screen.js'>
+		</script>
+		<script
+						src='https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js'>
+		</script>
 	</head>
 	<body>
 		<noscript>
@@ -294,8 +306,6 @@
 					Enter Details
 				</h1>
 
-				<progress hidden max='100'></progress>
-
 				<form name='user-details' class='flow'>
 					<div class="input-group flow">
 						<label class='required' for="id_number">
@@ -312,7 +322,7 @@
 								First Name
 							</label>
 
-							<input aria-required="true" id="first_name" name="first_name" placeholder="Jane" required="" type="text">
+							<input aria-required="true" id="first_name" name="first_name" placeholder="Jane" required="" type="text" />
 						</div>
 
 						<div class="input-group flow">
@@ -320,7 +330,8 @@
 								Last Name
 							</label>
 
-							<input aria-required="true" id="last_name" name="last_name" placeholder="Momodu" required="" type="text">
+							<input aria-required="true" id="last_name" name="last_name"
+								placeholder="Momodu" required="" type="text" />
 						</div>
 					</fieldset>
 
@@ -335,7 +346,8 @@
 									Day
 								</label>
 
-								<input aria-required="true" id="day" name="day" placeholder="31" required="" type="text">
+								<input aria-required="true" id="day" name="day" placeholder="31"
+								required="" type="text" />
 							</div>
 
 							<div class="input-group flow">
@@ -344,7 +356,7 @@
 								</label>
 
 								<input aria-required="true" id="month" name="month"
-								placeholder="10" required="" type="text">
+								placeholder="10" required="" type="text" />
 							</div>
 
 							<div class="input-group flow">
@@ -353,22 +365,24 @@
 								</label>
 
 								<input aria-required="true" id="year" name="year"
-								placeholder="2000" required="" type="text">
+								placeholder="2000" required="" type="text" />
 							</div>
 						</div>
 					</fieldset>
 
 					<button data-type='primary' type='button' id='submitForm'>
 						Continue
-						<svg width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					</button>
+				</form>
 
-					<p class='center credits'>
-						<span>Powered by:</span>
-						<span class='company-name'>
-							<svg width="8" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<p class='center credits'>
+					<span>Powered by:</span>
+					<span class='company-name'>
+						<svg aria-hidden='true' width="8" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<symbol id='logo-mark'>
 								<path d="M6.665 3.999V2.822c0-1.653-.887-2.604-2.454-2.604-1.566
 								0-2.427.951-2.427 2.604v.3c0 .076.052.126.13.126.079
 								0 .13-.05.13-.126v-.3c0-.876.288-2.329 2.167-2.329 1.88 0 2.167
@@ -379,20 +393,15 @@
 								4.8c0-.3.261-.55.574-.55H6.51c.313 0 .574.25.574.55L6.9 8.381Z"
 								fill="#000"/>
 								<path d="M2.156 6.829c1.149 1.001 2.558.876 3.733 0 .156-.126-.079-.35-.235-.226-1.044.777-2.271.877-3.29 0-.13-.125-.365.075-.208.226Z" fill="#17A3DC"/>
-							</svg>
-							Smile Identity
-						</span>
-					</p>
-				</form>
+							</symbol>
+							<use href='#logo-mark' />
+						</svg>
+						Smile Identity
+					</span>
+				</p>
 			</section>
 
 			<script src='ekyc-smartselfie.js'>
-			</script>
-			<script async
-							src='consent-screen.js'>
-			</script>
-			<script async
-							src='https://cdn.smileidentity.com/js/v1.0.0-beta.5/smart-camera-web.js'>
 			</script>
 			<script async
 							src='libs/validate.min.js'>

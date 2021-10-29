@@ -14,13 +14,18 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	var EndUserConsent;
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var IDInfoForm = document.querySelector('#id-info');
-	var ProgressIndicator = document.querySelector('progress');
+	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
+	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
+	var CompleteScreen = document.querySelector('#complete-screen');
 
+	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
+	var RetryUploadButton = document.querySelector('#retry-upload');
 	var fileToUpload, uploadURL;
 
 	window.addEventListener('message', event => {
 		config = JSON.parse(event.data);
 		customizeConsentScreen();
+		activeScreen = EndUserConsent;
 		setUpForm();
 		getPartnerParams();
 		localStorage.setItem('SmileIdentityConfig', event.data);
@@ -35,6 +40,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		handleFormSubmit(event);
 	}, false);
 
+	RetryUploadButton.addEventListener('click', event => {
+		retryUpload();
+	}, false);
+
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 		id_info = config.id_info;
@@ -46,18 +55,21 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 
-		EndUserConsent.addEventListener('SmileIdentity::Consent', (event) => {
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;
 
 			if (consent_information.consented.personal_details) {
 				setActiveScreen(SmartCameraWeb);
 			}
-		});
+		}, false);
 
-		activeScreen = EndUserConsent;
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
+			console.log(event);
+		}, false);
 
 		const main = document.querySelector('main');
 		main.appendChild(EndUserConsent);
+		main.hidden = false;
 	}
 
 	function setUpForm() {
@@ -66,16 +78,16 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		if (country !== 'NG') return;
 
-		if (IDType === 'DRIVERS_LICENSE' || IDType === 'PHONE_NUMBER') {
-			const Names = IDInfoForm.querySelector('fieldset#names');
-
-			Names.hidden = false;
-		}
-
 		if (IDType === 'DRIVERS_LICENSE') {
 			const DOB = IDInfoForm.querySelector('fieldset#dob');
 
 			DOB.hidden = false;
+		}
+
+		if (IDType === 'DRIVERS_LICENSE' || IDType === 'PHONE_NUMBER') {
+			const Names = IDInfoForm.querySelector('fieldset#names');
+
+			Names.hidden = false;
 		}
 	}
 
@@ -332,22 +344,28 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
+		setActiveScreen(UploadProgressScreen);
+
 		let request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
 		request.upload.addEventListener('progress', function(e) {
 			let percentCompleted = (e.loaded / e.total)*100;
-			ProgressIndicator.hidden = false;
-			ProgressIndicator.setAttribute('value', percentCompleted);
+			animateUploadProgress(percentCompleted);
 		});
 
 		request.addEventListener('load', function(e) {
 			return request.response;
 		});
 
+		request.addEventListener('error', function(e) {
+			setActiveScreen(UploadFailureScreen);
+			throw new Error('uploadZip failed', { cause: e });
+		});
+
 		request.onreadystatechange = function() {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
-				setActiveScreen(SmartCameraWeb);
+				setActiveScreen(CompleteScreen);
 			}
 			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
 				throw new Error('uploadZip failed', { cause: request });
@@ -356,5 +374,24 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		request.setRequestHeader("Content-type", "application/zip");
 		request.send(file);
+	}
+
+	function retryUpload() {
+		var fileUploaded = uploadZip(fileToUpload, uploadURL);
+
+		return fileUploaded;
+	}
+
+	function animateUploadProgress(percentageCompleted) {
+		/**
+		 * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
+		 * and modified for the new use case
+		 */
+		// NOTE: get length of the path
+		const progressOutlineLength = UploadProgressOutline.getTotalLength();
+		// Set up the starting positions
+		UploadProgressOutline.style.strokeDasharray = progressOutlineLength + ' ' + progressOutlineLength;
+		// Set new position
+		UploadProgressOutline.style.strokeDashOffset = progressOutlineLength * (percentageCompleted / 100);
 	}
 }();

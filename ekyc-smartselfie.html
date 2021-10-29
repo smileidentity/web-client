@@ -161,6 +161,17 @@
 				min-height: 10rem;
 			}
 
+			button[data-type='icon'] {
+				align-items: center;
+				background-color: transparent;
+				border: 0;
+				cursor: pointer;
+				display: flex;
+				padding: 0;
+				position: fixed;
+				right: 5%;
+			}
+
 			button[data-type='primary'] {
 				--flow-space: 3rem;
 				display: inline-flex;
@@ -194,6 +205,18 @@
 			[disabled] {
 				cursor: not-allowed;
 				filter: opacity(.7);
+			}
+
+			.visually-hidden {
+				border: 0;
+				clip: rect(1px 1px 1px 1px); clip: rect(1px, 1px, 1px, 1px);
+				height: auto;
+				margin: 0;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				white-space: nowrap;
+				width: 1px;
 			}
 
 			.flow {
@@ -298,6 +321,13 @@
 		</noscript>
 
 		<main hidden>
+			<button data-type='icon' type='button' id='close-iframe'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>
+
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
 
 
 			<smart-camera-web hidden>

@@ -18,8 +18,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
+	var CloseIframeButton = document.querySelector('#close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
+
 	var fileToUpload, uploadURL;
 
 	window.addEventListener('message', event => {
@@ -42,6 +44,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
+	}, false);
+
+	CloseIframeButton.addEventListener('click', event => {
+		closeWindow();
 	}, false);
 
 	function customizeConsentScreen() {
@@ -393,5 +399,9 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		UploadProgressOutline.style.strokeDasharray = progressOutlineLength + ' ' + progressOutlineLength;
 		// Set new position
 		UploadProgressOutline.style.strokeDashOffset = progressOutlineLength * (percentageCompleted / 100);
+	}
+
+	function closeWindow() {
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 }();

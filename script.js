@@ -33,13 +33,19 @@ var SmileIdentity = function () {
 		iframe.setAttribute('allow', 'camera; geolocation; encrypted-media; fullscreen');
 		iframe.setAttribute('allowtransparency', 'true');
 
-		iframe.style.width = '100vw';
-		iframe.style.height = '100vh';
-		iframe.style.position = 'absolute';
-		iframe.style.border = 'none';
-		iframe.style.backgroundColor = 'rgba(0, 0, 0, .75)';
+		iframe.style.cssText = `
+			background-color: transparent;
+			background-color: rgba(0, 0, 0, .75);
+			border: none;
+			height: 100%;
+			left: 0;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			z-index: 1;
+		`;
 
-		document.body.appendChild(iframe);
+		document.body.prepend(iframe);
 	}
 
 	function closeIFrame(config) {

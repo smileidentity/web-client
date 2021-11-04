@@ -28,7 +28,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		config = JSON.parse(event.data);
 		customizeConsentScreen();
 		activeScreen = EndUserConsent;
-		setUpForm();
+		customizeForm();
 		getPartnerParams();
 		localStorage.setItem('SmileIdentityConfig', event.data);
 	}, false);
@@ -83,7 +83,105 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		main.hidden = false;
 	}
 
-	function setUpForm() {
+	const guideTextForIDType = {
+		GH: {
+			DRIVERS_LICENSE: {
+				label: 'Driver\'s License Number',
+				placeholder: ''
+			},
+			SSNIT: {
+				label: 'SSNIT Number',
+				placeholder: ''
+			},
+			VOTER_ID: {
+				label: 'Voter ID Number',
+				placeholder: ''
+			},
+			NEW_VOTER_ID: {
+				label: 'New Voter ID Number',
+				placeholder: ''
+			},
+			PASSPORT: {
+				label: 'Passport Number',
+				placeholder: ''
+			}
+		},
+		KE: {
+			ALIEN_CARD: {
+				label: 'Alien Card Number',
+				placeholder: ''
+			},
+			PASSPORT: {
+				label: 'Passport Number',
+				placeholder: ''
+			},
+			NATIONAL_ID: {
+				label: 'National ID Number',
+				placeholder: ''
+			}
+		},
+		NG: {
+			BVN: {
+				label: 'Bank Verification Number',
+				placeholder: ''
+			},
+			DRIVERS_LICENSE: {
+				label: 'Driver\'s License Number',
+				placeholder: ''
+			},
+			NIN: {
+				label: 'National ID Number',
+				placeholder: ''
+			},
+			NIN_SLIP: {
+				label: 'National ID Number',
+				placeholder: ''
+			},
+			PHONE_NUMBER: {
+				label: 'Phone Number',
+				placeholder: ''
+			},
+			TIN: {
+				label: 'Tax Identification Number',
+				placeholder: ''
+			},
+			VOTER_ID: {
+				label: 'Voter ID Number',
+				placeholder: ''
+			}
+		},
+		UG: {
+			NATIONAL_ID_NO_PHOTO: {
+				label: 'National ID Number',
+				placeholder: ''
+			}
+		},
+		ZA: {
+			NATIONAL_ID: {
+				label: 'National ID Number',
+				placeholder: ''
+			},
+			NATIONAL_ID_NO_PHOTO: {
+				label: 'National ID Number',
+				placeholder: ''
+			}
+		},
+	};
+
+	function customizeForm() {
+		setGuideTextForIDType();
+		setFormInputs();
+	}
+
+	function setGuideTextForIDType() {
+		const label = document.querySelector('[for="id_number"]');
+		const input = document.querySelector('#id_number');
+
+		label.innerHTML = guideTextForIDType[id_info.country][id_info.id_type]['label'];
+		input.setAttribute('placeholder', guideTextForIDType[id_info.country][id_info.id_type]['placeholder']);
+	}
+
+	function setFormInputs() {
 		const country = id_info.country;
 		const IDType = id_info.id_type;
 

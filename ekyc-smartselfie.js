@@ -50,12 +50,16 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		closeWindow();
 	}, false);
 
+	function toHRF(string) {
+		return string.replace(/\_/g, '');
+	}
+
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 		id_info = config.id_info;
 
 		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);

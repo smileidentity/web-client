@@ -73,9 +73,8 @@ var SmileIdentity = function () {
 	const countriesAndIDTypes = {
 		'GH': ['DRIVERS_LICENSE', 'NEW_VOTER_ID', 'PASSPORT', 'SSNIT', 'VOTER_ID'],
 		'KE': ['ALIEN_CARD', 'NATIONAL_ID', 'PASSPORT'],
-		'NG': ['BVN', 'DRIVERS_LICENSE', 'NIN', 'NIN_SLIP', 'PHONE_NUMBER', 'TIN', 'VOTER_ID'],
-		'UG': ['NATIONAL_ID_NO_PHOTO'],
-		'ZA': ['NATIONAL_ID', 'NATIONAL_ID_NO_PHOTO']
+		'NG': ['BVN', 'DRIVERS_LICENSE', 'NIN', 'NIN_SLIP', 'TIN', 'VOTER_ID'],
+		'ZA': ['NATIONAL_ID']
 	};
 
 	const requiredPartnerDetails = ['name', 'logo_url', 'partner_id', 'policy_url', 'theme_color'];

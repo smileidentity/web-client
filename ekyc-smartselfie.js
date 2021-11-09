@@ -398,6 +398,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		zip.file('info.json', JSON.stringify({
 			package_information: {
+				"language": "Hosted Web Integration"
 				"apiVersion": {
 					"buildNumber": 0,
 					"majorVersion": 2,

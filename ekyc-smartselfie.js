@@ -51,7 +51,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	}, false);
 
 	function toHRF(string) {
-		return string.replace(/\_/g, '');
+		return string.replace(/\_/g, ' ');
 	}
 
 	function customizeConsentScreen() {

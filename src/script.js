@@ -3,13 +3,7 @@ var SmileIdentity = function () {
 
 	function getSiteURL() {
 		var currentScriptSrc = document.currentScript.src;
-
-		const qualifiedURL = currentScriptSrc.split('script.js')[0];
-
-		if (qualifiedURL.includes('instrumented')) {
-			return '';
-		}
-
+		const qualifiedURL = currentScriptSrc.split('script')[0];
 		return qualifiedURL;
 	}
 
@@ -27,8 +21,9 @@ var SmileIdentity = function () {
 		var iframe = document.createElement('iframe');
 
 		iframe.setAttribute('src', `${config.siteURL}${getIFrameURL(productName)}`);
-		iframe.setAttribute('id', 'smile-identity-hosted-integration');
-		iframe.setAttribute('name', 'smile-identity-hosted-integration');
+		iframe.setAttribute('id', 'smile-identity-hosted-web-integration');
+		iframe.setAttribute('name', 'smile-identity-hosted-web-integration');
+		iframe.setAttribute('data-cy', 'smile-identity-hosted-web-integration');
 		iframe.setAttribute('frameborder', '0');
 		iframe.setAttribute('allow', 'camera; geolocation; encrypted-media; fullscreen');
 		iframe.setAttribute('allowtransparency', 'true');
@@ -115,7 +110,7 @@ var SmileIdentity = function () {
 	}
 
 	function publishConfigToIFrame(config) {
-		const targetWindow = document.querySelector("[name='smile-identity-hosted-integration']").contentWindow;
+		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration']").contentWindow;
 
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}

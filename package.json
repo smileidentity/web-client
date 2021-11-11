@@ -26,6 +26,7 @@
 		"@cypress/code-coverage": "3.9.11",
 		"cypress": "9.0.0",
 		"nyc": "15.1.0",
-		"serve": "13.0.2"
+		"serve": "13.0.2",
+		"terser": "5.9.0"
 	}
 }

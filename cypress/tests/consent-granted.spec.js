@@ -1,0 +1,31 @@
+it('should grant consent, and navigate to image capture screen', () => {
+	cy.visit('/');
+
+	cy
+		.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('#consent-screen')
+		.should('be.visible');
+
+	cy
+		.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('#allow')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('#consent-screen')
+		.should('not.be.visible');
+
+	cy
+		.getIFrameBody()
+		.find('smart-camera-web')
+		.shadow()
+		.find('#request-screen')
+		.should('be.visible');
+});

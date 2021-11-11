@@ -44,7 +44,7 @@ var SmileIdentity = function () {
 	}
 
 	function closeIFrame(config) {
-		const iframe = document.querySelector('#smile-identity-hosted-integration');
+		const iframe = document.querySelector('#smile-identity-hosted-web-integration');
 
 		iframe.remove();
 

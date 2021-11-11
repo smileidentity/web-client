@@ -478,6 +478,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 				window.setTimeout(closeWindow, 2000);
 			}
 			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
+				setActiveScreen(UploadFailureScreen);
 				throw new Error('uploadZip failed', { cause: request });
 			}
 		};

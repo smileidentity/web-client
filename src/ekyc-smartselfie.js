@@ -2,7 +2,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	'use strict';
 
 	const endpoints = {
-		'dev': 'https://devapi.smileidentity.com/v1',
 		'sandbox': 'https://testapi.smileidentity.com/v1',
 		'live': 'https://api.smileidentity.com/v1'
 	}
@@ -398,7 +397,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		zip.file('info.json', JSON.stringify({
 			package_information: {
-				"language": "Hosted Web Integration"
+				"language": "Hosted Web Integration",
 				"apiVersion": {
 					"buildNumber": 0,
 					"majorVersion": 2,
@@ -438,7 +437,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			body: JSON.stringify(payload),
 		};
 
-		const URL = `${endpoints[config.environment]}/upload`;
+		const URL = `${endpoints[config.environment] || config.environment}/upload`;
 
 		try {
 			const response = await fetch(URL, fetchConfig);

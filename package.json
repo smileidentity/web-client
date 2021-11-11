@@ -10,11 +10,11 @@
 		"build:dist": "mkdir dist && echo src/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/$(basename $1 .js).min.js' argv0",
 		"clean": "rm -rf build dist",
 		"copy": "cp src/*.html build && cp -r libs build && cp index.html build",
-		"copy:dist": "cp src/*.{js,html} dist && cp -r libs dist",
+		"copy:dist": "cp src/*.js dist ** cp src/*,html} dist && cp -r libs dist",
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build",
-		"start": "npx serve -p 8080 build"
+		"start": "npx serve -p 8000 build"
 	},
 	"repository": {
 		"type": "git",

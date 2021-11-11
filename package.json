@@ -5,8 +5,12 @@
 	"main": "inline.js",
 	"scripts": {
 		"build": "npm run instrument && npm run copy",
-		"clean": "rm -rf build",
+		"prebuild:dist": "rm -rf dist",
+		"postbuild:dist": "npm run copy:dist",
+		"build:dist": "mkdir dist && echo src/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/$(basename $1 .js).min.js' argv0",
+		"clean": "rm -rf build dist",
 		"copy": "cp src/*.html build && cp -r libs build && cp index.html build",
+		"copy:dist": "cp src/*.{js,html} dist && cp -r libs dist",
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build",

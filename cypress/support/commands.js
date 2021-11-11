@@ -23,3 +23,14 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+// -- Get iFrame body
+Cypress.Commands.add('getIFrameBody', () => {
+	cy.log('getIFrameBody');
+
+	return cy
+		.get('iframe[data-cy="smile-identity-hosted-web-integration"]', { log: false })
+		.its('0.contentDocument.body', { log: false })
+		.should('not.be.empty')
+		.then(body => cy.wrap(body, { log: false }));
+});

@@ -1,5 +1,6 @@
-# test related items
-instrumented
+# test / build / deploy folders
+build
+dist
 cypress/videos
 cypress/screenshots
 

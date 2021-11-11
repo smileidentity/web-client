@@ -4,9 +4,13 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build": "npx nyc instrument --compact=false script.js instrumented",
-		"start": "npx serve -p 8000",
-		"test": "npx cypress run"
+		"build": "npm run instrument && npm run copy",
+		"clean": "rm -rf build",
+		"copy": "cp src/*.html build && cp -r libs build && cp index.html build",
+		"instrument": "nyc instrument src build",
+		"preinstrument": "npm run clean",
+		"prestart": "npm run build",
+		"start": "npx serve -p 8080 build"
 	},
 	"repository": {
 		"type": "git",

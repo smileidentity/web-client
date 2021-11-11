@@ -19,8 +19,8 @@
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
 	"devDependencies": {
-		"@cypress/code-coverage": "3.9.10",
-		"cypress": "8.3.0",
-		"serve": "12.0.0"
+		"@cypress/code-coverage": "3.9.11",
+		"cypress": "9.0.0",
+		"serve": "13.0.2"
 	}
 }

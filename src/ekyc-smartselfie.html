@@ -2,11 +2,33 @@
 <html lang='en'>
 	<head>
 		<meta charset='utf-8' />
+		<meta name='viewport' content='width=device-width, initial-scale=1' />
 		<title>
 			SmileIdentity - Enhanced KYC with SmartSelfie
 		</title>
-		<meta name='viewport' content='width=device-width, initial-scale=1' />
-		<link rel="preconnect" href="https://fonts.gstatic.com"> 
+
+		<!-- Start Font Loading -->
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preload"
+			as="style"
+			href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700$CSS&display=swap" />
+		<link rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700$CSS&display=swap"
+			media="print" onload="this.media='all'" />
+		<noscript>
+			<link rel="stylesheet"
+				href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700$CSS&display=swap" />
+		</noscript>
+		<!-- End Font Loading -->
+
+		<link rel="preload" as='script' href="https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js" />
+
+		<script
+			src='consent-screen.min.js'>
+		</script>
+		<script
+			src='https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js'>
+		</script>
 
 		<style>
 			:root {
@@ -301,13 +323,6 @@
 				margin-right: .5rem;
 			}
 		</style>
-
-		<script
-						src='consent-screen.min.js'>
-		</script>
-		<script
-						src='https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js'>
-		</script>
 	</head>
 	<body>
 		<noscript>
@@ -544,15 +559,15 @@
 					</span>
 				</p>
 			</section>
-
-			<script src='ekyc-smartselfie.min.js'>
-			</script>
-			<script async
-							src='libs/validate.min.js'>
-			</script>
-			<script async
-							src='libs/jszip.min.js'>
-			</script>
 		</main>
+
+		<script src='ekyc-smartselfie.min.js'>
+		</script>
+		<script async
+			src='libs/validate.min.js'>
+		</script>
+		<script async
+			src='libs/jszip.min.js'>
+		</script>
 	</body>
 </html>

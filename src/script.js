@@ -12,7 +12,7 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'ekyc_smartselfie') return 'ekyc-smartselfie';
+		if (product === 'ekyc_smartselfie') return 'ekyc-smartselfie.html';
 
 		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);
 	}

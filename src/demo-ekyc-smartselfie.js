@@ -31,8 +31,8 @@ var eKYCSmartSelfieDemo = function eKYCSmartSelfieDemo() {
 	}
 
 	function setDemoIDNumber() {
+		IDNumber.setAttribute('readonly', true);
 		IDNumber.setAttribute('value', demoIDNumbers[id_info.country][id_info.id_type]);
-		IDNumber.readonly = true;
 	}
 
 	setDemoIDNumber();

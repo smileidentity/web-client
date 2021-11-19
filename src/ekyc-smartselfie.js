@@ -30,7 +30,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		customizeForm();
 		getPartnerParams();
 		localStorage.setItem('SmileIdentityConfig', event.data);
-		if (config.isDemo) initiateDemoMode();
+		if (config.environment === 'sandbox') initiateSandboxMode();
 	}, false);
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
@@ -54,10 +54,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		return string.replace(/\_/g, ' ');
 	}
 
-	function initiateDemoMode() {
+	function initiateSandboxMode() {
 		const script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = 'demo-ekyc-smartselfie.min.js';
+		script.src = 'sandbox-ekyc-smartselfie.min.js';
 
 		document.body.appendChild(script);
 	}

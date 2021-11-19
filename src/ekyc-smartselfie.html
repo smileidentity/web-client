@@ -194,7 +194,8 @@
 				right: 5%;
 			}
 
-			button[data-type='primary'] {
+			button[data-type='primary'],
+			button[data-type='tertiary'] {
 				--flow-space: 3rem;
 				display: inline-flex;
 				align-items: center;
@@ -217,6 +218,14 @@
 										transform 150ms ease;
 				-webkit-appearance: none;
 				-moz-appearance: none;
+			}
+
+			button[data-type='tertiary'] {
+				background: none;
+				background-color: #ffa000;
+				padding: .5rem;
+				border-radius: .5rem;
+				font-size: .75rem;
 			}
 
 			button:hover:not([disabled]),

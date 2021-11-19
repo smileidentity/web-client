@@ -1,10 +1,11 @@
-var eKYCSmartSelfieDemo = function eKYCSmartSelfieDemo() {
+var eKYCSmartSelfieSandbox = function eKYCSmartSelfieSandbox() {
 	'use strict';
 
+	var IDInfoForm = document.querySelector('form');
 	var IDNumber = document.querySelector('#id_number');
 	const { id_info } = JSON.parse(localStorage.getItem('SmileIdentityConfig'));
 
-	const demoIDNumbers = {
+	const sandboxIDNumbers = {
 		GH: {
 			DRIVERS_LICENSE: 'B0000000',
 			PASSPORT: 'G0000000',
@@ -29,11 +30,35 @@ var eKYCSmartSelfieDemo = function eKYCSmartSelfieDemo() {
 			NATIONAL_ID: '0000000000000'
 		},
 	}
-
-	function setDemoIDNumber() {
-		IDNumber.setAttribute('readonly', true);
-		IDNumber.setAttribute('value', demoIDNumbers[id_info.country][id_info.id_type]);
+	const sandboxPII = {
+		first_name: 'Ciroma',
+		last_name: 'Adekunle',
+		day: '01',
+		month: '10',
+		year: '1960'
 	}
 
-	setDemoIDNumber();
+	function setSandboxDetails() {
+		IDNumber.setAttribute('readonly', true);
+		IDNumber.setAttribute('value', sandboxIDNumbers[id_info.country][id_info.id_type]);
+
+		if (id_info.country === 'NG' && id_info.id_type === 'DRIVERS_LICENSE') {
+			['first_name', 'last_name', 'day', 'month', 'year'].forEach(field => {
+				const element = document.querySelector(`#${field}`);
+
+				element.setAttribute('readonly', true);
+				element.setAttribute('value', sandboxPII[field]);
+			});
+		}
+	}
+
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.setAttribute('data-type', 'tertiary');
+	button.textContent = 'Click here to fill in Test Data';
+	button.addEventListener('click', (e) => {
+		setSandboxDetails();
+	});
+
+	IDInfoForm.prepend(button);
 }();

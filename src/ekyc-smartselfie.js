@@ -394,7 +394,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		p.textContent = error.message;
 		p.style.color = 'red';
-		p.style.fontSize = '2rem';
+		p.style.fontSize = '1.5rem';
 		p.style.textAlign = 'center';
 
 		const main = document.querySelector('main');
@@ -472,11 +472,11 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			animateUploadProgress(percentCompleted);
 		});
 
-		request.addEventListener('load', function(e) {
+		request.upload.addEventListener('load', function(e) {
 			return request.response;
 		});
 
-		request.addEventListener('error', function(e) {
+		request.upload.addEventListener('error', function(e) {
 			setActiveScreen(UploadFailureScreen);
 			throw new Error('uploadZip failed', { cause: e });
 		});
@@ -484,6 +484,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		request.onreadystatechange = function() {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
 				setActiveScreen(CompleteScreen);
+				handleSuccess();
 				window.setTimeout(closeWindow, 2000);
 			}
 			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
@@ -519,7 +520,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 
-	function onSuccess() {
+	function handleSuccess() {
 		window.parent.postMessage('SmileIdentity::Success', '*');
 	}
 }();

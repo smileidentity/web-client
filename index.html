@@ -20,7 +20,7 @@
 
 	<body>
 		<script
-			src='script.min.js'>
+			src='js/script.min.js'>
 		</script>
 
 		<script>
@@ -29,7 +29,7 @@
 							"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoidXNlci1mZTIwY2JkYS1jMjJiLTRmZmUtOWRlZC05YjZhZGI2MDE1ZmIiLCJqb2JfaWQiOiJqb2ItNjYzY2VhNTUtZWIxYy00MjI2LWI1N2YtOGEwMTAwOTc4ZjViIiwiam9iX3R5cGUiOjF9LCJjYWxsYmFja191cmwiOiJodHRwczovL3dlYmhvb2suc2l0ZS9iZTM0YzkzZC1hOTFmLTQzZGItYWVmMi05MDZjNWNkOTVkNDciLCJpYXQiOjE2MzQyODE0MTAsImV4cCI6MTYzNTkxNTY4NH0.B4JaP4UWbNs38hV9nQ_9_Pnpos0fM3qu2nGG7Eymjs8",
 				product: 'ekyc_smartselfie',
 				callback_url: 'https://webhook.site/be34c93d-a91f-43db-aef2-906c5cd95d47',
-				environment: 'https://devapi.smileidentity.com/v1',
+				environment: 'sandbox',
 				partner_details: {
 					name: 'SID-Tams',
 					logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=ST',
@@ -37,9 +37,8 @@
 					policy_url: 'https://tamssokari.com',
 					theme_color: '#000'
 				},
-				id_info: {
-					country: 'NG',
-					id_type: 'BVN'
+				id_selection: {
+					'NG': ['NIN', 'NIN_SLIP']
 				},
 				onSuccess: () => {
 				},

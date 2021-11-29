@@ -7,6 +7,8 @@
 			SmileIdentity - Enhanced KYC with SmartSelfie
 		</title>
 
+		<link rel='stylesheet' href='css/styles.css' />
+
 		<!-- Start Font Loading -->
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link rel="preload"
@@ -24,315 +26,13 @@
 		<link rel="preload" as='script' href="https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js" />
 
 		<script
-			src='consent-screen.min.js'>
+			src='js/consent-screen.min.js'>
 		</script>
 		<script
 			src='https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js'>
 		</script>
-
-		<style>
-			:root {
-				--flow-space: 1rem;
-			}
-
-			*, ::after, ::before {
-				box-sizing: border-box
-			}
-
-			blockquote, body, dd, dl, figure, h1, h2, h3, h4, p {
-				margin: 0
-			}
-
-			ol[role=list], ul[role=list] {
-				list-style: none
-			}
-
-			html:focus-within {
-				scroll-behavior: smooth
-			}
-
-			a:not([class]) {
-				text-decoration-skip-ink: auto
-			}
-
-			img, picture {
-				max-width: 100%;
-				display: block
-			}
-
-			button, input, select, textarea {
-				font: inherit
-			}
-
-			@media (prefers-reduced-motion: reduce) {
-				html:focus-within {
-					scroll-behavior:auto
-				}
-
-				*, ::after, ::before {
-					animation-duration: 0s !important;
-					animation-iteration-count: 1 !important;
-					transition-duration: 0s !important;
-					scroll-behavior:auto !important
-				}
-			}
-
-			[hidden] {
-				display: none !important;
-			}
-
-			html {
-				font-family: 'Nunito Sans', sans-serif;
-			}
-
-			body {
-				min-height: 100vh;
-				text-rendering: optimizeSpeed;
-				color: #1c2334;
-				line-height: 1.5;
-				display: flex;
-				flex-direction: column;
-				position: relative;
-			}
-
-			main {
-				width: 100%;
-				max-width: 40rem;
-				background: #ffffff;
-				border-radius: 2rem;
-				padding: 2rem;
-				overflow-y: scroll;
-				position: absolute;
-				max-height: 100vh;
-			}
-
-			@media screen and (min-width: 40rem) {
-				main {
-					padding: 2rem 5rem;
-					top: 50%;
-					left: 50%;
-					transform: translate(-50%, -50%);
-				}
-			}
-
-			@media screen and (min-width: 80rem) {
-				main {
-					max-height: 80%;
-				}
-			}
-
-			h1 {
-				font-size: 2.25rem;
-				font-weight: 600;
-			}
-
-			section {
-				position: relative;
-			}
-
-			form {
-				--flow-space: 4rem;
-			}
-
-			form > * {
-				--flow-space: 1.5rem;
-			}
-
-			fieldset {
-				border: none;
-				margin-left: 0;
-				margin-right: 0;
-				padding: 0;
-			}
-
-			label,
-			input,
-			select,
-			textarea {
-				--flow-space: .5rem;
-				display: block;
-				width: 100%;
-			}
-
-			label, legend {
-				color: black;
-				font-weight: 500;
-				padding: 0;
-			}
-
-			/*
-			label.required:after {
-				content: '*';
-				display: inline-block;
-				color: red;
-			}
-			*/
-
-			input,
-			textarea {
-				border: 1px solid #d1d8d6;
-				border-radius: .5rem;
-				padding: .75rem 1rem;
-			}
-
-			input {
-				height: 3rem;
-			}
-
-			textarea {
-				min-height: 10rem;
-			}
-
-			button[data-type='icon'] {
-				align-items: center;
-				background-color: transparent;
-				border: 0;
-				cursor: pointer;
-				display: flex;
-				padding: 0;
-				position: fixed;
-				right: 5%;
-			}
-
-			button[data-type='primary'],
-			button[data-type='tertiary'] {
-				--flow-space: 3rem;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				background: linear-gradient(46.64deg, #031532 -0.41%, #114482 122.81%,
-					#02060B 122.81%);
-				border: none;
-				color: #ffffff;
-				cursor: pointer;
-				border-radius: 2rem;
-				font-size: 20px;
-				font-weight: 500;
-				line-height: 1;
-				letter-spacing: .05ch;
-				padding: 1rem 2.5rem;
-				text-decoration: none;
-				text-align: center;
-				width: 100%;
-				transition: background 250ms ease-in-out,
-										transform 150ms ease;
-				-webkit-appearance: none;
-				-moz-appearance: none;
-			}
-
-			button[data-type='tertiary'] {
-				background: none;
-				background-color: #ffa000;
-				padding: .5rem;
-				border-radius: .5rem;
-				font-size: .75rem;
-			}
-
-			button:hover:not([disabled]),
-			button:focus:not([disabled]) {
-				transform: scale(1.02);
-			}
-
-			[disabled] {
-				cursor: not-allowed;
-				filter: opacity(.7);
-			}
-
-			.visually-hidden {
-				border: 0;
-				clip: rect(1px 1px 1px 1px); clip: rect(1px, 1px, 1px, 1px);
-				height: auto;
-				margin: 0;
-				overflow: hidden;
-				padding: 0;
-				position: absolute;
-				white-space: nowrap;
-				width: 1px;
-			}
-
-			.flow {
-			}
-
-			.flow > * + * {
-				margin-top: var(--flow-space);
-			}
-
-			.center {
-				text-align: center;
-			}
-
-			.split-pair {
-				overflow: hidden;
-			}
-
-			.split-pair > * + * {
-				margin-top: var(--flow-space);
-			}
-
-			@media screen and (min-width: 45em) {
-				.split-pair {
-					display: flex;
-					align-items: center;
-					gap: 2rem;
-				}
-
-				.split-pair[data-variant='start'] {
-					align-items: start;
-				}
-
-				.split-pair > * {
-					flex-grow: 1;
-					flex-basis: 50%;
-				}
-
-				.split-pair > * + * {
-					margin-top: 0;
-				}
-			}
-
-			.input-group {
-				--flow-space: 1.5rem;
-			}
-
-			#error,
-			.validation-message {
-				color: red;
-				text-transform: capitalize;
-			}
-
-			.dob {
-				--flow-space: 1rem;
-				display: flex;
-				gap: 1rem;
-			}
-
-			@media screen and (min-width: 40rem) {
-				.dob {
-					gap: 2rem;
-				}
-			}
-
-			.credits {
-				--flow-space: 2rem;
-				color: #636670;
-				font-size: .75rem;
-			}
-
-			.company-name {
-				text-transform: uppercase;
-				letter-spacing: .1rem;
-				border-left: 1px solid #cecece;
-				margin-left: .75rem;
-				padding-left: .75rem;
-				display: inline-flex;
-				align-items: center;
-			}
-
-			.company-name svg {
-				margin-right: .5rem;
-			}
-		</style>
 	</head>
+
 	<body>
 		<noscript>
 			<h1>
@@ -344,7 +44,7 @@
 			</p>
 		</noscript>
 
-		<main hidden>
+		<main>
 			<button data-type='icon' type='button' id='close-iframe'>
 				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
@@ -352,6 +52,51 @@
 
 				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
 			</button>
+
+			<section class='flow' id='select-id-type'>
+				<h1 class='center font-size-500 max-width:100ch'>
+					Select Country and ID Type
+				</h1>
+
+				<form name='hosted-web-config' class='flow flow-space:800'>
+					<div class='split-pair flow-space:400'>
+						<div class='flow input-group'>
+							<label for="country">
+								Select Country
+							</label>
+							<select disabled required id="country" name="country">
+								<option value=''>--Please Select--</option>
+							</select>
+						</div>
+
+						<div class='flow input-group'>
+							<label for="id_type">
+								Select ID Type
+							</label>
+							<select required id="id_type" name="id_type" disabled>
+								<option value='' disabled>Select Country First</option>
+							</select>
+						</div>
+					</div>
+
+					<button data-type='primary' type='submit' id='submitForm'>
+						Create Hosted Web Session
+						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+				</form>
+
+				<p class='center attribution'>
+					<span>Powered by:</span>
+					<span class='company-name'>
+						<svg aria-hidden='true' width="8" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<use href='#logo-mark' />
+						</svg>
+						Smile Identity
+					</span>
+				</p>
+			</section>
 
 			<smart-camera-web hidden>
 			</smart-camera-web>
@@ -570,7 +315,7 @@
 			</section>
 		</main>
 
-		<script src='ekyc-smartselfie.min.js'>
+		<script src='js/ekyc-smartselfie.min.js'>
 		</script>
 		<script async
 			src='libs/validate.min.js'>

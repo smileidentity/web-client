@@ -12,7 +12,7 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'ekyc_smartselfie') return 'ekyc-smartselfie.html';
+		if (product === 'ekyc_smartselfie') return './../ekyc-smartselfie.html';
 
 		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);
 	}
@@ -65,12 +65,14 @@ var SmileIdentity = function () {
 		}
 	}
 
+	/*
 	const countriesAndIDTypes = {
 		'GH': ['DRIVERS_LICENSE', 'NEW_VOTER_ID', 'PASSPORT', 'SSNIT', 'VOTER_ID'],
 		'KE': ['ALIEN_CARD', 'NATIONAL_ID', 'PASSPORT'],
 		'NG': ['BVN', 'DRIVERS_LICENSE', 'NIN', 'NIN_SLIP', 'TIN', 'VOTER_ID'],
 		'ZA': ['NATIONAL_ID']
 	};
+	*/
 
 	const requiredPartnerDetails = ['name', 'logo_url', 'partner_id', 'policy_url', 'theme_color'];
 
@@ -79,10 +81,7 @@ var SmileIdentity = function () {
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
 		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `ekyc_smartselfie` is supported');
 
-		if (config.product === 'ekyc_smartselfie' && !config.id_info) {
-			throw new Error('SmileIdentity: Please provide ID Info via the `id_info` attribute');
-		}
-
+		/*
 		if (config.id_info.country || config.id_info.id_type) {
 			const validCountries = Object.keys(countriesAndIDTypes);
 			if (!config.id_info.country || !validCountries.includes(config.id_info.country)) {
@@ -95,6 +94,7 @@ var SmileIdentity = function () {
 				throw new Error(`SmileIdentity: Please select the id_type from ${validIDTypes.join(', ')}`);
 			}
 		}
+		*/
 
 		if (config.product === 'ekyc_smartselfie' && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');

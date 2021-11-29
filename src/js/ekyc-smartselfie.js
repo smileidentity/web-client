@@ -9,8 +9,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	var config;
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
+	var productConstraints;
 
 	var EndUserConsent;
+	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var IDInfoForm = document.querySelector('#id-info');
 	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
@@ -23,14 +25,106 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	var fileToUpload, uploadURL;
 
-	window.addEventListener('message', event => {
+	async function getProductConstraints() {
+		try {
+			const response = await fetch(`${endpoints[config.environment]}/services`);
+			const json = await response.json();
+
+			return json.hosted_web['ekyc_smartselfie'];
+		} catch (e) {
+		}
+	}
+
+	window.addEventListener('message', async event => {
 		config = JSON.parse(event.data);
-		customizeConsentScreen();
-		activeScreen = EndUserConsent;
-		customizeForm();
-		getPartnerParams();
-		localStorage.setItem('SmileIdentityConfig', event.data);
+		activeScreen = SelectIDType;
+
+		try {
+			productConstraints = await getProductConstraints();
+			initializeSession(productConstraints);
+			getPartnerParams();
+			localStorage.setItem('SmileIdentityConfig', event.data);
+		} catch (e) {
+			throw e;
+		}
 	}, false);
+
+	function initializeSession(constraints) {
+		const supportedCountries = Object.keys(constraints);
+
+		const selectCountry = SelectIDType.querySelector('#country');
+		const selectIDType = SelectIDType.querySelector('#id_type');
+		const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
+
+		let validCountries = [];
+
+		if (config.id_selection) {
+			validCountries = supportedCountries.filter(value =>
+				Object.keys(config.id_selection).includes(value));
+		} else {
+			validCountries = supportedCountries;
+		}
+
+		// ACTION: Load Countries as <option>s
+		validCountries.forEach(country => {
+			const option = document.createElement('option');
+			option.setAttribute('value', country);
+			option.textContent = constraints[country].name;
+			selectCountry.appendChild(option);
+		});
+
+		// ACTION: Enable Country Selection
+		selectCountry.disabled = false;
+
+		selectCountry.addEventListener('change', e => {
+			if (e.target.value) {
+				let validIDTypes = [];
+				const constrainedIDTypes = Object.keys(constraints[e.target.value].id_types);
+
+				let selectedIDTypes = config.id_selection ?
+					config.id_selection[e.target.value].filter(value => constrainedIDTypes.includes(value)) :
+					constrainedIDTypes;
+
+				// ACTION: Reset ID Type <select>
+				selectIDType.innerHTML = '';
+
+				// ACTION: Load ID Types as <option>s 
+				selectedIDTypes.forEach(IDType => {
+					const option = document.createElement('option');
+					option.setAttribute('value', IDType);
+					option.textContent = constraints[e.target.value]['id_types'][IDType].label;
+					selectIDType.appendChild(option);
+				});
+
+				// ACTION: Enable ID Type Selection
+				selectIDType.disabled = false;
+			} else {
+				// ACTION: Reset ID Type <select>
+				selectIDType.innerHTML = '';
+
+				// ACTION: Load the default <option>
+				const option = document.createElement('option');
+				option.disabled = true;
+				option.setAttribute('value', '');
+				option.textContent = '--Select Country First--';
+				selectIDType.appendChild(option);
+			}
+		});
+
+		hostedWebConfigForm.addEventListener('submit', e => {
+			e.preventDefault();
+
+			// ACTION: set up `id_info`
+			id_info = {
+				country: selectCountry.value,
+				id_type: selectIDType.value
+			};
+
+			customizeConsentScreen();
+			setActiveScreen(EndUserConsent);
+			customizeForm();
+		});
+	}
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
@@ -55,7 +149,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
-		id_info = config.id_info;
 
 		EndUserConsent = document.createElement('end-user-consent');
 		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
@@ -79,93 +172,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const main = document.querySelector('main');
 		main.appendChild(EndUserConsent);
-		main.hidden = false;
 	}
-
-	const guideTextForIDType = {
-		GH: {
-			DRIVERS_LICENSE: {
-				label: 'Driver\'s License Number',
-				placeholder: ''
-			},
-			SSNIT: {
-				label: 'SSNIT Number',
-				placeholder: ''
-			},
-			VOTER_ID: {
-				label: 'Voter ID Number',
-				placeholder: ''
-			},
-			NEW_VOTER_ID: {
-				label: 'New Voter ID Number',
-				placeholder: ''
-			},
-			PASSPORT: {
-				label: 'Passport Number',
-				placeholder: ''
-			}
-		},
-		KE: {
-			ALIEN_CARD: {
-				label: 'Alien Card Number',
-				placeholder: ''
-			},
-			PASSPORT: {
-				label: 'Passport Number',
-				placeholder: ''
-			},
-			NATIONAL_ID: {
-				label: 'National ID Number',
-				placeholder: ''
-			}
-		},
-		NG: {
-			BVN: {
-				label: 'Bank Verification Number',
-				placeholder: ''
-			},
-			DRIVERS_LICENSE: {
-				label: 'Driver\'s License Number',
-				placeholder: ''
-			},
-			NIN: {
-				label: 'National ID Number',
-				placeholder: ''
-			},
-			NIN_SLIP: {
-				label: 'National ID Number',
-				placeholder: ''
-			},
-			PHONE_NUMBER: {
-				label: 'Phone Number',
-				placeholder: ''
-			},
-			TIN: {
-				label: 'Tax Identification Number',
-				placeholder: ''
-			},
-			VOTER_ID: {
-				label: 'Voter ID Number',
-				placeholder: ''
-			}
-		},
-		UG: {
-			NATIONAL_ID_NO_PHOTO: {
-				label: 'National ID Number',
-				placeholder: ''
-			}
-		},
-		ZA: {
-			NATIONAL_ID: {
-				label: 'National ID Number',
-				placeholder: ''
-			},
-			NATIONAL_ID_NO_PHOTO: {
-				label: 'National ID Number',
-				placeholder: ''
-			}
-		},
-	};
 
 	function customizeForm() {
 		setGuideTextForIDType();
@@ -176,26 +183,26 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		const label = document.querySelector('[for="id_number"]');
 		const input = document.querySelector('#id_number');
 
-		label.innerHTML = guideTextForIDType[id_info.country][id_info.id_type]['label'];
-		input.setAttribute('placeholder', guideTextForIDType[id_info.country][id_info.id_type]['placeholder']);
+		label.innerHTML = productConstraints[id_info.country]['id_types'][id_info.id_type]['label'];
+		input.setAttribute('placeholder', productConstraints[id_info.country]['id_types'][id_info.id_type]['test_data']);
+		input.setAttribute('pattern', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
 	}
 
 	function setFormInputs() {
-		const country = id_info.country;
-		const IDType = id_info.id_type;
+		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
 
-		if (country !== 'NG') return;
+		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
-		if (IDType === 'DRIVERS_LICENSE') {
-			const DOB = IDInfoForm.querySelector('fieldset#dob');
-
-			DOB.hidden = false;
+		if (showNames) {
+			const Names = IDInfoForm.querySelector('fieldset#names');
+			Names.hidden = false;
 		}
 
-		if (IDType === 'DRIVERS_LICENSE' || IDType === 'PHONE_NUMBER') {
-			const Names = IDInfoForm.querySelector('fieldset#names');
+		const showDOB = requiredFields.some(fieldName => fieldName.includes('dob'));
 
-			Names.hidden = false;
+		if (showDOB) {
+			const DOB = IDInfoForm.querySelector('fieldset#dob');
+			DOB.hidden = false;
 		}
 	}
 
@@ -232,42 +239,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		validationMessages.forEach((el) => el.remove());
 	};
 
-	const regexes = {
-		GH: {
-			DRIVERS_LICENSE: /^[A-Z0-9]{6,10}$/i ,
-			SSNIT: /^[A-Z]{1}[A-Z0-9]{12,14}$/i,
-			VOTER_ID: /^[0-9]{10,12}$/,
-			NEW_VOTER_ID: /^[0-9]{10,12}$/,
-			PASSPORT: /^G[A-Z0-9]{7,9}$/i,
-			NATIONAL_ID: /^GHA-[A-Z0-9]{9}-[A-Z0-9]{1}$/i
-		},
-		KE: {
-			NATIONAL_ID: /^[0-9]{1,9}$/,
-			PASSPORT: /^[A-Z0-9]{7,9}$/,
-			ALIEN_CARD: /^[0-9]{6,9}$/,
-		},
-		NG: {
-			BANK_ACCOUNT: /^[0-9]{10}$/,
-			BVN: /^[0-9]{11}$/,
-			CAC: /^(RC)?[0-9]{5,8}$/,
-			DRIVERS_LICENSE: /^(?=.*[0-9])(?=.*[A-Z])[A-Z0-9]{3}([ -]{1})?[A-Z0-9]{6,12}$/i,
-			NATIONAL_ID: /^[0-9]{10}$/,
-			NIN: /^[0-9]{11}$/,
-			NIN_SLIP: /^[0-9]{11}$/,
-			PASSPORT: /^[A-Z]{1}( )?[0-9]{8}$/i,
-			PHONE_NUMBER: /^[0-9]{11}$/,
-			TIN: /^[0-9]{8,}-[0-9]{4,}$/,
-			VOTER_ID: /^([A-Z0-9]{19}|[A-Z0-9]{9})$/i,
-		},
-		UG: {
-			NATIONAL_ID_NO_PHOTO: /^[A-Z0-9]{14}$/i,
-		},
-		ZA: {
-			NATIONAL_ID: /^[0-9]{13}$/,
-			NATIONAL_ID_NO_PHOTO: /^[0-9]{13}$/,
-		},
-	};
-
 	function validateInputs(payload) {
 		const validationConstraints = {
 			id_number: {
@@ -275,47 +246,51 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 					allowEmpty: false,
 					message: 'is required'
 				},
-				format: regexes[id_info.country][id_info.id_type]
+				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
 			}
 		}
 
-		if (id_info.country === 'NG') {
-			if (id_info.id_type === 'PHONE_NUMBER' || id_info.id_type === 'DRIVERS_LICENSE') {
-				validationConstraints.first_name = {
-					presence: {
-						allowEmpty: false,
-						message: 'is required'
-					}
-				};
-				validationConstraints.last_name = {
-					presence: {
-						allowEmpty: false,
-						message: 'is required'
-					}
-				};
-			}
+		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
 
-			if (id_info.id_type === 'DRIVERS_LICENSE') {
-				validationConstraints.day = {
-					presence: {
-						allowEmpty: false,
-						message: 'is required'
-					}
-				};
-				validationConstraints.month = {
-					presence: {
-						allowEmpty: false,
-						message: 'is required'
-					}
-				};
-				validationConstraints.year = {
-					presence: {
-						allowEmpty: false,
-						message: 'is required'
-					}
-				};
-			}
-		};
+		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
+
+		if (showNames) {
+			validationConstraints.first_name = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+			validationConstraints.last_name = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+		}
+
+		const showDOB = requiredFields.some(fieldName => fieldName.includes('dob'));
+
+		if (showDOB) {
+			validationConstraints.day = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+			validationConstraints.month = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+			validationConstraints.year = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+		}
 
 		const validation = validate(payload, validationConstraints);
 

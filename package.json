@@ -14,7 +14,8 @@
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build && npm run build:dist",
-		"start": "npx serve -p 8000 build"
+		"start": "npx serve -p 8000 build",
+		"test": "npx cypress run"
 	},
 	"repository": {
 		"type": "git",

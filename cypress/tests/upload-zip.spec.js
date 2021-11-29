@@ -3,6 +3,9 @@ describe('zip upload screens', () => {
 		cy.visit('/');
 
 		cy
+			.selectBVNIDType()
+
+		cy
 			.intercept({
 				method: 'POST',
 				url: '*upload*'

@@ -34,3 +34,25 @@ Cypress.Commands.add('getIFrameBody', () => {
 		.should('not.be.empty')
 		.then(body => cy.wrap(body, { log: false }));
 });
+
+Cypress.Commands.add('selectBVNIDType', () => {
+	cy.log('selectingBVNIDType');
+
+	cy
+		.intercept('GET', '*/v1/services', { fixture: 'services' });
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('BVN')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});

@@ -3,6 +3,9 @@ describe('id-info screen', () => {
 		cy.visit('/');
 
 		cy
+			.selectBVNIDType()
+
+		cy
 			.intercept({
 				method: 'POST',
 				url: '*upload*'

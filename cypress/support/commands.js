@@ -39,7 +39,7 @@ Cypress.Commands.add('selectBVNIDType', () => {
 	cy.log('selectingBVNIDType');
 
 	cy
-		.intercept('GET', '*/v1/services', { fixture: 'services' });
+		.intercept('GET', '**/v1/services', { fixture: 'services.json' });
 
 	cy
 		.getIFrameBody()
@@ -54,5 +54,33 @@ Cypress.Commands.add('selectBVNIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#submitConfig')
+		.click();
+});
+
+Cypress.Commands.add('navigateThroughCameraScreens', () => {
+	cy.log('navigatingThroughCameraScreens');
+
+	cy
+		.getIFrameBody()
+		.find('smart-camera-web')
+		.shadow()
+		.find('#request-camera-access')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('smart-camera-web')
+		.shadow()
+		.find('#start-image-capture')
+		.click();
+
+	cy
+		.wait(4000);
+
+	cy
+		.getIFrameBody()
+		.find('smart-camera-web')
+		.shadow()
+		.find('#select-selfie')
 		.click();
 });

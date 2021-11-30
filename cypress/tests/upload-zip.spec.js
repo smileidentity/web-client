@@ -21,28 +21,7 @@ describe('zip upload screens', () => {
 			.click();
 
 		cy
-			.getIFrameBody()
-			.find('smart-camera-web')
-			.shadow()
-			.find('#request-camera-access')
-			.click();
-
-		cy
-			.getIFrameBody()
-			.find('smart-camera-web')
-			.shadow()
-			.find('#start-image-capture')
-			.click();
-
-		cy
-			.wait(4000);
-
-		cy
-			.getIFrameBody()
-			.find('smart-camera-web')
-			.shadow()
-			.find('#select-selfie')
-			.click();
+			.navigateThroughCameraScreens();
 
 		cy
 			.getIFrameBody()

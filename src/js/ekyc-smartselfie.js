@@ -435,6 +435,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		request.upload.addEventListener('progress', function(e) {
 			let percentCompleted = (e.loaded / e.total)*100;
+			UploadProgressOutline.parentElement.classList.toggle('spinner');
 			animateUploadProgress(percentCompleted);
 		});
 
@@ -464,6 +465,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	}
 
 	function retryUpload() {
+		UploadProgressOutline.parentElement.classList.toggle('spinner');
 		var fileUploaded = uploadZip(fileToUpload, uploadURL);
 
 		return fileUploaded;

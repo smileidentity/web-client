@@ -44,10 +44,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			initializeSession(productConstraints);
 			getPartnerParams();
 
-			if (config.demo_mode) {
-				localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
-				initiateDemoMode();
-			}
 			localStorage.setItem('SmileIdentityConfig', event.data);
 		} catch (e) {
 			throw e;
@@ -176,6 +172,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
+			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
+			initiateDemoMode();
 		}
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {

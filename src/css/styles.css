@@ -264,6 +264,17 @@ button:focus:not([disabled]) {
 	--flow-space: 1.5rem;
 }
 
+.demo-tip {
+	background-color: #f5fcff;
+	border-radius: .75rem;
+	border: 1px solid #A9D1E8;
+	color: inherit;
+	font-size: .875rem;
+	max-width: 36rem;
+	padding: 1rem;
+	text-decoration: none;
+}
+
 #error,
 .validation-message {
 	color: red;

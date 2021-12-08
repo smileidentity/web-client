@@ -43,6 +43,11 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			productConstraints = await getProductConstraints();
 			initializeSession(productConstraints);
 			getPartnerParams();
+
+			if (config.demo_mode) {
+				localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
+				initiateDemoMode();
+			}
 			localStorage.setItem('SmileIdentityConfig', event.data);
 		} catch (e) {
 			throw e;
@@ -124,6 +129,19 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			setActiveScreen(EndUserConsent);
 			customizeForm();
 		});
+	}
+
+	function initiateDemoMode() {
+		const demoTips = document.querySelectorAll('.demo-tip');
+		Array.prototype.forEach.call(demoTips, (tip) => {
+			tip.hidden = false;
+		});
+
+		const script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.src = 'js/demo-ekyc-smartselfie.min.js';
+
+		document.body.appendChild(script);
 	}
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {

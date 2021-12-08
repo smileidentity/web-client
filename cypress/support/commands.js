@@ -35,11 +35,18 @@ Cypress.Commands.add('getIFrameBody', () => {
 		.then(body => cy.wrap(body, { log: false }));
 });
 
-Cypress.Commands.add('selectBVNIDType', () => {
-	cy.log('selectingBVNIDType');
+Cypress.Commands.add('loadIDOptions', () => {
+	cy.log('loadingIDOptions');
 
 	cy
 		.intercept('GET', '**/v1/services', { fixture: 'services.json' });
+});
+
+Cypress.Commands.add('selectBVNIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingBVNIDType');
 
 	cy
 		.getIFrameBody()

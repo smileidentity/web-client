@@ -136,6 +136,17 @@ function templateString() {
 				transform: translate(-50%, -50%);
 			}
 
+			.demo-tip {
+				background-color: #f5fcff;
+				border-radius: .75rem;
+				border: 1px solid #A9D1E8;
+				color: inherit;
+				font-size: .875rem;
+				max-width: 36rem;
+				padding: 1rem;
+				text-decoration: none;
+			}
+
 			.callout {
 				border: 0.8px solid #DEEAEF;
 				border-radius: .5rem;
@@ -262,6 +273,9 @@ function templateString() {
 		<div id='consent-screen'>
 			<section class='flow center'>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
+				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
+					This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
+				</p>
 				<h1>
 					<span class='theme'>${this.partnerName}</span>
 					wants to access your
@@ -395,7 +409,7 @@ function templateString() {
 				</p>
 
 				<p style='--flow-space: .75rem'>
-					By choosing "Allow" below,
+					By choosing "Allow",
 					you grant
 					<span class='theme'>${this.partnerName}</span>
 					consent to process your personal data
@@ -537,7 +551,7 @@ function templateString() {
 				<svg style='transform: rotate(.5turn);' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
-				Go Back to Consent Page
+				Go Back
 			</button>
 
 			<button id='confirm-consent-rejection' data-type='secondary' style='--flow-space: 1rem; border-radius: 2rem'>
@@ -604,6 +618,10 @@ class EndUserConsent extends HTMLElement {
 		this.activeScreen.hidden = true;
 		screen.hidden = false;
 		this.activeScreen = screen;
+	}
+
+	get demoMode() {
+		return this.hasAttribute('demo-mode') ? true : false
 	}
 
 	get partnerName() {

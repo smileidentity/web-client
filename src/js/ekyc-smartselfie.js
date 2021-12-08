@@ -156,6 +156,9 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+		if (config.demo_mode) {
+			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
+		}
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;

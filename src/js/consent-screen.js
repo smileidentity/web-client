@@ -137,14 +137,21 @@ function templateString() {
 			}
 
 			.demo-tip {
+				align-items: center;
 				background-color: #f5fcff;
 				border-radius: .75rem;
 				border: 1px solid #A9D1E8;
 				color: inherit;
+				display: flex;
 				font-size: .875rem;
 				max-width: 36rem;
 				padding: 1rem;
+				text-align: left;
 				text-decoration: none;
+			}
+
+			.demo-tip > * + * {
+				margin-left: .5rem;
 			}
 
 			.callout {
@@ -274,7 +281,15 @@ function templateString() {
 			<section class='flow center'>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
 				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
-					This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
+					<svg aria-hidden='true' width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect x="4.46045" y="4.46069" width="47.7205" height="47.7205" rx="23.8603" fill="white"/>
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M35.1578 25.7487H34.2813V23.1195C34.2813 20.2273 31.915 17.861 29.0229 17.861C26.1307 17.861 23.7644 20.2273 23.7644 23.1195V25.7487H22.888C21.3981 25.7487 20.2588 26.888 20.2588 28.3779V34.5128C20.2588 36.0027 21.3981 37.142 22.888 37.142H35.1578C36.6476 37.142 37.787 36.0027 37.787 34.5128V28.3779C37.787 26.888 36.6476 25.7487 35.1578 25.7487ZM25.5171 23.1194C25.5171 21.1913 27.0946 19.6138 29.0227 19.6138C30.9508 19.6138 32.5283 21.1913 32.5283 23.1194V25.7487H25.5171V23.1194ZM35.1577 35.3892C35.6836 35.3892 36.0342 35.0386 36.0342 34.5128V28.3779C36.0342 27.8521 35.6836 27.5015 35.1577 27.5015H22.888C22.3622 27.5015 22.0116 27.8521 22.0116 28.3779V34.5128C22.0116 35.0386 22.3622 35.3892 22.888 35.3892H35.1577Z" fill="#2D9CDB"/>
+						<rect x="4.46045" y="4.46069" width="47.7205" height="47.7205" rx="23.8603" stroke="#DDF2F7" stroke-width="7.15808"/>
+					</svg>
+
+					<span>
+						This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
+					</span>
 				</p>
 				<h1>
 					<span class='theme'>${this.partnerName}</span>

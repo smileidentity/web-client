@@ -265,14 +265,26 @@ button:focus:not([disabled]) {
 }
 
 .demo-tip {
+	align-items: center;
 	background-color: #f5fcff;
 	border-radius: .75rem;
 	border: 1px solid #A9D1E8;
 	color: inherit;
+	display: flex;
 	font-size: .875rem;
 	max-width: 36rem;
 	padding: 1rem;
+	text-align: left;
 	text-decoration: none;
+}
+
+.demo-tip[data-variant='yellow'] {
+	background-color: #FFF8EE;
+	border: #FFF8EE;
+}
+
+.demo-tip > * + * {
+	margin-left: .5rem;
 }
 
 #error,

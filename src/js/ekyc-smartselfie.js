@@ -452,12 +452,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		let request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
-		request.upload.addEventListener('progress', function(e) {
-			let percentCompleted = (e.loaded / e.total)*100;
-			UploadProgressOutline.parentElement.classList.toggle('spinner');
-			animateUploadProgress(percentCompleted);
-		});
-
 		request.upload.addEventListener('load', function(e) {
 			return request.response;
 		});
@@ -488,19 +482,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		var fileUploaded = uploadZip(fileToUpload, uploadURL);
 
 		return fileUploaded;
-	}
-
-	function animateUploadProgress(percentageCompleted) {
-		/**
-		 * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
-		 * and modified for the new use case
-		 */
-		// NOTE: get length of the path
-		const progressOutlineLength = UploadProgressOutline.getTotalLength();
-		// Set up the starting positions
-		UploadProgressOutline.style.strokeDasharray = progressOutlineLength + ' ' + progressOutlineLength;
-		// Set new position
-		UploadProgressOutline.style.strokeDashOffset = progressOutlineLength * (percentageCompleted / 100);
 	}
 
 	function closeWindow() {

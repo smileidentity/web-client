@@ -2,7 +2,6 @@ it('should load an iframe', () => {
 	cy.visit('/');
 
 	cy
-		.get('#iframe')
-		.its('0.contentDocument.body')
+		.getIFrameBody()
 		.should('be.visible')
 });

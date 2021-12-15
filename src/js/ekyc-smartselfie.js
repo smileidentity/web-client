@@ -117,16 +117,19 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			const selectedCountry = selectCountry.value;
 			const selectedIDType = selectIDType.value;
 
+			console.log(selectedCountry);
+			console.log(selectedIDType);
 			// ACTION: set up `id_info`
 			id_info = {
 				country: selectedCountry,
 				id_type: selectedIDType
 			};
 
-			if (config.consent_required) {
-				const IDRequiresConsent = config.consent_required[selectedCountry].includes(selectedIDType);
+			if (config.consent_required || config.demo_mode) {
+				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
+					config.consent_required[selectedCountry].includes(selectedIDType);
 
-				if (IDRequiresConsent) {
+				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
 				} else {
@@ -489,7 +492,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	}
 
 	function retryUpload() {
-		UploadProgressOutline.parentElement.classList.toggle('spinner');
 		var fileUploaded = uploadZip(fileToUpload, uploadURL);
 
 		return fileUploaded;

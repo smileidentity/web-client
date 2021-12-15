@@ -1,4 +1,4 @@
-it('should load an iframe', () => {
+it('should demonstrate id-restrictions via the `id_selection` config attribute', () => {
 	cy.visit('/id-selection');
 
 	cy

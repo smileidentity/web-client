@@ -114,15 +114,26 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		hostedWebConfigForm.addEventListener('submit', e => {
 			e.preventDefault();
+			const selectedCountry = selectCountry.value;
+			const selectedIDType = selectIDType.value;
 
 			// ACTION: set up `id_info`
 			id_info = {
-				country: selectCountry.value,
-				id_type: selectIDType.value
+				country: selectedCountry,
+				id_type: selectedIDType
 			};
 
-			customizeConsentScreen();
-			setActiveScreen(EndUserConsent);
+			if (config.consent_required) {
+				const IDRequiresConsent = config.consent_required[selectedCountry].includes(selectedIDType);
+
+				if (IDRequiresConsent) {
+					customizeConsentScreen();
+					setActiveScreen(EndUserConsent);
+				} else {
+					setActiveScreen(SmartCameraWeb);
+				}
+			}
+
 			customizeForm();
 		});
 	}

@@ -1,3 +1,30 @@
+/**
+* SmileIdentity - Creates an instance of the Smile Identity Web Integration
+* @function
+* @param { Object } config - the configuration object
+* @param { string } config.token - token generated on the server side using the
+* `get_web_token` method in one of our server-to-server libraries
+* @param { string } config.callback_url - callback URL for responses
+* @param { string } config.environment - one of `sandbox` or `production`
+* @param { string } config.product - one of the product types,
+	`ekyc_smartselfie` is the currently supported one
+* @param { Object } config.partner_details - partner details for customization
+* @param { string } config.partner_details.name - name to display on the widget
+* @param { string } config.partner_details.policy_url - URL for data privacy
+	policy
+* @param { string } config.partner_details.partner_id - partner_id for the
+	organization
+* @param { string } config.partner_details.theme_color - accent color for links in a css compliant color format
+* @param { string } config.partner_details.logo_url - URL for a logo image,
+	preferably in 1:1 aspect ratio
+* @param { Object } [config.id_selection=all our [supported id types / countries]{@link https://docs.smileidentity.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
+* e.g. { 'NG': ['BVN', 'NIN'] }
+* @param { Object } [config.consent_required=none of our [supported id types / countries]{@link https://docs.smileidentity.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
+* e.g. { 'NG': ['BVN', 'NIN'] }
+* N.B.: This controls the display of the screen for the provision of end-user
+	consent. Ensure that your authorization matches this in the sandbox
+	environment before publishing to end users
+*/
 var SmileIdentity = function () {
 	'use strict';
 

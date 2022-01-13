@@ -117,8 +117,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			const selectedCountry = selectCountry.value;
 			const selectedIDType = selectIDType.value;
 
-			console.log(selectedCountry);
-			console.log(selectedIDType);
 			// ACTION: set up `id_info`
 			id_info = {
 				country: selectedCountry,

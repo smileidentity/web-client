@@ -12,7 +12,11 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'ekyc_smartselfie') return './../ekyc-smartselfie.html';
+		if (product === 'ekyc_smartselfie') {
+			return './../ekyc-smartselfie.html';
+		} else if (product === 'doc_verification') {
+			return './../doc-verification.html';
+		}
 
 		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);
 	}
@@ -70,17 +74,19 @@ var SmileIdentity = function () {
 	function isConfigValid(config) {
 		if (!config.token) throw new Error('SmileIdentity: Please provide your web token via the `token` attribute');
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
-		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `ekyc_smartselfie` is supported');
+		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `ekyc_smartselfie` and `doc_verification` are supported');
 
 		if (config.product === 'ekyc_smartselfie' && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');
 		}
 
-		requiredPartnerDetails.forEach(param => {
-			if (!config.partner_details[param]) {
-				throw new Error(`SmileIdentity: Please include ${param} in the "partner_details" object`);
-			}
-		});
+		if (config.product === 'ekyc_smartselfie' && config.partner_details) {
+			requiredPartnerDetails.forEach(param => {
+				if (!config.partner_details[param]) {
+					throw new Error(`SmileIdentity: Please include ${param} in the "partner_details" object`);
+				}
+			});
+		}
 
 		return true;
 	}

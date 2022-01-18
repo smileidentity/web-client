@@ -140,7 +140,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		setActiveScreen(IDInfoForm);
+		setActiveScreen(UploadProgressScreen);
 		handleFormSubmit(event);
 	}, false);
 
@@ -178,116 +178,12 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		activeScreen = node;
 	}
 
-	function resetForm() {
-		const submitButton = IDInfoForm.querySelector('[type="button"]');
-		submitButton.disabled = true;
-
-		const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
-		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
-
-		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
-		validationMessages.forEach((el) => el.remove());
-	};
-
-	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				},
-				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
-			}
-		}
-
-		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
-
-		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
-
-		if (showNames) {
-			validationConstraints.first_name = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.last_name = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-		}
-
-		const showDOB = requiredFields.some(fieldName => fieldName.includes('dob'));
-
-		if (showDOB) {
-			validationConstraints.day = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.month = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.year = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-		}
-
-		const validation = validate(payload, validationConstraints);
-
-		if (validation) {
-			handleValidationErrors(validation);
-			const submitButton = IDInfoForm.querySelector('[type="button"]');
-			submitButton.removeAttribute('disabled');
-		}
-
-		return validation;
-	}
-
-	function handleValidationErrors(errors) {
-		const fields = Object.keys(errors);
-
-		fields.forEach((field) => {
-			const input = IDInfoForm.querySelector(`#${field}`);
-			input.setAttribute('aria-invalid', 'true');
-			input.setAttribute('aria-describedby', `${field}-hint`);
-
-			const errorDiv = document.createElement('div')
-			errorDiv.setAttribute('id', `${field}-hint`);
-			errorDiv.setAttribute('class', 'validation-message');
-			errorDiv.textContent = errors[field][0];
-
-			input.insertAdjacentElement('afterend', errorDiv);
-		});
-	}
-
 	async function handleFormSubmit(event) {
 		event.preventDefault();
-		resetForm();
-		const form = IDInfoForm.querySelector('form');
-
-		const formData = new FormData(form);
-		const payload = Object.fromEntries(formData.entries());
-
-		const isInvalid = validateInputs(payload);
-
-		if (isInvalid) {
-			return;
-		}
 
 		id_info = Object.assign({
-			dob: `${payload.year}-${payload.month}-${payload.day}`,
 			entered: true
-		}, id_info, payload);
+		}, id_info);
 
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
@@ -378,8 +274,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-		setActiveScreen(UploadProgressScreen);
-
 		let request = new XMLHttpRequest();
 		request.open('PUT', destination);
 

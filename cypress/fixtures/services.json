@@ -1,5 +1,228 @@
 {
     "hosted_web": {
+        "doc_verification": {
+            "GH": {
+                "name": "Ghana",
+                "id_types": {
+                    "NHIS": {
+                        "label": "National Health Insurance Card"
+                    },
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "NATIONAL_ID_NON_CITIZEN": {
+                        "label": "National ID"
+                    },
+                    "VOTER_ID": {
+                        "label": "Voter's ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    },
+                    "ECOWAS_ID": {
+                        "label": "ECOWAS ID"
+                    }
+                }
+            },
+            "RW": {
+                "name": "Rwanda",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    },
+                    "RWANDA_CARD": {
+                        "label": "Rwanda Card"
+                    }
+                }
+            },
+            "CI": {
+                "name": "Cote d'Ivoire",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "TZ": {
+                "name": "Tanzania",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "VOTER_ID": {
+                        "label": "Voter's ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "ZA": {
+                "name": "South Africa",
+                "id_types": {
+                    "NATIONAL_ID_DOC": {
+                        "label": "National ID Document"
+                    },
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "MU": {
+              "name": "Mauritius",
+              "id_types": {
+              "NATIONAL_ID": {
+                  "label": "National ID"
+              },
+              "PASSPORT": {
+                  "label": "Passport"
+              }
+              }
+            },
+            "CM": {
+                "name": "Cameroon",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "EPASSPORT": {
+                        "label": "Passport"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "MW": {
+                "name": "Malawi",
+                "id_types": {
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "UG": {
+                "name": "Uganda",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "NA": {
+                "name": "Namibia",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "ZM": {
+                "name": "Zimbabwe",
+                "id_types": {
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "BW": {
+                "name": "Botswana",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "NG": {
+                "name": "Nigeria",
+                "id_types": {
+                    "VOTER_ID": {
+                        "label": "Voter's ID"
+                    },
+                    "NIN": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "label": "Driver's License"
+                    }
+                }
+            },
+            "GA": {
+                "name": "Gabon",
+                "id_types": {
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "KE": {
+                "name": "Kenya",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    }
+                }
+            },
+            "SN": {
+                "name": "Senegal",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "label": "National ID"
+                    },
+                    "PASSPORT": {
+                        "label": "Passport"
+                    },
+                    "ECOWAS_ID": {
+                        "label": "ECOWAS ID"
+                    }
+                }
+            }
+        },
         "ekyc_smartselfie": {
             "GH": {
                 "name": "Ghana",

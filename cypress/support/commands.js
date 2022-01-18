@@ -64,6 +64,28 @@ Cypress.Commands.add('selectBVNIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectNINIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingNINIDType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('NIN')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('navigateThroughCameraScreens', () => {
 	cy.log('navigatingThroughCameraScreens');
 

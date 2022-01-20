@@ -1,4 +1,4 @@
-it('should load an iframe', () => {
+it('should show content for demo mode', () => {
 	cy.visit('/demo');
 
 	cy

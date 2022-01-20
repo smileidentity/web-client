@@ -30,6 +30,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 			return json.hosted_web['doc_verification'];
 		} catch (e) {
+			throw new Error("Failed to get supported ID types", { cause: e });
 		}
 	}
 

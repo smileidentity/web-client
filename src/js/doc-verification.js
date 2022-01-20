@@ -199,10 +199,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	async function handleFormSubmit(event) {
 		event.preventDefault();
 
-		id_info = Object.assign({
-			entered: true
-		}, id_info);
-
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
 

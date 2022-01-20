@@ -159,11 +159,28 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function getPartnerParams() {
 		function parseJWT(token) {
+			/**
+			 * A JSON Web Token (JWT) uses a base64 URL encoded string in it's body.
+			 *
+			 * in order to get a regular JSON string, we would follow these steps:
+			 *
+			 * 1. get the body of a JWT string
+			 * 2. replace the base64 URL delimiters ( - and _ ) with regular URL delimiters ( + and / )
+			 * 3. convert the regular base64 string to a string
+			 * 4. encode the string from above as a URIComponent,
+			 *    ref: just above this - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#examples
+			 * 5. decode the URI Component to a JSON string
+			 * 6. parse the JSON string to a javascript object
+			 */
 			var base64Url = token.split('.')[1];
 			var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-			var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-					return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-			}).join(''));
+			var jsonPayload = decodeURIComponent(
+				atob(base64)
+					.split('')
+					.map(function(c) {
+						return '%' + (c.charCodeAt(0).toString(16));
+				}).join('')
+			);
 
 			return JSON.parse(jsonPayload);
 		};

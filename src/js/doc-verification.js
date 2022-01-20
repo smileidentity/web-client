@@ -8,13 +8,11 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	var config;
 	var activeScreen;
-	var consent_information, id_info, images, partner_params;
+	var id_info, images, partner_params;
 	var productConstraints;
 
-	var EndUserConsent;
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
-	var IDInfoForm = document.querySelector('#id-info');
 	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
@@ -30,7 +28,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			const response = await fetch(`${endpoints[config.environment]}/services`);
 			const json = await response.json();
 
-			return json.hosted_web['ekyc_smartselfie'];
+			return json.hosted_web['doc_verification'];
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -124,19 +122,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 				id_type: selectedIDType
 			};
 
-			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType);
-
-				if (IDRequiresConsent || config.demo_mode) {
-					customizeConsentScreen();
-					setActiveScreen(EndUserConsent);
-				} else {
-					setActiveScreen(SmartCameraWeb);
-				}
-			}
-
-			customizeForm();
+			setActiveScreen(SmartCameraWeb);
 		});
 	}
 
@@ -148,17 +134,14 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = 'js/demo-ekyc-smartselfie.min.js';
+		script.src = 'js/demo-doc-verification.min.js';
 
 		document.body.appendChild(script);
 	}
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		setActiveScreen(IDInfoForm);
-	}, false);
-
-	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
+		setActiveScreen(UploadProgressScreen);
 		handleFormSubmit(event);
 	}, false);
 
@@ -172,70 +155,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');
-	}
-
-	function customizeConsentScreen() {
-		const partnerDetails = config.partner_details;
-
-		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
-		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
-		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
-		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
-		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
-		if (config.demo_mode) {
-			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
-			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
-			initiateDemoMode();
-		}
-
-		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
-			consent_information = event.detail;
-
-			if (consent_information.consented.personal_details) {
-				setActiveScreen(SmartCameraWeb);
-			}
-		}, false);
-
-		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
-			closeWindow();
-		}, false);
-
-		const main = document.querySelector('main');
-		main.appendChild(EndUserConsent);
-	}
-
-	function customizeForm() {
-		setGuideTextForIDType();
-		setFormInputs();
-	}
-
-	function setGuideTextForIDType() {
-		const label = document.querySelector('[for="id_number"]');
-		const input = document.querySelector('#id_number');
-
-		label.innerHTML = productConstraints[id_info.country]['id_types'][id_info.id_type]['label'];
-		input.setAttribute('placeholder', productConstraints[id_info.country]['id_types'][id_info.id_type]['test_data']);
-		input.setAttribute('pattern', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
-	}
-
-	function setFormInputs() {
-		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
-
-		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
-
-		if (showNames) {
-			const Names = IDInfoForm.querySelector('fieldset#names');
-			Names.hidden = false;
-		}
-
-		const showDOB = requiredFields.some(fieldName => fieldName.includes('dob'));
-
-		if (showDOB) {
-			const DOB = IDInfoForm.querySelector('fieldset#dob');
-			DOB.hidden = false;
-		}
 	}
 
 	function getPartnerParams() {
@@ -277,116 +196,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		activeScreen = node;
 	}
 
-	function resetForm() {
-		const submitButton = IDInfoForm.querySelector('[type="button"]');
-		submitButton.disabled = true;
-
-		const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
-		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
-
-		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
-		validationMessages.forEach((el) => el.remove());
-	};
-
-	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				},
-				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
-			}
-		}
-
-		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
-
-		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
-
-		if (showNames) {
-			validationConstraints.first_name = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.last_name = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-		}
-
-		const showDOB = requiredFields.some(fieldName => fieldName.includes('dob'));
-
-		if (showDOB) {
-			validationConstraints.day = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.month = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-			validationConstraints.year = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-		}
-
-		const validation = validate(payload, validationConstraints);
-
-		if (validation) {
-			handleValidationErrors(validation);
-			const submitButton = IDInfoForm.querySelector('[type="button"]');
-			submitButton.removeAttribute('disabled');
-		}
-
-		return validation;
-	}
-
-	function handleValidationErrors(errors) {
-		const fields = Object.keys(errors);
-
-		fields.forEach((field) => {
-			const input = IDInfoForm.querySelector(`#${field}`);
-			input.setAttribute('aria-invalid', 'true');
-			input.setAttribute('aria-describedby', `${field}-hint`);
-
-			const errorDiv = document.createElement('div')
-			errorDiv.setAttribute('id', `${field}-hint`);
-			errorDiv.setAttribute('class', 'validation-message');
-			errorDiv.textContent = errors[field][0];
-
-			input.insertAdjacentElement('afterend', errorDiv);
-		});
-	}
-
 	async function handleFormSubmit(event) {
 		event.preventDefault();
-		resetForm();
-		const form = IDInfoForm.querySelector('form');
-
-		const formData = new FormData(form);
-		const payload = Object.fromEntries(formData.entries());
-
-		const isInvalid = validateInputs(payload);
-
-		if (isInvalid) {
-			return;
-		}
-
-		id_info = Object.assign({
-			dob: `${payload.year}-${payload.month}-${payload.day}`,
-			entered: true
-		}, id_info, payload);
 
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
@@ -477,8 +288,6 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-		setActiveScreen(UploadProgressScreen);
-
 		let request = new XMLHttpRequest();
 		request.open('PUT', destination);
 

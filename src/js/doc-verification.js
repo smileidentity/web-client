@@ -3,7 +3,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	const endpoints = {
 		'sandbox': 'https://testapi.smileidentity.com/v1',
-		'live': 'https://api.smileidentity.com/v1'
+		'production': 'https://api.smileidentity.com/v1'
 	}
 
 	var config;

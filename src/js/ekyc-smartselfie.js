@@ -137,6 +137,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 				} else {
 					setActiveScreen(SmartCameraWeb);
 				}
+			} else {
+				setActiveScreen(SmartCameraWeb);
 			}
 
 			customizeForm();

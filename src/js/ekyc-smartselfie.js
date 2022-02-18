@@ -457,7 +457,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const fetchConfig = {
 			cache: 'no-cache',
-			mode: 'cors',
+			mode: 'no-cors',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'

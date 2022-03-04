@@ -55,7 +55,19 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	}, false);
 
 	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints).sort();
+		const supportedCountries = Object.keys(constraints)
+			.map(countryCode => ({
+				code: countryCode,
+				name: constraints[countryCode].name
+			})).sort((a, b) => {
+				if (a.name < b.name) {
+					return -1;
+				} else if (a.name > b.name) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}).map(item => item.code);
 
 		const selectCountry = SelectIDType.querySelector('#country');
 		const selectIDType = SelectIDType.querySelector('#id_type');

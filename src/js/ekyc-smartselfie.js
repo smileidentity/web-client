@@ -138,6 +138,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 				country: selectedCountry,
 				id_type: selectedIDType
 			};
+			var nextNode = (config.product ==="ekyc_smartselfie") ? SmartCameraWeb : IDInfoForm
 
 			if (config.consent_required || config.demo_mode) {
 				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
@@ -147,10 +148,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
 				} else {
-					setActiveScreen(SmartCameraWeb);
+					setActiveScreen(nextNode);
 				}
 			} else {
-				setActiveScreen(SmartCameraWeb);
+				setActiveScreen(nextNode);
 			}
 
 			customizeForm();
@@ -281,7 +282,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			);
 
 			return JSON.parse(jsonPayload);
-		};
+		}
 
 		const { partner_params: partnerParams } = parseJWT(config.token);
 
@@ -303,7 +304,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
 		validationMessages.forEach((el) => el.remove());
-	};
+	}
 
 	function validateInputs(payload) {
 		const validationConstraints = {
@@ -406,9 +407,13 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		}, id_info, payload);
 
 		try {
-			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
-
-			var fileUploaded = uploadZip(fileToUpload, uploadURL);
+			if(config.product ==="ekyc_smartselfie") {
+				[uploadURL, fileToUpload] = await Promise.all([getUploadURL(), createZip()]);
+				uploadZip(fileToUpload, uploadURL);
+			} else {
+				await submitIdInfoForm()
+				complete()
+			}
 		} catch (error) {
 			switch (error.message) {
 				case 'createZip failed':
@@ -492,6 +497,43 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		}
 	}
 
+	async function submitIdInfoForm(formData) {
+		const { year, month, day, ...data } = id_info
+		const dob = (year && month && day) ? `${year}-${month}-${day}` : undefined;
+		const { callback_url, partner_details: { partner_id, signature, timestamp } } = config;
+		const payload = {
+			...data,
+			signature,
+			timestamp,
+			dob,
+			partner_id,
+			partner_params,
+			callback_url,
+		}
+
+		const fetchConfig = {
+			cache: 'no-cache',
+			mode: 'cors',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'POST',
+			body: JSON.stringify(payload),
+		};
+		const URL = `${endpoints[config.environment]}/async_id_verification`;
+		const response = await fetch(URL, fetchConfig);
+		const json = await response.json();
+
+		if (json.error) throw new Error(json.error);
+	}
+
+	function complete() {
+		setActiveScreen(CompleteScreen);
+		handleSuccess();
+		window.setTimeout(closeWindow, 2000);
+	}
+
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
 		setActiveScreen(UploadProgressScreen);
@@ -510,9 +552,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		request.onreadystatechange = function() {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
-				setActiveScreen(CompleteScreen);
-				handleSuccess();
-				window.setTimeout(closeWindow, 2000);
+				complete();
 			}
 			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
 				setActiveScreen(UploadFailureScreen);

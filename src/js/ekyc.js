@@ -400,14 +400,8 @@ var eKYC = function eKYCSmartSelfie() {
 			await submitIdInfoForm()
 			complete()
 		} catch (error) {
-			switch (error.message) {
-				case 'createZip failed':
-				case 'getUploadURL failed':
-				case 'uploadFile failed':
-				default:
-					displayErrorMessage(error);
-					console.error(`SmileIdentity - ${error.name}: ${error.cause}`);
-			}
+			displayErrorMessage(error);
+			console.error(`SmileIdentity - ${error.name}: ${error.cause}`)
 		}
 	}
 

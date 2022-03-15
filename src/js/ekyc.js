@@ -1,9 +1,13 @@
-var eKYCSmartSelfie = function eKYCSmartSelfie() {
+
+// noinspection JSVoidFunctionReturnValueUsed
+
+var eKYC = function eKYCSmartSelfie() {
 	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
+		'development': 'https://devapi.smileidentity.com/v1',
 		'sandbox': 'https://testapi.smileidentity.com/v1',
 		'live': 'https://api.smileidentity.com/v1',
 		'production': 'https://api.smileidentity.com/v1'
@@ -16,14 +20,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 	var EndUserConsent;
 	var SelectIDType = document.querySelector('#select-id-type');
-	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var IDInfoForm = document.querySelector('#id-info');
-	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
-	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
 	var CloseIframeButton = document.querySelector('#close-iframe');
-	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 
 	var fileToUpload, uploadURL;
@@ -147,10 +147,10 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
 				} else {
-					setActiveScreen(SmartCameraWeb);
+					setActiveScreen(IDInfoForm);
 				}
 			} else {
-				setActiveScreen(SmartCameraWeb);
+				setActiveScreen(IDInfoForm);
 			}
 
 			customizeForm();
@@ -165,22 +165,13 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const script = document.createElement('script');
 		script.type = 'text/javascript';
-		script.src = 'js/demo-ekyc-smartselfie.min.js';
+		script.src = 'js/demo-ekyc.min.js';
 
 		document.body.appendChild(script);
 	}
 
-	SmartCameraWeb.addEventListener('imagesComputed', event => {
-		images = event.detail.images;
-		setActiveScreen(IDInfoForm);
-	}, false);
-
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
 		handleFormSubmit(event);
-	}, false);
-
-	RetryUploadButton.addEventListener('click', event => {
-		retryUpload();
 	}, false);
 
 	CloseIframeButton.addEventListener('click', event => {
@@ -210,7 +201,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			consent_information = event.detail;
 
 			if (consent_information.consented.personal_details) {
-				setActiveScreen(SmartCameraWeb);
+				setActiveScreen(IDInfoForm);
 			}
 		}, false);
 
@@ -281,7 +272,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			);
 
 			return JSON.parse(jsonPayload);
-		};
+		}
 
 		const { partner_params: partnerParams } = parseJWT(config.token);
 
@@ -303,7 +294,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 
 		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
 		validationMessages.forEach((el) => el.remove());
-	};
+	}
 
 	function validateInputs(payload) {
 		const validationConstraints = {
@@ -406,9 +397,8 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		}, id_info, payload);
 
 		try {
-			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
-
-			var fileUploaded = uploadZip(fileToUpload, uploadURL);
+			await submitIdInfoForm()
+			complete()
 		} catch (error) {
 			switch (error.message) {
 				case 'createZip failed':
@@ -419,7 +409,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 					console.error(`SmileIdentity - ${error.name}: ${error.cause}`);
 			}
 		}
-	};
+	}
 
 	function displayErrorMessage(error) {
 		const p = document.createElement('p');
@@ -433,38 +423,18 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 		main.prepend(p);
 	}
 
-	async function createZip() {
-		const zip = new JSZip();
-
-		zip.file('info.json', JSON.stringify({
-			package_information: {
-				"language": "Hosted Web Integration",
-				"apiVersion": {
-					"buildNumber": 0,
-					"majorVersion": 2,
-					"minorVersion": 0
-				}
-			},
-			id_info,
-			images
-		}));
-
-		try {
-			const zipFile = await zip.generateAsync({ type: 'blob' });
-
-			return zipFile;
-		} catch (error) {
-			throw new Error('createZip failed', { cause: error });
-		}
-	}
-
-	async function getUploadURL() {
-		var payload = {
-			file_name: `${config.product}.zip`,
-			smile_client_id: config.partner_details.partner_id,
-			callback_url: config.callback_url,
-			token: config.token,
-			partner_params
+	async function submitIdInfoForm(formData) {
+		const { year, month, day, ...data } = id_info
+		const dob = (year && month && day) ? `${year}-${month}-${day}` : undefined;
+		const { callback_url, partner_details: { partner_id, signature, timestamp } } = config;
+		const payload = {
+			...data,
+			signature,
+			timestamp,
+			dob,
+			partner_id,
+			partner_params,
+			callback_url,
 		}
 
 		const fetchConfig = {
@@ -477,57 +447,17 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		};
+		const URL = `${endpoints[config.environment]}/async_id_verification`;
+		const response = await fetch(URL, fetchConfig);
+		const json = await response.json();
 
-		const URL = `${endpoints[config.environment] || config.environment}/upload`;
-
-		try {
-			const response = await fetch(URL, fetchConfig);
-			const json = await response.json();
-
-			if (json.error) throw new Error(json.error);
-
-			return json.upload_url;
-		} catch (error) {
-			throw new Error('getUploadURL failed', { cause: error });
-		}
+		if (json.error) throw new Error(json.error);
 	}
 
-	function uploadZip(file, destination) {
-		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-		setActiveScreen(UploadProgressScreen);
-
-		let request = new XMLHttpRequest();
-		request.open('PUT', destination);
-
-		request.upload.addEventListener('load', function(e) {
-			return request.response;
-		});
-
-		request.upload.addEventListener('error', function(e) {
-			setActiveScreen(UploadFailureScreen);
-			throw new Error('uploadZip failed', { cause: e });
-		});
-
-		request.onreadystatechange = function() {
-			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
-				setActiveScreen(CompleteScreen);
-				handleSuccess();
-				window.setTimeout(closeWindow, 2000);
-			}
-			if (request.readyState === XMLHttpRequest.DONE && request.status !== 200) {
-				setActiveScreen(UploadFailureScreen);
-				throw new Error('uploadZip failed', { cause: request });
-			}
-		};
-
-		request.setRequestHeader("Content-type", "application/zip");
-		request.send(file);
-	}
-
-	function retryUpload() {
-		var fileUploaded = uploadZip(fileToUpload, uploadURL);
-
-		return fileUploaded;
+	function complete() {
+		setActiveScreen(CompleteScreen);
+		handleSuccess();
+		window.setTimeout(closeWindow, 2000);
 	}
 
 	function closeWindow() {

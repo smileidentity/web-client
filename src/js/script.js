@@ -39,8 +39,10 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'ekyc_smartselfie' || product === 'enhanced_kyc') {
+		if (product === 'ekyc_smartselfie') {
 			return './../ekyc-smartselfie.html';
+		} else if (product === 'enhanced_kyc') {
+			return './../ekyc.html';
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';
 		}

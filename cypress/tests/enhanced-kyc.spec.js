@@ -9,11 +9,6 @@ describe('enhanced kyc', () => {
 			.getIFrameBody()
 			.find('#id-info')
 			.should('be.visible');
-		cy
-			.intercept({
-				method: 'POST',
-				url: '*v1/async_id_verification*'
-			}, {}).as('submitEnhancedKYC');
 	});
 
 	it('should show an error message when input is invalid', () => {
@@ -45,6 +40,12 @@ describe('enhanced kyc', () => {
 
 	it('should progress when input is valid', () => {
 		cy
+			.intercept({
+				method: 'POST',
+				url: '*v1/async_id_verification*'
+			}, {}).as('submitEnhancedKYC');
+
+		cy
 			.getIFrameBody()
 			.find('#id_number')
 			.type('12345678901');
@@ -55,9 +56,5 @@ describe('enhanced kyc', () => {
 			.click();
 		cy
 			.wait('@submitEnhancedKYC');
-		cy
-			.getIFrameBody()
-			.find('#id-info')
-			.should('not.be.visible');
 	});
 });

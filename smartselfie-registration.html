@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang='en'>
+	<head>
+		<meta name='viewport' content='width=device-width, initial-scale=1' />
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				max-width: 100%;
+				min-height: 100%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<script src='js/script.min.js'></script>
+
+		<script>
+			SmileIdentity({
+				token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoid2ViLXRva2VuLXRlc3QtdXNlci0wMDMiLCJqb2JfaWQiOiJ3ZWItdG9rZW4tam9iLTEyNyIsImpvYl90eXBlIjo0fSwiY2FsbGJhY2tfdXJsIjoiaHR0cHM6Ly93ZWJob29rLnNpdGUvMWFhYTdhN2ItYWNjYi00MGFjLTg2NDMtZmQ4YTg3MDNlOWJlIiwiaWF0IjoxNjQ3NjA0OTQ4LCJleHAiOjE2NDkyNTI1NDZ9.vp-QG13aqdY6Y5scDqcgGkpZdEtGeNkmFE2-zZakd4g",
+				product: 'smartselfie_authentication',
+				callback_url: 'https://webhook.site/1aaa7a7b-accb-40ac-8643-fd8a8703e9be',
+				environment: 'sandbox',
+				consent_required: {
+					'NG': ['BVN']
+				},
+				partner_details: {
+					name: 'Test Org',
+					logo_url: 'https://portal.smileidentity.com/favicon.ico',
+					partner_id: '212',
+					policy_url: 'https://smileidentity.com/privacy-policy',
+					theme_color: '#000',
+					signature: '3sWXsvpqa4HPTEHPOCbREo9geBUuq2QvgvWUI9kYKUI=',
+					timestamp: '2022-03-11T16:37:09.022210'
+				},
+				onSuccess: () => {
+				},
+				onClose: () => {
+				},
+			});
+		</script>
+	</body>
+</html>

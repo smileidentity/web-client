@@ -26,7 +26,7 @@ var eKYC = function eKYC() {
 			const response = await fetch(`${endpoints[config.environment]}/services`);
 			const json = await response.json();
 
-			return json.hosted_web['ekyc_smartselfie'];
+			return json.hosted_web['enhanced_kyc'];
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}

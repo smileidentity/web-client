@@ -161,6 +161,7 @@ button[data-type='icon'] {
 	display: flex;
 	padding: 0;
 	position: fixed;
+	top: 11%;
 	right: 5%;
 }
 

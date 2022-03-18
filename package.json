@@ -15,6 +15,7 @@
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
+		"watch": "watch 'npm run prestart' src",
 		"test": "npx cypress run"
 	},
 	"repository": {

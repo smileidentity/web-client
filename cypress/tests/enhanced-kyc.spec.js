@@ -57,4 +57,18 @@ describe('enhanced kyc', () => {
 		cy
 			.wait('@submitEnhancedKYC');
 	});
+
+	it('should show consent screen for the required id type', () => {
+		cy.visit('/ekyc-consent-required');
+
+		cy
+			.selectBVNIDType();
+
+		cy
+			.getIFrameBody()
+			.find('end-user-consent')
+			.shadow()
+			.find('#consent-screen')
+			.should('be.visible');
+	});
 });

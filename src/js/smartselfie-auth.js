@@ -1,6 +1,6 @@
 // noinspection JSVoidFunctionReturnValueUsed
 
-var smartSelfieReg = (function smartSelfieReg() {
+var smartselfieAuth = (function smartselfieAuth() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -11,6 +11,16 @@ var smartSelfieReg = (function smartSelfieReg() {
     production: "https://api.smileidentity.com/v1",
   };
 
+  const labels = {
+    "2": {
+      title: "SmartSelfie™ Authentication",
+      upload: "Authenticating User",
+    },
+    "4": {
+      title: "SmartSelfie™ Registration",
+      upload: "Registering User",
+    },
+  };
   var config;
   var activeScreen;
   var images, partner_params;
@@ -35,12 +45,7 @@ var smartSelfieReg = (function smartSelfieReg() {
     ({ detail }) => {
       config = detail.config;
       partner_params = detail.partner_params;
-
-      var title = "SmartSelfie™ Authentication";
-      if (partner_params.job_type === 4) {
-        title = "SmartSelfie™ Registration";
-      }
-      setActiveScreen(SmartCameraWeb, title, false);
+      setActiveScreen(SmartCameraWeb, labels[`${partner_params.job_type}`].title, false);
     },
     false
   );
@@ -58,12 +63,7 @@ var smartSelfieReg = (function smartSelfieReg() {
     "imagesComputed",
     (event) => {
       images = event.detail.images;
-      setActiveScreen(
-        UploadProgressScreen,
-        partner_params.job_type === 4
-          ? "Registering User"
-          : "Authenticating User"
-      );
+      setActiveScreen(UploadProgressScreen, labels[`${partner_params.job_type}`].upload);
       handleFormSubmit();
     },
     false
@@ -71,7 +71,7 @@ var smartSelfieReg = (function smartSelfieReg() {
 
   RetryUploadButton.addEventListener(
     "click",
-    (event) => {
+    () => {
       retryUpload();
     },
     false
@@ -178,13 +178,9 @@ var smartSelfieReg = (function smartSelfieReg() {
   }
 
   function uploadZip(file, destination) {
-    // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-    setActiveScreen(
-      UploadProgressScreen,
-      partner_params.job_type === 4 ? "Registering User" : "Authenticating User"
-    );
+    setActiveScreen(UploadProgressScreen, labels[`${partner_params.job_type}`].upload);
 
-    let request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
     request.upload.addEventListener("load", function (e) {
@@ -219,9 +215,7 @@ var smartSelfieReg = (function smartSelfieReg() {
   }
 
   function retryUpload() {
-    var fileUploaded = uploadZip(fileToUpload, uploadURL);
-
-    return fileUploaded;
+    return uploadZip(fileToUpload, uploadURL);
   }
 
   function closeWindow() {

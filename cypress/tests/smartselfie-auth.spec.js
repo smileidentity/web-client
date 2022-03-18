@@ -1,6 +1,6 @@
-describe("smartselfie registration ", () => {
+describe("smartselfie authentication ", () => {
   beforeEach(() => {
-    cy.visit("/smartselfie-authentication");
+    cy.visit("/smartselfie-registration");
 
     cy.getIFrameBody().should("be.visible");
 
@@ -48,9 +48,9 @@ describe("smartselfie registration ", () => {
 
     cy.wait("@getUploadURL");
 
-    cy.wait("@failedUploadRequest");
-
     cy.getIFrameBody().find("#upload-progress-screen").should("not.be.visible");
+
+    cy.wait("@failedUploadRequest");
 
     cy.getIFrameBody().find("#upload-failure-screen").should("be.visible");
   });

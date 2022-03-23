@@ -1,6 +1,6 @@
 describe("smartselfie authentication ", () => {
   beforeEach(() => {
-    cy.visit("/smartselfie-registration");
+    cy.visit("/smartselfie");
 
     cy.getIFrameBody().should("be.visible");
 

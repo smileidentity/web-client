@@ -43,7 +43,7 @@ var SmileIdentity = function () {
 			return './../ekyc-smartselfie.html';
 		} else if (product === 'enhanced_kyc') {
 			return './../ekyc.html';
-		} else	if (product === 'smartselfie_authentication') {
+		} else if (product === 'authentication' || product === 'smartselfie') {
 			return './../smartselfie-auth.html';
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';

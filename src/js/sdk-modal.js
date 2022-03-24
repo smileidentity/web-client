@@ -147,17 +147,19 @@ class SDKModal extends HTMLElement {
     window.addEventListener(
       "message",
       async (event) => {
-        try {
-          var config = JSON.parse(event.data);
-          var partner_params = this._getPartnerParams(config);
-          localStorage.setItem("SmileIdentityConfig", event.data);
-          this.dispatchEvent(
-            new CustomEvent("SmileIdentity::ModalInit", {
-              detail: { config, partner_params },
-            })
-          );
-        } catch (e) {
-          throw e;
+        if (event.data.includes("SmileIdentity::HostedWebIntegration")) {
+          try {
+            var config = JSON.parse(event.data);
+            var partner_params = this._getPartnerParams(config);
+            localStorage.setItem("SmileIdentityConfig", event.data);
+            this.dispatchEvent(
+              new CustomEvent("SmileIdentity::ModalInit", {
+                detail: { config, partner_params },
+              })
+            );
+          } catch (e) {
+            throw e;
+          }
         }
       },
       false

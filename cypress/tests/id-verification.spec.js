@@ -59,7 +59,7 @@ describe('ID verification', () => {
 	});
 
 	it('should show consent screen for the required id type', () => {
-		cy.visit('/id-verification');
+		cy.visit('/identity-verification');
 
 		cy
 			.selectBVNIDType();

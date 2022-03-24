@@ -45,6 +45,8 @@ var SmileIdentity = function () {
 			return './../ekyc.html';
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';
+		} else if (product === 'identity_verification') {
+			return './../id-verification.html';
 		}
 
 		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);

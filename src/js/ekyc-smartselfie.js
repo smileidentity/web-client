@@ -40,17 +40,19 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 	}
 
 	window.addEventListener('message', async event => {
-		config = JSON.parse(event.data);
-		activeScreen = SelectIDType;
+		if (event.data.includes('SmileIdentity::HostedWebIntegration')) {
+			config = JSON.parse(event.data);
+			activeScreen = SelectIDType;
 
-		try {
-			productConstraints = await getProductConstraints();
-			initializeSession(productConstraints);
-			getPartnerParams();
+			try {
+				productConstraints = await getProductConstraints();
+				initializeSession(productConstraints);
+				getPartnerParams();
 
-			localStorage.setItem('SmileIdentityConfig', event.data);
-		} catch (e) {
-			throw e;
+				localStorage.setItem('SmileIdentityConfig', event.data);
+			} catch (e) {
+				throw e;
+			}
 		}
 	}, false);
 

@@ -122,6 +122,7 @@ var SmileIdentity = function () {
 
 	function publishConfigToIFrame(config) {
 		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration']").contentWindow;
+		config.source = 'SmileIdentity::HostedWebIntegration';
 
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
@@ -154,8 +155,8 @@ var SmileIdentity = function () {
 						break;
 					default:
 						return;
-					}
-				}, false);
+				}
+			}, false);
 		}
 	}
 

@@ -1,6 +1,4 @@
-// noinspection JSVoidFunctionReturnValueUsed
-
-var smartselfieAuth = (function smartselfieAuth() {
+var eKYCSmartSelfie = (function eKYCSmartSelfie() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -12,58 +10,57 @@ var smartselfieAuth = (function smartselfieAuth() {
   };
 
   const labels = {
-    "2": {
+    2: {
       title: "SmartSelfie™ Authentication",
       upload: "Authenticating User",
     },
-    "4": {
+    4: {
       title: "SmartSelfie™ Registration",
       upload: "Registering User",
     },
   };
   var config;
   var activeScreen;
-  var images, partner_params;
+  var id_info, images, partner_params;
+
   var SmartCameraWeb = document.querySelector("smart-camera-web");
   var UploadProgressScreen = document.querySelector("#upload-progress-screen");
   var UploadFailureScreen = document.querySelector("#upload-failure-screen");
   var CompleteScreen = document.querySelector("#complete-screen");
 
-  var SDKModalScreen = document.querySelector("sdk-modal");
+  var CloseIframeButton = document.querySelector("#close-iframe");
+  var UploadProgressOutline = UploadProgressScreen.querySelector(
+    "#upload-progress-outline"
+  );
   var RetryUploadButton = document.querySelector("#retry-upload");
 
   var fileToUpload, uploadURL;
 
-  SDKModalScreen.addEventListener(
-    "SmileIdentity::ModalClose",
-    (event) => closeWindow(),
-    false
-  );
-
-  SDKModalScreen.addEventListener(
-    "SmileIdentity::ModalInit",
-    ({ detail }) => {
-      config = detail.config;
-      partner_params = detail.partner_params;
-      setActiveScreen(SmartCameraWeb, labels[`${partner_params.job_type}`].title, false);
+  window.addEventListener(
+    "message",
+    async (event) => {
+      if (event.data.includes("SmileIdentity::HostedWebIntegration")) {
+        try {
+          config = JSON.parse(event.data);
+          partner_params = getPartnerParams();
+          id_info = {};
+          setActiveScreen(SmartCameraWeb);
+          localStorage.setItem("SmileIdentityConfig", event.data);
+        } catch (e) {
+          throw e;
+        }
+      }
     },
     false
   );
-  // hidden title and credit in modal when using camera
-  SmartCameraWeb.shadowRoot
-    .querySelector("#request-camera-access")
-    .addEventListener("click", () => {
-      setTimeout(() => {
-        SDKModalScreen.setAttribute("showtitle", `false`);
-        SDKModalScreen.setAttribute("showcredit", `false`);
-      });
-    });
 
   SmartCameraWeb.addEventListener(
     "imagesComputed",
     (event) => {
       images = event.detail.images;
-      setActiveScreen(UploadProgressScreen, labels[`${partner_params.job_type}`].upload);
+      var title = document.querySelector("#uploadTitle");
+      title.innerHTML = labels[`${partner_params.job_type}`].upload;
+      setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
     },
     false
@@ -71,18 +68,57 @@ var smartselfieAuth = (function smartselfieAuth() {
 
   RetryUploadButton.addEventListener(
     "click",
-    () => {
+    (event) => {
       retryUpload();
     },
     false
   );
 
-  function setActiveScreen(node, title, showCredit = true) {
+  CloseIframeButton.addEventListener(
+    "click",
+    (event) => {
+      closeWindow();
+    },
+    false
+  );
+
+  function parseJWT(token) {
+    /**
+     * A JSON Web Token (JWT) uses a base64 URL encoded string in it's body.
+     *
+     * in order to get a regular JSON string, we would follow these steps:
+     *
+     * 1. get the body of a JWT string
+     * 2. replace the base64 URL delimiters ( - and _ ) with regular URL delimiters ( + and / )
+     * 3. convert the regular base64 string to a string
+     * 4. encode the string from above as a URIComponent,
+     *    ref: just above this - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#examples
+     * 5. decode the URI Component to a JSON string
+     * 6. parse the JSON string to a javascript object
+     */
+    var base64Url = token.split(".")[1];
+    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    var jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + c.charCodeAt(0).toString(16);
+        })
+        .join("")
+    );
+
+    return JSON.parse(jsonPayload);
+  }
+
+  function getPartnerParams() {
+    const { partner_params: partnerParams } = parseJWT(config.token);
+    return partnerParams;
+  }
+
+  function setActiveScreen(node) {
     if (activeScreen) activeScreen.hidden = true;
     node.hidden = false;
     activeScreen = node;
-    SDKModalScreen.setAttribute("showcredit", `${showCredit}`);
-    SDKModalScreen.setAttribute("title", title);
   }
 
   async function handleFormSubmit(event) {
@@ -130,6 +166,7 @@ var smartselfieAuth = (function smartselfieAuth() {
             minorVersion: 0,
           },
         },
+        id_info,
         images,
       })
     );
@@ -165,22 +202,17 @@ var smartselfieAuth = (function smartselfieAuth() {
 
     const URL = `${endpoints[config.environment]}/upload`;
 
-    try {
-      const response = await fetch(URL, fetchConfig);
-      const json = await response.json();
+    const response = await fetch(URL, fetchConfig);
+    const json = await response.json();
 
-      if (json.error) throw new Error(json.error);
+    if (json.error) throw new Error(json.error);
 
-      return json.upload_url;
-    } catch (error) {
-      throw new Error("getUploadURL failed", { cause: error });
-    }
+    return json.upload_url;
   }
 
   function uploadZip(file, destination) {
-    setActiveScreen(UploadProgressScreen, labels[`${partner_params.job_type}`].upload);
-
-    const request = new XMLHttpRequest();
+    // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
+    let request = new XMLHttpRequest();
     request.open("PUT", destination);
 
     request.upload.addEventListener("load", function (e) {
@@ -197,7 +229,7 @@ var smartselfieAuth = (function smartselfieAuth() {
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen, "Submission Complete");
+        setActiveScreen(CompleteScreen);
         handleSuccess();
         window.setTimeout(closeWindow, 2000);
       }
@@ -215,7 +247,9 @@ var smartselfieAuth = (function smartselfieAuth() {
   }
 
   function retryUpload() {
-    return uploadZip(fileToUpload, uploadURL);
+    var fileUploaded = uploadZip(fileToUpload, uploadURL);
+
+    return fileUploaded;
   }
 
   function closeWindow() {

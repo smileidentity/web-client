@@ -7,7 +7,7 @@
 * @param { string } config.callback_url - callback URL for responses
 * @param { string } config.environment - one of `sandbox` or `production`
 * @param { string } config.product - one of the product types,
-	`ekyc_smartselfie` is the currently supported one
+	`biometric_kyc` is the currently supported one
 * @param { Object } config.partner_details - partner details for customization
 * @param { string } config.partner_details.name - name to display on the widget
 * @param { string } config.partner_details.policy_url - URL for data privacy
@@ -39,7 +39,7 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'ekyc_smartselfie') {
+		if (product === 'biometric_kyc') {
 			return './../biometric-kyc.html';
 		} else if (product === 'enhanced_kyc') {
 			return './../ekyc.html';
@@ -47,7 +47,7 @@ var SmileIdentity = function () {
 			return './../smartselfie-auth.html';
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';
-		} else if (product === 'identity_verification') {
+		} else if (product === 'basic_kyc') {
 			return './../basic-kyc.html';
 		}
 
@@ -107,13 +107,13 @@ var SmileIdentity = function () {
 	function isConfigValid(config) {
 		if (!config.token) throw new Error('SmileIdentity: Please provide your web token via the `token` attribute');
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
-		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `ekyc_smartselfie` and `doc_verification` are supported');
+		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `biometric_kyc` and `doc_verification` are supported');
 
-		if (config.product === 'ekyc_smartselfie' && !config.partner_details) {
+		if (config.product === 'biometric_kyc' && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');
 		}
 
-		if (config.product === 'ekyc_smartselfie' && config.partner_details) {
+		if (config.product === 'biometric_kyc' && config.partner_details) {
 			requiredPartnerDetails.forEach(param => {
 				if (!config.partner_details[param]) {
 					throw new Error(`SmileIdentity: Please include ${param} in the "partner_details" object`);

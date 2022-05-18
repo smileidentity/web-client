@@ -223,7 +223,7 @@
                 }
             }
         },
-        "ekyc_smartselfie": {
+        "biometric_kyc": {
             "GH": {
                 "name": "Ghana",
                 "id_types": {

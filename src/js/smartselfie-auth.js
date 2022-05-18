@@ -1,3 +1,5 @@
+// noinspection JSVoidFunctionReturnValueUsed
+
 var SmartSelfie = (function SmartSelfie() {
   "use strict";
 
@@ -58,6 +60,7 @@ var SmartSelfie = (function SmartSelfie() {
     "imagesComputed",
     (event) => {
       images = event.detail.images;
+      console.log(images,"=====")
       var title = document.querySelector("#uploadTitle");
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);

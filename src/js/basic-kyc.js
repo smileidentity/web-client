@@ -1,4 +1,4 @@
-var idVerification = (function idVerification() {
+var basicKyc = (function idVerification() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and

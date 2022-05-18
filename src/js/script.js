@@ -40,7 +40,7 @@ var SmileIdentity = function () {
 
 	function getIFrameURL(product) {
 		if (product === 'ekyc_smartselfie') {
-			return './../ekyc-smartselfie.html';
+			return './../biometric-kyc.html';
 		} else if (product === 'enhanced_kyc') {
 			return './../ekyc.html';
 		} else if (product === 'authentication' || product === 'smartselfie') {
@@ -48,7 +48,7 @@ var SmileIdentity = function () {
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';
 		} else if (product === 'identity_verification') {
-			return './../id-verification.html';
+			return './../basic-kyc.html';
 		}
 
 		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);

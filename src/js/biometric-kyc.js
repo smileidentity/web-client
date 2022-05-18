@@ -1,4 +1,4 @@
-var eKYCSmartSelfie = function eKYCSmartSelfie() {
+var biometricKyc = function eKYCSmartSelfie() {
 	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and

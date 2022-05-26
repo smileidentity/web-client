@@ -106,7 +106,7 @@ var SmileIdentity = function () {
 	function isConfigValid(config) {
 		if (!config.token) throw new Error('SmileIdentity: Please provide your web token via the `token` attribute');
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
-		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute. Currently, only `biometric_kyc` and `doc_verification` are supported');
+		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute.');
 
 		if (config.product === 'biometric_kyc' && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');

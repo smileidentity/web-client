@@ -108,7 +108,7 @@ var SmileIdentity = function () {
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
 		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute.');
 
-		if (config.product === 'biometric_kyc' && !config.partner_details) {
+		if ((config.product === 'biometric_kyc' || config.product === 'ekyc_smartselfie') && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');
 		}
 

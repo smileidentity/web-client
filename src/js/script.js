@@ -112,7 +112,7 @@ var SmileIdentity = function () {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');
 		}
 
-		if (config.product === 'biometric_kyc' && config.partner_details) {
+		if ((config.product === 'biometric_kyc' || config.product === 'ekyc_smartselfie') && config.partner_details) {
 			requiredPartnerDetails.forEach(param => {
 				if (!config.partner_details[param]) {
 					throw new Error(`SmileIdentity: Please include ${param} in the "partner_details" object`);

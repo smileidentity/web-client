@@ -38,7 +38,7 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'biometric_kyc') {
+		if (product === 'biometric_kyc' || product === 'ekyc_smartselfie') {
 			return './../biometric-kyc.html';
 		} else if (product === 'enhanced_kyc') {
 			return './../ekyc.html';

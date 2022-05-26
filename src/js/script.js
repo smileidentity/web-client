@@ -7,7 +7,6 @@
 * @param { string } config.callback_url - callback URL for responses
 * @param { string } config.environment - one of `sandbox` or `production`
 * @param { string } config.product - one of the product types,
-	`biometric_kyc` is the currently supported one
 * @param { Object } config.partner_details - partner details for customization
 * @param { string } config.partner_details.name - name to display on the widget
 * @param { string } config.partner_details.policy_url - URL for data privacy

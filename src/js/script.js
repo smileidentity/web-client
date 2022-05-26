@@ -46,7 +46,7 @@ var SmileIdentity = function () {
 			return './../smartselfie-auth.html';
 		} else if (product === 'doc_verification') {
 			return './../doc-verification.html';
-		} else if (product === 'basic_kyc') {
+		} else if (product === 'basic_kyc' || product === 'identity_verification') {
 			return './../basic-kyc.html';
 		}
 

@@ -1,4 +1,4 @@
-var eKYCSmartSelfie = function eKYCSmartSelfie() {
+var biometricKyc = function biometricKyc() {
 	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
@@ -33,7 +33,7 @@ var eKYCSmartSelfie = function eKYCSmartSelfie() {
 			const response = await fetch(`${endpoints[config.environment]}/services`);
 			const json = await response.json();
 
-			return json.hosted_web['ekyc_smartselfie'];
+			return json.hosted_web['biometric_kyc'];
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}

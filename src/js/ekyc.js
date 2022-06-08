@@ -424,6 +424,7 @@ var eKYC = function eKYC() {
 			partner_id,
 			partner_params,
 			callback_url,
+			token: config.token,
 			source_sdk: 'hosted_web',
 			source_sdk_version: 'v1.0.0',
 		}

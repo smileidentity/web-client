@@ -415,16 +415,14 @@ var eKYC = function eKYC() {
 	async function submitIdInfoForm(formData) {
 		const { year, month, day, ...data } = id_info
 		const dob = (year && month && day) ? `${year}-${month}-${day}` : undefined;
-		const { callback_url, partner_details: { partner_id, signature, timestamp } } = config;
+		const { callback_url, token, partner_details: { partner_id } } = config;
 		const payload = {
 			...data,
-			signature,
-			timestamp,
 			dob,
 			partner_id,
 			partner_params,
 			callback_url,
-			token: config.token,
+			token,
 			source_sdk: 'hosted_web',
 			source_sdk_version: 'v1.0.0',
 		}

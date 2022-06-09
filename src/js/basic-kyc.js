@@ -490,17 +490,16 @@ var basicKyc = (function basicKyc() {
 		const dob = year && month && day ? `${year}-${month}-${day}` : undefined;
 		const {
 			callback_url,
-			partner_details: { partner_id, signature, timestamp },
+			token,
+			partner_details: { partner_id },
 		} = config;
 		const payload = {
 			...data,
-			signature,
-			timestamp,
 			dob,
 			partner_id,
 			partner_params,
 			callback_url,
-			token: config.token,
+			token,
 			source_sdk: "hosted_web",
 			source_sdk_version: "v1.0.0"
 		};

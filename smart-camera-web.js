@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.7';
+const VERSION = '1.0.0-beta.9';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -851,8 +851,8 @@ class SmartCameraWeb extends HTMLElement {
 
 	_captureIDImage() {
 		const canvas = document.createElement('canvas');
-		canvas.width = 1024;
-		canvas.height = 576;
+		canvas.width = 2240;
+		canvas.height = 1260;
 
 		const context = this._drawIDImage(canvas);
 

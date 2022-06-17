@@ -443,6 +443,228 @@
                 }
             }
         },
+        "basic_kyc": {
+            "GH": {
+                "name": "Ghana",
+                "id_types": {
+                    "SSNIT": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "SSNIT",
+                        "test_data": "C000000000000",
+                        "id_number_regex": "^[A-Z]{1}[A-Z0-9]{12,14}$/i"
+                    },
+                    "VOTER_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Voter ID",
+                        "test_data": "0000000000",
+                        "id_number_regex": "^[0-9]{10,12}$"
+                    },
+                    "NEW_VOTER_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "New Voter ID",
+                        "test_data": "0000000000",
+                        "id_number_regex": "^[0-9]{10,12}$"
+                    },
+                    "NATIONAL_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "National ID",
+                        "test_data": "",
+                        "id_number_regex": "^GHA-[A-Z0-9]{9}-[A-Z0-9]{1}$/i"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Driver's License",
+                        "test_data": "B0000000",
+                        "id_number_regex": "^[A-Z0-9]{6,10}$/i"
+                    },
+                    "PASSPORT": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Passport",
+                        "test_data": "G0000000",
+                        "id_number_regex": "^G[A-Z0-9]{7,9}$/i"
+                    }
+                }
+            },
+            "NG": {
+                "name": "Nigeria",
+                "id_types": {
+                    "TIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Tax Identification Number",
+                        "test_data": "00000000-0000",
+                        "id_number_regex": "^[0-9]{8,}-[0-9]{4,}$"
+                    },
+                    "VOTER_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Voter ID Number",
+                        "test_data": "0000000000000000000",
+                        "id_number_regex": "^([A-Z0-9]{19}|[A-Z0-9]{9})$/i"
+                    },
+                    "NIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "National ID",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
+                    "NIN_SLIP": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "National ID (Slip)",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
+                    "BVN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id",
+                            "first_name",
+                            "last_name"
+                        ],
+                        "label": "Bank Verification Number",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id",
+                            "first_name",
+                            "last_name",
+                            "dob",
+                            "day",
+                            "month",
+                            "year"
+                        ],
+                        "label": "Driver's License",
+                        "test_data": "ABC000000000",
+                        "id_number_regex": "^(?=.*[0-9])(?=.*[A-Z])[A-Z0-9]{3}([ -]{1})?[A-Z0-9]{6,12}$/i"
+                    }
+                }
+            },
+            "KE": {
+                "name": "Kenya",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "National ID",
+                        "test_data": "A00000000",
+                        "id_number_regex": "^[0-9]{1,9}$"
+                    },
+                    "ALIEN_CARD": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Alien Card",
+                        "test_data": "000000",
+                        "id_number_regex": "^[0-9]{6,9}$"
+                    },
+                    "PASSPORT": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Passport",
+                        "test_data": "00000000",
+                        "id_number_regex": "^[A-Z0-9]{7,9}$"
+                    }
+                }
+            },
+            "ZA": {
+                "name": "South Africa",
+                "id_types": {
+                    "NATIONAL_ID": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "National ID",
+                        "test_data": "0000000000000",
+                        "id_number_regex": "^[0-9]{13}$"
+                    }
+                }
+            }
+        },
         "enhanced_kyc": {
             "GH": {
                 "name": "Ghana",

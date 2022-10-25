@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.9';
+const VERSION = '1.0.0-beta.10';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -262,8 +262,15 @@ template.innerHTML = `
 
 	.video-container video {
 		min-height: 100%;
-		clip-path: ellipse(101px 118px);
 		transform: scaleX(-1) translateX(50%) translateY(-50%);
+	}
+
+	.video-container .video {
+		background-color: black;
+		position: absolute;
+		left: 50%;
+		height: calc(100% - 6px);
+		clip-path: ellipse(101px 118px);
 	}
 
 	.id-video-container {
@@ -381,6 +388,8 @@ template.innerHTML = `
 		</p>
 
 		<div class='video-container'>
+			<div class='video'>
+			</div>
 			<svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="#17A3DC" stroke-width="7.13965"/>
 			</svg>
@@ -742,7 +751,7 @@ class SmartCameraWeb extends HTMLElement {
 		this.backOfIDReviewScreen = this.shadowRoot.querySelector('#back-of-id-review-screen');
 		this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
 
-		this.videoContainer = this.shadowRoot.querySelector('.video-container');
+		this.videoContainer = this.shadowRoot.querySelector('.video-container > .video');
 		this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
 		this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
 		this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');

@@ -1,4 +1,4 @@
-// smart-camera-web.spec.js created with Cypress
+// smart-camera-web-with-id.spec.js created with Cypress
 //
 // Start writing your Cypress tests below!
 // If you're unfamiliar with how Cypress works,
@@ -54,7 +54,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')
@@ -89,7 +89,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(1500);
+			.wait(3000);
 
 		cy
 			.get('smart-camera-web')
@@ -98,7 +98,7 @@ context('SmartCameraWeb', () => {
 			.should('be.visible');
 
 		cy
-			.wait(2500);
+			.wait(5000);
 
 		cy
 			.get('smart-camera-web')
@@ -121,7 +121,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')
@@ -156,7 +156,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')
@@ -192,7 +192,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')
@@ -236,7 +236,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')
@@ -286,7 +286,7 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
-			.wait(4000);
+			.wait(8000);
 
 		cy
 			.get('smart-camera-web')

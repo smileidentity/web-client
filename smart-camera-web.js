@@ -222,7 +222,7 @@ template.innerHTML = `
 	}
 
 	@keyframes fadeInOut {
-		0% {
+		12.5% {
 			opacity: 0;
 		}
 
@@ -230,7 +230,7 @@ template.innerHTML = `
 			opacity: 1;
 		}
 
-		100% {
+		87.5% {
 			opacity: 0;
 		}
 	}
@@ -804,7 +804,7 @@ class SmartCameraWeb extends HTMLElement {
 			this._reCaptureIDImage();
 		});
 
-		this._videoStreamDurationInMS = 3800;
+		this._videoStreamDurationInMS = 7800;
 		this._imageCaptureIntervalInMS = 200;
 
 		this._data = {

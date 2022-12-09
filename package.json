@@ -1,6 +1,6 @@
 {
   "name": "@smile_identity/smart-camera-web",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "WebComponent for smartly capturing images on the web, for use with SmileIdentity",
   "main": "smart-camera-web.js",
   "scripts": {
@@ -23,8 +23,8 @@
   },
   "homepage": "https://github.com/smileidentity/smart-camera-web#readme",
   "devDependencies": {
-    "@cypress/code-coverage": "3.9.7",
+    "@cypress/code-coverage": "^3.10.0",
     "cypress": "7.6.0",
-    "serve": "12.0.0"
+    "serve": "^14.1.2"
   }
 }

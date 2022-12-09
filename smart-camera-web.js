@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.10';
+const VERSION = '1.0.0-beta.11';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 

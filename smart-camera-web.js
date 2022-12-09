@@ -82,7 +82,6 @@ template.innerHTML = `
 
 	video {
 		background-color: black;
-		object-fit: cover;
 	}
 
 	a {
@@ -275,6 +274,7 @@ template.innerHTML = `
 
 	.id-video-container {
 		min-height: calc((2 * 10rem) + 198px);
+		height: auto;
 	}
 
 	.id-video-container .image-frame {
@@ -282,7 +282,7 @@ template.innerHTML = `
 		border-color: rgba(0, 0, 0, 0.7);
 		border-style: solid;
 		height: auto;
-		max-width: 90%;
+		width: 90%;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -290,10 +290,11 @@ template.innerHTML = `
 	}
 
 	.id-video-container video {
-		max-width: 100%;
-		max-height: 98%;
+		width: 100%;
 		transform: translateX(-50%) translateY(-50%);
 		z-index: 1;
+		height: 100%;
+		block-size: 100%;
 	}
 
 	.id-video-container img {
@@ -305,8 +306,9 @@ template.innerHTML = `
 		max-height: 260px;
 	}
 
-	#id-review-screen .image-frame {
-		border-color: rgba(0, 0, 0, 1);
+	#id-review-screen .id-video-container,
+	#back-of-id-review-screen .id-video-container {
+		background-color: rgba(0, 0, 0, 1);
 	}
 
 	.actions {
@@ -322,7 +324,7 @@ template.innerHTML = `
 
 <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
 	<symbol id="image-frame">
-		<path fill-rule="evenodd" clip-rule="evenodd" d="M0 0v69.605h13.349V13.349h56.256V0H0zM396 0h-69.605v13.349h56.256v56.256H396V0zM0 258.604V189h13.349v56.256h56.256v13.348H0zM396 258.604h-69.605v-13.348h56.256V189H396v69.604z" fill="#fff"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" d="M0 0v69.605h13.349V13.349h56.256V0H0zM396 0h-69.605v13.349h56.256v56.256H396V0zM0 258.604V189h13.349v56.256h56.256v13.348H0zM396 258.604h-69.605v-13.348h56.256V189H396v69.604z" fill="#f00"/>
 	</symbol>
 </svg>
 
@@ -483,10 +485,6 @@ template.innerHTML = `
 		</p>
 
 		<div class='id-video-container'>
-			<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
-				<use href='#image-frame' />
-			</svg>
-
 			<div class='actions'>
 				<button id='select-id-image' class='button icon-btn' type='button'>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
@@ -558,10 +556,6 @@ template.innerHTML = `
 		</p>
 
 		<div class='id-video-container'>
-			<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
-				<use href='#image-frame' />
-			</svg>
-
 			<div class='actions'>
 				<button id='select-back-of-id-image' class='button icon-btn' type='button'>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
@@ -1009,11 +1003,33 @@ class SmartCameraWeb extends HTMLElement {
 		stream.getTracks().forEach(track => track.stop());
 	}
 
+	isSamsungMultiCameraDevice() {
+		const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);
+		if (!matchedModelNumber) {
+			return false;
+		}
+
+		const modelNumber = parseInt(matchedModelNumber[0].match(/\d{3}/)[0], 10);
+		const smallerModelNumber = 970; // S10e
+		return !isNaN(modelNumber) && modelNumber >= smallerModelNumber;
+	}
+
+	isIOSDevice() {
+		return ((/iPad|iPhone|iPod/.test(navigator.platform) && checkIOSVersion()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+	}
+
 	async _startIDCamera() {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
 				audio: false,
-				video: { facingMode: 'environment', width: { min: 1280 } }
+				video: {
+					facingMode: 'environment',
+					width: { min: 1280 },
+					// NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
+					// "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
+					// Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
+					zoom: this.isSamsungMultiCameraDevice() ? 2.0 : 1.0
+				}
 			});
 
 			this.handleIDStream(stream);
@@ -1078,7 +1094,14 @@ class SmartCameraWeb extends HTMLElement {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
 				audio: false,
-				video: { facingMode: 'environment', width: { min: 1280 } }
+				video: {
+					facingMode: 'environment',
+					width: { min: 1280 },
+					// NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
+					// "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
+					// Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
+					zoom: this.isSamsungMultiCameraDevice() ? 2.0 : 1.0
+				}
 			});
 
 			this.handleIDStream(stream);

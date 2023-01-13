@@ -210,9 +210,12 @@ var biometricKyc = function biometricKyc() {
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;
+			console.log(`ConsentGranted`);
+			console.log(`id_info, before modification: ${JSON.stringify(id_info, null, 2)}`);
 
 			if (consent_information.consented.personal_details) {
 				id_info.consent_information = consent_information;
+				console.log(`id_info, after modification: ${JSON.stringify(id_info, null, 2)}`);
 				setActiveScreen(SmartCameraWeb);
 			}
 		}, false);
@@ -403,11 +406,13 @@ var biometricKyc = function biometricKyc() {
 			return;
 		}
 
+		console.log(`before object.assign: ${JSON.stringify(id_info, null, 2)}`);
 		id_info = Object.assign({
 			dob: `${payload.year}-${payload.month}-${payload.day}`,
 			entered: true
 		}, id_info, payload);
 
+		console.log(`after object.assign: ${JSON.stringify(id_info, null, 2)}`);
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
 
@@ -437,6 +442,7 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	async function createZip() {
+		console.log(`in createZip: ${JSON.stringify(id_info, null, 2)}`);
 		const zip = new JSZip();
 
 		zip.file('info.json', JSON.stringify({

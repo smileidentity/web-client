@@ -212,6 +212,7 @@ var biometricKyc = function biometricKyc() {
 			consent_information = event.detail;
 
 			if (consent_information.consented.personal_details) {
+				id_info.consent_information = consent_information;
 				setActiveScreen(SmartCameraWeb);
 			}
 		}, false);

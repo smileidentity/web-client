@@ -13,6 +13,7 @@ var documentVerification = function documentVerification() {
 	var activeScreen;
 	var id_info, images, partner_params;
 	var productConstraints;
+	var partnerProductConstraints;
 
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
@@ -26,12 +27,42 @@ var documentVerification = function documentVerification() {
 
 	var fileToUpload, uploadURL;
 
+	function postData(url = '', data = {}) {
+		return fetch(url, {
+			method: 'POST',
+			mode: 'cors',
+			cache: 'no-cache',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		});
+	}
+
 	async function getProductConstraints() {
 		try {
-			const response = await fetch(`${endpoints[config.environment]}/services`);
-			const json = await response.json();
+			const productsConfigPayload = {
+				partner_id: config.partner_details.partner_id,
+				token: config.token,
+				partner_params
+			}
+	
+			const productsConfigUrl = `${endpoints[config.environment]}/products_config`;
+			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
+			const servicesPromise = fetch(`${endpoints[config.environment]}/services`);
+			const [productsConfigResponse, servicesResponse] = await Promise.all([
+				productsConfigPromise,
+				servicesPromise
+			])
 
-			return json.hosted_web['doc_verification'];
+			const partnerConstraints = await productsConfigResponse.json()
+			const generalConstraints = await servicesResponse.json()
+
+			return {
+				partnerConstraints,
+				generalConstraints: generalConstraints.hosted_web['doc_verification']
+			}
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -43,9 +74,11 @@ var documentVerification = function documentVerification() {
 			activeScreen = SelectIDType;
 
 			try {
-				productConstraints = await getProductConstraints();
-				initializeSession(productConstraints);
 				getPartnerParams();
+				const { partnerConstraints, generalConstraints } = await getProductConstraints();
+				partnerProductConstraints = partnerConstraints;
+				productConstraints = generalConstraints;
+				initializeSession(generalConstraints, partnerConstraints);
 
 				localStorage.setItem('SmileIdentityConfig', event.data);
 			} catch (e) {
@@ -54,11 +87,11 @@ var documentVerification = function documentVerification() {
 		}
 	}, false);
 
-	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints)
+	function initializeSession(generalConstraints, partnerConstraints) {
+		const supportedCountries = Object.keys(generalConstraints)
 			.map(countryCode => ({
 				code: countryCode,
-				name: constraints[countryCode].name
+				name: generalConstraints[countryCode].name
 			})).sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
@@ -79,14 +112,14 @@ var documentVerification = function documentVerification() {
 			validCountries = supportedCountries.filter(value =>
 				Object.keys(config.id_selection).includes(value));
 		} else {
-			validCountries = supportedCountries;
+			validCountries = Object.keys(partnerConstraints.idSelection);
 		}
 
 		// ACTION: Load Countries as <option>s
 		validCountries.forEach(country => {
 			const option = document.createElement('option');
 			option.setAttribute('value', country);
-			option.textContent = constraints[country].name;
+			option.textContent = generalConstraints[country].name;
 			selectCountry.appendChild(option);
 		});
 
@@ -95,12 +128,9 @@ var documentVerification = function documentVerification() {
 
 		selectCountry.addEventListener('change', e => {
 			if (e.target.value) {
-				let validIDTypes = [];
-				const constrainedIDTypes = Object.keys(constraints[e.target.value].id_types);
-
-				let selectedIDTypes = config.id_selection ?
-					config.id_selection[e.target.value].filter(value => constrainedIDTypes.includes(value)) :
-					constrainedIDTypes;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection;
+				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
+				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 
 				// ACTION: Reset ID Type <select>
 				selectIDType.innerHTML = '';
@@ -109,7 +139,7 @@ var documentVerification = function documentVerification() {
 				selectedIDTypes.forEach(IDType => {
 					const option = document.createElement('option');
 					option.setAttribute('value', IDType);
-					option.textContent = constraints[e.target.value]['id_types'][IDType].label;
+					option.textContent = generalConstraints[e.target.value]['id_types'][IDType].label;
 					selectIDType.appendChild(option);
 				});
 
@@ -280,21 +310,9 @@ var documentVerification = function documentVerification() {
 			partner_params
 		}
 
-		const fetchConfig = {
-			cache: 'no-cache',
-			mode: 'cors',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			method: 'POST',
-			body: JSON.stringify(payload),
-		};
-
 		const URL = `${endpoints[config.environment] || config.environment}/upload`;
-
 		try {
-			const response = await fetch(URL, fetchConfig);
+			const response = await postData(URL, payload);
 			const json = await response.json();
 
 			if (json.error) throw new Error(json.error);

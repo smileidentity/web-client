@@ -119,10 +119,13 @@ var biometricKyc = function biometricKyc() {
 
 		// ACTION: Load Countries as <option>s
 		validCountries.forEach(country => {
-			const option = document.createElement('option');
-			option.setAttribute('value', country);
-			option.textContent = generalConstraints[country].name;
-			selectCountry.appendChild(option);
+			const countryObject = generalConstraints[country]
+			if (countryObject) {
+				const option = document.createElement('option');
+				option.setAttribute('value', country);
+				option.textContent = countryObject.name;
+				selectCountry.appendChild(option);
+			}
 		});
 
 		// ACTION: Enable Country Selection

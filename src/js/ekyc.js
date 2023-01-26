@@ -51,8 +51,8 @@ var eKYC = function eKYC() {
 				servicesPromise
 			])
 
-			const partnerConstraints = await productsConfigResponse.json()
-			const generalConstraints = await servicesResponse.json()
+			const partnerConstraints = await productsConfigResponse.json();
+			const generalConstraints = await servicesResponse.json();
 
 			return {
 				partnerConstraints,
@@ -83,6 +83,7 @@ var eKYC = function eKYC() {
 	}, false);
 
 	function initializeSession(generalConstraints, partnerConstraints) {
+		debugger;
 		const supportedCountries = Object.keys(generalConstraints)
 			.map(countryCode => ({
 				code: countryCode,
@@ -112,10 +113,13 @@ var eKYC = function eKYC() {
 
 		// ACTION: Load Countries as <option>s
 		validCountries.forEach(country => {
-			const option = document.createElement('option');
-			option.setAttribute('value', country);
-			option.textContent = generalConstraints[country].name;
-			selectCountry.appendChild(option);
+			const countryObject = generalConstraints[country]
+			if (countryObject) {
+				const option = document.createElement('option');
+				option.setAttribute('value', country);
+				option.textContent = countryObject.name;
+				selectCountry.appendChild(option);
+			}
 		});
 
 		// ACTION: Enable Country Selection

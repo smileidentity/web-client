@@ -45,7 +45,7 @@ var basicKyc = (function basicKyc() {
 	
 			const productsConfigUrl = `${endpoints[config.environment]}/v1/products_config`;
 			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
-			const servicesPromise = fetch(`${endpoints[config.environment]}/services`);
+			const servicesPromise = fetch(`${endpoints[config.environment]}/v1/services`);
 			const [productsConfigResponse, servicesResponse] = await Promise.all([
 				productsConfigPromise,
 				servicesPromise

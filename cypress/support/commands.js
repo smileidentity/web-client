@@ -42,7 +42,7 @@ Cypress.Commands.add('loadIDOptions', () => {
 		.intercept('GET', '**/v1/services', { fixture: 'services.json' });
 
 	cy
-		.intercept('POST', '**/v1/products_config', { fixture: 'services.json' });
+		.intercept('POST', '**/v1/products_config', { fixture: 'products_config.json' });
 });
 
 Cypress.Commands.add('selectBVNIDType', () => {

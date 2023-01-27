@@ -6,7 +6,7 @@ var basicKyc = (function basicKyc() {
 	const endpoints = {
 		sandbox: "https://testapi.smileidentity.com",
 		live: "https://api.smileidentity.com",
-		production: "https://api.smileidentity.com",
+		production: "https://devapi.smileidentity.com",
 	};
 
 	var config;

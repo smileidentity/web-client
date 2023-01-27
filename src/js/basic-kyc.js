@@ -116,7 +116,7 @@ var basicKyc = (function basicKyc() {
 				Object.keys(config.id_selection).includes(value)
 			);
 		} else {
-			validCountries = Object.keys(partnerConstraints.idSelection);
+			validCountries = Object.keys(partnerConstraints.idSelection.basic_kyc);
 		}
 
 		// ACTION: Load Countries as <option>s
@@ -135,7 +135,7 @@ var basicKyc = (function basicKyc() {
 
 		selectCountry.addEventListener("change", (e) => {
 			if (e.target.value) {
-				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.basic_kyc;
 				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
 				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 

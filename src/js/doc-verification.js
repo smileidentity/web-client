@@ -112,7 +112,7 @@ var documentVerification = function documentVerification() {
 			validCountries = supportedCountries.filter(value =>
 				Object.keys(config.id_selection).includes(value));
 		} else {
-			validCountries = Object.keys(partnerConstraints.idSelection);
+			validCountries = Object.keys(partnerConstraints.idSelection.doc_verification);
 		}
 
 		// ACTION: Load Countries as <option>s
@@ -131,7 +131,7 @@ var documentVerification = function documentVerification() {
 
 		selectCountry.addEventListener('change', e => {
 			if (e.target.value) {
-				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.doc_verification;
 				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
 				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 

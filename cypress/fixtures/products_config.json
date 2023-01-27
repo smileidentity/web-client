@@ -69,6 +69,7 @@
                 "BANK_ACCOUNT",
                 "NATIONAL_ID",
                 "TIN",
+                "BVN",
                 "PASSPORT"
             ]
         },

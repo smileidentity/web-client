@@ -4,7 +4,8 @@ var basicKyc = (function basicKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		sandbox: "https://devapi.smileidentity.com",
+		sandbox: "https://testapi.smileidentity.com",
+		qa: "https://devapi.smileidentity.com",
 		live: "https://api.smileidentity.com",
 		production: "https://api.smileidentity.com",
 	};
@@ -535,7 +536,9 @@ var basicKyc = (function basicKyc() {
 			source_sdk_version: "v1.0.0"
 		};
 
-		const URL = `${endpoints[config.environment]}/v2/verify_async`;
+		// const URL = `${endpoints[config.environment]}/v2/verify_async`;
+		// this is just for QA and will be removed before deployment
+		const URL = 'https://testapi.smileidentity.com/v2/verify_async'
 		const response = await postData(URL, payload);
 		const json = await response.json();
 

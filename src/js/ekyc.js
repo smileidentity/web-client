@@ -4,9 +4,10 @@ var eKYC = function eKYC() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		'sandbox': 'https://devapi.smileidentity.com/v1',
-		'live': 'https://api.smileidentity.com/v1',
-		'production': 'https://api.smileidentity.com/v1'
+		sandbox: 'https://testapi.smileidentity.com/v1',
+		qa: "https://devapi.smileidentity.com",
+		live: 'https://api.smileidentity.com/v1',
+		production: 'https://api.smileidentity.com/v1'
 	}
 
 	var config;
@@ -466,7 +467,9 @@ var eKYC = function eKYC() {
 			source_sdk_version: 'v1.0.0',
 		}
 
-		const URL = `${endpoints[config.environment]}/async_id_verification`;
+		// const URL = `${endpoints[config.environment]}/async_id_verification`;
+		// this is just for QA and will be removed before deployment
+		const URL = 'https://testapi.smileidentity.com/v1/async_id_verification'
 		const response = await postData(URL, payload);
 		const json = await response.json();
 

@@ -510,10 +510,7 @@ var biometricKyc = function biometricKyc() {
 			partner_params
 		}
 
-		// const URL = `${endpoints[config.environment] || config.environment}/upload`;
-		// this is just for QA and will be removed before deployment
-		const URL = 'https://testapi.smileidentity.com/v1/upload'
-
+		const URL = `${endpoints[config.environment] || config.environment}/upload`;
 		try {
 			const response = await postData(URL, payload);
 			const json = await response.json();

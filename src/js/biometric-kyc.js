@@ -4,9 +4,9 @@ var biometricKyc = function biometricKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		'sandbox': 'https://testapi.smileidentity.com/v1',
+		'sandbox': 'https://devapi.smileidentity.com/v1',
 		'live': 'https://api.smileidentity.com/v1',
-		'production': 'https://devapi.smileidentity.com/v1'
+		'production': 'https://api.smileidentity.com/v1'
 	}
 
 	var config;

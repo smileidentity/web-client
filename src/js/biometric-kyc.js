@@ -58,12 +58,16 @@ var biometricKyc = function biometricKyc() {
 				servicesPromise
 			])
 
-			const partnerConstraints = await productsConfigResponse.json()
-			const generalConstraints = await servicesResponse.json()
+			if (productsConfigResponse.ok && servicesResponse.ok) {
+				const partnerConstraints = await productsConfigResponse.json()
+				const generalConstraints = await servicesResponse.json()
 
-			return {
-				partnerConstraints,
-				generalConstraints: generalConstraints.hosted_web['biometric_kyc']
+				return {
+					partnerConstraints,
+					generalConstraints: generalConstraints.hosted_web['biometric_kyc']
+				}
+			} else {
+				throw new Error("Failed to get supported ID types");
 			}
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });

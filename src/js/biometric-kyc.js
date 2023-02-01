@@ -5,7 +5,6 @@ var biometricKyc = function biometricKyc() {
 	// `production` pointing to the same URL
 	const endpoints = {
 		sandbox: 'https://testapi.smileidentity.com/v1',
-		qa: "https://devapi.smileidentity.com/v1",
 		live: 'https://api.smileidentity.com/v1',
 		production: 'https://api.smileidentity.com/v1'
 	}
@@ -146,10 +145,11 @@ var biometricKyc = function biometricKyc() {
 				selectIDType.innerHTML = '';
 
 				// ACTION: Load ID Types as <option>s 
-				selectedIDTypes.forEach(IDType => {
-					const option = document.createElement('option');
-					option.setAttribute('value', IDType);
-					option.textContent = generalConstraints[e.target.value]['id_types'][IDType].label;
+				selectedIDTypes.forEach((IDType) => {
+					const option = document.createElement("option");
+					option.setAttribute("value", IDType);
+					option.textContent =
+					generalConstraints[e.target.value]["id_types"][IDType].label;
 					selectIDType.appendChild(option);
 				});
 
@@ -510,9 +510,7 @@ var biometricKyc = function biometricKyc() {
 			partner_params
 		}
 
-		// const URL = `${endpoints[config.environment] || config.environment}/upload`;
-		// this is just for QA and will be removed before deployment
-		const URL = 'https://testapi.smileidentity.com/v1/upload'
+		const URL = `${endpoints[config.environment] || config.environment}/upload`;
 
 		try {
 			const response = await postData(URL, payload);

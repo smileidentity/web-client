@@ -265,6 +265,33 @@ button:focus:not([disabled]) {
 	--flow-space: 1.5rem;
 }
 
+.verification-header {
+	display: flex;
+	align-items: center;
+}
+
+.backButton {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.backText {
+	font-family: 'Nunito Sans';
+	font-style: normal;
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 20px;
+	/* or 167% */
+	letter-spacing: -0.24px;
+
+	color: #262626;
+}
+
+.user-details {
+	padding: 2rem 5rem;
+}
+
 .demo-tip {
 	align-items: center;
 	background-color: #f5fcff;

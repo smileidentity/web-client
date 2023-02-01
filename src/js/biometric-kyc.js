@@ -8,7 +8,8 @@ var biometricKyc = function biometricKyc() {
 		'live': 'https://api.smileidentity.com/v1',
 		'production': 'https://api.smileidentity.com/v1'
 	}
-
+	
+	var pages = [];
 	var config;
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
@@ -181,6 +182,12 @@ var biometricKyc = function biometricKyc() {
 		handleFormSubmit(event);
 	}, false);
 
+	IDInfoForm.querySelector('#backButton').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		setActiveScreen(page);
+	}, false);
+
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
 	}, false);
@@ -293,6 +300,7 @@ var biometricKyc = function biometricKyc() {
 
 	function setActiveScreen(node) {
 		activeScreen.hidden = true;
+		pages.push(activeScreen);
 		node.hidden = false;
 		activeScreen = node;
 	}

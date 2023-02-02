@@ -9,6 +9,7 @@ var eKYC = function eKYC() {
 		'production': 'https://api.smileidentity.com/v1'
 	}
 
+	var pages = [];
 	var config;
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
@@ -169,6 +170,12 @@ var eKYC = function eKYC() {
 		handleFormSubmit(event);
 	}, false);
 
+	IDInfoForm.querySelector('#backButton').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		setActiveScreen(page);
+	}, false);
+
 	CloseIframeButton.addEventListener('click', event => {
 		closeWindow();
 	}, false);
@@ -278,6 +285,7 @@ var eKYC = function eKYC() {
 	function setActiveScreen(node) {
 		activeScreen.hidden = true;
 		node.hidden = false;
+		pages.push(activeScreen);
 		activeScreen = node;
 	}
 

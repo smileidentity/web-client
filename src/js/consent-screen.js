@@ -294,7 +294,7 @@ function templateString() {
 				<h1>
 					<span class='theme'>${this.partnerName}</span>
 					wants to access your
-					<span class='theme'>${this.IDType}</span>
+					<span class='theme'>${this.idTypeLabel}</span>
 					information
 				</h1>
 				<p class='color-grey'>
@@ -651,8 +651,8 @@ class EndUserConsent extends HTMLElement {
 		return this.getAttribute('policy-url');
 	}
 
-	get IDType() {
-		return this.getAttribute('id-type');
+	get idTypeLabel() {
+		return this.getAttribute('id-type-label');
 	}
 
 	get themeColor() {

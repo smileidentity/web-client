@@ -197,11 +197,13 @@ var biometricKyc = function biometricKyc() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type-label', toHRF(id_info.id_type));
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));

@@ -181,7 +181,8 @@ var eKYC = function eKYC() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type-label', toHRF(id_info.id_type));
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);

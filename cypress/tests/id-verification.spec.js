@@ -71,4 +71,16 @@ describe('ID verification', () => {
 			.find('#consent-screen')
 			.should('be.visible');
 	});
+
+	it('should show the select id page', ()=>{
+		cy
+		.getIFrameBody()
+		.find('#backButton')
+		.click();
+
+		cy
+			.getIFrameBody()
+			.find('#select-id-type')
+			.should('be.visible');
+	});
 });

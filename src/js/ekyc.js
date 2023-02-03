@@ -272,6 +272,13 @@ var eKYC = function eKYC() {
 	function setFormInputs() {
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
 
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			const IdNumber = IDInfoForm.querySelector('div#id-number');
+			IdNumber.hidden = false;
+		}
+
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
 		if (showNames) {

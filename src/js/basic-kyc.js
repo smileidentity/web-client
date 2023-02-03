@@ -270,6 +270,17 @@ var basicKyc = (function basicKyc() {
 			false
 		);
 
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => {
+			consent_information = event.detail;
+
+			if (consent_information.consented.personal_details) {
+				id_info.id_number = consent_information.id_number;
+				id_info.session_id = consent_information.session_id;
+				id_info.consent_information = consent_information;
+				setActiveScreen(IDInfoForm);
+			}
+		}, false);
+
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentDenied",
 			(event) => {

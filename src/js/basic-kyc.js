@@ -13,6 +13,7 @@ var basicKyc = (function basicKyc() {
 	var activeScreen;
 	var consent_information, id_info, partner_params;
 	var productConstraints;
+	var partnerProductConstraints;
 
 	var EndUserConsent;
 	var SelectIDType = document.querySelector("#select-id-type");
@@ -21,14 +22,46 @@ var basicKyc = (function basicKyc() {
 
 	var CloseIframeButton = document.querySelector("#close-iframe");
 
+	function postData(url = '', data = {}) {
+		return fetch(url, {
+			method: 'POST',
+			mode: 'cors',
+			cache: 'no-cache',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		});
+	}
+
 	async function getProductConstraints() {
 		try {
-			const response = await fetch(
-				`${endpoints[config.environment]}/v1/services`
-			);
-			const json = await response.json();
+			const productsConfigPayload = {
+				partner_id: config.partner_details.partner_id,
+				token: config.token,
+				partner_params
+			}
+	
+			const productsConfigUrl = `${endpoints[config.environment]}/v1/products_config`;
+			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
+			const servicesPromise = fetch(`${endpoints[config.environment]}/v1/services`);
+			const [productsConfigResponse, servicesResponse] = await Promise.all([
+				productsConfigPromise,
+				servicesPromise
+			])
 
-			return json.hosted_web["basic_kyc"];
+			if (productsConfigResponse.ok && servicesResponse.ok) {
+				const partnerConstraints = await productsConfigResponse.json()
+				const generalConstraints = await servicesResponse.json()
+
+				return {
+					partnerConstraints,
+					generalConstraints: generalConstraints.hosted_web['basic_kyc']
+				}
+			} else {
+				throw new Error("Failed to get supported ID types");
+			}
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -42,9 +75,11 @@ var basicKyc = (function basicKyc() {
 				activeScreen = SelectIDType;
 
 				try {
-					productConstraints = await getProductConstraints();
-					initializeSession(productConstraints);
 					getPartnerParams();
+					const { partnerConstraints, generalConstraints } = await getProductConstraints();
+					partnerProductConstraints = partnerConstraints;
+					productConstraints = generalConstraints;
+					initializeSession(generalConstraints, partnerConstraints);
 
 					localStorage.setItem("SmileIdentityConfig", event.data);
 				} catch (e) {
@@ -55,11 +90,11 @@ var basicKyc = (function basicKyc() {
 		false
 	);
 
-	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints)
+	function initializeSession(generalConstraints, partnerConstraints) {
+		const supportedCountries = Object.keys(generalConstraints)
 			.map((countryCode) => ({
 				code: countryCode,
-				name: constraints[countryCode].name,
+				name: generalConstraints[countryCode].name,
 			}))
 			.sort((a, b) => {
 				if (a.name < b.name) {
@@ -85,15 +120,18 @@ var basicKyc = (function basicKyc() {
 				Object.keys(config.id_selection).includes(value)
 			);
 		} else {
-			validCountries = supportedCountries;
+			validCountries = Object.keys(partnerConstraints.idSelection.basic_kyc);
 		}
 
 		// ACTION: Load Countries as <option>s
-		validCountries.forEach((country) => {
-			const option = document.createElement("option");
-			option.setAttribute("value", country);
-			option.textContent = constraints[country].name;
-			selectCountry.appendChild(option);
+		validCountries.forEach(country => {
+			const countryObject = generalConstraints[country]
+			if (countryObject) {
+				const option = document.createElement('option');
+				option.setAttribute('value', country);
+				option.textContent = countryObject.name;
+				selectCountry.appendChild(option);
+			}
 		});
 
 		// ACTION: Enable Country Selection
@@ -101,16 +139,9 @@ var basicKyc = (function basicKyc() {
 
 		selectCountry.addEventListener("change", (e) => {
 			if (e.target.value) {
-				let validIDTypes = [];
-				const constrainedIDTypes = Object.keys(
-					constraints[e.target.value].id_types
-				);
-
-				let selectedIDTypes = config.id_selection
-					? config.id_selection[e.target.value].filter((value) =>
-							constrainedIDTypes.includes(value)
-						)
-					: constrainedIDTypes;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.basic_kyc;
+				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
+				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 
 				// ACTION: Reset ID Type <select>
 				selectIDType.innerHTML = "";
@@ -120,7 +151,7 @@ var basicKyc = (function basicKyc() {
 					const option = document.createElement("option");
 					option.setAttribute("value", IDType);
 					option.textContent =
-						constraints[e.target.value]["id_types"][IDType].label;
+					generalConstraints[e.target.value]["id_types"][IDType].label;
 					selectIDType.appendChild(option);
 				});
 
@@ -486,7 +517,7 @@ var basicKyc = (function basicKyc() {
 		main.prepend(p);
 	}
 
-	async function submitIdInfoForm(formData) {
+	async function submitIdInfoForm() {
 		const { year, month, day, ...data } = id_info;
 		const dob = year && month && day ? `${year}-${month}-${day}` : undefined;
 		const {
@@ -505,18 +536,8 @@ var basicKyc = (function basicKyc() {
 			source_sdk_version: "v1.0.0"
 		};
 
-		const fetchConfig = {
-			cache: "no-cache",
-			mode: "cors",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			method: "POST",
-			body: JSON.stringify(payload),
-		};
 		const URL = `${endpoints[config.environment]}/v2/verify_async`;
-		const response = await fetch(URL, fetchConfig);
+		const response = await postData(URL, payload);
 		const json = await response.json();
 
 		if (json.error) throw new Error(json.error);

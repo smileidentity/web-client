@@ -443,6 +443,20 @@ function templateString() {
 			</section>
 		</div>
 
+		<div hidden id='totp-consent-app'>
+			<totp-consent-app
+				base-url=${this.baseUrl}
+				country=${this.country}
+				id-hint=${this.idHint}
+				id-type=${this.idType}
+				id-type-label=${this.idTypeLabel}
+				partner-id=${this.partnerId}
+				partner-name=${this.partnerName}
+				token=${this.token}
+			>
+			</totp-consent-app>
+		</div>
+
 		<div hidden id='consent-rejected-screen' class='flow'>
 			<section class='flow center'>
 				<svg xmlns="http://www.w3.org/2000/svg" width="185" height="138" fill="none">
@@ -599,6 +613,7 @@ class EndUserConsent extends HTMLElement {
 	constructor() {
 		super();
 
+		this.idRequiresTotpConsent = ['BVN', 'BVN_MFA'];
 		this.templateString = templateString.bind(this);
 		this.render = () => {
 			return this.templateString();
@@ -614,6 +629,7 @@ class EndUserConsent extends HTMLElement {
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
 
 		this.consentScreen = this.shadowRoot.querySelector('#consent-screen');
+		this.totpConsentApp = this.shadowRoot.querySelector('#totp-consent-app');
 		this.consentRejectedScreen = this.shadowRoot.querySelector('#consent-rejected-screen');
 
 		this.allowButton = this.shadowRoot.querySelector('#allow');
@@ -635,8 +651,36 @@ class EndUserConsent extends HTMLElement {
 		this.activeScreen = screen;
 	}
 
+	get baseUrl() {
+		return this.getAttribute('base-url');
+	}
+
+	get country() {
+		return this.getAttribute('country');
+	}
+
 	get demoMode() {
 		return this.hasAttribute('demo-mode') ? true : false
+	}
+
+	get idHint() {
+		return this.getAttribute('id-hint') || 'Your BVN should be 11 digits long';
+	}
+
+	get idRegex() {
+		return this.getAttribute('id-regex');
+	}
+
+	get idType() {
+		return this.getAttribute('id-type');
+	}
+
+	get idTypeLabel() {
+		return this.getAttribute('id-type-label');
+	}
+
+	get partnerId() {
+		return this.getAttribute('partner-id');
 	}
 
 	get partnerName() {
@@ -651,29 +695,33 @@ class EndUserConsent extends HTMLElement {
 		return this.getAttribute('policy-url');
 	}
 
-	get idTypeLabel() {
-		return this.getAttribute('id-type-label');
-	}
-
 	get themeColor() {
 		return this.getAttribute('theme-color') || '#043C93';
+	}
+
+	get token() {
+		return this.getAttribute('token');
 	}
 
 	handleConsentGrant(e) {
 		const granted = e.target === this.allowButton;
 
 		if (granted) {
-			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::ConsentGranted', {
-					detail: {
-						consented: {
-							personal_details: granted,
-							contact_information: granted,
-							document_information: granted,
+			if (this.idRequiresTotpConsent.includes(this.idType)) {
+				this.setActiveScreen(this.totpConsentApp);
+			} else {
+				this.dispatchEvent(
+					new CustomEvent('SmileIdentity::ConsentGranted', {
+						detail: {
+							consented: {
+								personal_details: granted,
+								contact_information: granted,
+								document_information: granted,
+							}
 						}
-					}
-				})
-			);
+					})
+				);
+			}
 		} else {
 			this.setActiveScreen(this.consentRejectedScreen);
 		}

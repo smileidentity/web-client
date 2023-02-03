@@ -235,12 +235,17 @@ var biometricKyc = function biometricKyc() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement('end-user-consent');
+		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
+		EndUserConsent.setAttribute('country', id_info.country);
+		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
 		EndUserConsent.setAttribute('id-type', id_info.id_type);
 		EndUserConsent.setAttribute('id-type-label', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+		EndUserConsent.setAttribute('token', config.token);
 
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);

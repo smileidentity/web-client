@@ -18,6 +18,7 @@ var biometricKyc = function biometricKyc() {
 	var EndUserConsent;
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
+	var SmartCameraWebContainer = document.querySelector('#camera-container');
 	var IDInfoForm = document.querySelector('#id-info');
 	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
@@ -185,6 +186,11 @@ var biometricKyc = function biometricKyc() {
 	IDInfoForm.querySelector('#backButton').addEventListener('click', event => {
 		event.preventDefault();
 		var page = pages.pop();
+		if (page == SmartCameraWeb) {
+			// reset the smart-camera-web element
+			SmartCameraWebContainer.removeChild(page);
+			SmartCameraWebContainer.appendChild(page);
+		}
 		setActiveScreen(page);
 	}, false);
 

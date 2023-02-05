@@ -517,27 +517,8 @@ class TotpBasedConsent extends HTMLElement {
 			}
 			const url = `${this.baseUrl}/totp_consent`;
 
-			const fakeResponse = {
-				ok: true,
-				json: () => Promise.resolve({
-					"message": "Select OTP Delivery Mode",
-					"success": true,
-					"session_id": "00000000",
-					"modes": [
-							{
-									"sms": "08001****67"
-							},
-							{
-									"email": "fa*****il@gmail.com"
-							}
-					],
-					"signature": "Jm5Xbt5zW10PwGT7PA/URi1GLvrVkTuxmereGEo5zyI=",
-					"timestamp": "2023-02-03T11:47:08.809Z"
-				})
-			};
-
 			try {
-				const response = fakeResponse; // await postData(url, data);
+				const response = await postData(url, data);
 				const json = await response.json();
 
 				if (!response.ok) {
@@ -573,18 +554,8 @@ class TotpBasedConsent extends HTMLElement {
 		}
 		const url = `${this.baseUrl}/totp_consent/mode`;
 
-		const fakeResponse = {
-			ok: true,
-			json: () => Promise.resolve({
-				"message": "OTP Delivery Mode Selected",
-				"success": true,
-				"signature": "hrrGpBJfHMLi9pqK8XAGQ+Cw56y2RefxZQN1IpmWSaI=",
-				"timestamp": "2023-02-03T11:48:18.110Z"
-			})
-		};
-
 		try {
-			const response = fakeResponse; // await postData(url, data);
+			const response = await postData(url, data);
 			const json = await response.json();
 
 			if (!response.ok) {
@@ -617,18 +588,9 @@ class TotpBasedConsent extends HTMLElement {
 			otp: this.otp,
 		}
 		const url = `${this.baseUrl}/totp_consent/otp`;
-		const fakeResponse = {
-			ok: true,
-			json: () => Promise.resolve({
-				"message": "OTP Confirmed",
-				"success": true,
-				"signature": "LxxGIzHg1qIikcXt7ItElhV3HYuquFvJ9R4Z9D4eC98=",
-				"timestamp": "2023-02-03T11:49:29.432Z"
-			})
-		};
 
 		try {
-			const response = fakeResponse; // await postData(url, data);
+			const response = await postData(url, data);
 			const json = await response.json();
 
 			if (!response.ok) {

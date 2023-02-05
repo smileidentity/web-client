@@ -1,9 +1,6 @@
 'use strict';
 
-function async postData(url = '', data = {}, mockObject) {
-	if (mockObject) {
-	}
-
+function postData(url = '', data = {}) {
 	return fetch(url, {
 		method: 'POST',
 		mode: 'cors',
@@ -104,6 +101,14 @@ function markup() {
 				width: 100%;
 			}
 
+			input,
+			select,
+			textarea {
+				border: 1px solid #d1d8d6;
+				border-radius: .5rem;
+				padding: .75rem 1rem;
+			}
+
 			button {
 				border-radius: .5rem;
 				font-size: 20px;
@@ -168,6 +173,12 @@ function markup() {
 				font-weight: bold;
 			}
 
+			#error,
+			.validation-message {
+				color: red;
+				text-transform: capitalize;
+			}
+
 			.input-group {
 				--flow-space: 1.5rem;
 				text-align: initial;
@@ -218,6 +229,7 @@ function markup() {
 				font-weight: 700;
 				letter-spacing: 2rem;
 				padding: .5rem 1rem;
+				margin-inline: auto;
 			}
 		</style>
 
@@ -226,14 +238,14 @@ function markup() {
 				Enter your ${this.idTypeLabel}
 			</h1>
 
-			<form style='--flow-space: 5.5rem'>
+			<form name='id-entry-form' class='flow' novalidate style='--flow-space: 5.5rem'>
 				<div id='id-number' class="input-group flow">
-					<label class='required' for="id-number-entry">
+					<label class='required' for="id_number">
 						${this.idTypeLabel}
 					</label>
 
-					<input aria-required='true' id="id-number-entry" name="id_number"
-						placeholder='' maxlength='11' pattern='${this.idRegex}' />
+					<input aria-required='true' id="id_number" name="id_number"
+						maxlength='11' placeholder='' />
 
 					<p>
 						<small>${this.idHint}</small>
@@ -254,7 +266,7 @@ function markup() {
 				Select contact method
 			</h1>
 
-			<form style='--flow-space: 4.25rem' id='otp-entry' class='flow center'>
+			<form name='select-mode-form' novalidate style='--flow-space: 4.25rem' id='otp-entry' class='flow center'>
 				<fieldset class='flow center'>
 					<legend class='flow' style='--flow-space: 1.5rem'>
 						<p>
@@ -270,58 +282,30 @@ function markup() {
 					</legend>
 
 					<div class='flow center'>
-						<label class='input-radio'>
-							<input type="radio" id="huey" name="drone" value="huey">
-							<div class='otp-mode'>
-								<img src='https://via.placeholder.com/30' alt='' />
-								<div class='flow'>
-									<p>
-										**********
-									</p>
-									<p>
-										<small>
-											An OTP will be sent to your email to verify your identity
-										</small>
-									</p>
+						${this.modes.length ? this.modes.map(mode => (
+							`<label class='input-radio'>
+								<input type="radio" id="" name="mode" value="${Object.entries(mode)[0][0]}">
+								<div class='otp-mode'>
+									<img src='https://via.placeholder.com/30' alt='' />
+									<div class='flow'>
+										<p>
+											${Object.entries(mode)[0][1]}
+										</p>
+										<p>
+											<small>
+												An OTP will be sent by ${Object.entries(mode)[0][0]} to verify your identity
+											</small>
+										</p>
+									</div>
 								</div>
-							</div>
-						</label>
-
-						<label class='input-radio'>
-							<input type="radio" id="dewey" name="drone" value="dewey">
-							<div class='otp-mode'>
-								<img src='https://via.placeholder.com/30' alt='' />
-								<div class='flow'>
-									<p>
-										**********
-									</p>
-									<p>
-										<small>
-											An OTP will be sent to your email to verify your identity
-										</small>
-									</p>
-								</div>
-							</div>
-						</label>
-
-						<label class='input-radio'>
-							<input type="radio" id="louie" name="drone" value="louie">
-							<div class='otp-mode'>
-								<img src='https://via.placeholder.com/30' alt='' />
-								<div class='flow'>
-									<p>
-										**********
-									</p>
-									<p>
-										<small>
-											An OTP will be sent to your email to verify your identity
-										</small>
-									</p>
-								</div>
-							</div>
-						</label>
+							</label>`
+						)).join('\n') : "No modes yet"}
 					</div>
 				</fieldset>
+
+				<button id='contact-methods-outdated' style='--flow-space: .5rem' data-type='text' class='' type='button'>
+					I am no longer using any of these options
+				</button>
 
 				<button data-type='primary' id='select-otp-mode' type='submit'>
 					Continue
@@ -338,7 +322,7 @@ function markup() {
 			</h1>
 
 			<div style='--flow-space: 4.25rem' id='otp-entry'>
-				<div style='--flow-space: 1.5rem' class='flow center'>
+				<form name='otp-submission-form' novalidate style='--flow-space: 1.5rem' class='flow center'>
 					<label for='totp-token'>
 						Enter the OTP sent to <span class='font-weight:bold'>${this.selectedOtpDeliveryMode}</span>
 					</label>
@@ -358,29 +342,7 @@ function markup() {
 							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					</button>
-				</div>
-			</div>
-
-			<div hidden style='--flow-space: 4.25rem' id='otp-expired'>
-				<div style='--flow-space: 1.5rem' class='flow center'>
-					<p style='--flow-space: 1.5rem'>
-						If you didn't receive the OTP, you can
-					</p>
-
-					<button style='--flow-space: .5rem' data-type='text' class='try-another-method' type='button'>
-						Try another contact method
-					</button>
-
-					<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="none">
-						<path stroke="#F15A5A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" d="M30 47.5a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
-						<path stroke="#F15A5A" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" d="M30.625 34.375V36.7c0 .875-.45 1.7-1.225 2.15L27.5 40"/>
-						<path stroke="#2F718D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M18.75 19.175V16.75c0-5.625 4.525-11.15 10.15-11.675a11.25 11.25 0 0 1 12.35 11.2v3.45M22.5 55h15c10.05 0 11.85-4.025 12.375-8.925l1.875-15C52.425 24.975 50.675 20 40 20H20C9.325 20 7.575 24.975 8.25 31.075l1.875 15C10.65 50.975 12.45 55 22.5 55Z"/>
-					</svg>
-
-					<p>
-						Your OTP has expired
-					</p>
-				</div>
+				</form>
 			</div>
 		</div>
 	`
@@ -396,6 +358,66 @@ class TotpBasedConsent extends HTMLElement {
 		}
 
 		this.attachShadow({ mode: 'open' });
+
+		this.modes = [];
+		this['otp-delivery-mode'] = '';
+
+		this.queryOtpModes = this.queryOtpModes.bind(this);
+		this.selectOtpMode = this.selectOtpMode.bind(this);
+		this.submitOtp = this.submitOtp.bind(this);
+		this.switchContactMethod = this.switchContactMethod.bind(this);
+	}
+
+	static get observedAttributes() {
+		return ['modes', 'otp-delivery-mode'];
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		switch (name) {
+			case 'modes':
+			case 'otp-delivery-mode': {
+				const updatedTemplate = document.createElement('template');
+				updatedTemplate.innerHTML = this.render();
+				const updatedNode = updatedTemplate.content.cloneNode(true).querySelector(`#${this.activeScreen.id}`);
+				updatedNode.hidden = false;
+				this.shadowRoot.replaceChild(updatedNode, this.activeScreen);
+				this.setUpEventListeners();
+				this.setActiveScreen(updatedNode);
+				break;
+			}
+			default:
+				break;
+		}
+	}
+
+	setUpEventListeners() {
+		// Screens
+		this.idEntryScreen = this.shadowRoot.querySelector('#id-entry');
+		this.selectModeScreen = this.shadowRoot.querySelector('#select-mode');
+		this.otpVerificationScreen = this.shadowRoot.querySelector('#otp-verification');
+
+		if (!this.activeScreen) {
+			this.activeScreen = this.idEntryScreen;
+		}
+
+		// Buttons
+		this.queryOtpModesButton = this.idEntryScreen.querySelector('#query-otp-modes');
+		this.selectOtpModeButton = this.selectModeScreen.querySelector('#select-otp-mode');
+		this.contactMethodsOutdatedButton = this.selectModeScreen.querySelector('#contact-methods-outdated');
+		this.submitOtpButton = this.otpVerificationScreen.querySelector('#submit-otp');
+		this.switchContactMethodButton = this.otpVerificationScreen.querySelector('.try-another-method');
+
+		// Input Elements
+		this.idNumberInput = this.idEntryScreen.querySelector('#id_number');
+		this.modeInputs = this.selectModeScreen.querySelectorAll('[name="mode"]');
+		this.otpInput = this.otpVerificationScreen.querySelector('#totp-token');
+
+		// Event Handlers
+		this.queryOtpModesButton.addEventListener('click', this.queryOtpModes);
+		this.selectOtpModeButton.addEventListener('click', this.selectOtpMode);
+		this.submitOtpButton.addEventListener('click', this.submitOtp);
+		this.switchContactMethodButton.addEventListener('click', this.switchContactMethod);
+		this.contactMethodsOutdatedButton.addEventListener('click', this.handleTotpConsentContactMethodsOutdated);
 	}
 
 	connectedCallback() {
@@ -403,41 +425,101 @@ class TotpBasedConsent extends HTMLElement {
 		template.innerHTML = this.render();
 
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
+		this.setUpEventListeners();
+	}
 
-		// Screens
-		this.idEntryScreen = this.shadowRoot.querySelector('#id-entry');
-		this.selectModeScreen = this.shadowRoot.querySelector('#select-mode');
-		this.otpVerificationScreen = this.shadowRoot.querySelector('#otp-verification');
-		this.activeScreen(this.idEntryScreen);
+	switchContactMethod() {
+		this.queryOtpModes();
+	}
 
-		// Sub-Screens
-		this.otpEntryFrame = this.otpVerificationScreen.querySelector('#otp-entry');
-		this.otpExpiredFrame = this.otpVerificationScreen.querySelector('#otp-expired');
+	resetForm() {
+		const submitButton = this.activeScreen.querySelector('[type="submit"]');
+		submitButton.disabled = true;
 
-		// Buttons
-		this.queryOtpModes = this.idEntryScreen.querySelector('#query-otp-modes');
-		this.selectOtpMode = this.selectModeScreen.querySelector('#select-otp-mode');
-		this.submitOtp = this.otpVerificationScreen.querySelector('#submit-otp');
-		this.tryAnotherContactMethod = this.otpVerificationScreen.querySelectorAll('.try-another-method');
+		const invalidElements = this.activeScreen.querySelectorAll('[aria-invalid]');
+		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-		// Input Elements
-		this.idNumberEntry = this.idEntryScreen.querySelector('#id-number-entry');
-		this.mode = this.selectModeScreen.querySelector('[name="mode"]');
-		this.otp = this.otpEntryFrame.querySelector('#totp-token');
+		const validationMessages = this.activeScreen.querySelectorAll('.validation-message');
+		validationMessages.forEach((el) => el.remove());
+	}
 
-		// Event Handlers
-		this.queryOtpModes.addEventListener('click', async () => {
-			// TODO: validate BVN
+	handleIdNumberValidationErrors(errors) {
+		const submitButton = this.activeScreen.querySelector('[type="submit"]');
+		const fields = Object.keys(errors);
+
+		fields.forEach((field) => {
+			const input = this.activeScreen.querySelector(`#${field}`);
+			input.setAttribute('aria-invalid', 'true');
+			input.setAttribute('aria-describedby', `${field}-hint`);
+
+			const errorDiv = document.createElement('div')
+			errorDiv.setAttribute('id', `${field}-hint`);
+			errorDiv.setAttribute('class', 'validation-message');
+			errorDiv.textContent = errors[field][0];
+
+			input.insertAdjacentElement('afterend', errorDiv);
+		});
+		submitButton.disabled = false;
+	}
+
+	handleActiveScreenErrors(error) {
+		const submitButton = this.activeScreen.querySelector('[type="submit"]');
+		const errorDiv = document.createElement('div')
+		errorDiv.setAttribute('class', 'validation-message');
+		errorDiv.textContent = error;
+		submitButton.insertAdjacentElement('beforebegin', errorDiv);
+		submitButton.disabled = false;
+	}
+
+	validateIdNumber(idNumber) {
+		const validationConstraints = {
+			id_number: {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				},
+				format: new RegExp(this.idRegex)
+			}
+		};
+
+		const errors = validate({ id_number: idNumber }, validationConstraints);
+
+		if (errors) {
+			this.handleIdNumberValidationErrors(errors);
+			this.queryOtpModesButton.removeAttribute('disabled');
+		}
+
+		return errors;
+	}
+
+	async queryOtpModes(event) {
+		if (event) {
+			// ACTION: disable another submission
+			event.preventDefault();
+
+			// ACTION: Reset any form validation errors'
+			this.resetForm();
+		}
+
+		// ACTION: Validate idNumber
+		const validationErrors = this.validateIdNumber(this.idNumberInput.value);
+
+		// ACTION: Get and set idNumber
+		localStorage.setItem('idNumber', this.idNumberInput.value || this.idNumber);
+
+		if (!validationErrors) {
 			const data = {
 				country: this.country,
-				id_number: this.idNumberEntry.value,
+				id_number: this.idNumber,
 				id_type: 'BVN_MFA',
 				token: this.token,
 				partner_id: this.partnerId,
 			}
 			const url = `${this.baseUrl}/totp_consent`;
 
-			return {
+			const fakeResponse = {
+				ok: true,
+				json: () => Promise.resolve({
 					"message": "Select OTP Delivery Mode",
 					"success": true,
 					"session_id": "00000000",
@@ -451,85 +533,118 @@ class TotpBasedConsent extends HTMLElement {
 					],
 					"signature": "Jm5Xbt5zW10PwGT7PA/URi1GLvrVkTuxmereGEo5zyI=",
 					"timestamp": "2023-02-03T11:47:08.809Z"
+				})
 			};
+
 			try {
-				/*
-				const result = await postData(url, data);
-				console.log(result);
-				this.sessionId = result.session_id;
-				this.modes = result.modes;
-				this.setActiveScreen(this.selectModeScreen);
-				*/
+				const response = fakeResponse; // await postData(url, data);
+				const json = await response.json();
+
+				if (!response.ok) {
+					this.handleActiveScreenErrors(json.error);
+				} else {
+					this.sessionId = json.session_id;
+					this.modes = json.modes;
+					this.setActiveScreen(this.selectModeScreen);
+					this.setAttribute('modes', json.modes);
+				}
 			} catch (error) {
-				// TODO: handle errors
-				console.error(error);
+				this.handleActiveScreenErrors(error.message);
 			}
-		});
+		}
+	}
 
-		this.selectOtpMode.addEventListener('click', async () => {
-			// TODO: validate BVN
-			const data = {
-				country: this.country,
-				id_number: this.idNumberEntry.value,
-				id_type: 'BVN_MFA',
-				token: this.token,
-				session_id: this.sessionId,
-				mode: this.mode.value,
-			}
-			const url = `${this.baseUrl}/totp_consent/mode`;
+	async selectOtpMode(event) {
+		// ACTION: disable another submission
+		event.preventDefault();
 
-			return {
-					"message": "OTP Delivery Mode Selected",
-					"success": true,
-					"signature": "hrrGpBJfHMLi9pqK8XAGQ+Cw56y2RefxZQN1IpmWSaI=",
-					"timestamp": "2023-02-03T11:48:18.110Z"
-			};
-			/*
-			try {
-				const result = await postData(url, data);
-				console.log(result);
+		// ACTION: Reset any form validation errors'
+		this.resetForm();
+
+		// ACTION: Get mode
+		this.mode = Array.prototype.find.call(this.modeInputs, (node) => node.checked).value;
+		const data = {
+			country: this.country,
+			id_number: this.idNumber,
+			id_type: 'BVN_MFA',
+			token: this.token,
+			session_id: this.sessionId,
+			mode: this.mode,
+		}
+		const url = `${this.baseUrl}/totp_consent/mode`;
+
+		const fakeResponse = {
+			ok: true,
+			json: () => Promise.resolve({
+				"message": "OTP Delivery Mode Selected",
+				"success": true,
+				"signature": "hrrGpBJfHMLi9pqK8XAGQ+Cw56y2RefxZQN1IpmWSaI=",
+				"timestamp": "2023-02-03T11:48:18.110Z"
+			})
+		};
+
+		try {
+			const response = fakeResponse; // await postData(url, data);
+			const json = await response.json();
+
+			if (!response.ok) {
+				this.handleActiveScreenErrors(json.error);
+			} else {
+				this.selectedOtpDeliveryMode = this.modes.filter(mode => mode[this.mode])[0][this.mode];
 				this.setActiveScreen(this.otpVerificationScreen);
-			} catch (error) {
-				// TODO: handle errors
-				console.error(error);
+				this.setAttribute('otp-delivery-mode', this.selectedOtpDeliveryMode);
 			}
-			*/
-		});
+		} catch (error) {
+			this.handleActiveScreenErrors(error.message);
+		}
+	}
 
-		this.submitOtp.addEventListener('click', async () => {
-			// TODO: validate BVN
-			const data = {
-				country: this.country,
-				id_number: this.idNumberEntry.value,
-				id_type: 'BVN_MFA',
-				token: this.token,
-				session_id: this.sessionId,
-				otp: this.otp,
-			}
-			const url = `${this.baseUrl}/totp_consent/otp`;
-			return {
+	async submitOtp(event) {
+		// ACTION: disable another submission
+		event.preventDefault();
+
+		// ACTION: Reset any form validation errors'
+		this.resetForm();
+
+		this.otp = this.otpInput.value;
+
+		const data = {
+			country: this.country,
+			id_number: this.idNumber,
+			id_type: 'BVN_MFA',
+			token: this.token,
+			session_id: this.sessionId,
+			otp: this.otp,
+		}
+		const url = `${this.baseUrl}/totp_consent/otp`;
+		const fakeResponse = {
+			ok: true,
+			json: () => Promise.resolve({
 				"message": "OTP Confirmed",
 				"success": true,
 				"signature": "LxxGIzHg1qIikcXt7ItElhV3HYuquFvJ9R4Z9D4eC98=",
 				"timestamp": "2023-02-03T11:49:29.432Z"
-			};
-/*
-			try {
-				const result = await postData(url, data);
-				console.log(result);
-				this.sessionId = result.session_id;
-			} catch (error) {
-				// TODO: handle errors
-				console.error(error);
-			}
-			*/
-		});
+			})
+		};
 
-		Array.forEach.call(this.tryAnotherContactMethod, (node) => {
-			node.addEventListener('click', () => {
-				this.setActiveScreen(this.idEntryScreen);
-			});
-		});
+		try {
+			const response = fakeResponse; // await postData(url, data);
+			const json = await response.json();
+
+			if (!response.ok) {
+				this.handleActiveScreenErrors(json.error);
+			} else {
+				this.handleTotpConsentGrant();
+			}
+		} catch (error) {
+			this.handleActiveScreenErrors(error.message);
+		}
+	}
+
+	setActiveScreen(screen) {
+		this.activeScreen.hidden = true;
+		screen.hidden = false;
+		this.activeScreen = screen;
 	}
 
 	get baseUrl() {
@@ -542,6 +657,10 @@ class TotpBasedConsent extends HTMLElement {
 
 	get idHint() {
 		return this.getAttribute('id-hint') || 'Your BVN should be 11 digits long';
+	}
+
+	get idNumber() {
+		return localStorage.getItem('idNumber');
 	}
 
 	get idRegex() {
@@ -575,16 +694,16 @@ class TotpBasedConsent extends HTMLElement {
 					id_number: this.idNumber,
 					session_id: this.sessionId,
 					consented: {
-						personal_details: granted,
-						contact_information: granted,
-						document_information: granted,
+						personal_details: true,
+						contact_information: true,
+						document_information: true,
 					}
 				}
 			})
 		);
 	}
 
-	handleTotpConsentContactModesOutdated(e) {
+	handleTotpConsentContactMethodsOutdated(e) {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
 		this.dispatchEvent(
 			new CustomEvent(tag, {

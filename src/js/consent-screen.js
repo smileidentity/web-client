@@ -445,14 +445,14 @@ function templateString() {
 
 		<div hidden id='totp-consent-app'>
 			<totp-consent-app
-				base-url=${this.baseUrl}
-				country=${this.country}
-				id-hint=${this.idHint}
-				id-type=${this.idType}
-				id-type-label=${this.idTypeLabel}
-				partner-id=${this.partnerId}
-				partner-name=${this.partnerName}
-				token=${this.token}
+				base-url='${this.baseUrl}'
+				country='${this.country}'
+				id-hint='${this.idHint}'
+				id-type='${this.idType}'
+				id-type-label='${this.idTypeLabel}'
+				partner-id='${this.partnerId}'
+				partner-name='${this.partnerName}'
+				token='${this.token}'
 			>
 			</totp-consent-app>
 		</div>

@@ -239,7 +239,7 @@ var biometricKyc = function biometricKyc() {
 		EndUserConsent.setAttribute('country', id_info.country);
 		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
 		EndUserConsent.setAttribute('id-type', id_info.id_type);
-		EndUserConsent.setAttribute('id-type-label', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country]['id_types'][id_info.id_type]['label']);
 		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);

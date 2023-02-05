@@ -448,6 +448,7 @@ function templateString() {
 				base-url='${this.baseUrl}'
 				country='${this.country}'
 				id-hint='${this.idHint}'
+				id-regex='${this.idRegex}'
 				id-type='${this.idType}'
 				id-type-label='${this.idTypeLabel}'
 				partner-id='${this.partnerId}'

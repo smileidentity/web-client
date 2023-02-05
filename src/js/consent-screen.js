@@ -614,7 +614,7 @@ class EndUserConsent extends HTMLElement {
 	constructor() {
 		super();
 
-		this.idRequiresTotpConsent = ['BVN', 'BVN_MFA'];
+		this.idRequiresTotpConsent = ['BVN_MFA'];
 		this.templateString = templateString.bind(this);
 		this.render = () => {
 			return this.templateString();

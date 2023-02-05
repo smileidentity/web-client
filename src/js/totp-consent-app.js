@@ -91,6 +91,19 @@ function markup() {
 				font-weight: 700;
 			}
 
+			button, input, select, textarea {
+				font: inherit
+			}
+
+			label,
+			input,
+			select,
+			textarea {
+				--flow-space: .5rem;
+				display: block;
+				width: 100%;
+			}
+
 			button {
 				border-radius: .5rem;
 				font-size: 20px;
@@ -155,6 +168,11 @@ function markup() {
 				font-weight: bold;
 			}
 
+			.input-group {
+				--flow-space: 1.5rem;
+				text-align: initial;
+			}
+
 			.input-radio {
 				--flow-space: 1.5rem;
 				background-color: #F8F8F8;
@@ -205,17 +223,22 @@ function markup() {
 
 		<div class='flow center' id='id-entry'>
 			<h1>
-				Enter your ${this.idType}
+				Enter your ${this.idTypeLabel}
 			</h1>
 
 			<form style='--flow-space: 5.5rem'>
-				<label class='flow'>
-					<span>Bank Verification Number</span>
-					<input id='id-number-entry' maxlength='11' type='text' pattern='${this.idRegex}' />
-				</label>
-				<p>
-					<small>${this.idHint}</small>
-				</p>
+				<div id='id-number' class="input-group flow">
+					<label class='required' for="id-number-entry">
+						${this.idTypeLabel}
+					</label>
+
+					<input aria-required='true' id="id-number-entry" name="id_number"
+						placeholder='' maxlength='11' pattern='${this.idRegex}' />
+
+					<p>
+						<small>${this.idHint}</small>
+					</p>
+				</div>
 
 				<button data-type='primary' id='query-otp-modes' type='submit'>
 					Continue
@@ -385,6 +408,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.idEntryScreen = this.shadowRoot.querySelector('#id-entry');
 		this.selectModeScreen = this.shadowRoot.querySelector('#select-mode');
 		this.otpVerificationScreen = this.shadowRoot.querySelector('#otp-verification');
+		this.activeScreen(this.idEntryScreen);
 
 		// Sub-Screens
 		this.otpEntryFrame = this.otpVerificationScreen.querySelector('#otp-entry');
@@ -560,14 +584,17 @@ class TotpBasedConsent extends HTMLElement {
 		);
 	}
 
-	handleTotpConsentContactUnavailable(e) {
+	handleTotpConsentContactModesOutdated(e) {
+		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
 		this.dispatchEvent(
-			new CustomEvent('SmileIdentity::ConsentDenied::TOTP::ContactMethodsUnreachable', {
+			new CustomEvent(tag, {
 				detail: {
 					id_number: this.idNumber,
-					session_id: this.sessionId,
+					message: tag,
+					session_id: this.sessionId
 				}
 			})
+		);
 	}
 };
 

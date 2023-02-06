@@ -444,7 +444,7 @@ var basicKyc = (function basicKyc() {
 						"id_number_regex"
 					]
 				),
-			},
+			};
 		}
 
 		const showNames = requiredFields.some((fieldName) =>

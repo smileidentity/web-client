@@ -411,7 +411,7 @@ var biometricKyc = function biometricKyc() {
 						"id_number_regex"
 					]
 				),
-			},
+			};
 		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));

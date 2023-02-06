@@ -689,7 +689,7 @@ class TotpBasedConsent extends HTMLElement {
 		return this.getAttribute('token');
 	}
 
-	handleTotpConsentGrant(e) {
+	handleTotpConsentGrant() {
 		this.dispatchEvent(
 			new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
 				detail: {
@@ -705,7 +705,7 @@ class TotpBasedConsent extends HTMLElement {
 		);
 	}
 
-	handleTotpConsentContactMethodsOutdated(e) {
+	handleTotpConsentContactMethodsOutdated() {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
 		this.dispatchEvent(
 			new CustomEvent(tag, {

@@ -364,6 +364,18 @@
                         "test_data": "00000000000",
                         "id_number_regex": "^[0-9]{11}$"
                     },
+                    "BVN_MFA": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "session_id",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Bank Verification Number",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
                     "DRIVERS_LICENSE": {
                         "required_fields": [
                             "country",
@@ -444,7 +456,7 @@
             }
         },
         "basic_kyc": {
-            "GH": {
+            "GH": 
                 "name": "Ghana",
                 "id_types": {
                     "SSNIT": {
@@ -577,6 +589,19 @@
                             "country",
                             "id_type",
                             "id_number",
+                            "user_id",
+                            "job_id",
+                            "first_name",
+                            "last_name"
+                        ],
+                        "label": "Bank Verification Number",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
+                    "BVN_MFA": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
                             "user_id",
                             "job_id",
                             "first_name",
@@ -799,6 +824,17 @@
                             "country",
                             "id_type",
                             "id_number",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Bank Verification Number",
+                        "test_data": "00000000000",
+                        "id_number_regex": "^[0-9]{11}$"
+                    },
+                    "BVN_MFA": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
                             "user_id",
                             "job_id"
                         ],

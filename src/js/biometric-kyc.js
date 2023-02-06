@@ -501,7 +501,7 @@ var biometricKyc = function biometricKyc() {
 		id_info = Object.assign({
 			dob: `${payload.year}-${payload.month}-${payload.day}`,
 			entered: true
-		}, id_info, payload);
+		}, payload, id_info);
 
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);

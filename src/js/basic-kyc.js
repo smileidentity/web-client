@@ -538,8 +538,8 @@ var basicKyc = (function basicKyc() {
 				dob: `${payload.year}-${payload.month}-${payload.day}`,
 				entered: true,
 			},
-			id_info,
-			payload
+			payload,
+			id_info
 		);
 
 		try {

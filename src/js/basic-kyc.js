@@ -251,7 +251,7 @@ var basicKyc = (function basicKyc() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement("end-user-consent");
-		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
+		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
 		EndUserConsent.setAttribute('country', id_info.country);
 		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
 		EndUserConsent.setAttribute('id-type', id_info.id_type);

@@ -144,7 +144,7 @@ var SmileIdentity = function () {
 			saveConfig(config);
 
 			window.addEventListener('message', (event) => {
-				const data = event.data;
+				const data = event.data.message || event.data;
 
 				switch (data) {
 					case 'SmileIdentity::Close':
@@ -154,6 +154,7 @@ var SmileIdentity = function () {
 						return handleSuccess(config);
 						break;
 					case 'SmileIdentity::ConsentDenied':
+					case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
 						return handleConsentRejection(config);
 						break;
 					default:

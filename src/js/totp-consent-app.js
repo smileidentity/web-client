@@ -551,7 +551,7 @@ class TotpBasedConsent extends HTMLElement {
 			const data = {
 				country: this.country,
 				id_number: this.idNumber,
-				id_type: 'BVN_MFA',
+				id_type: this.idType,
 				partner_id: this.partnerId,
 				token: this.token,
 			}
@@ -587,7 +587,7 @@ class TotpBasedConsent extends HTMLElement {
 		const data = {
 			country: this.country,
 			id_number: this.idNumber,
-			id_type: 'BVN_MFA',
+			id_type: this.idType,
 			mode: this.mode,
 			partner_id: this.partnerId,
 			session_id: this.sessionId,
@@ -623,7 +623,7 @@ class TotpBasedConsent extends HTMLElement {
 		const data = {
 			country: this.country,
 			id_number: this.idNumber,
-			id_type: 'BVN_MFA',
+			id_type: this.idType,
 			otp: this.otp,
 			partner_id: this.partnerId,
 			session_id: this.sessionId,

@@ -60,7 +60,6 @@ var eKYC = function eKYC() {
 					"required_fields": [
 						"country",
 						"id_type",
-						"id_number",
 						"session_id",
 						"user_id",
 						"job_id"

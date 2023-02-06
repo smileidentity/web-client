@@ -67,7 +67,6 @@ var biometricKyc = function biometricKyc() {
 					"required_fields": [
 						"country",
 						"id_type",
-						"id_number",
 						"session_id",
 						"user_id",
 						"job_id"
@@ -287,7 +286,7 @@ var biometricKyc = function biometricKyc() {
 				id_info.id_number = consent_information.id_number;
 				id_info.session_id = consent_information.session_id;
 				id_info.consent_information = consent_information;
-				setActiveScreen(IDInfoForm);
+				setActiveScreen(SmartCameraWeb);
 			}
 		}, false);
 

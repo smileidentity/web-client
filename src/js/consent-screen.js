@@ -443,20 +443,19 @@ function templateString() {
 			</section>
 		</div>
 
-		<div hidden id='totp-consent-app'>
-			<totp-consent-app
-				base-url='${this.baseUrl}'
-				country='${this.country}'
-				id-hint='${this.idHint}'
-				id-regex='${this.idRegex}'
-				id-type='${this.idType}'
-				id-type-label='${this.idTypeLabel}'
-				partner-id='${this.partnerId}'
-				partner-name='${this.partnerName}'
-				token='${this.token}'
-			>
-			</totp-consent-app>
-		</div>
+		<totp-consent-app
+			hidden
+			base-url='${this.baseUrl}'
+			country='${this.country}'
+			id-hint='${this.idHint}'
+			id-regex='${this.idRegex}'
+			id-type='${this.idType}'
+			id-type-label='${this.idTypeLabel}'
+			partner-id='${this.partnerId}'
+			partner-name='${this.partnerName}'
+			token='${this.token}'
+		>
+		</totp-consent-app>
 
 		<div hidden id='consent-rejected-screen' class='flow'>
 			<section class='flow center'>
@@ -630,7 +629,7 @@ class EndUserConsent extends HTMLElement {
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
 
 		this.consentScreen = this.shadowRoot.querySelector('#consent-screen');
-		this.totpConsentApp = this.shadowRoot.querySelector('#totp-consent-app');
+		this.totpConsentApp = this.shadowRoot.querySelector('totp-consent-app');
 		this.consentRejectedScreen = this.shadowRoot.querySelector('#consent-rejected-screen');
 
 		this.allowButton = this.shadowRoot.querySelector('#allow');
@@ -643,6 +642,7 @@ class EndUserConsent extends HTMLElement {
 
 		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
 		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
+
 		this.activeScreen = this.consentScreen;
 	}
 

@@ -188,10 +188,13 @@ var eKYC = function eKYC() {
 			if (config.consent_required || config.demo_mode) {
 				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
 					config.consent_required[selectedCountry].includes(selectedIDType);
+				const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
 
 				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
+				} else if (IDRequiresConsent && idRequiresTOTPConsent) {
+					handleFormSubmit();
 				} else {
 					setActiveScreen(IDInfoForm);
 				}
@@ -450,8 +453,10 @@ var eKYC = function eKYC() {
 	}
 
 	async function handleFormSubmit(event) {
-		event.preventDefault();
-		resetForm();
+		if (event) {
+			event.preventDefault();
+			resetForm();
+		}
 		const form = IDInfoForm.querySelector('form');
 
 		const formData = new FormData(form);

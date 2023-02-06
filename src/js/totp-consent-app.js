@@ -677,6 +677,10 @@ class TotpBasedConsent extends HTMLElement {
 		return this.getAttribute('id-type-label');
 	}
 
+	get onConsentEvent() {
+		return this.getAttribute('on-consent-event');
+	}
+
 	get partnerId() {
 		return this.getAttribute('partner-id');
 	}
@@ -690,7 +694,7 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	handleTotpConsentGrant(e) {
-		this.dispatchEvent(
+		this.onConsentEvent(
 			new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
 				detail: {
 					id_number: this.idNumber,
@@ -707,7 +711,7 @@ class TotpBasedConsent extends HTMLElement {
 
 	handleTotpConsentContactMethodsOutdated(e) {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
-		this.dispatchEvent(
+		this.onConsentEvent(
 			new CustomEvent(tag, {
 				detail: {
 					id_number: this.idNumber,

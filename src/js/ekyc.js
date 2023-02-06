@@ -54,6 +54,19 @@ var eKYC = function eKYC() {
 			if (productsConfigResponse.ok && servicesResponse.ok) {
 				const partnerConstraints = await productsConfigResponse.json()
 				const generalConstraints = await servicesResponse.json()
+				generalConstraints.hosted_web['enhanced_kyc']['NG']['id_types']['BVN_MFA'] = {
+					"id_number_regex": "^[0-9]{11}$",
+					"label": "Bank Verification Number (with OTP)",
+					"required_fields": [
+						"country",
+						"id_type",
+						"id_number",
+						"session_id",
+						"user_id",
+						"job_id"
+					],
+					"test_data": "00000000000"
+				};
 
 				return {
 					partnerConstraints,

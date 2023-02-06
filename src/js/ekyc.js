@@ -275,7 +275,7 @@ var eKYC = function eKYC() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(e.type, '*');
+			window.parent.postMessage(event.type, '*');
 			closeWindow();
 		}, false);
 

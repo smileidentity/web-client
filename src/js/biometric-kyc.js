@@ -296,7 +296,7 @@ var biometricKyc = function biometricKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(e.type, '*');
+			window.parent.postMessage(event.type, '*');
 			closeWindow();
 		}, false);
 

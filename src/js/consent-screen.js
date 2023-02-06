@@ -643,6 +643,10 @@ class EndUserConsent extends HTMLElement {
 		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
 		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
 
+		const self = this;
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => self.dispatchEvent(event));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => self.dispatchEvent(event));
+
 		this.activeScreen = this.consentScreen;
 	}
 

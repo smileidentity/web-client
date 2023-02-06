@@ -424,8 +424,17 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
+		const validationConstraints = {};
+
+		const requiredFields =
+			productConstraints[id_info.country]["id_types"][id_info.id_type][
+				"required_fields"
+			];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			validationConstraints.id_number = {
 				presence: {
 					allowEmpty: false,
 					message: "is required",
@@ -436,12 +445,7 @@ var basicKyc = (function basicKyc() {
 					]
 				),
 			},
-		};
-
-		const requiredFields =
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"required_fields"
-			];
+		}
 
 		const showNames = requiredFields.some((fieldName) =>
 			fieldName.includes("name")

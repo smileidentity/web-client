@@ -394,17 +394,25 @@ var biometricKyc = function biometricKyc() {
 	};
 
 	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				},
-				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
-			}
-		}
+		const validationConstraints = {};
 
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			validationConstraints.id_number = {
+				presence: {
+					allowEmpty: false,
+					message: "is required",
+				},
+				format: new RegExp(
+					productConstraints[id_info.country]["id_types"][id_info.id_type][
+						"id_number_regex"
+					]
+				),
+			},
+		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 

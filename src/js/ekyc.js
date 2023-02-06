@@ -275,6 +275,11 @@ var eKYC = function eKYC() {
 			closeWindow();
 		}, false);
 
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(e.type, '*');
+			closeWindow();
+		}, false);
+
 		const main = document.querySelector('main');
 		main.appendChild(EndUserConsent);
 	}

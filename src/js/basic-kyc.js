@@ -60,7 +60,6 @@ var basicKyc = (function basicKyc() {
 					"required_fields": [
 						"country",
 						"id_type",
-						"id_number",
 						"session_id",
 						"user_id",
 						"job_id",
@@ -304,6 +303,11 @@ var basicKyc = (function basicKyc() {
 			},
 			false
 		);
+
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(e.type, '*');
+			closeWindow();
+		}, false);
 
 		const main = document.querySelector("main");
 		main.appendChild(EndUserConsent);

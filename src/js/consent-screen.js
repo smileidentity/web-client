@@ -453,7 +453,6 @@ function templateString() {
 				id-type-label='${this.idTypeLabel}'
 				partner-id='${this.partnerId}'
 				partner-name='${this.partnerName}'
-				on-consent-event='${this.onTotpConsentEvent}'
 				token='${this.token}'
 			>
 			</totp-consent-app>
@@ -733,11 +732,6 @@ class EndUserConsent extends HTMLElement {
 		this.dispatchEvent(
 			new CustomEvent('SmileIdentity::ConsentDenied')
 		);
-	}
-
-	onTotpConsentEvent(event) {
-		console.log(event);
-		this.dispatchEvent(event);
 	}
 }
 

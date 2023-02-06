@@ -643,9 +643,8 @@ class EndUserConsent extends HTMLElement {
 		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
 		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
 
-		const self = this;
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => self.dispatchEvent(event));
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => self.dispatchEvent(event));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
 
 		this.activeScreen = this.consentScreen;
 	}
@@ -736,6 +735,15 @@ class EndUserConsent extends HTMLElement {
 		this.dispatchEvent(
 			new CustomEvent('SmileIdentity::ConsentDenied')
 		);
+	}
+
+	handleTotpConsentEvents(e) {
+		const customEvent = new CustomEvent(e.type, {
+			detail: {
+				...e.detail
+			}
+		});
+		this.dispatchEvent(customEvent);
 	}
 }
 

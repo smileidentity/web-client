@@ -404,6 +404,8 @@ class TotpBasedConsent extends HTMLElement {
 		this.selectOtpMode = this.selectOtpMode.bind(this);
 		this.submitOtp = this.submitOtp.bind(this);
 		this.switchContactMethod = this.switchContactMethod.bind(this);
+		this.handleTotpConsentGrant = this.handleTotpConsentGrant.bind(this);
+		this.handleTotpConsentContactMethodsOutdated = this.handleTotpConsentContactMethodsOutdated.bind(this);
 	}
 
 	static get observedAttributes() {
@@ -451,11 +453,11 @@ class TotpBasedConsent extends HTMLElement {
 		this.otpInput = this.otpVerificationScreen.querySelector('#totp-token');
 
 		// Event Handlers
-		this.queryOtpModesButton.addEventListener('click', this.queryOtpModes);
-		this.selectOtpModeButton.addEventListener('click', this.selectOtpMode);
-		this.submitOtpButton.addEventListener('click', this.submitOtp);
-		this.switchContactMethodButton.addEventListener('click', this.switchContactMethod);
-		this.contactMethodsOutdatedButton.addEventListener('click', this.handleTotpConsentContactMethodsOutdated);
+		this.queryOtpModesButton.addEventListener('click', e => this.queryOtpModes(e));
+		this.selectOtpModeButton.addEventListener('click', e => this.selectOtpMode(e));
+		this.submitOtpButton.addEventListener('click', e => this.submitOtp(e));
+		this.switchContactMethodButton.addEventListener('click', e => this.switchContactMethod(e));
+		this.contactMethodsOutdatedButton.addEventListener('click', e => this.handleTotpConsentContactMethodsOutdated(e));
 	}
 
 	connectedCallback() {
@@ -636,7 +638,7 @@ class TotpBasedConsent extends HTMLElement {
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
 			} else {
-				this.handleTotpConsentGrant();
+				this.handleTotpConsentGrant(event);
 			}
 		} catch (error) {
 			this.handleActiveScreenErrors(error.message);
@@ -689,33 +691,33 @@ class TotpBasedConsent extends HTMLElement {
 		return this.getAttribute('token');
 	}
 
-	handleTotpConsentGrant() {
-		this.dispatchEvent(
-			new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
-				detail: {
-					id_number: this.idNumber,
-					session_id: this.sessionId,
-					consented: {
-						personal_details: true,
-						contact_information: true,
-						document_information: true,
-					}
+	handleTotpConsentGrant(event) {
+		const customEvent = new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
+			detail: {
+				id_number: this.idNumber,
+				session_id: this.sessionId,
+				consented: {
+					personal_details: true,
+					contact_information: true,
+					document_information: true,
 				}
-			})
-		);
+			}
+		});
+
+		this.dispatchEvent(customEvent);
 	}
 
-	handleTotpConsentContactMethodsOutdated() {
+	handleTotpConsentContactMethodsOutdated(event) {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
-		this.dispatchEvent(
-			new CustomEvent(tag, {
-				detail: {
-					id_number: this.idNumber,
-					message: tag,
-					session_id: this.sessionId
-				}
-			})
-		);
+		const customEvent = new CustomEvent(tag, {
+			detail: {
+				id_number: this.idNumber,
+				message: tag,
+				session_id: this.sessionId
+			}
+		});
+
+		this.dispatchEvent(customEvent);
 	}
 };
 

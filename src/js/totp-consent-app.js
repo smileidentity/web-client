@@ -286,7 +286,45 @@ function markup() {
 							`<label class='input-radio'>
 								<input type="radio" id="" name="mode" value="${Object.entries(mode)[0][0]}">
 								<div class='otp-mode'>
-									<img src='https://via.placeholder.com/30' alt='' />
+									${Object.entries(mode)[0][0] === 'sms' ? `
+										<svg xmlns="http://www.w3.org/2000/svg" width="29" height="37" fill="none">
+											<path stroke="#2F718D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.697 24.12c4.914 0 7.37 0 8.897-1.652 1.527-1.651 1.527-4.31 1.527-9.625 0-5.316 0-7.974-1.527-9.625-1.526-1.651-3.983-1.651-8.897-1.651h-5.211c-4.914 0-7.37 0-8.897 1.651-1.527 1.651-1.527 4.31-1.527 9.625 0 5.316 0 7.974 1.527 9.625.85.92 1.991 1.328 3.685 1.508"/>
+											<g filter="url(#a)">
+												<path stroke="#2F718D" stroke-linecap="round" stroke-width="2" d="M16.697 24.12c-1.61 0-3.384.703-5.005 1.613-2.602 1.462-3.903 2.193-4.545 1.727-.64-.465-.52-1.91-.277-4.799l.055-.656" shape-rendering="crispEdges"/>
+											</g>
+											<defs>
+												<filter id="a" width="20.023" height="15.595" x="1.675" y="21.005" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+													<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+													<feColorMatrix in="SourceAlpha" result="hardAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+													<feOffset dy="4"/>
+													<feGaussianBlur stdDeviation="2"/>
+													<feComposite in2="hardAlpha" operator="out"/>
+													<feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+													<feBlend in2="BackgroundImageFix" result="effect1_dropShadow_2_404"/>
+													<feBlend in="SourceGraphic" in2="effect1_dropShadow_2_404" result="shape"/>
+												</filter>
+											</defs>
+										</svg>
+									` : `
+										<svg xmlns="http://www.w3.org/2000/svg" width="35" height="24" fill="none">
+											<path stroke="#2F718D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.062 4.367c0-1.437 1.221-2.603 2.727-2.603h21.815c1.506 0 2.727 1.166 2.727 2.603v15.62c0 1.438-1.221 2.604-2.727 2.604H6.789c-1.506 0-2.727-1.166-2.727-2.604V4.367Z"/>
+											<g filter="url(#a)">
+												<path stroke="#2F718D" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5.426 3.066 8.647 7.338c2.067 1.754 5.18 1.754 7.247 0l8.648-7.338" shape-rendering="crispEdges"/>
+											</g>
+											<defs>
+												<filter id="a" width="34.042" height="18.154" x=".676" y="2.316" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+													<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+													<feColorMatrix in="SourceAlpha" result="hardAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+													<feOffset dy="4"/>
+													<feGaussianBlur stdDeviation="2"/>
+													<feComposite in2="hardAlpha" operator="out"/>
+													<feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+													<feBlend in2="BackgroundImageFix" result="effect1_dropShadow_2_394"/>
+													<feBlend in="SourceGraphic" in2="effect1_dropShadow_2_394" result="shape"/>
+												</filter>
+											</defs>
+										</svg>
+									`}
 									<div class='flow'>
 										<p>
 											${Object.entries(mode)[0][1]}

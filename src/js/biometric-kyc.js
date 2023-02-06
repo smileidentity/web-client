@@ -225,7 +225,12 @@ var biometricKyc = function biometricKyc() {
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		setActiveScreen(IDInfoForm);
+		const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
+		if (idRequiresTOTPConsent) {
+			handleFormSubmit();
+		} else {
+			setActiveScreen(IDInfoForm);
+		}
 	}, false);
 
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
@@ -466,8 +471,10 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	async function handleFormSubmit(event) {
-		event.preventDefault();
-		resetForm();
+		if (event) {
+			event.preventDefault();
+			resetForm();
+		}
 		const form = IDInfoForm.querySelector('form');
 
 		const formData = new FormData(form);

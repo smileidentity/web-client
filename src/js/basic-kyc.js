@@ -63,7 +63,9 @@ var basicKyc = (function basicKyc() {
 						"id_number",
 						"session_id",
 						"user_id",
-						"job_id"
+						"job_id",
+						"first_name",
+						"last_name"
 					],
 					"test_data": "00000000000"
 				};
@@ -290,7 +292,7 @@ var basicKyc = (function basicKyc() {
 				id_info.id_number = consent_information.id_number;
 				id_info.session_id = consent_information.session_id;
 				id_info.consent_information = consent_information;
-				setActiveScreen(IDInfoForm);
+				handleFormSubmit();
 			}
 		}, false);
 

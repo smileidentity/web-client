@@ -372,7 +372,7 @@
                             "user_id",
                             "job_id"
                         ],
-                        "label": "Bank Verification Number",
+                        "label": "Bank Verification Number (MFA)",
                         "test_data": "00000000000",
                         "id_number_regex": "^[0-9]{11}$"
                     },
@@ -607,7 +607,7 @@
                             "first_name",
                             "last_name"
                         ],
-                        "label": "Bank Verification Number",
+                        "label": "Bank Verification Number (MFA)",
                         "test_data": "00000000000",
                         "id_number_regex": "^[0-9]{11}$"
                     },
@@ -838,7 +838,7 @@
                             "user_id",
                             "job_id"
                         ],
-                        "label": "Bank Verification Number",
+                        "label": "Bank Verification Number (MFA)",
                         "test_data": "00000000000",
                         "id_number_regex": "^[0-9]{11}$"
                     },

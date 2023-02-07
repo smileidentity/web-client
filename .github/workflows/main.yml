@@ -20,7 +20,7 @@ jobs:
         with:
           build: npm ci
       - name: E2E Test
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v5.2.0
         with:
           build: npm run build
           build:dist: npm run build:dist

@@ -43,6 +43,42 @@ Cypress.Commands.add('loadIDOptions', () => {
 
 	cy
 		.intercept('POST', '**/v1/products_config', { fixture: 'products_config.json' });
+
+	cy
+		.intercept('POST', '**/v1/totp_consent', {
+			statusCode: 200,
+			body: {
+				message: 'Select OTP Delivery Mode',
+				modes: [
+					{
+						sms: '08001****67',
+					},
+					{
+						email: 'fa*****il@gmail.com',
+					}
+				],
+				session_id: '0000000000000',
+				success: true,
+			}
+		});
+
+	cy
+		.intercept('POST', '**/v1/totp_consent/mode', {
+			statusCode: 200,
+			body: {
+				message: 'OTP Delivery Mode Selected',
+				success: true,
+			}
+		});
+
+	cy
+		.intercept('POST', '**/v1/totp_consent/otp', {
+			statusCode: 200,
+			body: {
+				message: 'OTP Confirmed',
+				success: true,
+			}
+		});
 });
 
 Cypress.Commands.add('selectBVNIDType', () => {

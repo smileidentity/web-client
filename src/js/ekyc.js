@@ -87,7 +87,6 @@ var eKYC = function eKYC() {
 	}, false);
 
 	function initializeSession(generalConstraints, partnerConstraints) {
-		debugger;
 		const supportedCountries = Object.keys(generalConstraints)
 			.map(countryCode => ({
 				code: countryCode,

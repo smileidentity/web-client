@@ -147,6 +147,46 @@ Cypress.Commands.add('selectNINIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('getTotpConsentApp', () => {
+	cy.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('totp-consent-app')
+		.shadow()
+});
+
+Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
+	cy.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('#allow')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('#id_number')
+		.type('00000000000');
+
+	cy.getTotpConsentApp()
+		.find('#query-otp-modes')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('[type="radio"]')
+		.check('email');
+
+	cy.getTotpConsentApp()
+		.find('#select-otp-mode')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('#totp-token')
+		.type('000000');
+
+	cy.getTotpConsentApp()
+		.find('#submit-otp')
+		.click();
+});
+
 Cypress.Commands.add('navigateThroughCameraScreens', () => {
 	cy.log('navigatingThroughCameraScreens');
 

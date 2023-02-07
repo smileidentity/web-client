@@ -323,7 +323,7 @@ describe('totpConsent', () => {
 		});
 	});
 
-	describe.only('for enhanced kyc', () => {
+	describe('for enhanced kyc', () => {
 		beforeEach(() => {
 			cy
 				.intercept({

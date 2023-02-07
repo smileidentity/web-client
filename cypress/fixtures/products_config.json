@@ -33,6 +33,7 @@
                 "NATIONAL_ID",
                 "TIN",
                 "BVN",
+                "BVN_MFA",
                 "PHONE_NUMBER",
                 "PASSPORT"
             ]
@@ -70,6 +71,7 @@
                 "NATIONAL_ID",
                 "TIN",
                 "BVN",
+                "BVN_MFA",
                 "PASSPORT"
             ]
         },
@@ -105,7 +107,7 @@
                 "BANK_ACCOUNT",
                 "NATIONAL_ID",
                 "TIN",
-                "BVN",
+                "BVN_MFA",
                 "PASSPORT"
             ]
         },
@@ -147,7 +149,8 @@
     },
     "consentRequired": {
         "NG": [
-            "NIN_V2"
+            "NIN_V2",
+            "BVN_MFA"
         ]
     }
 }

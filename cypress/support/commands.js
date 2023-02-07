@@ -67,6 +67,28 @@ Cypress.Commands.add('selectBVNIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectBVNMFAIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingBVNMFAIDType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('BVN_MFA')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('selectNINIDType', () => {
 	cy
 		.loadIDOptions();

@@ -27,6 +27,12 @@ describe('document verification', () => {
 		cy
 			.getIFrameBody()
 			.find('smart-camera-web')
+			.invoke('attr', 'document-type')
+			.should('eq', 'NIN')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
 			.shadow()
 			.find('#id-camera-screen')
 			.should('be.visible');

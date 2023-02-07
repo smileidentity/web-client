@@ -42,7 +42,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('000000');
 
 				cy.getTotpConsentApp()
@@ -73,7 +73,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('00000000000');
 
 				cy.getTotpConsentApp()
@@ -106,7 +106,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('00000000000');
 
 				cy.getTotpConsentApp()
@@ -138,7 +138,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('00000000000');
 
 				cy.getTotpConsentApp()
@@ -178,7 +178,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('00000000000');
 
 				cy.getTotpConsentApp()
@@ -218,7 +218,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#id-entry')
+					.find('#id_number')
 					.type('00000000000');
 
 				cy.getTotpConsentApp()

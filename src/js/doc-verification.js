@@ -139,6 +139,7 @@ var documentVerification = function documentVerification() {
 				id_type: selectedIDType
 			};
 
+			SmartCameraWeb.setAttribute('document-type', selectedIDType)
 			setActiveScreen(SmartCameraWeb);
 		});
 	}

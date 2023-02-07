@@ -456,7 +456,7 @@
             }
         },
         "basic_kyc": {
-            "GH": 
+            "GH": {
                 "name": "Ghana",
                 "id_types": {
                     "SSNIT": {

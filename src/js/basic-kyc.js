@@ -182,10 +182,11 @@ var basicKyc = (function basicKyc() {
 			};
 
 			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent =
+				const IDRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType) || (
 					config.consent_required &&
 					config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType);
+					config.consent_required[selectedCountry].includes(selectedIDType)
+				);
 
 				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();

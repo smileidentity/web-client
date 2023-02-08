@@ -282,6 +282,44 @@ describe('totpConsent', () => {
 				.find('#id-number')
 				.should('not.be.visible');
 		});
+
+		it('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
+			cy.visit('/basic_kyc_preview_bvn_mfa');
+			cy.loadIDOptions();
+
+			cy
+				.getIFrameBody()
+				.find('#country')
+				.select('NG')
+
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.select('BVN_MFA')
+
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.should('contain', 'with OTP');
+
+			cy.visit('/basic_kyc');
+			cy.loadIDOptions();
+
+			cy
+				.getIFrameBody()
+				.find('#country')
+				.select('NG')
+
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.select('BVN_MFA')
+
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.should('not.contain', 'with OTP');
+		});
 	});
 
 	describe('for biometric kyc', () => {

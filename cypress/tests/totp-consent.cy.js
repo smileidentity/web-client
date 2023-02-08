@@ -198,7 +198,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#select-otp-code')
+					.find('#select-otp-mode')
 					.should('not.be.visible');
 
 				cy.getTotpConsentApp()

@@ -171,8 +171,9 @@ var eKYC = function eKYC() {
 				id_type: selectedIDType
 			};
 
-			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType) || (
+			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType);
+			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
+				const IDRequiresConsent = selectedIdRequiresConsent || (
 					config.consent_required &&
 					config.consent_required[selectedCountry] &&
 					config.consent_required[selectedCountry].includes(selectedIDType)

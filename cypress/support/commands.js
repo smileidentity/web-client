@@ -43,6 +43,42 @@ Cypress.Commands.add('loadIDOptions', () => {
 
 	cy
 		.intercept('POST', '**/v1/products_config', { fixture: 'products_config.json' });
+
+	cy
+		.intercept('POST', '**/v1/totp_consent', {
+			statusCode: 200,
+			body: {
+				message: 'Select OTP Delivery Mode',
+				modes: [
+					{
+						sms: '08001****67',
+					},
+					{
+						email: 'fa*****il@gmail.com',
+					}
+				],
+				session_id: '0000000000000',
+				success: true,
+			}
+		});
+
+	cy
+		.intercept('POST', '**/v1/totp_consent/mode', {
+			statusCode: 200,
+			body: {
+				message: 'OTP Delivery Mode Selected',
+				success: true,
+			}
+		});
+
+	cy
+		.intercept('POST', '**/v1/totp_consent/otp', {
+			statusCode: 200,
+			body: {
+				message: 'OTP Confirmed',
+				success: true,
+			}
+		});
 });
 
 Cypress.Commands.add('selectBVNIDType', () => {
@@ -60,6 +96,28 @@ Cypress.Commands.add('selectBVNIDType', () => {
 		.getIFrameBody()
 		.find('#id_type')
 		.select('BVN')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
+Cypress.Commands.add('selectBVNMFAIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingBVNMFAIDType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('BVN_MFA')
 
 	cy
 		.getIFrameBody()
@@ -86,6 +144,54 @@ Cypress.Commands.add('selectNINIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#submitConfig')
+		.click();
+});
+
+Cypress.Commands.add('getTotpConsentApp', () => {
+	cy.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('totp-consent-app')
+		.shadow()
+});
+
+Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
+	cy.getIFrameBody()
+		.find('end-user-consent')
+		.shadow()
+		.find('#allow')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('#id_number')
+		.type('00000000000');
+
+	cy.getTotpConsentApp()
+		.find('#query-otp-modes')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('#select-otp-mode')
+		.should('be.visible');
+
+	cy.getTotpConsentApp()
+		.find('[type="radio"]')
+		.check('email');
+
+	cy.getTotpConsentApp()
+		.find('#select-otp-mode')
+		.click();
+
+	cy.getTotpConsentApp()
+		.find('#submit-otp')
+		.should('be.visible');
+
+	cy.getTotpConsentApp()
+		.find('#totp-token')
+		.type('000000');
+
+	cy.getTotpConsentApp()
+		.find('#submit-otp')
 		.click();
 });
 

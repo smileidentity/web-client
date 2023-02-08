@@ -55,6 +55,24 @@ var eKYC = function eKYC() {
 				const partnerConstraints = await productsConfigResponse.json()
 				const generalConstraints = await servicesResponse.json()
 
+				const previewBvnMfa = config.previewBVNMFA;
+				if (previewBvnMfa) {
+					generalConstraints.hosted_web['basic_kyc']['NG']['id_types']['BVN_MFA'] = {
+						"id_number_regex": "^[0-9]{11}$",
+						"label": "Bank Verification Number (with OTP)",
+						"required_fields": [
+							"country",
+							"id_type",
+							"session_id",
+							"user_id",
+							"job_id",
+							"first_name",
+							"last_name"
+						],
+						"test_data": "00000000000"
+					};
+				}
+
 				return {
 					partnerConstraints,
 					generalConstraints: generalConstraints.hosted_web['enhanced_kyc']
@@ -87,7 +105,6 @@ var eKYC = function eKYC() {
 	}, false);
 
 	function initializeSession(generalConstraints, partnerConstraints) {
-		debugger;
 		const supportedCountries = Object.keys(generalConstraints)
 			.map(countryCode => ({
 				code: countryCode,
@@ -172,9 +189,13 @@ var eKYC = function eKYC() {
 				id_type: selectedIDType
 			};
 
-			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType);
+			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType);
+			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
+				const IDRequiresConsent = selectedIdRequiresConsent || (
+					config.consent_required &&
+					config.consent_required[selectedCountry] &&
+					config.consent_required[selectedCountry].includes(selectedIDType)
+				);
 
 				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();
@@ -219,11 +240,18 @@ var eKYC = function eKYC() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
+		EndUserConsent.setAttribute('country', id_info.country);
+		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country]['id_types'][id_info.id_type]['label']);
+		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+		EndUserConsent.setAttribute('token', config.token);
+
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
@@ -239,8 +267,24 @@ var eKYC = function eKYC() {
 			}
 		}, false);
 
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => {
+			consent_information = event.detail;
+
+			if (consent_information.consented.personal_details) {
+				id_info.id_number = consent_information.id_number;
+				id_info.session_id = consent_information.session_id;
+				id_info.consent_information = consent_information;
+				handleFormSubmit();
+			}
+		}, false);
+
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
 			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			closeWindow();
+		}, false);
+
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -264,6 +308,13 @@ var eKYC = function eKYC() {
 
 	function setFormInputs() {
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			const IdNumber = IDInfoForm.querySelector('div#id-number');
+			IdNumber.hidden = false;
+		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
@@ -331,17 +382,25 @@ var eKYC = function eKYC() {
 	}
 
 	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				},
-				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
-			}
-		}
+		const validationConstraints = {};
 
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			validationConstraints.id_number = {
+				presence: {
+					allowEmpty: false,
+					message: "is required",
+				},
+				format: new RegExp(
+					productConstraints[id_info.country]["id_types"][id_info.id_type][
+						"id_number_regex"
+					]
+				),
+			};
+		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
@@ -412,8 +471,10 @@ var eKYC = function eKYC() {
 	}
 
 	async function handleFormSubmit(event) {
-		event.preventDefault();
-		resetForm();
+		if (event) {
+			event.preventDefault();
+			resetForm();
+		}
 		const form = IDInfoForm.querySelector('form');
 
 		const formData = new FormData(form);
@@ -428,7 +489,7 @@ var eKYC = function eKYC() {
 		id_info = Object.assign({
 			dob: `${payload.year}-${payload.month}-${payload.day}`,
 			entered: true
-		}, id_info, payload);
+		}, payload, id_info);
 
 		try {
 			await submitIdInfoForm()

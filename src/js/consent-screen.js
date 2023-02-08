@@ -294,7 +294,7 @@ function templateString() {
 				<h1>
 					<span class='theme'>${this.partnerName}</span>
 					wants to access your
-					<span class='theme'>${this.IDType}</span>
+					<span class='theme'>${this.idTypeLabel}</span>
 					information
 				</h1>
 				<p class='color-grey'>
@@ -442,6 +442,20 @@ function templateString() {
 				</button>
 			</section>
 		</div>
+
+		<totp-consent-app
+			hidden
+			base-url='${this.baseUrl}'
+			country='${this.country}'
+			id-hint='${this.idHint}'
+			id-regex='${this.idRegex}'
+			id-type='${this.idType}'
+			id-type-label='${this.idTypeLabel}'
+			partner-id='${this.partnerId}'
+			partner-name='${this.partnerName}'
+			token='${this.token}'
+		>
+		</totp-consent-app>
 
 		<div hidden id='consent-rejected-screen' class='flow'>
 			<section class='flow center'>
@@ -599,6 +613,7 @@ class EndUserConsent extends HTMLElement {
 	constructor() {
 		super();
 
+		this.idRequiresTotpConsent = ['BVN_MFA'];
 		this.templateString = templateString.bind(this);
 		this.render = () => {
 			return this.templateString();
@@ -614,6 +629,7 @@ class EndUserConsent extends HTMLElement {
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
 
 		this.consentScreen = this.shadowRoot.querySelector('#consent-screen');
+		this.totpConsentApp = this.shadowRoot.querySelector('totp-consent-app');
 		this.consentRejectedScreen = this.shadowRoot.querySelector('#consent-rejected-screen');
 
 		this.allowButton = this.shadowRoot.querySelector('#allow');
@@ -626,6 +642,10 @@ class EndUserConsent extends HTMLElement {
 
 		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
 		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
+
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
+
 		this.activeScreen = this.consentScreen;
 	}
 
@@ -635,8 +655,36 @@ class EndUserConsent extends HTMLElement {
 		this.activeScreen = screen;
 	}
 
+	get baseUrl() {
+		return this.getAttribute('base-url');
+	}
+
+	get country() {
+		return this.getAttribute('country');
+	}
+
 	get demoMode() {
 		return this.hasAttribute('demo-mode') ? true : false
+	}
+
+	get idHint() {
+		return this.getAttribute('id-hint') || 'Your BVN should be 11 digits long';
+	}
+
+	get idRegex() {
+		return this.getAttribute('id-regex');
+	}
+
+	get idType() {
+		return this.getAttribute('id-type');
+	}
+
+	get idTypeLabel() {
+		return this.getAttribute('id-type-label');
+	}
+
+	get partnerId() {
+		return this.getAttribute('partner-id');
 	}
 
 	get partnerName() {
@@ -651,29 +699,33 @@ class EndUserConsent extends HTMLElement {
 		return this.getAttribute('policy-url');
 	}
 
-	get IDType() {
-		return this.getAttribute('id-type');
-	}
-
 	get themeColor() {
 		return this.getAttribute('theme-color') || '#043C93';
+	}
+
+	get token() {
+		return this.getAttribute('token');
 	}
 
 	handleConsentGrant(e) {
 		const granted = e.target === this.allowButton;
 
 		if (granted) {
-			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::ConsentGranted', {
-					detail: {
-						consented: {
-							personal_details: granted,
-							contact_information: granted,
-							document_information: granted,
+			if (this.idRequiresTotpConsent.includes(this.idType)) {
+				this.setActiveScreen(this.totpConsentApp);
+			} else {
+				this.dispatchEvent(
+					new CustomEvent('SmileIdentity::ConsentGranted', {
+						detail: {
+							consented: {
+								personal_details: granted,
+								contact_information: granted,
+								document_information: granted,
+							}
 						}
-					}
-				})
-			);
+					})
+				);
+			}
 		} else {
 			this.setActiveScreen(this.consentRejectedScreen);
 		}
@@ -683,6 +735,15 @@ class EndUserConsent extends HTMLElement {
 		this.dispatchEvent(
 			new CustomEvent('SmileIdentity::ConsentDenied')
 		);
+	}
+
+	handleTotpConsentEvents(e) {
+		const customEvent = new CustomEvent(e.type, {
+			detail: {
+				...e.detail
+			}
+		});
+		this.dispatchEvent(customEvent);
 	}
 }
 

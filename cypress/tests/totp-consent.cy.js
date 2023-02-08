@@ -186,12 +186,20 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
+					.find('#select-otp-code')
+					.should('be.visible');
+
+				cy.getTotpConsentApp()
 					.find('[type="radio"]')
 					.check('sms');
 
 				cy.getTotpConsentApp()
 					.find('#select-otp-mode')
 					.click();
+
+				cy.getTotpConsentApp()
+					.find('#select-otp-code')
+					.should('not.be.visible');
 
 				cy.getTotpConsentApp()
 					.find('#totp-token')
@@ -261,7 +269,7 @@ describe('totpConsent', () => {
 				}, {}).as('submitBasicKYC');
 		});
 
-		it('should submit navigate to the id form after totp consent is granted, without the need to re-enter the id-number', () => {
+		it('should navigate to the id form after totp consent is granted, without the need to re-enter the id-number', () => {
 			cy.visit('/basic_kyc');
 			cy.selectBVNMFAIDType();
 			cy.navigateThroughTotpConsentApp();

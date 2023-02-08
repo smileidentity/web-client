@@ -171,12 +171,20 @@ Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
 		.click();
 
 	cy.getTotpConsentApp()
+		.find('#select-otp-mode')
+		.should('be.visible');
+
+	cy.getTotpConsentApp()
 		.find('[type="radio"]')
 		.check('email');
 
 	cy.getTotpConsentApp()
 		.find('#select-otp-mode')
 		.click();
+
+	cy.getTotpConsentApp()
+		.find('#submit-otp')
+		.should('be.visible');
 
 	cy.getTotpConsentApp()
 		.find('#totp-token')

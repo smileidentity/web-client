@@ -166,3 +166,5 @@ var SmileIdentity = function () {
 
 	return SmileIdentity;
 }();
+
+window.SmileIdentity = SmileIdentity;

@@ -62,7 +62,7 @@ var biometricKyc = function biometricKyc() {
 				const partnerConstraints = await productsConfigResponse.json()
 				const generalConstraints = await servicesResponse.json()
 
-				const previewBvnMfa = config.environment === 'sandbox' && config.previewBVNMFA;
+				const previewBvnMfa = config.previewBVNMFA;
 				if (previewBvnMfa) {
 					generalConstraints.hosted_web['basic_kyc']['NG']['id_types']['BVN_MFA'] = {
 						"id_number_regex": "^[0-9]{11}$",

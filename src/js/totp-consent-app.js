@@ -286,7 +286,7 @@ function markup() {
 							`<label class='input-radio'>
 								<input type="radio" id="" name="mode" value="${Object.keys(mode)[0]}">
 								<div class='otp-mode'>
-									${Object.keys(mode)[0] === 'sms' ? `
+									${Object.keys(mode)[0].includes('sms') ? `
 										<svg xmlns="http://www.w3.org/2000/svg" width="29" height="37" fill="none">
 											<path stroke="#2F718D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.697 24.12c4.914 0 7.37 0 8.897-1.652 1.527-1.651 1.527-4.31 1.527-9.625 0-5.316 0-7.974-1.527-9.625-1.526-1.651-3.983-1.651-8.897-1.651h-5.211c-4.914 0-7.37 0-8.897 1.651-1.527 1.651-1.527 4.31-1.527 9.625 0 5.316 0 7.974 1.527 9.625.85.92 1.991 1.328 3.685 1.508"/>
 											<g filter="url(#sms)">

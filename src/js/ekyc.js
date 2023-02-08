@@ -57,7 +57,7 @@ var eKYC = function eKYC() {
 
 				const previewBvnMfa = config.previewBVNMFA;
 				if (previewBvnMfa) {
-					generalConstraints.hosted_web['basic_kyc']['NG']['id_types']['BVN_MFA'] = {
+					generalConstraints.hosted_web['enhanced_kyc']['NG']['id_types']['BVN_MFA'] = {
 						"id_number_regex": "^[0-9]{11}$",
 						"label": "Bank Verification Number (with OTP)",
 						"required_fields": [

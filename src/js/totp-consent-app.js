@@ -1,6 +1,6 @@
 'use strict';
 
-function postData(url = '', data = {}) {
+function postData(url, data) {
 	return fetch(url, {
 		method: 'POST',
 		mode: 'cors',
@@ -711,9 +711,11 @@ class TotpBasedConsent extends HTMLElement {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
 		const customEvent = new CustomEvent(tag, {
 			detail: {
-				id_number: this.idNumber,
 				message: tag,
-				session_id: this.sessionId
+				data: {
+					id_number: this.idNumber,
+					session_id: this.sessionId
+				}
 			}
 		});
 

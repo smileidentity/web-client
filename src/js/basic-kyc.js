@@ -293,7 +293,7 @@ var basicKyc = (function basicKyc() {
 		);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.type, '*');
+			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 

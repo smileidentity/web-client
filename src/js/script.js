@@ -95,9 +95,9 @@ var SmileIdentity = function () {
 		}
 	}
 
-	function handleConsentRejection(config) {
+	function handleConsentRejection(config, error) {
 		if (config.onError) {
-			config.onError();
+			config.onError(error);
 		}
 	}
 
@@ -144,9 +144,9 @@ var SmileIdentity = function () {
 			saveConfig(config);
 
 			window.addEventListener('message', (event) => {
-				const data = event.data.message || event.data;
+				const tag = event.data.message || event.data;
 
-				switch (data) {
+				switch (tag) {
 					case 'SmileIdentity::Close':
 						return closeIFrame(config);
 						break;
@@ -155,7 +155,7 @@ var SmileIdentity = function () {
 						break;
 					case 'SmileIdentity::ConsentDenied':
 					case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
-						return handleConsentRejection(config);
+						return handleConsentRejection(config, event.data);
 						break;
 					default:
 						return;

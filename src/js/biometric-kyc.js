@@ -187,9 +187,7 @@ var biometricKyc = function biometricKyc() {
 		event.preventDefault();
 		var page = pages.pop();
 		if (page == SmartCameraWeb) {
-			// reset the smart-camera-web element
-			SmartCameraWebContainer.removeChild(page);
-			SmartCameraWebContainer.appendChild(page);
+			page.reset();
 		}
 		setActiveScreen(page);
 	}, false);

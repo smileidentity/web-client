@@ -331,7 +331,7 @@ function markup() {
 										</p>
 										<p>
 											<small>
-												An OTP will be sent by ${Object.keys(mode)[0]} to verify your identity
+												An OTP will be sent by ${Object.keys(mode)[0].includes('sms') ? 'sms' : 'email'} to verify your identity
 											</small>
 										</p>
 									</div>

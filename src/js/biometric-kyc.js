@@ -73,8 +73,6 @@ var biometricKyc = function biometricKyc() {
 							"session_id",
 							"user_id",
 							"job_id",
-							"first_name",
-							"last_name"
 						],
 						"test_data": "00000000000"
 					};

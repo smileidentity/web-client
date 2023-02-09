@@ -387,6 +387,39 @@ describe('totpConsent', () => {
 				.find('#id_type')
 				.should('contain', 'with OTP');
 
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.select('BVN_MFA')
+
+			cy
+				.getIFrameBody()
+				.find('#submitConfig')
+				.click();
+
+			cy.navigateThroughTotpConsentApp();
+
+			cy.getIFrameBody()
+				.find('end-user-consent')
+				.should('not.be.visible');
+
+			cy.navigateThroughCameraScreens();
+
+			cy.getIFrameBody()
+				.find('#id-info')
+				.should('not.be.visible');
+
+			cy
+				.wait('@getUploadURL');
+
+			cy
+				.wait('@successfulUpload');
+
+			cy
+				.getIFrameBody()
+				.find('#complete-screen')
+				.should('be.visible');
+
 			cy.visit('/biometric_kyc');
 			cy.loadIDOptions();
 
@@ -455,6 +488,34 @@ describe('totpConsent', () => {
 				.getIFrameBody()
 				.find('#id_type')
 				.should('contain', 'with OTP');
+
+			cy
+				.getIFrameBody()
+				.find('#id_type')
+				.select('BVN_MFA')
+
+			cy
+				.getIFrameBody()
+				.find('#submitConfig')
+				.click();
+
+			cy.navigateThroughTotpConsentApp();
+
+			cy.getIFrameBody()
+				.find('end-user-consent')
+				.should('not.be.visible');
+
+			cy.getIFrameBody()
+				.find('#id-info')
+				.should('not.be.visible');
+
+			cy
+				.wait('@submitEnhancedKYC');
+
+			cy
+				.getIFrameBody()
+				.find('#complete-screen')
+				.should('be.visible');
 
 			cy.visit('/enhanced_kyc');
 			cy.loadIDOptions();

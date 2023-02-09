@@ -28,6 +28,9 @@ context('SmartCameraWeb', () => {
 			.click();
 
 		cy
+			.wait(2000);
+
+		cy
 			.get('smart-camera-web')
 			.shadow()
 			.find('#request-screen')
@@ -175,6 +178,43 @@ context('SmartCameraWeb', () => {
 			.get('smart-camera-web')
 			.shadow()
 			.find('#thanks-screen')
+			.should('be.visible');
+	});
+
+	it('should switch to request screen when "Rest"', () => {
+
+		cy
+			.get('smart-camera-web').then((element) => {
+				element[0].reset();
+			});
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-camera-access')
+			.click();
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-screen')
+			.should('not.be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#camera-screen')
+			.should('be.visible');
+
+		cy
+			.get('smart-camera-web').then((element) => {
+				element[0].reset();
+			});
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#request-screen')
 			.should('be.visible');
 	});
 });

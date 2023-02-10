@@ -14,6 +14,7 @@ var basicKyc = (function basicKyc() {
 	var activeScreen;
 	var consent_information, id_info, partner_params;
 	var productConstraints;
+	var partnerProductConstraints;
 
 	var EndUserConsent;
 	var SelectIDType = document.querySelector("#select-id-type");
@@ -22,14 +23,64 @@ var basicKyc = (function basicKyc() {
 
 	var CloseIframeButton = document.querySelector("#close-iframe");
 
+	function postData(url = '', data = {}) {
+		return fetch(url, {
+			method: 'POST',
+			mode: 'cors',
+			cache: 'no-cache',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		});
+	}
+
 	async function getProductConstraints() {
 		try {
-			const response = await fetch(
-				`${endpoints[config.environment]}/v1/services`
-			);
-			const json = await response.json();
+			const productsConfigPayload = {
+				partner_id: config.partner_details.partner_id,
+				token: config.token,
+				partner_params
+			}
+	
+			const productsConfigUrl = `${endpoints[config.environment]}/v1/products_config`;
+			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
+			const servicesPromise = fetch(`${endpoints[config.environment]}/v1/services`);
+			const [productsConfigResponse, servicesResponse] = await Promise.all([
+				productsConfigPromise,
+				servicesPromise
+			])
 
-			return json.hosted_web["basic_kyc"];
+			if (productsConfigResponse.ok && servicesResponse.ok) {
+				const partnerConstraints = await productsConfigResponse.json()
+				const generalConstraints = await servicesResponse.json()
+
+				const previewBvnMfa = config.previewBVNMFA;
+				if (previewBvnMfa) {
+					generalConstraints.hosted_web['basic_kyc']['NG']['id_types']['BVN_MFA'] = {
+						"id_number_regex": "^[0-9]{11}$",
+						"label": "Bank Verification Number (with OTP)",
+						"required_fields": [
+							"country",
+							"id_type",
+							"session_id",
+							"user_id",
+							"job_id",
+							"first_name",
+							"last_name"
+						],
+						"test_data": "00000000000"
+					};
+				}
+
+				return {
+					partnerConstraints,
+					generalConstraints: generalConstraints.hosted_web['basic_kyc']
+				}
+			} else {
+				throw new Error("Failed to get supported ID types");
+			}
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -43,9 +94,11 @@ var basicKyc = (function basicKyc() {
 				activeScreen = SelectIDType;
 
 				try {
-					productConstraints = await getProductConstraints();
-					initializeSession(productConstraints);
 					getPartnerParams();
+					const { partnerConstraints, generalConstraints } = await getProductConstraints();
+					partnerProductConstraints = partnerConstraints;
+					productConstraints = generalConstraints;
+					initializeSession(generalConstraints, partnerConstraints);
 
 					localStorage.setItem("SmileIdentityConfig", event.data);
 				} catch (e) {
@@ -56,11 +109,11 @@ var basicKyc = (function basicKyc() {
 		false
 	);
 
-	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints)
+	function initializeSession(generalConstraints, partnerConstraints) {
+		const supportedCountries = Object.keys(generalConstraints)
 			.map((countryCode) => ({
 				code: countryCode,
-				name: constraints[countryCode].name,
+				name: generalConstraints[countryCode].name,
 			}))
 			.sort((a, b) => {
 				if (a.name < b.name) {
@@ -86,15 +139,18 @@ var basicKyc = (function basicKyc() {
 				Object.keys(config.id_selection).includes(value)
 			);
 		} else {
-			validCountries = supportedCountries;
+			validCountries = Object.keys(partnerConstraints.idSelection.basic_kyc);
 		}
 
 		// ACTION: Load Countries as <option>s
-		validCountries.forEach((country) => {
-			const option = document.createElement("option");
-			option.setAttribute("value", country);
-			option.textContent = constraints[country].name;
-			selectCountry.appendChild(option);
+		validCountries.forEach(country => {
+			const countryObject = generalConstraints[country]
+			if (countryObject) {
+				const option = document.createElement('option');
+				option.setAttribute('value', country);
+				option.textContent = countryObject.name;
+				selectCountry.appendChild(option);
+			}
 		});
 
 		// ACTION: Enable Country Selection
@@ -102,16 +158,9 @@ var basicKyc = (function basicKyc() {
 
 		selectCountry.addEventListener("change", (e) => {
 			if (e.target.value) {
-				let validIDTypes = [];
-				const constrainedIDTypes = Object.keys(
-					constraints[e.target.value].id_types
-				);
-
-				let selectedIDTypes = config.id_selection
-					? config.id_selection[e.target.value].filter((value) =>
-							constrainedIDTypes.includes(value)
-						)
-					: constrainedIDTypes;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.basic_kyc;
+				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
+				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 
 				// ACTION: Reset ID Type <select>
 				selectIDType.innerHTML = "";
@@ -121,7 +170,7 @@ var basicKyc = (function basicKyc() {
 					const option = document.createElement("option");
 					option.setAttribute("value", IDType);
 					option.textContent =
-						constraints[e.target.value]["id_types"][IDType].label;
+					generalConstraints[e.target.value]["id_types"][IDType].label;
 					selectIDType.appendChild(option);
 				});
 
@@ -151,11 +200,13 @@ var basicKyc = (function basicKyc() {
 				id_type: selectedIDType,
 			};
 
-			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent =
+			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType);
+			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
+				const IDRequiresConsent = selectedIdRequiresConsent || (
 					config.consent_required &&
 					config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType);
+					config.consent_required[selectedCountry].includes(selectedIDType)
+				);
 
 				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();
@@ -214,11 +265,17 @@ var basicKyc = (function basicKyc() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement("end-user-consent");
-		EndUserConsent.setAttribute("id-type", toHRF(id_info.id_type));
-		EndUserConsent.setAttribute("partner-name", partnerDetails.name);
-		EndUserConsent.setAttribute("partner-logo", partnerDetails.logo_url);
-		EndUserConsent.setAttribute("policy-url", partnerDetails.policy_url);
-		EndUserConsent.setAttribute("theme-color", partnerDetails.theme_color);
+		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
+		EndUserConsent.setAttribute('country', id_info.country);
+		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country]['id_types'][id_info.id_type]['label']);
+		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
+		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
+		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
+		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
+		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+		EndUserConsent.setAttribute('token', config.token);
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute("demo-mode", config.demo_mode);
 			localStorage.setItem(
@@ -240,6 +297,17 @@ var basicKyc = (function basicKyc() {
 			false
 		);
 
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => {
+			consent_information = event.detail;
+
+			if (consent_information.consented.personal_details) {
+				id_info.id_number = consent_information.id_number;
+				id_info.session_id = consent_information.session_id;
+				id_info.consent_information = consent_information;
+				setActiveScreen(IDInfoForm);
+			}
+		}, false);
+
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentDenied",
 			(event) => {
@@ -248,6 +316,11 @@ var basicKyc = (function basicKyc() {
 			},
 			false
 		);
+
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(event.detail, '*');
+			closeWindow();
+		}, false);
 
 		const main = document.querySelector("main");
 		main.appendChild(EndUserConsent);
@@ -283,6 +356,13 @@ var basicKyc = (function basicKyc() {
 			productConstraints[id_info.country]["id_types"][id_info.id_type][
 				"required_fields"
 			];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			const IdNumber = IDInfoForm.querySelector('div#id-number');
+			IdNumber.hidden = false;
+		}
 
 		const showNames = requiredFields.some((fieldName) =>
 			fieldName.includes("name")
@@ -358,8 +438,17 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
+		const validationConstraints = {};
+
+		const requiredFields =
+			productConstraints[id_info.country]["id_types"][id_info.id_type][
+				"required_fields"
+			];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			validationConstraints.id_number = {
 				presence: {
 					allowEmpty: false,
 					message: "is required",
@@ -369,13 +458,8 @@ var basicKyc = (function basicKyc() {
 						"id_number_regex"
 					]
 				),
-			},
-		};
-
-		const requiredFields =
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"required_fields"
-			];
+			};
+		}
 
 		const showNames = requiredFields.some((fieldName) =>
 			fieldName.includes("name")
@@ -468,8 +552,8 @@ var basicKyc = (function basicKyc() {
 				dob: `${payload.year}-${payload.month}-${payload.day}`,
 				entered: true,
 			},
-			id_info,
-			payload
+			payload,
+			id_info
 		);
 
 		try {
@@ -493,7 +577,7 @@ var basicKyc = (function basicKyc() {
 		main.prepend(p);
 	}
 
-	async function submitIdInfoForm(formData) {
+	async function submitIdInfoForm() {
 		const { year, month, day, ...data } = id_info;
 		const dob = year && month && day ? `${year}-${month}-${day}` : undefined;
 		const {
@@ -512,18 +596,8 @@ var basicKyc = (function basicKyc() {
 			source_sdk_version: "v1.0.0"
 		};
 
-		const fetchConfig = {
-			cache: "no-cache",
-			mode: "cors",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			method: "POST",
-			body: JSON.stringify(payload),
-		};
 		const URL = `${endpoints[config.environment]}/v2/verify_async`;
-		const response = await fetch(URL, fetchConfig);
+		const response = await postData(URL, payload);
 		const json = await response.json();
 
 		if (json.error) throw new Error(json.error);

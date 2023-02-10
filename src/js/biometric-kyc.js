@@ -4,9 +4,9 @@ var biometricKyc = function biometricKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		'sandbox': 'https://testapi.smileidentity.com/v1',
-		'live': 'https://api.smileidentity.com/v1',
-		'production': 'https://api.smileidentity.com/v1'
+		sandbox: 'https://testapi.smileidentity.com/v1',
+		live: 'https://api.smileidentity.com/v1',
+		production: 'https://api.smileidentity.com/v1'
 	}
 	
 	var pages = [];
@@ -14,6 +14,7 @@ var biometricKyc = function biometricKyc() {
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
 	var productConstraints;
+	var partnerProductConstraints;
 
 	var EndUserConsent;
 	var SelectIDType = document.querySelector('#select-id-type');
@@ -30,12 +31,62 @@ var biometricKyc = function biometricKyc() {
 
 	var fileToUpload, uploadURL;
 
+	function postData(url = '', data = {}) {
+		return fetch(url, {
+			method: 'POST',
+			mode: 'cors',
+			cache: 'no-cache',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		});
+	}
+
 	async function getProductConstraints() {
 		try {
-			const response = await fetch(`${endpoints[config.environment]}/services`);
-			const json = await response.json();
+			const productsConfigPayload = {
+				partner_id: config.partner_details.partner_id,
+				token: config.token,
+				partner_params
+			}
+	
+			const productsConfigUrl = `${endpoints[config.environment]}/products_config`;
+			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
+			const servicesPromise = fetch(`${endpoints[config.environment]}/services`);
+			const [productsConfigResponse, servicesResponse] = await Promise.all([
+				productsConfigPromise,
+				servicesPromise
+			])
 
-			return json.hosted_web['biometric_kyc'];
+			if (productsConfigResponse.ok && servicesResponse.ok) {
+				const partnerConstraints = await productsConfigResponse.json()
+				const generalConstraints = await servicesResponse.json()
+
+				const previewBvnMfa = config.previewBVNMFA;
+				if (previewBvnMfa) {
+					generalConstraints.hosted_web['biometric_kyc']['NG']['id_types']['BVN_MFA'] = {
+						"id_number_regex": "^[0-9]{11}$",
+						"label": "Bank Verification Number (with OTP)",
+						"required_fields": [
+							"country",
+							"id_type",
+							"session_id",
+							"user_id",
+							"job_id",
+						],
+						"test_data": "00000000000"
+					};
+				}
+
+				return {
+					partnerConstraints,
+					generalConstraints: generalConstraints.hosted_web['biometric_kyc']
+				}
+			} else {
+				throw new Error("Failed to get supported ID types");
+			}
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -47,9 +98,11 @@ var biometricKyc = function biometricKyc() {
 			activeScreen = SelectIDType;
 
 			try {
-				productConstraints = await getProductConstraints();
-				initializeSession(productConstraints);
 				getPartnerParams();
+				const { partnerConstraints, generalConstraints } = await getProductConstraints();
+				partnerProductConstraints = partnerConstraints;
+				productConstraints = generalConstraints;
+				initializeSession(generalConstraints, partnerConstraints);
 
 				localStorage.setItem('SmileIdentityConfig', event.data);
 			} catch (e) {
@@ -58,11 +111,11 @@ var biometricKyc = function biometricKyc() {
 		}
 	}, false);
 
-	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints)
+	function initializeSession(generalConstraints, partnerConstraints) {
+		const supportedCountries = Object.keys(generalConstraints)
 			.map(countryCode => ({
 				code: countryCode,
-				name: constraints[countryCode].name
+				name: generalConstraints[countryCode].name
 			})).sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
@@ -83,15 +136,18 @@ var biometricKyc = function biometricKyc() {
 			validCountries = supportedCountries.filter(value =>
 				Object.keys(config.id_selection).includes(value));
 		} else {
-			validCountries = supportedCountries;
+			validCountries = Object.keys(partnerConstraints.idSelection.biometric_kyc);
 		}
 
 		// ACTION: Load Countries as <option>s
 		validCountries.forEach(country => {
-			const option = document.createElement('option');
-			option.setAttribute('value', country);
-			option.textContent = constraints[country].name;
-			selectCountry.appendChild(option);
+			const countryObject = generalConstraints[country]
+			if (countryObject) {
+				const option = document.createElement('option');
+				option.setAttribute('value', country);
+				option.textContent = countryObject.name;
+				selectCountry.appendChild(option);
+			}
 		});
 
 		// ACTION: Enable Country Selection
@@ -99,21 +155,19 @@ var biometricKyc = function biometricKyc() {
 
 		selectCountry.addEventListener('change', e => {
 			if (e.target.value) {
-				let validIDTypes = [];
-				const constrainedIDTypes = Object.keys(constraints[e.target.value].id_types);
-
-				let selectedIDTypes = config.id_selection ?
-					config.id_selection[e.target.value].filter(value => constrainedIDTypes.includes(value)) :
-					constrainedIDTypes;
+				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.biometric_kyc;
+				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
+				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
 
 				// ACTION: Reset ID Type <select>
 				selectIDType.innerHTML = '';
 
 				// ACTION: Load ID Types as <option>s 
-				selectedIDTypes.forEach(IDType => {
-					const option = document.createElement('option');
-					option.setAttribute('value', IDType);
-					option.textContent = constraints[e.target.value]['id_types'][IDType].label;
+				selectedIDTypes.forEach((IDType) => {
+					const option = document.createElement("option");
+					option.setAttribute("value", IDType);
+					option.textContent =
+					generalConstraints[e.target.value]["id_types"][IDType].label;
 					selectIDType.appendChild(option);
 				});
 
@@ -143,9 +197,13 @@ var biometricKyc = function biometricKyc() {
 				id_type: selectedIDType
 			};
 
-			if (config.consent_required || config.demo_mode) {
-				const IDRequiresConsent = config.consent_required && config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType);
+			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType);
+			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
+				const IDRequiresConsent = selectedIdRequiresConsent || (
+					config.consent_required &&
+					config.consent_required[selectedCountry] &&
+					config.consent_required[selectedCountry].includes(selectedIDType)
+				);
 
 				if (IDRequiresConsent || config.demo_mode) {
 					customizeConsentScreen();
@@ -176,7 +234,12 @@ var biometricKyc = function biometricKyc() {
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		setActiveScreen(IDInfoForm);
+		const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
+		if (idRequiresTOTPConsent) {
+			handleFormSubmit();
+		} else {
+			setActiveScreen(IDInfoForm);
+		}
 	}, false);
 
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
@@ -208,11 +271,18 @@ var biometricKyc = function biometricKyc() {
 		const partnerDetails = config.partner_details;
 
 		EndUserConsent = document.createElement('end-user-consent');
-		EndUserConsent.setAttribute('id-type', toHRF(id_info.id_type));
+		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
+		EndUserConsent.setAttribute('country', id_info.country);
+		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+		EndUserConsent.setAttribute('id-type', id_info.id_type);
+		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country]['id_types'][id_info.id_type]['label']);
+		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+		EndUserConsent.setAttribute('token', config.token);
+
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
@@ -228,8 +298,24 @@ var biometricKyc = function biometricKyc() {
 			}
 		}, false);
 
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => {
+			consent_information = event.detail;
+
+			if (consent_information.consented.personal_details) {
+				id_info.id_number = consent_information.id_number;
+				id_info.session_id = consent_information.session_id;
+				id_info.consent_information = consent_information;
+				setActiveScreen(SmartCameraWeb);
+			}
+		}, false);
+
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
 			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			closeWindow();
+		}, false);
+
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -253,6 +339,13 @@ var biometricKyc = function biometricKyc() {
 
 	function setFormInputs() {
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			const IdNumber = IDInfoForm.querySelector('div#id-number');
+			IdNumber.hidden = false;
+		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
@@ -321,17 +414,25 @@ var biometricKyc = function biometricKyc() {
 	};
 
 	function validateInputs(payload) {
-		const validationConstraints = {
-			id_number: {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				},
-				format: new RegExp(productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex'])
-			}
-		}
+		const validationConstraints = {};
 
 		const requiredFields = productConstraints[id_info.country]['id_types'][id_info.id_type]['required_fields'];
+
+		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+
+		if (showIdNumber) {
+			validationConstraints.id_number = {
+				presence: {
+					allowEmpty: false,
+					message: "is required",
+				},
+				format: new RegExp(
+					productConstraints[id_info.country]["id_types"][id_info.id_type][
+						"id_number_regex"
+					]
+				),
+			};
+		}
 
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
@@ -402,8 +503,10 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	async function handleFormSubmit(event) {
-		event.preventDefault();
-		resetForm();
+		if (event) {
+			event.preventDefault();
+			resetForm();
+		}
 		const form = IDInfoForm.querySelector('form');
 
 		const formData = new FormData(form);
@@ -418,7 +521,7 @@ var biometricKyc = function biometricKyc() {
 		id_info = Object.assign({
 			dob: `${payload.year}-${payload.month}-${payload.day}`,
 			entered: true
-		}, id_info, payload);
+		}, payload, id_info);
 
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
@@ -484,21 +587,10 @@ var biometricKyc = function biometricKyc() {
 			partner_params
 		}
 
-		const fetchConfig = {
-			cache: 'no-cache',
-			mode: 'cors',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			method: 'POST',
-			body: JSON.stringify(payload),
-		};
-
 		const URL = `${endpoints[config.environment] || config.environment}/upload`;
 
 		try {
-			const response = await fetch(URL, fetchConfig);
+			const response = await postData(URL, payload);
 			const json = await response.json();
 
 			if (json.error) throw new Error(json.error);

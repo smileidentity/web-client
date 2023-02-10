@@ -1,6 +1,6 @@
 describe('enhanced kyc', () => {
 	beforeEach(() => {
-		cy.visit('/enhanced-kyc');
+		cy.visit('/enhanced_kyc');
 
 		cy
 			.selectBVNIDType()

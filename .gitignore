@@ -1,6 +1,7 @@
 # test / build / deploy folders
 build
 dist
+src/js/*.min.js
 cypress/videos
 cypress/screenshots
 

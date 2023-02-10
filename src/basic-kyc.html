@@ -28,6 +28,7 @@
     </noscript>
     <!-- End Font Loading -->
 
+    <script src="js/totp-consent-app.min.js"></script>
     <script src="js/consent-screen.min.js"></script>
   </head>
 
@@ -150,7 +151,7 @@
 				</p>
 
         <form name="user-details" class="flow">
-          <div class="input-group flow">
+          <div hidden id='id-number' class="input-group flow">
             <label class="required" for="id_number"> ID Number </label>
 
             <input

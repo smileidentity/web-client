@@ -533,6 +533,12 @@ var eKYC = function eKYC() {
 	}
 
 	function complete() {
+		const countryName = productConstraints[id_info.country].name;
+		const idTypeName = productConstraints[id_info.country]['id_types'][id_info.id_type].label;
+
+		const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
+		thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
+
 		setActiveScreen(CompleteScreen);
 		handleSuccess();
 		window.setTimeout(closeWindow, 2000);

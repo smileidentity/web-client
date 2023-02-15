@@ -607,6 +607,12 @@ var biometricKyc = function biometricKyc() {
 
 		request.onreadystatechange = function() {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+				const countryName = productConstraints[id_info.country].name;
+				const idTypeName = productConstraints[id_info.country]['id_types'][id_info.id_type].label;
+
+				const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
+				thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
+
 				setActiveScreen(CompleteScreen);
 				handleSuccess();
 				window.setTimeout(closeWindow, 2000);

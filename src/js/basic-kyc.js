@@ -199,7 +199,9 @@ var basicKyc = (function basicKyc() {
 				id_type: selectedIDType,
 			};
 
-			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType);
+			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry]
+				? partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType)
+				: false;
 			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
 				const IDRequiresConsent = selectedIdRequiresConsent || (
 					config.consent_required &&

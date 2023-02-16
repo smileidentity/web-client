@@ -234,6 +234,12 @@ function markup() {
 		</style>
 
 		<div class='flow center' id='id-entry'>
+			<div id="back-button" class="back-button">
+				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg> 
+				<span class="backText">Go Back</span>
+			</div>
 			<h1>
 				Enter your ${this.idTypeLabel}
 			</h1>
@@ -262,6 +268,12 @@ function markup() {
 		</div>
 
 		<div hidden class='flow center' id='select-mode'>
+			<div id="back-to-entry-button" class="back-button">
+				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg> 
+				<span class="backText">Go Back</span>
+			</div>
 			<h1>
 				Select contact method
 			</h1>
@@ -406,6 +418,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.switchContactMethod = this.switchContactMethod.bind(this);
 		this.handleTotpConsentGrant = this.handleTotpConsentGrant.bind(this);
 		this.handleTotpConsentContactMethodsOutdated = this.handleTotpConsentContactMethodsOutdated.bind(this);
+		this.pages = [];
 	}
 
 	static get observedAttributes() {
@@ -442,7 +455,9 @@ class TotpBasedConsent extends HTMLElement {
 
 		// Buttons
 		this.queryOtpModesButton = this.idEntryScreen.querySelector('#query-otp-modes');
+		this.backButton = this.idEntryScreen.querySelector('#back-button');
 		this.selectOtpModeButton = this.selectModeScreen.querySelector('#select-otp-mode');
+		this.entryBackbutton = this.selectModeScreen.querySelector('#back-to-entry-button');
 		this.contactMethodsOutdatedButton = this.selectModeScreen.querySelector('#contact-methods-outdated');
 		this.submitOtpButton = this.otpVerificationScreen.querySelector('#submit-otp');
 		this.switchContactMethodButton = this.otpVerificationScreen.querySelector('.try-another-method');
@@ -458,6 +473,25 @@ class TotpBasedConsent extends HTMLElement {
 		this.submitOtpButton.addEventListener('click', e => this.submitOtp(e));
 		this.switchContactMethodButton.addEventListener('click', e => this.switchContactMethod(e));
 		this.contactMethodsOutdatedButton.addEventListener('click', e => this.handleTotpConsentContactMethodsOutdated(e));
+		
+		this.entryBackbutton.addEventListener('click', () => {
+			this.handleBackClick();
+		});
+
+		this.backButton.addEventListener('click', () => {
+			this.handleBackClick();
+		});
+	}
+
+	handleBackClick() {
+		const page = this.pages.pop();
+		if (page) {
+			this.setActiveScreen(page);
+		} else {
+			this.dispatchEvent(
+				new CustomEvent('SmileIdentity::ConsentDenied::Back', {})
+			);
+		}
 	}
 
 	connectedCallback() {

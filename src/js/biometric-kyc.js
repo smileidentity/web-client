@@ -219,12 +219,14 @@ var biometricKyc = function biometricKyc() {
 		});
 	}
 
-	function initiateDemoMode() {
+	function initiateDemoMode(consentScreenExists) {
 		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
 			tip.hidden = false;
 		});
-
+		if (consentScreenExists) {
+			return
+		}
 		const script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = 'js/demo-ekyc-smartselfie.min.js';
@@ -270,6 +272,12 @@ var biometricKyc = function biometricKyc() {
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 
+		const main = document.querySelector('main');
+		EndUserConsent = document.querySelector("end-user-consent");
+		var consentScreenExists = !!EndUserConsent;
+		if (EndUserConsent) {
+			main.removeChild(EndUserConsent);
+		}
 		EndUserConsent = document.createElement('end-user-consent');
 		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
 		EndUserConsent.setAttribute('country', id_info.country);
@@ -286,8 +294,12 @@ var biometricKyc = function biometricKyc() {
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
-			initiateDemoMode();
+			initiateDemoMode(consentScreenExists);
 		}
+
+		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
+			setActiveScreen(SelectIDType);
+		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;
@@ -319,7 +331,6 @@ var biometricKyc = function biometricKyc() {
 			closeWindow();
 		}, false);
 
-		const main = document.querySelector('main');
 		main.appendChild(EndUserConsent);
 	}
 

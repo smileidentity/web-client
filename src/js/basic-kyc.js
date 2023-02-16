@@ -222,12 +222,14 @@ var basicKyc = (function basicKyc() {
 		});
 	}
 
-	function initiateDemoMode() {
-		const demoTips = document.querySelectorAll(".demo-tip");
+	function initiateDemoMode(consentScreenExists) {
+		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
 			tip.hidden = false;
 		});
-
+		if (consentScreenExists) {
+			return
+		}
 		const script = document.createElement("script");
 		script.type = "text/javascript";
 		script.src = "js/demo-ekyc.min.js";
@@ -264,6 +266,12 @@ var basicKyc = (function basicKyc() {
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 
+		const main = document.querySelector('main');
+		EndUserConsent = document.querySelector("end-user-consent");
+		var consentScreenExists = !!EndUserConsent;
+		if (EndUserConsent) {
+			main.removeChild(EndUserConsent);
+		}
 		EndUserConsent = document.createElement("end-user-consent");
 		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
 		EndUserConsent.setAttribute('country', id_info.country);
@@ -282,8 +290,11 @@ var basicKyc = (function basicKyc() {
 				"SmileIdentityConstraints",
 				JSON.stringify(productConstraints, null, 2)
 			);
-			initiateDemoMode();
+			initiateDemoMode(consentScreenExists);
 		}
+		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
+			setActiveScreen(SelectIDType);
+		}, false);
 
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentGranted",
@@ -322,7 +333,6 @@ var basicKyc = (function basicKyc() {
 			closeWindow();
 		}, false);
 
-		const main = document.querySelector("main");
 		main.appendChild(EndUserConsent);
 	}
 

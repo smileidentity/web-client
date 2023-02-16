@@ -278,6 +278,12 @@ function templateString() {
 		</style>
 
 		<div id='consent-screen'>
+			<div id="back-button" class="back-button">
+				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg> 
+				<span class="backText">Go Back</span>
+			</div>
 			<section class='flow center'>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
 				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
@@ -623,6 +629,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	connectedCallback() {
+		this.pages = [];
 		const template = document.createElement('template');
 		template.innerHTML = this.render();
 
@@ -636,6 +643,7 @@ class EndUserConsent extends HTMLElement {
 		this.rejectButton = this.shadowRoot.querySelector('#cancel');
 		this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
 		this.confirmConsentRejectionButton = this.shadowRoot.querySelector('#confirm-consent-rejection');
+		this.backButton = this.shadowRoot.querySelector('#back-button')
 
 		this.allowButton.addEventListener('click', e => this.handleConsentGrant(e));
 		this.rejectButton.addEventListener('click', e => this.handleConsentGrant(e));
@@ -645,7 +653,11 @@ class EndUserConsent extends HTMLElement {
 
 		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
 		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::Back', e => this.handleBackEvents(e));
 
+		this.backButton.addEventListener('click', (e) => {
+			this.handleBackEvents(e);
+		});
 		this.activeScreen = this.consentScreen;
 	}
 
@@ -713,6 +725,7 @@ class EndUserConsent extends HTMLElement {
 		if (granted) {
 			if (this.idRequiresTotpConsent.includes(this.idType)) {
 				this.setActiveScreen(this.totpConsentApp);
+				this.pages.push(this.consentScreen);
 			} else {
 				this.dispatchEvent(
 					new CustomEvent('SmileIdentity::ConsentGranted', {
@@ -744,6 +757,17 @@ class EndUserConsent extends HTMLElement {
 			}
 		});
 		this.dispatchEvent(customEvent);
+	}
+
+	handleBackEvents(e){
+		const page = this.pages.pop();
+		if (page) {
+			this.setActiveScreen(page);
+		}else{
+			this.dispatchEvent(
+				new CustomEvent('SmileIdentity::ConsentIDChange')
+			);
+		}
 	}
 }
 

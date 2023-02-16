@@ -75,7 +75,7 @@ describe('ID verification', () => {
 	it('should show the select id page', ()=>{
 		cy
 		.getIFrameBody()
-		.find('#backButton')
+		.find('#back-button')
 		.click();
 
 		cy

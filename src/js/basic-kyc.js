@@ -243,7 +243,7 @@ var basicKyc = (function basicKyc() {
 		false
 	);
 
-	IDInfoForm.querySelector('#backButton').addEventListener('click', event => {
+	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
 		event.preventDefault();
 		var page = pages.pop();
 		setActiveScreen(page);

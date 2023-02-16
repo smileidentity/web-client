@@ -270,7 +270,7 @@ button:focus:not([disabled]) {
 	align-items: center;
 }
 
-.backButton {
+.back-button {
 	display: flex;
 	align-items: center;
 	cursor: pointer;

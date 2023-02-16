@@ -246,10 +246,10 @@ var biometricKyc = function biometricKyc() {
 		handleFormSubmit(event);
 	}, false);
 
-	IDInfoForm.querySelector('#backButton').addEventListener('click', event => {
+	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
 		event.preventDefault();
 		var page = pages.pop();
-		if (page == SmartCameraWeb) {
+		if (page === SmartCameraWeb) {
 			page.reset();
 		}
 		setActiveScreen(page);

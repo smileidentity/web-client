@@ -292,6 +292,19 @@ button:focus:not([disabled]) {
 	top: 0%;
 }
 
+#id-info .back-button {
+	position: absolute;
+	left: -9%;
+	right: 83.27%;
+	top: 0%;
+	cursor: pointer;
+}
+
+#id-info .back-button-text {
+	left: 15%;
+	right: 16%;
+}
+
 .user-details {
 	padding: 2rem 5rem;
 }

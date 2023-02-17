@@ -271,21 +271,25 @@ button:focus:not([disabled]) {
 }
 
 .back-button {
-	display: flex;
-	align-items: center;
+	position: absolute;
+	left: -9%;
+	right: 83.27%;
+	top: 10%;
 	cursor: pointer;
 }
 
-.backText {
+.back-button-text {
 	font-family: 'Nunito Sans';
 	font-style: normal;
 	font-weight: 700;
 	font-size: 12px;
 	line-height: 20px;
-	/* or 167% */
 	letter-spacing: -0.24px;
-
 	color: #262626;
+	position: absolute;
+	left: 56%;
+	right: 14%;
+	top: 0%;
 }
 
 .user-details {

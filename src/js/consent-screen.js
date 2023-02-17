@@ -122,6 +122,27 @@ function templateString() {
 				color: #F86B58;
 			}
 
+			.back-button {
+				position: absolute;
+				left: 7%;
+				right: 13.27%;
+				top: 10.45%;
+			}
+			
+			.back-button-text {
+				font-family: 'Nunito Sans';
+				font-style: normal;
+				font-weight: 700;
+				font-size: 12px;
+				line-height: 20px;
+				letter-spacing: -0.24px;
+				color: #262626;
+				position: absolute;
+				left: 5%;
+				right: 11%;
+				top: 1.45%;
+			}
+
 			img {
 				border-radius: 50%;
 				position: relative;
@@ -282,7 +303,7 @@ function templateString() {
 				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg> 
-				<span class="backText">Go Back</span>
+				<span class="back-button-text">Go Back</span>
 			</div>
 			<section class='flow center'>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />

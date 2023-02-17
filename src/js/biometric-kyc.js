@@ -28,6 +28,7 @@ var biometricKyc = function biometricKyc() {
 	var CloseIframeButton = document.querySelector('#close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
+	var CameraBackButton = document.querySelector('#back-button-camera');
 
 	var fileToUpload, uploadURL;
 
@@ -249,6 +250,15 @@ var biometricKyc = function biometricKyc() {
 	}, false);
 
 	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		if (page === SmartCameraWeb) {
+			page.reset();
+		}
+		setActiveScreen(page);
+	}, false);
+
+	CameraBackButton.addEventListener('click', event => {
 		event.preventDefault();
 		var page = pages.pop();
 		if (page === SmartCameraWeb) {

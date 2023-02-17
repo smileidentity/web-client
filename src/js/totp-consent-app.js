@@ -173,6 +173,27 @@ function markup() {
 				font-weight: bold;
 			}
 
+			.back-button {
+				position: absolute;
+				left: -9%;
+				right: 83.27%;
+				top: 15.45%;
+			}
+			
+			.back-button-text {
+				font-family: 'Nunito Sans';
+				font-style: normal;
+				font-weight: 700;
+				font-size: 12px;
+				line-height: 20px;
+				letter-spacing: -0.24px;
+				color: #262626;
+				position: absolute;
+				left: 56%;
+				right: 14%;
+				top: 1.45%;
+			}
+
 			#error,
 			.validation-message {
 				color: red;
@@ -238,7 +259,7 @@ function markup() {
 				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg> 
-				<span class="backText">Go Back</span>
+				<span class="back-button-text">Go Back</span>
 			</div>
 			<h1>
 				Enter your ${this.idTypeLabel}
@@ -272,7 +293,7 @@ function markup() {
 				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg> 
-				<span class="backText">Go Back</span>
+				<span class="back-button-text">Go Back</span>
 			</div>
 			<h1>
 				Select contact method

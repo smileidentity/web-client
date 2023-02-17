@@ -1,0 +1,33 @@
+name: test
+on:
+  pull_request:
+    branches: main
+    types:
+      - opened
+      - edited
+      - synchronize
+  push:
+    tags: v1
+    branches: main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code, and install dependencies
+        uses: actions/checkout@v3
+        with:
+          build: npm ci
+      - name: run tests
+        uses: cypress-io/github-action@v5
+        with:
+          build: npm run build
+          build:dist: npm run build:dist
+          start: npm start
+      - name: upload test failure artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+

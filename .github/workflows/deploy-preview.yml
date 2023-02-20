@@ -1,0 +1,48 @@
+name: deploy-preview
+on:
+  workflow_call:
+  pull_request:
+    branches: [ 'main' ]
+    types:
+      - opened
+      - edited
+      - synchronize
+  push:
+    branches: [ 'main' ]
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  deploy-preview:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: set destination directory
+        id: set_dest_dir
+        run: echo "DEST_DIR=js/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
+      - name: deploy preview to s3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js'
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEST_DIR: ${{ steps.set_dest_dir.outputs.DEST_DIR }}
+        # Publish the inspect and preview link to the PR
+      - name: share preview url as PR comment
+        if: github.event.pull_request.opened == true || github.event.pull_request.ready_for_review == true
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "This branch has been deployed to s3 / cloudfront.\n\n✅ Preview URL: https://cdn.smileidentity.com/${{ steps.set_dest_dir.outputs.DEST_DIR }}/smart-camera-web.js"
+

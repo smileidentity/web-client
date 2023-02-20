@@ -1,14 +1,6 @@
 name: test
 on:
-  pull_request:
-    branches: main
-    types:
-      - opened
-      - edited
-      - synchronize
-  push:
-    tags: v1
-    branches: main
+  workflow_call:
 
 jobs:
   test:

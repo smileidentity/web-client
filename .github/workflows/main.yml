@@ -1,8 +1,6 @@
 name: deploy v1
 
 on:
-  pull_request:
-    branches: [ 'main' ]
   push:
     tags: v1
     branches: main
@@ -32,4 +30,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: "./dist"
-          DEST_DIR: "inline/v0"
+          DEST_DIR: "inline/v1"

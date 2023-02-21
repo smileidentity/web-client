@@ -16,6 +16,7 @@ var eKYC = function eKYC() {
 	var partnerProductConstraints;
 
 	var EndUserConsent;
+	var VirtualNinApp;
 	var SelectIDType = document.querySelector('#select-id-type');
 	var IDInfoForm = document.querySelector('#id-info');
 	var CompleteScreen = document.querySelector('#complete-screen');
@@ -201,10 +202,20 @@ var eKYC = function eKYC() {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
 				} else {
-					setActiveScreen(IDInfoForm);
+					if (selectedIDType === 'V_NIN') {
+						createVirtualNinApp(partnerConstraints.enterpriseId);
+						setActiveScreen(VirtualNinApp);
+					} else {
+						setActiveScreen(IDInfoForm);
+					}
 				}
 			} else {
-				setActiveScreen(IDInfoForm);
+				if (selectedIDType === 'V_NIN') {
+					createVirtualNinApp(partnerConstraints.enterpriseId);
+					setActiveScreen(VirtualNinApp);
+				} else {
+					setActiveScreen(IDInfoForm);
+				}
 			}
 
 			customizeForm();
@@ -234,6 +245,20 @@ var eKYC = function eKYC() {
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');
+	}
+
+	function createVirtualNinApp(enterpriseId) {
+		VirtualNinApp = document.createElement('virtual-nin-app');
+		VirtualNinApp.setAttribute('enterprise-id', enterpriseId);
+		VirtualNinApp.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+
+		VirtualNinApp.addEventListener('SmileIdentity::VirtualNinApp::Submitted', event => {
+			id_info.id_number = event.detail.data.id_number;
+			handleFormSubmit();
+		});
+
+		const main = document.querySelector("main");
+		main.appendChild(VirtualNinApp);
 	}
 
 	function customizeConsentScreen() {

@@ -16,6 +16,7 @@ var biometricKyc = function biometricKyc() {
 	var partnerProductConstraints;
 
 	var EndUserConsent;
+	var VirtualNinApp;
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var IDInfoForm = document.querySelector('#id-info');
@@ -209,10 +210,20 @@ var biometricKyc = function biometricKyc() {
 					customizeConsentScreen();
 					setActiveScreen(EndUserConsent);
 				} else {
-					setActiveScreen(SmartCameraWeb);
+					if (selectedIDType === 'V_NIN') {
+						createVirtualNinApp(partnerConstraints.enterpriseId);
+						setActiveScreen(VirtualNinApp);
+					} else {
+						setActiveScreen(SmartCameraWeb);
+					}
 				}
 			} else {
-				setActiveScreen(SmartCameraWeb);
+				if (selectedIDType === 'V_NIN') {
+					createVirtualNinApp(partnerConstraints.enterpriseId);
+					setActiveScreen(VirtualNinApp);
+				} else {
+					setActiveScreen(SmartCameraWeb);
+				}
 			}
 
 			customizeForm();
@@ -235,7 +246,8 @@ var biometricKyc = function biometricKyc() {
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
 		const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
-		if (idRequiresTOTPConsent) {
+		const isVirtualNin = id_info.id_type === 'V_NIN';
+		if (idRequiresTOTPConsent || isVirtualNin) {
 			handleFormSubmit();
 		} else {
 			setActiveScreen(IDInfoForm);
@@ -256,6 +268,20 @@ var biometricKyc = function biometricKyc() {
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');
+	}
+
+	function createVirtualNinApp(enterpriseId) {
+		VirtualNinApp = document.createElement('virtual-nin-app');
+		VirtualNinApp.setAttribute('enterprise-id', enterpriseId);
+		VirtualNinApp.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+
+		VirtualNinApp.addEventListener('SmileIdentity::VirtualNinApp::Submitted', event => {
+			id_info.id_number = event.detail.data.id_number;
+			setActiveScreen(SmartCameraWeb);
+		});
+
+		const main = document.querySelector("main");
+		main.appendChild(VirtualNinApp);
 	}
 
 	function customizeConsentScreen() {

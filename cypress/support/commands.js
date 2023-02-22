@@ -147,6 +147,28 @@ Cypress.Commands.add('selectNINIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectVNINIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingNINIDType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('V_NIN')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('getTotpConsentApp', () => {
 	cy.getIFrameBody()
 		.find('end-user-consent')
@@ -192,6 +214,64 @@ Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
 
 	cy.getTotpConsentApp()
 		.find('#submit-otp')
+		.click();
+});
+
+Cypress.Commands.add('navigateThroughVirtualNinApp', () => {
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#generate-with-ussd')
+		.should('be.visible')
+		.click();
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#generate-ussd-code')
+		.should('be.visible');
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#nin')
+		.should('be.visible')
+		.type('00000000000');
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#get-ussd-code')
+		.click();
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#show-ussd-code')
+		.should('be.visible');
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#copy-ussd-code')
+		.click();
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#enter-virtual-nin')
+		.should('be.visible');
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#id_number')
+		.type('0000000000000000');
+
+	cy.getIFrameBody()
+		.find('virtual-nin-app')
+		.shadow()
+		.find('#submit-virtual-nin')
 		.click();
 });
 

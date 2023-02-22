@@ -328,6 +328,17 @@
                         "test_data": "0000000000000000000",
                         "id_number_regex": "^([A-Z0-9]{19}|[A-Z0-9]{9})$/i"
                     },
+                    "V_NIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Virtual NIN",
+                        "test_data": "0000000000000000",
+                        "id_number_regex": "^[0-9]{16}$"
+                    },
                     "NIN": {
                         "required_fields": [
                             "country",
@@ -559,6 +570,17 @@
                         "label": "Voter ID Number",
                         "test_data": "0000000000000000000",
                         "id_number_regex": "^([A-Z0-9]{19}|[A-Z0-9]{9})$/i"
+                    },
+                    "V_NIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Virtual NIN",
+                        "test_data": "0000000000000000",
+                        "id_number_regex": "^[0-9]{16}$"
                     },
                     "NIN": {
                         "required_fields": [
@@ -794,6 +816,17 @@
                         "label": "Voter ID Number",
                         "test_data": "0000000000000000000",
                         "id_number_regex": "^([A-Z0-9]{19}|[A-Z0-9]{9})$/i"
+                    },
+                    "V_NIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Virtual NIN",
+                        "test_data": "0000000000000000",
+                        "id_number_regex": "^[0-9]{16}$"
                     },
                     "NIN": {
                         "required_fields": [

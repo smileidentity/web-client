@@ -139,6 +139,7 @@ class VirtualNinApp extends HTMLElement {
 		this['ussd-code'] = '';
 
 		this.getUssdCode = this.getUssdCode.bind(this);
+		this.copyUssdCode = this.copyUssdCode.bind(this);
 		this.submitVirtualNin = this.submitVirtualNin.bind(this);
 	}
 
@@ -170,7 +171,7 @@ class VirtualNinApp extends HTMLElement {
 		this.mobileAppLink.addEventListener('click', () => this.setActiveScreen(this.enterVirtualNinScreen));
 		this.generateWithUssdButton.addEventListener('click', () => this.setActiveScreen(this.generateUssdScreen));
 		this.getUssdCodeButton.addEventListener('click', e => this.getUssdCode(e));
-		this.copyUssdCodeButton.addEventListener('click', () => this.setActiveScreen(this.enterVirtualNinScreen));
+		this.copyUssdCodeButton.addEventListener('click', () => this.copyUssdCode());
 		this.submitVirtualNinButton.addEventListener('click', e => this.submitVirtualNin(e));
 		this.switchMethodButton.addEventListener('click', () => this.setActiveScreen(this.generateVirtualNinScreen));
 	}
@@ -277,29 +278,22 @@ class VirtualNinApp extends HTMLElement {
 		const validationErrors = this.validateNin(this.nin.value);
 
 		if (!validationErrors) {
+			this.resetForm();
 			this.ussdCode = `*346*3*${this.nin.value}*${this.enterpriseId}#`;
 			this.setActiveScreen(this.showUssdScreen);
 			this.setAttribute('ussd-code', this.ussdCode);
 		}
 	}
 
-	copyUssdCode() {
-		const key = this.shadowRoot.getElementById(id);
-		if (!key) return;
-		const range = document.createRange();
-		range.selectNode(key);
-		const selection = window.getSelection();
-		// this may look weird, but selections have an array of ranges, and which is
-		// chosen is an implementation that may vary by browser.
-		selection.removeAllRanges();
-		selection.addRange(range);
+	async copyUssdCode() {
 		try {
-			const successful = document.execCommand("copy");
-			if (successful) {
-				return { message: msg };
+			if ('clipboard' in navigator) {
+				await navigator.clipboard.writeText(this.ussdCode);
 			}
 		} catch (err) {
-			return { error: "Unable to copy text" };
+			throw new Error("Unable to copy ussd code", { cause: err });
+		} finally {
+			this.setActiveScreen(this.enterVirtualNinScreen);
 		}
 	}
 

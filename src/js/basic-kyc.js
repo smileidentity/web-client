@@ -466,7 +466,8 @@ var basicKyc = (function basicKyc() {
 
 		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
 
-		if (showIdNumber) {
+		const isVirtualNin = id_info.id_type === 'V_NIN';
+		if (showIdNumber && !isVirtualNin) {
 			validationConstraints.id_number = {
 				presence: {
 					allowEmpty: false,

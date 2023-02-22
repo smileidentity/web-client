@@ -1,125 +1,341 @@
 'use strict';
 function vNinHelperMarkup() {
 	return `
-		<div id='generate-virtual-nin'>
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			:host {
+				--flow-space: 1.5rem;
+
+				--color-dark: #404040;
+				--color-grey: #9394AB;
+
+				--color-success: #1EB244;
+				--color-failure: #FFEDEB;
+				--color-failure-tint: #F86B58;
+			}
+
+			html {
+				font-family: 'Nunito Sans', sans-serif;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			[disabled] {
+				cursor: not-allowed !important;
+				filter: grayscale(75%);
+			}
+
+			.visually-hidden {
+				border: 0;
+				clip: rect(1px 1px 1px 1px);
+				clip: rect(1px, 1px, 1px, 1px);
+				height: auto;
+				margin: 0;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				white-space: nowrap;
+				width: 1px;
+			}
+
+			.color-dark {
+				color: var(--color-dark);
+			}
+
+			.color-grey {
+				color: var(--color-grey);
+			}
+
+			.flow > * + * {
+				margin-top: var(--flow-space);
+			}
+
+			.center {
+				margin-left: auto;
+				margin-right: auto;
+
+				text-align: center;
+			}
+
+			h1 {
+				font-size: 1.5rem;
+				font-weight: 700;
+			}
+
+			button, input, select, textarea {
+				font: inherit
+			}
+
+			label,
+			input,
+			select,
+			textarea {
+				--flow-space: .5rem;
+				display: block;
+				width: 100%;
+			}
+
+			input,
+			select,
+			textarea {
+				border: 1px solid #d1d8d6;
+				border-radius: .5rem;
+				padding: .75rem 1rem;
+			}
+
+			button. .button {
+				border-radius: 1rem;
+				font-size: 20px;
+				text-align: center;
+				width: 100%;
+				display: inline-block;
+				padding: 1rem 2.5rem;
+				cursor: pointer;
+				font-weight: 500;
+				line-height: 1;
+				letter-spacing: .05ch;
+				text-decoration: none;
+				display: inline-block;
+				border: none;
+				transition: background 250ms ease-in-out,
+										transform 150ms ease;
+				-webkit-appearance: none;
+				-moz-appearance: none;
+			}
+
+			button:focus,
+			button:hover {
+				filter: opacity(.75);
+			}
+
+			button[data-type='icon'] {
+				height: 2rem;
+				padding: 0;
+				width: 2rem;
+				background: transparent;
+			}
+
+			.flow-space-large {
+				--flow-space: 5.25rem;
+			}
+
+			.flow-space-initial {
+				--flow-space: 1.5rem;
+			}
+
+			.flow-space-small {
+				--flow-space: .75rem;
+			}
+
+			button[data-type='primary'],
+			.button[data-type='primary'] {
+				background: #3886F7;
+				border: none;
+				border-radius: 1rem;
+				color: #fff;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 1rem 2.5rem;
+				text-decoration: none;
+			}
+
+			button[data-type='text'] {
+				padding: 0;
+				background: transparent;
+				border: none;
+				color: #3886F7;
+			}
+
+			input {
+				font: inherit;
+			}
+
+			fieldset {
+				margin: 0;
+				border: none;
+			}
+
+			.font-weight-bold {
+				font-weight: 600;
+			}
+
+			.font-size-small {
+				font-size: .75rem;
+			}
+
+			#error,
+			.validation-message {
+				color: red;
+				text-transform: capitalize;
+			}
+
+			.input-group {
+				--flow-space: 1.5rem;
+				text-align: initial;
+			}
+
+			input {
+				block-size: 3.25rem;
+				max-inline-size: 100%;
+				background-color: #F5F5F5;
+				border: none;
+				border-bottom: 2px solid #2F718D;
+				font-size: 1.25rem;
+				font-weight: 600;
+				padding: .5rem 1rem;
+			}
+
+			#ussd-code {
+				background-color: #F8F8F8;
+				inline-size: 20rem;
+				margin-inline: auto;
+				text-align: center;
+			}
+		</style>
+
+		<div class='flow center' id='generate-virtual-nin'>
 			<h1>
 				Generate Virtual NIN
 			</h1>
-			<p>
+			<p class='color-grey'>
 				We require your Virtual NIN issued by NIMC, the NIN custodian,
 				to process your information.
 			</p>
 
-			<div>
-				<div>
-					<p>
+			<div class='flow-space-large flow'>
+				<div class='flow'>
+					<p class='font-size-small font-weight-bold'>
 						Do you have the NIMC App?
 					</p>
 
-					<a id='mobile-app-link' href='${this.nimcAppDeepLink}' target='_blank'>
+					<a class='flow-space-initial button' data-type='primary' id='mobile-app-link' href='${this.nimcAppDeepLink}' target='_blank'>
 						Generate VNIN using NIMC App
 					</a>
 
-					<p>
+					<p class='flow-space-small color-grey font-size-small'>
 						You would be redirected to the NIMC mobile app
 					</p>
 				</div>
 
-				<p>
+				<p class='flow-space-initial'>
 					OR
 				</p>
 
-				<div>
-					<p>
+				<div class='flow-space-initial flow'>
+					<p class='font-size-small font-weight-bold'>
 						Don't have the NIMC Mobile ID App?
 					</p>
-					<button id='generate-with-ussd' type='button'>
-						Generate VNIN using USSD
-					</button>
 					<p>
+						<button data-type='text' id='generate-with-ussd' type='button'>
+							Generate VNIN using USSD
+						</button>
+					</p>
+					<p class='color-grey font-size-small'>
 						Click to begin with generating Virtual NIN using *346*3*NIN*Agent Code#
 					</p>
 				</div>
 			</div>
 		</div>
 
-		<div hidden id='generate-ussd-code'>
+		<div hidden class='flow center' id='generate-ussd-code'>
 			<h1>
 				Enter your NIN
 			</h1>
-			<p>
+			<p class='color-grey flow-space-small'>
 				Let's help you generate the code for generating your Virtual NIN.
 			</p>
-			<p>
+			<p class='color-grey flow-space-small'>
 				Enter your regular NIN, and click on "Get Code"
 			</p>
 
-			<form novalidate>
-				<label for='nin'>
-					Enter your 11-digit NIN
-				</label>
-				<input id='nin' pattern='^[0-9]{11}$' maxlength='11' />
-				<p>
-					<small>
+			<form class='flow flow-space-large' novalidate>
+				<div class='flow input-group'>
+					<label for='nin'>
+						Enter your 11-digit NIN
+					</label>
+					<input id='nin' pattern='^[0-9]{11}$' maxlength='11' />
+					<p class='color-grey flow-space-small'>
 						Let's help you generate the code
-					</small>
-				</p>
+					</p>
+				</div>
 
-				<button type='submit' id='get-ussd-code'>
-					Get code
-				</button>
+				<div>
+					<button data-type='primary' type='submit' id='get-ussd-code'>
+						Get code
+					</button>
+				</div>
 			</form>
 		</div>
 
-		<div hidden id='show-ussd-code'>
-			<p>
+		<div hidden class='flow center' id='show-ussd-code'>
+			<br />
+			<p class='flow-space-large'>
 				Type or paste this in your phone and dial
 			<p>
 
 			<input id='ussd-code' readonly value='${this.ussdCode}' />
 
-			<p>
+			<p class='color-grey'>
 				<small>
 					You might incur a charge from NIMC and your service provider
 				</small>
 			</p>
 
-			<button id='copy-ussd-code'>
-				<span>Copy</span>
-				<span class='visually-hidden'>USSD Code</span>
-			</button>
+			<p>
+				<button data-type='primary' id='copy-ussd-code'>
+					<span>Copy</span>
+					<span class='visually-hidden'>USSD Code</span>
+				</button>
+			</p>
+
+			<br class='flow-space-large' />
 		</div>
 
-		<div hidden id='enter-virtual-nin'>
+		<div hidden class='flow center' id='enter-virtual-nin'>
 			<h1>
 				Enter your Virtual NIN
 			</h1>
-			<p>
+			<p class='color-grey'>
 				We require your Virtual NIN issued by NIMC, the NIN custodian,
 				to process your information.
 			</p>
 
-			<form novalidate>
-				<div>
-				<label for='id_number'>
-					Enter your generated virtual NIN
-				</label>
-				<input id='id_number' pattern=${this.idTypeRegex} name='id_number' maxlength='16'/>
-				<button type='submit' id='submit-virtual-nin'>
-					Enter VNIN
-				</button>
+			<form class='flow flow-space-large' novalidate>
+				<div class='flow input-group'>
+					<label for='id_number'>
+						Enter your generated virtual NIN
+					</label>
 
-				<p>
-					<small>
-						Couldn't generate VNIN?
-					</small>
-				</p>
+					<input id='id_number' pattern=${this.idTypeRegex} name='id_number' maxlength='16'/>
+				</div>
 
-				<p>
-					<button type='button' id='switch-method'>
-						Try another method
+				<div class='flow flow-space-initial'>
+					<button data-type='primary' type='submit' id='submit-virtual-nin'>
+						Enter VNIN
 					</button>
-				</p>
+
+					<div class='font-size-small'>
+						<p>
+							Couldn't generate VNIN?
+						</p>
+
+						<p>
+							<button data-type='text' type='button' id='switch-method'>
+								Try another method
+							</button>
+						</p>
+					</div>
+				</div>
 			</form>
 		</div>
 	`

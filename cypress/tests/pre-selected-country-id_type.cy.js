@@ -1,4 +1,4 @@
-describe.skip('No ID Selection', () => {
+describe('No ID Selection', () => {
 	it('basic_kyc', () => {
 		cy.visit('/basic_kyc');
 
@@ -156,7 +156,7 @@ describe.skip('No ID Selection', () => {
 	});
 });
 
-describe.skip('Preselected Country', () => {
+describe('Preselected Country', () => {
 	it('basic_kyc', () => {
 		cy.visit('/basic_kyc_pre_select_country');
 

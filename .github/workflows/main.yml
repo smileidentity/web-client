@@ -1,44 +1,26 @@
-name: Cypress Tests
+name: deploy v1
 
 on:
-  pull_request:
-    branches: main
-    types:
-      - opened
-      - edited
-      - synchronize
   push:
-    tags: v[0-9]*
+    tags: v1
     branches: main
 
 jobs:
-  test_build_deploy:
+  test:
+    uses: ./.github/workflows/test.yml
+  deploy:
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: set node version
+        uses: actions/setup-node@v3
         with:
-          build: npm ci
-      - name: E2E Test
-        uses: cypress-io/github-action@v5
-        with:
-          build: npm run build
-          build:dist: npm run build:dist
-          start: npm start
-      - name: Get Version
-        if: startsWith( github.ref, 'refs/tags/v' )
-        id: get_version
-        run: |
-          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-      - name: Set Destination
-        if: startsWith( github.ref, 'refs/tags/v' )
-        id: set_destination
-        env:
-          TAG: ${{ steps.get_version.outputs.VERSION }}
-        run: |
-          echo ::set-output name=DEST_DIR::$( echo "inline/$TAG" )
-      - name: Publish to CDN
-        if: startsWith( github.ref, 'refs/tags/v' )
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build && npm run build:dist
+      - name: deploy to s3 / cloudfront
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
           args: --follow-symlinks --delete
@@ -48,9 +30,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: "./dist"
-          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR }}
-      - uses: actions/upload-artifact@v1
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
+          DEST_DIR: "inline/v1"

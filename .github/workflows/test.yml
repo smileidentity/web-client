@@ -1,6 +1,11 @@
 name: test
 on:
   workflow_call:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
 
 jobs:
   test:

@@ -3,9 +3,7 @@ on:
   pull_request:
     branches: [ 'main' ]
     types:
-      - opened
-      - edited
-      - synchronize
+      - ready_for_review
 
 jobs:
   test:
@@ -38,7 +36,6 @@ jobs:
           DEST_DIR: ${{ steps.set_dest_dir.outputs.DEST_DIR }}
         # Publish the inspect and preview link to the PR
       - name: share preview url as PR comment
-        if: github.event.pull_request.opened == true || github.event.pull_request.ready_for_review == true
         uses: unsplash/comment-on-pr@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

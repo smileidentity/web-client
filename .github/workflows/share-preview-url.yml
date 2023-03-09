@@ -6,7 +6,6 @@ on:
       - ready_for_review
 
 jobs:
-  needs: [ deploy-preview ]
   comment-on-pr:
     - uses: actions/checkout@v3
     - name: get dest dir
@@ -18,6 +17,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         msg: "This branch has been deployed to s3 / cloudfront.\n\n✅ Preview URL: https://cdn.smileidentity.com/${{ steps.get_dest_dir.outputs.DEST_DIR }}/js/script.js"
-
-
 

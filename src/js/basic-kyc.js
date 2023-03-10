@@ -239,6 +239,7 @@ var basicKyc = (function basicKyc() {
 					if (id_info && id_info.country && country === id_info.country) {
 						option.setAttribute('selected', true);
 						selectCountry.value = country;
+						selectCountry.disabled = true;
 						loadIdTypes(country);
 					}
 

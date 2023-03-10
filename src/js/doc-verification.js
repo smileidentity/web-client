@@ -153,6 +153,7 @@ var documentVerification = function documentVerification() {
 					if (id_info && id_info.country && country === id_info.country) {
 						option.setAttribute('selected', true);
 						selectCountry.value = country;
+						selectCountry.disabled = true;
 						loadIdTypes(country);
 					}
 

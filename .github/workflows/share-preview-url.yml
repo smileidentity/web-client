@@ -7,7 +7,6 @@ on:
 
 jobs:
   comment-on-pr:
-    - uses: actions/checkout@v3
     - name: get dest dir
       id: get_dest_dir
       run: echo "DEST_DIR=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"

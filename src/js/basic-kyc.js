@@ -198,7 +198,7 @@ var basicKyc = (function basicKyc() {
 					const selectedIDTypes = validIDTypes[countryCode].filter(value => constrainedIDTypes.includes(value))
 
 					// ACTION: Reset ID Type <select>
-					selectIDType.innerHTML = "";
+					selectIDType.querySelector('option').textContent = '--Please Select--';
 
 					// ACTION: Load ID Types as <option>s
 					selectedIDTypes.forEach((IDType) => {

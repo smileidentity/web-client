@@ -186,7 +186,11 @@ var eKYC = function eKYC() {
 					const selectedIDTypes = validIDTypes[countryCode].filter(value => constrainedIDTypes.includes(value))
 
 					// ACTION: Reset ID Type <select>
-					selectIDType.querySelector('option').textContent = '--Please Select--';
+					selectIDType.innerHTML = '';
+					const initialOption = document.createElement('option');
+					initialOption.setAttribute('value', '');
+					initialOption.textContent = '--Please Select--';
+					selectIDType.appendChild(initialOption);
 
 					// ACTION: Load ID Types as <option>s
 					selectedIDTypes.forEach((IDType) => {

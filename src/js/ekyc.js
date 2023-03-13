@@ -94,8 +94,6 @@ var eKYC = function eKYC() {
 				partnerProductConstraints = partnerConstraints;
 				productConstraints = generalConstraints;
 				initializeSession(generalConstraints, partnerConstraints);
-
-				localStorage.setItem('SmileIdentityConfig', event.data);
 			} catch (e) {
 				throw e;
 			}

@@ -45,7 +45,6 @@ var SmartSelfie = (function SmartSelfie() {
           partner_params = getPartnerParams();
           id_info = {};
           setActiveScreen(SmartCameraWeb);
-          localStorage.setItem("SmileIdentityConfig", event.data);
         } catch (e) {
           throw e;
         }

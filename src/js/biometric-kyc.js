@@ -178,25 +178,6 @@ var biometricKyc = function biometricKyc() {
 			const selectIDType = SelectIDType.querySelector('#id_type');
 			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
-			// ACTION: Load Countries as <option>s
-			validCountries.forEach(country => {
-				const countryObject = generalConstraints[country]
-				if (countryObject) {
-					const option = document.createElement('option');
-					option.setAttribute('value', country);
-					option.textContent = countryObject.name;
-
-					if (id_info && id_info.country && country === id_info.country) {
-						option.setAttribute('selected', true);
-						selectCountry.value = country;
-						selectCountry.disabled = true;
-						loadIdTypes(country);
-					}
-
-					selectCountry.appendChild(option);
-				}
-			});
-
 			// ACTION: Enable Country Selection
 			selectCountry.disabled = false;
 
@@ -242,6 +223,25 @@ var biometricKyc = function biometricKyc() {
 
 			selectCountry.addEventListener('change', e => {
 				loadIdTypes(e.target.value);
+			});
+
+			// ACTION: Load Countries as <option>s
+			validCountries.forEach(country => {
+				const countryObject = generalConstraints[country]
+				if (countryObject) {
+					const option = document.createElement('option');
+					option.setAttribute('value', country);
+					option.textContent = countryObject.name;
+
+					if (id_info && id_info.country && country === id_info.country) {
+						option.setAttribute('selected', true);
+						selectCountry.value = country;
+						selectCountry.disabled = true;
+						loadIdTypes(country);
+					}
+
+					selectCountry.appendChild(option);
+				}
 			});
 
 			hostedWebConfigForm.addEventListener('submit', e => {

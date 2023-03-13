@@ -47,8 +47,6 @@ var documentVerification = function documentVerification() {
 				productConstraints = await getProductConstraints();
 				initializeSession(productConstraints);
 				getPartnerParams();
-
-				localStorage.setItem('SmileIdentityConfig', event.data);
 			} catch (e) {
 				throw e;
 			}

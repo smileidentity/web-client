@@ -17,6 +17,7 @@ var biometricKyc = function biometricKyc() {
 
 	var EndUserConsent;
 	var VirtualNinApp;
+	var LoadingScreen = document.querySelector('#loading-screen');
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var IDInfoForm = document.querySelector('#id-info');
@@ -94,7 +95,7 @@ var biometricKyc = function biometricKyc() {
 	window.addEventListener('message', async event => {
 		if (event.data.includes('SmileIdentity::HostedWebIntegration')) {
 			config = JSON.parse(event.data);
-			activeScreen = SelectIDType;
+			activeScreen = LoadingScreen;
 
 			try {
 				getPartnerParams();
@@ -107,6 +108,42 @@ var biometricKyc = function biometricKyc() {
 			}
 		}
 	}, false);
+
+	function setInitialScreen(partnerConstraints) {
+		const { country: selectedCountry, id_type: selectedIDType } = id_info;
+
+		const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry]
+			? partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType)
+			: false;
+		if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
+			const IDRequiresConsent = selectedIdRequiresConsent || (
+				config.consent_required &&
+				config.consent_required[selectedCountry] &&
+				config.consent_required[selectedCountry].includes(selectedIDType)
+			);
+
+			if (IDRequiresConsent || config.demo_mode) {
+				customizeConsentScreen();
+				setActiveScreen(EndUserConsent);
+			} else {
+				if (selectedIDType === 'V_NIN') {
+					createVirtualNinApp(partnerConstraints.enterpriseId);
+					setActiveScreen(VirtualNinApp);
+				} else {
+					setActiveScreen(SmartCameraWeb);
+				}
+			}
+		} else {
+			if (selectedIDType === 'V_NIN') {
+				createVirtualNinApp(partnerConstraints.enterpriseId);
+				setActiveScreen(VirtualNinApp);
+			} else {
+				setActiveScreen(SmartCameraWeb);
+			}
+		}
+
+		customizeForm();
+	}
 
 	function initializeSession(generalConstraints, partnerConstraints) {
 		const supportedCountries = Object.keys(generalConstraints)
@@ -123,109 +160,116 @@ var biometricKyc = function biometricKyc() {
 				}
 			}).map(item => item.code);
 
-		const selectCountry = SelectIDType.querySelector('#country');
-		const selectIDType = SelectIDType.querySelector('#id_type');
-		const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
-
 		let validCountries = [];
 
 		if (config.id_selection) {
 			validCountries = supportedCountries.filter(value =>
 				Object.keys(config.id_selection).includes(value));
+
+			if (validCountries.length === 1) {
+				const selectedCountry = validCountries[0];
+				id_info = {
+					country: validCountries[0]
+				};
+
+				const idTypes = config.id_selection[selectedCountry];
+				if (idTypes.length === 1 || typeof idTypes === 'string') {
+					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
+
+					// ACTION: set initial screen
+					setInitialScreen(partnerConstraints);
+				}
+			}
 		} else {
 			validCountries = Object.keys(partnerConstraints.idSelection.biometric_kyc);
 		}
 
-		// ACTION: Load Countries as <option>s
-		validCountries.forEach(country => {
-			const countryObject = generalConstraints[country]
-			if (countryObject) {
-				const option = document.createElement('option');
-				option.setAttribute('value', country);
-				option.textContent = countryObject.name;
-				selectCountry.appendChild(option);
-			}
-		});
+		if (!id_info || !id_info.id_type) {
+			const selectCountry = SelectIDType.querySelector('#country');
+			const selectIDType = SelectIDType.querySelector('#id_type');
+			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
-		// ACTION: Enable Country Selection
-		selectCountry.disabled = false;
+			// ACTION: Enable Country Selection
+			selectCountry.disabled = false;
 
-		selectCountry.addEventListener('change', e => {
-			if (e.target.value) {
-				const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.biometric_kyc;
-				const constrainedIDTypes = Object.keys(generalConstraints[e.target.value].id_types);
-				const selectedIDTypes = validIDTypes[e.target.value].filter(value => constrainedIDTypes.includes(value))
+			// ACTION: Enable select screen
+			setActiveScreen(SelectIDType);
 
-				// ACTION: Reset ID Type <select>
-				selectIDType.innerHTML = '';
+			function loadIdTypes(countryCode) {
+				if (countryCode) {
+					const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.biometric_kyc;
+					const constrainedIDTypes = Object.keys(generalConstraints[countryCode].id_types);
+					const selectedIDTypes = validIDTypes[countryCode].filter(value => constrainedIDTypes.includes(value))
 
-				// ACTION: Load ID Types as <option>s 
-				selectedIDTypes.forEach((IDType) => {
+					// ACTION: Reset ID Type <select>
+					selectIDType.innerHTML = '';
+					const initialOption = document.createElement('option');
+					initialOption.setAttribute('value', '');
+					initialOption.textContent = '--Please Select--';
+					selectIDType.appendChild(initialOption);
+
+					// ACTION: Load ID Types as <option>s
+					selectedIDTypes.forEach((IDType) => {
+						const option = document.createElement("option");
+						option.setAttribute("value", IDType);
+						option.textContent =
+						generalConstraints[countryCode]["id_types"][IDType].label;
+						selectIDType.appendChild(option);
+					});
+
+					// ACTION: Enable ID Type Selection
+					selectIDType.disabled = false;
+				} else {
+					// ACTION: Reset ID Type <select>
+					selectIDType.innerHTML = "";
+
+					// ACTION: Load the default <option>
 					const option = document.createElement("option");
-					option.setAttribute("value", IDType);
-					option.textContent =
-					generalConstraints[e.target.value]["id_types"][IDType].label;
+					option.disabled = true;
+					option.setAttribute("value", "");
+					option.textContent = "--Select Country First--";
 					selectIDType.appendChild(option);
-				});
-
-				// ACTION: Enable ID Type Selection
-				selectIDType.disabled = false;
-			} else {
-				// ACTION: Reset ID Type <select>
-				selectIDType.innerHTML = '';
-
-				// ACTION: Load the default <option>
-				const option = document.createElement('option');
-				option.disabled = true;
-				option.setAttribute('value', '');
-				option.textContent = '--Select Country First--';
-				selectIDType.appendChild(option);
+				}
 			}
-		});
 
-		hostedWebConfigForm.addEventListener('submit', e => {
-			e.preventDefault();
-			const selectedCountry = selectCountry.value;
-			const selectedIDType = selectIDType.value;
+			selectCountry.addEventListener('change', e => {
+				loadIdTypes(e.target.value);
+			});
 
-			// ACTION: set up `id_info`
-			id_info = {
-				country: selectedCountry,
-				id_type: selectedIDType
-			};
+			// ACTION: Load Countries as <option>s
+			validCountries.forEach(country => {
+				const countryObject = generalConstraints[country]
+				if (countryObject) {
+					const option = document.createElement('option');
+					option.setAttribute('value', country);
+					option.textContent = countryObject.name;
 
-			const selectedIdRequiresConsent = partnerConstraints.consentRequired[selectedCountry]
-				? partnerConstraints.consentRequired[selectedCountry].includes(selectedIDType)
-				: false;
-			if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
-				const IDRequiresConsent = selectedIdRequiresConsent || (
-					config.consent_required &&
-					config.consent_required[selectedCountry] &&
-					config.consent_required[selectedCountry].includes(selectedIDType)
-				);
-
-				if (IDRequiresConsent || config.demo_mode) {
-					customizeConsentScreen();
-					setActiveScreen(EndUserConsent);
-				} else {
-					if (selectedIDType === 'V_NIN') {
-						createVirtualNinApp(partnerConstraints.enterpriseId);
-						setActiveScreen(VirtualNinApp);
-					} else {
-						setActiveScreen(SmartCameraWeb);
+					if (id_info && id_info.country && country === id_info.country) {
+						option.setAttribute('selected', true);
+						selectCountry.value = country;
+						selectCountry.disabled = true;
+						loadIdTypes(country);
 					}
-				}
-			} else {
-				if (selectedIDType === 'V_NIN') {
-					createVirtualNinApp(partnerConstraints.enterpriseId);
-					setActiveScreen(VirtualNinApp);
-				} else {
-					setActiveScreen(SmartCameraWeb);
-				}
-			}
 
-			customizeForm();
+					selectCountry.appendChild(option);
+				}
+			});
+
+			hostedWebConfigForm.addEventListener('submit', e => {
+				e.preventDefault();
+				const selectedCountry = selectCountry.value;
+				const selectedIDType = selectIDType.value;
+
+				// ACTION: set up `id_info`
+				id_info = {
+					country: selectedCountry,
+					id_type: selectedIDType
+				};
+
+				// ACTION: set initial screen
+				setInitialScreen(partnerConstraints);
 		});
+		}
 	}
 
 	function initiateDemoMode() {

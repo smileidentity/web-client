@@ -192,6 +192,7 @@ function markup() {
 				left: 56%;
 				right: 14%;
 				top: 1.45%;
+				disply: none;
 			}
 
 			#error,

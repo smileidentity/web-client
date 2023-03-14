@@ -290,19 +290,28 @@ button:focus:not([disabled]) {
 	left: 56%;
 	right: 14%;
 	top: 0%;
+	display: none;
 }
 
 #id-info .back-button {
 	position: absolute;
 	left: -9%;
-	right: 83.27%;
-	top: 0%;
+	right: 3em;
+	top: 1em;
 	cursor: pointer;
 }
 
 #id-info .back-button-text {
 	left: 15%;
 	right: 16%;
+}
+
+#select-id-type .back-button {
+	position: absolute;
+	left: -9%;
+	right: 83.27%;
+	top: 0%;
+	cursor: pointer;
 }
 
 .user-details {

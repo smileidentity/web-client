@@ -337,7 +337,7 @@
                         ],
                         "label": "Virtual NIN",
                         "test_data": "0000000000000000",
-                        "id_number_regex": "^[0-9]{16}$"
+                        "id_number_regex": "^[a-zA-Z0-9]{16}$"
                     },
                     "NIN": {
                         "required_fields": [

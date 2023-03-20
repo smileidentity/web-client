@@ -282,44 +282,6 @@ describe('totpConsent', () => {
 				.find('#id-number')
 				.should('not.be.visible');
 		});
-
-		it('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
-			cy.visit('/basic_kyc_preview_bvn_mfa');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('contain', 'with OTP');
-
-			cy.visit('/basic_kyc');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('not.contain', 'with OTP');
-		});
 	});
 
 	describe('for biometric kyc', () => {
@@ -367,77 +329,6 @@ describe('totpConsent', () => {
 				.find('#complete-screen')
 				.should('be.visible');
 		});
-
-		it('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
-			cy.visit('/biometric_kyc_preview_bvn_mfa');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('contain', 'with OTP');
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#submitConfig')
-				.click();
-
-			cy.navigateThroughTotpConsentApp();
-
-			cy.getIFrameBody()
-				.find('end-user-consent')
-				.should('not.be.visible');
-
-			cy.navigateThroughCameraScreens();
-
-			cy.getIFrameBody()
-				.find('#id-info')
-				.should('not.be.visible');
-
-			cy
-				.wait('@getUploadURL');
-
-			cy
-				.wait('@successfulUpload');
-
-			cy
-				.getIFrameBody()
-				.find('#complete-screen')
-				.should('be.visible');
-
-			cy.visit('/biometric_kyc');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('not.contain', 'with OTP');
-		});
 	});
 
 	describe('for enhanced kyc', () => {
@@ -468,72 +359,6 @@ describe('totpConsent', () => {
 				.getIFrameBody()
 				.find('#complete-screen')
 				.should('be.visible');
-		});
-
-		it('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
-			cy.visit('/enhanced_kyc_preview_bvn_mfa');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('contain', 'with OTP');
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#submitConfig')
-				.click();
-
-			cy.navigateThroughTotpConsentApp();
-
-			cy.getIFrameBody()
-				.find('end-user-consent')
-				.should('not.be.visible');
-
-			cy.getIFrameBody()
-				.find('#id-info')
-				.should('not.be.visible');
-
-			cy
-				.wait('@submitEnhancedKYC');
-
-			cy
-				.getIFrameBody()
-				.find('#complete-screen')
-				.should('be.visible');
-
-			cy.visit('/enhanced_kyc');
-			cy.loadIDOptions();
-
-			cy
-				.getIFrameBody()
-				.find('#country')
-				.select('NG')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.select('BVN_MFA')
-
-			cy
-				.getIFrameBody()
-				.find('#id_type')
-				.should('not.contain', 'with OTP');
 		});
 	});
 });

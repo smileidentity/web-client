@@ -63,22 +63,6 @@ var biometricKyc = function biometricKyc() {
 				const partnerConstraints = await productsConfigResponse.json()
 				const generalConstraints = await servicesResponse.json()
 
-				const previewBvnMfa = config.previewBVNMFA;
-				if (previewBvnMfa) {
-					generalConstraints.hosted_web['biometric_kyc']['NG']['id_types']['BVN_MFA'] = {
-						"id_number_regex": "^[0-9]{11}$",
-						"label": "Bank Verification Number (with OTP)",
-						"required_fields": [
-							"country",
-							"id_type",
-							"session_id",
-							"user_id",
-							"job_id",
-						],
-						"test_data": "00000000000"
-					};
-				}
-
 				return {
 					partnerConstraints,
 					generalConstraints: generalConstraints.hosted_web['biometric_kyc']

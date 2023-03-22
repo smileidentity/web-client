@@ -241,20 +241,20 @@ function markup() {
 				}
 			}
 
-			.spinner::before {
+			.spinner {
 				animation: 1.5s linear infinite spin;
 				animation-play-state: inherit;
 				border: solid 5px #cfd0d1;
 				border-bottom-color: #1c87c9;
 				border-radius: 50%;
 				content: "";
-				height: 40px;
-				width: 40px;
-				position: absolute;
-				top: 10%;
-				left: 10%;
-				transform: translate3d(-50%, -50%, 0);
+				display: block;
+				height: 25px;
+				width: 25px;
 				will-change: transform;
+				position: relative;
+				top: .675rem;
+				left: 1.25rem;
 			}
 		</style>
 
@@ -278,13 +278,11 @@ function markup() {
 				</div>
 
 				<button data-type='primary' id='query-otp-modes' type='submit'>
-					Continue
-					${!this.loading ?
-						`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						</svg>`
-						: `<span class='spinner'></span>`
-					}
+					<span>Continue</span>
+					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span hidden class='spinner'></span>
 				</button>
 			</form>
 		</div>
@@ -374,13 +372,11 @@ function markup() {
 				</button>
 
 				<button data-type='primary' id='select-otp-mode' type='submit'>
-					Continue
-					${!this.loading ?
-						`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						</svg>`
-						: `<span class='spinner'></span>`
-					}
+					<span>Continue</span>
+					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					<span hidden class='spinner'></span>
 				</button>
 			</form>
 		</div>
@@ -406,13 +402,11 @@ function markup() {
 					</button>
 
 					<button data-type='primary' id='submit-otp' type='submit'>
-						Submit
-						${!this.loading ?
-							`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>`
-							: `<span class='spinner'></span>`
-						}
+						<span>Submit</span>
+						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+						<span hidden class='spinner'></span>
 					</button>
 				</form>
 			</div>
@@ -443,12 +437,11 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	static get observedAttributes() {
-		return ['loading', 'modes', 'otp-delivery-mode'];
+		return ['modes', 'otp-delivery-mode'];
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		switch (name) {
-			case 'loading':
 			case 'modes':
 			case 'otp-delivery-mode': {
 				const updatedTemplate = document.createElement('template');
@@ -593,9 +586,10 @@ class TotpBasedConsent extends HTMLElement {
 			const url = `${this.baseUrl}/totp_consent`;
 
 			try {
-				this.setAttribute('loading', true);
+				this.toggleLoading();
 				const response = await postData(url, data);
 				const json = await response.json();
+				this.toggleLoading();
 
 				if (!response.ok) {
 					this.handleActiveScreenErrors(json.error);
@@ -606,9 +600,8 @@ class TotpBasedConsent extends HTMLElement {
 					this.setAttribute('modes', json.modes);
 				}
 			} catch (error) {
+				this.toggleLoading();
 				this.handleActiveScreenErrors(error.message);
-			} finally {
-				this.setAttribute('loading', false);
 			}
 		}
 	}
@@ -634,9 +627,10 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/mode`;
 
 		try {
-			this.setAttribute('loading', true);
+			this.toggleLoading();
 			const response = await postData(url, data);
 			const json = await response.json();
+			this.toggleLoading();
 
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
@@ -646,9 +640,8 @@ class TotpBasedConsent extends HTMLElement {
 				this.setAttribute('otp-delivery-mode', this.selectedOtpDeliveryMode);
 			}
 		} catch (error) {
+			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
-		} finally {
-			this.setAttribute('loading', false);
 		}
 	}
 
@@ -673,9 +666,10 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/otp`;
 
 		try {
-			this.setAttribute('loading', true);
+			this.toggleLoading();
 			const response = await postData(url, data);
 			const json = await response.json();
+			this.toggleLoading();
 
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
@@ -683,10 +677,18 @@ class TotpBasedConsent extends HTMLElement {
 				this.handleTotpConsentGrant(event);
 			}
 		} catch (error) {
+			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
-		} finally {
-			this.setAttribute('loading', false);
 		}
+	}
+
+	toggleLoading() {
+		const button = this.activeScreen.querySelector('button[type="submit"]');
+		const arrow = button.querySelector('svg');
+		const spinner = button.querySelector('.spinner');
+
+		arrow.toggleAttribute('hidden');
+		spinner.toggleAttribute('hidden');
 	}
 
 	setActiveScreen(screen) {
@@ -733,10 +735,6 @@ class TotpBasedConsent extends HTMLElement {
 
 	get token() {
 		return this.getAttribute('token');
-	}
-
-	get loading() {
-		return this.getAttribute('loading');
 	}
 
 	handleTotpConsentGrant(event) {

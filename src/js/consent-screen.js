@@ -449,7 +449,7 @@ function templateString() {
 			country='${this.country}'
 			id-hint='${this.idHint}'
 			id-regex='${this.idRegex}'
-			id-type='${this.idType}'
+			id-type='${this.idType.includes('BVN') ? 'BVN_MFA' : this.idType}'
 			id-type-label='${this.idTypeLabel}'
 			partner-id='${this.partnerId}'
 			partner-name='${this.partnerName}'
@@ -613,7 +613,7 @@ class EndUserConsent extends HTMLElement {
 	constructor() {
 		super();
 
-		this.idRequiresTotpConsent = ['BVN_MFA'];
+		this.idRequiresTotpConsent = ['BVN', 'BVN_MFA'];
 		this.templateString = templateString.bind(this);
 		this.render = () => {
 			return this.templateString();

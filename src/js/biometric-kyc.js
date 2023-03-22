@@ -539,6 +539,10 @@ var biometricKyc = function biometricKyc() {
 			entered: true
 		}, payload, id_info);
 
+		if (id_info.id_type.includes('BVN')) {
+			id_info.id_type = 'BVN_MFA';
+		}
+
 		try {
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
 

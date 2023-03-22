@@ -3,7 +3,7 @@ describe('totpConsent', () => {
 		it('should not show up for non-BVN_MFA id types', () => {
 			cy.visit('/');
 
-			cy.selectBVNIDType();
+			cy.selectNINIDType();
 
 			cy.getIFrameBody()
 				.find('end-user-consent')

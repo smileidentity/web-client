@@ -231,6 +231,31 @@ function markup() {
 				padding: .5rem 1rem;
 				margin-inline: auto;
 			}
+
+			@keyframes spin {
+				0% {
+					transform: translate3d(-50%, -50%, 0) rotate(0deg);
+				}
+				100% {
+					transform: translate3d(-50%, -50%, 0) rotate(360deg);
+				}
+			}
+
+			.spinner::before {
+				animation: 1.5s linear infinite spin;
+				animation-play-state: inherit;
+				border: solid 5px #cfd0d1;
+				border-bottom-color: #1c87c9;
+				border-radius: 50%;
+				content: "";
+				height: 40px;
+				width: 40px;
+				position: absolute;
+				top: 10%;
+				left: 10%;
+				transform: translate3d(-50%, -50%, 0);
+				will-change: transform;
+			}
 		</style>
 
 		<div class='flow center' id='id-entry'>
@@ -254,9 +279,12 @@ function markup() {
 
 				<button data-type='primary' id='query-otp-modes' type='submit'>
 					Continue
-					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
+					${!this.loading ?
+						`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>`
+						: `<span class='spinner'></span>`
+					}
 				</button>
 			</form>
 		</div>
@@ -347,9 +375,12 @@ function markup() {
 
 				<button data-type='primary' id='select-otp-mode' type='submit'>
 					Continue
-					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
+					${!this.loading ?
+						`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>`
+						: `<span class='spinner'></span>`
+					}
 				</button>
 			</form>
 		</div>
@@ -376,9 +407,12 @@ function markup() {
 
 					<button data-type='primary' id='submit-otp' type='submit'>
 						Submit
-						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-						</svg>
+						${!this.loading ?
+							`<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>`
+							: `<span class='spinner'></span>`
+						}
 					</button>
 				</form>
 			</div>
@@ -409,11 +443,12 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	static get observedAttributes() {
-		return ['modes', 'otp-delivery-mode'];
+		return ['loading', 'modes', 'otp-delivery-mode'];
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		switch (name) {
+			case 'loading':
 			case 'modes':
 			case 'otp-delivery-mode': {
 				const updatedTemplate = document.createElement('template');
@@ -558,6 +593,7 @@ class TotpBasedConsent extends HTMLElement {
 			const url = `${this.baseUrl}/totp_consent`;
 
 			try {
+				this.setAttribute('loading', true);
 				const response = await postData(url, data);
 				const json = await response.json();
 
@@ -571,6 +607,8 @@ class TotpBasedConsent extends HTMLElement {
 				}
 			} catch (error) {
 				this.handleActiveScreenErrors(error.message);
+			} finally {
+				this.setAttribute('loading', false);
 			}
 		}
 	}
@@ -596,6 +634,7 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/mode`;
 
 		try {
+			this.setAttribute('loading', true);
 			const response = await postData(url, data);
 			const json = await response.json();
 
@@ -608,6 +647,8 @@ class TotpBasedConsent extends HTMLElement {
 			}
 		} catch (error) {
 			this.handleActiveScreenErrors(error.message);
+		} finally {
+			this.setAttribute('loading', false);
 		}
 	}
 
@@ -632,6 +673,7 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/otp`;
 
 		try {
+			this.setAttribute('loading', true);
 			const response = await postData(url, data);
 			const json = await response.json();
 
@@ -642,6 +684,8 @@ class TotpBasedConsent extends HTMLElement {
 			}
 		} catch (error) {
 			this.handleActiveScreenErrors(error.message);
+		} finally {
+			this.setAttribute('loading', false);
 		}
 	}
 
@@ -689,6 +733,10 @@ class TotpBasedConsent extends HTMLElement {
 
 	get token() {
 		return this.getAttribute('token');
+	}
+
+	get loading() {
+		return this.getAttribute('loading');
 	}
 
 	handleTotpConsentGrant(event) {

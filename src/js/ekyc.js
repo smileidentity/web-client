@@ -593,6 +593,10 @@ var eKYC = function eKYC() {
 			},
 		}
 
+		if (payload.id_type.includes('BVN')) {
+			payload.id_type = 'BVN_MFA';
+		}
+
 		const URL = `${endpoints[config.environment]}/async_id_verification`;
 		const response = await postData(URL, payload);
 		const json = await response.json();

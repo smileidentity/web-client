@@ -605,6 +605,10 @@ var basicKyc = (function basicKyc() {
 			id_info
 		);
 
+		if (id_info.id_type.includes('BVN')) {
+			id_info.id_type = 'BVN_MFA';
+		}
+
 		try {
 			await submitIdInfoForm();
 			complete();

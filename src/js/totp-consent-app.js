@@ -499,11 +499,12 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	static get observedAttributes() {
-		return ['modes', 'otp-delivery-mode'];
+		return ['loading', 'modes', 'otp-delivery-mode'];
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		switch (name) {
+			case 'loading':
 			case 'modes':
 			case 'otp-delivery-mode': {
 				const updatedTemplate = document.createElement('template');
@@ -693,6 +694,8 @@ class TotpBasedConsent extends HTMLElement {
 			} catch (error) {
 				this.toggleLoading();
 				this.handleActiveScreenErrors(error.message);
+			} finally {
+				this.setAttribute('loading', false);
 			}
 		}
 	}
@@ -733,6 +736,8 @@ class TotpBasedConsent extends HTMLElement {
 		} catch (error) {
 			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
+		} finally {
+			this.setAttribute('loading', false);
 		}
 	}
 
@@ -770,6 +775,8 @@ class TotpBasedConsent extends HTMLElement {
 		} catch (error) {
 			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
+		} finally {
+			this.setAttribute('loading', false);
 		}
 	}
 
@@ -829,6 +836,10 @@ class TotpBasedConsent extends HTMLElement {
 
 	get token() {
 		return this.getAttribute('token');
+	}
+
+	get loading() {
+		return this.getAttribute('loading');
 	}
 
 	handleTotpConsentGrant(event) {

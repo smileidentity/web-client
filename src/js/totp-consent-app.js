@@ -278,7 +278,7 @@ function markup() {
 				</div>
 
 				<button data-type='primary' id='query-otp-modes' type='submit'>
-					<span>Continue</span>
+					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -372,7 +372,7 @@ function markup() {
 				</button>
 
 				<button data-type='primary' id='select-otp-mode' type='submit'>
-					<span>Continue</span>
+					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -402,7 +402,7 @@ function markup() {
 					</button>
 
 					<button data-type='primary' id='submit-otp' type='submit'>
-						<span>Submit</span>
+						<span class='text'>Submit</span>
 						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
@@ -690,9 +690,11 @@ class TotpBasedConsent extends HTMLElement {
 
 	toggleLoading() {
 		const button = this.activeScreen.querySelector('button[type="submit"]');
+		const text = button.querySelector('.text');
 		const arrow = button.querySelector('svg');
 		const spinner = button.querySelector('.spinner');
 
+		text.toggleAttribute('hidden');
 		arrow.toggleAttribute('hidden');
 		spinner.toggleAttribute('hidden');
 	}

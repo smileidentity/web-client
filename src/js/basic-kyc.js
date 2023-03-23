@@ -628,7 +628,8 @@ var basicKyc = (function basicKyc() {
 
 	function complete() {
 		const countryName = productConstraints[id_info.country].name;
-		const idTypeName = productConstraints[id_info.country]['id_types'][id_info.id_type].label;
+		const idTypeName = id_info.id_type.includes('BVN') ? 'Bank Verification Number' :
+			productConstraints[id_info.country]['id_types'][id_info.id_type].label;
 
 		const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
 		thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;

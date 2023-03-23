@@ -677,10 +677,16 @@ class TotpBasedConsent extends HTMLElement {
 			const url = `${this.baseUrl}/totp_consent`;
 
 			try {
-				this.toggleLoading();
+				// NOTE: when triggered from another context, do not show loading state
+				if (event) {
+					this.toggleLoading();
+				}
 				const response = await postData(url, data);
 				const json = await response.json();
-				this.toggleLoading();
+				// NOTE: when triggered from another context, do not show loading state
+				if (event) {
+					this.toggleLoading();
+				}
 
 				if (!response.ok) {
 					this.handleActiveScreenErrors(json.error);

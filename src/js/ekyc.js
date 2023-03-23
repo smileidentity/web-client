@@ -303,6 +303,7 @@ var eKYC = function eKYC() {
 				id_info.id_number = consent_information.id_number;
 				id_info.session_id = consent_information.session_id;
 				id_info.consent_information = consent_information;
+				IDInfoForm.querySelector('#id_number').value = id_info.id_number;
 				handleFormSubmit();
 			}
 		}, false);

@@ -329,6 +329,33 @@ describe('totpConsent', () => {
 				.find('#complete-screen')
 				.should('be.visible');
 		});
+
+		it('should execute for BVN set using `consent_required`', () => {
+			cy.visit('/consent-required');
+			cy.selectBVNIDType();
+			cy.navigateThroughTotpConsentApp();
+
+			cy.getIFrameBody()
+				.find('end-user-consent')
+				.should('not.be.visible');
+
+			cy.navigateThroughCameraScreens();
+
+			cy.getIFrameBody()
+				.find('#id-info')
+				.should('not.be.visible');
+
+			cy
+				.wait('@getUploadURL');
+
+			cy
+				.wait('@successfulUpload');
+
+			cy
+				.getIFrameBody()
+				.find('#complete-screen')
+				.should('be.visible');
+		});
 	});
 
 	describe('for enhanced kyc', () => {

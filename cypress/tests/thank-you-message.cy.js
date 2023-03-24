@@ -50,9 +50,6 @@ describe('Thank you message', () => {
 			cy.visit('/biometric_kyc');
 
 			cy
-				.selectBVNIDType()
-
-			cy
 				.intercept({
 					method: 'POST',
 					url: '*upload*'
@@ -67,6 +64,9 @@ describe('Thank you message', () => {
 				}, {
 					statusCode: 200
 				}).as('successfulUpload');
+
+			cy
+				.selectBVNIDType()
 
 			cy
 				.navigateThroughCameraScreens();

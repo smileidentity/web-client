@@ -49,7 +49,7 @@ describe('No ID Selection', () => {
 		cy.visit('/biometric_kyc');
 
 		cy
-			.selectBVNIDType()
+			.selectNINIDType()
 
 		cy
 			.intercept({
@@ -106,7 +106,7 @@ describe('No ID Selection', () => {
 			.find('#thank-you-message')
 			.should('be.visible')
 			.should('contain', 'Nigeria')
-			.should('contain', 'Bank Verification');
+			.should('contain', 'National ID');
 	});
 
 	it('document_verification', () => {
@@ -313,7 +313,7 @@ describe('Preselected Country', () => {
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('BVN')
+			.select('NIN')
 
 		cy
 			.getIFrameBody()
@@ -375,7 +375,7 @@ describe('Preselected Country', () => {
 			.find('#thank-you-message')
 			.should('be.visible')
 			.should('contain', 'Nigeria')
-			.should('contain', 'Bank Verification');
+			.should('contain', 'National ID');
 	});
 
 	it('document_verification', () => {
@@ -666,7 +666,7 @@ describe('Preselected Country and ID Type', () => {
 			.find('#thank-you-message')
 			.should('be.visible')
 			.should('contain', 'Nigeria')
-			.should('contain', 'Bank Verification');
+			.should('contain', 'National ID');
 	});
 
 	it('document_verification', () => {

@@ -260,7 +260,13 @@ var biometricKyc = function biometricKyc() {
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		const idRequiresTOTPConsent = ['BVN', 'BVN_MFA'].includes(id_info.id_type);
+		const idRequiresTOTPConsent = id_info.id_type.includes('BVN') && (
+			partnerProductConstraints.consentRequired[id_info.country].includes(id_info.id_type) || (
+				config.consent_required &&
+				config.consent_required[id_info.country] &&
+				config.consent_required[id_info.country].includes(id_info.id_type)
+			)
+		);
 		if (idRequiresTOTPConsent) {
 			handleFormSubmit();
 		} else {

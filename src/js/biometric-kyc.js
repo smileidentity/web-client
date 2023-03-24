@@ -268,7 +268,7 @@ var biometricKyc = function biometricKyc() {
 
 	SmartCameraWeb.addEventListener('imagesComputed', event => {
 		images = event.detail.images;
-		const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
+		const idRequiresTOTPConsent = ['BVN', 'BVN_MFA'].includes(id_info.id_type);
 		if (idRequiresTOTPConsent) {
 			handleFormSubmit();
 		} else {

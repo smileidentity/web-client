@@ -666,7 +666,7 @@ describe('Preselected Country and ID Type', () => {
 			.find('#thank-you-message')
 			.should('be.visible')
 			.should('contain', 'Nigeria')
-			.should('contain', 'National ID');
+			.should('contain', 'Bank Verification Number');
 	});
 
 	it('document_verification', () => {

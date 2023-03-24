@@ -48,7 +48,7 @@ function markup() {
 
 			[disabled] {
 				cursor: not-allowed !important;
-				filter: grayscale(75%);
+				background: #E5E5E5 !important;
 			}
 
 			.visually-hidden {
@@ -688,6 +688,7 @@ class TotpBasedConsent extends HTMLElement {
 		const arrow = button.querySelector('svg');
 		const spinner = button.querySelector('.spinner');
 
+		button.toggleAttribute('disabled');
 		text.toggleAttribute('hidden');
 		arrow.toggleAttribute('hidden');
 		spinner.toggleAttribute('hidden');

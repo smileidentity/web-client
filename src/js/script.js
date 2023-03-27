@@ -130,10 +130,6 @@ var SmileIdentity = function () {
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
 
-	function saveConfig(config) {
-		localStorage.setItem('SmileIdentityConfig', JSON.stringify(config));
-	}
-
 	function SmileIdentity(config) {
 		const configIsValid = isConfigValid(config);
 
@@ -141,7 +137,6 @@ var SmileIdentity = function () {
 			createIframe(config.product);
 
 			setTimeout(() => publishConfigToIFrame(config), 2000);
-			saveConfig(config);
 
 			window.addEventListener('message', (event) => {
 				const tag = event.data.message || event.data;

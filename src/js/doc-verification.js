@@ -14,6 +14,7 @@ var documentVerification = function documentVerification() {
 	var id_info, images, partner_params;
 	var productConstraints;
 
+	var LoadingScreen = document.querySelector('#loading-screen');
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
 	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
@@ -40,14 +41,12 @@ var documentVerification = function documentVerification() {
 	window.addEventListener('message', async event => {
 		if (event.data.includes('SmileIdentity::HostedWebIntegration')) {
 			config = JSON.parse(event.data);
-			activeScreen = SelectIDType;
+			activeScreen = LoadingScreen;
 
 			try {
 				productConstraints = await getProductConstraints();
 				initializeSession(productConstraints);
 				getPartnerParams();
-
-				localStorage.setItem('SmileIdentityConfig', event.data);
 			} catch (e) {
 				throw e;
 			}
@@ -69,79 +68,120 @@ var documentVerification = function documentVerification() {
 				}
 			}).map(item => item.code);
 
-		const selectCountry = SelectIDType.querySelector('#country');
-		const selectIDType = SelectIDType.querySelector('#id_type');
-		const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
-
 		let validCountries = [];
 
 		if (config.id_selection) {
-			validCountries = supportedCountries.filter(value =>
-				Object.keys(config.id_selection).includes(value));
+			const selectedCountryList = Object.keys(config.id_selection);
+			validCountries = supportedCountries.filter((value) =>
+				selectedCountryList.includes(value)
+			);
+
+			if (validCountries.length === 1) {
+				const selectedCountry = validCountries[0];
+				id_info = {
+					country: validCountries[0]
+				};
+
+				const idTypes = config.id_selection[selectedCountry];
+				if (idTypes.length === 1 || typeof idTypes === 'string') {
+					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
+
+					// ACTION: set initial screen
+					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
+					setActiveScreen(SmartCameraWeb);
+				}
+			}
 		} else {
 			validCountries = supportedCountries;
 		}
 
-		// ACTION: Load Countries as <option>s
-		validCountries.forEach(country => {
-			const option = document.createElement('option');
-			option.setAttribute('value', country);
-			option.textContent = constraints[country].name;
-			selectCountry.appendChild(option);
-		});
+		if (!id_info || !id_info.id_type) {
+			const selectCountry = SelectIDType.querySelector('#country');
+			const selectIDType = SelectIDType.querySelector('#id_type');
+			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
-		// ACTION: Enable Country Selection
-		selectCountry.disabled = false;
+			// ACTION: Enable Country Selection
+			selectCountry.disabled = false;
 
-		selectCountry.addEventListener('change', e => {
-			if (e.target.value) {
-				let validIDTypes = [];
-				const constrainedIDTypes = Object.keys(constraints[e.target.value].id_types);
+			// ACTION: Enable select screen
+			setActiveScreen(SelectIDType);
 
-				let selectedIDTypes = config.id_selection ?
-					config.id_selection[e.target.value].filter(value => constrainedIDTypes.includes(value)) :
-					constrainedIDTypes;
+			function loadIdTypes(countryCode) {
+				if (countryCode) {
+					const constrainedIDTypes = Object.keys(productConstraints[countryCode].id_types);
+					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : constrainedIDTypes;
+					const selectedIDTypes = validIDTypes.filter(value => constrainedIDTypes.includes(value));
 
-				// ACTION: Reset ID Type <select>
-				selectIDType.innerHTML = '';
+					// ACTION: Reset ID Type <select>
+					selectIDType.innerHTML = '';
+					const initialOption = document.createElement('option');
+					initialOption.setAttribute('value', '');
+					initialOption.textContent = '--Please Select--';
+					selectIDType.appendChild(initialOption);
 
-				// ACTION: Load ID Types as <option>s 
-				selectedIDTypes.forEach(IDType => {
-					const option = document.createElement('option');
-					option.setAttribute('value', IDType);
-					option.textContent = constraints[e.target.value]['id_types'][IDType].label;
+					// ACTION: Load ID Types as <option>s
+					selectedIDTypes.forEach((IDType) => {
+						const option = document.createElement("option");
+						option.setAttribute("value", IDType);
+						option.textContent =
+						productConstraints[countryCode]["id_types"][IDType].label;
+						selectIDType.appendChild(option);
+					});
+
+					// ACTION: Enable ID Type Selection
+					selectIDType.disabled = false;
+				} else {
+					// ACTION: Reset ID Type <select>
+					selectIDType.innerHTML = "";
+
+					// ACTION: Load the default <option>
+					const option = document.createElement("option");
+					option.disabled = true;
+					option.setAttribute("value", "");
+					option.textContent = "--Select Country First--";
 					selectIDType.appendChild(option);
-				});
-
-				// ACTION: Enable ID Type Selection
-				selectIDType.disabled = false;
-			} else {
-				// ACTION: Reset ID Type <select>
-				selectIDType.innerHTML = '';
-
-				// ACTION: Load the default <option>
-				const option = document.createElement('option');
-				option.disabled = true;
-				option.setAttribute('value', '');
-				option.textContent = '--Select Country First--';
-				selectIDType.appendChild(option);
+				}
 			}
-		});
 
-		hostedWebConfigForm.addEventListener('submit', e => {
-			e.preventDefault();
-			const selectedCountry = selectCountry.value;
-			const selectedIDType = selectIDType.value;
+			// ACTION: Load Countries as <option>s
+			validCountries.forEach(country => {
+				const countryObject = productConstraints[country];
 
-			// ACTION: set up `id_info`
-			id_info = {
-				country: selectedCountry,
-				id_type: selectedIDType
-			};
+				if (countryObject) {
+					const option = document.createElement('option');
+					option.setAttribute('value', country);
+					option.textContent = constraints[country].name;
 
-			SmartCameraWeb.setAttribute('document-type', selectedIDType)
-			setActiveScreen(SmartCameraWeb);
-		});
+					if (id_info && id_info.country && country === id_info.country) {
+						option.setAttribute('selected', true);
+						selectCountry.value = country;
+						selectCountry.disabled = true;
+						loadIdTypes(country);
+					}
+
+					selectCountry.appendChild(option);
+				}
+			});
+
+			selectCountry.addEventListener('change', e => {
+				loadIdTypes(e.target.value);
+			});
+
+			hostedWebConfigForm.addEventListener('submit', e => {
+				e.preventDefault();
+				const selectedCountry = selectCountry.value;
+				const selectedIDType = selectIDType.value;
+
+				// ACTION: set up `id_info`
+				id_info = {
+					country: selectedCountry,
+					id_type: selectedIDType
+				};
+
+				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				setActiveScreen(SmartCameraWeb);
+			});
+		}
 	}
 
 	function initiateDemoMode() {

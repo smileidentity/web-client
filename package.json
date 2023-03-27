@@ -9,7 +9,7 @@
 		"postbuild:dist": "npm run copy:dist",
 		"build:dist": "mkdir -p dist/js && echo src/js/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/js/$(basename $1 .js).min.js' argv0 && cp -r dist/js build",
 		"clean": "rm -rf build dist",
-		"copy": "cp -r src/* build && cp -r libs build && cp *.html build",
+		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
 		"copy:dist": "cp -r src/* dist && cp -r libs dist",
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",

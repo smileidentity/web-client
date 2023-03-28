@@ -26,7 +26,7 @@ function templateString() {
 			}
 
 			html {
-				font-family: 'Nunito Sans', sans-serif;
+				font-family: 'Nunito', sans-serif;
 			}
 
 			[hidden] {

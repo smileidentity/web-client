@@ -160,9 +160,6 @@ button[data-type='icon'] {
 	cursor: pointer;
 	display: flex;
 	padding: 0;
-	position: fixed;
-	top: 11%;
-	right: 5%;
 }
 
 button[data-type='primary'],
@@ -265,53 +262,23 @@ button:focus:not([disabled]) {
 	--flow-space: 1.5rem;
 }
 
-.verification-header {
+.justify-right {
+	justify-content: end !important;
+}
+
+.nav {
 	display: flex;
-	align-items: center;
+	justify-content: space-between;
 }
 
 .back-button {
-	position: absolute;
-	left: -9%;
-	right: 83.27%;
-	top: 10%;
-	cursor: pointer;
+	display: block !important;
 }
 
 .back-button-text {
-	font-family: 'Nunito Sans';
-	font-style: normal;
-	font-weight: 700;
-	font-size: 12px;
-	line-height: 20px;
-	letter-spacing: -0.24px;
-	color: #262626;
-	position: absolute;
-	left: 56%;
-	right: 14%;
-	top: 0%;
-	display: none;
-}
-
-#id-info .back-button {
-	position: absolute;
-	left: -9%;
-	right: 3em;
-	top: 1em;
-	cursor: pointer;
-}
-
-#id-info .back-button-text {
-	left: 15%;
-	right: 16%;
-}
-
-#select-id-type .back-button {
-	position: absolute;
-	left: -9%;
-	right: 83.27%;
-	top: 0%;
-	cursor: pointer;
+	font-size: 8px;
+	line-height: 11px;
+	color: #3886F7;
 }
 
 .user-details {

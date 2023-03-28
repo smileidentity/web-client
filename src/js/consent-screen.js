@@ -122,26 +122,15 @@ function templateString() {
 				color: #F86B58;
 			}
 
-			.back-button {
-				position: absolute;
-				top: 70px;
-				width: 68px;
-				text-align: left;
-				left: 33px;
-				cursor: pointer;
+			.nav {
+				display: flex;
+				justify-content: space-between;
 			}
 			
 			.back-button-text {
-				font-family: 'Nunito Sans';
-				font-style: normal;
-				font-weight: 700;
-				font-size: 12px;
-				line-height: 20px;
-				letter-spacing: -0.24px;
-				color: #262626;
-				position: absolute;
-				left: 25px;
-				display: none;
+				font-size: 8px;
+				line-height: 11px;
+				color: #3886F7;
 			}
 
 			img {
@@ -301,11 +290,21 @@ function templateString() {
 
 		<div id='consent-screen'>
 			<section class='flow center'>
-				<div id="back-button" class="back-button">
-					<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg> 
-					<span class="back-button-text">Go Back</span>
+				<div class="nav">
+					<div class="back-wrapper">
+						<button type='button' data-type='icon' id="back-button" class="back-button">
+							<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<div class="back-button-text">Back</div>
+					</div>
+					<button data-type='icon' type='button' class='close-iframe'>
+						<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+						</svg>												             
+						<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+					</button>
 				</div>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
 				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
@@ -666,6 +665,7 @@ class EndUserConsent extends HTMLElement {
 		this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
 		this.confirmConsentRejectionButton = this.shadowRoot.querySelector('#confirm-consent-rejection');
 		this.backButton = this.shadowRoot.querySelector('#back-button')
+		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
 		this.allowButton.addEventListener('click', e => this.handleConsentGrant(e));
 		this.rejectButton.addEventListener('click', e => this.handleConsentGrant(e));
@@ -680,6 +680,13 @@ class EndUserConsent extends HTMLElement {
 		this.backButton.addEventListener('click', (e) => {
 			this.handleBackEvents(e);
 		});
+
+		CloseIframeButtons.forEach((button) => {
+			button.addEventListener('click', event => {
+				this.closeWindow();
+			}, false);
+		});
+
 		this.activeScreen = this.consentScreen;
 	}
 
@@ -790,6 +797,10 @@ class EndUserConsent extends HTMLElement {
 				new CustomEvent('SmileIdentity::ConsentIDChange')
 			);
 		}
+	}
+
+	closeWindow() {
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 }
 

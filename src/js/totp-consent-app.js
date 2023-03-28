@@ -173,26 +173,15 @@ function markup() {
 				font-weight: bold;
 			}
 
-			.back-button {
-				position: absolute;
-				left: -9%;
-				right: 83.27%;
-				top: 15.45%;
+			.nav {
+				display: flex;
+				justify-content: space-between;
 			}
-			
+
 			.back-button-text {
-				font-family: 'Nunito Sans';
-				font-style: normal;
-				font-weight: 700;
-				font-size: 12px;
-				line-height: 20px;
-				letter-spacing: -0.24px;
-				color: #262626;
-				position: absolute;
-				left: 56%;
-				right: 14%;
-				top: 1.45%;
-				disply: none;
+				font-size: 8px;
+				line-height: 11px;
+				color: #3886F7;
 			}
 
 			#error,
@@ -256,11 +245,21 @@ function markup() {
 		</style>
 
 		<div class='flow center' id='id-entry'>
-			<div id="back-button" class="back-button">
-				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg> 
-				<span class="back-button-text">Go Back</span>
+			<div class="nav">
+				<div class="back-wrapper">
+					<button type='button' data-type='icon' id="back-button" class="back-button">
+						<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+					<div class="back-button-text">Back</div>
+				</div>
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
 			</div>
 			<h1>
 				Enter your ${this.idTypeLabel}
@@ -290,11 +289,21 @@ function markup() {
 		</div>
 
 		<div hidden class='flow center' id='select-mode'>
-			<div id="back-to-entry-button" class="back-button">
-				<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg> 
-				<span class="back-button-text">Go Back</span>
+			<div class="nav">
+				<div class="back-wrapper">
+					<button type='button' data-type='icon' id="back-to-entry-button" class="back-button">
+						<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+					<div class="back-button-text">Back</div>
+				</div>
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
 			</div>
 			<h1>
 				Select contact method
@@ -389,6 +398,14 @@ function markup() {
 		</div>
 
 		<div hidden class='flow center' id='otp-verification'>
+			<div class="nav justify-right">
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
+			</div>
 			<h1>
 				OTP Verification
 			</h1>
@@ -483,6 +500,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.contactMethodsOutdatedButton = this.selectModeScreen.querySelector('#contact-methods-outdated');
 		this.submitOtpButton = this.otpVerificationScreen.querySelector('#submit-otp');
 		this.switchContactMethodButton = this.otpVerificationScreen.querySelector('.try-another-method');
+		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
 		// Input Elements
 		this.idNumberInput = this.idEntryScreen.querySelector('#id_number');
@@ -503,6 +521,16 @@ class TotpBasedConsent extends HTMLElement {
 		this.backButton.addEventListener('click', () => {
 			this.handleBackClick();
 		});
+
+		CloseIframeButtons.forEach((button) => {
+			button.addEventListener('click', event => {
+				this.closeWindow();
+			}, false);
+		});
+	}
+
+	closeWindow() {
+		window.parent.postMessage("SmileIdentity::Close", "*");
 	}
 
 	handleBackClick() {

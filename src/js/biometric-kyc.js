@@ -26,7 +26,7 @@ var biometricKyc = function biometricKyc() {
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
-	var CloseIframeButton = document.querySelector('#close-iframe');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 	var CameraBackButton = document.querySelector('#back-button-camera');
@@ -315,9 +315,15 @@ var biometricKyc = function biometricKyc() {
 		retryUpload();
 	}, false);
 
-	CloseIframeButton.addEventListener('click', event => {
-		closeWindow();
-	}, false);
+	CloseIframeButtons.forEach(function resetCloseButton(button) {
+		const resetCloseButton = () => {
+		   button.removeEventListener("click", resetCloseButton);
+		   closeWindow();
+		};
+
+		button.removeEventListener("click", resetCloseButton);
+		button.addEventListener("click", resetCloseButton);
+	  });
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');

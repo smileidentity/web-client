@@ -21,7 +21,7 @@ var documentVerification = function documentVerification() {
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
-	var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 

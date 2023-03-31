@@ -173,6 +173,9 @@ function markup() {
 				font-weight: bold;
 			}
 
+			.justify-right {
+				justify-content: end !important;
+			}
 			.nav {
 				display: flex;
 				justify-content: space-between;

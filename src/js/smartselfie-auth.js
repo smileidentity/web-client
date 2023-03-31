@@ -28,7 +28,7 @@ var SmartSelfie = (function SmartSelfie() {
   var UploadFailureScreen = document.querySelector("#upload-failure-screen");
   var CompleteScreen = document.querySelector("#complete-screen");
 
-  var CloseIframeButtons = document.querySelectorAll(".close-iframe");
+  var CloseIframeButton = document.querySelector("#close-iframe");
   var UploadProgressOutline = UploadProgressScreen.querySelector(
     "#upload-progress-outline"
   );
@@ -73,11 +73,13 @@ var SmartSelfie = (function SmartSelfie() {
     false
   );
 
-  CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', event => {
-			closeWindow();
-		}, false);
-	});
+  CloseIframeButton.addEventListener(
+    "click",
+    (event) => {
+      closeWindow();
+    },
+    false
+  );
 
   function parseJWT(token) {
     /**

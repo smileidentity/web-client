@@ -23,6 +23,7 @@ describe('back-button', () => {
 	describe('for basic kyc', () => {
 		it('should show the select id page when back is clicked', () => {
 			cy.visit('/basic_kyc_preview_bvn_mfa');
+			cy.loadIDOptions();
 			cy
 				.getIFrameBody()
 				.find('#country')
@@ -130,11 +131,8 @@ describe('back-button', () => {
 				.getIFrameBody()
 				.find('smart-camera-web')
 				.shadow()
-				.find('#back-button-request')
-				.click();
-			cy
-				.getIFrameBody()
-				.find('#back-button-camera')
+				.find('.back-button-exit')
+				.last()
 				.click();
 
 			cy.getTotpConsentApp()
@@ -170,7 +168,7 @@ describe('back-button', () => {
 				}).as('submitEnhancedKYC');
 		});
 
-		it.only('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
+		it('should set "Bank Verification Number (with OTP)" in the id selection list when previewBVNMFA is true', () => {
 			cy.visit('/enhanced_kyc_preview_bvn_mfa');
 			cy.loadIDOptions();
 

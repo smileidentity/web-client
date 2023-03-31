@@ -288,6 +288,14 @@ var biometricKyc = function biometricKyc() {
 			setActiveScreen(IDInfoForm);
 		}
 	}, false);
+	SmartCameraWeb.addEventListener('backExit', event => {
+		SmartCameraWeb.reset();
+		var page = pages.pop();
+		setActiveScreen(page);
+	}, false);
+	SmartCameraWeb.addEventListener('close', event => {
+		closeWindow();
+	}, false);
 
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
 		handleFormSubmit(event);
@@ -302,14 +310,14 @@ var biometricKyc = function biometricKyc() {
 		setActiveScreen(page);
 	}, false);
 
-	CameraBackButton.addEventListener('click', event => {
-		event.preventDefault();
-		var page = pages.pop();
-		if (page === SmartCameraWeb) {
-			page.reset();
-		}
-		setActiveScreen(page);
-	}, false);
+	// CameraBackButton.addEventListener('click', event => {
+	// 	event.preventDefault();
+	// 	var page = pages.pop();
+	// 	if (page === SmartCameraWeb) {
+	// 		page.reset();
+	// 	}
+	// 	setActiveScreen(page);
+	// }, false);
 
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
@@ -387,6 +395,11 @@ var biometricKyc = function biometricKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+			window.parent.postMessage(event.detail, '*');
+			closeWindow();
+		}, false);
+		
+		SmartCameraWeb.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
 			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);

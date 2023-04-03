@@ -291,7 +291,7 @@ function templateString() {
 		<div id='consent-screen'>
 			<section class='flow center'>
 				<div class="nav">
-					<div class="back-wrapper">
+					<div class="back-wrapper ${this.hideBack ? 'hidden' : ''}">
 						<button type='button' data-type='icon' id="back-button" class="back-button">
 							<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -706,6 +706,10 @@ class EndUserConsent extends HTMLElement {
 
 	get demoMode() {
 		return this.hasAttribute('demo-mode') ? true : false
+	}
+
+	get hideBack() {
+		return this.hasAttribute('hide-back-nav') ? true : false
 	}
 
 	get idHint() {

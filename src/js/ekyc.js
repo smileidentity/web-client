@@ -21,6 +21,7 @@ var eKYC = function eKYC() {
 	var SelectIDType = document.querySelector('#select-id-type');
 	var IDInfoForm = document.querySelector('#id-info');
 	var CompleteScreen = document.querySelector('#complete-screen');
+	var disableConsentBack = false;
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
@@ -313,6 +314,9 @@ var eKYC = function eKYC() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableConsentBack) {
+			EndUserConsent.setAttribute('hide-back-nav', true);
+		}
 
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);

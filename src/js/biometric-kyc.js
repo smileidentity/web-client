@@ -30,6 +30,7 @@ var biometricKyc = function biometricKyc() {
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 	var CameraBackButton = document.querySelector('#back-button-camera');
+	var disableConsentBack = false;
 
 	var fileToUpload, uploadURL;
 
@@ -167,7 +168,7 @@ var biometricKyc = function biometricKyc() {
 				const idTypes = config.id_selection[selectedCountry];
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
-
+					disableConsentBack = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}
@@ -358,6 +359,9 @@ var biometricKyc = function biometricKyc() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableConsentBack) {
+			EndUserConsent.setAttribute('hide-back-nav', true);
+		}
 
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);

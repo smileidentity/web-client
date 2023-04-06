@@ -203,6 +203,14 @@ var documentVerification = function documentVerification() {
 		handleFormSubmit(event);
 	}, false);
 
+	SmartCameraWeb.addEventListener('backExit', event => {
+		setActiveScreen(SelectIDType);
+	}, false);
+
+	SmartCameraWeb.addEventListener('close', event => {
+		closeWindow();
+	}, false);
+
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
 	}, false);

@@ -22,7 +22,7 @@ var basicKyc = (function basicKyc() {
 	var IDInfoForm = document.querySelector("#id-info");
 	var CompleteScreen = document.querySelector("#complete-screen");
 
-	var CloseIframeButton = document.querySelector("#close-iframe");
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	function postData(url = '', data = {}) {
 		return fetch(url, {
@@ -296,13 +296,12 @@ var basicKyc = (function basicKyc() {
 		setActiveScreen(page);
 	}, false);
 
-	CloseIframeButton.addEventListener(
-		"click",
-		(event) => {
+
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
 			closeWindow();
-		},
-		false
-	);
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, " ");

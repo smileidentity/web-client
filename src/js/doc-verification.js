@@ -88,6 +88,9 @@ var documentVerification = function documentVerification() {
 
 					// ACTION: set initial screen
 					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
+					// Hide the back button that takes the user back to the id selection screen
+					// from startcamera web
+					SmartCameraWeb.setAttribute('hide-back-to-host', true);
 					setActiveScreen(SmartCameraWeb);
 				}
 			}

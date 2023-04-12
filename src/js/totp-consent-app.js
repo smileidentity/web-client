@@ -182,7 +182,7 @@ function markup() {
 			}
 
 			.back-button-text {
-				font-size: 8px;
+				font-size: 11px;
 				line-height: 11px;
 				color: #3886F7;
 			}

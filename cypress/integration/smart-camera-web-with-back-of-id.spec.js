@@ -5,8 +5,6 @@
 // check out the link below and learn how to write your first test:
 // https://on.cypress.io/writing-first-test
 
-let app;
-
 context('SmartCameraWeb', () => {
 	beforeEach(() => {
 		cy.visit('/capture-back-of-id');

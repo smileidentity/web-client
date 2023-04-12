@@ -164,7 +164,21 @@ function scwTemplateString() {
 			justify-content: center;
 			padding: 4px 8px;
 		}
-
+		.justify-right {
+			justify-content: end !important;
+		}
+		.nav {
+			display: none;
+			justify-content: space-between;
+		}
+		.back-button {
+			display: block !important;
+		}
+		.back-button-text {
+			font-size: 11px;
+			line-height: 11px;
+			color: #3886F7;
+		}
 		.section {
 			border: 1px solid #f4f4f4;
 			border-radius: .5rem;
@@ -346,8 +360,23 @@ function scwTemplateString() {
 			<path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
 		</symbol>
 	</svg>
-
 	<div id='request-screen' class='flow center'>
+		<div class="nav back-to-host-nav">
+			<div class="back-wrapper back-to-host-wrapper">
+				<button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
+					<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+				<div class="back-button-text">Back</div>
+			</div>
+			<button data-type='icon' type='button'  id='request-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<div class='section | flow'>
 			<p class='color-red' id='error'>
 			</p>
@@ -378,6 +407,22 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='camera-screen' class='flow center'>
+		<div class="nav back-to-host-nav">
+			<div class="back-wrapper back-to-host-wrapper">
+				<button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
+					<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+				<div class="back-button-text">Back</div>
+			</div>
+			<button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Take a Selfie</h1>
 
 		<div class='section | flow'>
@@ -416,6 +461,14 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='review-screen' class='flow center'>
+		<div class="nav justify-right">
+			<button data-type='icon' type='button'  id='review-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Review Selfie</h1>
 
 		<div class='section | flow'>
@@ -446,6 +499,22 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='id-camera-screen' class='flow center'>
+		<div class="nav">
+			<div class="back-wrapper">
+				<button type='button' data-type='icon' id="back-button-selfie" class="back-button icon-btn">
+					<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+				<div class="back-button-text">Back</div>
+			</div>
+			<button data-type='icon' type='button'  id='id-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Take ID Card Photo</h1>
 		<div class='section | flow'>
 			${this.hideAttribution ? '' : `
@@ -478,6 +547,14 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='id-review-screen' class='flow center'>
+		<div class="nav justify-right">
+			<button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Review ID Card</h1>
 		<div class='section | flow'>
 			${this.hideAttribution ? '' : `
@@ -521,6 +598,22 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='back-of-id-camera-screen' class='flow center'>
+		<div class="nav">
+			<div class="back-wrapper">
+				<button type='button' data-type='icon' id="back-button-id-image" class="back-button icon-btn">
+					<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+				<div class="back-button-text">Back</div>
+			</div>
+			<button data-type='icon' type='button'  id='back-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Take Back of ID Card Photo</h1>
 		<div class='section | flow'>
 			${this.hideAttribution ? '' : `
@@ -553,6 +646,14 @@ function scwTemplateString() {
 	</div>
 
 	<div hidden id='back-of-id-review-screen' class='flow center'>
+		<div class="nav justify-right">
+			<button data-type='icon' type='button'  id='back-review-screen-close' class='close-iframe icon-btn'>
+				<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+				</svg>												             
+				<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+			</button>
+		</div>
 		<h1>Review Back of ID Card Photo</h1>
 		<div class='section | flow'>
 			${this.hideAttribution ? '' : `
@@ -634,9 +735,10 @@ class SmartCameraWeb extends HTMLElement {
 		const template = document.createElement('template');
 		template.innerHTML = this.render();
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
-
+		
 		if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
 			this.shadowRoot.querySelector('#request-camera-access').addEventListener('click', e => this.init(e));
+			this.setupNavigation();
 		} else {
 			const heading = document.createElement('h1');
 			heading.classList.add('error-message');
@@ -653,6 +755,12 @@ class SmartCameraWeb extends HTMLElement {
 		this.activeScreen = null;
 		this.shadowRoot.innerHTML = '';
 	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		this.hideBackToHostButtons();
+	}
+
+	static get observedAttributes() { return ['hide-back-to-host']; }
 
 	reset(){
 		this.disconnectedCallback();
@@ -792,6 +900,20 @@ class SmartCameraWeb extends HTMLElement {
 		this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
 		this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
 		this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
+		this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
+		this.backToIdImageButton = this.shadowRoot.querySelector('#back-button-id-image');
+		
+		this.backToIdImageButton.addEventListener('click', () => {
+			this._reCaptureIDImage().then(() => {
+				this.setActiveScreen(this.IDReviewScreen);
+				this._reCaptureIDImage();
+			});
+		});
+
+
+		this.backToSelfie.addEventListener('click', () => {
+			this._reStartImageCapture();
+		});
 
 		this.startImageCapture.addEventListener('click', () => {
 			this._startImageCapture();
@@ -848,6 +970,46 @@ class SmartCameraWeb extends HTMLElement {
 			.catch(e => {
 				this.handleError(e)
 			});
+	}
+
+	setupNavigation(){
+		if (!this.hasAttribute('show-navigation')) return;
+		this.shadowRoot.querySelectorAll('.nav').forEach((navItem) => {
+			navItem.style.display = 'flex';
+		});
+		this.addBackButtonListeners();
+		this.addCloseButtonListeners();
+	}
+
+	addBackButtonListeners(){
+		let backButtons = this.shadowRoot.querySelectorAll('.back-button-exit');
+		backButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				this._backAndExit();
+			})
+		});
+	}
+
+	get hideBackToHost() {
+		return this.hasAttribute('hide-back-to-host');
+	}
+
+	hideBackToHostButtons(){
+		this.shadowRoot.querySelectorAll('.back-to-host-nav').forEach((navItem) => {
+			navItem.classList.add('justify-right')
+		})
+		this.shadowRoot.querySelectorAll('.back-to-host-wrapper').forEach((backWrapper) => {
+			backWrapper.style.display = 'none';
+		})
+	}
+
+	addCloseButtonListeners(){
+		let closeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+		closeButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				this._exitSmartCamera();
+			})
+		});
 	}
 
 	_startImageCapture() {
@@ -1093,6 +1255,18 @@ class SmartCameraWeb extends HTMLElement {
 		);
 
 		this.setActiveScreen(this.thanksScreen);
+	}
+
+	_exitSmartCamera(){
+		this.dispatchEvent(
+			new CustomEvent('close', { detail: {} })
+		);
+	}
+
+	_backAndExit(){
+		this.dispatchEvent(
+			new CustomEvent('backExit', { detail: {} })
+		);
 	}
 
 	async _reStartImageCapture() {

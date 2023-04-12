@@ -23,3 +23,10 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('exitScreens', () => {
+	cy.location('pathname').should('eq', '/closed')
+	cy
+	.get('smart-camera-web')
+	.should('not.exist');
+})

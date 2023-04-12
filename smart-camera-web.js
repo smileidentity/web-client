@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.0-beta.11';
+const VERSION = '1.0.0-beta.15';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -42,10 +42,10 @@ function getLivenessFramesIndices(totalNoOfFrames, numberOfFramesRequired = DEFA
 };
 
 
-const scwTemplateString = () => {
+function scwTemplateString() {
 	return  `
 	<link rel="preconnect" href="https://fonts.gstatic.com"> 
-	<link href="ht tps://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
 
 	<style>
 		* {
@@ -352,18 +352,20 @@ const scwTemplateString = () => {
 			<p class='color-red' id='error'>
 			</p>
 
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<symbol id="logo-mark">
-							<path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
-						</symbol>
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<symbol id="logo-mark">
+								<path fill="#fff" d="M6.67 4V2.82c0-1.65-.9-2.6-2.46-2.6s-2.43.95-2.43 2.6v.3c0 .08.06.13.13.13.08 0 .13-.05.13-.13v-.3c0-.87.3-2.33 2.17-2.33C6.1.5 6.38 1.95 6.38 2.82V4H1.65a.85.85 0 00-.86.83L.97 8.4c0 .45.4.82.87.82h4.51c.47 0 .86-.37.86-.82l.19-3.56A.9.9 0 006.67 4zm.23 4.38c0 .33-.26.55-.57.55h-4.5a.57.57 0 01-.57-.55L1.08 4.8c0-.3.26-.55.57-.55h4.86c.31 0 .57.25.57.55L6.9 8.38z"/>
+							</symbol>
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<p>
 				We need access to your camera so that we can take selfie and proof-of-life images.
@@ -379,15 +381,17 @@ const scwTemplateString = () => {
 		<h1>Take a Selfie</h1>
 
 		<div class='section | flow'>
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<div class='video-container'>
 				<div class='video'>
@@ -444,15 +448,17 @@ const scwTemplateString = () => {
 	<div hidden id='id-camera-screen' class='flow center'>
 		<h1>Take ID Card Photo</h1>
 		<div class='section | flow'>
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<div class='id-video-container'>
 				<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
@@ -474,15 +480,17 @@ const scwTemplateString = () => {
 	<div hidden id='id-review-screen' class='flow center'>
 		<h1>Review ID Card</h1>
 		<div class='section | flow'>
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<div class='id-video-container'>
 				<div class='actions'>
@@ -515,15 +523,17 @@ const scwTemplateString = () => {
 	<div hidden id='back-of-id-camera-screen' class='flow center'>
 		<h1>Take Back of ID Card Photo</h1>
 		<div class='section | flow'>
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<div class='id-video-container'>
 				<svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
@@ -545,15 +555,17 @@ const scwTemplateString = () => {
 	<div hidden id='back-of-id-review-screen' class='flow center'>
 		<h1>Review Back of ID Card Photo</h1>
 		<div class='section | flow'>
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 
 			<div class='id-video-container'>
 				<div class='actions'>
@@ -587,15 +599,17 @@ const scwTemplateString = () => {
 		<div class='section | flow'>
 			<h1>Thank you</h1>
 
-			<p class='powered-by text-transform-uppercase'>
-				<span class='logo-mark'>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
-						<use href="#logo-mark" />
-					</svg>
-				</span>
-				<span>Powered By</span>
-				<span class='company'>Smile Identity</span>
-			</p>
+			${this.hideAttribution ? '' : `
+				<p class='powered-by text-transform-uppercase'>
+					<span class='logo-mark'>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+							<use href="#logo-mark" />
+						</svg>
+					</span>
+					<span>Powered By</span>
+					<span class='company'>Smile Identity</span>
+				</p>
+			`}
 		</div>
 	</div>
 	`;
@@ -1125,6 +1139,10 @@ class SmartCameraWeb extends HTMLElement {
 		} catch (e) {
 			this.handleError(e);
 		}
+	}
+
+	get hideAttribution() {
+		return this.hasAttribute('hide-attribution');
 	}
 }
 

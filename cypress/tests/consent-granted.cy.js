@@ -1,7 +1,7 @@
 it('should grant consent, and navigate to image capture screen', () => {
 	cy.visit('/');
 	cy.
-		selectBVNIDType();
+		selectNINIDType();
 
 	cy
 		.getIFrameBody()

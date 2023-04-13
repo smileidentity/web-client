@@ -48,7 +48,7 @@ function markup() {
 
 			[disabled] {
 				cursor: not-allowed !important;
-				filter: grayscale(75%);
+				background: #E5E5E5 !important;
 			}
 
 			.visually-hidden {
@@ -231,6 +231,31 @@ function markup() {
 				padding: .5rem 1rem;
 				margin-inline: auto;
 			}
+
+			@keyframes spin {
+				0% {
+					transform: translate3d(-50%, -50%, 0) rotate(0deg);
+				}
+				100% {
+					transform: translate3d(-50%, -50%, 0) rotate(360deg);
+				}
+			}
+
+			.spinner {
+				animation: 1.5s linear infinite spin;
+				animation-play-state: inherit;
+				border: solid 5px #cfd0d1;
+				border-bottom-color: #1c87c9;
+				border-radius: 50%;
+				content: "";
+				display: block;
+				height: 25px;
+				width: 25px;
+				will-change: transform;
+				position: relative;
+				top: .675rem;
+				left: 1.25rem;
+			}
 		</style>
 
 		<div class='flow center' id='id-entry'>
@@ -253,10 +278,11 @@ function markup() {
 				</div>
 
 				<button data-type='primary' id='query-otp-modes' type='submit'>
-					Continue
+					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
+					<span hidden class='spinner'></span>
 				</button>
 			</form>
 		</div>
@@ -346,10 +372,11 @@ function markup() {
 				</button>
 
 				<button data-type='primary' id='select-otp-mode' type='submit'>
-					Continue
+					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
+					<span hidden class='spinner'></span>
 				</button>
 			</form>
 		</div>
@@ -375,10 +402,11 @@ function markup() {
 					</button>
 
 					<button data-type='primary' id='submit-otp' type='submit'>
-						Submit
+						<span class='text'>Submit</span>
 						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
+						<span hidden class='spinner'></span>
 					</button>
 				</form>
 			</div>
@@ -474,7 +502,6 @@ class TotpBasedConsent extends HTMLElement {
 
 	resetForm() {
 		const submitButton = this.activeScreen.querySelector('[type="submit"]');
-		submitButton.disabled = true;
 
 		const invalidElements = this.activeScreen.querySelectorAll('[aria-invalid]');
 		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
@@ -499,7 +526,6 @@ class TotpBasedConsent extends HTMLElement {
 
 			input.insertAdjacentElement('afterend', errorDiv);
 		});
-		submitButton.disabled = false;
 	}
 
 	handleActiveScreenErrors(error) {
@@ -508,7 +534,6 @@ class TotpBasedConsent extends HTMLElement {
 		errorDiv.setAttribute('class', 'validation-message');
 		errorDiv.textContent = error;
 		submitButton.insertAdjacentElement('beforebegin', errorDiv);
-		submitButton.disabled = false;
 	}
 
 	validateIdNumber(idNumber) {
@@ -526,7 +551,6 @@ class TotpBasedConsent extends HTMLElement {
 
 		if (errors) {
 			this.handleIdNumberValidationErrors(errors);
-			this.queryOtpModesButton.removeAttribute('disabled');
 		}
 
 		return errors;
@@ -558,8 +582,10 @@ class TotpBasedConsent extends HTMLElement {
 			const url = `${this.baseUrl}/totp_consent`;
 
 			try {
+				this.toggleLoading();
 				const response = await postData(url, data);
 				const json = await response.json();
+				this.toggleLoading();
 
 				if (!response.ok) {
 					this.handleActiveScreenErrors(json.error);
@@ -570,6 +596,7 @@ class TotpBasedConsent extends HTMLElement {
 					this.setAttribute('modes', json.modes);
 				}
 			} catch (error) {
+				this.toggleLoading();
 				this.handleActiveScreenErrors(error.message);
 			}
 		}
@@ -596,8 +623,10 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/mode`;
 
 		try {
+			this.toggleLoading();
 			const response = await postData(url, data);
 			const json = await response.json();
+			this.toggleLoading();
 
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
@@ -607,6 +636,7 @@ class TotpBasedConsent extends HTMLElement {
 				this.setAttribute('otp-delivery-mode', this.selectedOtpDeliveryMode);
 			}
 		} catch (error) {
+			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
 		}
 	}
@@ -632,8 +662,10 @@ class TotpBasedConsent extends HTMLElement {
 		const url = `${this.baseUrl}/totp_consent/otp`;
 
 		try {
+			this.toggleLoading();
 			const response = await postData(url, data);
 			const json = await response.json();
+			this.toggleLoading();
 
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
@@ -641,8 +673,21 @@ class TotpBasedConsent extends HTMLElement {
 				this.handleTotpConsentGrant(event);
 			}
 		} catch (error) {
+			this.toggleLoading();
 			this.handleActiveScreenErrors(error.message);
 		}
+	}
+
+	toggleLoading() {
+		const button = this.activeScreen.querySelector('button[type="submit"]');
+		const text = button.querySelector('.text');
+		const arrow = button.querySelector('svg');
+		const spinner = button.querySelector('.spinner');
+
+		button.toggleAttribute('disabled');
+		text.toggleAttribute('hidden');
+		arrow.toggleAttribute('hidden');
+		spinner.toggleAttribute('hidden');
 	}
 
 	setActiveScreen(screen) {

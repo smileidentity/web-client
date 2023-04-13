@@ -3,7 +3,7 @@ describe('zip upload screens', () => {
 		cy.visit('/');
 
 		cy
-			.selectBVNIDType()
+			.selectNINIDType()
 
 		cy
 			.intercept({

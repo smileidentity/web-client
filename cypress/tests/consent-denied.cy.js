@@ -2,7 +2,7 @@ it('should ask to confirm "consent denial"', () => {
 	cy.visit('/');
 
 	cy
-		.selectBVNIDType()
+		.selectNINIDType()
 
 	cy
 		.getIFrameBody()
@@ -37,7 +37,7 @@ it('should restore consent screen when user clicks "go back"', () => {
 	cy.visit('/');
 
 	cy
-		.selectBVNIDType()
+		.selectNINIDType()
 
 	cy
 		.getIFrameBody()
@@ -86,7 +86,7 @@ it('should close the iframe when user confirms consent denial', () => {
 	cy.visit('/');
 
 	cy
-		.selectBVNIDType()
+		.selectNINIDType()
 
 	cy
 		.getIFrameBody()

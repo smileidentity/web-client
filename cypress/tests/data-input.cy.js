@@ -3,7 +3,7 @@ describe('id-info screen', () => {
 		cy.visit('/');
 
 		cy
-			.selectBVNIDType()
+			.selectNINIDType()
 
 		cy
 			.intercept({

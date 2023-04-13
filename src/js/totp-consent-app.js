@@ -502,7 +502,6 @@ class TotpBasedConsent extends HTMLElement {
 
 	resetForm() {
 		const submitButton = this.activeScreen.querySelector('[type="submit"]');
-		submitButton.disabled = true;
 
 		const invalidElements = this.activeScreen.querySelectorAll('[aria-invalid]');
 		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
@@ -527,7 +526,6 @@ class TotpBasedConsent extends HTMLElement {
 
 			input.insertAdjacentElement('afterend', errorDiv);
 		});
-		submitButton.disabled = false;
 	}
 
 	handleActiveScreenErrors(error) {
@@ -536,7 +534,6 @@ class TotpBasedConsent extends HTMLElement {
 		errorDiv.setAttribute('class', 'validation-message');
 		errorDiv.textContent = error;
 		submitButton.insertAdjacentElement('beforebegin', errorDiv);
-		submitButton.disabled = false;
 	}
 
 	validateIdNumber(idNumber) {
@@ -554,7 +551,6 @@ class TotpBasedConsent extends HTMLElement {
 
 		if (errors) {
 			this.handleIdNumberValidationErrors(errors);
-			this.queryOtpModesButton.removeAttribute('disabled');
 		}
 
 		return errors;

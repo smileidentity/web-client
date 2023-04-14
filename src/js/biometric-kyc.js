@@ -366,7 +366,7 @@ var biometricKyc = function biometricKyc() {
 			initiateDemoMode();
 		}
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
 			setActiveScreen(SelectIDType);
 		}, false);
 

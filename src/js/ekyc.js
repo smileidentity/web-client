@@ -321,7 +321,7 @@ var eKYC = function eKYC() {
 			initiateDemoMode();
 		}
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
 				setActiveScreen(SelectIDType);
 		}, false);
 

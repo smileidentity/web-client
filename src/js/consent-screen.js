@@ -802,7 +802,7 @@ class EndUserConsent extends HTMLElement {
 			this.setActiveScreen(page);
 		}else{
 			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::ConsentIDChange')
+				new CustomEvent('SmileIdentity::Exit')
 			);
 		}
 	}

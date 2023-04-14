@@ -338,7 +338,7 @@ var basicKyc = (function basicKyc() {
 			);
 			initiateDemoMode();
 		}
-		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
 			setActiveScreen(SelectIDType);
 		}, false);
 

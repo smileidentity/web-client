@@ -21,6 +21,7 @@ var basicKyc = (function basicKyc() {
 	var SelectIDType = document.querySelector("#select-id-type");
 	var IDInfoForm = document.querySelector("#id-info");
 	var CompleteScreen = document.querySelector("#complete-screen");
+	var disableConsentBack = false;
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
@@ -325,6 +326,10 @@ var basicKyc = (function basicKyc() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableConsentBack) {
+			EndUserConsent.setAttribute('hide-back-to-host', true);
+		}
+
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute("demo-mode", config.demo_mode);
 			localStorage.setItem(

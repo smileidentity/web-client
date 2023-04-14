@@ -117,7 +117,6 @@ var eKYC = function eKYC() {
 			);
 
 			if (IDRequiresConsent || config.demo_mode) {
-				disableConsentBack = true;
 				customizeConsentScreen();
 				setActiveScreen(EndUserConsent);
 			} else {

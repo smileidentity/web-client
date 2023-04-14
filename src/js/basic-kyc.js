@@ -169,7 +169,7 @@ var basicKyc = (function basicKyc() {
 				const idTypes = config.id_selection[selectedCountry];
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
-
+					disableConsentBack = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}

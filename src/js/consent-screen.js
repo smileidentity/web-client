@@ -713,7 +713,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	get hideBack() {
-		return this.hasAttribute('hide-back-nav') ? true : false
+		return this.hasAttribute('hide-back-to-host') ? true : false
 	}
 
 	get idHint() {

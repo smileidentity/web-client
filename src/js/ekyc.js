@@ -117,16 +117,24 @@ var eKYC = function eKYC() {
 			);
 
 			if (IDRequiresConsent || config.demo_mode) {
+				disableConsentBack = true;
 				customizeConsentScreen();
 				setActiveScreen(EndUserConsent);
 			} else {
+				hideIdFromBackExit();
 				setActiveScreen(IDInfoForm);
 			}
 		} else {
+			hideIdFromBackExit();
 			setActiveScreen(IDInfoForm);
 		}
 
 		customizeForm();
+	}
+
+	function hideIdFromBackExit() {
+		IDInfoForm.querySelector('.nav').classList.add('justify-right');
+		IDInfoForm.querySelector('.back-wrapper').style.display = 'none';
 	}
 
 	function initializeSession(generalConstraints, partnerConstraints) {

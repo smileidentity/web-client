@@ -129,9 +129,11 @@ var biometricKyc = function biometricKyc() {
 				customizeConsentScreen();
 				setActiveScreen(EndUserConsent);
 			} else {
+				SmartCameraWeb.setAttribute('hide-back-to-host', true);
 				setActiveScreen(SmartCameraWeb);
 			}
 		} else {
+			SmartCameraWeb.setAttribute('hide-back-to-host', true);
 			setActiveScreen(SmartCameraWeb);
 		}
 

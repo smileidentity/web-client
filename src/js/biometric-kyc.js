@@ -357,7 +357,7 @@ var biometricKyc = function biometricKyc() {
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
 		if (disableConsentBack) {
-			EndUserConsent.setAttribute('hide-back-nav', true);
+			EndUserConsent.setAttribute('hide-back-to-host', true);
 		}
 
 		if (config.demo_mode) {

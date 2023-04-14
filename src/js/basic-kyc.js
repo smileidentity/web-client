@@ -267,14 +267,12 @@ var basicKyc = (function basicKyc() {
 		}
 	}
 
-	function initiateDemoMode(consentScreenExists) {
+	function initiateDemoMode() {
 		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
 			tip.hidden = false;
 		});
-		if (consentScreenExists) {
-			return
-		}
+
 		const script = document.createElement("script");
 		script.type = "text/javascript";
 		script.src = "js/demo-ekyc.min.js";
@@ -312,7 +310,6 @@ var basicKyc = (function basicKyc() {
 
 		const main = document.querySelector('main');
 		EndUserConsent = document.querySelector("end-user-consent");
-		var consentScreenExists = !!EndUserConsent;
 		if (EndUserConsent) {
 			main.removeChild(EndUserConsent);
 		}
@@ -334,7 +331,7 @@ var basicKyc = (function basicKyc() {
 				"SmileIdentityConstraints",
 				JSON.stringify(productConstraints, null, 2)
 			);
-			initiateDemoMode(consentScreenExists);
+			initiateDemoMode();
 		}
 		EndUserConsent.addEventListener('SmileIdentity::ConsentIDChange', () => {
 			setActiveScreen(SelectIDType);

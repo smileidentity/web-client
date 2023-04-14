@@ -21,7 +21,7 @@ var eKYC = function eKYC() {
 	var SelectIDType = document.querySelector('#select-id-type');
 	var IDInfoForm = document.querySelector('#id-info');
 	var CompleteScreen = document.querySelector('#complete-screen');
-	var disableConsentBack = false;
+	var disableBackOnFirstScreen = false;
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
@@ -120,7 +120,6 @@ var eKYC = function eKYC() {
 				customizeConsentScreen();
 				setActiveScreen(EndUserConsent);
 			} else {
-				hideIdFromBackExit();
 				setActiveScreen(IDInfoForm);
 			}
 		} else {
@@ -132,6 +131,8 @@ var eKYC = function eKYC() {
 	}
 
 	function hideIdFromBackExit() {
+		// only disable if this is the first screen
+		if (!disableBackOnFirstScreen) return;
 		IDInfoForm.querySelector('.nav').classList.add('justify-right');
 		IDInfoForm.querySelector('.back-wrapper').style.display = 'none';
 	}
@@ -169,7 +170,7 @@ var eKYC = function eKYC() {
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
-					disableConsentBack = true;
+					disableBackOnFirstScreen = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}
@@ -319,7 +320,7 @@ var eKYC = function eKYC() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
-		if (disableConsentBack) {
+		if (disableBackOnFirstScreen) {
 			EndUserConsent.setAttribute('hide-back-to-host', true);
 		}
 

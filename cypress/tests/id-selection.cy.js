@@ -550,15 +550,13 @@ describe('Preselected Country and ID Type', () => {
 			.find('#id_type')
 			.should('not.be.visible');
 
-
-		cy.getIFrameBody()
-			.find('#back-button')
-			.should('not.be.visible');
-
-
 		cy.getIFrameBody()
 			.find('#id-info')
 			.should('be.visible');
+		
+		cy.getIFrameBody()
+			.find('#back-button')
+			.should('not.be.visible');
 
 		cy
 			.intercept({
@@ -793,7 +791,7 @@ describe('Preselected Country and ID Type', () => {
 			.find('#id-info')
 			.should('be.visible');
 
-		cy.getIFrameBody()
+			cy.getIFrameBody()
 			.find('#back-button')
 			.should('not.be.visible');
 

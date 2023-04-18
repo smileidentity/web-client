@@ -13,7 +13,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: run tests
-        uses: cypress-io/github-action@v3
+        uses: cypress-io/github-action@v5
         with:
           build: npm run build
           start: npm start

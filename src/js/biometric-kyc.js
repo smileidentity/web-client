@@ -402,11 +402,6 @@ var biometricKyc = function biometricKyc() {
 			closeWindow();
 		}, false);
 		
-		SmartCameraWeb.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.detail, '*');
-			closeWindow();
-		}, false);
-
 		main.appendChild(EndUserConsent);
 	}
 

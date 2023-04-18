@@ -315,15 +315,11 @@ var biometricKyc = function biometricKyc() {
 		retryUpload();
 	}, false);
 
-	CloseIframeButtons.forEach(function resetCloseButton(button) {
-		const resetCloseButton = () => {
-		   button.removeEventListener("click", resetCloseButton);
-		   closeWindow();
-		};
-
-		button.removeEventListener("click", resetCloseButton);
-		button.addEventListener("click", resetCloseButton);
-	  });
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');

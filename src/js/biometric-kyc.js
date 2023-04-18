@@ -311,15 +311,6 @@ var biometricKyc = function biometricKyc() {
 		setActiveScreen(page);
 	}, false);
 
-	// CameraBackButton.addEventListener('click', event => {
-	// 	event.preventDefault();
-	// 	var page = pages.pop();
-	// 	if (page === SmartCameraWeb) {
-	// 		page.reset();
-	// 	}
-	// 	setActiveScreen(page);
-	// }, false);
-
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
 	}, false);

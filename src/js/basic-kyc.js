@@ -9,6 +9,7 @@ var basicKyc = (function basicKyc() {
 		production: "https://api.smileidentity.com",
 	};
 
+	var pages = [];
 	var config;
 	var activeScreen;
 	var consent_information, id_info, partner_params;
@@ -20,8 +21,9 @@ var basicKyc = (function basicKyc() {
 	var SelectIDType = document.querySelector("#select-id-type");
 	var IDInfoForm = document.querySelector("#id-info");
 	var CompleteScreen = document.querySelector("#complete-screen");
+	var disableBackOnFirstScreen = false;
 
-	var CloseIframeButton = document.querySelector("#close-iframe");
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	function postData(url = '', data = {}) {
 		return fetch(url, {
@@ -127,10 +129,18 @@ var basicKyc = (function basicKyc() {
 				setActiveScreen(IDInfoForm);
 			}
 		} else {
+			hideIdFromBackExit();
 			setActiveScreen(IDInfoForm);
 		}
 
 		customizeForm();
+	}
+
+	function hideIdFromBackExit() {
+		// only disable if this is the first screen
+		if (!disableBackOnFirstScreen) return;
+		IDInfoForm.querySelector('.nav').classList.add('justify-right');
+		IDInfoForm.querySelector('.back-wrapper').style.display = 'none';
 	}
 
 	function initializeSession(generalConstraints, partnerConstraints) {
@@ -167,7 +177,7 @@ var basicKyc = (function basicKyc() {
 				const idTypes = config.id_selection[selectedCountry];
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
-
+					disableBackOnFirstScreen = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}
@@ -267,7 +277,7 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function initiateDemoMode() {
-		const demoTips = document.querySelectorAll(".demo-tip");
+		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
 			tip.hidden = false;
 		});
@@ -287,13 +297,18 @@ var basicKyc = (function basicKyc() {
 		false
 	);
 
-	CloseIframeButton.addEventListener(
-		"click",
-		(event) => {
+	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		setActiveScreen(page);
+	}, false);
+
+
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
 			closeWindow();
-		},
-		false
-	);
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, " ");
@@ -302,6 +317,11 @@ var basicKyc = (function basicKyc() {
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 
+		const main = document.querySelector('main');
+		EndUserConsent = document.querySelector("end-user-consent");
+		if (EndUserConsent) {
+			main.removeChild(EndUserConsent);
+		}
 		EndUserConsent = document.createElement("end-user-consent");
 		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
 		EndUserConsent.setAttribute('country', id_info.country);
@@ -314,6 +334,10 @@ var basicKyc = (function basicKyc() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableBackOnFirstScreen) {
+			EndUserConsent.setAttribute('hide-back-to-host', true);
+		}
+
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute("demo-mode", config.demo_mode);
 			localStorage.setItem(
@@ -322,6 +346,9 @@ var basicKyc = (function basicKyc() {
 			);
 			initiateDemoMode();
 		}
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
+			setActiveScreen(SelectIDType);
+		}, false);
 
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentGranted",
@@ -360,7 +387,6 @@ var basicKyc = (function basicKyc() {
 			closeWindow();
 		}, false);
 
-		const main = document.querySelector("main");
 		main.appendChild(EndUserConsent);
 	}
 
@@ -457,6 +483,7 @@ var basicKyc = (function basicKyc() {
 
 	function setActiveScreen(node) {
 		activeScreen.hidden = true;
+		pages.push(activeScreen);
 		node.hidden = false;
 		activeScreen = node;
 	}

@@ -8,7 +8,8 @@ var biometricKyc = function biometricKyc() {
 		live: 'https://api.smileidentity.com/v1',
 		production: 'https://api.smileidentity.com/v1'
 	}
-
+	
+	var pages = [];
 	var config;
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
@@ -19,14 +20,17 @@ var biometricKyc = function biometricKyc() {
 	var LoadingScreen = document.querySelector('#loading-screen');
 	var SelectIDType = document.querySelector('#select-id-type');
 	var SmartCameraWeb = document.querySelector('smart-camera-web');
+	var SmartCameraWebContainer = document.querySelector('#camera-container');
 	var IDInfoForm = document.querySelector('#id-info');
 	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
-	var CloseIframeButton = document.querySelector('#close-iframe');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
+	var CameraBackButton = document.querySelector('#back-button-camera');
+	var disableBackOnFirstScreen = false;
 
 	var fileToUpload, uploadURL;
 
@@ -125,9 +129,11 @@ var biometricKyc = function biometricKyc() {
 				customizeConsentScreen();
 				setActiveScreen(EndUserConsent);
 			} else {
+				SmartCameraWeb.setAttribute('hide-back-to-host', true);
 				setActiveScreen(SmartCameraWeb);
 			}
 		} else {
+			SmartCameraWeb.setAttribute('hide-back-to-host', true);
 			setActiveScreen(SmartCameraWeb);
 		}
 
@@ -164,7 +170,7 @@ var biometricKyc = function biometricKyc() {
 				const idTypes = config.id_selection[selectedCountry];
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
-
+					disableBackOnFirstScreen = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}
@@ -266,7 +272,7 @@ var biometricKyc = function biometricKyc() {
 		Array.prototype.forEach.call(demoTips, (tip) => {
 			tip.hidden = false;
 		});
-
+	
 		const script = document.createElement('script');
 		script.type = 'text/javascript';
 		script.src = 'js/demo-ekyc-smartselfie.min.js';
@@ -283,18 +289,37 @@ var biometricKyc = function biometricKyc() {
 			setActiveScreen(IDInfoForm);
 		}
 	}, false);
+	SmartCameraWeb.addEventListener('backExit', event => {
+		SmartCameraWeb.reset();
+		var page = pages.pop();
+		setActiveScreen(page);
+	}, false);
+	SmartCameraWeb.addEventListener('close', event => {
+		closeWindow();
+	}, false);
 
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
 		handleFormSubmit(event);
+	}, false);
+
+	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		if (page === SmartCameraWeb) {
+			page.reset();
+		}
+		setActiveScreen(page);
 	}, false);
 
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
 	}, false);
 
-	CloseIframeButton.addEventListener('click', event => {
-		closeWindow();
-	}, false);
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');
@@ -303,6 +328,11 @@ var biometricKyc = function biometricKyc() {
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 
+		const main = document.querySelector('main');
+		EndUserConsent = document.querySelector("end-user-consent");
+		if (EndUserConsent) {
+			main.removeChild(EndUserConsent);
+		}
 		EndUserConsent = document.createElement('end-user-consent');
 		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
 		EndUserConsent.setAttribute('country', id_info.country);
@@ -315,12 +345,19 @@ var biometricKyc = function biometricKyc() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableBackOnFirstScreen) {
+			EndUserConsent.setAttribute('hide-back-to-host', true);
+		}
 
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
 			initiateDemoMode();
 		}
+
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
+			setActiveScreen(SelectIDType);
+		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;
@@ -351,8 +388,7 @@ var biometricKyc = function biometricKyc() {
 			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
-
-		const main = document.querySelector('main');
+		
 		main.appendChild(EndUserConsent);
 	}
 
@@ -430,6 +466,7 @@ var biometricKyc = function biometricKyc() {
 
 	function setActiveScreen(node) {
 		activeScreen.hidden = true;
+		pages.push(activeScreen);
 		node.hidden = false;
 		activeScreen = node;
 	}

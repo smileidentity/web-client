@@ -21,7 +21,7 @@ var documentVerification = function documentVerification() {
 	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
 	var CompleteScreen = document.querySelector('#complete-screen');
 
-	var CloseIframeButton = document.querySelector('#close-iframe');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 
@@ -88,6 +88,9 @@ var documentVerification = function documentVerification() {
 
 					// ACTION: set initial screen
 					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
+					// Hide the back button that takes the user back to the id selection screen
+					// from startcamera web
+					SmartCameraWeb.setAttribute('hide-back-to-host', true);
 					setActiveScreen(SmartCameraWeb);
 				}
 			}
@@ -203,13 +206,23 @@ var documentVerification = function documentVerification() {
 		handleFormSubmit(event);
 	}, false);
 
+	SmartCameraWeb.addEventListener('backExit', event => {
+		setActiveScreen(SelectIDType);
+	}, false);
+
+	SmartCameraWeb.addEventListener('close', event => {
+		closeWindow();
+	}, false);
+
 	RetryUploadButton.addEventListener('click', event => {
 		retryUpload();
 	}, false);
 
-	CloseIframeButton.addEventListener('click', event => {
-		closeWindow();
-	}, false);
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');

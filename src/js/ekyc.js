@@ -9,6 +9,7 @@ var eKYC = function eKYC() {
 		production: 'https://api.smileidentity.com/v1'
 	}
 
+	var pages = [];
 	var config;
 	var activeScreen;
 	var consent_information, id_info, images, partner_params;
@@ -20,8 +21,9 @@ var eKYC = function eKYC() {
 	var SelectIDType = document.querySelector('#select-id-type');
 	var IDInfoForm = document.querySelector('#id-info');
 	var CompleteScreen = document.querySelector('#complete-screen');
+	var disableBackOnFirstScreen = false;
 
-	var CloseIframeButton = document.querySelector('#close-iframe');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	function postData(url = '', data = {}) {
 		return fetch(url, {
@@ -121,10 +123,18 @@ var eKYC = function eKYC() {
 				setActiveScreen(IDInfoForm);
 			}
 		} else {
+			hideIdFromBackExit();
 			setActiveScreen(IDInfoForm);
 		}
 
 		customizeForm();
+	}
+
+	function hideIdFromBackExit() {
+		// only disable if this is the first screen
+		if (!disableBackOnFirstScreen) return;
+		IDInfoForm.querySelector('.nav').classList.add('justify-right');
+		IDInfoForm.querySelector('.back-wrapper').style.display = 'none';
 	}
 
 	function initializeSession(generalConstraints, partnerConstraints) {
@@ -160,6 +170,7 @@ var eKYC = function eKYC() {
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
+					disableBackOnFirstScreen = true;
 					// ACTION: set initial screen
 					setInitialScreen(partnerConstraints);
 				}
@@ -273,9 +284,17 @@ var eKYC = function eKYC() {
 		handleFormSubmit(event);
 	}, false);
 
-	CloseIframeButton.addEventListener('click', event => {
-		closeWindow();
+	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
+		event.preventDefault();
+		var page = pages.pop();
+		setActiveScreen(page);
 	}, false);
+
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function toHRF(string) {
 		return string.replace(/\_/g, ' ');
@@ -283,7 +302,12 @@ var eKYC = function eKYC() {
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
-
+		
+		const main = document.querySelector('main');
+		EndUserConsent = document.querySelector("end-user-consent");
+		if (EndUserConsent) {
+			main.removeChild(EndUserConsent);
+		}
 		EndUserConsent = document.createElement('end-user-consent');
 		EndUserConsent.setAttribute('base-url', endpoints[config.environment] || config.environment);
 		EndUserConsent.setAttribute('country', id_info.country);
@@ -296,12 +320,19 @@ var eKYC = function eKYC() {
 		EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
 		EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
 		EndUserConsent.setAttribute('token', config.token);
+		if (disableBackOnFirstScreen) {
+			EndUserConsent.setAttribute('hide-back-to-host', true);
+		}
 
 		if (config.demo_mode) {
 			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem('SmileIdentityConstraints', JSON.stringify(productConstraints, null, 2));
 			initiateDemoMode();
 		}
+
+		EndUserConsent.addEventListener('SmileIdentity::Exit', () => {
+				setActiveScreen(SelectIDType);
+		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted', event => {
 			consent_information = event.detail;
@@ -333,7 +364,6 @@ var eKYC = function eKYC() {
 			closeWindow();
 		}, false);
 
-		const main = document.querySelector('main');
 		main.appendChild(EndUserConsent);
 	}
 
@@ -412,6 +442,7 @@ var eKYC = function eKYC() {
 	function setActiveScreen(node) {
 		activeScreen.hidden = true;
 		node.hidden = false;
+		pages.push(activeScreen);
 		activeScreen = node;
 	}
 

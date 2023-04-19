@@ -1,7 +1,5 @@
 describe('document verification', () => {
 	beforeEach(() => {
-		cy.visit('/document-verification');
-
 		cy
 			.intercept({
 				method: 'POST',
@@ -17,6 +15,8 @@ describe('document verification', () => {
 			}, {
 				statusCode: 200
 			}).as('successfulUpload');
+		cy.visit('/document-verification');
+
 
 		cy.selectNINIDType();
 

@@ -49,7 +49,7 @@ button, input, select, textarea {
 }
 
 html {
-	font-family: 'Nunito Sans', sans-serif;
+	font-family: 'Nunito', sans-serif;
 }
 
 body {
@@ -160,9 +160,6 @@ button[data-type='icon'] {
 	cursor: pointer;
 	display: flex;
 	padding: 0;
-	position: fixed;
-	top: 11%;
-	right: 5%;
 }
 
 button[data-type='primary'],
@@ -263,6 +260,29 @@ button:focus:not([disabled]) {
 
 .input-group {
 	--flow-space: 1.5rem;
+}
+
+.justify-right {
+	justify-content: end !important;
+}
+
+.nav {
+	display: flex;
+	justify-content: space-between;
+}
+
+.back-button {
+	display: block !important;
+}
+
+.back-button-text {
+	font-size: 11px;
+	line-height: 11px;
+	color: #3886F7;
+}
+
+.user-details {
+	padding: 2rem 5rem;
 }
 
 .demo-tip {

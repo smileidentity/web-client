@@ -26,7 +26,7 @@ function templateString() {
 			}
 
 			html {
-				font-family: 'Nunito Sans', sans-serif;
+				font-family: 'Nunito', sans-serif;
 			}
 
 			[hidden] {
@@ -120,6 +120,21 @@ function templateString() {
 			button[data-type='secondary'] {
 				background-color: #FFEDEB;
 				color: #F86B58;
+			}
+
+			.nav {
+				display: flex;
+				justify-content: space-between;
+			}
+
+			.justify-right {
+				justify-content: end !important;
+			}
+			
+			.back-button-text {
+				font-size: 11px;
+				line-height: 11px;
+				color: #3886F7;
 			}
 
 			img {
@@ -279,6 +294,22 @@ function templateString() {
 
 		<div id='consent-screen'>
 			<section class='flow center'>
+				<div class="nav ${this.hideBack ? 'justify-right' : ''}">
+					<div class="back-wrapper" ${this.hideBack ? 'hidden' : ''}>
+						<button type='button' data-type='icon' id="back-button" class="back-button">
+							<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<div class="back-button-text">Back</div>
+					</div>
+					<button data-type='icon' type='button' class='close-iframe'>
+						<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+						</svg>												             
+						<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+					</button>
+				</div>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
 				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
 					<svg aria-hidden='true' width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -623,6 +654,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	connectedCallback() {
+		this.pages = [];
 		const template = document.createElement('template');
 		template.innerHTML = this.render();
 
@@ -636,6 +668,8 @@ class EndUserConsent extends HTMLElement {
 		this.rejectButton = this.shadowRoot.querySelector('#cancel');
 		this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
 		this.confirmConsentRejectionButton = this.shadowRoot.querySelector('#confirm-consent-rejection');
+		this.backButton = this.shadowRoot.querySelector('#back-button')
+		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
 		this.allowButton.addEventListener('click', e => this.handleConsentGrant(e));
 		this.rejectButton.addEventListener('click', e => this.handleConsentGrant(e));
@@ -645,6 +679,17 @@ class EndUserConsent extends HTMLElement {
 
 		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
 		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::Back', e => this.handleBackEvents(e));
+
+		this.backButton.addEventListener('click', (e) => {
+			this.handleBackEvents(e);
+		});
+
+		CloseIframeButtons.forEach((button) => {
+			button.addEventListener('click', event => {
+				this.closeWindow();
+			}, false);
+		});
 
 		this.activeScreen = this.consentScreen;
 	}
@@ -665,6 +710,10 @@ class EndUserConsent extends HTMLElement {
 
 	get demoMode() {
 		return this.hasAttribute('demo-mode') ? true : false
+	}
+
+	get hideBack() {
+		return this.hasAttribute('hide-back-to-host');
 	}
 
 	get idHint() {
@@ -713,6 +762,7 @@ class EndUserConsent extends HTMLElement {
 		if (granted) {
 			if (this.idRequiresTotpConsent.includes(this.idType)) {
 				this.setActiveScreen(this.totpConsentApp);
+				this.pages.push(this.consentScreen);
 			} else {
 				this.dispatchEvent(
 					new CustomEvent('SmileIdentity::ConsentGranted', {
@@ -744,6 +794,21 @@ class EndUserConsent extends HTMLElement {
 			}
 		});
 		this.dispatchEvent(customEvent);
+	}
+
+	handleBackEvents(e){
+		const page = this.pages.pop();
+		if (page) {
+			this.setActiveScreen(page);
+		}else{
+			this.dispatchEvent(
+				new CustomEvent('SmileIdentity::Exit')
+			);
+		}
+	}
+
+	closeWindow() {
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 }
 

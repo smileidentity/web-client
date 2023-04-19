@@ -553,6 +553,10 @@ describe('Preselected Country and ID Type', () => {
 		cy.getIFrameBody()
 			.find('#id-info')
 			.should('be.visible');
+		
+		cy.getIFrameBody()
+			.find('#back-button')
+			.should('not.be.visible');
 
 		cy
 			.intercept({
@@ -610,6 +614,11 @@ describe('Preselected Country and ID Type', () => {
 		cy.getIFrameBody()
 			.find('smart-camera-web')
 			.should('be.visible');
+
+		cy.getIFrameBody()
+			.find('smart-camera-web')
+			.find('#back-button-exit')
+			.should('not.be.exist');
 
 		cy
 			.intercept({
@@ -702,6 +711,10 @@ describe('Preselected Country and ID Type', () => {
 			.find('smart-camera-web')
 			.should('be.visible');
 
+		cy.getIFrameBody()
+			.find('smart-camera-web')
+			.find('#back-button-exit')
+			.should('not.be.exist');
 		cy
 			.navigateThroughCameraScreens();
 
@@ -777,6 +790,10 @@ describe('Preselected Country and ID Type', () => {
 		cy.getIFrameBody()
 			.find('#id-info')
 			.should('be.visible');
+
+			cy.getIFrameBody()
+			.find('#back-button')
+			.should('not.be.visible');
 
 		cy
 			.getIFrameBody()

@@ -39,7 +39,7 @@ function markup() {
 			}
 
 			html {
-				font-family: 'Nunito Sans', sans-serif;
+				font-family: 'Nunito', sans-serif;
 			}
 
 			[hidden] {
@@ -173,6 +173,20 @@ function markup() {
 				font-weight: bold;
 			}
 
+			.justify-right {
+				justify-content: end !important;
+			}
+			.nav {
+				display: flex;
+				justify-content: space-between;
+			}
+
+			.back-button-text {
+				font-size: 11px;
+				line-height: 11px;
+				color: #3886F7;
+			}
+
 			#error,
 			.validation-message {
 				color: red;
@@ -259,6 +273,22 @@ function markup() {
 		</style>
 
 		<div class='flow center' id='id-entry'>
+			<div class="nav">
+				<div class="back-wrapper">
+					<button type='button' data-type='icon' id="back-button" class="back-button">
+						<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+					<div class="back-button-text">Back</div>
+				</div>
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
+			</div>
 			<h1>
 				Enter your ${this.idTypeLabel}
 			</h1>
@@ -288,6 +318,22 @@ function markup() {
 		</div>
 
 		<div hidden class='flow center' id='select-mode'>
+			<div class="nav">
+				<div class="back-wrapper">
+					<button type='button' data-type='icon' id="back-to-entry-button" class="back-button">
+						<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</button>
+					<div class="back-button-text">Back</div>
+				</div>
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
+			</div>
 			<h1>
 				Select contact method
 			</h1>
@@ -382,6 +428,14 @@ function markup() {
 		</div>
 
 		<div hidden class='flow center' id='otp-verification'>
+			<div class="nav justify-right">
+				<button data-type='icon' type='button' class='close-iframe'>
+					<svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+					</svg>												             
+					<span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+				</button>
+			</div>
 			<h1>
 				OTP Verification
 			</h1>
@@ -434,6 +488,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.switchContactMethod = this.switchContactMethod.bind(this);
 		this.handleTotpConsentGrant = this.handleTotpConsentGrant.bind(this);
 		this.handleTotpConsentContactMethodsOutdated = this.handleTotpConsentContactMethodsOutdated.bind(this);
+		this.pages = [];
 	}
 
 	static get observedAttributes() {
@@ -470,10 +525,13 @@ class TotpBasedConsent extends HTMLElement {
 
 		// Buttons
 		this.queryOtpModesButton = this.idEntryScreen.querySelector('#query-otp-modes');
+		this.backButton = this.idEntryScreen.querySelector('#back-button');
 		this.selectOtpModeButton = this.selectModeScreen.querySelector('#select-otp-mode');
+		this.entryBackbutton = this.selectModeScreen.querySelector('#back-to-entry-button');
 		this.contactMethodsOutdatedButton = this.selectModeScreen.querySelector('#contact-methods-outdated');
 		this.submitOtpButton = this.otpVerificationScreen.querySelector('#submit-otp');
 		this.switchContactMethodButton = this.otpVerificationScreen.querySelector('.try-another-method');
+		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
 		// Input Elements
 		this.idNumberInput = this.idEntryScreen.querySelector('#id_number');
@@ -486,6 +544,35 @@ class TotpBasedConsent extends HTMLElement {
 		this.submitOtpButton.addEventListener('click', e => this.submitOtp(e));
 		this.switchContactMethodButton.addEventListener('click', e => this.switchContactMethod(e));
 		this.contactMethodsOutdatedButton.addEventListener('click', e => this.handleTotpConsentContactMethodsOutdated(e));
+		
+		this.entryBackbutton.addEventListener('click', () => {
+			this.handleBackClick();
+		});
+
+		this.backButton.addEventListener('click', () => {
+			this.handleBackClick();
+		});
+
+		CloseIframeButtons.forEach((button) => {
+			button.addEventListener('click', event => {
+				this.closeWindow();
+			}, false);
+		});
+	}
+
+	closeWindow() {
+		window.parent.postMessage("SmileIdentity::Close", "*");
+	}
+
+	handleBackClick() {
+		const page = this.pages.pop();
+		if (page) {
+			this.setActiveScreen(page);
+		} else {
+			this.dispatchEvent(
+				new CustomEvent('SmileIdentity::ConsentDenied::Back', {})
+			);
+		}
 	}
 
 	connectedCallback() {

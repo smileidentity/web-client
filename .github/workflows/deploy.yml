@@ -21,13 +21,13 @@ jobs:
       - name: get version number
         id: get_version
         run: |
-          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+          echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
       - name: set destination directory
         id: set_destination
         env:
           TAG: ${{ steps.get_version.outputs.VERSION }}
         run: |
-          echo ::set-output name=DEST_DIR::$( echo "js/$TAG" )
+          echo "DEST_DIR=js/$TAG" >> $GITHUB_OUTPUT
       - name: deploy to s3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:

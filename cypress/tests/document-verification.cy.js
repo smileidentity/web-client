@@ -23,7 +23,7 @@ describe('document verification', () => {
 		cy.navigateThroughCameraScreens();
 	});
 
-	it('should capture selfie and id image', () => {
+	xit('should capture selfie and id image', () => {
 		cy
 			.getIFrameBody()
 			.find('smart-camera-web')

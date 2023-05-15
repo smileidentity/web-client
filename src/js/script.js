@@ -120,6 +120,10 @@ var SmileIdentity = function () {
 			});
 		}
 
+		if (config.document_capture_mode && !['camera', 'upload'].includes(config.document_capture_mode)) {
+			throw new Error('SmileIdentity: document_capture_mode must be one of `camera` or `upload`');
+		}
+
 		return true;
 	}
 

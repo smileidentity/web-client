@@ -186,6 +186,10 @@ var documentVerification = function documentVerification() {
 				};
 
 				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				// ACTION: set document capture mode
+				if (config.document_capture_mode) {
+					SmartCameraWeb.setAttribute('document-capture-mode', config.document_capture_mode)
+				}
 				setActiveScreen(SmartCameraWeb);
 			});
 		}

@@ -7,7 +7,7 @@
 
 context('SmartCameraWeb', () => {
 	beforeEach(() => {
-		cy.visit('/capture-id');
+		cy.visit('/capture-id-portrait');
 	});
 
 	it('should find the button to request-camera-access', () => {
@@ -177,19 +177,19 @@ context('SmartCameraWeb', () => {
 			cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape')
+			.find('#id-camera-screen .id-video-container.portrait')
 			.should('be.visible');
 
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape .actions')
+			.find('#id-camera-screen .id-video-container.portrait .actions')
 			.should('be.visible');
 
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape .image-frame')
+			.find('#id-camera-screen .id-video-container.portrait .image-frame-portrait')
 			.should('be.visible');
 	});
 
@@ -239,8 +239,8 @@ context('SmartCameraWeb', () => {
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-review-screen .id-video-container.landscape img')
-			.should('not.have.css', 'transform', 'none');
+			.find('#id-review-screen .id-video-container.portrait img')
+			.should('have.css', 'transform', 'none');
 	});
 
 	it('should switch from the id review screen back to the camera screen on clicking the "Re-Capture" icon', () => {
@@ -295,19 +295,19 @@ context('SmartCameraWeb', () => {
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape')
+			.find('#id-camera-screen .id-video-container.portrait')
 			.should('be.visible');
 
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape .actions')
+			.find('#id-camera-screen .id-video-container.portrait .actions')
 			.should('be.visible');
 
 		cy
 			.get('smart-camera-web')
 			.shadow()
-			.find('#id-camera-screen .id-video-container.landscape .image-frame')
+			.find('#id-camera-screen .id-video-container.portrait .image-frame-portrait')
 			.should('be.visible');
 	});
 

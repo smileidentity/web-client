@@ -1,6 +1,6 @@
 {
   "name": "@smile_identity/smart-camera-web",
-  "version": "1.0.0-beta.16",
+  "version": "1.0.0-beta.17",
   "description": "WebComponent for smartly capturing images on the web, for use with SmileIdentity",
   "main": "smart-camera-web.js",
   "scripts": {
@@ -25,6 +25,9 @@
   "devDependencies": {
     "@cypress/code-coverage": "^3.10.4",
     "cypress": "12.10.0",
+    "eslint": "^8.40.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
     "serve": "^14.2.0"
   }
 }

@@ -168,11 +168,28 @@ context('SmartCameraWeb', () => {
 			.find('#review-screen')
 			.should('not.be.visible');
 
-
 		cy
 			.get('smart-camera-web')
 			.shadow()
 			.find('#id-camera-screen')
+			.should('be.visible');
+
+			cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen .id-video-container.landscape')
+			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen .id-video-container.landscape .actions')
+			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-camera-screen .id-video-container.landscape .image-frame')
 			.should('be.visible');
 	});
 
@@ -218,6 +235,12 @@ context('SmartCameraWeb', () => {
 			.shadow()
 			.find('#id-review-screen')
 			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#id-review-screen .id-video-container.landscape img')
+			.should('not.have.css', 'transform', 'none');
 	});
 
 	it('should switch from the review screen to the back of ID camera screen on clicking the "Approve" icon', () => {
@@ -267,6 +290,24 @@ context('SmartCameraWeb', () => {
 			.get('smart-camera-web')
 			.shadow()
 			.find('#back-of-id-camera-screen')
+			.should('be.visible');
+
+			cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#back-of-id-camera-screen .id-video-container.landscape')
+			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#back-of-id-camera-screen .id-video-container.landscape .actions')
+			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#back-of-id-camera-screen .id-video-container.landscape .image-frame')
 			.should('be.visible');
 	});
 
@@ -333,6 +374,12 @@ context('SmartCameraWeb', () => {
 			.shadow()
 			.find('#back-of-id-review-screen')
 			.should('be.visible');
+
+		cy
+			.get('smart-camera-web')
+			.shadow()
+			.find('#back-of-id-review-screen .id-video-container.landscape img')
+			.should('not.have.css', 'transform', 'none');
 	});
 
 	it('should switch from the back of ID review screen to the back of ID camera screen on clicking the "Re-Capture" icon', () => {
@@ -404,80 +451,31 @@ context('SmartCameraWeb', () => {
 			.shadow()
 			.find('#back-of-id-camera-screen')
 			.should('be.visible');
+
+		cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('#back-of-id-camera-screen .id-video-container.landscape')
+      .should('be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('#back-of-id-camera-screen .id-video-container.landscape .actions')
+      .should('be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('#back-of-id-camera-screen .id-video-container.landscape .image-frame')
+      .should('be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('#back-of-id-camera-screen .id-video-container.portrait')
+      .should('not.exist');
 	});
-
-	it('should switch from the back of ID review screen to the back of ID camera screen on clicking the "Re-Capture" icon', () => {
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#request-camera-access')
-			.click();
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#start-image-capture')
-			.click();
-
-		cy
-			.wait(8000);
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#select-selfie')
-			.click();
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#capture-id-image')
-			.click();
-
-		cy
-			.wait(2000);
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#select-id-image')
-			.click();
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#back-of-id-camera-screen')
-			.should('be.visible');
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#capture-back-of-id-image')
-			.click();
-
-		cy
-			.wait(2000);
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#re-capture-back-of-id-image')
-			.click();
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#back-of-id-review-screen')
-			.should('not.be.visible');
-
-		cy
-			.get('smart-camera-web')
-			.shadow()
-			.find('#back-of-id-camera-screen')
-			.should('be.visible');
-
-	});
-
 
 	it('should switch from the back of ID review screen to the thanks screen on clicking the "Approve" icon', () => {
 		cy

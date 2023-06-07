@@ -109,7 +109,7 @@ describe('No ID Selection', () => {
 			.should('contain', 'Bank Verification');
 	});
 
-	xit('document_verification', () => {
+	it('document_verification', () => {
 		cy.visit('/document-verification');
 
 		cy
@@ -139,6 +139,20 @@ describe('No ID Selection', () => {
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
 			.should('eq', 'NIN')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
 
 		cy
 			.getIFrameBody()
@@ -378,7 +392,7 @@ describe('Preselected Country', () => {
 			.should('contain', 'Bank Verification');
 	});
 
-	xit('document_verification', () => {
+	it('document_verification', () => {
 		cy.visit('/document-verification-pre-select-country');
 
 		cy
@@ -423,6 +437,20 @@ describe('Preselected Country', () => {
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
 			.should('eq', 'PASSPORT')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
 
 		cy
 			.getIFrameBody()
@@ -678,7 +706,7 @@ describe('Preselected Country and ID Type', () => {
 			.should('contain', 'Bank Verification');
 	});
 
-	xit('document_verification', () => {
+	it('document_verification', () => {
 		cy.visit('/document-verification-pre-select-id-type');
 
 		cy
@@ -723,6 +751,20 @@ describe('Preselected Country and ID Type', () => {
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
 			.should('eq', 'PASSPORT')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
 
 		cy
 			.getIFrameBody()

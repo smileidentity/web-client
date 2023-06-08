@@ -144,6 +144,20 @@ describe('No ID Selection', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
 			.find('#id-camera-screen')
 			.should('be.visible');
 
@@ -423,6 +437,20 @@ describe('Preselected Country', () => {
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
 			.should('eq', 'PASSPORT')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
 
 		cy
 			.getIFrameBody()
@@ -723,6 +751,20 @@ describe('Preselected Country and ID Type', () => {
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
 			.should('eq', 'PASSPORT')
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
 
 		cy
 			.getIFrameBody()

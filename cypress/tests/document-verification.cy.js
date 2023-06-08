@@ -34,6 +34,20 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.shadow()
+			.find('#id-entry-screen')
+			.should('be.visible');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
+			.find('#id-entry-screen #take-photo')
+			.click();
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.shadow()
 			.find('#id-camera-screen')
 			.should('be.visible');
 

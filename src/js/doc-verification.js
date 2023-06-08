@@ -88,6 +88,10 @@ var documentVerification = function documentVerification() {
 
 					// ACTION: set initial screen
 					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
+					// ACTION: set document capture mode
+					if (config.document_capture_modes) {
+						SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
+					}
 					// Hide the back button that takes the user back to the id selection screen
 					// from startcamera web
 					SmartCameraWeb.setAttribute('hide-back-to-host', true);
@@ -182,6 +186,10 @@ var documentVerification = function documentVerification() {
 				};
 
 				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				// ACTION: set document capture mode
+				if (config.document_capture_modes) {
+					SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
+				}
 				setActiveScreen(SmartCameraWeb);
 			});
 		}

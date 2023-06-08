@@ -1,6 +1,4 @@
-'use strict';
-
-const VERSION = '1.0.0-beta.17';
+const VERSION = '1.0.0-beta.18';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
@@ -53,14 +51,79 @@ function getLivenessFramesIndices(totalNoOfFrames, numberOfFramesRequired = DEFA
   return selectedFrames;
 }
 
+class SmartFileUpload {
+  static memoryLimit = 10240000;
+
+  static supportedTypes = ['image/jpeg', 'image/png'];
+
+  static getHumanSize(numberOfBytes) {
+    // Approximate to the closest prefixed unit
+    const units = [
+      'B',
+      'kB',
+      'MB',
+      'GB',
+      'TB',
+      'PB',
+      'EB',
+      'ZB',
+      'YB',
+    ];
+    const exponent = Math.min(
+      Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
+      units.length - 1,
+    );
+    const approx = numberOfBytes / 1024 ** exponent;
+    const output = exponent === 0
+      ? `${numberOfBytes} bytes`
+      : `${approx.toFixed(0)} ${units[exponent]}`;
+
+    return output;
+  }
+
+  static getData(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        resolve(e.target.result);
+      };
+      reader.onerror = () => {
+        reject(new Error('An error occurred reading the file. Please check the file, and try again'));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  static async retrieve(files) {
+    if (files.length > 1) {
+      throw new Error('Only one file upload is permitted at a time');
+    }
+
+    const file = files[0];
+
+    if (!SmartFileUpload.supportedTypes.includes(file.type)) {
+      throw new Error('Unsupported file format. Please ensure that you are providing a JPG or PNG image');
+    }
+
+    if (file.size > SmartFileUpload.memoryLimit) {
+      throw new Error(`${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`);
+    }
+
+    const imageAsDataUrl = await SmartFileUpload.getData(file);
+
+    return imageAsDataUrl;
+  }
+}
+
 function scwTemplateString() {
   return `
   <link rel="preconnect" href="https://fonts.gstatic.com"> 
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     * {
-      font-family: 'Nunito Sans', sans-serif;
+      font-family: 'Nunito', sans-serif;
     }
 
     [hidden] {
@@ -120,6 +183,14 @@ function scwTemplateString() {
       color: #0E1B42;
     }
 
+    .color-digital-blue {
+      color: #001096 !important;
+    }
+
+    .color-deep-blue {
+      color: #001096;
+    }
+
     .center {
       text-align: center;
       margin-left: auto;
@@ -136,6 +207,14 @@ function scwTemplateString() {
 
     .text-transform-uppercase {
       text-transform: uppercase;
+    }
+
+    [id*=-"screen"] {
+      min-block-size: 100%;
+    }
+
+    [data-variant="full-width"] {
+      inline-size: 100%;
     }
 
     .flow > * + * {
@@ -164,6 +243,10 @@ function scwTemplateString() {
       background-color: #242F40;
     }
 
+    .button--tertiary {
+      background-color: #001096;
+    }
+
     .icon-btn {
       appearance: none;
       background: none;
@@ -179,7 +262,7 @@ function scwTemplateString() {
       justify-content: end !important;
     }
     .nav {
-      display: none;
+      display: flex;
       justify-content: space-between;
     }
     .back-button {
@@ -266,18 +349,18 @@ function scwTemplateString() {
     }
   
     .id-video-container.portrait video {
-			width: calc(213px + 0.9rem);
-			height: 100%;
-			position: absolute;
-			top: 239px;
-			left: 161px;
-			padding-bottom: calc((214px * 1.4) / 3);
-			padding-top: calc((191px * 1.4) / 3);
-			object-fit: cover;
+      width: calc(213px + 0.9rem);
+      height: 100%;
+      position: absolute;
+      top: 239px;
+      left: 161px;
+      padding-bottom: calc((214px * 1.4) / 3);
+      padding-top: calc((191px * 1.4) / 3);
+      object-fit: cover;
 
-			transform: translateX(-50%) translateY(-50%);
-			z-index: 1;
-			block-size: 100%;
+      transform: translateX(-50%) translateY(-50%);
+      z-index: 1;
+      block-size: 100%;
     }
 
     .video-container,
@@ -324,17 +407,17 @@ function scwTemplateString() {
     }
 
     .id-video-container.portrait .image-frame-portrait {
-			border-width: 0.9rem;
-			border-color: rgba(0, 0, 0, 0.7);
-			border-style: solid;
-			height: auto;
-			position: absolute;
-			top: 80px;
-			left: 47px;
-			z-index: 2;
-			width: 200px;
-			height: calc(200px * 1.4);
-		}
+      border-width: 0.9rem;
+      border-color: rgba(0, 0, 0, 0.7);
+      border-style: solid;
+      height: auto;
+      position: absolute;
+      top: 80px;
+      left: 47px;
+      z-index: 2;
+      width: 200px;
+      height: calc(200px * 1.4);
+    }
 
     .id-video-container.landscape .image-frame {
       border-width: 10rem 1rem;
@@ -362,7 +445,6 @@ function scwTemplateString() {
       left: 50%;
       transform: translateX(-50%) translateY(-50%);
       max-width: 90%;
-      max-height: 260px;
     }
 
     #id-review-screen .id-video-container,
@@ -376,7 +458,7 @@ function scwTemplateString() {
     #id-review-screen .id-video-container.portrait img, #back-of-id-review-screen .id-video-container.portrait img {
       height: 280px;
       width: 200px;
-			padding-top: 14px;
+      padding-top: 14px;
       transform: none;
     }
     .actions {
@@ -392,11 +474,54 @@ function scwTemplateString() {
     #back-of-id-camera-screen .id-video-container.portrait .actions,
     #id-camera-screen .id-video-container.portrait .actions {
       top: 145%;
-			width: calc(200px * 1.4);
+      width: calc(200px * 1.4);
     }
 
     #back-of-id-camera-screen .section.portrait, #id-camera-screen .section.portrait {
       min-height: calc((200px * 1.4) + 260px);
+    }
+
+    #id-entry-screen,
+    #back-of-id-entry-screen {
+      block-size: 45rem;
+      padding-block: 2rem;
+      display: flex;
+      flex-direction: column;
+      max-block-size: 100%;
+      max-inline-size: 40ch;
+    }
+
+    #id-entry-screen header p {
+      margin-block: 0 !important;
+    }
+
+    .document-tips {
+      margin-block-start: 1.5rem;
+      display: flex;
+      align-items: center;
+      text-align: initial;
+    }
+
+    .document-tips svg {
+      flex-shrink: 0;
+      margin-inline-end: 1rem;
+    }
+
+    .document-tips p {
+      margin-block: 0;
+    }
+
+    .document-tips p:first-of-type {
+      font-size; 1.875rem;
+      font-weight: bold
+    }
+
+    [type='file'] {
+      display: none;
+    }
+
+    .document-tips > * + * {
+      margin-inline-start; 1em;
     }
   </style>
 
@@ -430,27 +555,34 @@ function scwTemplateString() {
       <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
     </symbol>
   </svg>
-  <div id='request-screen' class='flow center'>
-    <div class="nav back-to-host-nav">
-      <div class="back-wrapper back-to-host-wrapper">
-        <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="back-button-text">Back</div>
-      </div>
-      <button data-type='icon' type='button'  id='request-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg>             
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
-    </div>
-    <div class='section | flow'>
-      <p class='color-red' id='error'>
-      </p>
 
+  <div class='flow center'>
+    <p class='color-red | center' id='error'>
+    </p>
+  </div>
+
+  <div id='request-screen' class='flow center'>
+    ${this.showNavigation ? `
+      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right': ''}">
+        ${ this.hideBackToHost ? '' : `
+          <div class="back-wrapper back-to-host-wrapper">
+            <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
+              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="back-button-text">Back</div>
+          </div>
+        `}
+        <button data-type='icon' type='button' id='request-screen-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
+    <div class='section | flow'>
       ${this.hideAttribution ? '' : `
         <p class='powered-by text-transform-uppercase'>
           <span class='logo-mark'>
@@ -477,22 +609,26 @@ function scwTemplateString() {
   </div>
 
   <div hidden id='camera-screen' class='flow center'>
-    <div class="nav back-to-host-nav">
-      <div class="back-wrapper back-to-host-wrapper">
-        <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${this.showNavigation ? `
+      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right': ''}">
+        ${ this.hideBackToHost ? '' : `
+          <div class="back-wrapper back-to-host-wrapper">
+            <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
+              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="back-button-text">Back</div>
+          </div>
+        `}
+        <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
           </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
-        <div class="back-button-text">Back</div>
       </div>
-      <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg>      
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
-    </div>
+    ` : ''}
     <h1>Take a Selfie</h1>
 
     <div class='section | flow'>
@@ -518,7 +654,7 @@ function scwTemplateString() {
       </div>
 
       <small class='tips'>
-        <svg width='2.75rem' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40">
+        <svg width='44' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40">
           <path fill="#F8F8FA" fill-rule="evenodd" d="M17.44 0h4.2c4.92 0 7.56.68 9.95 1.96a13.32 13.32 0 015.54 5.54c1.27 2.39 1.95 5.02 1.95 9.94v4.2c0 4.92-.68 7.56-1.95 9.95a13.32 13.32 0 01-5.54 5.54c-2.4 1.27-5.03 1.95-9.95 1.95h-4.2c-4.92 0-7.55-.68-9.94-1.95a13.32 13.32 0 01-5.54-5.54C.68 29.19 0 26.56 0 21.64v-4.2C0 12.52.68 9.9 1.96 7.5A13.32 13.32 0 017.5 1.96C9.89.68 12.52 0 17.44 0z" clip-rule="evenodd"/>
           <path fill="#AEB6CB" d="M19.95 10.58a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.54 2.3a.71.71 0 000 1.43.71.71 0 000-1.43zm11.08 0a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.63 1.27a4.98 4.98 0 00-2.05 9.48v1.2a2.14 2.14 0 004.28 0v-1.2a4.99 4.99 0 00-2.23-9.48zm-7.75 4.27a.71.71 0 000 1.43.71.71 0 000-1.43zm15.68 0a.71.71 0 000 1.43.71.71 0 000-1.43z"/>
         </svg>
@@ -531,14 +667,16 @@ function scwTemplateString() {
   </div>
 
   <div hidden id='review-screen' class='flow center'>
-    <div class="nav justify-right">
-      <button data-type='icon' type='button'  id='review-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg>
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
-    </div>
+    ${this.showNavigation ? `
+      <div class="nav justify-right">
+        <button data-type='icon' type='button'  id='review-screen-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
     <h1>Review Selfie</h1>
 
     <div class='section | flow'>
@@ -568,23 +706,135 @@ function scwTemplateString() {
     </div>
   </div>
 
-  <div hidden id='id-camera-screen' class='flow center'>
-    <div class="nav">
-      <div class="back-wrapper">
-        <button type='button' data-type='icon' id="back-button-selfie" class="back-button icon-btn">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <div hidden id='id-entry-screen' class='flow center'>
+    ${this.showNavigation ? `
+      <div class="nav">
+        <div class="back-wrapper">
+          <button type='button' data-type='icon' id="back-button-selfie" class="back-button icon-btn">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="back-button-text">Back</div>
+        </div>
+        <button data-type='icon' type='button' id='id-entry-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
           </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
-        <div class="back-button-text">Back</div>
       </div>
-      <button data-type='icon' type='button'  id='id-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+    ` : ''}
+    <header>
+      <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
+        <g clip-path="url(#clip-path)">
+          <path fill="#7FCBF5" d="m37.806 75.563.15-52.06c0-1.625-1.145-3.581-2.53-4.394L4.126 1.054C3.435.632 2.772.602 2.32.874l-1.265.721c-.452.271-.753.813-.753 1.625l-.15 52.06c0 1.626 1.144 3.581 2.53 4.394L33.98 77.73c.934.541 1.958.09 1.807.18l1.266-.722c.451-.27.753-.843.753-1.625Zm-1.266.782c0 .392-.06.722-.18.963.12-.27.18-.602.18-.963Z"/>
+          <path fill="#7FCBF5" d="m39.07 74.84.151-52.06c0-1.625-1.144-3.58-2.53-4.393L5.39.361c-.692-.42-1.355-.45-1.807-.18L2.32.903c-.452.271-.753.813-.753 1.625l-.15 52.06c0 1.625 1.144 3.581 2.53 4.394l31.299 18.055c.934.542 1.958.09 1.807.181l1.266-.722c.451-.271.753-.843.753-1.625v-.03Zm-1.265.783c0 .391-.06.722-.18.963.12-.27.18-.602.18-.963Z"/>
+          <path fill="#3B3837" d="M13.19 40.626c-.873-.06-1.687.03-2.44.27 1.597 2.498 3.525 4.635 5.603 6.2-1.265-2.077-2.35-4.274-3.163-6.47Zm9.88 5.687c-.813 1.264-1.897 2.227-3.192 2.799 2.078.842 4.006.933 5.633.27a24.828 24.828 0 0 0-2.44-3.069Zm-5.542-4.393c-1.054-.542-2.109-.933-3.133-1.144a34.476 34.476 0 0 0 3.133 6.23V41.92Zm1.265.722v5.085c1.265-.511 2.32-1.384 3.133-2.587a21.086 21.086 0 0 0-3.133-2.498Zm-7.35-10.593-4.609-2.648c.12 3.16 1.205 6.65 3.043 9.99.873-.3 1.807-.39 2.801-.33-.753-2.438-1.175-4.785-1.265-6.982m6.115 3.521-4.88-2.829c.06 2.017.452 4.153 1.175 6.41 1.205.21 2.44.662 3.705 1.324V35.6Zm6.145 3.52-4.88-2.828v4.905c1.235.783 2.47 1.776 3.675 2.95.723-1.415 1.115-3.1 1.205-5.026Zm5.844 3.371-4.609-2.648c-.09 2.107-.512 3.972-1.295 5.507a30.696 30.696 0 0 1 2.802 3.581c1.867-1.204 2.952-3.43 3.102-6.44ZM14.154 25.73c-.904 1.504-1.416 3.43-1.506 5.627l4.88 2.829v-5.748c-1.145-.722-2.26-1.625-3.374-2.678m8.043 4.634a13.447 13.447 0 0 1-3.404-1.264v5.748l4.88 2.829c-.09-2.287-.572-4.815-1.476-7.313Zm-11.869-9.088c-2.078 1.084-3.343 3.49-3.524 6.68l4.609 2.649c.09-2.378.633-4.454 1.566-6.079a31.138 31.138 0 0 1-2.65-3.25Zm15.725 9.058c-.813.21-1.717.27-2.65.18.933 2.709 1.445 5.387 1.536 7.855l4.608 2.648c-.15-3.37-1.385-7.222-3.464-10.713m-8.465-7.613c-1.084.42-2.018 1.113-2.801 2.046a19.827 19.827 0 0 0 2.771 2.166v-4.212m1.265.722v4.213c.934.481 1.838.842 2.772 1.053a33.855 33.855 0 0 0-2.771-5.266Zm-2.38-2.137c-1.867-.722-3.614-.903-5.12-.451.723.963 1.476 1.896 2.289 2.738.783-1.023 1.747-1.805 2.862-2.317m3.524 2.016a34.581 34.581 0 0 1 2.832 5.567c.813.09 1.566.06 2.29-.12-1.507-2.197-3.254-4.063-5.122-5.477m-8.886 33.945s-.271-.271-.271-.452V55.16c0-.15.12-.24.27-.15l14.008 8.065s.271.27.271.451v1.595c0 .15-.12.24-.27.15l-14.008-8.064Zm0-4.093s-.271-.27-.271-.451v-1.595c0-.15.12-.241.27-.15l14.008 8.064s.271.27.271.451v1.595c0 .15-.12.241-.27.15l-14.008-8.064Zm4.308-38.037s-.272-.27-.272-.451V13.03c0-.15.12-.241.271-.15l7.772 4.332s.272.271.272.452v1.595c0 .15-.12.24-.271.15l-7.773-4.333Zm2.71 34.546s-.09-.06-.15-.09h-.06c-3.193-1.956-6.236-5.146-8.525-9.028-2.47-4.183-3.826-8.667-3.826-12.639 0-4.152 1.596-7.222 4.338-8.395 2.26-.963 5.12-.572 8.103 1.083h.06s.09.09.151.12c.06.03.09.06.15.09h.06c2.983 1.806 5.845 4.725 8.074 8.276 2.741 4.363 4.278 9.238 4.278 13.391 0 3.942-1.386 6.861-3.886 8.185-2.32 1.234-5.362.933-8.555-.872h-.06s-.091-.09-.151-.12Zm15.756-29.731L2.707 1.896c-1.416-.812-2.56-.15-2.56 1.445l-.151 51.94c0 1.625 1.114 3.58 2.53 4.393L33.735 77.67c1.416.813 2.56.151 2.56-1.444l.15-51.91c0-1.625-1.144-3.58-2.53-4.393"/>
+          <path fill="#7FCBF5" d="M16.353 47.096c-2.079-1.565-4.007-3.701-5.603-6.2.753-.24 1.566-.33 2.44-.27a35.724 35.724 0 0 0 3.163 6.47Zm3.494 2.016a7.52 7.52 0 0 0 3.193-2.799c.874.933 1.687 1.987 2.44 3.07-1.626.662-3.554.542-5.633-.27Zm-2.38-2.137a33.523 33.523 0 0 1-3.133-6.229c1.025.211 2.079.572 3.133 1.144v5.085Zm1.235.723v-5.086a19.828 19.828 0 0 1 3.163 2.498c-.813 1.203-1.897 2.076-3.163 2.588Zm-8.886-8.336c-1.838-3.31-2.922-6.8-3.043-9.99l4.61 2.648c.06 2.196.481 4.543 1.265 6.981a7.717 7.717 0 0 0-2.802.331m3.976-.21c-.692-2.227-1.084-4.394-1.174-6.41l4.88 2.828v4.905c-1.266-.662-2.5-1.113-3.706-1.324Zm8.646 4.995c-1.205-1.174-2.44-2.167-3.705-2.95v-4.904l4.91 2.828c-.09 1.926-.482 3.611-1.205 5.026Zm3.946 4.785a30.707 30.707 0 0 0-2.801-3.582c.783-1.564 1.205-3.4 1.295-5.507l4.609 2.649c-.15 3.009-1.235 5.236-3.103 6.44ZM12.647 31.296c.09-2.197.603-4.122 1.507-5.627 1.114 1.053 2.259 1.956 3.404 2.678v5.748l-4.91-2.829m6.115 3.521V29.04c1.174.602 2.29 1.024 3.434 1.264.873 2.528 1.386 5.026 1.476 7.313l-4.88-2.829m-11.96-6.891c.181-3.19 1.416-5.597 3.525-6.68a28.286 28.286 0 0 0 2.651 3.25c-.934 1.624-1.476 3.7-1.566 6.078l-4.61-2.648Zm18.105 10.442c-.09-2.468-.602-5.146-1.536-7.854.934.09 1.837 0 2.65-.18 2.08 3.49 3.314 7.342 3.465 10.712l-4.609-2.648m-7.35-11.435a19.841 19.841 0 0 1-2.772-2.167 6.523 6.523 0 0 1 2.802-2.046v4.213m1.235.722v-4.213a33.86 33.86 0 0 1 2.771 5.266c-.903-.21-1.837-.571-2.771-1.053Zm-5.212-4.032c-.813-.843-1.566-1.776-2.289-2.739 1.506-.451 3.284-.3 5.121.452-1.115.511-2.078 1.294-2.862 2.317m9.188 5.296a34.581 34.581 0 0 0-2.831-5.567c1.867 1.414 3.614 3.28 5.12 5.477-.722.15-1.476.18-2.289.12m-4.579-8.185s-.09-.06-.15-.09h-.06c-2.983-1.685-5.845-2.077-8.104-1.114-2.741 1.174-4.338 4.243-4.338 8.396 0 4.153 1.356 8.426 3.826 12.639 2.29 3.882 5.332 7.072 8.525 8.998h.06s.09.12.15.15c.061.03.091.06.152.09h.06c3.193 1.806 6.236 2.137 8.555.903 2.5-1.324 3.856-4.243 3.886-8.185 0-4.153-1.536-9.028-4.278-13.361-2.229-3.551-5.09-6.5-8.073-8.276h-.06s-.09-.09-.15-.12"/>
+          <path fill="#43C15F" d="M40.668 50.165h-.03c-5.723 0-10.363 4.635-10.363 10.352v.03c0 5.717 4.64 10.352 10.363 10.352h.03c5.723 0 10.363-4.635 10.363-10.352v-.03c0-5.717-4.64-10.352-10.363-10.352Z"/>
+          <path fill="#E5E7E7" d="m38.826 65.873-5.603-5.447 1.627-1.685 3.976 3.822 7.591-7.343 1.627 1.685-9.188 8.968h-.03Z"/>
+        </g>
+        <defs>
+          <clipPath id="clip-path">
+            <path fill="#fff" d="M0 0h51v78H0z"/>
+          </clipPath>
+        </defs>
+      </svg>
+      <h1>
+        Submit${this.captureBackOfID ? ' the Front of' : ''} Your ID
+      </h1>
+      <p>
+        We'll use it to verify your identity.
+      </p>
+      <p>
+        Follow the tips below for the best results.
+      </p>
+    </header>
+    <div class='flow'>
+      <div class='document-tips'>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none">
+          <g fill="#9394AB" clip-path="url(#clip)">
+            <path fill-rule="evenodd" d="M26.827 16a10.827 10.827 0 1 1-21.655 0 10.827 10.827 0 0 1 21.655 0Z" clip-rule="evenodd"/>
+            <path d="M16.51 3.825h-1.02L15.992 0l.518 3.825ZM22.53 5.707l-.884-.51 2.346-3.056-1.462 3.566ZM26.804 10.354l-.51-.883 3.557-1.479-3.047 2.362ZM28.183 16.51v-1.02l3.817.502-3.817.518ZM26.293 22.53l.51-.884 3.056 2.346-3.566-1.462ZM21.646 26.804l.884-.51 1.478 3.557-2.362-3.047ZM15.49 28.183h1.02L16.009 32l-.518-3.817ZM9.47 26.293l.884.51-2.346 3.056 1.462-3.566ZM5.196 21.646l.51.884-3.557 1.478 3.047-2.362ZM3.825 15.49v1.02L0 16.009l3.825-.518ZM5.707 9.47l-.51.884L2.14 8.008 5.707 9.47ZM10.354 5.196l-.883.51L7.992 2.15l2.362 3.047Z"/>
+          </g>
+          <defs>
+            <clipPath id="clip">
+              <path fill="#fff" d="M0 0h32v32H0z"/>
+            </clipPath>
+          </defs>
         </svg>
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
+        <div>
+          <p>Check the lighting</p>
+          <p>
+            Take your ID document image in a well-lit environment where it is easy to read, and free from glare on the card.
+          </p>
+        </div>
+      </div>
+      <div class='document-tips'>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="31" fill="none">
+          <g fill="#9394AB" clip-path="url(#path)">
+            <path d="M30.967 10.884H1.033A25.08 25.08 0 0 0 .65 12.06h30.702c-.11-.398-.238-.787-.384-1.176ZM31.515 12.696H.485c-.092.36-.165.721-.229 1.091h31.488c-.064-.37-.137-.73-.229-1.091ZM31.854 14.508H.146c-.045.333-.073.665-.1.997h31.908a18.261 18.261 0 0 0-.1-.997ZM32 16.767c0-.152 0-.294-.01-.446H.01c-.01.152-.01.294-.01.446 0 .152 0 .313.01.465h31.98c.01-.152.01-.313.01-.465ZM31.945 18.133H.055c.018.275.046.55.082.816h31.726c.036-.266.064-.54.082-.816ZM31.707 19.946H.293c.045.246.1.483.155.72h31.104c.055-.236.11-.474.155-.72ZM31.269 21.758H.73c.074.209.138.427.21.636h30.117c.073-.21.147-.427.21-.636ZM30.601 23.57H1.4l.247.541h28.708l.247-.54ZM29.687 25.383H2.322c.08.151.17.303.275.455h26.816l.274-.455ZM28.453 27.195H3.547l.284.36h24.338l.284-.36ZM26.816 29.007H5.184l.293.266h21.046l.293-.266ZM24.54 30.82H7.46l.284.18h16.512l.283-.18ZM28.873 6.898a16.377 16.377 0 0 0-.933-1.186A15.316 15.316 0 0 0 15.973 0 15.314 15.314 0 0 0 3.585 6.253h.027c-.164.218-.329.427-.484.645h25.746ZM29.12 7.268H2.88c-.293.437-.567.892-.823 1.357h27.886a13.617 13.617 0 0 0-.823-1.357ZM30.18 9.071H1.82c-.21.418-.403.845-.577 1.272h29.513a17.482 17.482 0 0 0-.575-1.272Z"/>
+          </g>
+          <defs>
+            <clipPath id="path">
+              <path fill="#fff" d="M0 0h32v31H0z"/>
+            </clipPath>
+          </defs>
+        </svg>
+        <div>
+          <p>Make sure it's in focus</p>
+          <p>
+            Ensure the photo of the ID document you submit is not blurry: you should be able to read the text on the document.
+          </p>
+        </div>
+      </div>
     </div>
+    <div style='margin-block-start: auto' class='flow'>
+      ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
+        <button data-variant='full-width' class='button button--primary' type='button' id='take-photo'>
+          Take Photo
+        </button>
+      ` : ''}
+      ${this.supportBothCaptureModes || this.documentCaptureModes === 'upload' ? `
+        <label id='upload-photo-label' class='button ${this.supportBothCaptureModes ? 'button--secondary' : 'button--primary'}'>
+          <input type='file' onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
+          <span>Upload Photo</span>
+        </label>
+      ` : ''}
+    </div>
+    ${this.hideAttribution ? '' : `
+      <p class='powered-by text-transform-uppercase'>
+        <span class='logo-mark'>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+            <use href="#logo-mark" />
+          </svg>
+        </span>
+        <span>Powered By</span>
+        <span class='company'>Smile Identity</span>
+      </p>
+    `}
+  </div>
+
+  <div hidden id='id-camera-screen' class='flow center'>
+    ${this.showNavigation ? `
+      <div class="nav">
+        <div class="back-wrapper">
+          <button type='button' data-type='icon' id="back-button-id-entry" class="back-button icon-btn">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="back-button-text">Back</div>
+        </div>
+        <button data-type='icon' type='button' id='id-camera-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
     <h1>Take ID Card Photo</h1>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       ${this.hideAttribution ? '' : `
@@ -621,14 +871,16 @@ function scwTemplateString() {
   </div>
 
   <div hidden id='id-review-screen' class='flow center'>
-    <div class="nav justify-right">
-      <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg>
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
-    </div>
+    ${this.showNavigation ? `
+      <div class="nav justify-right">
+        <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
     <h1>Review ID Card</h1>
     <div class='section | flow'>
       ${this.hideAttribution ? '' : `
@@ -645,18 +897,18 @@ function scwTemplateString() {
 
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         <div class='actions'>
+          <button id='re-capture-id-image' class='button icon-btn' type='button'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
+              <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
+            </svg>
+            <span class='visually-hidden'>Re-Capture</span>
+          </button>
           <button id='select-id-image' class='button icon-btn' type='button'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
               <circle cx="20.5" cy="20.5" r="20" stroke="#fff"/>
               <path d="M12.3 20.5l6.15 6.15 12.3-12.3" stroke="#fff" stroke-width="3.075" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class='visually-hidden'>Accept Image</span>
-          </button>
-          <button id='re-capture-id-image' class='button icon-btn' type='button'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
-              <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
-            </svg>
-            <span class='visually-hidden'>Re-Capture</span>
           </button>
         </div>
 
@@ -665,29 +917,98 @@ function scwTemplateString() {
           id='id-review-image'
           src=''
           width='396'
-          height='259'
         />
       </div>
     </div>
   </div>
 
-  <div hidden id='back-of-id-camera-screen' class='flow center'>
-    <div class="nav">
-      <div class="back-wrapper">
-        <button type='button' data-type='icon' id="back-button-id-image" class="back-button icon-btn">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <div hidden id='back-of-id-entry-screen' class='flow center'>
+    ${this.showNavigation ? `
+      <div class="nav">
+        <div class="back-wrapper">
+          <button type='button' data-type='icon' id="back-button-id-image" class="back-button icon-btn">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="back-button-text">Back</div>
+        </div>
+        <button data-type='icon' type='button' id='back-id-entry-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
           </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
-        <div class="back-button-text">Back</div>
       </div>
-      <button data-type='icon' type='button'  id='back-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg> 
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
+      ` : ''}
+    <header>
+      <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
+        <g clip-path="url(#clip-path)">
+          <path fill="#7FCBF5" d="m37.806 75.563.15-52.06c0-1.625-1.145-3.581-2.53-4.394L4.126 1.054C3.435.632 2.772.602 2.32.874l-1.265.721c-.452.271-.753.813-.753 1.625l-.15 52.06c0 1.626 1.144 3.581 2.53 4.394L33.98 77.73c.934.541 1.958.09 1.807.18l1.266-.722c.451-.27.753-.843.753-1.625Zm-1.266.782c0 .392-.06.722-.18.963.12-.27.18-.602.18-.963Z"/>
+          <path fill="#7FCBF5" d="m39.07 74.84.151-52.06c0-1.625-1.144-3.58-2.53-4.393L5.39.361c-.692-.42-1.355-.45-1.807-.18L2.32.903c-.452.271-.753.813-.753 1.625l-.15 52.06c0 1.625 1.144 3.581 2.53 4.394l31.299 18.055c.934.542 1.958.09 1.807.181l1.266-.722c.451-.271.753-.843.753-1.625v-.03Zm-1.265.783c0 .391-.06.722-.18.963.12-.27.18-.602.18-.963Z"/>
+          <path fill="#3B3837" d="M13.19 40.626c-.873-.06-1.687.03-2.44.27 1.597 2.498 3.525 4.635 5.603 6.2-1.265-2.077-2.35-4.274-3.163-6.47Zm9.88 5.687c-.813 1.264-1.897 2.227-3.192 2.799 2.078.842 4.006.933 5.633.27a24.828 24.828 0 0 0-2.44-3.069Zm-5.542-4.393c-1.054-.542-2.109-.933-3.133-1.144a34.476 34.476 0 0 0 3.133 6.23V41.92Zm1.265.722v5.085c1.265-.511 2.32-1.384 3.133-2.587a21.086 21.086 0 0 0-3.133-2.498Zm-7.35-10.593-4.609-2.648c.12 3.16 1.205 6.65 3.043 9.99.873-.3 1.807-.39 2.801-.33-.753-2.438-1.175-4.785-1.265-6.982m6.115 3.521-4.88-2.829c.06 2.017.452 4.153 1.175 6.41 1.205.21 2.44.662 3.705 1.324V35.6Zm6.145 3.52-4.88-2.828v4.905c1.235.783 2.47 1.776 3.675 2.95.723-1.415 1.115-3.1 1.205-5.026Zm5.844 3.371-4.609-2.648c-.09 2.107-.512 3.972-1.295 5.507a30.696 30.696 0 0 1 2.802 3.581c1.867-1.204 2.952-3.43 3.102-6.44ZM14.154 25.73c-.904 1.504-1.416 3.43-1.506 5.627l4.88 2.829v-5.748c-1.145-.722-2.26-1.625-3.374-2.678m8.043 4.634a13.447 13.447 0 0 1-3.404-1.264v5.748l4.88 2.829c-.09-2.287-.572-4.815-1.476-7.313Zm-11.869-9.088c-2.078 1.084-3.343 3.49-3.524 6.68l4.609 2.649c.09-2.378.633-4.454 1.566-6.079a31.138 31.138 0 0 1-2.65-3.25Zm15.725 9.058c-.813.21-1.717.27-2.65.18.933 2.709 1.445 5.387 1.536 7.855l4.608 2.648c-.15-3.37-1.385-7.222-3.464-10.713m-8.465-7.613c-1.084.42-2.018 1.113-2.801 2.046a19.827 19.827 0 0 0 2.771 2.166v-4.212m1.265.722v4.213c.934.481 1.838.842 2.772 1.053a33.855 33.855 0 0 0-2.771-5.266Zm-2.38-2.137c-1.867-.722-3.614-.903-5.12-.451.723.963 1.476 1.896 2.289 2.738.783-1.023 1.747-1.805 2.862-2.317m3.524 2.016a34.581 34.581 0 0 1 2.832 5.567c.813.09 1.566.06 2.29-.12-1.507-2.197-3.254-4.063-5.122-5.477m-8.886 33.945s-.271-.271-.271-.452V55.16c0-.15.12-.24.27-.15l14.008 8.065s.271.27.271.451v1.595c0 .15-.12.24-.27.15l-14.008-8.064Zm0-4.093s-.271-.27-.271-.451v-1.595c0-.15.12-.241.27-.15l14.008 8.064s.271.27.271.451v1.595c0 .15-.12.241-.27.15l-14.008-8.064Zm4.308-38.037s-.272-.27-.272-.451V13.03c0-.15.12-.241.271-.15l7.772 4.332s.272.271.272.452v1.595c0 .15-.12.24-.271.15l-7.773-4.333Zm2.71 34.546s-.09-.06-.15-.09h-.06c-3.193-1.956-6.236-5.146-8.525-9.028-2.47-4.183-3.826-8.667-3.826-12.639 0-4.152 1.596-7.222 4.338-8.395 2.26-.963 5.12-.572 8.103 1.083h.06s.09.09.151.12c.06.03.09.06.15.09h.06c2.983 1.806 5.845 4.725 8.074 8.276 2.741 4.363 4.278 9.238 4.278 13.391 0 3.942-1.386 6.861-3.886 8.185-2.32 1.234-5.362.933-8.555-.872h-.06s-.091-.09-.151-.12Zm15.756-29.731L2.707 1.896c-1.416-.812-2.56-.15-2.56 1.445l-.151 51.94c0 1.625 1.114 3.58 2.53 4.393L33.735 77.67c1.416.813 2.56.151 2.56-1.444l.15-51.91c0-1.625-1.144-3.58-2.53-4.393"/>
+          <path fill="#7FCBF5" d="M16.353 47.096c-2.079-1.565-4.007-3.701-5.603-6.2.753-.24 1.566-.33 2.44-.27a35.724 35.724 0 0 0 3.163 6.47Zm3.494 2.016a7.52 7.52 0 0 0 3.193-2.799c.874.933 1.687 1.987 2.44 3.07-1.626.662-3.554.542-5.633-.27Zm-2.38-2.137a33.523 33.523 0 0 1-3.133-6.229c1.025.211 2.079.572 3.133 1.144v5.085Zm1.235.723v-5.086a19.828 19.828 0 0 1 3.163 2.498c-.813 1.203-1.897 2.076-3.163 2.588Zm-8.886-8.336c-1.838-3.31-2.922-6.8-3.043-9.99l4.61 2.648c.06 2.196.481 4.543 1.265 6.981a7.717 7.717 0 0 0-2.802.331m3.976-.21c-.692-2.227-1.084-4.394-1.174-6.41l4.88 2.828v4.905c-1.266-.662-2.5-1.113-3.706-1.324Zm8.646 4.995c-1.205-1.174-2.44-2.167-3.705-2.95v-4.904l4.91 2.828c-.09 1.926-.482 3.611-1.205 5.026Zm3.946 4.785a30.707 30.707 0 0 0-2.801-3.582c.783-1.564 1.205-3.4 1.295-5.507l4.609 2.649c-.15 3.009-1.235 5.236-3.103 6.44ZM12.647 31.296c.09-2.197.603-4.122 1.507-5.627 1.114 1.053 2.259 1.956 3.404 2.678v5.748l-4.91-2.829m6.115 3.521V29.04c1.174.602 2.29 1.024 3.434 1.264.873 2.528 1.386 5.026 1.476 7.313l-4.88-2.829m-11.96-6.891c.181-3.19 1.416-5.597 3.525-6.68a28.286 28.286 0 0 0 2.651 3.25c-.934 1.624-1.476 3.7-1.566 6.078l-4.61-2.648Zm18.105 10.442c-.09-2.468-.602-5.146-1.536-7.854.934.09 1.837 0 2.65-.18 2.08 3.49 3.314 7.342 3.465 10.712l-4.609-2.648m-7.35-11.435a19.841 19.841 0 0 1-2.772-2.167 6.523 6.523 0 0 1 2.802-2.046v4.213m1.235.722v-4.213a33.86 33.86 0 0 1 2.771 5.266c-.903-.21-1.837-.571-2.771-1.053Zm-5.212-4.032c-.813-.843-1.566-1.776-2.289-2.739 1.506-.451 3.284-.3 5.121.452-1.115.511-2.078 1.294-2.862 2.317m9.188 5.296a34.581 34.581 0 0 0-2.831-5.567c1.867 1.414 3.614 3.28 5.12 5.477-.722.15-1.476.18-2.289.12m-4.579-8.185s-.09-.06-.15-.09h-.06c-2.983-1.685-5.845-2.077-8.104-1.114-2.741 1.174-4.338 4.243-4.338 8.396 0 4.153 1.356 8.426 3.826 12.639 2.29 3.882 5.332 7.072 8.525 8.998h.06s.09.12.15.15c.061.03.091.06.152.09h.06c3.193 1.806 6.236 2.137 8.555.903 2.5-1.324 3.856-4.243 3.886-8.185 0-4.153-1.536-9.028-4.278-13.361-2.229-3.551-5.09-6.5-8.073-8.276h-.06s-.09-.09-.15-.12"/>
+          <path fill="#43C15F" d="M40.668 50.165h-.03c-5.723 0-10.363 4.635-10.363 10.352v.03c0 5.717 4.64 10.352 10.363 10.352h.03c5.723 0 10.363-4.635 10.363-10.352v-.03c0-5.717-4.64-10.352-10.363-10.352Z"/>
+          <path fill="#E5E7E7" d="m38.826 65.873-5.603-5.447 1.627-1.685 3.976 3.822 7.591-7.343 1.627 1.685-9.188 8.968h-.03Z"/>
+        </g>
+        <defs>
+          <clipPath id="clip-path">
+            <path fill="#fff" d="M0 0h51v78H0z"/>
+          </clipPath>
+        </defs>
+      </svg>
+      <h1>
+        Submit Back of ID
+      </h1>
+      <p>
+        For this ID type, we require that you submit the back of the ID
+      </p>
+    </header>
+    <div style='margin-block-start: auto' class='flow'>
+      ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
+        <button data-variant='full-width' class='button button--primary' type='button' id='take-photo'>
+          Take Photo
+        </button>
+      ` : ''}
+      ${this.supportBothCaptureModes || this.documentCaptureModes === 'upload' ? `
+        <label class='button ${this.supportBothCaptureModes ? 'button--secondary' : 'button--primary'}'>
+          <input type='file' id='upload-photo' name='document' accept='image/png, image/jpeg' />
+          <span>Upload Photo</span>
+      </label>
+      ` : ''}
     </div>
+    ${this.hideAttribution ? '' : `
+      <p class='powered-by text-transform-uppercase'>
+        <span class='logo-mark'>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 10">
+            <use href="#logo-mark" />
+          </svg>
+        </span>
+        <span>Powered By</span>
+        <span class='company'>Smile Identity</span>
+      </p>
+    `}
+  </div>
+
+  <div hidden id='back-of-id-camera-screen' class='flow center'>
+    ${this.showNavigation ? `
+      <div class="nav">
+        <div class="back-wrapper">
+          <button type='button' data-type='icon' id="back-button-back-id-entry" class="back-button icon-btn">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="back-button-text">Back</div>
+        </div>
+        <button data-type='icon' type='button' id='back-id-camera-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
     <h1>Take Back of ID Card Photo</h1>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       ${this.hideAttribution ? '' : `
@@ -724,14 +1045,16 @@ function scwTemplateString() {
   </div>
 
   <div hidden id='back-of-id-review-screen' class='flow center'>
-    <div class="nav justify-right">
-      <button data-type='icon' type='button'  id='back-review-screen-close' class='close-iframe icon-btn'>
-        <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
-        </svg>
-        <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-      </button>
-    </div>
+    ${this.showNavigation ? `
+      <div class="nav justify-right">
+        <button data-type='icon' type='button' id='back-review-screen-close' class='close-iframe icon-btn'>
+          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          </svg>
+          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+        </button>
+      </div>
+    ` : ''}
     <h1>Review Back of ID Card Photo</h1>
     <div class='section | flow'>
       ${this.hideAttribution ? '' : `
@@ -748,18 +1071,18 @@ function scwTemplateString() {
 
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         <div class='actions'>
+          <button id='re-capture-back-of-id-image' class='button icon-btn' type='button'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
+              <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
+            </svg>
+            <span class='visually-hidden'>Re-Capture</span>
+          </button>
           <button id='select-back-of-id-image' class='button icon-btn' type='button'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
               <circle cx="20.5" cy="20.5" r="20" stroke="#fff"/>
               <path d="M12.3 20.5l6.15 6.15 12.3-12.3" stroke="#fff" stroke-width="3.075" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class='visually-hidden'>Accept Image</span>
-          </button>
-          <button id='re-capture-back-of-id-image' class='button icon-btn' type='button'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
-              <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
-            </svg>
-            <span class='visually-hidden'>Re-Capture</span>
           </button>
         </div>
 
@@ -768,7 +1091,6 @@ function scwTemplateString() {
           id='back-of-id-review-image'
           src=''
           width='396'
-          height='259'
         />
       </div>
     </div>
@@ -803,42 +1125,24 @@ class SmartCameraWeb extends HTMLElement {
     this.activeScreen = null;
   }
 
-  setActiveScreen(el) {
-    const element = el;
+  setActiveScreen(element) {
     this.activeScreen.hidden = true;
     element.hidden = false;
     this.activeScreen = element;
   }
 
-  updateTemplate() {
-    this.shadowRoot.innerHTML = '';
+  connectedCallback() {
+    this.shadowRoot.innerHTML = this.render();
 
-    const template = document.createElement('template');
-    template.innerHTML = this.render();
-    this.shadowRoot.appendChild(template.content.cloneNode(true));
-
-    this.attachListeners();
-  }
-
-  attachListeners() {
     if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-      const button = this.shadowRoot.querySelector('#request-camera-access');
-      if (button) {
-        button.addEventListener('click', (e) => this.init(e));
-      }
-      this.setupNavigation();
+      this.setUpEventListeners();
     } else {
       const heading = document.createElement('h1');
       heading.classList.add('error-message');
       heading.textContent = 'Your browser does not support this integration';
 
-      this.shadowRoot.appendChild(heading);
+      this.shadowRoot.innerHTML = heading;
     }
-  }
-
-  connectedCallback() {
-    this.setupDocumentTypeObserver()
-    this.updateTemplate();
   }
 
   disconnectedCallback() {
@@ -849,24 +1153,163 @@ class SmartCameraWeb extends HTMLElement {
     this.shadowRoot.innerHTML = '';
   }
 
-  static get observedAttributes() { return ['hide-back-to-host', 'document-type']; }
+  static get observedAttributes() {
+    return ['document-capture-modes', 'document-type', 'hide-back-to-host', 'show-navigation'];
+  }
 
-  setupDocumentTypeObserver() {
-    this.documentType = this.getAttribute('document-type');
-    this.isPortraitCaptureView = this.documentType === 'GREEN_BOOK';
+  attributeChangedCallback(name) {
+    switch (name) {
+    case 'document-capture-modes':
+    case 'document-type':
+    case 'hide-back-to-host':
+    case 'show-navigation':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
+    }
+  }
 
-    const documentTypeAttributeObserver = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        if (mutation.attributeName === 'document-type') {
-          const newValue = this.getAttribute('document-type');
-          this.isPortraitCaptureView = newValue === 'GREEN_BOOK'
-        }
+  setUpEventListeners() {
+    this.errorMessage = this.shadowRoot.querySelector('#error');
+
+    this.requestScreen = this.shadowRoot.querySelector('#request-screen');
+    this.activeScreen = this.requestScreen;
+    this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
+    this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
+    this.idEntryScreen = this.shadowRoot.querySelector('#id-entry-screen');
+    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
+    this.IDReviewScreen = this.shadowRoot.querySelector('#id-review-screen');
+    this.backOfIdEntryScreen = this.shadowRoot.querySelector('#back-of-id-entry-screen');
+    this.backOfIDCameraScreen = this.shadowRoot.querySelector('#back-of-id-camera-screen');
+    this.backOfIDReviewScreen = this.shadowRoot.querySelector('#back-of-id-review-screen');
+    this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
+
+    this.videoContainer = this.shadowRoot.querySelector('.video-container > .video');
+    this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
+    this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
+    this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
+    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
+    this.captureBackOfIDImage = this.shadowRoot.querySelector('#capture-back-of-id-image');
+    this.reviewImage = this.shadowRoot.querySelector('#review-image');
+    this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
+    this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-image');
+
+    this.reStartImageCapture = this.shadowRoot.querySelector('#restart-image-capture');
+    this.reCaptureIDImage = this.shadowRoot.querySelector('#re-capture-id-image');
+    this.reCaptureBackOfIDImage = this.shadowRoot.querySelector('#re-capture-back-of-id-image');
+    this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
+    this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
+    this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
+    this.takeDocumentPhotoButton = this.idEntryScreen.querySelector('#take-photo');
+    this.uploadDocumentPhotoButton = this.idEntryScreen.querySelector('#upload-photo');
+    this.takeBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#take-photo');
+    this.uploadBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#upload-photo');
+
+    this.shadowRoot.querySelector('#request-camera-access').addEventListener('click', () => this.init());
+
+    if (this.showNavigation) {
+      // Add Back Button Listeners
+      const backButtons = this.shadowRoot.querySelectorAll('.back-button-exit');
+      backButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          this._backAndExit();
+        });
       });
+
+      // Add Close Button Listeners
+      const closeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+      closeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          this._exitSmartCamera();
+        });
+      });
+    }
+
+    if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
+    if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
+    if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
+    if (this.uploadBackOfDocumentPhotoButton) this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
+
+    this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
+    this.backToIdEntryButton = this.shadowRoot.querySelector('#back-button-id-entry');
+    this.backToBackIdEntryButton = this.shadowRoot.querySelector('#back-button-back-id-entry');
+    this.backToIdImageButton = this.shadowRoot.querySelector('#back-button-id-image');
+
+    if (this.backToSelfie) this.backToSelfie.addEventListener('click', () => {
+      this._reStartImageCapture();
     });
 
-    documentTypeAttributeObserver.observe(this, {
-      attributes: true, attributeFilter: ['document-type']
+    if (this.backToIdEntryButton) this.backToIdEntryButton.addEventListener('click', () => {
+      this.setActiveScreen(this.idEntryScreen);
     });
+
+    if (this.backToBackIdEntryButton) this.backToBackIdEntryButton.addEventListener('click', () => {
+      this.setActiveScreen(this.backOfIdEntryScreen);
+    });
+
+    if (this.backToIdImageButton) this.backToIdImageButton.addEventListener('click', () => {
+      this.setActiveScreen(this.IDReviewScreen);
+    });
+
+    this.startImageCapture.addEventListener('click', () => {
+      this._startImageCapture();
+    });
+
+    this.selectSelfie.addEventListener('click', () => {
+      this._selectSelfie();
+    });
+
+    this.selectIDImage.addEventListener('click', () => {
+      this._selectIDImage();
+    });
+
+    this.selectBackOfIDImage.addEventListener('click', () => {
+      this._selectIDImage(true);
+    });
+
+    this.captureIDImage.addEventListener('click', () => {
+      this._captureIDImage();
+    });
+
+    this.captureBackOfIDImage.addEventListener('click', () => {
+      this._captureIDImage();
+    });
+
+    this.reStartImageCapture.addEventListener('click', () => {
+      this._reStartImageCapture();
+    });
+
+    this.reCaptureIDImage.addEventListener('click', () => {
+      this._reCaptureIDImage();
+    });
+
+    this.reCaptureBackOfIDImage.addEventListener('click', () => {
+      this._reCaptureIDImage();
+    });
+  }
+
+  init() {
+    this._videoStreamDurationInMS = 7800;
+    this._imageCaptureIntervalInMS = 200;
+
+    this._data = {
+      partner_params: {
+        libraryVersion: VERSION,
+        permissionGranted: false,
+      },
+      images: [],
+    };
+    this._rawImages = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+      .then((stream) => {
+        this.handleSuccess(stream);
+      })
+      .catch((e) => {
+        this.handleError(e);
+      });
   }
 
   reset() {
@@ -874,13 +1317,8 @@ class SmartCameraWeb extends HTMLElement {
     this.connectedCallback();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'document-type' && oldValue !== newValue) {
-      this.isPortraitCaptureView = newValue === 'GREEN_BOOK';
-      this.updateTemplate();
-    }
-
-		this.hideBackToHostButtons();
+  resetErrorMessage() {
+    this.errorMessage.textContent = '';
   }
 
   handleSuccess(stream) {
@@ -934,10 +1372,10 @@ class SmartCameraWeb extends HTMLElement {
     const videoContainer = this.activeScreen === this.IDCameraScreen
       ? this.IDCameraScreen.querySelector('.id-video-container')
       : this.backOfIDCameraScreen.querySelector('.id-video-container');
-    
+
     video.onloadedmetadata = () => {
       videoContainer.querySelector('.actions').hidden = false;
-    }
+    };
 
     if (!videoExists) {
       videoContainer.prepend(video);
@@ -948,192 +1386,43 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   handleError(e) {
-    if (e.name === 'NotAllowedError' || e.name === 'SecurityError') {
+    switch (e.name) {
+    case 'NotAllowedError':
+    case 'SecurityError':
       this.errorMessage.textContent = `
-        Looks like camera access was not granted, or was blocked by a browser
-        level setting / extension. Please follow the prompt from the URL bar,
-        or extensions, and enable access.
-
-        You may need to refresh to start all over again
+          Looks like camera access was not granted, or was blocked by a browser
+          level setting / extension. Please follow the prompt from the URL bar,
+          or extensions, and enable access.
+          You may need to refresh to start all over again
         `;
-    }
-
-    if (e.name === 'AbortError') {
+      break;
+    case 'AbortError':
       this.errorMessage.textContent = `
-        Oops! Something happened, and we lost access to your stream.
-
-        Please refresh to start all over again
+          Oops! Something happened, and we lost access to your stream.
+          Please refresh to start all over again
         `;
-    }
-
-    if (e.name === 'NotReadableError') {
+      break;
+    case 'NotReadableError':
       this.errorMessage.textContent = `
-        There seems to be a problem with your device's camera, or its connection.
-
-        Please check this, and when resolved, try again. Or try another device.
+          There seems to be a problem with your device's camera, or its connection.
+          Please check this, and when resolved, try again. Or try another device.
         `;
-    }
-
-    if (e.name === 'NotFoundError') {
+      break;
+    case 'NotFoundError':
       this.errorMessage.textContent = `
-        We are unable to find a video stream.
-
-        You may need to refresh to start all over again
+          We are unable to find a video stream.
+          You may need to refresh to start all over again
         `;
-    }
-
-    if (e.name === 'TypeError') {
+      break;
+    case 'TypeError':
       this.errorMessage.textContent = `
-        This site is insecure, and as such cannot have access to your camera.
-
-        Try to navigate to a secure version of this page, or contact the owner.
-      `;
+          This site is insecure, and as such cannot have access to your camera.
+          Try to navigate to a secure version of this page, or contact the owner.
+        `;
+      break;
+    default:
+      this.errorMessage.textContent = e.message;
     }
-  }
-
-  init() {
-    this.errorMessage = this.shadowRoot.querySelector('#error');
-
-    this.captureID = this.hasAttribute('capture-id');
-    this.captureBackOfID = this.getAttribute('capture-id') === 'back';
-
-    this.requestScreen = this.shadowRoot.querySelector('#request-screen');
-    this.activeScreen = this.requestScreen;
-    this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
-    this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
-    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
-    this.IDReviewScreen = this.shadowRoot.querySelector('#id-review-screen');
-    this.backOfIDCameraScreen = this.shadowRoot.querySelector('#back-of-id-camera-screen');
-    this.backOfIDReviewScreen = this.shadowRoot.querySelector('#back-of-id-review-screen');
-    this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
-
-    this.videoContainer = this.shadowRoot.querySelector('.video-container > .video');
-    this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
-    this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
-    this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
-    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.captureBackOfIDImage = this.shadowRoot.querySelector('#capture-back-of-id-image');
-    this.reviewImage = this.shadowRoot.querySelector('#review-image');
-    this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
-    this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-image');
-
-    this.reStartImageCapture = this.shadowRoot.querySelector('#restart-image-capture');
-    this.reCaptureIDImage = this.shadowRoot.querySelector('#re-capture-id-image');
-    this.reCaptureBackOfIDImage = this.shadowRoot.querySelector('#re-capture-back-of-id-image');
-    this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
-    this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
-    this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
-    this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
-    this.backToIdImageButton = this.shadowRoot.querySelector('#back-button-id-image');
-
-    this.backToIdImageButton.addEventListener('click', () => {
-      this._reCaptureIDImage().then(() => {
-        this.setActiveScreen(this.IDReviewScreen);
-        this._reCaptureIDImage();
-      });
-    });
-
-    this.backToSelfie.addEventListener('click', () => {
-      this._reStartImageCapture();
-    });
-
-    this.startImageCapture.addEventListener('click', () => {
-      this._startImageCapture();
-    });
-
-    this.selectSelfie.addEventListener('click', () => {
-      this._selectSelfie();
-    });
-
-    this.selectIDImage.addEventListener('click', () => {
-      this._selectIDImage();
-    });
-
-    this.selectBackOfIDImage.addEventListener('click', () => {
-      this._selectIDImage(true);
-    });
-
-    this.captureIDImage.addEventListener('click', () => {
-      this._captureIDImage();
-    });
-
-    this.captureBackOfIDImage.addEventListener('click', () => {
-      this._captureIDImage();
-    });
-
-    this.reStartImageCapture.addEventListener('click', () => {
-      this._reStartImageCapture();
-    });
-
-    this.reCaptureIDImage.addEventListener('click', () => {
-      this._reCaptureIDImage();
-    });
-
-    this.reCaptureBackOfIDImage.addEventListener('click', () => {
-      this._reCaptureIDImage();
-    });
-
-    this._videoStreamDurationInMS = 7800;
-    this._imageCaptureIntervalInMS = 200;
-
-    this._data = {
-      partner_params: {
-        libraryVersion: VERSION,
-        permissionGranted: false,
-      },
-      images: [],
-    };
-    this._rawImages = [];
-
-    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
-      .then((stream) => {
-        this.handleSuccess(stream);
-      })
-      .catch((e) => {
-        this.handleError(e);
-      })
-  }
-
-  setupNavigation() {
-    if (!this.hasAttribute('show-navigation')) return;
-    this.shadowRoot.querySelectorAll('.nav').forEach((el) => {
-      const navItem = el;
-      navItem.style.display = 'flex';
-    });
-    this.addBackButtonListeners();
-    this.addCloseButtonListeners();
-  }
-
-  addBackButtonListeners() {
-    const backButtons = this.shadowRoot.querySelectorAll('.back-button-exit');
-    backButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        this._backAndExit();
-      });
-    });
-  }
-
-  get hideBackToHost() {
-    return this.hasAttribute('hide-back-to-host');
-  }
-
-  hideBackToHostButtons() {
-    this.shadowRoot.querySelectorAll('.back-to-host-nav').forEach((navItem) => {
-      navItem.classList.add('justify-right');
-    });
-    this.shadowRoot.querySelectorAll('.back-to-host-wrapper').forEach((el) => {
-      const backWrapper = el;
-      backWrapper.style.display = 'none';
-    });
-  }
-
-  addCloseButtonListeners() {
-    const closeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
-    closeButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        this._exitSmartCamera();
-      });
-    });
   }
 
   _startImageCapture() {
@@ -1215,6 +1504,36 @@ class SmartCameraWeb extends HTMLElement {
     );
 
     return context;
+  }
+
+  async _uploadDocument(event) {
+    this.resetErrorMessage();
+    try {
+      const { files } = event.target;
+
+      // validate file, and convert file to data url
+      const fileData = await SmartFileUpload.retrieve(files);
+
+      // add file to images list
+      this._data.images.push({
+        image_type_id: this.activeScreen === this.idEntryScreen ? 3 : 7,
+        // NOTE: data URLs start with a file type before the base64 data,
+        // separated by a comma.
+        //
+        // we are only interested in the base64 segment, so we extract it
+        image: fileData.split(',')[1],
+      });
+
+      // add file to preview state
+      const nextScreen = this.activeScreen === this.idEntryScreen ? this.IDReviewScreen : this.backOfIDReviewScreen;
+      const previewImage = nextScreen.querySelector('img');
+      previewImage.src = fileData;
+
+      // change active screen
+      this.setActiveScreen(nextScreen);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   _drawIDImage(video = this._IDVideo) {
@@ -1374,6 +1693,12 @@ class SmartCameraWeb extends HTMLElement {
         },
       });
 
+      if (this.activeScreen === this.idEntryScreen) {
+        this.setActiveScreen(this.IDCameraScreen);
+      } else if (this.activeScreen === this.backOfIdEntryScreen) {
+        this.setActiveScreen(this.backOfIDCameraScreen);
+      }
+
       this.handleIDStream(stream);
     } catch (e) {
       this.handleError(e);
@@ -1384,8 +1709,7 @@ class SmartCameraWeb extends HTMLElement {
     if (!this.captureID) {
       this._publishSelectedImages();
     } else {
-      this.setActiveScreen(this.IDCameraScreen);
-      this._startIDCamera();
+      this.setActiveScreen(this.idEntryScreen);
     }
   }
 
@@ -1393,8 +1717,7 @@ class SmartCameraWeb extends HTMLElement {
     if (!this.captureBackOfID || backOfIDCaptured) {
       this._publishSelectedImages();
     } else {
-      this.setActiveScreen(this.backOfIDCameraScreen);
-      this._startIDCamera();
+      this.setActiveScreen(this.backOfIdEntryScreen);
     }
   }
 
@@ -1421,6 +1744,7 @@ class SmartCameraWeb extends HTMLElement {
   async _reStartImageCapture() {
     this.startImageCapture.disabled = false;
 
+    this._rawImages = [];
     this._data.images = [];
 
     try {
@@ -1436,38 +1760,56 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   async _reCaptureIDImage() {
-    if (this.activeScreen === this.IDReviewScreen) {
-      this.setActiveScreen(this.IDCameraScreen);
-    } else {
-      this.setActiveScreen(this.backOfIDCameraScreen);
-    }
+    const previousScreen = this.activeScreen === this.IDReviewScreen
+      ? this.idEntryScreen : this.backOfIdEntryScreen;
+    this.setActiveScreen(previousScreen);
 
     // NOTE: removes the last element in the list
     this._data.images.pop();
+  }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: 'environment',
-          width: { min: 1280 },
-          // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-          // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-          // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-          zoom: isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-        },
-      });
+  get captureID() {
+    return this.hasAttribute('capture-id');
+  }
 
-      this.handleIDStream(stream);
-    } catch (e) {
-      this.handleError(e);
-    }
+  get captureBackOfID() {
+    return this.getAttribute('capture-id') === 'back' || false;
   }
 
   get hideAttribution() {
     return this.hasAttribute('hide-attribution');
   }
 
+  get showNavigation() {
+    return this.hasAttribute('show-navigation');
+  }
+
+  get hideBackToHost() {
+    return this.hasAttribute('hide-back-to-host');
+  }
+
+  get isPortraitCaptureView() {
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
+  }
+
+  get documentCaptureModes() {
+    /*
+      NOTE: options are `camera`, `upload`, and a comma-separated combination
+      of both.
+
+      defaults to `camera`;
+    */
+    return this.getAttribute('document-capture-modes') || 'camera';
+  }
+
+  get supportBothCaptureModes() {
+    const value = this.documentCaptureModes;
+    return value.includes('camera') && value.includes('upload');
+  }
+
+  get doNotUpload() {
+    return this.getAttribute('document-capture-modes') === 'camera';
+  }
 }
 
 window.customElements.define('smart-camera-web', SmartCameraWeb);

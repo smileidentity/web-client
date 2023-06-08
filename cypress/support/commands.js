@@ -30,3 +30,32 @@ Cypress.Commands.add('exitScreens', () => {
     .get('smart-camera-web')
     .should('not.exist');
 });
+
+Cypress.Commands.add('navigateFaceCaptureScreens', () => {
+  cy
+    .get('smart-camera-web')
+    .shadow()
+    .find('#request-camera-access')
+    .click();
+
+  cy
+    .get('smart-camera-web')
+    .shadow()
+    .find('#start-image-capture')
+    .click();
+
+  cy
+    .wait(8000);
+
+  cy
+    .get('smart-camera-web')
+    .shadow()
+    .find('#select-selfie')
+    .click();
+
+  cy
+    .get('smart-camera-web')
+    .shadow()
+    .find('#review-screen')
+    .should('not.be.visible');
+});

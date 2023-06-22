@@ -356,12 +356,12 @@ var eKYC = function eKYC() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			window.top.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.detail, '*');
+			window.top.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -624,10 +624,10 @@ var eKYC = function eKYC() {
 	}
 
 	function closeWindow() {
-		window.parent.postMessage('SmileIdentity::Close', '*');
+		window.top.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.parent.postMessage('SmileIdentity::Success', '*');
+		window.top.postMessage('SmileIdentity::Success', '*');
 	}
 }();

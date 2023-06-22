@@ -255,10 +255,10 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   function closeWindow() {
-    window.parent.postMessage("SmileIdentity::Close", "*");
+    window.top.postMessage("SmileIdentity::Close", "*");
   }
 
   function handleSuccess() {
-    window.parent.postMessage("SmileIdentity::Success", "*");
+    window.top.postMessage("SmileIdentity::Success", "*");
   }
 })();

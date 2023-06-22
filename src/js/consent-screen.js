@@ -808,7 +808,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	closeWindow() {
-		window.parent.postMessage('SmileIdentity::Close', '*');
+		window.top.postMessage('SmileIdentity::Close', '*');
 	}
 }
 

@@ -108,6 +108,52 @@ var productSelection = (function productSelection() {
 		setActiveScreen(form);
 	}
 
+	function createIframe(productName) {
+		var iframe = document.createElement('iframe');
+
+		iframe.setAttribute('src', `${getIFrameURL(productName)}`);
+		iframe.setAttribute('id', 'smile-identity-hosted-web-integration-post-product-selection');
+		iframe.setAttribute('name', 'smile-identity-hosted-web-integration-post-product-selection');
+		iframe.setAttribute('data-cy', 'smile-identity-hosted-web-integration-post-product-selection');
+		iframe.setAttribute('frameborder', '0');
+		iframe.setAttribute('allow', 'camera; geolocation; encrypted-media; fullscreen');
+		iframe.setAttribute('allowtransparency', 'true');
+
+		iframe.style.cssText = `
+			background-color: black;
+			background-color: rgba(0, 0, 0, .75);
+			border: none;
+			height: 100%;
+			left: 0;
+			position: fixed;
+			top: 0;
+			width: 100%;
+			z-index: 999999;
+		`;
+
+		document.body.prepend(iframe);
+	}
+
+	function getIFrameURL(product) {
+		switch (product) {
+			case 'biometric_kyc':
+				return './../biometric-kyc.html';
+			case 'doc_verification':
+				return './../doc-verification.html';
+			case 'enhanced_kyc':
+				return './../ekyc.html';
+			default:
+				throw new Error('Unsupported product');
+		}
+	}
+
+	function publishMessage() {
+		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration-post-product-selection']").contentWindow;
+		config.source = 'SmileIdentity::HostedWebIntegration';
+
+		targetWindow.postMessage(JSON.stringify(config), '*');
+	}
+
 	ConfigForm.addEventListener('submit', (e) => {
 		e.preventDefault();
 
@@ -115,10 +161,11 @@ var productSelection = (function productSelection() {
 		const selectedIdType = ConfigForm.querySelector('#id_type').value;
 
 		config.id_selection = {};
-		config.id_selection[selectedCountry] = selectedIdType;
+		config.id_selection[selectedCountry] = [selectedIdType];
 		config.product = getVerificationMethod(selectedCountry, selectedIdType);
 
-		console.log(config);
+		createIframe(config.product);
+		setTimeout(() => publishMessage(config), 2000);
 	});
 
 	window.addEventListener(

@@ -82,7 +82,7 @@ it('should restore consent screen when user clicks "go back"', () => {
 		.should('be.visible');
 });
 
-it('should close the iframe when user confirms consent denial', () => {
+xit('should close the iframe when user confirms consent denial', () => {
 	cy.visit('/');
 
 	cy

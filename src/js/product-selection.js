@@ -109,6 +109,9 @@ var productSelection = (function productSelection() {
 	}
 
 	function getSiteURL() {
+		console.log(document);
+		console.log(document.currentScript);
+		console.log(document.location);
 		var currentScriptSrc = document.currentScript.src;
 		const qualifiedURL = currentScriptSrc.split('script')[0];
 		return qualifiedURL;

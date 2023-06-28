@@ -56,7 +56,7 @@ var SmileIdentity = function () {
 	function getIFrameURL(product) {
 		switch (product) {
 			case 'biometric_kyc':
-			case 'ekyc_smartselfi':
+			case 'ekyc_smartselfie':
 				return './../biometric-kyc.html';
 			case 'enhanced_kyc':
 				return './../ekyc.html';

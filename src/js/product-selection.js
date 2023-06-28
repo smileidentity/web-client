@@ -108,10 +108,29 @@ var productSelection = (function productSelection() {
 		setActiveScreen(form);
 	}
 
+	function getSiteURL() {
+		var currentScriptSrc = document.currentScript.src;
+		const qualifiedURL = currentScriptSrc.split('script')[0];
+		return qualifiedURL;
+	}
+
+	function getIFrameURL(product) {
+		switch (product) {
+			case 'biometric_kyc':
+				return './../biometric-kyc.html';
+			case 'doc_verification':
+				return './../doc-verification.html';
+			case 'enhanced_kyc':
+				return './../ekyc.html';
+			default:
+				throw new Error('Unsupported product');
+		}
+	}
+
 	function createIframe(productName) {
 		var iframe = document.createElement('iframe');
 
-		iframe.setAttribute('src', `${getIFrameURL(productName)}`);
+		iframe.setAttribute('src', `${getSiteURL()}${getIFrameURL(productName)}`);
 		iframe.setAttribute('id', 'smile-identity-hosted-web-integration-post-product-selection');
 		iframe.setAttribute('name', 'smile-identity-hosted-web-integration-post-product-selection');
 		iframe.setAttribute('data-cy', 'smile-identity-hosted-web-integration-post-product-selection');
@@ -132,19 +151,6 @@ var productSelection = (function productSelection() {
 		`;
 
 		document.body.prepend(iframe);
-	}
-
-	function getIFrameURL(product) {
-		switch (product) {
-			case 'biometric_kyc':
-				return './../biometric-kyc.html';
-			case 'doc_verification':
-				return './../doc-verification.html';
-			case 'enhanced_kyc':
-				return './../ekyc.html';
-			default:
-				throw new Error('Unsupported product');
-		}
 	}
 
 	function publishMessage() {

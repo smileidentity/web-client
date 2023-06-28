@@ -109,12 +109,9 @@ var productSelection = (function productSelection() {
 	}
 
 	function getSiteURL() {
-		console.log(document);
-		console.log(document.currentScript);
-		console.log(document.location);
-		var currentScriptSrc = document.currentScript.src;
-		const qualifiedURL = currentScriptSrc.split('script')[0];
-		return qualifiedURL;
+		const urlParts = location.href.split('/');
+		const url = urlParts.slice(0, -1).join('/')
+		return `${url}/`;
 	}
 
 	function getIFrameURL(product) {

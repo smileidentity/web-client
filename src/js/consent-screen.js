@@ -808,7 +808,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	closeWindow() {
-		const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
+		const referenceWindow = window.parent;
 		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 }

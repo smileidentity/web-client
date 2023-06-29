@@ -4,10 +4,13 @@ var SmartSelfie = (function SmartSelfie() {
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
+    development: "https://devapi.smileidentity.com/v1",
     sandbox: "https://testapi.smileidentity.com/v1",
     live: "https://api.smileidentity.com/v1",
     production: "https://api.smileidentity.com/v1",
   };
+
+  const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 
   const labels = {
     2: {
@@ -254,10 +257,10 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   function closeWindow() {
-    window.parent.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage("SmileIdentity::Close", "*");
   }
 
   function handleSuccess() {
-    window.parent.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage("SmileIdentity::Success", "*");
   }
 })();

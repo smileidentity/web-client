@@ -1,4 +1,13 @@
 /**
+ * A IdTypeVerificationMethod selection
+ * @typedef {Object} IdTypeVerificationMethod
+ * @property {string} country - 
+ * @property {string} id_type - 
+ * @property {string} verification_method - one of the smile identity
+ * verification methods
+ */
+
+/**
 * SmileIdentity - Creates an instance of the Smile Identity Web Integration
 * @function
 * @param { Object } config - the configuration object
@@ -6,7 +15,14 @@
 * `get_web_token` method in one of our server-to-server libraries
 * @param { string } config.callback_url - callback URL for responses
 * @param { string } config.environment - one of `sandbox` or `production`
-* @param { string } config.product - one of the product types,
+* @param { string } [config.product] - one of the product types,
+* @param { Object[] } [config.id_types] - list of the id types and their
+* verification_methods
+* @param { Object[] } config.id_types[]. - list of the id types and their
+* @param { string } config.id_type[].country - 
+* @param { string } config.id_type[].id_type - list of the id types and their
+* @param { string } config.id_type[].verification_method - one of
+* SmileIdentity's verification_methods
 * @param { Object } config.partner_details - partner details for customization
 * @param { string } config.partner_details.name - name to display on the widget
 * @param { string } config.partner_details.policy_url - URL for data privacy
@@ -38,19 +54,25 @@ var SmileIdentity = function () {
 	};
 
 	function getIFrameURL(product) {
-		if (product === 'biometric_kyc' || product === 'ekyc_smartselfie') {
-			return './../biometric-kyc.html';
-		} else if (product === 'enhanced_kyc') {
-			return './../ekyc.html';
-		} else if (product === 'authentication' || product === 'smartselfie') {
-			return './../smartselfie-auth.html';
-		} else if (product === 'doc_verification') {
-			return './../doc-verification.html';
-		} else if (product === 'basic_kyc' || product === 'identity_verification') {
-			return './../basic-kyc.html';
+		switch (product) {
+			case 'biometric_kyc':
+			case 'ekyc_smartselfie':
+				return './../biometric-kyc.html';
+			case 'enhanced_kyc':
+				return './../ekyc.html';
+			case 'authentication':
+			case 'smartselfie':
+				return './../smartselfie-auth.html';
+			case 'doc_verification':
+				return './../doc-verification.html';
+			case 'basic_kyc':
+			case 'identity_verification':
+				return './../basic-kyc.html';
+			case undefined:
+				return './../product-selection.html';
+			default:
+				throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);
 		}
-
-		throw new Error(`SmileIdentity: ${product} is not currently supported in this integration`);
 	}
 
 	function createIframe(productName) {
@@ -106,7 +128,7 @@ var SmileIdentity = function () {
 	function isConfigValid(config) {
 		if (!config.token) throw new Error('SmileIdentity: Please provide your web token via the `token` attribute');
 		if (!config.callback_url) throw new Error('SmileIdentity: Please provide a callback URL via the `callback_url` attribute');
-		if (!config.product) throw new Error('SmileIdentity: Please select a product via the `product` attribute.');
+		if (!config.product && !config.id_types) throw new Error('SmileIdentity: Please select a product via the `product` attribute.');
 
 		if ((config.product === 'biometric_kyc' || config.product === 'ekyc_smartselfie') && !config.partner_details) {
 			throw new Error('SmileIdentity: Please provide Partner Details via the `partner_details` attribute');

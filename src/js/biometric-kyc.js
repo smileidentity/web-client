@@ -4,10 +4,13 @@ var biometricKyc = function biometricKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
+		development: 'https://devapi.smileidentity.com/v1',
 		sandbox: 'https://testapi.smileidentity.com/v1',
 		live: 'https://api.smileidentity.com/v1',
 		production: 'https://api.smileidentity.com/v1'
 	}
+
+	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 	
 	var pages = [];
 	var config;
@@ -380,12 +383,12 @@ var biometricKyc = function biometricKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.detail, '*');
+			referenceWindow.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 		
@@ -653,7 +656,10 @@ var biometricKyc = function biometricKyc() {
 			smile_client_id: config.partner_details.partner_id,
 			callback_url: config.callback_url,
 			token: config.token,
-			partner_params
+			partner_params: {
+				...partner_params,
+				job_type: 1
+			}
 		}
 
 		const URL = `${endpoints[config.environment] || config.environment}/upload`;
@@ -715,10 +721,10 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	function closeWindow() {
-		window.parent.postMessage('SmileIdentity::Close', '*');
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.parent.postMessage('SmileIdentity::Success', '*');
+		referenceWindow.postMessage('SmileIdentity::Success', '*');
 	}
 }();

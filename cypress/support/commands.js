@@ -147,6 +147,28 @@ Cypress.Commands.add('selectNINIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectPASSPORTIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingNINIDType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('PASSPORT')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('getTotpConsentApp', () => {
 	cy.getIFrameBody()
 		.find('end-user-consent')

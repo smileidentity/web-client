@@ -4,11 +4,14 @@ var eKYC = function eKYC() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
+		development: 'https://devapi.smileidentity.com/v1',
 		sandbox: 'https://testapi.smileidentity.com/v1',
 		live: 'https://api.smileidentity.com/v1',
 		production: 'https://api.smileidentity.com/v1'
 	}
 
+	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
+	
 	var pages = [];
 	var config;
 	var activeScreen;
@@ -355,12 +358,12 @@ var eKYC = function eKYC() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
+			referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.detail, '*');
+			referenceWindow.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -596,11 +599,14 @@ var eKYC = function eKYC() {
 			...data,
 			dob,
 			partner_id,
-			partner_params,
 			callback_url,
 			token,
 			source_sdk: 'hosted_web',
 			source_sdk_version: 'v1.0.0',
+			partner_params: {
+				...partner_params,
+				job_type: 5
+			},
 		}
 
 		const URL = `${endpoints[config.environment]}/async_id_verification`;
@@ -623,10 +629,10 @@ var eKYC = function eKYC() {
 	}
 
 	function closeWindow() {
-		window.parent.postMessage('SmileIdentity::Close', '*');
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.parent.postMessage('SmileIdentity::Success', '*');
+		referenceWindow.postMessage('SmileIdentity::Success', '*');
 	}
 }();

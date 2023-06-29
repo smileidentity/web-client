@@ -340,7 +340,10 @@ var documentVerification = function documentVerification() {
 			smile_client_id: config.partner_details.partner_id,
 			callback_url: config.callback_url,
 			token: config.token,
-			partner_params
+			partner_params: {
+				...partner_params,
+				job_type: 6
+			}
 		}
 
 		const fetchConfig = {

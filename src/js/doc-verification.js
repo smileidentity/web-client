@@ -4,13 +4,10 @@ var documentVerification = function documentVerification() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		'development': 'https://devapi.smileidentity.com/v1',
 		'sandbox': 'https://testapi.smileidentity.com/v1',
 		'live': 'https://api.smileidentity.com/v1',
 		'production': 'https://api.smileidentity.com/v1'
 	}
-
-	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 
 	var config;
 	var activeScreen;
@@ -342,10 +339,7 @@ var documentVerification = function documentVerification() {
 			smile_client_id: config.partner_details.partner_id,
 			callback_url: config.callback_url,
 			token: config.token,
-			partner_params: {
-				...partner_params,
-				job_type: 6
-			}
+			partner_params
 		}
 
 		const fetchConfig = {
@@ -410,10 +404,10 @@ var documentVerification = function documentVerification() {
 	}
 
 	function closeWindow() {
-		referenceWindow.postMessage('SmileIdentity::Close', '*');
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		referenceWindow.postMessage('SmileIdentity::Success', '*');
+		window.parent.postMessage('SmileIdentity::Success', '*');
 	}
 }();

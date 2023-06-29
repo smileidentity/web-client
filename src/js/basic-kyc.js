@@ -4,13 +4,10 @@ var basicKyc = (function basicKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		development: "https://devapi.smileidentity.com",
 		sandbox: "https://testapi.smileidentity.com",
 		live: "https://api.smileidentity.com",
 		production: "https://api.smileidentity.com",
 	};
-
-	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 
 	var pages = [];
 	var config;
@@ -379,14 +376,14 @@ var basicKyc = (function basicKyc() {
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentDenied",
 			(event) => {
-				referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
+				window.parent.postMessage("SmileIdentity::ConsentDenied", "*");
 				closeWindow();
 			},
 			false
 		);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			referenceWindow.postMessage(event.detail, '*');
+			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -683,10 +680,10 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function closeWindow() {
-		referenceWindow.postMessage("SmileIdentity::Close", "*");
+		window.parent.postMessage("SmileIdentity::Close", "*");
 	}
 
 	function handleSuccess() {
-		referenceWindow.postMessage("SmileIdentity::Success", "*");
+		window.parent.postMessage("SmileIdentity::Success", "*");
 	}
 })();

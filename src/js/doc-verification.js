@@ -10,7 +10,7 @@ var documentVerification = function documentVerification() {
 		'production': 'https://api.smileidentity.com/v1'
 	}
 
-	const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 
 	var config;
 	var activeScreen;

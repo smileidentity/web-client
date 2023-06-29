@@ -10,7 +10,7 @@ var eKYC = function eKYC() {
 		production: 'https://api.smileidentity.com/v1'
 	}
 
-	const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+	const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
 	
 	var pages = [];
 	var config;

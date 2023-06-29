@@ -10,6 +10,8 @@ var documentVerification = function documentVerification() {
 		'production': 'https://api.smileidentity.com/v1'
 	}
 
+	const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+
 	var config;
 	var activeScreen;
 	var id_info, images, partner_params;
@@ -408,10 +410,10 @@ var documentVerification = function documentVerification() {
 	}
 
 	function closeWindow() {
-		window.parent.postMessage('SmileIdentity::Close', '*');
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.parent.postMessage('SmileIdentity::Success', '*');
+		referenceWindow.postMessage('SmileIdentity::Success', '*');
 	}
 }();

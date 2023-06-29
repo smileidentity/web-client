@@ -561,7 +561,8 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	closeWindow() {
-		window.parent.postMessage("SmileIdentity::Close", "*");
+		const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+		referenceWindow.postMessage("SmileIdentity::Close", "*");
 	}
 
 	handleBackClick() {

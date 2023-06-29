@@ -10,6 +10,8 @@ var SmartSelfie = (function SmartSelfie() {
     production: "https://api.smileidentity.com/v1",
   };
 
+  const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+
   const labels = {
     2: {
       title: "SmartSelfie™ Authentication",
@@ -255,10 +257,10 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   function closeWindow() {
-    window.parent.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage("SmileIdentity::Close", "*");
   }
 
   function handleSuccess() {
-    window.parent.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage("SmileIdentity::Success", "*");
   }
 })();

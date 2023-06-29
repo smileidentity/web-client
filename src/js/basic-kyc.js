@@ -10,6 +10,8 @@ var basicKyc = (function basicKyc() {
 		production: "https://api.smileidentity.com",
 	};
 
+	const referenceWindow = window.parent.url.includes('product-selection') ? window.parent.parent : window.parent;
+
 	var pages = [];
 	var config;
 	var activeScreen;
@@ -377,14 +379,14 @@ var basicKyc = (function basicKyc() {
 		EndUserConsent.addEventListener(
 			"SmileIdentity::ConsentDenied",
 			(event) => {
-				window.parent.postMessage("SmileIdentity::ConsentDenied", "*");
+				referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
 				closeWindow();
 			},
 			false
 		);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.parent.postMessage(event.detail, '*');
+			referenceWindow.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 
@@ -681,10 +683,10 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function closeWindow() {
-		window.parent.postMessage("SmileIdentity::Close", "*");
+		referenceWindow.postMessage("SmileIdentity::Close", "*");
 	}
 
 	function handleSuccess() {
-		window.parent.postMessage("SmileIdentity::Success", "*");
+		referenceWindow.postMessage("SmileIdentity::Success", "*");
 	}
 })();

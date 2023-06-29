@@ -381,12 +381,12 @@ var biometricKyc = function biometricKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', event => {
-			window.top.postMessage('SmileIdentity::ConsentDenied', '*');
+			window.parent.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);
 
 		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
-			window.top.postMessage(event.detail, '*');
+			window.parent.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
 		
@@ -716,10 +716,10 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	function closeWindow() {
-		window.top.postMessage('SmileIdentity::Close', '*');
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.top.postMessage('SmileIdentity::Success', '*');
+		window.parent.postMessage('SmileIdentity::Success', '*');
 	}
 }();

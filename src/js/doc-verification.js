@@ -405,10 +405,10 @@ var documentVerification = function documentVerification() {
 	}
 
 	function closeWindow() {
-		window.top.postMessage('SmileIdentity::Close', '*');
+		window.parent.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function handleSuccess() {
-		window.top.postMessage('SmileIdentity::Success', '*');
+		window.parent.postMessage('SmileIdentity::Success', '*');
 	}
 }();

@@ -117,11 +117,11 @@ var productSelection = (function productSelection() {
 	function getIFrameURL(product) {
 		switch (product) {
 			case 'biometric_kyc':
-				return './biometric-kyc.html';
+				return 'biometric-kyc.html';
 			case 'doc_verification':
-				return './doc-verification.html';
+				return 'doc-verification.html';
 			case 'enhanced_kyc':
-				return './ekyc.html';
+				return 'ekyc.html';
 			default:
 				throw new Error('Unsupported product');
 		}

@@ -127,7 +127,7 @@ describe('totpConsent', () => {
 					.should('contain', 'Invalid Mode');
 			});
 
-			xit('should close if the user does not have access to any of the contact methods', () => {
+			it('should close if the user does not have access to any of the contact methods', () => {
 				cy.visit('/');
 				cy.selectBVNMFAIDType();
 

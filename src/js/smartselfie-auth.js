@@ -10,7 +10,7 @@ var SmartSelfie = (function SmartSelfie() {
     production: "https://api.smileidentity.com/v1",
   };
 
-  const referenceWindow = window.parent.location.href.includes('product-selection') ? window.parent.parent : window.parent;
+  const referenceWindow = window.parent;
 
   const labels = {
     2: {

@@ -25,7 +25,6 @@ var documentVerification = function documentVerification() {
 	var CompleteScreen = document.querySelector('#complete-screen');
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
-	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 
 	var fileToUpload, uploadURL;

@@ -359,13 +359,29 @@ button[data-type='icon'] {
 	margin-right: .5rem;
 }
 
-.spinner {
-	animation: rotate 2s linear infinite;
+@keyframes spin {
+	0% {
+		transform: translate3d(-50%, -50%, 0) rotate(0deg);
+	}
+	100% {
+		transform: translate3d(-50%, -50%, 0) rotate(360deg);
+	}
 }
 
-.spinner #upload-progress-outline {
-	stroke-linecap: round;
-	animation: dash 1.5s ease-in-out infinite;
+.spinner {
+	animation: 1.5s linear infinite spin;
+	animation-play-state: inherit;
+	border: solid 1rem #cfd0d1;
+	border-bottom-color: var(--color-active);
+	border-radius: 50%;
+	content: "";
+	display: block;
+	height: 10rem;
+	width: 10rem;
+	will-change: transform;
+	position: relative;
+	top: 5rem;
+	left: 50%;
 }
 
 @keyframes rotate {

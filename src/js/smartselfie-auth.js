@@ -32,9 +32,6 @@ var SmartSelfie = (function SmartSelfie() {
   var CompleteScreen = document.querySelector("#complete-screen");
 
   var CloseIframeButton = document.querySelector("#close-iframe");
-  var UploadProgressOutline = UploadProgressScreen.querySelector(
-    "#upload-progress-outline"
-  );
   var RetryUploadButton = document.querySelector("#retry-upload");
 
   var fileToUpload, uploadURL;

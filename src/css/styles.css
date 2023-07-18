@@ -242,10 +242,6 @@ button[data-type='icon'] {
 	text-align: center;
 }
 
-.split-pair {
-	overflow: hidden;
-}
-
 .split-pair > * + * {
 	margin-top: var(--flow-space);
 }

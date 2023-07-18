@@ -36,6 +36,10 @@ function markup() {
 
 				--color-richblue: #043C93;
 				--color-theme: ${this.themeColor};
+
+				--color-active: #001096;
+				--color-default: #2D2B2A;
+				--color-disabled: #848282;
 			}
 
 			html {
@@ -48,7 +52,6 @@ function markup() {
 
 			[disabled] {
 				cursor: not-allowed !important;
-				background: #E5E5E5 !important;
 			}
 
 			.visually-hidden {
@@ -263,7 +266,7 @@ function markup() {
 				animation: 1.5s linear infinite spin;
 				animation-play-state: inherit;
 				border: solid 5px #cfd0d1;
-				border-bottom-color: #1c87c9;
+				border-bottom-color: var(--color-active);
 				border-radius: 50%;
 				content: "";
 				display: block;

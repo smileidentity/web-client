@@ -146,7 +146,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#select-otp-mode')
+					.find('form[name="select-mode-form"]')
 					.should('be.visible');
 
 				cy.getTotpConsentApp()
@@ -186,7 +186,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#select-otp-mode')
+					.find('form[name="select-mode-form"]')
 					.should('be.visible');
 
 				cy.getTotpConsentApp()
@@ -198,7 +198,7 @@ describe('totpConsent', () => {
 					.click();
 
 				cy.getTotpConsentApp()
-					.find('#select-otp-mode')
+					.find('form[name="select-mode-form"]')
 					.should('not.be.visible');
 
 				cy.getTotpConsentApp()
@@ -254,7 +254,7 @@ describe('totpConsent', () => {
 					.should('not.be.visible');
 
 				cy.getTotpConsentApp()
-					.find('#select-otp-mode')
+					.find('form[name="select-mode-form"]')
 					.should('be.visible')
 			});
 		});

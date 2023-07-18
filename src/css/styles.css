@@ -1,5 +1,8 @@
 :root {
 	--flow-space: 1rem;
+	--color-active: #001096;
+	--color-default: #2D2B2A;
+	--color-disabled: #848282;
 }
 
 *, ::after, ::before {
@@ -153,6 +156,54 @@ select {
 	background-size: 12px auto,100%;
 }
 
+button {
+	--button-color: var(--color-default);
+	--flow-space: 3rem;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	align-items: center;
+	appearance: none;
+	background-color: transparent;
+	border-radius: 2.5rem;
+	border: none;
+	color: #ffffff;
+	cursor: pointer;
+	display: inline-flex;
+	font-size: 20px;
+	font-weight: 500;
+	inline-size: 100%;
+	justify-content: center;
+	letter-spacing: .05ch;
+	line-height: 1;
+	padding: 1rem 2.5rem;
+	text-align: center;
+	text-decoration: none;
+}
+
+button[data-variant='solid'] {
+	background-color: var(--button-color);
+	border: 2px solid var(--button-color);
+}
+
+button[data-variant='outline'] {
+	color: var(--button-color);
+	border: 2px solid var(--button-color);
+}
+
+button[data-variant='ghost'] {
+	color: var(--button-color);
+}
+
+button:hover,
+button:focus,
+button:active {
+	--button-color: var(--color-active);
+}
+
+button:disabled {
+	--button-color: var(--color-disabled);
+}
+
 button[data-type='icon'] {
 	align-items: center;
 	background-color: transparent;
@@ -160,45 +211,7 @@ button[data-type='icon'] {
 	cursor: pointer;
 	display: flex;
 	padding: 0;
-}
-
-button[data-type='primary'],
-button[data-type='tertiary'] {
-	--flow-space: 3rem;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background: linear-gradient(46.64deg, #031532 -0.41%, #114482 122.81%,
-		#02060B 122.81%);
-	border: none;
-	color: #ffffff;
-	cursor: pointer;
-	border-radius: 2rem;
-	font-size: 20px;
-	font-weight: 500;
-	line-height: 1;
-	letter-spacing: .05ch;
-	padding: 1rem 2.5rem;
-	text-decoration: none;
-	text-align: center;
-	width: 100%;
-	transition: background 250ms ease-in-out,
-							transform 150ms ease;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-}
-
-button[data-type='tertiary'] {
-	background: none;
-	background-color: #ffa000;
-	padding: .5rem;
-	border-radius: .5rem;
-	font-size: .75rem;
-}
-
-button:hover:not([disabled]),
-button:focus:not([disabled]) {
-	transform: scale(1.02);
+	width: auto;
 }
 
 [disabled] {

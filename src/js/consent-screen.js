@@ -81,28 +81,60 @@ function templateString() {
 			}
 
 			button {
-				border-radius: .5rem;
-				font-size: 20px;
-				text-align: center;
-				width: 100%;
-				display: inline-block;
-				padding: 1rem 2.5rem;
-				cursor: pointer;
-				font-weight: 500;
-				line-height: 1;
-				letter-spacing: .05ch;
-				text-decoration: none;
-				display: inline-block;
-				border: none;
-				transition: background 250ms ease-in-out,
-										transform 150ms ease;
+				--button-color: var(--color-default);
+				--flow-space: 3rem;
 				-webkit-appearance: none;
 				-moz-appearance: none;
+				align-items: center;
+				appearance: none;
+				background-color: transparent;
+				border-radius: 2.5rem;
+				border: none;
+				color: #ffffff;
+				cursor: pointer;
+				display: inline-flex;
+				font-size: 20px;
+				font-weight: 500;
+				inline-size: 100%;
+				justify-content: center;
+				letter-spacing: .05ch;
+				line-height: 1;
+				padding: 1rem 2.5rem;
+				text-align: center;
+				text-decoration: none;
 			}
 
+			button[data-variant='solid'] {
+				background-color: var(--button-color);
+				border: 2px solid var(--button-color);
+			}
+
+			button[data-variant='outline'] {
+				color: var(--button-color);
+				border: 2px solid var(--button-color);
+			}
+
+			button[data-variant='ghost'] {
+				color: var(--button-color);
+			}
+
+			button:hover,
 			button:focus,
-			button:hover {
-				filter: opacity(.75);
+			button:active {
+				--button-color: var(--color-active);
+			}
+
+			button:disabled {
+				--button-color: var(--color-disabled);
+			}
+
+			button[data-type='icon'] {
+				align-items: center;
+				background-color: transparent;
+				border: 0;
+				cursor: pointer;
+				display: flex;
+				padding: 0;
 			}
 
 			button[data-type='icon'] {
@@ -110,16 +142,6 @@ function templateString() {
 				padding: 0;
 				width: 2rem;
 				background: transparent;
-			}
-
-			button[data-type='primary'] {
-				background-color: #1EB244;
-				color: #FEFEFE;
-			}
-
-			button[data-type='secondary'] {
-				background-color: #FFEDEB;
-				color: #F86B58;
 			}
 
 			.nav {
@@ -239,31 +261,6 @@ function templateString() {
 
 			svg {
 				flex-shrink: 0;
-			}
-
-			button[data-type='tertiary'] {
-				--flow-space: 3rem;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				background: linear-gradient(46.64deg, #031532 -0.41%, #114482 122.81%,
-					#02060B 122.81%);
-				border: none;
-				color: #ffffff;
-				cursor: pointer;
-				border-radius: 2rem;
-				font-size: 20px;
-				font-weight: 500;
-				line-height: 1;
-				letter-spacing: .05ch;
-				padding: 1rem 2.5rem;
-				text-decoration: none;
-				text-align: center;
-				width: 100%;
-				transition: background 250ms ease-in-out,
-										transform 150ms ease;
-				-webkit-appearance: none;
-				-moz-appearance: none;
 			}
 
 			[disabled] {
@@ -464,11 +461,11 @@ function templateString() {
 			</section>
 
 			<section class='flow' style='--flow-space: 2.5rem'>
-				<button id='allow' data-type='primary'>
+				<button id='allow' data-variant='solid'>
 					Allow
 				</button>
 
-				<button id='cancel' data-type='secondary' style='--flow-space: 1.5rem'>
+				<button id='cancel' data-variant='outline' style='--flow-space: 1.5rem'>
 					Cancel
 				</button>
 			</section>
@@ -607,14 +604,14 @@ function templateString() {
 				</p>
 			</section>
 
-			<button data-type='tertiary' type='button' id='back-to-consent'>
+			<button data-variant='solid' type='button' id='back-to-consent'>
 				<svg style='transform: rotate(.5turn);' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
 				Go Back
 			</button>
 
-			<button id='confirm-consent-rejection' data-type='secondary' style='--flow-space: 1rem; border-radius: 2rem'>
+			<button data-variant='outline' id='confirm-consent-rejection' style='--flow-space: 1rem; border-radius: 2rem'>
 				No, Cancel Verification
 			</button>
 

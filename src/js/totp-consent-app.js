@@ -39,7 +39,7 @@ function markup() {
 			}
 
 			html {
-				font-family: 'Nunito', sans-serif;
+				font-family: 'DM Sans', sans-serif;
 			}
 
 			[hidden] {

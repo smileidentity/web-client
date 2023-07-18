@@ -341,8 +341,8 @@ button[data-type='icon'] {
 
 .credits {
 	--flow-space: 2rem;
-	color: #636670;
-	font-size: .75rem;
+	margin-inline: auto;
+	max-inline-size: 10rem;
 }
 
 .company-name {

@@ -139,7 +139,7 @@ var productSelection = (function productSelection() {
 		iframe.setAttribute('allowtransparency', 'true');
 
 		iframe.style.cssText = `
-			background-color: white;
+			background-color: #F9F0E7;
 			border: none;
 			height: 100%;
 			left: 0;

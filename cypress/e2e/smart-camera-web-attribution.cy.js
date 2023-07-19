@@ -4,8 +4,8 @@ describe('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('.powered-by')
-      .should('contain.text', 'Powered By');
+      .find('powered-by-smile-id')
+      .should('be.visible');
   });
 
   it('hides attribution when `hide-attribution` attribute is passed', () => {
@@ -13,7 +13,7 @@ describe('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('.powered-by')
+      .find('powered-by-smile-id')
       .should('not.exist');
   });
 });

@@ -30,7 +30,6 @@ var biometricKyc = function biometricKyc() {
 	var CompleteScreen = document.querySelector('#complete-screen');
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
-	var UploadProgressOutline = UploadProgressScreen.querySelector('#upload-progress-outline');
 	var RetryUploadButton = document.querySelector('#retry-upload');
 	var CameraBackButton = document.querySelector('#back-button-camera');
 	var disableBackOnFirstScreen = false;

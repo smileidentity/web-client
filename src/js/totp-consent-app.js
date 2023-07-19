@@ -36,10 +36,14 @@ function markup() {
 
 				--color-richblue: #043C93;
 				--color-theme: ${this.themeColor};
+
+				--color-active: #001096;
+				--color-default: #2D2B2A;
+				--color-disabled: #848282;
 			}
 
 			html {
-				font-family: 'Nunito', sans-serif;
+				font-family: 'DM Sans', sans-serif;
 			}
 
 			[hidden] {
@@ -48,7 +52,6 @@ function markup() {
 
 			[disabled] {
 				cursor: not-allowed !important;
-				background: #E5E5E5 !important;
 			}
 
 			.visually-hidden {
@@ -110,28 +113,51 @@ function markup() {
 			}
 
 			button {
-				border-radius: .5rem;
-				font-size: 20px;
-				text-align: center;
-				width: 100%;
-				display: inline-block;
-				padding: 1rem 2.5rem;
-				cursor: pointer;
-				font-weight: 500;
-				line-height: 1;
-				letter-spacing: .05ch;
-				text-decoration: none;
-				display: inline-block;
-				border: none;
-				transition: background 250ms ease-in-out,
-										transform 150ms ease;
+				--button-color: var(--color-default);
+				--flow-space: 3rem;
 				-webkit-appearance: none;
 				-moz-appearance: none;
+				align-items: center;
+				appearance: none;
+				background-color: transparent;
+				border-radius: 2.5rem;
+				border: none;
+				color: #ffffff;
+				cursor: pointer;
+				display: inline-flex;
+				font-size: 20px;
+				font-weight: 500;
+				inline-size: 100%;
+				justify-content: center;
+				letter-spacing: .05ch;
+				line-height: 1;
+				padding: 1rem 2.5rem;
+				text-align: center;
+				text-decoration: none;
 			}
 
+			button[data-variant='solid'] {
+				background-color: var(--button-color);
+				border: 2px solid var(--button-color);
+			}
+
+			button[data-variant='outline'] {
+				color: var(--button-color);
+				border: 2px solid var(--button-color);
+			}
+
+			button[data-variant='ghost'] {
+				color: var(--button-color);
+			}
+
+			button:hover,
 			button:focus,
-			button:hover {
-				filter: opacity(.75);
+			button:active {
+				--button-color: var(--color-active);
+			}
+
+			button:disabled {
+				--button-color: var(--color-disabled);
 			}
 
 			button[data-type='icon'] {
@@ -139,25 +165,6 @@ function markup() {
 				padding: 0;
 				width: 2rem;
 				background: transparent;
-			}
-
-			button[data-type='primary'] {
-				--flow-space: 5.25rem;
-				background: linear-gradient(46.64deg, #031532 -0.41%, #114482 122.81%, #02060B 122.81%);
-				border: none;
-				border-radius: 2rem;
-				color: #FEFEFE;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				padding: 1rem 2.5rem;
-			}
-
-			button[data-type='text'] {
-				padding: 0;
-				background: transparent;
-				border: none;
-				color: #3886F7;
 			}
 
 			input {
@@ -259,7 +266,7 @@ function markup() {
 				animation: 1.5s linear infinite spin;
 				animation-play-state: inherit;
 				border: solid 5px #cfd0d1;
-				border-bottom-color: #1c87c9;
+				border-bottom-color: var(--color-active);
 				border-radius: 50%;
 				content: "";
 				display: block;
@@ -307,7 +314,7 @@ function markup() {
 					</p>
 				</div>
 
-				<button data-type='primary' id='query-otp-modes' type='submit'>
+				<button data-variant='solid' id='query-otp-modes' type='submit'>
 					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -413,11 +420,11 @@ function markup() {
 					</div>
 				</fieldset>
 
-				<button id='contact-methods-outdated' style='--flow-space: .5rem' data-type='text' class='' type='button'>
+				<button data-variant='ghost' id='contact-methods-outdated' style='--flow-space: .5rem' class='' type='button'>
 					I am no longer using any of these options
 				</button>
 
-				<button data-type='primary' id='select-otp-mode' type='submit'>
+				<button data-variant='solid' id='select-otp-mode' type='submit'>
 					<span class='text'>Continue</span>
 					<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -451,11 +458,11 @@ function markup() {
 						Didn't receive the OTP${!this.selectedOtpDeliveryMode ? '?' : ` at <span class='font-weight:bold'>${this.selectedOtpDeliveryMode}</span>?`}
 					</p>
 
-					<button style='--flow-space: .5rem' data-type='text' class='try-another-method' type='button'>
+					<button style='--flow-space: .5rem' data-variant='ghost' class='try-another-method' type='button'>
 						Try another contact method
 					</button>
 
-					<button data-type='primary' id='submit-otp' type='submit'>
+					<button data-variant='solid' id='submit-otp' type='submit'>
 						<span class='text'>Submit</span>
 						<svg aria-hidden='true' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

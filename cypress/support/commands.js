@@ -193,7 +193,7 @@ Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
 		.click();
 
 	cy.getTotpConsentApp()
-		.find('#select-otp-mode')
+		.find('form[name="select-mode-form"]')
 		.should('be.visible');
 
 	cy.getTotpConsentApp()

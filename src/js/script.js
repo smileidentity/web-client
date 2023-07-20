@@ -32,6 +32,8 @@
 * @param { string } config.partner_details.theme_color - accent color for links in a css compliant color format
 * @param { string } config.partner_details.logo_url - URL for a logo image,
 	preferably in 1:1 aspect ratio
+* @param { Object } [config.partner_params] - optional additional metadata for
+* partner organization
 * @param { Object } [config.id_selection=all our [supported id types / countries]{@link https://docs.smileidentity.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
 * e.g. { 'NG': ['BVN', 'NIN'] }
 * @param { Object } [config.consent_required=none of our [supported id types / countries]{@link https://docs.smileidentity.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types

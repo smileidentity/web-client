@@ -181,8 +181,8 @@ var SmartSelfie = (function SmartSelfie() {
 
   async function getUploadURL() {
     var payload = {
-      source_sdk: 'hosted_web',
-      source_sdk_version: 'v1.0.0',
+      source_sdk: config.sdk || 'hosted_web',
+      source_sdk_version: config.sdk_version || 'v1.0.0',
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
       callback_url: config.callback_url,

@@ -1,6 +1,6 @@
 # Smart Camera Web
 
-<img alt="Build" src="https://github.com/smileidentity/smart-camera-web/actions/workflows/main.yml/badge.svg" />
+<img alt="Build" src="https://github.com/smileidentity/smart-camera-web/actions/workflows/deploy-preview.yml/badge.svg" />
 
 SmartCameraWeb is a [Web Component](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
 used to capture images — selfies, liveness images, ID Document images — for use

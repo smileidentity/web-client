@@ -111,7 +111,8 @@ var SmartSelfie = (function SmartSelfie() {
 
   function getPartnerParams() {
     const { partner_params: partnerParams } = parseJWT(config.token);
-    return partnerParams;
+    partner_params = { ...partnerParams, ...(config.partner_params || {}) }
+    return partner_params;
   }
 
   function setActiveScreen(node) {

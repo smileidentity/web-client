@@ -463,7 +463,7 @@ var biometricKyc = function biometricKyc() {
 
 		const { partner_params: partnerParams } = parseJWT(config.token);
 
-		partner_params = partnerParams;
+		partner_params = { ...partnerParams, ...(config.partner_params || {}) };
 	}
 
 	function setActiveScreen(node) {

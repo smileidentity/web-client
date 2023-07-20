@@ -601,8 +601,8 @@ var eKYC = function eKYC() {
 			partner_id,
 			callback_url,
 			token,
-			source_sdk: 'hosted_web',
-			source_sdk_version: 'v1.0.0',
+			source_sdk: config.sdk || 'hosted_web',
+			source_sdk_version: config.sdk_version || 'v1.0.0',
 			partner_params: {
 				...partner_params,
 				job_type: 5

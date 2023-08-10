@@ -394,6 +394,13 @@ var eKYC = function eKYC() {
 			IdNumber.hidden = false;
 		}
 
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+
+		if (showCitizenship) {
+			const Citizenship = IDInfoForm.querySelector('fieldset#citizenship');
+			Citizenship.hidden = false;
+		}
+
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
 		if (showNames) {
@@ -478,6 +485,16 @@ var eKYC = function eKYC() {
 						"id_number_regex"
 					]
 				),
+			};
+		}
+
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+		if (showCitizenship) {
+			validationConstraints.citizenship = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
 			};
 		}
 

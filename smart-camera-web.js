@@ -1596,32 +1596,11 @@ class SmartCameraWeb extends HTMLElement {
     canvas.height = 144;
 
     const contextWithImage = this._drawImage(canvas);
-
-    const imageData = contextWithImage.getImageData(0, 0, canvas.width, canvas.height);
-    // NOTE: this gives us access to rgba values
-    const { data } = imageData;
-
-    // NOTE: we loop over every 4 elements because pixel data is stored in
-    // 4 indexes
-    for (let i = 0; i < data.length; i += 4) {
-      // NOTE: This section converts the pixels in the image to Greyscale
-      // Step 1: Get color channels
-      const r = data[i]; // Red Channel
-      const g = data[i + 1]; // Green Channel
-      const b = data[i + 2]; // Blue Channel
-
-      // Step 2: Compute greyscale image using a luminousity based weighted average method
-      // ref: https://goodcalculators.com/rgb-to-grayscale-conversion-calculator/
-      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-
-      // ACTION: Replace all channels to grey-scale value
-      data[i] = brightness;
-      data[i + 1] = brightness;
-      data[i + 2] = brightness;
-    }
-
-    contextWithImage.putImageData(imageData, 0, 0);
-
+    contextWithImage.putImageData(
+      contextWithImage.getImageData(0, 0, canvas.width, canvas.height),
+      0,
+      0,
+    );
     this._rawImages.push(canvas.toDataURL('image/jpeg'));
   }
 

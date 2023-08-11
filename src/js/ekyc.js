@@ -394,13 +394,6 @@ var eKYC = function eKYC() {
 			IdNumber.hidden = false;
 		}
 
-		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
-
-		if (showCitizenship) {
-			const Citizenship = IDInfoForm.querySelector('fieldset#citizenship');
-			Citizenship.hidden = false;
-		}
-
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
 		if (showNames) {
@@ -413,6 +406,13 @@ var eKYC = function eKYC() {
 		if (showDOB) {
 			const DOB = IDInfoForm.querySelector('fieldset#dob');
 			DOB.hidden = false;
+		}
+
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+
+		if (showCitizenship) {
+			const Citizenship = IDInfoForm.querySelector('fieldset#citizenship');
+			Citizenship.hidden = false;
 		}
 	}
 
@@ -488,16 +488,6 @@ var eKYC = function eKYC() {
 			};
 		}
 
-		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
-		if (showCitizenship) {
-			validationConstraints.citizenship = {
-				presence: {
-					allowEmpty: false,
-					message: 'is required'
-				}
-			};
-		}
-
 		const showNames = requiredFields.some(fieldName => fieldName.includes('name'));
 
 		if (showNames) {
@@ -531,6 +521,16 @@ var eKYC = function eKYC() {
 				}
 			};
 			validationConstraints.year = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+		}
+
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+		if (showCitizenship) {
+			validationConstraints.citizenship = {
 				presence: {
 					allowEmpty: false,
 					message: 'is required'

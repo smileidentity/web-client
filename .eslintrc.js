@@ -2,19 +2,24 @@ module.exports = {
   env: {
     browser: true,
     commonjs: true,
+    'cypress/globals': true,
     es2021: true,
   },
   extends: 'airbnb-base',
-  overrides: [
-  ],
   parserOptions: {
     ecmaVersion: 'latest',
   },
+  plugins: [
+    'cypress',
+  ],
   rules: {
-    'max-len': 'off',
     indent: ['error', 2],
-    'no-underscore-dangle': 'off',
+    'max-classes-per-file': 'off',
+    'max-len': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
-    'no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: false }],
+    'no-plusplus': 'off',
+    'no-underscore-dangle': 'off',
+    'no-unused-vars': ['error', { args: 'after-used', ignoreRestSiblings: false, vars: 'all' }],
+    'sort-keys': 'error',
   },
 };

@@ -585,8 +585,8 @@ function scwTemplateString() {
 
   <div id='request-screen' class='flow center'>
     ${this.showNavigation ? `
-      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right': ''}">
-        ${ this.hideBackToHost ? '' : `
+      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
+        ${this.hideBackToHost ? '' : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
               <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -621,8 +621,8 @@ function scwTemplateString() {
 
   <div hidden id='camera-screen' class='flow center'>
     ${this.showNavigation ? `
-      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right': ''}">
-        ${ this.hideBackToHost ? '' : `
+      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
+        ${this.hideBackToHost ? '' : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
               <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1092,7 +1092,7 @@ class PoweredBySmileId extends HTMLElement {
           </defs>
         </svg>
       </p>
-    `
+    `;
 
     this.attachShadow({ mode: 'open' }).appendChild(template.content.cloneNode(true));
   }
@@ -1110,7 +1110,7 @@ class SmartCameraWeb extends HTMLElement {
 
   setActiveScreen(element) {
     this.activeScreen.hidden = true;
-    element.hidden = false;
+    element.hidden = false; // eslint-disable-line no-param-reassign
     this.activeScreen = element;
   }
 
@@ -1220,21 +1220,29 @@ class SmartCameraWeb extends HTMLElement {
     this.backToBackIdEntryButton = this.shadowRoot.querySelector('#back-button-back-id-entry');
     this.backToIdImageButton = this.shadowRoot.querySelector('#back-button-id-image');
 
-    if (this.backToSelfie) this.backToSelfie.addEventListener('click', () => {
-      this._reStartImageCapture();
-    });
+    if (this.backToSelfie) {
+      this.backToSelfie.addEventListener('click', () => {
+        this._reStartImageCapture();
+      });
+    }
 
-    if (this.backToIdEntryButton) this.backToIdEntryButton.addEventListener('click', () => {
-      this.setActiveScreen(this.idEntryScreen);
-    });
+    if (this.backToIdEntryButton) {
+      this.backToIdEntryButton.addEventListener('click', () => {
+        this.setActiveScreen(this.idEntryScreen);
+      });
+    }
 
-    if (this.backToBackIdEntryButton) this.backToBackIdEntryButton.addEventListener('click', () => {
-      this.setActiveScreen(this.backOfIdEntryScreen);
-    });
+    if (this.backToBackIdEntryButton) {
+      this.backToBackIdEntryButton.addEventListener('click', () => {
+        this.setActiveScreen(this.backOfIdEntryScreen);
+      });
+    }
 
-    if (this.backToIdImageButton) this.backToIdImageButton.addEventListener('click', () => {
-      this.setActiveScreen(this.IDReviewScreen);
-    });
+    if (this.backToIdImageButton) {
+      this.backToIdImageButton.addEventListener('click', () => {
+        this.setActiveScreen(this.IDReviewScreen);
+      });
+    }
 
     this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();
@@ -1278,11 +1286,11 @@ class SmartCameraWeb extends HTMLElement {
     this._imageCaptureIntervalInMS = 200;
 
     this._data = {
+      images: [],
       partner_params: {
         libraryVersion: VERSION,
         permissionGranted: false,
       },
-      images: [],
     };
     this._rawImages = [];
 
@@ -1450,8 +1458,8 @@ class SmartCameraWeb extends HTMLElement {
     }
 
     this._data.images.push({
-      image_type_id: this.activeScreen === this.IDCameraScreen ? 3 : 7,
       image: image.split(',')[1],
+      image_type_id: this.activeScreen === this.IDCameraScreen ? 3 : 7,
     });
 
     this._stopIDVideoStream();
@@ -1499,12 +1507,12 @@ class SmartCameraWeb extends HTMLElement {
 
       // add file to images list
       this._data.images.push({
-        image_type_id: this.activeScreen === this.idEntryScreen ? 3 : 7,
         // NOTE: data URLs start with a file type before the base64 data,
         // separated by a comma.
         //
         // we are only interested in the base64 segment, so we extract it
         image: fileData.split(',')[1],
+        image_type_id: this.activeScreen === this.idEntryScreen ? 3 : 7,
       });
 
       // add file to preview state
@@ -1629,8 +1637,8 @@ class SmartCameraWeb extends HTMLElement {
     this._referenceImage = image;
 
     this._data.images.push({
-      image_type_id: 2,
       image: image.split(',')[1],
+      image_type_id: 2,
     });
   }
 
@@ -1651,8 +1659,8 @@ class SmartCameraWeb extends HTMLElement {
     const livenessFramesIndices = getLivenessFramesIndices(totalNoOfFrames);
 
     this._data.images = this._data.images.concat(livenessFramesIndices.map((imageIndex) => ({
-      image_type_id: 6,
       image: this._rawImages[imageIndex].split(',')[1],
+      image_type_id: 6,
     })));
 
     this.setActiveScreen(this.reviewScreen);

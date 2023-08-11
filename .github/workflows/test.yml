@@ -12,6 +12,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
+      - run: npm run lint
       - name: run tests
         uses: cypress-io/github-action@v5
         with:

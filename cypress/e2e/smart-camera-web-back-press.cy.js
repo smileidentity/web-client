@@ -167,9 +167,6 @@ context('SmartCameraWeb', () => {
       .find('#back-button-id-entry')
       .click();
 
-    // cy
-    // 	.wait(2000);
-
     cy
       .get('smart-camera-web')
       .shadow()
@@ -249,9 +246,6 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('#back-button-id-image')
       .click();
-
-    // cy
-    // 	.wait(2000);
 
     cy
       .get('smart-camera-web')
@@ -338,9 +332,6 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('#back-button-back-id-entry')
       .click();
-
-    // cy
-    // 	.wait(2000);
 
     cy
       .get('smart-camera-web')

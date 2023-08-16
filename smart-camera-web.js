@@ -303,6 +303,21 @@ function scwTemplateString() {
       padding: 1rem;
     }
 
+    .selfie-review-image {
+      overflow: hidden;
+      aspect-ratio: 1/1;
+    }
+
+    #review-image {
+      scale: 1.75;
+    }
+
+    @media (max-aspect-ratio: 1/1) {
+      #review-image {
+        transform: scaleX(-1) translateY(-10%);
+      }
+    }
+
     .tips,
     .powered-by {
       align-items: center;
@@ -368,7 +383,7 @@ function scwTemplateString() {
       position: relative;
       height: calc(200px * 1.4);
     }
-  
+
     .id-video-container.portrait video {
       width: calc(213px + 0.9rem);
       height: 100%;
@@ -683,13 +698,15 @@ function scwTemplateString() {
     <h1>Review Selfie</h1>
 
     <div class='section | flow'>
-      <img
-        alt='your selfie'
-        id='review-image'
-        src=''
-        width='480'
-        height='480'
-      />
+      <div class='selfie-review-image'>
+        <img
+          alt='your selfie'
+          id='review-image'
+          src=''
+          width='480'
+          height='480'
+        />
+      </div>
 
       <p class='color-richblue-shade font-size-large'>
         Is this clear enough?
@@ -1474,27 +1491,46 @@ class SmartCameraWeb extends HTMLElement {
   _drawImage(canvas, video = this._video) {
     const context = canvas.getContext('2d');
 
-    const imageDimension = 240;
-
-    const xCenterOfImage = video.videoWidth / 2;
-    const yCenterOfImage = video.videoHeight / 2;
-
     context.drawImage(
       video,
-      (xCenterOfImage - (imageDimension / 2)), (
-        yCenterOfImage - (imageDimension / 2)),
-      imageDimension,
-
-      imageDimension,
       0,
-
+      0,
+      video.videoWidth,
+      video.videoHeight,
+      0,
       0,
       canvas.width,
-
       canvas.height,
     );
 
     return context;
+  }
+
+  _capturePOLPhoto() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 240;
+    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+
+    this._drawImage(canvas);
+
+    this._rawImages.push(canvas.toDataURL('image/jpeg'));
+  }
+
+  _captureReferencePhoto() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 480;
+    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+
+    this._drawImage(canvas);
+
+    const image = canvas.toDataURL('image/jpeg');
+
+    this._referenceImage = image;
+
+    this._data.images.push({
+      image: image.split(',')[1],
+      image_type_id: 2,
+    });
   }
 
   async _uploadDocument(event) {
@@ -1588,37 +1624,6 @@ class SmartCameraWeb extends HTMLElement {
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg');
-  }
-
-  _capturePOLPhoto() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 144;
-    canvas.height = 144;
-
-    const contextWithImage = this._drawImage(canvas);
-    contextWithImage.putImageData(
-      contextWithImage.getImageData(0, 0, canvas.width, canvas.height),
-      0,
-      0,
-    );
-    this._rawImages.push(canvas.toDataURL('image/jpeg'));
-  }
-
-  _captureReferencePhoto() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 480;
-    canvas.height = 480;
-
-    this._drawImage(canvas);
-
-    const image = canvas.toDataURL('image/jpeg');
-
-    this._referenceImage = image;
-
-    this._data.images.push({
-      image: image.split(',')[1],
-      image_type_id: 2,
-    });
   }
 
   _stopVideoStream(stream) {

@@ -17,6 +17,8 @@ var productSelection = (function productSelection() {
 	var SelectIdType = document.querySelector('#select-id-type');
 	var ConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
+	const referenceWindow = window.parent;
+
 	function setActiveScreen(element) {
 		activeScreen.hidden = true;
 		element.hidden = false;
@@ -194,6 +196,8 @@ var productSelection = (function productSelection() {
 				} catch (e) {
 					throw e;
 				}
+			} else {
+				referenceWindow.postMessage(event.detail || event.data, '*');
 			}
 		},
 		false

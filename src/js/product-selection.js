@@ -10,14 +10,21 @@ var productSelection = (function productSelection() {
 		production: "https://api.smileidentity.com",
 	};
 
+	const referenceWindow = window.parent;
+
 	var config;
 	var verificationMethodMap;
 	var activeScreen;
 	var LoadingScreen = document.querySelector('#loading-screen');
 	var SelectIdType = document.querySelector('#select-id-type');
 	var ConfigForm = document.querySelector('form[name="hosted-web-config"]');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
-	const referenceWindow = window.parent;
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function setActiveScreen(element) {
 		activeScreen.hidden = true;
@@ -152,6 +159,10 @@ var productSelection = (function productSelection() {
 		`;
 
 		document.body.prepend(iframe);
+	}
+
+	function closeWindow(config) {
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 
 	function publishMessage() {

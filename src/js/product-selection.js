@@ -67,15 +67,25 @@ var productSelection = (function productSelection() {
 			idTypeSelector.appendChild(initialOption);
 
 			// ACTION: Load ID Types as <option>s
-			Object.keys(verificationMethodMap[countryCode].id_types).forEach((idType) => {
+			const idTypes = Object.keys(verificationMethodMap[countryCode].id_types);
+			const isSingleIdType = idTypes.length === 1;
+			idTypes.forEach((idType) => {
 				const option = document.createElement("option");
 				option.setAttribute("value", idType);
 				option.textContent = verificationMethodMap[countryCode]["id_types"][idType].name;
+
+				if (isSingleIdType) {
+					option.setAttribute('selected', true);
+					setNextPage(countryCode, idType);
+				}
+
 				idTypeSelector.appendChild(option);
 			});
 
 			// ACTION: Enable ID Type Selection
-			idTypeSelector.disabled = false;
+			if (!isSingleIdType) {
+				idTypeSelector.disabled = false;
+			}
 		} else {
 			// ACTION: Reset ID Type <select>
 			idTypeSelector.innerHTML = "";
@@ -180,18 +190,22 @@ var productSelection = (function productSelection() {
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
 
-	ConfigForm.addEventListener('submit', (e) => {
-		e.preventDefault();
-
-		const selectedCountry = ConfigForm.querySelector('#country').value;
-		const selectedIdType = ConfigForm.querySelector('#id_type').value;
-
+	function setNextPage(selectedCountry, selectedIdType) {
 		config.id_selection = {};
 		config.id_selection[selectedCountry] = [selectedIdType];
 		config.product = getVerificationMethod(selectedCountry, selectedIdType);
 
 		createIframe(config.product);
 		setTimeout(() => publishMessage(config), 2000);
+	}
+
+	ConfigForm.addEventListener('submit', (e) => {
+		e.preventDefault();
+
+		const selectedCountry = ConfigForm.querySelector('#country').value;
+		const selectedIdType = ConfigForm.querySelector('#id_type').value;
+
+		setNextPage(selectedCountry, selectedIdType);
 	});
 
 	window.addEventListener(

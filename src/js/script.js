@@ -171,14 +171,11 @@ var SmileIdentity = function () {
 				switch (tag) {
 					case 'SmileIdentity::Close':
 						return closeIFrame(config);
-						break;
 					case 'SmileIdentity::Success':
 						return handleSuccess(config);
-						break;
 					case 'SmileIdentity::ConsentDenied':
 					case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
 						return handleConsentRejection(config, event.data);
-						break;
 					default:
 						return;
 				}

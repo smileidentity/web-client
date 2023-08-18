@@ -102,6 +102,7 @@ var productSelection = (function productSelection() {
 		});
 
 		const countries = Object.keys(verificationMethodMap);
+		const isSingleCountry = countries.length === 1;
 		countries.forEach(countryCode => {
 			const country = verificationMethodMap[countryCode];
 
@@ -109,10 +110,17 @@ var productSelection = (function productSelection() {
 			option.setAttribute('value', countryCode);
 			option.textContent = country.name;
 
+			if (isSingleCountry) {
+				option.setAttribute('selected', true);
+				loadIdTypes(verificationMethodMap, idTypeSelector, countryCode)
+			}
+
 			countrySelector.appendChild(option);
 		});
 
-		countrySelector.disabled = false;
+		if (!isSingleCountry) {
+			countrySelector.disabled = false;
+		}
 
 		setActiveScreen(form);
 	}

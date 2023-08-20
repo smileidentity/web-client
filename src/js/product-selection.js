@@ -76,7 +76,6 @@ var productSelection = (function productSelection() {
 
 				if (isSingleIdType) {
 					option.setAttribute('selected', true);
-					setProductPage(countryCode, idType);
 				}
 
 				idTypeSelector.appendChild(option);

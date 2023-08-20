@@ -91,6 +91,13 @@ describe('Verification Method Selection', () => {
 
             cy
                 .getIFrameBody()
+                .find('#submitConfig')
+                .click();
+
+            cy.wait(2000);
+
+            cy
+                .getIFrameBody()
                 .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
                 .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html')
         });

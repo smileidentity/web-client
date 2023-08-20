@@ -76,7 +76,7 @@ var productSelection = (function productSelection() {
 
 				if (isSingleIdType) {
 					option.setAttribute('selected', true);
-					setNextPage(countryCode, idType);
+					setProductPage(countryCode, idType);
 				}
 
 				idTypeSelector.appendChild(option);
@@ -190,7 +190,7 @@ var productSelection = (function productSelection() {
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
 
-	function setNextPage(selectedCountry, selectedIdType) {
+	function setProductPage(selectedCountry, selectedIdType) {
 		config.id_selection = {};
 		config.id_selection[selectedCountry] = [selectedIdType];
 		config.product = getVerificationMethod(selectedCountry, selectedIdType);
@@ -205,7 +205,7 @@ var productSelection = (function productSelection() {
 		const selectedCountry = ConfigForm.querySelector('#country').value;
 		const selectedIdType = ConfigForm.querySelector('#id_type').value;
 
-		setNextPage(selectedCountry, selectedIdType);
+		setProductPage(selectedCountry, selectedIdType);
 	});
 
 	window.addEventListener(

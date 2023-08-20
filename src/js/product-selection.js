@@ -10,14 +10,21 @@ var productSelection = (function productSelection() {
 		production: "https://api.smileidentity.com",
 	};
 
+	const referenceWindow = window.parent;
+
 	var config;
 	var verificationMethodMap;
 	var activeScreen;
 	var LoadingScreen = document.querySelector('#loading-screen');
 	var SelectIdType = document.querySelector('#select-id-type');
 	var ConfigForm = document.querySelector('form[name="hosted-web-config"]');
+	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
-	const referenceWindow = window.parent;
+	CloseIframeButtons.forEach((button) => {
+		button.addEventListener('click', event => {
+			closeWindow();
+		}, false);
+	});
 
 	function setActiveScreen(element) {
 		activeScreen.hidden = true;
@@ -60,15 +67,24 @@ var productSelection = (function productSelection() {
 			idTypeSelector.appendChild(initialOption);
 
 			// ACTION: Load ID Types as <option>s
-			Object.keys(verificationMethodMap[countryCode].id_types).forEach((idType) => {
+			const idTypes = Object.keys(verificationMethodMap[countryCode].id_types);
+			const isSingleIdType = idTypes.length === 1;
+			idTypes.forEach((idType) => {
 				const option = document.createElement("option");
 				option.setAttribute("value", idType);
 				option.textContent = verificationMethodMap[countryCode]["id_types"][idType].name;
+
+				if (isSingleIdType) {
+					option.setAttribute('selected', true);
+				}
+
 				idTypeSelector.appendChild(option);
 			});
 
 			// ACTION: Enable ID Type Selection
-			idTypeSelector.disabled = false;
+			if (!isSingleIdType) {
+				idTypeSelector.disabled = false;
+			}
 		} else {
 			// ACTION: Reset ID Type <select>
 			idTypeSelector.innerHTML = "";
@@ -95,6 +111,7 @@ var productSelection = (function productSelection() {
 		});
 
 		const countries = Object.keys(verificationMethodMap);
+		const isSingleCountry = countries.length === 1;
 		countries.forEach(countryCode => {
 			const country = verificationMethodMap[countryCode];
 
@@ -102,10 +119,17 @@ var productSelection = (function productSelection() {
 			option.setAttribute('value', countryCode);
 			option.textContent = country.name;
 
+			if (isSingleCountry) {
+				option.setAttribute('selected', true);
+				loadIdTypes(verificationMethodMap, idTypeSelector, countryCode)
+			}
+
 			countrySelector.appendChild(option);
 		});
 
-		countrySelector.disabled = false;
+		if (!isSingleCountry) {
+			countrySelector.disabled = false;
+		}
 
 		setActiveScreen(form);
 	}
@@ -154,11 +178,24 @@ var productSelection = (function productSelection() {
 		document.body.prepend(iframe);
 	}
 
+	function closeWindow(config) {
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
+	}
+
 	function publishMessage() {
 		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration-post-product-selection']").contentWindow;
 		config.source = 'SmileIdentity::HostedWebIntegration';
 
 		targetWindow.postMessage(JSON.stringify(config), '*');
+	}
+
+	function setProductPage(selectedCountry, selectedIdType) {
+		config.id_selection = {};
+		config.id_selection[selectedCountry] = [selectedIdType];
+		config.product = getVerificationMethod(selectedCountry, selectedIdType);
+
+		createIframe(config.product);
+		setTimeout(() => publishMessage(config), 2000);
 	}
 
 	ConfigForm.addEventListener('submit', (e) => {
@@ -167,12 +204,7 @@ var productSelection = (function productSelection() {
 		const selectedCountry = ConfigForm.querySelector('#country').value;
 		const selectedIdType = ConfigForm.querySelector('#id_type').value;
 
-		config.id_selection = {};
-		config.id_selection[selectedCountry] = [selectedIdType];
-		config.product = getVerificationMethod(selectedCountry, selectedIdType);
-
-		createIframe(config.product);
-		setTimeout(() => publishMessage(config), 2000);
+		setProductPage(selectedCountry, selectedIdType);
 	});
 
 	window.addEventListener(

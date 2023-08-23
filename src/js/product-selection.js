@@ -83,9 +83,7 @@ var productSelection = (function productSelection() {
 			});
 
 			// ACTION: Enable ID Type Selection
-			if (!isSingleIdType) {
-				idTypeSelector.disabled = false;
-			}
+			idTypeSelector.disabled = false;
 		} else {
 			// ACTION: Reset ID Type <select>
 			idTypeSelector.innerHTML = "";
@@ -128,10 +126,7 @@ var productSelection = (function productSelection() {
 			countrySelector.appendChild(option);
 		});
 
-		if (!isSingleCountry) {
-			countrySelector.disabled = false;
-		}
-
+		countrySelector.disabled = false;
 		setActiveScreen(form);
 	}
 

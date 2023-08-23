@@ -169,6 +169,50 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectKRAType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectKRAType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('KE')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('KRA_PIN')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
+Cypress.Commands.add('selectKEDriversLicenseType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectDriversLicenseType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('KE')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('DRIVERS_LICENSE')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('getTotpConsentApp', () => {
 	cy.getIFrameBody()
 		.find('end-user-consent')

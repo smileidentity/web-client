@@ -411,7 +411,7 @@ var eKYC = function eKYC() {
 		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
 
 		if (showCitizenship) {
-			const Citizenship = IDInfoForm.querySelector('fieldset#citizenship');
+			const Citizenship = IDInfoForm.querySelector('fieldset#citizenships');
 			Citizenship.hidden = false;
 		}
 	}

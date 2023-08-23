@@ -644,15 +644,15 @@ var basicKyc = (function basicKyc() {
 			await submitIdInfoForm();
 			complete();
 		} catch (error) {
-			displayErrorMessage(error);
-			console.error(`SmileIdentity - ${error.name}: ${error.cause}`);
+			displayErrorMessage('Something went wrong');
+			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
 		}
 	}
 
-	function displayErrorMessage(error) {
+	function displayErrorMessage(message) {
 		const p = document.createElement("p");
 
-		p.textContent = error.message;
+		p.textContent = message;
 		p.style.color = "red";
 		p.style.fontSize = "1.5rem";
 		p.style.textAlign = "center";

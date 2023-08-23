@@ -8,8 +8,6 @@ describe('Verification Method Selection', () => {
             it('should redirect to the biometric kyc sequence in a nested iframe', () => {
                 cy.selectBVNIDType();
 
-                cy.wait(4000);
-
                 cy
                     .getIFrameBody()
                     .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
@@ -21,8 +19,6 @@ describe('Verification Method Selection', () => {
             it('should redirect to the biometric kyc sequence in a nested iframe', () => {
                 cy.selectPASSPORTIDType();
 
-                cy.wait(4000);
-
                 cy
                     .getIFrameBody()
                     .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
@@ -33,8 +29,6 @@ describe('Verification Method Selection', () => {
         describe('enhanced_kyc', () => {
             it('should redirect to the biometric kyc sequence in a nested iframe', () => {
                 cy.selectNINIDType();
-
-                cy.wait(4000);
 
                 cy
                     .getIFrameBody()
@@ -50,17 +44,10 @@ describe('Verification Method Selection', () => {
         });
 
         it('disables country selector, allows id_type selection', () => {
-            cy.wait(4000);
-
             cy
                 .getIFrameBody()
-                .find('#country')
-                .should('have.attr', 'disabled');
-            
-            cy
-                .getIFrameBody()
-                .find('#id_type')
-                .should('not.have.attr', 'disabled');
+                .find('#country option:selected')
+                .should('have.text', 'Nigeria');
 
             cy
                 .getIFrameBody()
@@ -71,8 +58,6 @@ describe('Verification Method Selection', () => {
                 .getIFrameBody()
                 .find('#submitConfig')
                 .click();
-            
-            cy.wait(2000);
 
             cy
                 .getIFrameBody()
@@ -87,14 +72,20 @@ describe('Verification Method Selection', () => {
         });
 
         it('goes directly to the web embed', () => {
-            cy.wait(4000);
+            cy
+                .getIFrameBody()
+                .find('#country option:selected')
+                .should('have.text', 'Nigeria');
+
+            cy
+                .getIFrameBody()
+                .find('#id_type option:selected')
+                .should('have.text', 'Bank Verification Number');
 
             cy
                 .getIFrameBody()
                 .find('#submitConfig')
                 .click();
-
-            cy.wait(2000);
 
             cy
                 .getIFrameBody()

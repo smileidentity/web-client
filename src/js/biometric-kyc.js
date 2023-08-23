@@ -11,6 +11,7 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	const referenceWindow = window.parent;
+	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 	
 	var pages = [];
 	var config;
@@ -98,7 +99,7 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	window.addEventListener('message', async event => {
-		if (event.data.includes('SmileIdentity::HostedWebIntegration')) {
+		if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 

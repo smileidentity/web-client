@@ -152,7 +152,7 @@ var SmileIdentity = function () {
 
 	function publishConfigToIFrame(config) {
 		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration']").contentWindow;
-		config.source = 'SmileIdentity::HostedWebIntegration';
+		config.source = 'SmileIdentity::Configuration';
 
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
@@ -163,12 +163,12 @@ var SmileIdentity = function () {
 		if (configIsValid) {
 			createIframe(config.product);
 
-			setTimeout(() => publishConfigToIFrame(config), 2000);
-
 			window.addEventListener('message', (event) => {
 				const tag = event.data.message || event.data;
 
 				switch (tag) {
+					case 'SmileIdentity::ChildPageReady':
+						return publishConfigToIFrame(config);
 					case 'SmileIdentity::Close':
 						return closeIFrame(config);
 					case 'SmileIdentity::Success':

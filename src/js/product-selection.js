@@ -11,6 +11,7 @@ var productSelection = (function productSelection() {
 	};
 
 	const referenceWindow = window.parent;
+	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
 	var config;
 	var verificationMethodMap;
@@ -184,7 +185,7 @@ var productSelection = (function productSelection() {
 
 	function publishMessage() {
 		const targetWindow = document.querySelector("[name='smile-identity-hosted-web-integration-post-product-selection']").contentWindow;
-		config.source = 'SmileIdentity::HostedWebIntegration';
+		config.source = 'SmileIdentity::Configuration';
 
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
@@ -195,7 +196,6 @@ var productSelection = (function productSelection() {
 		config.product = getVerificationMethod(selectedCountry, selectedIdType);
 
 		createIframe(config.product);
-		setTimeout(() => publishMessage(config), 2000);
 	}
 
 	ConfigForm.addEventListener('submit', (e) => {
@@ -210,23 +210,27 @@ var productSelection = (function productSelection() {
 	window.addEventListener(
 		"message",
 		async (event) => {
-			if (event.data.includes("SmileIdentity::HostedWebIntegration")) {
-				config = JSON.parse(event.data);
-				activeScreen = LoadingScreen;
+			if (event.data) {
+				if (event.data.includes("SmileIdentity::Configuration")) {
+					config = JSON.parse(event.data);
+					activeScreen = LoadingScreen;
 
-				try {
-					const servicesResponse = await fetch(`${endpoints[config.environment]}/v1/services`);
+					try {
+						const servicesResponse = await fetch(`${endpoints[config.environment]}/v1/services`);
 
-					if (servicesResponse.ok) {
-						const services = await servicesResponse.json();
+						if (servicesResponse.ok) {
+							const services = await servicesResponse.json();
 
-						verificationMethodMap = transformIdTypesToVerificationMethodMap(config, services);
-						initializeForm(SelectIdType, verificationMethodMap);
-					} else {
-						throw Error('Failed to get supported ID types');
+							verificationMethodMap = transformIdTypesToVerificationMethodMap(config, services);
+							initializeForm(SelectIdType, verificationMethodMap);
+						} else {
+							throw Error('Failed to get supported ID types');
+						}
+					} catch (e) {
+						throw e;
 					}
-				} catch (e) {
-					throw e;
+				} else if (event.data.includes("SmileIdentity::ChildPageReady")) {
+					publishMessage(config);
 				}
 			} else {
 				referenceWindow.postMessage(event.detail || event.data, '*');

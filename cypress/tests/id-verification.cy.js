@@ -1,5 +1,6 @@
 describe('ID verification', () => {
 	beforeEach(() => {
+		cy.loadIDOptions();
 		cy.visit('/identity-verification');
 
 		cy

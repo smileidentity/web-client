@@ -1,3 +1,7 @@
+beforeEach(() => {
+	cy.loadIDOptions();
+});
+
 it('should ask to confirm "consent denial"', () => {
 	cy.visit('/');
 

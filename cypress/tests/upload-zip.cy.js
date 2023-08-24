@@ -1,5 +1,7 @@
 describe('zip upload screens', () => {
 	beforeEach(() => {
+		cy.loadIDOptions();
+
 		cy.visit('/');
 
 		cy

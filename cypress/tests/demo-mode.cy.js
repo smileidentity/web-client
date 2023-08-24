@@ -1,8 +1,8 @@
 it('should show content for demo mode', () => {
-	cy.visit('/demo');
-
 	cy
 		.loadIDOptions();
+
+	cy.visit('/demo');
 
 	cy
 		.getIFrameBody()

@@ -1,4 +1,8 @@
 describe('web-integration onError', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
+
 	it('should run when an error is published from the integration', () => {
 		cy.visit('/basic_kyc');
 		cy.selectBVNMFAIDType();

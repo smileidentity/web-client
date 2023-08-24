@@ -11,6 +11,7 @@ var SmartSelfie = (function SmartSelfie() {
   };
 
   const referenceWindow = window.parent;
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   const labels = {
     2: {
@@ -39,7 +40,7 @@ var SmartSelfie = (function SmartSelfie() {
   window.addEventListener(
     "message",
     async (event) => {
-      if (event.data.includes("SmileIdentity::HostedWebIntegration")) {
+      if (event.data && event.data.includes("SmileIdentity::Configuration")) {
         try {
           config = JSON.parse(event.data);
           partner_params = getPartnerParams();

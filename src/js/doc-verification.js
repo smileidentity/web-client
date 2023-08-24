@@ -11,6 +11,7 @@ var documentVerification = function documentVerification() {
 	}
 
 	const referenceWindow = window.parent;
+	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
 	var config;
 	var activeScreen;
@@ -41,7 +42,7 @@ var documentVerification = function documentVerification() {
 	}
 
 	window.addEventListener('message', async event => {
-		if (event.data.includes('SmileIdentity::HostedWebIntegration')) {
+		if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 

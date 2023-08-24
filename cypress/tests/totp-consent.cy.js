@@ -1,4 +1,8 @@
 describe('totpConsent', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
+
 	describe('core', () => {
 		it('should not show up for non-BVN_MFA id types', () => {
 			cy.visit('/');

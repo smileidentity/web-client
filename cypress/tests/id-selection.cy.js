@@ -1,4 +1,8 @@
 describe('No ID Selection', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
+
 	it('basic_kyc', () => {
 		cy.visit('/basic_kyc');
 

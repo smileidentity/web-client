@@ -15,6 +15,9 @@ describe('document verification', () => {
 			}, {
 				statusCode: 200
 			}).as('successfulUpload');
+
+		cy.loadIDOptions();
+
 		cy.visit('/document-verification');
 
 

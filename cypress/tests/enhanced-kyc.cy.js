@@ -1,5 +1,6 @@
 describe('enhanced kyc', () => {
 	beforeEach(() => {
+		cy.loadIDOptions();
 		cy.visit('/enhanced_kyc');
 
 		cy

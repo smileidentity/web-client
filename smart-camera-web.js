@@ -1,4 +1,4 @@
-const VERSION = '1.0.0-beta.21';
+const VERSION = '1.0.0-beta.22';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
@@ -1335,12 +1335,14 @@ class SmartCameraWeb extends HTMLElement {
 
     video.autoplay = true;
     video.playsInline = true;
+    video.muted = true;
 
     if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
+    video.play();
 
     if (!videoExists) this.videoContainer.prepend(video);
 
@@ -1370,12 +1372,14 @@ class SmartCameraWeb extends HTMLElement {
 
     video.autoplay = true;
     video.playsInline = true;
+    video.muted = true;
 
     if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
+    video.play();
 
     const videoContainer = this.activeScreen === this.IDCameraScreen
       ? this.IDCameraScreen.querySelector('.id-video-container')

@@ -46,6 +46,7 @@
 				onSuccess: () => {
 				},
 				onClose: () => {
+					displayError('User triggered this close action');
 				},
 				onError: (data) => {
 					displayError(JSON.stringify(data, null, 2));

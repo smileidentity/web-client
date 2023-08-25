@@ -310,7 +310,7 @@ var basicKyc = (function basicKyc() {
 
 	CloseIframeButtons.forEach((button) => {
 		button.addEventListener('click', event => {
-			closeWindow();
+			closeWindow(true);
 		}, false);
 	});
 
@@ -683,8 +683,9 @@ var basicKyc = (function basicKyc() {
 		window.setTimeout(closeWindow, 2000);
 	}
 
-	function closeWindow() {
-		referenceWindow.postMessage("SmileIdentity::Close", "*");
+	function closeWindow(userTriggered) {
+		const message = userTriggered ? 'SmileIdentity::Close' : 'SmileIdentity::Close::System';
+		referenceWindow.postMessage(message, "*");
 	}
 
 	function handleSuccess() {

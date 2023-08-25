@@ -298,7 +298,7 @@ var biometricKyc = function biometricKyc() {
 		setActiveScreen(page);
 	}, false);
 	SmartCameraWeb.addEventListener('close', event => {
-		closeWindow();
+		closeWindow(true);
 	}, false);
 
 	IDInfoForm.querySelector('#submitForm').addEventListener('click', event => {
@@ -320,7 +320,7 @@ var biometricKyc = function biometricKyc() {
 
 	CloseIframeButtons.forEach((button) => {
 		button.addEventListener('click', event => {
-			closeWindow();
+			closeWindow(true);
 		}, false);
 	});
 
@@ -714,8 +714,9 @@ var biometricKyc = function biometricKyc() {
 		return fileUploaded;
 	}
 
-	function closeWindow() {
-		referenceWindow.postMessage('SmileIdentity::Close', '*');
+	function closeWindow(userTriggered) {
+		const message = userTriggered ? 'SmileIdentity::Close' : 'SmileIdentity::Close::System';
+		referenceWindow.postMessage(message, '*');
 	}
 
 	function handleSuccess() {

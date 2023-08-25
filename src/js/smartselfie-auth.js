@@ -77,7 +77,7 @@ var SmartSelfie = (function SmartSelfie() {
   CloseIframeButton.addEventListener(
     "click",
     (event) => {
-      closeWindow();
+      closeWindow(true);
     },
     false
   );
@@ -249,8 +249,9 @@ var SmartSelfie = (function SmartSelfie() {
     return fileUploaded;
   }
 
-  function closeWindow() {
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+  function closeWindow(userTriggered) {
+    const message = userTriggered ? "SmileIdentity::Close" : "SmileIdentity::Close::System";
+    referenceWindow.postMessage(message, "*");
   }
 
   function handleSuccess() {

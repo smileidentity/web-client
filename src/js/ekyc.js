@@ -296,7 +296,7 @@ var eKYC = function eKYC() {
 
 	CloseIframeButtons.forEach((button) => {
 		button.addEventListener('click', event => {
-			closeWindow();
+			closeWindow(true);
 		}, false);
 	});
 
@@ -629,8 +629,9 @@ var eKYC = function eKYC() {
 		window.setTimeout(closeWindow, 2000);
 	}
 
-	function closeWindow() {
-		referenceWindow.postMessage('SmileIdentity::Close', '*');
+	function closeWindow(userTriggered) {
+		const message = userTriggered ? 'SmileIdentity::Close' : 'SmileIdentity::Close::System';
+		referenceWindow.postMessage(message, '*');
 	}
 
 	function handleSuccess() {

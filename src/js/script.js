@@ -102,12 +102,12 @@ var SmileIdentity = function () {
 		document.body.prepend(iframe);
 	}
 
-	function closeIFrame(config) {
+	function closeIFrame(config, userTriggered) {
 		const iframe = document.querySelector('#smile-identity-hosted-web-integration');
 
 		iframe.remove();
 
-		if (config.onClose) {
+		if (config.onClose && userTriggered) {
 			config.onClose();
 		}
 	}
@@ -170,7 +170,9 @@ var SmileIdentity = function () {
 					case 'SmileIdentity::ChildPageReady':
 						return publishConfigToIFrame(config);
 					case 'SmileIdentity::Close':
-						return closeIFrame(config);
+						return closeIFrame(config, true);
+					case 'SmileIdentity::Close::System':
+						return closeIFrame(config, false);
 					case 'SmileIdentity::Success':
 						return handleSuccess(config);
 					case 'SmileIdentity::ConsentDenied':

@@ -1,5 +1,9 @@
 describe('Thank you message', () => {
 	describe('should contain country and id type', () => {
+		beforeEach(() => {
+			cy.loadIDOptions();
+		});
+
 		it('for basic kyc', () => {
 			cy.visit('/basic_kyc');
 

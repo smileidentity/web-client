@@ -174,7 +174,7 @@ var productSelection = (function productSelection() {
 		document.body.prepend(iframe);
 	}
 
-	function closeWindow(config) {
+	function closeWindow() {
 		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 

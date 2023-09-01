@@ -408,6 +408,13 @@ var eKYC = function eKYC() {
 			const DOB = IDInfoForm.querySelector('fieldset#dob');
 			DOB.hidden = false;
 		}
+
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+
+		if (showCitizenship) {
+			const Citizenship = IDInfoForm.querySelector('fieldset#citizenships');
+			Citizenship.hidden = false;
+		}
 	}
 
 	function getPartnerParams() {
@@ -515,6 +522,16 @@ var eKYC = function eKYC() {
 				}
 			};
 			validationConstraints.year = {
+				presence: {
+					allowEmpty: false,
+					message: 'is required'
+				}
+			};
+		}
+
+		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+		if (showCitizenship) {
+			validationConstraints.citizenship = {
 				presence: {
 					allowEmpty: false,
 					message: 'is required'

@@ -546,6 +546,7 @@ var biometricKyc = function biometricKyc() {
 			};
 		}
 
+
 		const validation = validate(payload, validationConstraints);
 
 		if (validation) {

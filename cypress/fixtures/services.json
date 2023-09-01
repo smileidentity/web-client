@@ -669,6 +669,19 @@
                         "label": "Passport",
                         "test_data": "00000000",
                         "id_number_regex": "^[A-Z0-9]{7,9}$"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "citizenship",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Driver's License",
+                        "test_data": "00000000",
+                        "id_number_regex": "^[0-9]{1,9}$"
                     }
                 }
             },
@@ -900,6 +913,32 @@
                         "label": "Passport",
                         "test_data": "00000000",
                         "id_number_regex": "^[A-Z0-9]{7,9}$"
+                    },
+                    "KRA_PIN": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "citizenship",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "KRA PIN",
+                        "test_data": "00000000",
+                        "id_number_regex": "^[0-9]{1,9}$"
+                    },
+                    "DRIVERS_LICENSE": {
+                        "required_fields": [
+                            "country",
+                            "id_type",
+                            "id_number",
+                            "citizenship",
+                            "user_id",
+                            "job_id"
+                        ],
+                        "label": "Driver's License",
+                        "test_data": "00000000",
+                        "id_number_regex": "^[0-9]{1,9}$"
                     }
                 }
             },

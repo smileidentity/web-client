@@ -19,7 +19,8 @@
                 "NATIONAL_ID",
                 "ALIEN_CARD",
                 "PASSPORT",
-                "NATIONAL_ID_NO_PHOTO"
+                "NATIONAL_ID_NO_PHOTO",
+                "DRIVERS_LICENSE"
             ],
             "NG": [
                 "V_NIN",
@@ -94,7 +95,9 @@
                 "NATIONAL_ID",
                 "ALIEN_CARD",
                 "PASSPORT",
-                "NATIONAL_ID_NO_PHOTO"
+                "NATIONAL_ID_NO_PHOTO",
+                "DRIVERS_LICENSE",
+                "KRA_PIN"
             ],
             "NG": [
                 "V_NIN",

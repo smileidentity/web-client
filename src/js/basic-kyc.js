@@ -4,7 +4,6 @@ var basicKyc = (function basicKyc() {
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		development: "https://devapi.smileidentity.com",
 		sandbox: "https://testapi.smileidentity.com",
 		live: "https://api.smileidentity.com",
 		production: "https://api.smileidentity.com",

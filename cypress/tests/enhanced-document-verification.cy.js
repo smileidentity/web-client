@@ -20,7 +20,7 @@ describe('document verification', () => {
 
 		cy.visit('/enhanced_document_verification');
 
-		cy.selectPASSPORTIDType();
+		cy.selectVOTERIDType();
 
 		cy.navigateThroughCameraScreens();
 	});

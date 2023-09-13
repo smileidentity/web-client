@@ -20,7 +20,7 @@ describe('document verification', () => {
 
 		cy.visit('/enhanced_document_verification');
 
-		cy.selectKEDriversLicenseType();
+		cy.selectPASSPORTIDType();
 
 		cy.navigateThroughCameraScreens();
 	});
@@ -30,7 +30,7 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'DRIVERS_LICENSE')
+			.should('eq', 'PASSPORT')
 
 		cy
 			.getIFrameBody()

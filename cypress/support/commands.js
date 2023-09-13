@@ -151,7 +151,7 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 	cy
 		.loadIDOptions();
 
-	cy.log('selectingNINIDType');
+	cy.log('selectingPASSPORTIDType');
 
 	cy
 		.getIFrameBody()

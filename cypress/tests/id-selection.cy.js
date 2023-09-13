@@ -133,7 +133,7 @@ describe('No ID Selection', () => {
 			}).as('successfulUpload');
 
 		cy
-			.selectNINIDType()
+			.selectPASSPORTIDType()
 
 		cy
 			.navigateThroughCameraScreens();
@@ -142,7 +142,7 @@ describe('No ID Selection', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'NIN')
+			.should('eq', 'PASSPORT')
 
 		cy
 			.getIFrameBody()

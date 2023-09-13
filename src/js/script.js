@@ -67,6 +67,8 @@ var SmileIdentity = function () {
 				return './../smartselfie-auth.html';
 			case 'doc_verification':
 				return './../doc-verification.html';
+			case 'enhanced_document_verification':
+				return './../enhanced-document-verification.html';
 			case 'basic_kyc':
 			case 'identity_verification':
 				return './../basic-kyc.html';

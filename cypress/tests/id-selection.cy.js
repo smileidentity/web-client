@@ -133,7 +133,7 @@ describe('No ID Selection', () => {
 			}).as('successfulUpload');
 
 		cy
-			.selectNINIDType()
+			.selectPASSPORTIDType()
 
 		cy
 			.navigateThroughCameraScreens();
@@ -142,7 +142,7 @@ describe('No ID Selection', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'NIN')
+			.should('eq', 'PASSPORT')
 
 		cy
 			.getIFrameBody()
@@ -256,6 +256,10 @@ describe('No ID Selection', () => {
 });
 
 describe('Preselected Country', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
+
 	it('basic_kyc', () => {
 		cy.visit('/basic_kyc_pre_select_country');
 
@@ -569,6 +573,10 @@ describe('Preselected Country', () => {
 });
 
 describe('Preselected Country and ID Type', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
+
 	it('basic_kyc', () => {
 		cy.visit('/basic_kyc_pre_select_id_type');
 

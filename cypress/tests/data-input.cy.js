@@ -1,5 +1,7 @@
 describe('id-info screen', () => {
 	beforeEach(() => {
+		cy.loadIDOptions();
+
 		cy.visit('/');
 
 		cy

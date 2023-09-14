@@ -30,11 +30,27 @@ var documentVerification = function documentVerification() {
 	var fileToUpload, uploadURL;
 
 	async function getProductConstraints() {
+		var payload = {
+			token: config.token,
+			partner_id: config.partner_details.partner_id,
+		}
+
+		const fetchConfig = {
+			cache: 'no-cache',
+			mode: 'cors',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'POST',
+			body: JSON.stringify(payload),
+		};
+
 		try {
-			const response = await fetch(`${endpoints[config.environment]}/services`);
+			const response = await fetch(`${endpoints[config.environment]}/valid_documents`, fetchConfig);
 			const json = await response.json();
 
-			return json.hosted_web['doc_verification'];
+			return json.valid_documents;
 		} catch (e) {
 			throw new Error("Failed to get supported ID types", { cause: e });
 		}
@@ -56,10 +72,10 @@ var documentVerification = function documentVerification() {
 	}, false);
 
 	function initializeSession(constraints) {
-		const supportedCountries = Object.keys(constraints)
-			.map(countryCode => ({
-				code: countryCode,
-				name: constraints[countryCode].name
+		const supportedCountries = constraints
+			.map(({ country: { name, code } }) => ({
+				code,
+				name,
 			})).sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
@@ -87,10 +103,17 @@ var documentVerification = function documentVerification() {
 				const idTypes = config.id_selection[selectedCountry];
 				if (idTypes.length === 1 || typeof idTypes === 'string') {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
+					const documentCaptureConfig = constraints
+						.find(entry => entry.country.code === selectedCountry)
+						.id_types
+						.find(entry => entry.code === id_info.id_type);
 
 					// ACTION: set initial screen
 					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
 					// ACTION: set document capture mode
+					if (documentCaptureConfig.has_back) {
+						SmartCameraWeb.setAttribute('capture-id', 'back');
+					}
 					if (config.document_capture_modes) {
 						SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
 					}
@@ -117,23 +140,22 @@ var documentVerification = function documentVerification() {
 
 			function loadIdTypes(countryCode) {
 				if (countryCode) {
-					const constrainedIDTypes = Object.keys(productConstraints[countryCode].id_types);
-					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : constrainedIDTypes;
-					const selectedIDTypes = validIDTypes.filter(value => constrainedIDTypes.includes(value));
+					const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
+					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : countryIdTypes;
+					const selectedIDTypes = countryIdTypes.filter(idType =>
+						validIDTypes.find(
+							validIdType => (validIdType.code || validIdType) === idType.code
+						) || !idType.code
+					);
 
 					// ACTION: Reset ID Type <select>
 					selectIDType.innerHTML = '';
-					const initialOption = document.createElement('option');
-					initialOption.setAttribute('value', '');
-					initialOption.textContent = '--Please Select--';
-					selectIDType.appendChild(initialOption);
 
 					// ACTION: Load ID Types as <option>s
-					selectedIDTypes.forEach((IDType) => {
+					selectedIDTypes.forEach((idType) => {
 						const option = document.createElement("option");
-						option.setAttribute("value", IDType);
-						option.textContent =
-						productConstraints[countryCode]["id_types"][IDType].label;
+						option.setAttribute("value", idType.code);
+						option.textContent = idType.name;
 						selectIDType.appendChild(option);
 					});
 
@@ -153,19 +175,19 @@ var documentVerification = function documentVerification() {
 			}
 
 			// ACTION: Load Countries as <option>s
-			validCountries.forEach(country => {
-				const countryObject = productConstraints[country];
+			validCountries.forEach(countryCode => {
+				const countryObject = productConstraints.find(entry => entry.country.code === countryCode).country;
 
 				if (countryObject) {
 					const option = document.createElement('option');
-					option.setAttribute('value', country);
-					option.textContent = constraints[country].name;
+					option.setAttribute('value', countryCode);
+					option.textContent = countryObject.name;
 
-					if (id_info && id_info.country && country === id_info.country) {
+					if (id_info && id_info.country && countryCode === id_info.country) {
 						option.setAttribute('selected', true);
-						selectCountry.value = country;
+						selectCountry.value = countryCode;
 						selectCountry.disabled = true;
-						loadIdTypes(country);
+						loadIdTypes(countryCode);
 					}
 
 					selectCountry.appendChild(option);
@@ -188,7 +210,16 @@ var documentVerification = function documentVerification() {
 				};
 
 				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				const documentCaptureConfig = constraints
+					.find(entry => entry.country.code === selectedCountry)
+					.id_types
+					.find(entry => entry.code === selectedIDType);
+
 				// ACTION: set document capture mode
+				if (documentCaptureConfig.has_back) {
+					console.log('setting up smartcameraweb');
+					SmartCameraWeb.setAttribute('capture-id', 'back');
+				}
 				if (config.document_capture_modes) {
 					SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
 				}

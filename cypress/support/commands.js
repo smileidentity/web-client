@@ -42,6 +42,9 @@ Cypress.Commands.add('loadIDOptions', () => {
 		.intercept('GET', '**/v1/services', { fixture: 'services.json' });
 
 	cy
+		.intercept('POST', '**/v1/valid_documents', { fixture: 'valid_documents.json' });
+
+	cy
 		.intercept('POST', '**/v1/products_config', { fixture: 'products_config.json' });
 
 	cy
@@ -151,7 +154,7 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 	cy
 		.loadIDOptions();
 
-	cy.log('selectingNINIDType');
+	cy.log('selectingPASSPORTIDType');
 
 	cy
 		.getIFrameBody()

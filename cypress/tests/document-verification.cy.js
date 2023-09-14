@@ -21,7 +21,7 @@ describe('document verification', () => {
 		cy.visit('/document-verification');
 
 
-		cy.selectNINIDType();
+		cy.selectPASSPORTIDType();
 
 		cy.navigateThroughCameraScreens();
 	});
@@ -31,7 +31,7 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'NIN')
+			.should('eq', 'PASSPORT')
 
 		cy
 			.getIFrameBody()

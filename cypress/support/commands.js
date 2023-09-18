@@ -158,13 +158,23 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 
 	cy
 		.getIFrameBody()
-		.find('#country')
-		.select('NG')
+		.find('smileid-combobox-trigger input')
+		.type('Nigeria');
 
 	cy
 		.getIFrameBody()
-		.find('#id_type')
-		.select('PASSPORT')
+		.find('smileid-combobox-option[value="NG"]')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-trigger button')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-option[value="PASSPORT"]')
+		.click();
 
 	cy
 		.getIFrameBody()

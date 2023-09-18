@@ -71,6 +71,55 @@ var documentVerification = function documentVerification() {
 		}
 	}, false);
 
+	function loadCountrySelector(countries, placeholderElement) {
+		const autocomplete = document.createElement('smileid-combobox');
+		autocomplete.setAttribute('id', 'country');
+		autocomplete.innerHTML = `
+			<smileid-combobox-trigger label="Search country">
+			</smileid-combobox-trigger>
+
+			<smileid-combobox-listbox empty-label="No country found">
+				${countries.map(country =>
+					`
+						<smileid-combobox-option value="${country.code}" label="${country.name}">
+							${ country.name }
+						</smileid-combobox-option>
+					`
+				).join('\n')}
+			</smileid-combobox-listbox>
+		`;
+
+		placeholderElement.replaceWith(autocomplete);
+
+		return autocomplete;
+	}
+
+	function loadIdTypeSelector(idTypes, placeholderElement) {
+		const combobox = document.createElement('smileid-combobox');
+		combobox.setAttribute('id', 'id_type');
+		combobox.innerHTML = `
+			<smileid-combobox-trigger type="button" label="Select Document">
+			</smileid-combobox-trigger>
+
+			<smileid-combobox-listbox empty-label="No country found">
+				${idTypes.map(idType =>
+					`
+						<smileid-combobox-option value="${idType.code}" label="${idType.name}">
+							<div>
+								<p>${ idType.name }</p>
+								<small>${idType.example.length > 1 ? 'e.g. ' : ''}${idType.example.join(', ')}</small>
+							</div>
+						</smileid-combobox-option>
+					`
+				).join('\n')}
+			</smileid-combobox-listbox>
+		`;
+
+		placeholderElement.replaceWith(combobox);
+
+		return combobox;
+	}
+
 	function initializeSession(constraints) {
 		const supportedCountries = constraints
 			.map(({ country: { name, code } }) => ({
@@ -129,7 +178,7 @@ var documentVerification = function documentVerification() {
 
 		if (!id_info || !id_info.id_type) {
 			const selectCountry = SelectIDType.querySelector('#country');
-			const selectIDType = SelectIDType.querySelector('#id_type');
+			let selectIdType = SelectIDType.querySelector('#id_type');
 			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
 			// ACTION: Enable Country Selection
@@ -139,81 +188,59 @@ var documentVerification = function documentVerification() {
 			setActiveScreen(SelectIDType);
 
 			function loadIdTypes(countryCode) {
-				if (countryCode) {
-					const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
-					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : countryIdTypes;
-					const selectedIDTypes = countryIdTypes.filter(idType =>
-						validIDTypes.find(
+				const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
+				const validIdTypes = config.id_selection ? config.id_selection(countryCode) : countryIdTypes;
+				const selectedIdTypes = countryIdTypes
+					.filter(idType =>
+						validIdTypes.find(
 							validIdType => (validIdType.code || validIdType) === idType.code
 						) || !idType.code
 					);
 
-					// ACTION: Reset ID Type <select>
-					selectIDType.innerHTML = '';
-
-					// ACTION: Load ID Types as <option>s
-					selectedIDTypes.forEach((idType) => {
-						const option = document.createElement("option");
-						option.setAttribute("value", idType.code);
-						option.textContent = idType.name;
-						selectIDType.appendChild(option);
-					});
-
-					// ACTION: Enable ID Type Selection
-					selectIDType.disabled = false;
-				} else {
-					// ACTION: Reset ID Type <select>
-					selectIDType.innerHTML = "";
-
-					// ACTION: Load the default <option>
-					const option = document.createElement("option");
-					option.disabled = true;
-					option.setAttribute("value", "");
-					option.textContent = "--Select Country First--";
-					selectIDType.appendChild(option);
-				}
+				return selectedIdTypes;
 			}
 
-			// ACTION: Load Countries as <option>s
-			validCountries.forEach(countryCode => {
+			let selectedCountry, selectedIdType;
+			// ACTION: Load Countries using combobox
+			const countries = validCountries.map(countryCode => {
 				const countryObject = productConstraints.find(entry => entry.country.code === countryCode).country;
 
-				if (countryObject) {
-					const option = document.createElement('option');
-					option.setAttribute('value', countryCode);
-					option.textContent = countryObject.name;
-
-					if (id_info && id_info.country && countryCode === id_info.country) {
-						option.setAttribute('selected', true);
-						selectCountry.value = countryCode;
-						selectCountry.disabled = true;
-						loadIdTypes(countryCode);
-					}
-
-					selectCountry.appendChild(option);
-				}
+				return {
+					code: countryCode,
+					name: countryObject.name,
+				};
 			});
 
-			selectCountry.addEventListener('change', e => {
-				loadIdTypes(e.target.value);
+			const countrySelector = loadCountrySelector(countries, selectCountry);
+
+			countrySelector.addEventListener('change', e => {
+				selectIdType = SelectIDType.querySelector('#id_type');
+				selectedCountry = e.detail.value;
+
+				// ACTION: Load id types using combobox
+				const idTypes = loadIdTypes(selectedCountry);
+
+				const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
+
+				idTypeSelector.addEventListener('change', e => {
+					selectedIdType = e.detail.value;
+				});
 			});
 
 			hostedWebConfigForm.addEventListener('submit', e => {
 				e.preventDefault();
-				const selectedCountry = selectCountry.value;
-				const selectedIDType = selectIDType.value;
 
 				// ACTION: set up `id_info`
 				id_info = {
 					country: selectedCountry,
-					id_type: selectedIDType
+					id_type: selectedIdType
 				};
 
-				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				SmartCameraWeb.setAttribute('document-type', selectedIdType)
 				const documentCaptureConfig = constraints
 					.find(entry => entry.country.code === selectedCountry)
 					.id_types
-					.find(entry => entry.code === selectedIDType);
+					.find(entry => entry.code === selectedIdType);
 
 				// ACTION: set document capture mode
 				if (documentCaptureConfig.has_back) {

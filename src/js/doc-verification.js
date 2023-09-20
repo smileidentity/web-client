@@ -77,7 +77,10 @@ var documentVerification = function documentVerification() {
 		const autocomplete = document.createElement('smileid-combobox');
 		autocomplete.setAttribute('id', 'country');
 		autocomplete.innerHTML = `
-			<smileid-combobox-trigger label="${ isSingleCountry ? countries[0].name : "Search Country"}">
+			<smileid-combobox-trigger
+				${isSingleCountry ? 'disabled' : ''}
+				${isSingleCountry ? `value="${countries[0].name}"` : ''}
+				label="Search Country">
 			</smileid-combobox-trigger>
 
 			<smileid-combobox-listbox empty-label="No country found">
@@ -123,6 +126,29 @@ var documentVerification = function documentVerification() {
 	}
 
 	function initializeSession(constraints) {
+		let selectedCountry, selectedIdType;
+
+		function loadIdTypes(countryCode) {
+			const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
+			const validIdTypes = config.id_selection ? config.id_selection[countryCode] : countryIdTypes;
+			const selectedIdTypes = countryIdTypes
+				.filter(idType =>
+					validIdTypes.find(
+						validIdType => (validIdType.code || validIdType) === idType.code
+					) || !idType.code
+				);
+
+			return selectedIdTypes;
+		}
+
+		function initialiseIdTypeSelector(selectedCountry, selectIdType) {
+			const idTypes = loadIdTypes(selectedCountry);
+			const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
+			idTypeSelector.addEventListener('change', e => {
+				selectedIdType = e.detail.value;
+			});
+		}
+
 		const supportedCountries = constraints
 			.map(({ country: { name, code } }) => ({
 				code,
@@ -178,9 +204,18 @@ var documentVerification = function documentVerification() {
 			validCountries = supportedCountries;
 		}
 
+		const countries = validCountries.map(countryCode => {
+			const countryObject = productConstraints.find(entry => entry.country.code === countryCode).country;
+
+			return {
+				code: countryCode,
+				name: countryObject.name,
+			};
+		});
+
 		if (!id_info || !id_info.id_type) {
 			const selectCountry = SelectIDType.querySelector('#country');
-			let selectIdType = SelectIDType.querySelector('#id_type');
+			const selectIdType = SelectIDType.querySelector('#id_type');
 			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
 			// ACTION: Enable Country Selection
@@ -189,45 +224,21 @@ var documentVerification = function documentVerification() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
-				const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
-				const validIdTypes = config.id_selection ? config.id_selection(countryCode) : countryIdTypes;
-				const selectedIdTypes = countryIdTypes
-					.filter(idType =>
-						validIdTypes.find(
-							validIdType => (validIdType.code || validIdType) === idType.code
-						) || !idType.code
-					);
-
-				return selectedIdTypes;
-			}
-
-			let selectedCountry, selectedIdType;
 			// ACTION: Load Countries using combobox
-			const countries = validCountries.map(countryCode => {
-				const countryObject = productConstraints.find(entry => entry.country.code === countryCode).country;
-
-				return {
-					code: countryCode,
-					name: countryObject.name,
-				};
-			});
-
 			const countrySelector = loadCountrySelector(countries, selectCountry);
-
 			countrySelector.addEventListener('change', e => {
-				selectIdType = SelectIDType.querySelector('#id_type');
-				selectedCountry = e.detail.value;
+				selectedCountry = e.detail ? e.detail.value : '';
 
 				// ACTION: Load id types using combobox
-				const idTypes = loadIdTypes(selectedCountry);
-
-				const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
-
-				idTypeSelector.addEventListener('change', e => {
-					selectedIdType = e.detail.value;
-				});
+				initialiseIdTypeSelector(selectedCountry, selectIdType);
 			});
+
+			if (id_info && id_info.country) {
+				selectedCountry = id_info.country;
+
+				// ACTION: Load id types using combobox
+				initialiseIdTypeSelector(selectedCountry, selectIdType);
+			}
 
 			hostedWebConfigForm.addEventListener('submit', e => {
 				e.preventDefault();
@@ -246,7 +257,6 @@ var documentVerification = function documentVerification() {
 
 				// ACTION: set document capture mode
 				if (documentCaptureConfig.has_back) {
-					console.log('setting up smartcameraweb');
 					SmartCameraWeb.setAttribute('capture-id', 'back');
 				}
 				if (config.document_capture_modes) {

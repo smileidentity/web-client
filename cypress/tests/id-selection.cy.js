@@ -400,7 +400,7 @@ describe('Preselected Country', () => {
 			.should('contain', 'Bank Verification');
 	});
 
-	xit('document_verification', () => {
+	it('document_verification', () => {
 		cy.visit('/document-verification-pre-select-country');
 
 		cy
@@ -429,7 +429,7 @@ describe('Preselected Country', () => {
 
 		cy
 			.getIFrameBody()
-			.find('smileid-combobox-trigger button')
+			.find('smileid-combobox-trigger > button')
 			.click();
 
 		cy

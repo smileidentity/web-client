@@ -76,22 +76,34 @@ class ComboboxTrigger extends HTMLElement {
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
 						<path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m22 22-2-2m-8.5 1a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19Z"/>
 					</svg>
-					<input type="text" autofocus placeholder="${this.label}" />
+					<input type="text" placeholder="${this.label}" />
+					<button tabindex='-1' type='button'>
+						<span class="visually-hidden">Toggle</span>
+					</button>
 				</div>
 			` :
 			`<button type="button">${this.label}</button>`
 		}`;
-
-		this.trigger = this.querySelector('input') || this.querySelector('button');
+    
 		this.setAttribute('expanded', false);
-		this.trigger.setAttribute('aria-expanded', false);
-		this.trigger.setAttribute('role', 'combobox');
 
-		this.trigger.addEventListener('keydown', this.handleKeyDown);
-		if (this.trigger.tagName === "BUTTON") {
-			this.trigger.addEventListener('click', this.toggleExpansionState);
-		} else if (this.trigger.tagName === "INPUT") {
-			this.trigger.addEventListener('keyup', this.handleKeyUp);
+		this.inputTrigger = this.querySelector('input');
+    this.buttonTrigger = this.querySelector('button');
+    
+		this.buttonTrigger.setAttribute('aria-expanded', false);
+		this.buttonTrigger.setAttribute('role', 'combobox');
+
+		this.buttonTrigger.addEventListener('keydown', this.handleKeyDown);   
+		this.buttonTrigger.addEventListener('click', this.toggleExpansionState);
+    
+		if (this.inputTrigger) { 
+      this.inputTrigger.setAttribute('aria-expanded', false);  
+      this.inputTrigger.setAttribute('role', 'combobox');
+      
+      this.inputTrigger.addEventListener('focus', () => this.setAttribute('expanded', true));
+      this.inputTrigger.addEventListener('blur', () => this.setAttribute('expanded', false));
+      this.inputTrigger.addEventListener('keydown', this.handleKeyDown);
+			this.inputTrigger.addEventListener('keyup', this.handleKeyUp);
 		}
 
 		this.listbox = this.parentElement.querySelector('smileid-combobox-listbox');
@@ -103,12 +115,15 @@ class ComboboxTrigger extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		this.trigger.removeEventListener('keydown', this.handleKeyDown);
-		if (this.trigger.tagName === "BUTTON") {
-			this.trigger.removeEventListener('click', this.toggleExpansionState);
-		} else if (this.trigger.tagName === "INPUT") {
-			this.trigger.removeEventListener('keyup', this.handleKeyUp);
-		}
+		this.buttonTrigger.removeEventListener('keydown', this.handleKeyDown);
+    this.buttonTrigger.removeEventListener('click', this.toggleExpansionState);
+    
+    if (this.inputTrigger) {
+      this.inputTrigger.addEventListener('keydown', this.handleKeyDown)
+			this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);  
+      this.inputTrigger.removeEventListener('focus', () => this.setAttribute('expanded', true));
+      this.inputTrigger.removeEventListener('blur', () => this.setAttribute('expanded', false));
+    }
 
 		if (this.options) {
 			this.options.forEach(node => {
@@ -132,11 +147,11 @@ class ComboboxTrigger extends HTMLElement {
 			case "Space":
 			case " ":
 				if (this.getAttribute('expanded') === "true") {
-					if (this.trigger.tagName === "INPUT" && (key === "Space" || key === " ")) {
+					if (this.inputTrigger && (key === "Space" || key === " ")) {
 						this.resetListbox();
 					} else {
 						event.preventDefault();
-						const selectedOption = this.trigger.getAttribute('aria-activedescendant');
+						const selectedOption = this.buttonTrigger.getAttribute('aria-activedescendant');
 						if (selectedOption) {
 							document.getElementById(selectedOption).click();
 						}
@@ -198,8 +213,8 @@ class ComboboxTrigger extends HTMLElement {
 			if (this.getAttribute('expanded') === 'true') {
 				this.toggleExpansionState();
 			} else {
-				if (this.trigger.tagName === "INPUT") {
-					this.trigger.value = "";
+				if (this.inputTrigger) {
+					this.inputTrigger.value = "";
 
 					this.listbox.dispatchEvent(
 						new CustomEvent(
@@ -220,14 +235,17 @@ class ComboboxTrigger extends HTMLElement {
 	toggleExpansionState() {
 		const listboxIsExpanded = this.getAttribute('expanded') === "true";
 		this.setAttribute('expanded', !listboxIsExpanded);
-		this.trigger.setAttribute('aria-expanded', !listboxIsExpanded);
+		this.buttonTrigger.setAttribute('aria-expanded', !listboxIsExpanded);
+    if (this.inputTrigger) { 
+		  this.inputTrigger.setAttribute('aria-expanded', !listboxIsExpanded);
+    }
 	}
 
 	handleSelection(event) {
-		if (this.type === "text") {
-			this.trigger.value = event.detail.label;
-		} {
-			this.trigger.textContent = event.detail.label;
+		if (this.inputTrigger) {
+			this.inputTrigger.value = event.detail.label;
+		} else {
+			this.buttonTrigger.textContent = event.detail.label;
 		}
 
 		this.toggleExpansionState();
@@ -304,8 +322,8 @@ class ComboboxListbox extends HTMLElement {
 		this.addEventListener("Combobox::Listbox::Focus", this.handleFocus);
 		this.addEventListener("Combobox::Listbox::Reset", this.handleReset);
 
-		this.trigger = this.parentElement.querySelector("smileid-combobox-trigger input, smileid-combobox-trigger button");
-		this.trigger.setAttribute('aria-controls', this.getAttribute('id'));
+		this.triggers = Array.from(this.parentElement.querySelectorAll("smileid-combobox-trigger input, smileid-combobox-trigger button"));
+		this.triggers.forEach(node => node.setAttribute('aria-controls', this.getAttribute('id')));
 
 		this.optionNodes = Array.from(this.querySelectorAll('smileid-combobox-option'));
 		this.selectedNode = this.optionNodes.find(node => !node.hasAttribute('hidden') && node.hasAttribute('aria-selected')) || this.optionNodes.filter(node => !node.hasAttribute('hidden'))[0];
@@ -387,7 +405,9 @@ class ComboboxListbox extends HTMLElement {
 	}
 
 	handleOptionSelection(event) {
-		if (this.trigger.tagName === "INPUT") {
+    const inputTrigger = this.triggers.filter(node => node.tagName === "INPUT")[0];
+    
+		if (this.inputTrigger) {
 			this.setAttribute('search-term', event.detail.label);
 		}
 	}
@@ -443,7 +463,7 @@ class ComboboxListbox extends HTMLElement {
 			newNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		}
 
-		this.trigger.setAttribute('aria-activedescendant', newNode.id);
+		this.triggers.forEach(node => node.setAttribute('aria-activedescendant', newNode.id));
 	}
 }
 

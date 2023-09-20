@@ -452,6 +452,15 @@ smileid-combobox-trigger button {
 	background-size: 24px auto,100%;
 }
 
+smileid-combobox-trigger input ~ button {
+	display: block;
+	padding: 0px;
+	flex-shrink: 0;
+	background-position: right 0px;
+	inline-size: 24px;
+	block-size: 24px;
+}
+
 smileid-combobox-trigger[expanded="true"] button {
 	background-image: url(../img/icons/chevron-up.svg);
 }

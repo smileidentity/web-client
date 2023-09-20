@@ -192,6 +192,7 @@ button[data-variant='outline'] {
 
 button[data-variant='ghost'] {
 	color: var(--button-color);
+	padding: 0px;
 }
 
 button:hover,
@@ -284,6 +285,11 @@ button[data-type='icon'] {
 	justify-content: space-between;
 }
 
+.back-wrapper {
+	display: flex;
+	align-items: center;
+}
+
 .back-button {
 	display: block !important;
 }
@@ -291,7 +297,7 @@ button[data-type='icon'] {
 .back-button-text {
 	font-size: 11px;
 	line-height: 11px;
-	color: #3886F7;
+	color: rgb(21, 31, 114);
 }
 
 .user-details {

@@ -92,25 +92,23 @@ class ComboboxTrigger extends HTMLElement {
 			` :
 			`<button ${this.disabled ? 'disabled ' : ''}type="button">${this.value || this.label}</button>`
 		}`;
-    
+
 		this.setAttribute('expanded', false);
 
 		this.inputTrigger = this.querySelector('input');
-    this.buttonTrigger = this.querySelector('button');
-    
+		this.buttonTrigger = this.querySelector('button');
+
 		this.buttonTrigger.setAttribute('aria-expanded', false);
 		this.buttonTrigger.setAttribute('role', 'combobox');
 
-		this.buttonTrigger.addEventListener('keydown', this.handleKeyDown);   
+		this.buttonTrigger.addEventListener('keydown', this.handleKeyDown);
 		this.buttonTrigger.addEventListener('click', this.toggleExpansionState);
-    
-		if (this.inputTrigger) { 
-      this.inputTrigger.setAttribute('aria-expanded', false);  
-      this.inputTrigger.setAttribute('role', 'combobox');
-      
-      this.inputTrigger.addEventListener('focus', () => this.setAttribute('expanded', true));
-      this.inputTrigger.addEventListener('blur', () => this.setAttribute('expanded', false));
-      this.inputTrigger.addEventListener('keydown', this.handleKeyDown);
+
+		if (this.inputTrigger) {
+			this.inputTrigger.setAttribute('aria-expanded', false);
+			this.inputTrigger.setAttribute('role', 'combobox');
+
+			this.inputTrigger.addEventListener('keydown', this.handleKeyDown);
 			this.inputTrigger.addEventListener('keyup', this.handleKeyUp);
 		}
 
@@ -124,14 +122,12 @@ class ComboboxTrigger extends HTMLElement {
 
 	disconnectedCallback() {
 		this.buttonTrigger.removeEventListener('keydown', this.handleKeyDown);
-    this.buttonTrigger.removeEventListener('click', this.toggleExpansionState);
-    
-    if (this.inputTrigger) {
-      this.inputTrigger.addEventListener('keydown', this.handleKeyDown)
-			this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);  
-      this.inputTrigger.removeEventListener('focus', () => this.setAttribute('expanded', true));
-      this.inputTrigger.removeEventListener('blur', () => this.setAttribute('expanded', false));
-    }
+		this.buttonTrigger.removeEventListener('click', this.toggleExpansionState);
+
+		if (this.inputTrigger) {
+			this.inputTrigger.addEventListener('keydown', this.handleKeyDown)
+			this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);
+		}
 
 		if (this.options) {
 			this.options.forEach(node => {
@@ -244,9 +240,9 @@ class ComboboxTrigger extends HTMLElement {
 		const listboxIsExpanded = this.getAttribute('expanded') === "true";
 		this.setAttribute('expanded', !listboxIsExpanded);
 		this.buttonTrigger.setAttribute('aria-expanded', !listboxIsExpanded);
-    if (this.inputTrigger) { 
-		  this.inputTrigger.setAttribute('aria-expanded', !listboxIsExpanded);
-    }
+		if (this.inputTrigger) {
+			this.inputTrigger.setAttribute('aria-expanded', !listboxIsExpanded);
+		}
 	}
 
 	handleSelection(event) {
@@ -413,8 +409,8 @@ class ComboboxListbox extends HTMLElement {
 	}
 
 	handleOptionSelection(event) {
-    const inputTrigger = this.triggers.filter(node => node.tagName === "INPUT")[0];
-    
+		const inputTrigger = this.triggers.filter(node => node.tagName === "INPUT")[0];
+
 		if (this.inputTrigger) {
 			this.setAttribute('search-term', event.detail.label);
 		}

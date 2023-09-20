@@ -9,6 +9,8 @@ describe('KE Drivers License verification basic kyc', () => {
 				body: { success: true }
 			}).as('submitIdVerification');
 
+		cy.loadIDOptions();
+
 		cy.visit('/kra-verification-basic-kyc');
 
 		cy
@@ -133,6 +135,8 @@ describe('KRA PIN verification enhanced kyc', () => {
 				statusCode: 200,
 				body: { success: true }
 			}).as('submitIdVerification');
+
+		cy.loadIDOptions();
 
 		cy.visit('/kra-verification-ekyc');
 

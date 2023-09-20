@@ -72,16 +72,18 @@ var documentVerification = function documentVerification() {
 	}, false);
 
 	function loadCountrySelector(countries, placeholderElement) {
+		const isSingleCountry = countries.length === 1;
+
 		const autocomplete = document.createElement('smileid-combobox');
 		autocomplete.setAttribute('id', 'country');
 		autocomplete.innerHTML = `
-			<smileid-combobox-trigger label="Search country">
+			<smileid-combobox-trigger label="${ isSingleCountry ? countries[0].name : "Search Country"}">
 			</smileid-combobox-trigger>
 
 			<smileid-combobox-listbox empty-label="No country found">
 				${countries.map(country =>
 					`
-						<smileid-combobox-option value="${country.code}" label="${country.name}">
+						<smileid-combobox-option ${ isSingleCountry ? 'aria-selected="true" ' : ''}value="${country.code}" label="${country.name}">
 							${ country.name }
 						</smileid-combobox-option>
 					`

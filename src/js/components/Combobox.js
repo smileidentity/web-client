@@ -65,6 +65,14 @@ class ComboboxTrigger extends HTMLElement {
 		return this.getAttribute("label") || "";
 	}
 
+	get value() {
+		return this.getAttribute("value") || "";
+	}
+
+	get disabled() {
+		return this.hasAttribute('disabled');
+	}
+
 	connectedCallback() {
 		if (!this.label) {
 			throw new Error("<combobox-trigger>: a label attribute is required");
@@ -76,13 +84,13 @@ class ComboboxTrigger extends HTMLElement {
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
 						<path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m22 22-2-2m-8.5 1a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19Z"/>
 					</svg>
-					<input type="text" placeholder="${this.label}" />
-					<button tabindex='-1' type='button'>
+					<input ${this.value ? `value="${this.value}" ` : ''}${this.disabled ? ' disabled ' : ''}type="text" placeholder="${this.label}" />
+					<button ${this.disabled ? 'disabled ' : ''}tabindex='-1' type='button'>
 						<span class="visually-hidden">Toggle</span>
 					</button>
 				</div>
 			` :
-			`<button type="button">${this.label}</button>`
+			`<button ${this.disabled ? 'disabled ' : ''}type="button">${this.value || this.label}</button>`
 		}`;
     
 		this.setAttribute('expanded', false);

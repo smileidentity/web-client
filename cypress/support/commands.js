@@ -168,7 +168,7 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 
 	cy
 		.getIFrameBody()
-		.find('smileid-combobox-trigger button')
+		.find('smileid-combobox-trigger > button')
 		.click();
 
 	cy

@@ -458,13 +458,10 @@ var eKYC = function eKYC() {
 	}
 
 	function resetForm() {
-		const submitButton = IDInfoForm.querySelector('[type="button"]');
-		submitButton.disabled = true;
-
 		const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
 		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
+		const validationMessages = document.querySelectorAll('.validation-message');
 		validationMessages.forEach((el) => el.remove());
 	}
 
@@ -589,9 +586,12 @@ var eKYC = function eKYC() {
 		}, payload, id_info);
 
 		try {
+			if (event.target) event.target.disabled = true;
 			await submitIdInfoForm()
 			complete()
+			if (event.target) event.target.disabled = false;
 		} catch (error) {
+			if (event.target) event.target.disabled = false;
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`)
 		}

@@ -123,13 +123,20 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   async function handleFormSubmit(event) {
+    event.preventDefault();
+    const errorMessage = document.querySelector('.validation-message');
+    if (errorMessage) errorMessage.remove();
+
     try {
+      event.target.disabled = true;
       [uploadURL, fileToUpload] = await Promise.all([
         getUploadURL(),
         createZip(),
       ]);
       uploadZip(fileToUpload, uploadURL);
+      event.target.disabled = false;
     } catch (error) {
+      event.target.disabled = false;
       displayErrorMessage('Something went wrong');
       console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
     }

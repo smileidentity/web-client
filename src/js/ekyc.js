@@ -586,12 +586,12 @@ var eKYC = function eKYC() {
 		}, payload, id_info);
 
 		try {
-			if (event.target) event.target.disabled = true;
+			if (event && event.target) event.target.disabled = true;
 			await submitIdInfoForm()
+			if (event && event.target) event.target.disabled = false;
 			complete()
-			if (event.target) event.target.disabled = false;
 		} catch (error) {
-			if (event.target) event.target.disabled = false;
+			if (event && event.target) event.target.disabled = false;
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`)
 		}

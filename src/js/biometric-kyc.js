@@ -594,13 +594,13 @@ var biometricKyc = function biometricKyc() {
 		}, payload, id_info);
 
 		try {
-			if (event.target) event.target.disabled = true;
+			if (event && event.target) event.target.disabled = true;
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
 
 			var fileUploaded = uploadZip(fileToUpload, uploadURL);
-			if (event.target) event.target.disabled = false;
+			if (event && event.target) event.target.disabled = false;
 		} catch (error) {
-			if (event.target) event.target.disabled = false;
+			if (event && event.target) event.target.disabled = false;
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
 		}

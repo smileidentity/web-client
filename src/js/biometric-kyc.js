@@ -474,13 +474,10 @@ var biometricKyc = function biometricKyc() {
 	}
 
 	function resetForm() {
-		const submitButton = IDInfoForm.querySelector('[type="button"]');
-		submitButton.disabled = true;
-
 		const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
 		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-		const validationMessages = IDInfoForm.querySelectorAll('.validation-message');
+		const validationMessages = document.querySelectorAll('.validation-message');
 		validationMessages.forEach((el) => el.remove());
 	};
 
@@ -596,10 +593,13 @@ var biometricKyc = function biometricKyc() {
 		}, payload, id_info);
 
 		try {
+			if (event && event.target) event.target.disabled = true;
 			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
 
 			var fileUploaded = uploadZip(fileToUpload, uploadURL);
+			if (event && event.target) event.target.disabled = false;
 		} catch (error) {
+			if (event && event.target) event.target.disabled = false;
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
 		}
@@ -609,7 +609,7 @@ var biometricKyc = function biometricKyc() {
 		const p = document.createElement('p');
 
 		p.textContent = message;
-		p.style.color = 'red';
+		p.classList.add('validation-message');
 		p.style.fontSize = '1.5rem';
 		p.style.textAlign = 'center';
 

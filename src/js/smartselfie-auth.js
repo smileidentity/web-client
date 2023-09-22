@@ -122,6 +122,9 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   async function handleFormSubmit(event) {
+    const errorMessage = document.querySelector('.validation-message');
+    if (errorMessage) errorMessage.remove();
+
     try {
       [uploadURL, fileToUpload] = await Promise.all([
         getUploadURL(),

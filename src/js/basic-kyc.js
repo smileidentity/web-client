@@ -500,13 +500,10 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function resetForm() {
-		const submitButton = IDInfoForm.querySelector('[type="button"]');
-		submitButton.disabled = true;
-
 		const invalidElements = IDInfoForm.querySelectorAll("[aria-invalid]");
 		invalidElements.forEach((el) => el.removeAttribute("aria-invalid"));
 
-		const validationMessages = IDInfoForm.querySelectorAll(
+		const validationMessages = document.querySelectorAll(
 			".validation-message"
 		);
 		validationMessages.forEach((el) => el.remove());
@@ -642,9 +639,12 @@ var basicKyc = (function basicKyc() {
 		);
 
 		try {
+			event.target.disabled = true;
 			await submitIdInfoForm();
 			complete();
+			event.target.disabled = false;
 		} catch (error) {
+			event.target.disabled = false;
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
 		}
@@ -654,7 +654,7 @@ var basicKyc = (function basicKyc() {
 		const p = document.createElement("p");
 
 		p.textContent = message;
-		p.style.color = "red";
+		p.classList.add('validation-message');
 		p.style.fontSize = "1.5rem";
 		p.style.textAlign = "center";
 

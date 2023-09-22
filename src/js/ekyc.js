@@ -601,7 +601,7 @@ var eKYC = function eKYC() {
 		const p = document.createElement('p');
 
 		p.textContent = message;
-		p.style.color = 'red';
+		p.classList.add('validation-message');
 		p.style.fontSize = '1.5rem';
 		p.style.textAlign = 'center';
 

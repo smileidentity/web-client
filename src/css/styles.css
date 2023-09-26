@@ -488,9 +488,10 @@ smileid-combobox-trigger input:focus {
 smileid-combobox-listbox {
 	background-color: white;
 
-	inline-size: 15rem;
+	inline-size: 100%;
 	max-block-size: 10rem;
 
+	margin-block-start: .5rem;
 	flex-direction: column;
 	overflow-y: scroll;
 	border: 1px solid black;

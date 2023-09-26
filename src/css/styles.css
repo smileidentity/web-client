@@ -516,6 +516,7 @@ smileid-combobox-option {
 	padding: .75rem 1rem;
 }
 
+smileid-combobox-option:hover,
 smileid-combobox-option[tabindex="0"] {
 	background-color: #F9F0E7;
 }

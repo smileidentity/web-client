@@ -107,6 +107,7 @@ class ComboboxTrigger extends HTMLElement {
 
 			this.inputTrigger.addEventListener('keydown', this.handleKeyDown);
 			this.inputTrigger.addEventListener('keyup', this.handleKeyUp);
+			this.inputTrigger.addEventListener('change', (e) => e.stopPropagation());
 		}
 
 		this.listbox = this.parentElement.querySelector('smileid-combobox-listbox');
@@ -122,8 +123,9 @@ class ComboboxTrigger extends HTMLElement {
 		this.buttonTrigger.removeEventListener('click', this.toggleExpansionState);
 
 		if (this.inputTrigger) {
-			this.inputTrigger.addEventListener('keydown', this.handleKeyDown)
+			this.inputTrigger.removeEventListener('keydown', this.handleKeyDown)
 			this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);
+			this.inputTrigger.removeEventListener('change', (e) => e.stopPropagation());
 		}
 
 		if (this.options) {

@@ -99,9 +99,14 @@ var documentVerification = function documentVerification() {
 		return autocomplete;
 	}
 
-	function loadIdTypeSelector(idTypes, placeholderElement) {
-		const combobox = document.createElement('smileid-combobox');
-		combobox.setAttribute('id', 'id_type');
+	function loadIdTypeSelector(idTypes) {
+		const idTypeSelector = document.querySelector('#id-type-selector');
+		let combobox = document.querySelector('smileid-combobox[id="id_type"]');
+		if (!combobox) {
+			combobox = document.createElement('smileid-combobox');
+			combobox.setAttribute('id', 'id_type');
+		}
+
 		combobox.innerHTML = `
 			<smileid-combobox-trigger type="button" label="Select Document">
 			</smileid-combobox-trigger>
@@ -120,7 +125,10 @@ var documentVerification = function documentVerification() {
 			</smileid-combobox-listbox>
 		`;
 
-		placeholderElement.replaceWith(combobox);
+		if (idTypeSelector.hidden) {
+			idTypeSelector.appendChild(combobox);
+			idTypeSelector.removeAttribute('hidden');
+		}
 
 		return combobox;
 	}
@@ -215,7 +223,6 @@ var documentVerification = function documentVerification() {
 
 		if (!id_info || !id_info.id_type) {
 			const selectCountry = SelectIDType.querySelector('#country');
-			const selectIdType = SelectIDType.querySelector('#id_type');
 			const hostedWebConfigForm = document.querySelector('form[name="hosted-web-config"]');
 
 			// ACTION: Enable Country Selection
@@ -230,14 +237,14 @@ var documentVerification = function documentVerification() {
 				selectedCountry = e.detail ? e.detail.value : '';
 
 				// ACTION: Load id types using combobox
-				initialiseIdTypeSelector(selectedCountry, selectIdType);
+				initialiseIdTypeSelector(selectedCountry);
 			});
 
 			if (id_info && id_info.country) {
 				selectedCountry = id_info.country;
 
 				// ACTION: Load id types using combobox
-				initialiseIdTypeSelector(selectedCountry, selectIdType);
+				initialiseIdTypeSelector(selectedCountry);
 			}
 
 			hostedWebConfigForm.addEventListener('submit', e => {

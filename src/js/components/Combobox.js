@@ -1,4 +1,4 @@
-const generateId = (prefix) => {
+function generateId(prefix) {
 	const id = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
 	return `${prefix}-${id}`;
 };

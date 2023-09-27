@@ -41,6 +41,33 @@ function maintainScrollVisibility(activeElement, scrollParent) {
 class Combobox extends HTMLElement {
 	constructor() {
 		super();
+
+		this.handleRoaming = this.handleRoaming.bind(this)
+	}
+
+	connectedCallback() {
+		this.trigger = this.querySelector('smileid-combobox-trigger');
+
+		document.addEventListener('click', this.handleRoaming);
+		this.addEventListener('focusout', this.handleRoaming);
+		this.addEventListener('blur', this.handleRoaming);
+	}
+
+	disconnectedCallback() {
+		document.removeEventListener('click', this.handleRoaming);
+		this.removeEventListener('focusout', this.handleRoaming);
+		this.removeEventListener('blur', this.handleRoaming);
+	}
+
+	handleRoaming(event) {
+		const target = event.relatedTarget || event.target;
+		if (this.contains(target)) {
+			return;
+		}
+
+		if (this.trigger.getAttribute('expanded') === 'true') {
+			this.trigger.setAttribute('expanded', 'false');
+		}
 	}
 }
 

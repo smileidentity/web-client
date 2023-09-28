@@ -1,76 +1,82 @@
-it('should show consent screen for the required id type', () => {
-	cy.visit('/consent-required');
+describe('consent required', () => {
+	beforeEach(() => {
+		cy.loadIDOptions();
+	});
 
-	cy
-		.selectBVNIDType();
+	it('should show consent screen for the required id type', () => {
+		cy.visit('/consent-required');
 
-	cy
-		.getIFrameBody()
-		.find('end-user-consent')
-		.shadow()
-		.find('#consent-screen')
-		.should('be.visible');
-});
+		cy
+			.selectBVNIDType();
 
-it('should NOT show consent screen for the non-required id type', () => {
-	cy.visit('/consent-required');
+		cy
+			.getIFrameBody()
+			.find('end-user-consent')
+			.shadow()
+			.find('#consent-screen')
+			.should('be.visible');
+	});
 
-	cy
-		.loadIDOptions();
+	it('should NOT show consent screen for the non-required id type', () => {
+		cy.visit('/consent-required');
 
-	cy
-		.getIFrameBody()
-		.find('#country')
-		.select('Nigeria')
-		.should('have.value', 'NG');
+		cy
+			.loadIDOptions();
 
-	cy
-		.getIFrameBody()
-		.find('#id_type')
-		.select('NIN')
-		.should('have.value', 'NIN');
+		cy
+			.getIFrameBody()
+			.find('#country')
+			.select('Nigeria')
+			.should('have.value', 'NG');
 
-	cy
-		.getIFrameBody()
-		.find('#submitConfig')
-		.click();
+		cy
+			.getIFrameBody()
+			.find('#id_type')
+			.select('NIN')
+			.should('have.value', 'NIN');
 
-	cy
-		.getIFrameBody()
-		.find('end-user-consent')
-		.should('not.exist');
-});
+		cy
+			.getIFrameBody()
+			.find('#submitConfig')
+			.click();
 
-it('should NOT show consent screen when configuration is absent', () => {
-	cy.visit('/consent-not-required');
+		cy
+			.getIFrameBody()
+			.find('end-user-consent')
+			.should('not.exist');
+	});
 
-	cy
-		.loadIDOptions();
+	it('should NOT show consent screen when configuration is absent', () => {
+		cy.visit('/consent-not-required');
 
-	cy
-		.getIFrameBody()
-		.find('#country')
-		.select('Nigeria')
-		.should('have.value', 'NG');
+		cy
+			.loadIDOptions();
 
-	cy
-		.getIFrameBody()
-		.find('#id_type')
-		.select('NIN')
-		.should('have.value', 'NIN');
+		cy
+			.getIFrameBody()
+			.find('#country')
+			.select('Nigeria')
+			.should('have.value', 'NG');
 
-	cy
-		.getIFrameBody()
-		.find('#submitConfig')
-		.click();
+		cy
+			.getIFrameBody()
+			.find('#id_type')
+			.select('NIN')
+			.should('have.value', 'NIN');
 
-	cy
-		.getIFrameBody()
-		.find('end-user-consent')
-		.should('not.exist');
+		cy
+			.getIFrameBody()
+			.find('#submitConfig')
+			.click();
 
-	cy
-		.getIFrameBody()
-		.find('smart-camera-web')
-		.should('exist')
+		cy
+			.getIFrameBody()
+			.find('end-user-consent')
+			.should('not.exist');
+
+		cy
+			.getIFrameBody()
+			.find('smart-camera-web')
+			.should('exist')
+	});
 });

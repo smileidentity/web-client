@@ -1,4 +1,4 @@
-const VERSION = '1.0.0-beta.22';
+const VERSION = '1.0.0-beta.23';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
@@ -264,6 +264,7 @@ function scwTemplateString() {
     }
 
     .button[data-variant~='ghost'] {
+      padding: 0px;
       color: var(--button-color);
       background-color: transparent;
     }
@@ -286,13 +287,19 @@ function scwTemplateString() {
       display: flex;
       justify-content: space-between;
     }
+
+    .back-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
     .back-button {
       display: block !important;
     }
     .back-button-text {
       font-size: 11px;
       line-height: 11px;
-      color: #3886F7;
+      color: rgb(21, 31, 114);
     }
     .section {
       border: 1px solid #f4f4f4;
@@ -604,16 +611,18 @@ function scwTemplateString() {
         ${this.hideBackToHost ? '' : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
-              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+                <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
               </svg>
             </button>
             <div class="back-button-text">Back</div>
           </div>
         `}
         <button data-type='icon' type='button' id='request-screen-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -640,16 +649,18 @@ function scwTemplateString() {
         ${this.hideBackToHost ? '' : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
-              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+                <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
               </svg>
             </button>
             <div class="back-button-text">Back</div>
           </div>
         `}
         <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -688,8 +699,9 @@ function scwTemplateString() {
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='review-screen-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -734,15 +746,17 @@ function scwTemplateString() {
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-selfie" class="back-button icon-btn">
-            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+              <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+              <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
             </svg>
           </button>
           <div class="back-button-text">Back</div>
         </div>
         <button data-type='icon' type='button' id='id-entry-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -813,7 +827,7 @@ function scwTemplateString() {
         </div>
       </div>
     </div>
-    <div style='margin-block-start: auto' class='flow'>
+    <div class='flow'>
       ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
         <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
           Take Photo
@@ -836,15 +850,17 @@ function scwTemplateString() {
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-id-entry" class="back-button icon-btn">
-            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+              <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+              <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
             </svg>
           </button>
           <div class="back-button-text">Back</div>
         </div>
         <button data-type='icon' type='button' id='id-camera-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -881,8 +897,9 @@ function scwTemplateString() {
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -926,15 +943,17 @@ function scwTemplateString() {
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-id-image" class="back-button icon-btn">
-            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+              <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+              <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
             </svg>
           </button>
           <div class="back-button-text">Back</div>
         </div>
         <button data-type='icon' type='button' id='back-id-entry-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -960,10 +979,58 @@ function scwTemplateString() {
         Submit Back of ID
       </h1>
       <p>
-        For this ID type, we require that you submit the back of the ID
+        Submit back of ID document
+      </p>
+      <p>
+        Follow the tips below for the best results.
       </p>
     </header>
-    <div style='margin-block-start: auto' class='flow'>
+    <div class='flow'>
+      <div class='document-tips'>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none">
+          <g fill="#9394AB" clip-path="url(#clip)">
+            <path fill-rule="evenodd" d="M26.827 16a10.827 10.827 0 1 1-21.655 0 10.827 10.827 0 0 1 21.655 0Z" clip-rule="evenodd"/>
+            <path d="M16.51 3.825h-1.02L15.992 0l.518 3.825ZM22.53 5.707l-.884-.51 2.346-3.056-1.462 3.566ZM26.804 10.354l-.51-.883 3.557-1.479-3.047 2.362ZM28.183 16.51v-1.02l3.817.502-3.817.518ZM26.293 22.53l.51-.884 3.056 2.346-3.566-1.462ZM21.646 26.804l.884-.51 1.478 3.557-2.362-3.047ZM15.49 28.183h1.02L16.009 32l-.518-3.817ZM9.47 26.293l.884.51-2.346 3.056 1.462-3.566ZM5.196 21.646l.51.884-3.557 1.478 3.047-2.362ZM3.825 15.49v1.02L0 16.009l3.825-.518ZM5.707 9.47l-.51.884L2.14 8.008 5.707 9.47ZM10.354 5.196l-.883.51L7.992 2.15l2.362 3.047Z"/>
+          </g>
+          <defs>
+            <clipPath id="clip">
+              <path fill="#fff" d="M0 0h32v32H0z"/>
+            </clipPath>
+          </defs>
+        </svg>
+        <div>
+          <p>Check the lighting</p>
+          <p>
+            Take your ID document image in a well-lit environment where it is easy to read, and free from glare on the card.
+          </p>
+        </div>
+      </div>
+      <div class='document-tips'>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="31" fill="none">
+          <g fill="#9394AB" clip-path="url(#path)">
+            <path d="M30.967 10.884H1.033A25.08 25.08 0 0 0 .65 12.06h30.702c-.11-.398-.238-.787-.384-1.176ZM31.515 12.696H.485c-.092.36-.165.721-.229 1.091h31.488c-.064-.37-.137-.73-.229-1.091ZM31.854 14.508H.146c-.045.333-.073.665-.1.997h31.908a18.261 18.261 0 0 0-.1-.997ZM32 16.767c0-.152 0-.294-.01-.446H.01c-.01.152-.01.294-.01.446 0 .152 0 .313.01.465h31.98c.01-.152.01-.313.01-.465ZM31.945 18.133H.055c.018.275.046.55.082.816h31.726c.036-.266.064-.54.082-.816ZM31.707 19.946H.293c.045.246.1.483.155.72h31.104c.055-.236.11-.474.155-.72ZM31.269 21.758H.73c.074.209.138.427.21.636h30.117c.073-.21.147-.427.21-.636ZM30.601 23.57H1.4l.247.541h28.708l.247-.54ZM29.687 25.383H2.322c.08.151.17.303.275.455h26.816l.274-.455ZM28.453 27.195H3.547l.284.36h24.338l.284-.36ZM26.816 29.007H5.184l.293.266h21.046l.293-.266ZM24.54 30.82H7.46l.284.18h16.512l.283-.18ZM28.873 6.898a16.377 16.377 0 0 0-.933-1.186A15.316 15.316 0 0 0 15.973 0 15.314 15.314 0 0 0 3.585 6.253h.027c-.164.218-.329.427-.484.645h25.746ZM29.12 7.268H2.88c-.293.437-.567.892-.823 1.357h27.886a13.617 13.617 0 0 0-.823-1.357ZM30.18 9.071H1.82c-.21.418-.403.845-.577 1.272h29.513a17.482 17.482 0 0 0-.575-1.272Z"/>
+          </g>
+          <defs>
+            <clipPath id="path">
+              <path fill="#fff" d="M0 0h32v31H0z"/>
+            </clipPath>
+          </defs>
+        </svg>
+        <div>
+          <p>Make sure it's in focus</p>
+          <p>
+            Ensure the photo of the ID document you submit is not blurry: you should be able to read the text on the document.
+          </p>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div class='flow'>
+      ${!this.documentType ? `
+        <button data-variant='ghost full-width' class='button' type='button' id='skip-this-step'>
+          Skip this step
+        </button>
+      ` : ''}
       ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
         <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
           Take Photo
@@ -973,7 +1040,7 @@ function scwTemplateString() {
         <label data-variant='${this.supportBothCaptureModes ? 'outline' : 'solid'}' class='button'>
           <input type='file' id='upload-photo' name='document' accept='image/png, image/jpeg' />
           <span>Upload Photo</span>
-      </label>
+        </label>
       ` : ''}
     </div>
     ${this.hideAttribution ? '' : `
@@ -986,15 +1053,17 @@ function scwTemplateString() {
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-back-id-entry" class="back-button icon-btn">
-            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+              <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+              <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
             </svg>
           </button>
           <div class="back-button-text">Back</div>
         </div>
         <button data-type='icon' type='button' id='back-id-camera-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -1031,8 +1100,9 @@ function scwTemplateString() {
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button' id='back-review-screen-close' class='close-iframe icon-btn'>
-          <svg aria-hidden='true' width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.8748 11.3775L0 21.2523L1.41421 22.6665L11.289 12.7917L21.2524 22.7551L22.6666 21.3409L12.7032 11.3775L22.6665 1.41421L21.2523 0L11.289 9.96328L1.41428 0.0885509L6.76494e-05 1.50276L9.8748 11.3775Z" fill="#BDBDBF"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
+            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
           </svg>
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
@@ -1204,6 +1274,7 @@ class SmartCameraWeb extends HTMLElement {
     this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
     this.takeDocumentPhotoButton = this.idEntryScreen.querySelector('#take-photo');
     this.uploadDocumentPhotoButton = this.idEntryScreen.querySelector('#upload-photo');
+    this.skipBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#skip-this-step');
     this.takeBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#take-photo');
     this.uploadBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#upload-photo');
 
@@ -1228,6 +1299,7 @@ class SmartCameraWeb extends HTMLElement {
     }
 
     if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
+    if (this.skipBackOfDocumentPhotoButton) this.skipBackOfDocumentPhotoButton.addEventListener('click', () => this._skipBackDocument());
     if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
     if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
     if (this.uploadBackOfDocumentPhotoButton) this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
@@ -1537,6 +1609,10 @@ class SmartCameraWeb extends HTMLElement {
     });
   }
 
+  _skipBackDocument() {
+    this._publishSelectedImages();
+  }
+
   async _uploadDocument(event) {
     this.resetErrorMessage();
     try {
@@ -1603,6 +1679,7 @@ class SmartCameraWeb extends HTMLElement {
 
       return croppedCanvas.toDataURL('image/jpeg');
     }
+
     canvas.width = 2240;
     canvas.height = 1260;
 
@@ -1611,19 +1688,18 @@ class SmartCameraWeb extends HTMLElement {
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
     if (aspectRatio < 1) {
-      const cropHeight = video.videoWidth * aspectRatio;
+      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
+      const videoBox = video.getBoundingClientRect();
+      const frameBox = imageFrame.getBoundingClientRect();
 
-      context.drawImage(
-        video,
-        0, (
-          (video.videoHeight - cropHeight) / 2),
-        video.videoWidth,
-        cropHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      );
+      const sourceXOffset = ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
+      const sourceYOffset = ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
+      const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
+      const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
+
+      canvas.height = (canvas.width * frameBox.height) / frameBox.width;
+
+      context.drawImage(video, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
       return canvas.toDataURL('image/jpeg');
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -1765,6 +1841,10 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideBackToHost() {
     return this.hasAttribute('hide-back-to-host');
+  }
+
+  get documentType() {
+    return this.getAttribute('document-type');
   }
 
   get isPortraitCaptureView() {

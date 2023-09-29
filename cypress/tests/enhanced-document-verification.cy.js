@@ -1,4 +1,4 @@
-describe('document verification', () => {
+describe('enhanced document verification', () => {
 	beforeEach(() => {
 		cy
 			.intercept({
@@ -18,22 +18,9 @@ describe('document verification', () => {
 
 		cy.loadIDOptions();
 
-		cy.visit('/document-verification');
+		cy.visit('/enhanced_document_verification');
 
-		cy
-			.getIFrameBody()
-			.find('#country')
-			.select('NG')
-
-		cy
-			.getIFrameBody()
-			.find('#id_type')
-			.select('NATIONAL_ID')
-
-		cy
-			.getIFrameBody()
-			.find('#submitConfig')
-			.click();
+		cy.selectVOTERIDType();
 
 		cy.navigateThroughCameraScreens();
 	});
@@ -43,7 +30,7 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'NATIONAL_ID')
+			.should('eq', 'VOTER_ID')
 
 		cy
 			.getIFrameBody()

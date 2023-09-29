@@ -141,6 +141,8 @@ var productSelection = (function productSelection() {
 				return 'biometric-kyc.html';
 			case 'doc_verification':
 				return 'doc-verification.html';
+			case 'enhanced_document_verification':
+				return 'enhanced-document-verification.html';
 			case 'enhanced_kyc':
 				return 'ekyc.html';
 			default:

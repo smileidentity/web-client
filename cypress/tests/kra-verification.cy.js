@@ -9,7 +9,8 @@ describe('KE Drivers License verification basic kyc', () => {
 				body: { success: true }
 			}).as('submitIdVerification');
 
-		cy.loadIDOptions();
+		cy
+			.loadIDOptions();
 
 		cy.visit('/kra-verification-basic-kyc');
 

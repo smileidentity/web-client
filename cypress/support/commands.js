@@ -150,6 +150,28 @@ Cypress.Commands.add('selectNINIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectVOTERIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingVoterIdType');
+
+	cy
+		.getIFrameBody()
+		.find('#country')
+		.select('NG')
+
+	cy
+		.getIFrameBody()
+		.find('#id_type')
+		.select('VOTER_ID')
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('selectPASSPORTIDType', () => {
 	cy
 		.loadIDOptions();

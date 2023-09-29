@@ -1,4 +1,4 @@
-describe('document verification', () => {
+describe('enhanced document verification', () => {
 	beforeEach(() => {
 		cy
 			.intercept({
@@ -18,9 +18,9 @@ describe('document verification', () => {
 
 		cy.loadIDOptions();
 
-		cy.visit('/document-verification');
+		cy.visit('/enhanced_document_verification');
 
-		cy.selectPASSPORTIDType();
+		cy.selectVOTERIDType();
 
 		cy.navigateThroughCameraScreens();
 	});
@@ -30,7 +30,7 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'PASSPORT')
+			.should('eq', 'VOTER_ID')
 
 		cy
 			.getIFrameBody()

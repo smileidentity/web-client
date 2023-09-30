@@ -1,3 +1,5 @@
+const validate = require("validate.js");
+
 var eKYC = function eKYC() {
 	'use strict';
 

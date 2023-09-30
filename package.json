@@ -9,8 +9,8 @@
 		"postbuild:dist": "npm run copy:dist",
 		"build:dist": "mkdir -p dist/js && echo src/js/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/js/$(basename $1 .js).min.js' argv0 && cp -r dist/js build",
 		"clean": "rm -rf build dist",
-		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
-		"copy:dist": "cp -r src/* dist && cp -r libs dist",
+		"copy": "cp -r src/* build && cp -r build && cp cypress/pages/*.html build",
+		"copy:dist": "cp -r src/* dist && cp -r dist",
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build && npm run build:dist",
@@ -34,5 +34,9 @@
 		"nyc": "15.1.0",
 		"serve": "13.0.2",
 		"terser": "5.9.0"
+	},
+	"dependencies": {
+		"jszip": "^3.10.1",
+		"validate.js": "^0.13.1"
 	}
 }

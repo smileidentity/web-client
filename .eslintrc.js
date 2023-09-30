@@ -21,5 +21,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  rules: {},
+  rules: {
+    'no-tabs': 0,
+    indent: 0,
+    strict: 0,
+  },
 };

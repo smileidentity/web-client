@@ -1,11 +1,13 @@
-const SmartSelfie = (function SmartSelfie() {
+var SmartSelfie = (function SmartSelfie() {
+  "use strict";
+
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: 'https://devapi.smileidentity.com/v1',
-    sandbox: 'https://testapi.smileidentity.com/v1',
-    live: 'https://api.smileidentity.com/v1',
-    production: 'https://api.smileidentity.com/v1',
+    development: "https://devapi.smileidentity.com/v1",
+    sandbox: "https://testapi.smileidentity.com/v1",
+    live: "https://api.smileidentity.com/v1",
+    production: "https://api.smileidentity.com/v1",
   };
 
   const referenceWindow = window.parent;
@@ -13,34 +15,32 @@ const SmartSelfie = (function SmartSelfie() {
 
   const labels = {
     2: {
-      title: 'SmartSelfie™ Authentication',
-      upload: 'Authenticating User',
+      title: "SmartSelfie™ Authentication",
+      upload: "Authenticating User",
     },
     4: {
-      title: 'SmartSelfie™ Registration',
-      upload: 'Registering User',
+      title: "SmartSelfie™ Registration",
+      upload: "Registering User",
     },
   };
-  let config;
-  let activeScreen;
-  let id_info; let images; let
-    partner_params;
+  var config;
+  var activeScreen;
+  var id_info, images, partner_params;
 
-  const SmartCameraWeb = document.querySelector('smart-camera-web');
-  const UploadProgressScreen = document.querySelector('#upload-progress-screen');
-  const UploadFailureScreen = document.querySelector('#upload-failure-screen');
-  const CompleteScreen = document.querySelector('#complete-screen');
+  var SmartCameraWeb = document.querySelector("smart-camera-web");
+  var UploadProgressScreen = document.querySelector("#upload-progress-screen");
+  var UploadFailureScreen = document.querySelector("#upload-failure-screen");
+  var CompleteScreen = document.querySelector("#complete-screen");
 
-  const CloseIframeButton = document.querySelector('#close-iframe');
-  const RetryUploadButton = document.querySelector('#retry-upload');
+  var CloseIframeButton = document.querySelector("#close-iframe");
+  var RetryUploadButton = document.querySelector("#retry-upload");
 
-  let fileToUpload; let
-    uploadURL;
+  var fileToUpload, uploadURL;
 
   window.addEventListener(
-    'message',
+    "message",
     async (event) => {
-      if (event.data && event.data.includes('SmileIdentity::Configuration')) {
+      if (event.data && event.data.includes("SmileIdentity::Configuration")) {
         try {
           config = JSON.parse(event.data);
           partner_params = getPartnerParams();
@@ -51,35 +51,35 @@ const SmartSelfie = (function SmartSelfie() {
         }
       }
     },
-    false,
+    false
   );
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
+    "imagesComputed",
     (event) => {
       images = event.detail.images;
-      const title = document.querySelector('#uploadTitle');
+      var title = document.querySelector("#uploadTitle");
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
     },
-    false,
+    false
   );
 
   RetryUploadButton.addEventListener(
-    'click',
+    "click",
     (event) => {
       retryUpload();
     },
-    false,
+    false
   );
 
   CloseIframeButton.addEventListener(
-    'click',
+    "click",
     (event) => {
       closeWindow(true);
     },
-    false,
+    false
   );
 
   function parseJWT(token) {
@@ -96,13 +96,15 @@ const SmartSelfie = (function SmartSelfie() {
      * 5. decode the URI Component to a JSON string
      * 6. parse the JSON string to a javascript object
      */
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
+    var base64Url = token.split(".")[1];
+    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    var jsonPayload = decodeURIComponent(
       atob(base64)
-        .split('')
-        .map((c) => `%${c.charCodeAt(0).toString(16)}`)
-        .join(''),
+        .split("")
+        .map(function (c) {
+          return "%" + c.charCodeAt(0).toString(16);
+        })
+        .join("")
     );
 
     return JSON.parse(jsonPayload);
@@ -110,7 +112,7 @@ const SmartSelfie = (function SmartSelfie() {
 
   function getPartnerParams() {
     const { partner_params: partnerParams } = parseJWT(config.token);
-    partner_params = { ...partnerParams, ...(config.partner_params || {}) };
+    partner_params = { ...partnerParams, ...(config.partner_params || {}) }
     return partner_params;
   }
 
@@ -137,14 +139,14 @@ const SmartSelfie = (function SmartSelfie() {
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement('p');
+    const p = document.createElement("p");
 
     p.textContent = message;
-    p.style.color = 'red';
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
+    p.style.color = "red";
+    p.style.fontSize = "1.5rem";
+    p.style.textAlign = "center";
 
-    const main = document.querySelector('main');
+    const main = document.querySelector("main");
     main.prepend(p);
   }
 
@@ -152,10 +154,10 @@ const SmartSelfie = (function SmartSelfie() {
     const zip = new JSZip();
 
     zip.file(
-      'info.json',
+      "info.json",
       JSON.stringify({
         package_information: {
-          language: 'Hosted Web Integration',
+          language: "Hosted Web Integration",
           apiVersion: {
             buildNumber: 0,
             majorVersion: 2,
@@ -164,20 +166,20 @@ const SmartSelfie = (function SmartSelfie() {
         },
         id_info,
         images,
-      }),
+      })
     );
 
     try {
-      const zipFile = await zip.generateAsync({ type: 'blob' });
+      const zipFile = await zip.generateAsync({ type: "blob" });
 
       return zipFile;
     } catch (error) {
-      throw new Error('createZip failed', { cause: error });
+      throw new Error("createZip failed", { cause: error });
     }
   }
 
   async function getUploadURL() {
-    const payload = {
+    var payload = {
       source_sdk: config.sdk || 'hosted_web',
       source_sdk_version: config.sdk_version || 'v1.1.0',
       file_name: `${config.product}.zip`,
@@ -188,13 +190,13 @@ const SmartSelfie = (function SmartSelfie() {
     };
 
     const fetchConfig = {
-      cache: 'no-cache',
-      mode: 'cors',
+      cache: "no-cache",
+      mode: "cors",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     };
 
@@ -210,50 +212,52 @@ const SmartSelfie = (function SmartSelfie() {
 
   function uploadZip(file, destination) {
     // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-    const request = new XMLHttpRequest();
-    request.open('PUT', destination);
+    let request = new XMLHttpRequest();
+    request.open("PUT", destination);
 
-    request.upload.addEventListener('load', (e) => request.response);
+    request.upload.addEventListener("load", function (e) {
+      return request.response;
+    });
 
-    request.upload.addEventListener('error', (e) => {
+    request.upload.addEventListener("error", function (e) {
       setActiveScreen(UploadFailureScreen);
-      throw new Error('uploadZip failed', { cause: e });
+      throw new Error("uploadZip failed", { cause: e });
     });
 
     request.onreadystatechange = function () {
       if (
-        request.readyState === XMLHttpRequest.DONE
-        && request.status === 200
+        request.readyState === XMLHttpRequest.DONE &&
+        request.status === 200
       ) {
         setActiveScreen(CompleteScreen);
         handleSuccess();
         window.setTimeout(closeWindow, 2000);
       }
       if (
-        request.readyState === XMLHttpRequest.DONE
-        && request.status !== 200
+        request.readyState === XMLHttpRequest.DONE &&
+        request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error('uploadZip failed', { cause: request });
+        throw new Error("uploadZip failed", { cause: request });
       }
     };
 
-    request.setRequestHeader('Content-type', 'application/zip');
+    request.setRequestHeader("Content-type", "application/zip");
     request.send(file);
   }
 
   function retryUpload() {
-    const fileUploaded = uploadZip(fileToUpload, uploadURL);
+    var fileUploaded = uploadZip(fileToUpload, uploadURL);
 
     return fileUploaded;
   }
 
   function closeWindow(userTriggered) {
-    const message = userTriggered ? 'SmileIdentity::Close' : 'SmileIdentity::Close::System';
-    referenceWindow.postMessage(message, '*');
+    const message = userTriggered ? "SmileIdentity::Close" : "SmileIdentity::Close::System";
+    referenceWindow.postMessage(message, "*");
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage('SmileIdentity::Success', '*');
+    referenceWindow.postMessage("SmileIdentity::Success", "*");
   }
-}());
+})();

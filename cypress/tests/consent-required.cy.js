@@ -72,5 +72,5 @@ it('should NOT show consent screen when configuration is absent', () => {
 	cy
 		.getIFrameBody()
 		.find('smart-camera-web')
-		.should('exist')
+		.should('exist');
 });

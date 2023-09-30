@@ -7,15 +7,15 @@ describe('No ID Selection', () => {
 		cy.visit('/basic_kyc');
 
 		cy
-			.selectNINIDType()
+			.selectNINIDType();
 
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify*'
+				url: '*v2/verify*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitBasicKYC');
 
 		cy
@@ -53,22 +53,22 @@ describe('No ID Selection', () => {
 		cy.visit('/biometric_kyc');
 
 		cy
-			.selectBVNIDType()
+			.selectBVNIDType();
 
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
@@ -119,21 +119,21 @@ describe('No ID Selection', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
-			.selectPASSPORTIDType()
+			.selectPASSPORTIDType();
 
 		cy
 			.navigateThroughCameraScreens();
@@ -142,7 +142,7 @@ describe('No ID Selection', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'PASSPORT')
+			.should('eq', 'PASSPORT');
 
 		cy
 			.getIFrameBody()
@@ -212,7 +212,7 @@ describe('No ID Selection', () => {
 		cy.visit('/enhanced_kyc');
 
 		cy
-			.selectNINIDType()
+			.selectNINIDType();
 
 		cy
 			.getIFrameBody()
@@ -222,10 +222,10 @@ describe('No ID Selection', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v1/async_id_verification*'
+				url: '*v1/async_id_verification*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitEnhancedKYC');
 
 		cy
@@ -265,12 +265,12 @@ describe('Preselected Country', () => {
 		cy
 			.getIFrameBody()
 			.find('#country')
-			.should('contain', 'Nigeria')
+			.should('contain', 'Nigeria');
 
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('NIN')
+			.select('NIN');
 
 		cy
 			.getIFrameBody()
@@ -280,10 +280,10 @@ describe('Preselected Country', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify*'
+				url: '*v2/verify*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitBasicKYC');
 
 		cy
@@ -326,12 +326,12 @@ describe('Preselected Country', () => {
 		cy
 			.getIFrameBody()
 			.find('#country')
-			.should('contain', 'Nigeria')
+			.should('contain', 'Nigeria');
 
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('BVN')
+			.select('BVN');
 
 		cy
 			.getIFrameBody()
@@ -341,17 +341,17 @@ describe('Preselected Country', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
@@ -402,17 +402,17 @@ describe('Preselected Country', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
@@ -421,12 +421,12 @@ describe('Preselected Country', () => {
 		cy
 			.getIFrameBody()
 			.find('#country')
-			.should('contain', 'Nigeria')
+			.should('contain', 'Nigeria');
 
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('PASSPORT')
+			.select('PASSPORT');
 
 		cy
 			.getIFrameBody()
@@ -440,7 +440,7 @@ describe('Preselected Country', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'PASSPORT')
+			.should('eq', 'PASSPORT');
 
 		cy
 			.getIFrameBody()
@@ -515,12 +515,12 @@ describe('Preselected Country', () => {
 		cy
 			.getIFrameBody()
 			.find('#country')
-			.should('contain', 'Nigeria')
+			.should('contain', 'Nigeria');
 
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('NIN')
+			.select('NIN');
 
 		cy
 			.getIFrameBody()
@@ -535,10 +535,10 @@ describe('Preselected Country', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v1/async_id_verification*'
+				url: '*v1/async_id_verification*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitEnhancedKYC');
 
 		cy
@@ -585,7 +585,7 @@ describe('Preselected Country and ID Type', () => {
 		cy.getIFrameBody()
 			.find('#id-info')
 			.should('be.visible');
-		
+
 		cy.getIFrameBody()
 			.find('#back-button')
 			.should('not.be.visible');
@@ -593,10 +593,10 @@ describe('Preselected Country and ID Type', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify*'
+				url: '*v2/verify*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitBasicKYC');
 
 		cy
@@ -655,17 +655,17 @@ describe('Preselected Country and ID Type', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
@@ -716,17 +716,17 @@ describe('Preselected Country and ID Type', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy.loadIDOptions();
@@ -754,7 +754,7 @@ describe('Preselected Country and ID Type', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'PASSPORT')
+			.should('eq', 'PASSPORT');
 
 		cy
 			.getIFrameBody()
@@ -849,10 +849,10 @@ describe('Preselected Country and ID Type', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v1/async_id_verification*'
+				url: '*v1/async_id_verification*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitEnhancedKYC');
 
 		cy

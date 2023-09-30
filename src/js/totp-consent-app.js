@@ -6,10 +6,10 @@ function postData(url, data) {
 		mode: 'cors',
 		cache: 'no-cache',
 		headers: {
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify(data)
+		body: JSON.stringify(data),
 	});
 }
 
@@ -361,7 +361,7 @@ function markup() {
 					</legend>
 
 					<div class='flow center'>
-						${this.modes.length ? this.modes.map(mode => (
+						${this.modes.length ? this.modes.map((mode) => (
 							`<label class='input-radio'>
 								<input type="radio" id="" name="mode" value="${Object.keys(mode)[0]}">
 								<div class='otp-mode'>
@@ -416,7 +416,7 @@ function markup() {
 									</div>
 								</div>
 							</label>`
-						)).join('\n') : "No modes yet"}
+						)).join('\n') : 'No modes yet'}
 					</div>
 				</fieldset>
 
@@ -472,17 +472,15 @@ function markup() {
 				</form>
 			</div>
 		</div>
-	`
-};
+	`;
+}
 
 class TotpBasedConsent extends HTMLElement {
 	constructor() {
 		super();
 
 		this.templateString = markup.bind(this);
-		this.render = () => {
-			return this.templateString();
-		}
+		this.render = () => this.templateString();
 
 		this.attachShadow({ mode: 'open' });
 
@@ -538,7 +536,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.contactMethodsOutdatedButton = this.selectModeScreen.querySelector('#contact-methods-outdated');
 		this.submitOtpButton = this.otpVerificationScreen.querySelector('#submit-otp');
 		this.switchContactMethodButton = this.otpVerificationScreen.querySelector('.try-another-method');
-		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+		const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
 		// Input Elements
 		this.idNumberInput = this.idEntryScreen.querySelector('#id_number');
@@ -546,12 +544,12 @@ class TotpBasedConsent extends HTMLElement {
 		this.otpInput = this.otpVerificationScreen.querySelector('#totp-token');
 
 		// Event Handlers
-		this.queryOtpModesButton.addEventListener('click', e => this.queryOtpModes(e));
-		this.selectOtpModeButton.addEventListener('click', e => this.selectOtpMode(e));
-		this.submitOtpButton.addEventListener('click', e => this.submitOtp(e));
-		this.switchContactMethodButton.addEventListener('click', e => this.switchContactMethod(e));
-		this.contactMethodsOutdatedButton.addEventListener('click', e => this.handleTotpConsentContactMethodsOutdated(e));
-		
+		this.queryOtpModesButton.addEventListener('click', (e) => this.queryOtpModes(e));
+		this.selectOtpModeButton.addEventListener('click', (e) => this.selectOtpMode(e));
+		this.submitOtpButton.addEventListener('click', (e) => this.submitOtp(e));
+		this.switchContactMethodButton.addEventListener('click', (e) => this.switchContactMethod(e));
+		this.contactMethodsOutdatedButton.addEventListener('click', (e) => this.handleTotpConsentContactMethodsOutdated(e));
+
 		this.entryBackbutton.addEventListener('click', () => {
 			this.handleBackClick();
 		});
@@ -561,7 +559,7 @@ class TotpBasedConsent extends HTMLElement {
 		});
 
 		CloseIframeButtons.forEach((button) => {
-			button.addEventListener('click', event => {
+			button.addEventListener('click', (event) => {
 				this.closeWindow();
 			}, false);
 		});
@@ -569,7 +567,7 @@ class TotpBasedConsent extends HTMLElement {
 
 	closeWindow() {
 		const referenceWindow = window.parent;
-		referenceWindow.postMessage("SmileIdentity::Close", "*");
+		referenceWindow.postMessage('SmileIdentity::Close', '*');
 	}
 
 	handleBackClick() {
@@ -578,7 +576,7 @@ class TotpBasedConsent extends HTMLElement {
 			this.setActiveScreen(page);
 		} else {
 			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::ConsentDenied::Back', {})
+				new CustomEvent('SmileIdentity::ConsentDenied::Back', {}),
 			);
 		}
 	}
@@ -614,7 +612,7 @@ class TotpBasedConsent extends HTMLElement {
 			input.setAttribute('aria-invalid', 'true');
 			input.setAttribute('aria-describedby', `${field}-hint`);
 
-			const errorDiv = document.createElement('div')
+			const errorDiv = document.createElement('div');
 			errorDiv.setAttribute('id', `${field}-hint`);
 			errorDiv.setAttribute('class', 'validation-message');
 			errorDiv.textContent = errors[field][0];
@@ -625,7 +623,7 @@ class TotpBasedConsent extends HTMLElement {
 
 	handleActiveScreenErrors(error) {
 		const submitButton = this.activeScreen.querySelector('[type="submit"]');
-		const errorDiv = document.createElement('div')
+		const errorDiv = document.createElement('div');
 		errorDiv.setAttribute('class', 'validation-message');
 		errorDiv.textContent = error;
 		submitButton.insertAdjacentElement('beforebegin', errorDiv);
@@ -636,10 +634,10 @@ class TotpBasedConsent extends HTMLElement {
 			id_number: {
 				presence: {
 					allowEmpty: false,
-					message: 'is required'
+					message: 'is required',
 				},
-				format: new RegExp(this.idRegex)
-			}
+				format: new RegExp(this.idRegex),
+			},
 		};
 
 		const errors = validate({ id_number: idNumber }, validationConstraints);
@@ -673,7 +671,7 @@ class TotpBasedConsent extends HTMLElement {
 				id_type: this.idType,
 				partner_id: this.partnerId,
 				token: this.token,
-			}
+			};
 			const url = `${this.baseUrl}/totp_consent`;
 
 			try {
@@ -714,7 +712,7 @@ class TotpBasedConsent extends HTMLElement {
 			partner_id: this.partnerId,
 			session_id: this.sessionId,
 			token: this.token,
-		}
+		};
 		const url = `${this.baseUrl}/totp_consent/mode`;
 
 		try {
@@ -726,7 +724,7 @@ class TotpBasedConsent extends HTMLElement {
 			if (!response.ok) {
 				this.handleActiveScreenErrors(json.error);
 			} else {
-				this.selectedOtpDeliveryMode = this.modes.filter(mode => mode[this.mode])[0][this.mode];
+				this.selectedOtpDeliveryMode = this.modes.filter((mode) => mode[this.mode])[0][this.mode];
 				this.setActiveScreen(this.otpVerificationScreen);
 				this.setAttribute('otp-delivery-mode', this.selectedOtpDeliveryMode);
 			}
@@ -753,7 +751,7 @@ class TotpBasedConsent extends HTMLElement {
 			partner_id: this.partnerId,
 			session_id: this.sessionId,
 			token: this.token,
-		}
+		};
 		const url = `${this.baseUrl}/totp_consent/otp`;
 
 		try {
@@ -840,8 +838,8 @@ class TotpBasedConsent extends HTMLElement {
 					personal_details: true,
 					contact_information: true,
 					document_information: true,
-				}
-			}
+				},
+			},
 		});
 
 		this.dispatchEvent(customEvent);
@@ -854,13 +852,13 @@ class TotpBasedConsent extends HTMLElement {
 				message: tag,
 				data: {
 					id_number: this.idNumber,
-					session_id: this.sessionId
-				}
-			}
+					session_id: this.sessionId,
+				},
+			},
 		});
 
 		this.dispatchEvent(customEvent);
 	}
-};
+}
 
 window.customElements.define('totp-consent-app', TotpBasedConsent);

@@ -50,7 +50,7 @@ describe('web integration - onClose', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify_async*'
+				url: '*v2/verify_async*',
 			}, { statusCode: 200, body: { success: true } }).as('submitIdVerification');
 
 		cy

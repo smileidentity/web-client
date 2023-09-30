@@ -4,7 +4,7 @@ describe('enhanced kyc', () => {
 		cy.visit('/enhanced_kyc');
 
 		cy
-			.selectBVNIDType()
+			.selectBVNIDType();
 
 		cy
 			.getIFrameBody()
@@ -43,7 +43,7 @@ describe('enhanced kyc', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v1/async_id_verification*'
+				url: '*v1/async_id_verification*',
 			}, {}).as('submitEnhancedKYC');
 
 		cy
@@ -73,7 +73,7 @@ describe('enhanced kyc', () => {
 			.should('be.visible');
 	});
 
-	it('should show the select id page', ()=>{
+	it('should show the select id page', () => {
 		cy
 		.getIFrameBody()
 		.find('#back-button')

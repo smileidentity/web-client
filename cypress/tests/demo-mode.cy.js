@@ -40,7 +40,7 @@ it('should show content for demo mode', () => {
 		.getIFrameBody()
 		.find('#id-info')
 		.as('IDInfoForm');
-	
+
 	cy
 		.get('@IDInfoForm')
 		.find('.demo-tip')
@@ -49,8 +49,8 @@ it('should show content for demo mode', () => {
 	cy
 		.get('@IDInfoForm')
 		.find('input')
-		.then(inputs => {
-			Array.prototype.forEach.call(inputs, input => {
+		.then((inputs) => {
+			Array.prototype.forEach.call(inputs, (input) => {
 				expect(input).to.have.prop('readonly', true);
 			});
 		});

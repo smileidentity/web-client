@@ -1,4 +1,4 @@
-var eKYCSmartSelfieSandbox = function eKYCSmartSelfieSandbox() {
+const eKYCSmartSelfieSandbox = (function eKYCSmartSelfieSandbox() {
 	'use strict';
 
 	/**
@@ -23,13 +23,13 @@ var eKYCSmartSelfieSandbox = function eKYCSmartSelfieSandbox() {
 		last_name: 'Adekunle',
 		day: '01',
 		month: '01',
-		year: '1970'
-	}
+		year: '1970',
+	};
 
-	const { required_fields: requiredFields, test_data: testData } = constraints[country]['id_types'][IDType];
+	const { required_fields: requiredFields, test_data: testData } = constraints[country].id_types[IDType];
 
-	requiredFields.forEach(field => {
-		if (field === 'country' || field === 'id_type' || field === 'user_id' || field === 'job_id' ) return;
+	requiredFields.forEach((field) => {
+		if (field === 'country' || field === 'id_type' || field === 'user_id' || field === 'job_id') return;
 
 		const element = document.querySelector(`#${field}`);
 
@@ -37,9 +37,9 @@ var eKYCSmartSelfieSandbox = function eKYCSmartSelfieSandbox() {
 			element.setAttribute('value', testData);
 			element.setAttribute('readonly', true);
 		} else if (field === 'dob') {
-			let day = element.querySelector('#day');
-			let month = element.querySelector('#month');
-			let year = element.querySelector('#year');
+			const day = element.querySelector('#day');
+			const month = element.querySelector('#month');
+			const year = element.querySelector('#year');
 
 			day.setAttribute('readonly', true);
 			day.setAttribute('value', sandboxPII.day);
@@ -52,4 +52,4 @@ var eKYCSmartSelfieSandbox = function eKYCSmartSelfieSandbox() {
 			element.setAttribute('readonly', true);
 		}
 	});
-}();
+}());

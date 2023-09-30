@@ -3,10 +3,10 @@ describe('KE Drivers License verification basic kyc', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify*'
+				url: '*v2/verify*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitIdVerification');
 
 		cy
@@ -15,7 +15,7 @@ describe('KE Drivers License verification basic kyc', () => {
 		cy.visit('/kra-verification-basic-kyc');
 
 		cy
-			.selectKEDriversLicenseType()
+			.selectKEDriversLicenseType();
 		cy
 			.getIFrameBody()
 			.find('end-user-consent')
@@ -72,7 +72,6 @@ describe('KE Drivers License verification basic kyc', () => {
 			.getIFrameBody()
 			.find('#id_number-hint')
 			.should('contain', 'Id number is invalid');
-
 	});
 
 	it('should progress when input is valid', () => {
@@ -131,16 +130,16 @@ describe('KRA PIN verification enhanced kyc', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v1/async_id_verification*'
+				url: '*v1/async_id_verification*',
 			}, {
 				statusCode: 200,
-				body: { success: true }
+				body: { success: true },
 			}).as('submitIdVerification');
 
 		cy.visit('/kra-verification-ekyc');
 
 		cy
-			.selectKRAType()
+			.selectKRAType();
 		cy
 			.getIFrameBody()
 			.find('end-user-consent')
@@ -197,7 +196,6 @@ describe('KRA PIN verification enhanced kyc', () => {
 			.getIFrameBody()
 			.find('#id_number-hint')
 			.should('contain', 'Id number is invalid');
-
 	});
 
 	it('should progress when input is valid', () => {

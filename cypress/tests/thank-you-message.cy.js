@@ -8,15 +8,15 @@ describe('Thank you message', () => {
 			cy.visit('/basic_kyc');
 
 			cy
-				.selectNINIDType()
+				.selectNINIDType();
 
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*v2/verify*'
+					url: '*v2/verify*',
 				}, {
 					statusCode: 200,
-					body: { success: true }
+					body: { success: true },
 				}).as('submitBasicKYC');
 
 			cy
@@ -54,22 +54,22 @@ describe('Thank you message', () => {
 			cy.visit('/biometric_kyc');
 
 			cy
-				.selectBVNIDType()
+				.selectBVNIDType();
 
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*upload*'
+					url: '*upload*',
 				}, {
-					upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+					upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}).as('getUploadURL');
 
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
-					statusCode: 200
+					statusCode: 200,
 				}).as('successfulUpload');
 
 			cy
@@ -118,7 +118,7 @@ describe('Thank you message', () => {
 			cy.visit('/enhanced_kyc');
 
 			cy
-				.selectNINIDType()
+				.selectNINIDType();
 
 			cy
 				.getIFrameBody()
@@ -128,10 +128,10 @@ describe('Thank you message', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*v1/async_id_verification*'
+					url: '*v1/async_id_verification*',
 				}, {
 					statusCode: 200,
-					body: { success: true }
+					body: { success: true },
 				}).as('submitEnhancedKYC');
 
 			cy

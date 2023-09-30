@@ -11,7 +11,7 @@ describe('Verification Method Selection', () => {
                 cy
                     .getIFrameBody()
                     .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
-                    .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html')
+                    .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
             });
         });
 
@@ -22,7 +22,7 @@ describe('Verification Method Selection', () => {
                 cy
                     .getIFrameBody()
                     .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
-                    .should('have.attr', 'src', 'http://localhost:8000/doc-verification.html')
+                    .should('have.attr', 'src', 'http://localhost:8000/doc-verification.html');
             });
         });
 
@@ -33,7 +33,7 @@ describe('Verification Method Selection', () => {
                 cy
                     .getIFrameBody()
                     .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
-                    .should('have.attr', 'src', 'http://localhost:8000/ekyc.html')
+                    .should('have.attr', 'src', 'http://localhost:8000/ekyc.html');
             });
         });
     });
@@ -62,7 +62,7 @@ describe('Verification Method Selection', () => {
             cy
                 .getIFrameBody()
                 .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
-                .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html')
+                .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
         });
     });
 
@@ -90,7 +90,7 @@ describe('Verification Method Selection', () => {
             cy
                 .getIFrameBody()
                 .find('iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]')
-                .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html')
+                .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
         });
     });
 });

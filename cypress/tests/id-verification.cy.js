@@ -4,7 +4,7 @@ describe('ID verification', () => {
 		cy.visit('/identity-verification');
 
 		cy
-			.selectNINIDType()
+			.selectNINIDType();
 
 		cy
 			.getIFrameBody()
@@ -43,7 +43,7 @@ describe('ID verification', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*v2/verify_async*'
+				url: '*v2/verify_async*',
 			}, {}).as('submitIdVerification');
 
 		cy
@@ -73,7 +73,7 @@ describe('ID verification', () => {
 			.should('be.visible');
 	});
 
-	it('should show the select id page', ()=>{
+	it('should show the select id page', () => {
 		cy
 		.getIFrameBody()
 		.find('#back-button')

@@ -3,22 +3,22 @@ describe('id-info screen', () => {
 		cy.visit('/');
 
 		cy
-			.selectNINIDType()
+			.selectNINIDType();
 
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			});
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: '*amazonaws.com*'
+				url: '*amazonaws.com*',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			});
 
 		cy

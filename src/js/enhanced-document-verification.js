@@ -1,46 +1,48 @@
-var enhancedDocumentVerification = function enhancedDocumentVerification() {
+const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		'sandbox': 'https://testapi.smileidentity.com/v1',
-		'live': 'https://api.smileidentity.com/v1',
-		'production': 'https://api.smileidentity.com/v1'
-	}
+		sandbox: 'https://testapi.smileidentity.com/v1',
+		live: 'https://api.smileidentity.com/v1',
+		production: 'https://api.smileidentity.com/v1',
+	};
 
 	const referenceWindow = window.parent;
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
-	var config;
-	var activeScreen;
-	var id_info, images, partner_params;
-	var productConstraints;
+	let config;
+	let activeScreen;
+	let id_info; let images; let
+partner_params;
+	let productConstraints;
 
-	var LoadingScreen = document.querySelector('#loading-screen');
-	var SelectIDType = document.querySelector('#select-id-type');
-	var SmartCameraWeb = document.querySelector('smart-camera-web');
-	var UploadProgressScreen = document.querySelector('#upload-progress-screen');
-	var UploadFailureScreen = document.querySelector('#upload-failure-screen');
-	var CompleteScreen = document.querySelector('#complete-screen');
+	const LoadingScreen = document.querySelector('#loading-screen');
+	const SelectIDType = document.querySelector('#select-id-type');
+	const SmartCameraWeb = document.querySelector('smart-camera-web');
+	const UploadProgressScreen = document.querySelector('#upload-progress-screen');
+	const UploadFailureScreen = document.querySelector('#upload-failure-screen');
+	const CompleteScreen = document.querySelector('#complete-screen');
 
-	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
-	var RetryUploadButton = document.querySelector('#retry-upload');
+	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
+	const RetryUploadButton = document.querySelector('#retry-upload');
 
-	var fileToUpload, uploadURL;
+	let fileToUpload; let
+uploadURL;
 
 	async function getProductConstraints() {
 		try {
 			const response = await fetch(`${endpoints[config.environment]}/services`);
 			const json = await response.json();
 
-			return json.hosted_web['enhanced_document_verification'];
+			return json.hosted_web.enhanced_document_verification;
 		} catch (e) {
-			throw new Error("Failed to get supported ID types", { cause: e });
+			throw new Error('Failed to get supported ID types', { cause: e });
 		}
 	}
 
-	window.addEventListener('message', async event => {
+	window.addEventListener('message', async (event) => {
 		if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
@@ -57,31 +59,28 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 
 	function initializeSession(constraints) {
 		const supportedCountries = Object.keys(constraints)
-			.map(countryCode => ({
+			.map((countryCode) => ({
 				code: countryCode,
-				name: constraints[countryCode].name
+				name: constraints[countryCode].name,
 			})).sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
-				} else if (a.name > b.name) {
+				} if (a.name > b.name) {
 					return 1;
-				} else {
-					return 0;
 				}
-			}).map(item => item.code);
+					return 0;
+			}).map((item) => item.code);
 
 		let validCountries = [];
 
 		if (config.id_selection) {
 			const selectedCountryList = Object.keys(config.id_selection);
-			validCountries = supportedCountries.filter((value) =>
-				selectedCountryList.includes(value)
-			);
+			validCountries = supportedCountries.filter((value) => selectedCountryList.includes(value));
 
 			if (validCountries.length === 1) {
 				const selectedCountry = validCountries[0];
 				id_info = {
-					country: validCountries[0]
+					country: validCountries[0],
 				};
 
 				const idTypes = config.id_selection[selectedCountry];
@@ -89,10 +88,10 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 					id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
 					// ACTION: set initial screen
-					SmartCameraWeb.setAttribute('document-type', id_info.id_type)
+					SmartCameraWeb.setAttribute('document-type', id_info.id_type);
 					// ACTION: set document capture mode
 					if (config.document_capture_modes) {
-						SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
+						SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','));
 					}
 					// Hide the back button that takes the user back to the id selection screen
 					// from startcamera web
@@ -119,7 +118,7 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 				if (countryCode) {
 					const constrainedIDTypes = Object.keys(productConstraints[countryCode].id_types);
 					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : constrainedIDTypes;
-					const selectedIDTypes = validIDTypes.filter(value => constrainedIDTypes.includes(value));
+					const selectedIDTypes = validIDTypes.filter((value) => constrainedIDTypes.includes(value));
 
 					// ACTION: Reset ID Type <select>
 					selectIDType.innerHTML = '';
@@ -130,10 +129,9 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 
 					// ACTION: Load ID Types as <option>s
 					selectedIDTypes.forEach((IDType) => {
-						const option = document.createElement("option");
-						option.setAttribute("value", IDType);
-						option.textContent =
-						productConstraints[countryCode]["id_types"][IDType].label;
+						const option = document.createElement('option');
+						option.setAttribute('value', IDType);
+						option.textContent =						productConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 
@@ -141,19 +139,19 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 					selectIDType.disabled = false;
 				} else {
 					// ACTION: Reset ID Type <select>
-					selectIDType.innerHTML = "";
+					selectIDType.innerHTML = '';
 
 					// ACTION: Load the default <option>
-					const option = document.createElement("option");
+					const option = document.createElement('option');
 					option.disabled = true;
-					option.setAttribute("value", "");
-					option.textContent = "--Select Country First--";
+					option.setAttribute('value', '');
+					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
 			}
 
 			// ACTION: Load Countries as <option>s
-			validCountries.forEach(country => {
+			validCountries.forEach((country) => {
 				const countryObject = productConstraints[country];
 
 				if (countryObject) {
@@ -172,11 +170,11 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 				}
 			});
 
-			selectCountry.addEventListener('change', e => {
+			selectCountry.addEventListener('change', (e) => {
 				loadIdTypes(e.target.value);
 			});
 
-			hostedWebConfigForm.addEventListener('submit', e => {
+			hostedWebConfigForm.addEventListener('submit', (e) => {
 				e.preventDefault();
 				const selectedCountry = selectCountry.value;
 				const selectedIDType = selectIDType.value;
@@ -184,13 +182,13 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 				// ACTION: set up `id_info`
 				id_info = {
 					country: selectedCountry,
-					id_type: selectedIDType
+					id_type: selectedIDType,
 				};
 
-				SmartCameraWeb.setAttribute('document-type', selectedIDType)
+				SmartCameraWeb.setAttribute('document-type', selectedIDType);
 				// ACTION: set document capture mode
 				if (config.document_capture_modes) {
-					SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','))
+					SmartCameraWeb.setAttribute('document-capture-modes', config.document_capture_modes.join(','));
 				}
 				setActiveScreen(SmartCameraWeb);
 			});
@@ -210,26 +208,26 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 		document.body.appendChild(script);
 	}
 
-	SmartCameraWeb.addEventListener('imagesComputed', event => {
+	SmartCameraWeb.addEventListener('imagesComputed', (event) => {
 		images = event.detail.images;
 		setActiveScreen(UploadProgressScreen);
 		handleFormSubmit(event);
 	}, false);
 
-	SmartCameraWeb.addEventListener('backExit', event => {
+	SmartCameraWeb.addEventListener('backExit', (event) => {
 		setActiveScreen(SelectIDType);
 	}, false);
 
-	SmartCameraWeb.addEventListener('close', event => {
+	SmartCameraWeb.addEventListener('close', (event) => {
 		closeWindow();
 	}, false);
 
-	RetryUploadButton.addEventListener('click', event => {
+	RetryUploadButton.addEventListener('click', (event) => {
 		retryUpload();
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', event => {
+		button.addEventListener('click', (event) => {
 			closeWindow();
 		}, false);
 	});
@@ -253,22 +251,20 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 			 * 5. decode the URI Component to a JSON string
 			 * 6. parse the JSON string to a javascript object
 			 */
-			var base64Url = token.split('.')[1];
-			var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-			var jsonPayload = decodeURIComponent(
+			const base64Url = token.split('.')[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const jsonPayload = decodeURIComponent(
 				atob(base64)
 					.split('')
-					.map(function(c) {
-						return '%' + (c.charCodeAt(0).toString(16));
-				}).join('')
+					.map((c) => `%${c.charCodeAt(0).toString(16)}`).join(''),
 			);
 
 			return JSON.parse(jsonPayload);
-		};
+		}
 
 		const { partner_params: partnerParams } = parseJWT(config.token);
 
-		partner_params = { ...partnerParams, ...(config.partner_params || {}) }
+		partner_params = { ...partnerParams, ...(config.partner_params || {}) };
 	}
 
 	function setActiveScreen(node) {
@@ -281,14 +277,14 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 		event.preventDefault();
 
 		try {
-			[ uploadURL, fileToUpload ] = await Promise.all([ getUploadURL(), createZip() ]);
+			[uploadURL, fileToUpload] = await Promise.all([getUploadURL(), createZip()]);
 
-			var fileUploaded = uploadZip(fileToUpload, uploadURL);
+			const fileUploaded = uploadZip(fileToUpload, uploadURL);
 		} catch (error) {
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
 		}
-	};
+	}
 
 	function displayErrorMessage(message) {
 		const p = document.createElement('p');
@@ -307,15 +303,15 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 
 		zip.file('info.json', JSON.stringify({
 			package_information: {
-				"language": "Hosted Web Integration",
-				"apiVersion": {
-					"buildNumber": 0,
-					"majorVersion": 2,
-					"minorVersion": 0
-				}
+				language: 'Hosted Web Integration',
+				apiVersion: {
+					buildNumber: 0,
+					majorVersion: 2,
+					minorVersion: 0,
+				},
 			},
 			id_info,
-			images
+			images,
 		}));
 
 		try {
@@ -328,7 +324,7 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 	}
 
 	async function getUploadURL() {
-		var payload = {
+		const payload = {
 			source_sdk: config.sdk || 'hosted_web',
 			source_sdk_version: config.sdk_version || 'v1.1.0',
 			file_name: `${config.product}.zip`,
@@ -337,16 +333,16 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 			token: config.token,
 			partner_params: {
 				...partner_params,
-				job_type: 11
-			}
-		}
+				job_type: 11,
+			},
+		};
 
 		const fetchConfig = {
 			cache: 'no-cache',
 			mode: 'cors',
 			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
 			},
 			method: 'POST',
 			body: JSON.stringify(payload),
@@ -368,19 +364,17 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 
 	function uploadZip(file, destination) {
 		// CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-		let request = new XMLHttpRequest();
+		const request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
-		request.upload.addEventListener('load', function(e) {
-			return request.response;
-		});
+		request.upload.addEventListener('load', (e) => request.response);
 
-		request.upload.addEventListener('error', function(e) {
+		request.upload.addEventListener('error', (e) => {
 			setActiveScreen(UploadFailureScreen);
 			throw new Error('uploadZip failed', { cause: e });
 		});
 
-		request.onreadystatechange = function() {
+		request.onreadystatechange = function () {
 			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
 				setActiveScreen(CompleteScreen);
 				handleSuccess();
@@ -392,12 +386,12 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 			}
 		};
 
-		request.setRequestHeader("Content-type", "application/zip");
+		request.setRequestHeader('Content-type', 'application/zip');
 		request.send(file);
 	}
 
 	function retryUpload() {
-		var fileUploaded = uploadZip(fileToUpload, uploadURL);
+		const fileUploaded = uploadZip(fileToUpload, uploadURL);
 
 		return fileUploaded;
 	}
@@ -409,4 +403,4 @@ var enhancedDocumentVerification = function enhancedDocumentVerification() {
 	function handleSuccess() {
 		referenceWindow.postMessage('SmileIdentity::Success', '*');
 	}
-}();
+}());

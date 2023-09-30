@@ -66,8 +66,8 @@ describe('totpConsent', () => {
 					statusCode: 400,
 					body: {
 						error: 'Result Not Found',
-						success: false
-					}
+						success: false,
+					},
 				});
 
 				cy.getIFrameBody()
@@ -99,8 +99,8 @@ describe('totpConsent', () => {
 					statusCode: 400,
 					body: {
 						error: 'Invalid Mode',
-						success: false
-					}
+						success: false,
+					},
 				});
 
 				cy.getIFrameBody()
@@ -171,8 +171,8 @@ describe('totpConsent', () => {
 					statusCode: 400,
 					body: {
 						error: 'Invalid OTP',
-						success: false
-					}
+						success: false,
+					},
 				});
 
 				cy.getIFrameBody()
@@ -207,7 +207,7 @@ describe('totpConsent', () => {
 
 				cy.getTotpConsentApp()
 					.find('#totp-token')
-					.type('123456')
+					.type('123456');
 
 				cy.getTotpConsentApp()
 					.find('#submit-otp')
@@ -259,7 +259,7 @@ describe('totpConsent', () => {
 
 				cy.getTotpConsentApp()
 					.find('form[name="select-mode-form"]')
-					.should('be.visible')
+					.should('be.visible');
 			});
 		});
 	});
@@ -269,7 +269,7 @@ describe('totpConsent', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*v2/verify*'
+					url: '*v2/verify*',
 				}, {}).as('submitBasicKYC');
 		});
 
@@ -294,12 +294,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -312,12 +312,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -331,17 +331,17 @@ describe('totpConsent', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*upload*'
+					url: '*upload*',
 				}, {
-					upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+					upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}).as('getUploadURL');
 
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
-					statusCode: 200
+					statusCode: 200,
 				}).as('successfulUpload');
 		});
 
@@ -379,12 +379,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -394,7 +394,7 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -430,12 +430,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -449,10 +449,10 @@ describe('totpConsent', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*v1/async_id_verification*'
+					url: '*v1/async_id_verification*',
 				}, {
 					statusCode: 200,
-					body: { success: true }
+					body: { success: true },
 				}).as('submitEnhancedKYC');
 		});
 
@@ -481,12 +481,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -496,7 +496,7 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -527,12 +527,12 @@ describe('totpConsent', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()

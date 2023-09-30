@@ -1,33 +1,34 @@
-var basicKyc = (function basicKyc() {
-	"use strict";
+const basicKyc = (function basicKyc() {
+	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		development: "https://devapi.smileidentity.com",
-		sandbox: "https://testapi.smileidentity.com",
-		live: "https://api.smileidentity.com",
-		production: "https://api.smileidentity.com",
+		development: 'https://devapi.smileidentity.com',
+		sandbox: 'https://testapi.smileidentity.com',
+		live: 'https://api.smileidentity.com',
+		production: 'https://api.smileidentity.com',
 	};
 
 	const referenceWindow = window.parent;
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
-	var pages = [];
-	var config;
-	var activeScreen;
-	var consent_information, id_info, partner_params;
-	var productConstraints;
-	var partnerProductConstraints;
+	const pages = [];
+	let config;
+	let activeScreen;
+	let consent_information; let id_info; let
+partner_params;
+	let productConstraints;
+	let partnerProductConstraints;
 
-	var EndUserConsent;
-	var LoadingScreen = document.querySelector('#loading-screen');
-	var SelectIDType = document.querySelector("#select-id-type");
-	var IDInfoForm = document.querySelector("#id-info");
-	var CompleteScreen = document.querySelector("#complete-screen");
-	var disableBackOnFirstScreen = false;
+	let EndUserConsent;
+	const LoadingScreen = document.querySelector('#loading-screen');
+	const SelectIDType = document.querySelector('#select-id-type');
+	const IDInfoForm = document.querySelector('#id-info');
+	const CompleteScreen = document.querySelector('#complete-screen');
+	let disableBackOnFirstScreen = false;
 
-	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
+	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	function postData(url = '', data = {}) {
 		return fetch(url, {
@@ -35,10 +36,10 @@ var basicKyc = (function basicKyc() {
 			mode: 'cors',
 			cache: 'no-cache',
 			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify(data)
+			body: JSON.stringify(data),
 		});
 	}
 
@@ -47,55 +48,54 @@ var basicKyc = (function basicKyc() {
 			const productsConfigPayload = {
 				partner_id: config.partner_details.partner_id,
 				token: config.token,
-				partner_params
-			}
-	
+				partner_params,
+			};
+
 			const productsConfigUrl = `${endpoints[config.environment]}/v1/products_config`;
 			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
 			const servicesPromise = fetch(`${endpoints[config.environment]}/v1/services`);
 			const [productsConfigResponse, servicesResponse] = await Promise.all([
 				productsConfigPromise,
-				servicesPromise
-			])
+				servicesPromise,
+			]);
 
 			if (productsConfigResponse.ok && servicesResponse.ok) {
-				const partnerConstraints = await productsConfigResponse.json()
-				const generalConstraints = await servicesResponse.json()
+				const partnerConstraints = await productsConfigResponse.json();
+				const generalConstraints = await servicesResponse.json();
 
 				const previewBvnMfa = config.previewBVNMFA;
 				if (previewBvnMfa) {
-					generalConstraints.hosted_web['basic_kyc']['NG']['id_types']['BVN_MFA'] = {
-						"id_number_regex": "^[0-9]{11}$",
-						"label": "Bank Verification Number (with OTP)",
-						"required_fields": [
-							"country",
-							"id_type",
-							"session_id",
-							"user_id",
-							"job_id",
-							"first_name",
-							"last_name"
+					generalConstraints.hosted_web.basic_kyc.NG.id_types.BVN_MFA = {
+						id_number_regex: '^[0-9]{11}$',
+						label: 'Bank Verification Number (with OTP)',
+						required_fields: [
+							'country',
+							'id_type',
+							'session_id',
+							'user_id',
+							'job_id',
+							'first_name',
+							'last_name',
 						],
-						"test_data": "00000000000"
+						test_data: '00000000000',
 					};
 				}
 
 				return {
 					partnerConstraints,
-					generalConstraints: generalConstraints.hosted_web['basic_kyc']
-				}
-			} else {
-				throw new Error("Failed to get supported ID types");
+					generalConstraints: generalConstraints.hosted_web.basic_kyc,
+				};
 			}
+				throw new Error('Failed to get supported ID types');
 		} catch (e) {
-			throw new Error("Failed to get supported ID types", { cause: e });
+			throw new Error('Failed to get supported ID types', { cause: e });
 		}
 	}
 
 	window.addEventListener(
-		"message",
+		'message',
 		async (event) => {
-			if (event.data && event.data.includes("SmileIdentity::Configuration")) {
+			if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 				config = JSON.parse(event.data);
 				activeScreen = LoadingScreen;
 
@@ -110,7 +110,7 @@ var basicKyc = (function basicKyc() {
 				}
 			}
 		},
-		false
+		false,
 	);
 
 	function setInitialScreen(partnerConstraints) {
@@ -121,9 +121,9 @@ var basicKyc = (function basicKyc() {
 			: false;
 		if (selectedIdRequiresConsent || config.consent_required || config.demo_mode) {
 			const IDRequiresConsent = selectedIdRequiresConsent || (
-				config.consent_required &&
-				config.consent_required[selectedCountry] &&
-				config.consent_required[selectedCountry].includes(selectedIDType)
+				config.consent_required
+				&& config.consent_required[selectedCountry]
+				&& config.consent_required[selectedCountry].includes(selectedIDType)
 			);
 
 			if (IDRequiresConsent || config.demo_mode) {
@@ -156,11 +156,10 @@ var basicKyc = (function basicKyc() {
 			.sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
-				} else if (a.name > b.name) {
+				} if (a.name > b.name) {
 					return 1;
-				} else {
-					return 0;
 				}
+					return 0;
 			})
 			.map((item) => item.code);
 
@@ -168,14 +167,12 @@ var basicKyc = (function basicKyc() {
 
 		if (config.id_selection) {
 			const selectedCountryList = Object.keys(config.id_selection);
-			validCountries = supportedCountries.filter((value) =>
-				selectedCountryList.includes(value)
-			);
+			validCountries = supportedCountries.filter((value) => selectedCountryList.includes(value));
 
 			if (validCountries.length === 1) {
 				const selectedCountry = validCountries[0];
 				id_info = {
-					country: validCountries[0]
+					country: validCountries[0],
 				};
 
 				const idTypes = config.id_selection[selectedCountry];
@@ -191,10 +188,10 @@ var basicKyc = (function basicKyc() {
 		}
 
 		if (!id_info || !id_info.id_type) {
-			const selectCountry = SelectIDType.querySelector("#country");
-			const selectIDType = SelectIDType.querySelector("#id_type");
+			const selectCountry = SelectIDType.querySelector('#country');
+			const selectIDType = SelectIDType.querySelector('#id_type');
 			const hostedWebConfigForm = document.querySelector(
-				'form[name="hosted-web-config"]'
+				'form[name="hosted-web-config"]',
 			);
 
 			// ACTION: Enable Country Selection
@@ -207,7 +204,7 @@ var basicKyc = (function basicKyc() {
 				if (countryCode) {
 					const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.basic_kyc;
 					const constrainedIDTypes = Object.keys(generalConstraints[countryCode].id_types);
-					const selectedIDTypes = validIDTypes[countryCode].filter(value => constrainedIDTypes.includes(value))
+					const selectedIDTypes = validIDTypes[countryCode].filter((value) => constrainedIDTypes.includes(value));
 
 					// ACTION: Reset ID Type <select>
 					selectIDType.innerHTML = '';
@@ -218,10 +215,9 @@ var basicKyc = (function basicKyc() {
 
 					// ACTION: Load ID Types as <option>s
 					selectedIDTypes.forEach((IDType) => {
-						const option = document.createElement("option");
-						option.setAttribute("value", IDType);
-						option.textContent =
-						generalConstraints[countryCode]["id_types"][IDType].label;
+						const option = document.createElement('option');
+						option.setAttribute('value', IDType);
+						option.textContent =						generalConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 
@@ -229,24 +225,24 @@ var basicKyc = (function basicKyc() {
 					selectIDType.disabled = false;
 				} else {
 					// ACTION: Reset ID Type <select>
-					selectIDType.innerHTML = "";
+					selectIDType.innerHTML = '';
 
 					// ACTION: Load the default <option>
-					const option = document.createElement("option");
+					const option = document.createElement('option');
 					option.disabled = true;
-					option.setAttribute("value", "");
-					option.textContent = "--Select Country First--";
+					option.setAttribute('value', '');
+					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
 			}
 
-			selectCountry.addEventListener("change", (e) => {
+			selectCountry.addEventListener('change', (e) => {
 				loadIdTypes(e.target.value);
 			});
 
 			// ACTION: Load Countries as <option>s
-			validCountries.forEach(country => {
-				const countryObject = generalConstraints[country]
+			validCountries.forEach((country) => {
+				const countryObject = generalConstraints[country];
 				if (countryObject) {
 					const option = document.createElement('option');
 					option.setAttribute('value', country);
@@ -263,7 +259,7 @@ var basicKyc = (function basicKyc() {
 				}
 			});
 
-			hostedWebConfigForm.addEventListener("submit", (e) => {
+			hostedWebConfigForm.addEventListener('submit', (e) => {
 				e.preventDefault();
 				const selectedCountry = selectCountry.value;
 				const selectedIDType = selectIDType.value;
@@ -286,52 +282,51 @@ var basicKyc = (function basicKyc() {
 			tip.hidden = false;
 		});
 
-		const script = document.createElement("script");
-		script.type = "text/javascript";
-		script.src = "js/demo-ekyc.min.js";
+		const script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.src = 'js/demo-ekyc.min.js';
 
 		document.body.appendChild(script);
 	}
 
-	IDInfoForm.querySelector("#submitForm").addEventListener(
-		"click",
+	IDInfoForm.querySelector('#submitForm').addEventListener(
+		'click',
 		(event) => {
 			handleFormSubmit(event);
 		},
-		false
+		false,
 	);
 
-	IDInfoForm.querySelector('#back-button').addEventListener('click', event => {
+	IDInfoForm.querySelector('#back-button').addEventListener('click', (event) => {
 		event.preventDefault();
-		var page = pages.pop();
+		const page = pages.pop();
 		setActiveScreen(page);
 	}, false);
 
-
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', event => {
+		button.addEventListener('click', (event) => {
 			closeWindow(true);
 		}, false);
 	});
 
 	function toHRF(string) {
-		return string.replace(/\_/g, " ");
+		return string.replace(/\_/g, ' ');
 	}
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
 
 		const main = document.querySelector('main');
-		EndUserConsent = document.querySelector("end-user-consent");
+		EndUserConsent = document.querySelector('end-user-consent');
 		if (EndUserConsent) {
 			main.removeChild(EndUserConsent);
 		}
-		EndUserConsent = document.createElement("end-user-consent");
+		EndUserConsent = document.createElement('end-user-consent');
 		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
 		EndUserConsent.setAttribute('country', id_info.country);
-		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
+		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country].id_types[id_info.id_type].id_number_regex);
 		EndUserConsent.setAttribute('id-type', id_info.id_type);
-		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country]['id_types'][id_info.id_type]['label']);
+		EndUserConsent.setAttribute('id-type-label', productConstraints[id_info.country].id_types[id_info.id_type].label);
 		EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
 		EndUserConsent.setAttribute('partner-name', partnerDetails.name);
 		EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
@@ -343,10 +338,10 @@ var basicKyc = (function basicKyc() {
 		}
 
 		if (config.demo_mode) {
-			EndUserConsent.setAttribute("demo-mode", config.demo_mode);
+			EndUserConsent.setAttribute('demo-mode', config.demo_mode);
 			localStorage.setItem(
-				"SmileIdentityConstraints",
-				JSON.stringify(productConstraints, null, 2)
+				'SmileIdentityConstraints',
+				JSON.stringify(productConstraints, null, 2),
 			);
 			initiateDemoMode();
 		}
@@ -355,7 +350,7 @@ var basicKyc = (function basicKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener(
-			"SmileIdentity::ConsentGranted",
+			'SmileIdentity::ConsentGranted',
 			(event) => {
 				consent_information = event.detail;
 
@@ -363,10 +358,10 @@ var basicKyc = (function basicKyc() {
 					setActiveScreen(IDInfoForm);
 				}
 			},
-			false
+			false,
 		);
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', event => {
+		EndUserConsent.addEventListener('SmileIdentity::ConsentGranted::TOTP', (event) => {
 			consent_information = event.detail;
 
 			if (consent_information.consented.personal_details) {
@@ -378,15 +373,15 @@ var basicKyc = (function basicKyc() {
 		}, false);
 
 		EndUserConsent.addEventListener(
-			"SmileIdentity::ConsentDenied",
+			'SmileIdentity::ConsentDenied',
 			(event) => {
-				referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
+				referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 				closeWindow();
 			},
-			false
+			false,
 		);
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', event => {
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', (event) => {
 			referenceWindow.postMessage(event.detail, '*');
 			closeWindow();
 		}, false);
@@ -401,56 +396,44 @@ var basicKyc = (function basicKyc() {
 
 	function setGuideTextForIDType() {
 		const label = document.querySelector('[for="id_number"]');
-		const input = document.querySelector("#id_number");
+		const input = document.querySelector('#id_number');
 
-		label.innerHTML =
-			productConstraints[id_info.country]["id_types"][id_info.id_type]["label"];
+		label.innerHTML =			productConstraints[id_info.country].id_types[id_info.id_type].label;
 		input.setAttribute(
-			"placeholder",
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"test_data"
-			]
+			'placeholder',
+			productConstraints[id_info.country].id_types[id_info.id_type].test_data,
 		);
 		input.setAttribute(
-			"pattern",
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"id_number_regex"
-			]
+			'pattern',
+			productConstraints[id_info.country].id_types[id_info.id_type].id_number_regex,
 		);
 	}
 
 	function setFormInputs() {
-		const requiredFields =
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"required_fields"
-			];
+		const requiredFields =			productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
 
-		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+		const showIdNumber = requiredFields.some((fieldName) => fieldName.includes('id_number'));
 
 		if (showIdNumber) {
 			const IdNumber = IDInfoForm.querySelector('div#id-number');
 			IdNumber.hidden = false;
 		}
 
-		const showNames = requiredFields.some((fieldName) =>
-			fieldName.includes("name")
-		);
+		const showNames = requiredFields.some((fieldName) => fieldName.includes('name'));
 
 		if (showNames) {
-			const Names = IDInfoForm.querySelector("fieldset#names");
+			const Names = IDInfoForm.querySelector('fieldset#names');
 			Names.hidden = false;
 		}
 
-		const showDOB = requiredFields.some((fieldName) =>
-			fieldName.includes("dob")
-		);
+		const showDOB = requiredFields.some((fieldName) => fieldName.includes('dob'));
 
 		if (showDOB) {
-			const DOB = IDInfoForm.querySelector("fieldset#dob");
+			const DOB = IDInfoForm.querySelector('fieldset#dob');
 			DOB.hidden = false;
 		}
 
-		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+		const showCitizenship = requiredFields.some((fieldName) => fieldName.includes('citizenship'));
 
 		if (showCitizenship) {
 			const Citizenship = IDInfoForm.querySelector('fieldset#citizenships');
@@ -473,15 +456,13 @@ var basicKyc = (function basicKyc() {
 			 * 5. decode the URI Component to a JSON string
 			 * 6. parse the JSON string to a javascript object
 			 */
-			var base64Url = token.split(".")[1];
-			var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-			var jsonPayload = decodeURIComponent(
+			const base64Url = token.split('.')[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const jsonPayload = decodeURIComponent(
 				atob(base64)
-					.split("")
-					.map(function (c) {
-						return "%" + c.charCodeAt(0).toString(16);
-					})
-					.join("")
+					.split('')
+					.map((c) => `%${c.charCodeAt(0).toString(16)}`)
+					.join(''),
 			);
 
 			return JSON.parse(jsonPayload);
@@ -500,11 +481,11 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function resetForm() {
-		const invalidElements = IDInfoForm.querySelectorAll("[aria-invalid]");
-		invalidElements.forEach((el) => el.removeAttribute("aria-invalid"));
+		const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
+		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
 		const validationMessages = document.querySelectorAll(
-			".validation-message"
+			'.validation-message',
 		);
 		validationMessages.forEach((el) => el.remove());
 	}
@@ -512,78 +493,69 @@ var basicKyc = (function basicKyc() {
 	function validateInputs(payload) {
 		const validationConstraints = {};
 
-		const requiredFields =
-			productConstraints[id_info.country]["id_types"][id_info.id_type][
-				"required_fields"
-			];
+		const requiredFields =			productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
 
-		const showIdNumber = requiredFields.some(fieldName => fieldName.includes('id_number'));
+		const showIdNumber = requiredFields.some((fieldName) => fieldName.includes('id_number'));
 
 		if (showIdNumber) {
 			validationConstraints.id_number = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 				format: new RegExp(
-					productConstraints[id_info.country]["id_types"][id_info.id_type][
-						"id_number_regex"
-					]
+					productConstraints[id_info.country].id_types[id_info.id_type].id_number_regex,
 				),
 			};
 		}
 
-		const showNames = requiredFields.some((fieldName) =>
-			fieldName.includes("name")
-		);
+		const showNames = requiredFields.some((fieldName) => fieldName.includes('name'));
 
 		if (showNames) {
 			validationConstraints.first_name = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 			};
 			validationConstraints.last_name = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 			};
 		}
 
-		const showDOB = requiredFields.some((fieldName) =>
-			fieldName.includes("dob")
-		);
+		const showDOB = requiredFields.some((fieldName) => fieldName.includes('dob'));
 
 		if (showDOB) {
 			validationConstraints.day = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 			};
 			validationConstraints.month = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 			};
 			validationConstraints.year = {
 				presence: {
 					allowEmpty: false,
-					message: "is required",
+					message: 'is required',
 				},
 			};
 		}
 
-		const showCitizenship = requiredFields.some(fieldName => fieldName.includes('citizenship'));
+		const showCitizenship = requiredFields.some((fieldName) => fieldName.includes('citizenship'));
 		if (showCitizenship) {
 			validationConstraints.citizenship = {
 				presence: {
 					allowEmpty: false,
-					message: 'is required'
-				}
+					message: 'is required',
+				},
 			};
 		}
 
@@ -592,7 +564,7 @@ var basicKyc = (function basicKyc() {
 		if (validation) {
 			handleValidationErrors(validation);
 			const submitButton = IDInfoForm.querySelector('[type="button"]');
-			submitButton.removeAttribute("disabled");
+			submitButton.removeAttribute('disabled');
 		}
 
 		return validation;
@@ -603,22 +575,22 @@ var basicKyc = (function basicKyc() {
 
 		fields.forEach((field) => {
 			const input = IDInfoForm.querySelector(`#${field}`);
-			input.setAttribute("aria-invalid", "true");
-			input.setAttribute("aria-describedby", `${field}-hint`);
+			input.setAttribute('aria-invalid', 'true');
+			input.setAttribute('aria-describedby', `${field}-hint`);
 
-			const errorDiv = document.createElement("div");
-			errorDiv.setAttribute("id", `${field}-hint`);
-			errorDiv.setAttribute("class", "validation-message");
+			const errorDiv = document.createElement('div');
+			errorDiv.setAttribute('id', `${field}-hint`);
+			errorDiv.setAttribute('class', 'validation-message');
 			errorDiv.textContent = errors[field][0];
 
-			input.insertAdjacentElement("afterend", errorDiv);
+			input.insertAdjacentElement('afterend', errorDiv);
 		});
 	}
 
 	async function handleFormSubmit(event) {
 		event.preventDefault();
 		resetForm();
-		const form = IDInfoForm.querySelector("form");
+		const form = IDInfoForm.querySelector('form');
 
 		const formData = new FormData(form);
 		const payload = Object.fromEntries(formData.entries());
@@ -629,14 +601,12 @@ var basicKyc = (function basicKyc() {
 			return;
 		}
 
-		id_info = Object.assign(
-			{
-				dob: `${payload.year}-${payload.month}-${payload.day}`,
+		id_info = {
+			dob: `${payload.year}-${payload.month}-${payload.day}`,
 				entered: true,
-			},
-			payload,
-			id_info
-		);
+			...payload,
+			...id_info,
+		};
 
 		try {
 			event.target.disabled = true;
@@ -651,19 +621,21 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function displayErrorMessage(message) {
-		const p = document.createElement("p");
+		const p = document.createElement('p');
 
 		p.textContent = message;
 		p.classList.add('validation-message');
-		p.style.fontSize = "1.5rem";
-		p.style.textAlign = "center";
+		p.style.fontSize = '1.5rem';
+		p.style.textAlign = 'center';
 
-		const main = document.querySelector("main");
+		const main = document.querySelector('main');
 		main.prepend(p);
 	}
 
 	async function submitIdInfoForm() {
-		const { year, month, day, ...data } = id_info;
+		const {
+ year, month, day, ...data
+} = id_info;
 		const dob = year && month && day ? `${year}-${month}-${day}` : undefined;
 		const {
 			callback_url,
@@ -677,8 +649,8 @@ var basicKyc = (function basicKyc() {
 			partner_params,
 			callback_url,
 			token,
-			source_sdk: config.sdk || "hosted_web",
-			source_sdk_version: config.sdk_version || "v1.1.0"
+			source_sdk: config.sdk || 'hosted_web',
+			source_sdk_version: config.sdk_version || 'v1.1.0',
 		};
 
 		const URL = `${endpoints[config.environment]}/v2/verify_async`;
@@ -690,7 +662,7 @@ var basicKyc = (function basicKyc() {
 
 	function complete() {
 		const countryName = productConstraints[id_info.country].name;
-		const idTypeName = productConstraints[id_info.country]['id_types'][id_info.id_type].label;
+		const idTypeName = productConstraints[id_info.country].id_types[id_info.id_type].label;
 
 		const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
 		thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
@@ -702,10 +674,10 @@ var basicKyc = (function basicKyc() {
 
 	function closeWindow(userTriggered) {
 		const message = userTriggered ? 'SmileIdentity::Close' : 'SmileIdentity::Close::System';
-		referenceWindow.postMessage(message, "*");
+		referenceWindow.postMessage(message, '*');
 	}
 
 	function handleSuccess() {
-		referenceWindow.postMessage("SmileIdentity::Success", "*");
+		referenceWindow.postMessage('SmileIdentity::Success', '*');
 	}
-})();
+}());

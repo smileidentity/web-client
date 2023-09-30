@@ -1,8 +1,8 @@
 /**
  * A IdTypeVerificationMethod selection
  * @typedef {Object} IdTypeVerificationMethod
- * @property {string} country - 
- * @property {string} id_type - 
+ * @property {string} country -
+ * @property {string} id_type -
  * @property {string} verification_method - one of the smile identity
  * verification methods
  */
@@ -19,7 +19,7 @@
 * @param { Object[] } [config.id_types] - list of the id types and their
 * verification_methods
 * @param { Object[] } config.id_types[]. - list of the id types and their
-* @param { string } config.id_type[].country - 
+* @param { string } config.id_type[].country -
 * @param { string } config.id_type[].id_type - list of the id types and their
 * @param { string } config.id_type[].verification_method - one of
 * SmileIdentity's verification_methods
@@ -42,17 +42,17 @@
 	consent. Ensure that your authorization matches this in the sandbox
 	environment before publishing to end users
 */
-var SmileIdentity = function () {
+const SmileIdentity = (function () {
 	'use strict';
 
 	function getSiteURL() {
-		var currentScriptSrc = document.currentScript.src;
+		const currentScriptSrc = document.currentScript.src;
 		const qualifiedURL = currentScriptSrc.split('script')[0];
 		return qualifiedURL;
 	}
 
 	const config = {
-		siteURL: getSiteURL()
+		siteURL: getSiteURL(),
 	};
 
 	function getIFrameURL(product) {
@@ -80,7 +80,7 @@ var SmileIdentity = function () {
 	}
 
 	function createIframe(productName) {
-		var iframe = document.createElement('iframe');
+		const iframe = document.createElement('iframe');
 
 		iframe.setAttribute('src', `${config.siteURL}${getIFrameURL(productName)}`);
 		iframe.setAttribute('id', 'smile-identity-hosted-web-integration');
@@ -138,7 +138,7 @@ var SmileIdentity = function () {
 		}
 
 		if ((config.product === 'biometric_kyc' || config.product === 'ekyc_smartselfie') && config.partner_details) {
-			requiredPartnerDetails.forEach(param => {
+			requiredPartnerDetails.forEach((param) => {
 				if (!config.partner_details[param]) {
 					throw new Error(`SmileIdentity: Please include ${param} in the "partner_details" object`);
 				}
@@ -181,13 +181,12 @@ var SmileIdentity = function () {
 					case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
 						return handleConsentRejection(config, event.data);
 					default:
-						return;
 				}
 			}, false);
 		}
 	}
 
 	return SmileIdentity;
-}();
+}());
 
 window.SmileIdentity = SmileIdentity;

@@ -32,7 +32,7 @@ Cypress.Commands.add('getIFrameBody', () => {
 		.get('iframe[data-cy="smile-identity-hosted-web-integration"]', { log: false })
 		.its('0.contentDocument.body', { log: false })
 		.should('not.be.empty')
-		.then(body => cy.wrap(body, { log: false }));
+		.then((body) => cy.wrap(body, { log: false }));
 });
 
 Cypress.Commands.add('loadIDOptions', () => {
@@ -55,11 +55,11 @@ Cypress.Commands.add('loadIDOptions', () => {
 					},
 					{
 						email: 'fa*****il@gmail.com',
-					}
+					},
 				],
 				session_id: '0000000000000',
 				success: true,
-			}
+			},
 		});
 
 	cy
@@ -68,7 +68,7 @@ Cypress.Commands.add('loadIDOptions', () => {
 			body: {
 				message: 'OTP Delivery Mode Selected',
 				success: true,
-			}
+			},
 		});
 
 	cy
@@ -77,7 +77,7 @@ Cypress.Commands.add('loadIDOptions', () => {
 			body: {
 				message: 'OTP Confirmed',
 				success: true,
-			}
+			},
 		});
 });
 
@@ -90,12 +90,12 @@ Cypress.Commands.add('selectBVNIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('NG')
+		.select('NG');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('BVN')
+		.select('BVN');
 
 	cy
 		.getIFrameBody()
@@ -112,12 +112,12 @@ Cypress.Commands.add('selectBVNMFAIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('NG')
+		.select('NG');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('BVN_MFA')
+		.select('BVN_MFA');
 
 	cy
 		.getIFrameBody()
@@ -134,12 +134,12 @@ Cypress.Commands.add('selectNINIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('NG')
+		.select('NG');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('NIN')
+		.select('NIN');
 
 	cy
 		.getIFrameBody()
@@ -156,12 +156,12 @@ Cypress.Commands.add('selectVOTERIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('NG')
+		.select('NG');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('VOTER_ID')
+		.select('VOTER_ID');
 
 	cy
 		.getIFrameBody()
@@ -178,12 +178,12 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('NG')
+		.select('NG');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('PASSPORT')
+		.select('PASSPORT');
 
 	cy
 		.getIFrameBody()
@@ -200,12 +200,12 @@ Cypress.Commands.add('selectKRAType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('KE')
+		.select('KE');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('KRA_PIN')
+		.select('KRA_PIN');
 
 	cy
 		.getIFrameBody()
@@ -222,12 +222,12 @@ Cypress.Commands.add('selectKEDriversLicenseType', () => {
 	cy
 		.getIFrameBody()
 		.find('#country')
-		.select('KE')
+		.select('KE');
 
 	cy
 		.getIFrameBody()
 		.find('#id_type')
-		.select('DRIVERS_LICENSE')
+		.select('DRIVERS_LICENSE');
 
 	cy
 		.getIFrameBody()
@@ -240,7 +240,7 @@ Cypress.Commands.add('getTotpConsentApp', () => {
 		.find('end-user-consent')
 		.shadow()
 		.find('totp-consent-app')
-		.shadow()
+		.shadow();
 });
 
 Cypress.Commands.add('navigateThroughTotpConsentApp', () => {

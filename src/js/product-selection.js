@@ -1,28 +1,28 @@
-var productSelection = (function productSelection() {
+const productSelection = (function productSelection() {
 	'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
 	const endpoints = {
-		development: "https://devapi.smileidentity.com",
-		sandbox: "https://testapi.smileidentity.com",
-		live: "https://api.smileidentity.com",
-		production: "https://api.smileidentity.com",
+		development: 'https://devapi.smileidentity.com',
+		sandbox: 'https://testapi.smileidentity.com',
+		live: 'https://api.smileidentity.com',
+		production: 'https://api.smileidentity.com',
 	};
 
 	const referenceWindow = window.parent;
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
-	var config;
-	var verificationMethodMap;
-	var activeScreen;
-	var LoadingScreen = document.querySelector('#loading-screen');
-	var SelectIdType = document.querySelector('#select-id-type');
-	var ConfigForm = document.querySelector('form[name="hosted-web-config"]');
-	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
+	let config;
+	let verificationMethodMap;
+	let activeScreen;
+	const LoadingScreen = document.querySelector('#loading-screen');
+	const SelectIdType = document.querySelector('#select-id-type');
+	const ConfigForm = document.querySelector('form[name="hosted-web-config"]');
+	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', event => {
+		button.addEventListener('click', (event) => {
 			closeWindow();
 		}, false);
 	});
@@ -34,11 +34,11 @@ var productSelection = (function productSelection() {
 	}
 
 	function getIdTypeName(country, id_type, services) {
-		if (services['hosted_web']['doc_verification'][country] && services['hosted_web']['doc_verification'][country]['id_types'][id_type]) {
-			return services['hosted_web']['doc_verification'][country]['id_types'][id_type]['label'];
+		if (services.hosted_web.doc_verification[country] && services.hosted_web.doc_verification[country].id_types[id_type]) {
+			return services.hosted_web.doc_verification[country].id_types[id_type].label;
 		}
-		if (services['hosted_web']['enhanced_kyc'][country] && services['hosted_web']['enhanced_kyc'][country]['id_types'][id_type]) {
-			return services['hosted_web']['enhanced_kyc'][country]['id_types'][id_type]['label'];
+		if (services.hosted_web.enhanced_kyc[country] && services.hosted_web.enhanced_kyc[country].id_types[id_type]) {
+			return services.hosted_web.enhanced_kyc[country].id_types[id_type].label;
 		}
 		throw new Error('Cannot find the full name of the id_type');
 	}
@@ -46,13 +46,13 @@ var productSelection = (function productSelection() {
 	function transformIdTypesToVerificationMethodMap(config, services) {
 		return config.id_types.reduce((idSelectionMap, { country, id_type, verification_method }) => {
 			idSelectionMap[country] = idSelectionMap[country] || {
-				name: services['hosted_web']['doc_verification'][country]['name'],
+				name: services.hosted_web.doc_verification[country].name,
 				id_types: {},
 			};
-			idSelectionMap[country]['id_types'][id_type] = {
+			idSelectionMap[country].id_types[id_type] = {
 				name: getIdTypeName(country, id_type, services),
-				verification_method
-			}
+				verification_method,
+			};
 
 			return idSelectionMap;
 		}, {});
@@ -71,9 +71,9 @@ var productSelection = (function productSelection() {
 			const idTypes = Object.keys(verificationMethodMap[countryCode].id_types);
 			const isSingleIdType = idTypes.length === 1;
 			idTypes.forEach((idType) => {
-				const option = document.createElement("option");
-				option.setAttribute("value", idType);
-				option.textContent = verificationMethodMap[countryCode]["id_types"][idType].name;
+				const option = document.createElement('option');
+				option.setAttribute('value', idType);
+				option.textContent = verificationMethodMap[countryCode].id_types[idType].name;
 
 				if (isSingleIdType) {
 					option.setAttribute('selected', true);
@@ -86,19 +86,19 @@ var productSelection = (function productSelection() {
 			idTypeSelector.disabled = false;
 		} else {
 			// ACTION: Reset ID Type <select>
-			idTypeSelector.innerHTML = "";
+			idTypeSelector.innerHTML = '';
 
 			// ACTION: Load the default <option>
-			const option = document.createElement("option");
+			const option = document.createElement('option');
 			option.disabled = true;
-			option.setAttribute("value", "");
-			option.textContent = "--Select Country First--";
+			option.setAttribute('value', '');
+			option.textContent = '--Select Country First--';
 			idTypeSelector.appendChild(option);
 		}
 	}
 
 	function getVerificationMethod(country, id_type) {
-		return verificationMethodMap[country]['id_types'][id_type].verification_method;
+		return verificationMethodMap[country].id_types[id_type].verification_method;
 	}
 
 	function initializeForm(form, verificationMethodMap) {
@@ -111,7 +111,7 @@ var productSelection = (function productSelection() {
 
 		const countries = Object.keys(verificationMethodMap);
 		const isSingleCountry = countries.length === 1;
-		countries.forEach(countryCode => {
+		countries.forEach((countryCode) => {
 			const country = verificationMethodMap[countryCode];
 
 			const option = document.createElement('option');
@@ -120,7 +120,7 @@ var productSelection = (function productSelection() {
 
 			if (isSingleCountry) {
 				option.setAttribute('selected', true);
-				loadIdTypes(verificationMethodMap, idTypeSelector, countryCode)
+				loadIdTypes(verificationMethodMap, idTypeSelector, countryCode);
 			}
 
 			countrySelector.appendChild(option);
@@ -132,7 +132,7 @@ var productSelection = (function productSelection() {
 
 	function getSiteURL() {
 		const urlParts = location.href.split('/');
-		const url = urlParts.slice(0, -1).join('/')
+		const url = urlParts.slice(0, -1).join('/');
 		return `${url}/`;
 	}
 
@@ -152,7 +152,7 @@ var productSelection = (function productSelection() {
 	}
 
 	function createIframe(productName) {
-		var iframe = document.createElement('iframe');
+		const iframe = document.createElement('iframe');
 
 		iframe.setAttribute('src', `${getSiteURL()}${getIFrameURL(productName)}`);
 		iframe.setAttribute('id', 'smile-identity-hosted-web-integration-post-product-selection');
@@ -205,10 +205,10 @@ var productSelection = (function productSelection() {
 	});
 
 	window.addEventListener(
-		"message",
+		'message',
 		async (event) => {
 			if (event.data) {
-				if (event.data.includes("SmileIdentity::Configuration")) {
+				if (event.data.includes('SmileIdentity::Configuration')) {
 					config = JSON.parse(event.data);
 					activeScreen = LoadingScreen;
 
@@ -226,13 +226,13 @@ var productSelection = (function productSelection() {
 					} catch (e) {
 						throw e;
 					}
-				} else if (event.data.includes("SmileIdentity::ChildPageReady")) {
+				} else if (event.data.includes('SmileIdentity::ChildPageReady')) {
 					publishMessage(config);
 				}
 			} else {
 				referenceWindow.postMessage(event.detail || event.data, '*');
 			}
 		},
-		false
+		false,
 	);
-})();
+}());

@@ -1,15 +1,15 @@
 describe('smartselfie authentication ', () => {
 	beforeEach(() => {
-    cy.visit("/smartselfie");
+    cy.visit('/smartselfie');
 
-    cy.getIFrameBody().should("be.visible");
+    cy.getIFrameBody().should('be.visible');
 
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
 			}).as('getUploadURL');
 	});
 
@@ -17,22 +17,22 @@ describe('smartselfie authentication ', () => {
 		beforeEach(() => {
       cy.intercept(
         {
-          method: "PUT",
-          url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip",
+          method: 'PUT',
+          url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
         },
         {
           statusCode: 200,
-        }
-      ).as("successfulUpload");
+        },
+      ).as('successfulUpload');
       cy
 			.navigateThroughCameraScreens();
 		});
 
 		it('should show the completion screen', () => {
-      cy.wait("@getUploadURL");
-  
-      cy.wait("@successfulUpload");
-      cy.getIFrameBody().find("#complete-screen").should("be.visible");
+      cy.wait('@getUploadURL');
+
+      cy.wait('@successfulUpload');
+      cy.getIFrameBody().find('#complete-screen').should('be.visible');
 		});
 	});
 
@@ -41,33 +41,32 @@ describe('smartselfie authentication ', () => {
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
 				}, {
-					statusCode: 412
+					statusCode: 412,
 				}).as('failedUploadRequest');
         cy
         .navigateThroughCameraScreens();
 		});
 
-    it("should show the upload failure screen", () => {
-      cy.wait("@getUploadURL");
-  
-      cy.getIFrameBody().find("#upload-progress-screen").should("not.be.visible");
-  
-      cy.wait("@failedUploadRequest");
-  
-      cy.getIFrameBody().find("#upload-failure-screen").should("be.visible");
+    it('should show the upload failure screen', () => {
+      cy.wait('@getUploadURL');
+
+      cy.getIFrameBody().find('#upload-progress-screen').should('not.be.visible');
+
+      cy.wait('@failedUploadRequest');
+
+      cy.getIFrameBody().find('#upload-failure-screen').should('be.visible');
     });
-  
+
     it('should should retry upload when "try again" button is clicked', () => {
-  
-      cy.wait("@getUploadURL");
-  
-      cy.wait("@failedUploadRequest");
-  
-      cy.getIFrameBody().find("#retry-upload").click();
-  
-      cy.wait("@failedUploadRequest");
+      cy.wait('@getUploadURL');
+
+      cy.wait('@failedUploadRequest');
+
+      cy.getIFrameBody().find('#retry-upload').click();
+
+      cy.wait('@failedUploadRequest');
     });
 	});
 });

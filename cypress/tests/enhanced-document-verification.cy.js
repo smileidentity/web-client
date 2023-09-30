@@ -3,17 +3,17 @@ describe('enhanced document verification', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy.loadIDOptions();
@@ -30,7 +30,7 @@ describe('enhanced document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'VOTER_ID')
+			.should('eq', 'VOTER_ID');
 
 		cy
 			.getIFrameBody()

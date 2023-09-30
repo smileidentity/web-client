@@ -34,5 +34,5 @@ describe('web-integration onError', () => {
 
 		cy.get('.validation-message')
 			.should('be.visible');
-	})
-})
+	});
+});

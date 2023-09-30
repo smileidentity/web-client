@@ -3,17 +3,17 @@ describe('document verification', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy.loadIDOptions();
@@ -23,12 +23,12 @@ describe('document verification', () => {
 		cy
 			.getIFrameBody()
 			.find('#country')
-			.select('NG')
+			.select('NG');
 
 		cy
 			.getIFrameBody()
 			.find('#id_type')
-			.select('NATIONAL_ID')
+			.select('NATIONAL_ID');
 
 		cy
 			.getIFrameBody()
@@ -43,7 +43,7 @@ describe('document verification', () => {
 			.getIFrameBody()
 			.find('smart-camera-web')
 			.invoke('attr', 'document-type')
-			.should('eq', 'NATIONAL_ID')
+			.should('eq', 'NATIONAL_ID');
 
 		cy
 			.getIFrameBody()

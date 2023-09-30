@@ -650,9 +650,7 @@ class EndUserConsent extends HTMLElement {
 
 		this.idRequiresTotpConsent = ['BVN_MFA'];
 		this.templateString = templateString.bind(this);
-		this.render = () => {
-			return this.templateString();
-		}
+		this.render = () => this.templateString();
 
 		this.attachShadow({ mode: 'open' });
 	}
@@ -672,25 +670,25 @@ class EndUserConsent extends HTMLElement {
 		this.rejectButton = this.shadowRoot.querySelector('#cancel');
 		this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
 		this.confirmConsentRejectionButton = this.shadowRoot.querySelector('#confirm-consent-rejection');
-		this.backButton = this.shadowRoot.querySelector('#back-button')
-		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+		this.backButton = this.shadowRoot.querySelector('#back-button');
+		const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-		this.allowButton.addEventListener('click', e => this.handleConsentGrant(e));
-		this.rejectButton.addEventListener('click', e => this.handleConsentGrant(e));
+		this.allowButton.addEventListener('click', (e) => this.handleConsentGrant(e));
+		this.rejectButton.addEventListener('click', (e) => this.handleConsentGrant(e));
 
 		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
-		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
+		this.confirmConsentRejectionButton.addEventListener('click', (e) => this.handleConsentRejection(e));
 
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::Back', e => this.handleBackEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', (e) => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', (e) => this.handleTotpConsentEvents(e));
+		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::Back', (e) => this.handleBackEvents(e));
 
 		this.backButton.addEventListener('click', (e) => {
 			this.handleBackEvents(e);
 		});
 
 		CloseIframeButtons.forEach((button) => {
-			button.addEventListener('click', event => {
+			button.addEventListener('click', (event) => {
 				this.closeWindow();
 			}, false);
 		});
@@ -713,7 +711,7 @@ class EndUserConsent extends HTMLElement {
 	}
 
 	get demoMode() {
-		return this.hasAttribute('demo-mode') ? true : false
+		return !!this.hasAttribute('demo-mode');
 	}
 
 	get hideBack() {
@@ -775,9 +773,9 @@ class EndUserConsent extends HTMLElement {
 								personal_details: granted,
 								contact_information: granted,
 								document_information: granted,
-							}
-						}
-					})
+							},
+						},
+					}),
 				);
 			}
 		} else {
@@ -787,26 +785,26 @@ class EndUserConsent extends HTMLElement {
 
 	handleConsentRejection(e) {
 		this.dispatchEvent(
-			new CustomEvent('SmileIdentity::ConsentDenied')
+			new CustomEvent('SmileIdentity::ConsentDenied'),
 		);
 	}
 
 	handleTotpConsentEvents(e) {
 		const customEvent = new CustomEvent(e.type, {
 			detail: {
-				...e.detail
-			}
+				...e.detail,
+			},
 		});
 		this.dispatchEvent(customEvent);
 	}
 
-	handleBackEvents(e){
+	handleBackEvents(e) {
 		const page = this.pages.pop();
 		if (page) {
 			this.setActiveScreen(page);
-		}else{
+		} else {
 			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::Exit')
+				new CustomEvent('SmileIdentity::Exit'),
 			);
 		}
 	}

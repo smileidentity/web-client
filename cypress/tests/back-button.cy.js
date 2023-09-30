@@ -3,17 +3,17 @@ describe('back-button', () => {
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
 			.intercept({
 				method: 'PUT',
-				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
-				statusCode: 200
+				statusCode: 200,
 			}).as('successfulUpload');
 
 		cy
@@ -27,12 +27,12 @@ describe('back-button', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -72,17 +72,17 @@ describe('back-button', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*upload*'
+					url: '*upload*',
 				}, {
-					upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+					upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}).as('getUploadURL');
 
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
-					statusCode: 200
+					statusCode: 200,
 				}).as('successfulUpload');
 		});
 
@@ -93,12 +93,12 @@ describe('back-button', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -108,7 +108,7 @@ describe('back-button', () => {
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -161,10 +161,10 @@ describe('back-button', () => {
 			cy
 				.intercept({
 					method: 'POST',
-					url: '*v1/async_id_verification*'
+					url: '*v1/async_id_verification*',
 				}, {
 					statusCode: 200,
-					body: { success: true }
+					body: { success: true },
 				}).as('submitEnhancedKYC');
 		});
 
@@ -175,12 +175,12 @@ describe('back-button', () => {
 			cy
 				.getIFrameBody()
 				.find('#country')
-				.select('NG')
+				.select('NG');
 
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()
@@ -190,7 +190,7 @@ describe('back-button', () => {
 			cy
 				.getIFrameBody()
 				.find('#id_type')
-				.select('BVN_MFA')
+				.select('BVN_MFA');
 
 			cy
 				.getIFrameBody()

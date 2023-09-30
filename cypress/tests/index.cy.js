@@ -3,5 +3,5 @@ it('should load an iframe', () => {
 
 	cy
 		.getIFrameBody()
-		.should('be.visible')
+		.should('be.visible');
 });

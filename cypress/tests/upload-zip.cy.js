@@ -5,14 +5,14 @@ describe('zip upload screens', () => {
 		cy.visit('/');
 
 		cy
-			.selectNINIDType()
+			.selectNINIDType();
 
 		cy
 			.intercept({
 				method: 'POST',
-				url: '*upload*'
+				url: '*upload*',
 			}, {
-				upload_url: "https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip"
+				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}).as('getUploadURL');
 
 		cy
@@ -36,9 +36,9 @@ describe('zip upload screens', () => {
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
-					statusCode: 200
+					statusCode: 200,
 				}).as('successfulUpload');
 		});
 
@@ -76,9 +76,9 @@ describe('zip upload screens', () => {
 			cy
 				.intercept({
 					method: 'PUT',
-					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip'
+					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
-					statusCode: 412
+					statusCode: 412,
 				}).as('failedUploadRequest');
 		});
 

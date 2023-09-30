@@ -500,7 +500,7 @@ class TotpBasedConsent extends HTMLElement {
 		return ['modes', 'otp-delivery-mode'];
 	}
 
-	attributeChangedCallback(name, oldValue, newValue) {
+	attributeChangedCallback(name) {
 		switch (name) {
 			case 'modes':
 			case 'otp-delivery-mode': {
@@ -559,7 +559,7 @@ class TotpBasedConsent extends HTMLElement {
 		});
 
 		CloseIframeButtons.forEach((button) => {
-			button.addEventListener('click', (event) => {
+			button.addEventListener('click', () => {
 				this.closeWindow();
 			}, false);
 		});
@@ -594,8 +594,6 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	resetForm() {
-		const submitButton = this.activeScreen.querySelector('[type="submit"]');
-
 		const invalidElements = this.activeScreen.querySelectorAll('[aria-invalid]');
 		invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
@@ -604,7 +602,6 @@ class TotpBasedConsent extends HTMLElement {
 	}
 
 	handleIdNumberValidationErrors(errors) {
-		const submitButton = this.activeScreen.querySelector('[type="submit"]');
 		const fields = Object.keys(errors);
 
 		fields.forEach((field) => {
@@ -829,7 +826,7 @@ class TotpBasedConsent extends HTMLElement {
 		return this.getAttribute('token');
 	}
 
-	handleTotpConsentGrant(event) {
+	handleTotpConsentGrant() {
 		const customEvent = new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
 			detail: {
 				id_number: this.idNumber,
@@ -845,7 +842,7 @@ class TotpBasedConsent extends HTMLElement {
 		this.dispatchEvent(customEvent);
 	}
 
-	handleTotpConsentContactMethodsOutdated(event) {
+	handleTotpConsentContactMethodsOutdated() {
 		const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
 		const customEvent = new CustomEvent(tag, {
 			detail: {

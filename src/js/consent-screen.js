@@ -688,7 +688,7 @@ class EndUserConsent extends HTMLElement {
 		});
 
 		CloseIframeButtons.forEach((button) => {
-			button.addEventListener('click', (event) => {
+			button.addEventListener('click', () => {
 				this.closeWindow();
 			}, false);
 		});
@@ -783,7 +783,7 @@ class EndUserConsent extends HTMLElement {
 		}
 	}
 
-	handleConsentRejection(e) {
+	handleConsentRejection() {
 		this.dispatchEvent(
 			new CustomEvent('SmileIdentity::ConsentDenied'),
 		);
@@ -798,7 +798,7 @@ class EndUserConsent extends HTMLElement {
 		this.dispatchEvent(customEvent);
 	}
 
-	handleBackEvents(e) {
+	handleBackEvents() {
 		const page = this.pages.pop();
 		if (page) {
 			this.setActiveScreen(page);

@@ -4,18 +4,13 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build:dist": "esbuild src/js/*.js --bundle --minify --outdir=dist/js && npm run postbuild:dist",
-		"build": "npm run instrument && npm run copy && npm run esbuild",
 		"clean": "rm -rf build dist",
 		"copy": "cp -r src/* build && cp cypress/pages/*.html build",
-		"copy:dist": "cp -r src/* dist",
-		"esbuild": "esbuild src/js/*.js --bundle --minify --outdir=build/js",
 		"instrument": "nyc instrument src build",
-		"postbuild:dist": "npm run copy:dist",
-		"prebuild:dist": "rm -rf dist",
-		"preinstrument": "npm run clean",
-		"prestart": "npm run build && npm run build:dist",
+		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
+		"build:dist": "for file in src/js/*.js; do esbuild $file --bundle --minify --outfile=dist/js/$(basename $file .js).min.js; done",
 		"start": "npx serve -p 8000 build",
+		"prestart": "npm run build && npm run build:dist",
 		"test": "npx cypress run",
 		"watch": "watch 'npm run prestart' src"
 	},
@@ -32,12 +27,11 @@
 	"devDependencies": {
 		"@cypress/code-coverage": "3.9.11",
 		"cypress": "^12.5.1",
+		"esbuild": "^0.19.4",
 		"nyc": "15.1.0",
-		"serve": "13.0.2",
-		"terser": "5.9.0"
+		"serve": "13.0.2"
 	},
 	"dependencies": {
-		"esbuild": "^0.19.4",
 		"jszip": "^3.10.1",
 		"validate.js": "^0.13.1"
 	}

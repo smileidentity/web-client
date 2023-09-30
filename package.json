@@ -17,7 +17,7 @@
 		"start": "npx serve -p 8000 build",
 		"watch": "watch 'npm run prestart' src",
 		"test": "npx cypress run",
-		"lint-html": "npx prettier --write $(git ls-files '*.html') && npx htmlhint --config .htmlhintrc $(git ls-files '*.html')"
+		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},
 	"repository": {
 		"type": "git",
@@ -32,7 +32,6 @@
 	"devDependencies": {
 		"@cypress/code-coverage": "3.9.11",
 		"cypress": "^12.5.1",
-		"htmlhint": "^1.1.4",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
 		"serve": "13.0.2",

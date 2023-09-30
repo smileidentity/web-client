@@ -204,6 +204,38 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 		.click();
 });
 
+Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
+	cy
+		.loadIDOptions();
+
+	cy.log('selectingPASSPORTIDType');
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-trigger input')
+		.type('South Africa');
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-option[value="ZA"]')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-trigger > button')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('smileid-combobox-option[value="GREEN_BOOK"]')
+		.click();
+
+	cy
+		.getIFrameBody()
+		.find('#submitConfig')
+		.click();
+});
+
 Cypress.Commands.add('selectKRAType', () => {
 	cy
 		.loadIDOptions();

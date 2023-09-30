@@ -56,13 +56,34 @@ var documentVerification = function documentVerification() {
 		}
 	}
 
+	async function getLegacyProductConstraints() {
+		const fetchConfig = {
+			cache: 'no-cache',
+			mode: 'cors',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'GET',
+		};
+
+		try {
+			const response = await fetch(`${endpoints[config.environment]}/services`, fetchConfig);
+			const json = await response.json();
+
+			return json.hosted_web.doc_verification;
+		} catch (e) {
+			throw new Error("Failed to get supported ID types", { cause: e });
+		}
+	}
+
 	window.addEventListener('message', async event => {
 		if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 
 			try {
-				productConstraints = await getProductConstraints();
+				const productConstraints = await getProductConstraints();
 				initializeSession(productConstraints);
 				getPartnerParams();
 			} catch (e) {
@@ -117,7 +138,9 @@ var documentVerification = function documentVerification() {
 						<smileid-combobox-option value="${idType.code}" label="${idType.name}">
 							<div>
 								<p>${ idType.name }</p>
-								<small>${idType.example.length > 1 ? 'e.g. ' : ''}${idType.example.join(', ')}</small>
+								${
+									idType.name === 'Others' || (idType.example && idType.example.length > 1) ? `<small>${idType.example.length > 1 ? 'e.g. ' : ''}${idType.example.join(', ')}</small>` : ''
+								}
 							</div>
 						</smileid-combobox-option>
 					`
@@ -133,20 +156,22 @@ var documentVerification = function documentVerification() {
 		return combobox;
 	}
 
-	function initializeSession(constraints) {
+	async function initializeSession(constraints) {
 		let selectedCountry, selectedIdType;
 
 		function loadIdTypes(countryCode) {
 			const countryIdTypes = constraints.find(item => item.country.code === countryCode).id_types;
-			const validIdTypes = config.id_selection ? config.id_selection[countryCode] : countryIdTypes;
-			const selectedIdTypes = countryIdTypes
-				.filter(idType =>
-					validIdTypes.find(
-						validIdType => (validIdType.code || validIdType) === idType.code
-					) || !idType.code
-				);
 
-			return selectedIdTypes;
+			if (config.id_selection) {
+				return countryIdTypes
+					.filter(idType =>
+						config.id_selection[countryCode].find(
+							validIdType => validIdType === idType.code
+						)
+					);
+			}
+
+			return countryIdTypes;
 		}
 
 		function initialiseIdTypeSelector(selectedCountry, selectIdType) {
@@ -174,6 +199,50 @@ var documentVerification = function documentVerification() {
 		let validCountries = [];
 
 		if (config.id_selection) {
+			/**
+			 * when id selection list is made, we have two sources for id_types:
+			 *  1. `valid_documents`, the new approach
+			 *  2. `services`, the old approach
+			 *
+			 * what we want to do is extend the `valid_documents` entries with the
+			 * entries from `services` that are not present.
+			 *
+			 * the steps to do that are:
+			 * 1. Get the legacyConstraints
+			 * 2. Add the absent entries to the new constraints `id_types` in the same
+			 *       format
+			 */
+			const legacyConstraints = await getLegacyProductConstraints();
+			Object.keys(config.id_selection)
+				.forEach(countryCode => {
+					/**
+					 * 1. find out if the country code is in the new constraints list
+					 * 2. find out if the id_type is in the id_types list
+					 *   2.1. if in the list, continue
+					 *   2.3. if not in the list, log a deprecated message, and add it
+					 */
+					const isCountrySupported = supportedCountries.includes(countryCode);
+
+					if (!isCountrySupported) {
+						throw new Error(`SmileIdentity - ${countryCode} is not supported`);
+					}
+
+					const countryIndex = constraints.findIndex(entry => entry.country.code === countryCode);
+
+					config.id_selection[countryCode].forEach(idSelectionIdType => {
+						const isIdTypeSupported = constraints[countryIndex].id_types
+							.find(constrainedIdType => idSelectionIdType === constrainedIdType.code)
+
+						if (isIdTypeSupported) return;
+						console.error(`SmileIdentity - ${countryCode}-${idSelectionIdType} has been deprecated`);
+						constraints[countryIndex].id_types.push({
+							code: idSelectionIdType,
+							has_back: false,
+							name: legacyConstraints[countryCode].id_types[idSelectionIdType].label,
+						});
+					});
+				});
+
 			const selectedCountryList = Object.keys(config.id_selection);
 			validCountries = supportedCountries.filter((value) =>
 				selectedCountryList.includes(value)
@@ -213,7 +282,7 @@ var documentVerification = function documentVerification() {
 		}
 
 		const countries = validCountries.map(countryCode => {
-			const countryObject = productConstraints.find(entry => entry.country.code === countryCode).country;
+			const countryObject = constraints.find(entry => entry.country.code === countryCode).country;
 
 			return {
 				code: countryCode,

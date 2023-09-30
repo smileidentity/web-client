@@ -14,11 +14,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
+      - run: npm run build:all
       - name: run tests
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
-          build: npm run build
-          build:dist: npm run build:dist
+          browser: chrome
           start: npm start
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3

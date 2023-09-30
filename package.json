@@ -9,6 +9,7 @@
 		"instrument": "nyc instrument src build",
 		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
 		"build:dist": "for file in src/js/*.js; do esbuild $file --bundle --minify --outfile=dist/js/$(basename $file .js).min.js; done",
+		"build:all": "npm run clean && npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
 		"prestart": "npm run build && npm run build:dist",
 		"test": "npx cypress run",

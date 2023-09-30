@@ -12,7 +12,7 @@
 		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
 		"copy:dist": "cp -r src/* dist && cp -r libs dist",
 		"instrument": "nyc instrument src build",
-		"lint": "eslint src/js cypress .eslintrc.js cypress.config.js --ext .js",
+		"lint": "npx eslint src/js cypress .eslintrc.js cypress.config.js --ext .js",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",

@@ -5,13 +5,12 @@
 	"main": "inline.js",
 	"scripts": {
 		"clean": "rm -rf build dist",
-		"copy": "cp -r src/* build && cp cypress/pages/*.html build",
-		"instrument": "nyc instrument src build",
-		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
+		"copy": "mkdir -p build && cp -r src/* build && cp cypress/pages/*.html build",
 		"build:dist": "for file in src/js/*.js; do esbuild $file --bundle --minify --outfile=dist/js/$(basename $file .js).min.js; done",
-		"build:all": "npm run clean && npm run build && npm run build:dist",
+		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
+		"instrument": "nyc instrument src build",
+		"prestart": "npm run clean && npm run copy && npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
-		"prestart": "npm run build && npm run build:dist",
 		"test": "npx cypress run",
 		"watch": "watch 'npm run prestart' src"
 	},

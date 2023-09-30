@@ -15,8 +15,9 @@ const documentVerification = (function documentVerification() {
 
 	let config;
 	let activeScreen;
-	let id_info; let images; let
-partner_params;
+	let id_info;
+	 let images;
+	  let partner_params;
 	let productConstraints;
 
 	const LoadingScreen = document.querySelector('#loading-screen');
@@ -29,8 +30,8 @@ partner_params;
 	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	const RetryUploadButton = document.querySelector('#retry-upload');
 
-	let fileToUpload; let
-uploadURL;
+	let fileToUpload;
+	let uploadURL;
 
 	async function getProductConstraints() {
 		try {
@@ -63,14 +64,16 @@ uploadURL;
 			.map((countryCode) => ({
 				code: countryCode,
 				name: constraints[countryCode].name,
-			})).sort((a, b) => {
+			}))
+.sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
 				} if (a.name > b.name) {
 					return 1;
 				}
 					return 0;
-			}).map((item) => item.code);
+			})
+.map((item) => item.code);
 
 		let validCountries = [];
 
@@ -132,7 +135,7 @@ uploadURL;
 					selectedIDTypes.forEach((IDType) => {
 						const option = document.createElement('option');
 						option.setAttribute('value', IDType);
-						option.textContent =						productConstraints[countryCode].id_types[IDType].label;
+						option.textContent = productConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 
@@ -253,11 +256,14 @@ uploadURL;
 			 * 6. parse the JSON string to a javascript object
 			 */
 			const base64Url = token.split('.')[1];
-			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const base64 = base64Url.replace(/-/g, '+')
+.replace(/_/g, '/');
 			const jsonPayload = decodeURIComponent(
 				atob(base64)
 					.split('')
-					.map((c) => `%${c.charCodeAt(0).toString(16)}`).join(''),
+					.map((c) => `%${c.charCodeAt(0)
+.toString(16)}`)
+.join(''),
 			);
 
 			return JSON.parse(jsonPayload);

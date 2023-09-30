@@ -16,11 +16,10 @@ const basicKyc = (function basicKyc() {
 	const pages = [];
 	let config;
 	let activeScreen;
-	let consent_information; let id_info; let
-partner_params;
+	let consent_information;
+	let id_info;
+	let partner_params;
 	let productConstraints;
-	let partnerProductConstraints;
-
 	let EndUserConsent;
 	const LoadingScreen = document.querySelector('#loading-screen');
 	const SelectIDType = document.querySelector('#select-id-type');
@@ -99,15 +98,10 @@ partner_params;
 				config = JSON.parse(event.data);
 				activeScreen = LoadingScreen;
 
-				try {
 					getPartnerParams();
 					const { partnerConstraints, generalConstraints } = await getProductConstraints();
-					partnerProductConstraints = partnerConstraints;
 					productConstraints = generalConstraints;
 					initializeSession(generalConstraints, partnerConstraints);
-				} catch (e) {
-					throw e;
-				}
 			}
 		},
 		false,
@@ -217,7 +211,7 @@ partner_params;
 					selectedIDTypes.forEach((IDType) => {
 						const option = document.createElement('option');
 						option.setAttribute('value', IDType);
-						option.textContent =						generalConstraints[countryCode].id_types[IDType].label;
+						option.textContent = generalConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 
@@ -289,7 +283,8 @@ partner_params;
 		document.body.appendChild(script);
 	}
 
-	IDInfoForm.querySelector('#submitForm').addEventListener(
+	IDInfoForm.querySelector('#submitForm')
+.addEventListener(
 		'click',
 		(event) => {
 			handleFormSubmit(event);
@@ -297,7 +292,8 @@ partner_params;
 		false,
 	);
 
-	IDInfoForm.querySelector('#back-button').addEventListener('click', (event) => {
+	IDInfoForm.querySelector('#back-button')
+.addEventListener('click', (event) => {
 		event.preventDefault();
 		const page = pages.pop();
 		setActiveScreen(page);
@@ -398,7 +394,7 @@ partner_params;
 		const label = document.querySelector('[for="id_number"]');
 		const input = document.querySelector('#id_number');
 
-		label.innerHTML =			productConstraints[id_info.country].id_types[id_info.id_type].label;
+		label.innerHTML = productConstraints[id_info.country].id_types[id_info.id_type].label;
 		input.setAttribute(
 			'placeholder',
 			productConstraints[id_info.country].id_types[id_info.id_type].test_data,
@@ -410,7 +406,7 @@ partner_params;
 	}
 
 	function setFormInputs() {
-		const requiredFields =			productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
+		const requiredFields = productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
 
 		const showIdNumber = requiredFields.some((fieldName) => fieldName.includes('id_number'));
 
@@ -457,11 +453,13 @@ partner_params;
 			 * 6. parse the JSON string to a javascript object
 			 */
 			const base64Url = token.split('.')[1];
-			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const base64 = base64Url.replace(/-/g, '+')
+.replace(/_/g, '/');
 			const jsonPayload = decodeURIComponent(
 				atob(base64)
 					.split('')
-					.map((c) => `%${c.charCodeAt(0).toString(16)}`)
+					.map((c) => `%${c.charCodeAt(0)
+.toString(16)}`)
 					.join(''),
 			);
 
@@ -493,7 +491,7 @@ partner_params;
 	function validateInputs(payload) {
 		const validationConstraints = {};
 
-		const requiredFields =			productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
+		const requiredFields = productConstraints[id_info.country].id_types[id_info.id_type].required_fields;
 
 		const showIdNumber = requiredFields.some((fieldName) => fieldName.includes('id_number'));
 

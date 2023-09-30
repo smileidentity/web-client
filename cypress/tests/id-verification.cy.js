@@ -44,7 +44,8 @@ describe('ID verification', () => {
 			.intercept({
 				method: 'POST',
 				url: '*v2/verify_async*',
-			}, {}).as('submitIdVerification');
+			}, {})
+.as('submitIdVerification');
 
 		cy
 			.getIFrameBody()

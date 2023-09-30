@@ -25,8 +25,9 @@ const SmartSelfie = (function SmartSelfie() {
   };
   let config;
   let activeScreen;
-  let id_info; let images; let
-partner_params;
+  let id_info;
+  let images;
+  let partner_params;
 
   const SmartCameraWeb = document.querySelector('smart-camera-web');
   const UploadProgressScreen = document.querySelector('#upload-progress-screen');
@@ -36,21 +37,17 @@ partner_params;
   const CloseIframeButton = document.querySelector('#close-iframe');
   const RetryUploadButton = document.querySelector('#retry-upload');
 
-  let fileToUpload; let
-uploadURL;
+  let fileToUpload;
+  let uploadURL;
 
   window.addEventListener(
     'message',
     async (event) => {
       if (event.data && event.data.includes('SmileIdentity::Configuration')) {
-        try {
           config = JSON.parse(event.data);
           partner_params = getPartnerParams();
           id_info = {};
           setActiveScreen(SmartCameraWeb);
-        } catch (e) {
-          throw e;
-        }
       }
     },
     false,
@@ -70,7 +67,7 @@ uploadURL;
 
   RetryUploadButton.addEventListener(
     'click',
-    (event) => {
+    () => {
       retryUpload();
     },
     false,
@@ -78,7 +75,7 @@ uploadURL;
 
   CloseIframeButton.addEventListener(
     'click',
-    (event) => {
+    () => {
       closeWindow(true);
     },
     false,
@@ -99,11 +96,13 @@ uploadURL;
      * 6. parse the JSON string to a javascript object
      */
     const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = base64Url.replace(/-/g, '+')
+.replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+        .map((c) => `%${c.charCodeAt(0)
+.toString(16)}`)
         .join(''),
     );
 
@@ -122,7 +121,7 @@ uploadURL;
     activeScreen = node;
   }
 
-  async function handleFormSubmit(event) {
+  async function handleFormSubmit() {
     const errorMessage = document.querySelector('.validation-message');
     if (errorMessage) errorMessage.remove();
 
@@ -215,7 +214,7 @@ uploadURL;
     const request = new XMLHttpRequest();
     request.open('PUT', destination);
 
-    request.upload.addEventListener('load', (e) => request.response);
+    request.upload.addEventListener('load', () => request.response);
 
     request.upload.addEventListener('error', (e) => {
       setActiveScreen(UploadFailureScreen);

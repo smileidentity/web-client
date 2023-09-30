@@ -22,7 +22,7 @@ const productSelection = (function productSelection() {
 	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow();
 		}, false);
 	});
@@ -132,7 +132,8 @@ const productSelection = (function productSelection() {
 
 	function getSiteURL() {
 		const urlParts = location.href.split('/');
-		const url = urlParts.slice(0, -1).join('/');
+		const url = urlParts.slice(0, -1)
+.join('/');
 		return `${url}/`;
 	}
 
@@ -212,7 +213,6 @@ const productSelection = (function productSelection() {
 					config = JSON.parse(event.data);
 					activeScreen = LoadingScreen;
 
-					try {
 						const servicesResponse = await fetch(`${endpoints[config.environment]}/v1/services`);
 
 						if (servicesResponse.ok) {
@@ -223,9 +223,6 @@ const productSelection = (function productSelection() {
 						} else {
 							throw Error('Failed to get supported ID types');
 						}
-					} catch (e) {
-						throw e;
-					}
 				} else if (event.data.includes('SmileIdentity::ChildPageReady')) {
 					publishMessage(config);
 				}

@@ -13,7 +13,8 @@ describe('zip upload screens', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.getIFrameBody()
@@ -39,7 +40,8 @@ describe('zip upload screens', () => {
 					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
 					statusCode: 200,
-				}).as('successfulUpload');
+				})
+.as('successfulUpload');
 		});
 
 		it('should show the completion screen', () => {
@@ -79,7 +81,8 @@ describe('zip upload screens', () => {
 					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
 					statusCode: 412,
-				}).as('failedUploadRequest');
+				})
+.as('failedUploadRequest');
 		});
 
 		it('should should show the upload failure screen', () => {

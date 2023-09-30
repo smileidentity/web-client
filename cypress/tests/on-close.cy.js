@@ -51,7 +51,8 @@ describe('web integration - onClose', () => {
 			.intercept({
 				method: 'POST',
 				url: '*v2/verify_async*',
-			}, { statusCode: 200, body: { success: true } }).as('submitIdVerification');
+			}, { statusCode: 200, body: { success: true } })
+.as('submitIdVerification');
 
 		cy
 			.getIFrameBody()

@@ -16,10 +16,10 @@ const eKYC = (function eKYC() {
 	const pages = [];
 	let config;
 	let activeScreen;
-	let consent_information; let id_info; let images; let
-partner_params;
+	let consent_information;
+	 let id_info;
+	   let partner_params;
 	let productConstraints;
-	let partnerProductConstraints;
 
 	let EndUserConsent;
 	const LoadingScreen = document.querySelector('#loading-screen');
@@ -146,14 +146,16 @@ partner_params;
 			.map((countryCode) => ({
 				code: countryCode,
 				name: generalConstraints[countryCode].name,
-			})).sort((a, b) => {
+			}))
+.sort((a, b) => {
 				if (a.name < b.name) {
 					return -1;
 				} if (a.name > b.name) {
 					return 1;
 				}
 					return 0;
-			}).map((item) => item.code);
+			})
+.map((item) => item.code);
 
 		let validCountries = [];
 
@@ -208,7 +210,7 @@ partner_params;
 					selectedIDTypes.forEach((IDType) => {
 						const option = document.createElement('option');
 						option.setAttribute('value', IDType);
-						option.textContent =						generalConstraints[countryCode].id_types[IDType].label;
+						option.textContent = generalConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 
@@ -280,11 +282,13 @@ partner_params;
 		document.body.appendChild(script);
 	}
 
-	IDInfoForm.querySelector('#submitForm').addEventListener('click', (event) => {
+	IDInfoForm.querySelector('#submitForm')
+.addEventListener('click', (event) => {
 		handleFormSubmit(event);
 	}, false);
 
-	IDInfoForm.querySelector('#back-button').addEventListener('click', (event) => {
+	IDInfoForm.querySelector('#back-button')
+.addEventListener('click', (event) => {
 		event.preventDefault();
 		const page = pages.pop();
 		setActiveScreen(page);
@@ -429,11 +433,14 @@ partner_params;
 			 * 6. parse the JSON string to a javascript object
 			 */
 			const base64Url = token.split('.')[1];
-			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const base64 = base64Url.replace(/-/g, '+')
+.replace(/_/g, '/');
 			const jsonPayload = decodeURIComponent(
 				atob(base64)
 					.split('')
-					.map((c) => `%${c.charCodeAt(0).toString(16)}`).join(''),
+					.map((c) => `%${c.charCodeAt(0)
+.toString(16)}`)
+.join(''),
 			);
 
 			return JSON.parse(jsonPayload);

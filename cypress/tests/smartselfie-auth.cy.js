@@ -2,7 +2,8 @@ describe('smartselfie authentication ', () => {
 	beforeEach(() => {
     cy.visit('/smartselfie');
 
-    cy.getIFrameBody().should('be.visible');
+    cy.getIFrameBody()
+.should('be.visible');
 
 		cy
 			.intercept({
@@ -10,7 +11,8 @@ describe('smartselfie authentication ', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 	});
 
 	describe('when a successful upload happens', () => {
@@ -23,7 +25,8 @@ describe('smartselfie authentication ', () => {
         {
           statusCode: 200,
         },
-      ).as('successfulUpload');
+      )
+.as('successfulUpload');
       cy
 			.navigateThroughCameraScreens();
 		});
@@ -32,7 +35,9 @@ describe('smartselfie authentication ', () => {
       cy.wait('@getUploadURL');
 
       cy.wait('@successfulUpload');
-      cy.getIFrameBody().find('#complete-screen').should('be.visible');
+      cy.getIFrameBody()
+.find('#complete-screen')
+.should('be.visible');
 		});
 	});
 
@@ -44,7 +49,8 @@ describe('smartselfie authentication ', () => {
 					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
 				}, {
 					statusCode: 412,
-				}).as('failedUploadRequest');
+				})
+.as('failedUploadRequest');
         cy
         .navigateThroughCameraScreens();
 		});
@@ -52,11 +58,15 @@ describe('smartselfie authentication ', () => {
     it('should show the upload failure screen', () => {
       cy.wait('@getUploadURL');
 
-      cy.getIFrameBody().find('#upload-progress-screen').should('not.be.visible');
+      cy.getIFrameBody()
+.find('#upload-progress-screen')
+.should('not.be.visible');
 
       cy.wait('@failedUploadRequest');
 
-      cy.getIFrameBody().find('#upload-failure-screen').should('be.visible');
+      cy.getIFrameBody()
+.find('#upload-failure-screen')
+.should('be.visible');
     });
 
     it('should should retry upload when "try again" button is clicked', () => {
@@ -64,7 +74,9 @@ describe('smartselfie authentication ', () => {
 
       cy.wait('@failedUploadRequest');
 
-      cy.getIFrameBody().find('#retry-upload').click();
+      cy.getIFrameBody()
+.find('#retry-upload')
+.click();
 
       cy.wait('@failedUploadRequest');
     });

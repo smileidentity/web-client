@@ -44,7 +44,8 @@ describe('enhanced kyc', () => {
 			.intercept({
 				method: 'POST',
 				url: '*v1/async_id_verification*',
-			}, {}).as('submitEnhancedKYC');
+			}, {})
+.as('submitEnhancedKYC');
 
 		cy
 			.getIFrameBody()

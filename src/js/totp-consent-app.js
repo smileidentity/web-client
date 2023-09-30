@@ -416,7 +416,8 @@ function markup() {
 									</div>
 								</div>
 							</label>`
-						)).join('\n') : 'No modes yet'}
+						))
+.join('\n') : 'No modes yet'}
 					</div>
 				</fieldset>
 
@@ -506,7 +507,8 @@ class TotpBasedConsent extends HTMLElement {
 			case 'otp-delivery-mode': {
 				const updatedTemplate = document.createElement('template');
 				updatedTemplate.innerHTML = this.render();
-				const updatedNode = updatedTemplate.content.cloneNode(true).querySelector(`#${this.activeScreen.id}`);
+				const updatedNode = updatedTemplate.content.cloneNode(true)
+.querySelector(`#${this.activeScreen.id}`);
 				updatedNode.hidden = false;
 				this.shadowRoot.replaceChild(updatedNode, this.activeScreen);
 				this.setUpEventListeners();

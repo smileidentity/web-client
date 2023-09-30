@@ -51,7 +51,7 @@ const SmileIdentity = (function () {
 		return qualifiedURL;
 	}
 
-	const config = {
+	const sidConfig = {
 		siteURL: getSiteURL(),
 	};
 
@@ -82,7 +82,7 @@ const SmileIdentity = (function () {
 	function createIframe(productName) {
 		const iframe = document.createElement('iframe');
 
-		iframe.setAttribute('src', `${config.siteURL}${getIFrameURL(productName)}`);
+		iframe.setAttribute('src', `${sidConfig.siteURL}${getIFrameURL(productName)}`);
 		iframe.setAttribute('id', 'smile-identity-hosted-web-integration');
 		iframe.setAttribute('name', 'smile-identity-hosted-web-integration');
 		iframe.setAttribute('data-cy', 'smile-identity-hosted-web-integration');
@@ -181,6 +181,7 @@ const SmileIdentity = (function () {
 					case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
 						return handleConsentRejection(config, event.data);
 					default:
+            return null;
 				}
 			}, false);
 		}

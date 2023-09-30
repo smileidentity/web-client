@@ -16,7 +16,8 @@ describe('No ID Selection', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitBasicKYC');
+			})
+.as('submitBasicKYC');
 
 		cy
 			.getIFrameBody()
@@ -61,7 +62,8 @@ describe('No ID Selection', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -69,7 +71,8 @@ describe('No ID Selection', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy
 			.navigateThroughCameraScreens();
@@ -122,7 +125,8 @@ describe('No ID Selection', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -130,7 +134,8 @@ describe('No ID Selection', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy
 			.selectPASSPORTIDType();
@@ -226,7 +231,8 @@ describe('No ID Selection', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitEnhancedKYC');
+			})
+.as('submitEnhancedKYC');
 
 		cy
 			.getIFrameBody()
@@ -284,7 +290,8 @@ describe('Preselected Country', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitBasicKYC');
+			})
+.as('submitBasicKYC');
 
 		cy
 			.getIFrameBody()
@@ -344,7 +351,8 @@ describe('Preselected Country', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -352,7 +360,8 @@ describe('Preselected Country', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy
 			.navigateThroughCameraScreens();
@@ -405,7 +414,8 @@ describe('Preselected Country', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -413,7 +423,8 @@ describe('Preselected Country', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy
 			.loadIDOptions();
@@ -539,7 +550,8 @@ describe('Preselected Country', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitEnhancedKYC');
+			})
+.as('submitEnhancedKYC');
 
 		cy
 			.getIFrameBody()
@@ -597,7 +609,8 @@ describe('Preselected Country and ID Type', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitBasicKYC');
+			})
+.as('submitBasicKYC');
 
 		cy
 			.getIFrameBody()
@@ -658,7 +671,8 @@ describe('Preselected Country and ID Type', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -666,7 +680,8 @@ describe('Preselected Country and ID Type', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy
 			.navigateThroughCameraScreens();
@@ -719,7 +734,8 @@ describe('Preselected Country and ID Type', () => {
 				url: '*upload*',
 			}, {
 				upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-			}).as('getUploadURL');
+			})
+.as('getUploadURL');
 
 		cy
 			.intercept({
@@ -727,7 +743,8 @@ describe('Preselected Country and ID Type', () => {
 				url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 			}, {
 				statusCode: 200,
-			}).as('successfulUpload');
+			})
+.as('successfulUpload');
 
 		cy.loadIDOptions();
 
@@ -853,7 +870,8 @@ describe('Preselected Country and ID Type', () => {
 			}, {
 				statusCode: 200,
 				body: { success: true },
-			}).as('submitEnhancedKYC');
+			})
+.as('submitEnhancedKYC');
 
 		cy
 			.getIFrameBody()

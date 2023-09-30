@@ -17,7 +17,8 @@ describe('Thank you message', () => {
 				}, {
 					statusCode: 200,
 					body: { success: true },
-				}).as('submitBasicKYC');
+				})
+.as('submitBasicKYC');
 
 			cy
 				.getIFrameBody()
@@ -62,7 +63,8 @@ describe('Thank you message', () => {
 					url: '*upload*',
 				}, {
 					upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-				}).as('getUploadURL');
+				})
+.as('getUploadURL');
 
 			cy
 				.intercept({
@@ -70,7 +72,8 @@ describe('Thank you message', () => {
 					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
 					statusCode: 200,
-				}).as('successfulUpload');
+				})
+.as('successfulUpload');
 
 			cy
 				.navigateThroughCameraScreens();
@@ -132,7 +135,8 @@ describe('Thank you message', () => {
 				}, {
 					statusCode: 200,
 					body: { success: true },
-				}).as('submitEnhancedKYC');
+				})
+.as('submitEnhancedKYC');
 
 			cy
 				.getIFrameBody()

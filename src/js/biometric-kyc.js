@@ -16,16 +16,16 @@ const biometricKyc = (function biometricKyc() {
 	const pages = [];
 	let config;
 	let activeScreen;
-	let consent_information; let id_info; let images; let
-partner_params;
+	let consent_information;
+	let id_info;
+	let images;
+	let partner_params;
 	let productConstraints;
-	let partnerProductConstraints;
-
 	let EndUserConsent;
+
 	const LoadingScreen = document.querySelector('#loading-screen');
 	const SelectIDType = document.querySelector('#select-id-type');
 	const SmartCameraWeb = document.querySelector('smart-camera-web');
-	const SmartCameraWebContainer = document.querySelector('#camera-container');
 	const IDInfoForm = document.querySelector('#id-info');
 	const UploadProgressScreen = document.querySelector('#upload-progress-screen');
 	const UploadFailureScreen = document.querySelector('#upload-failure-screen');
@@ -33,11 +33,10 @@ partner_params;
 
 	const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 	const RetryUploadButton = document.querySelector('#retry-upload');
-	const CameraBackButton = document.querySelector('#back-button-camera');
 	let disableBackOnFirstScreen = false;
 
-	let fileToUpload; let
-uploadURL;
+	let fileToUpload;
+	let uploadURL;
 
 	function postData(url = '', data = {}) {
 		return fetch(url, {
@@ -209,7 +208,7 @@ uploadURL;
 					selectedIDTypes.forEach((IDType) => {
 						const option = document.createElement('option');
 						option.setAttribute('value', IDType);
-						option.textContent =						generalConstraints[countryCode].id_types[IDType].label;
+						option.textContent = generalConstraints[countryCode].id_types[IDType].label;
 						selectIDType.appendChild(option);
 					});
 

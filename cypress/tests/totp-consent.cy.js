@@ -270,7 +270,8 @@ describe('totpConsent', () => {
 				.intercept({
 					method: 'POST',
 					url: '*v2/verify*',
-				}, {}).as('submitBasicKYC');
+				}, {})
+.as('submitBasicKYC');
 		});
 
 		it('should navigate to the id form after totp consent is granted, without the need to re-enter the id-number', () => {
@@ -334,7 +335,8 @@ describe('totpConsent', () => {
 					url: '*upload*',
 				}, {
 					upload_url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
-				}).as('getUploadURL');
+				})
+.as('getUploadURL');
 
 			cy
 				.intercept({
@@ -342,7 +344,8 @@ describe('totpConsent', () => {
 					url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
 				}, {
 					statusCode: 200,
-				}).as('successfulUpload');
+				})
+.as('successfulUpload');
 		});
 
 		it('should navigate to the camera screen, and submit after images are captured', () => {
@@ -453,7 +456,8 @@ describe('totpConsent', () => {
 				}, {
 					statusCode: 200,
 					body: { success: true },
-				}).as('submitEnhancedKYC');
+				})
+.as('submitEnhancedKYC');
 		});
 
 		it('should submit after totp consent is granted', () => {

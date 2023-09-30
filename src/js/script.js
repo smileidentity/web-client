@@ -159,6 +159,7 @@ const SmileIdentity = (function () {
 		targetWindow.postMessage(JSON.stringify(config), '*');
 	}
 
+	// eslint-disable-next-line no-shadow
 	function SmileIdentity(config) {
 		const configIsValid = isConfigValid(config);
 

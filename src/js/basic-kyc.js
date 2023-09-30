@@ -1,5 +1,6 @@
+// eslint-disable-next-line no-unused-vars
 const basicKyc = (function basicKyc() {
-	'use strict';
+'use strict';
 
 	// NOTE: In order to support prior integrations, we have `live` and
 	// `production` pointing to the same URL
@@ -194,7 +195,7 @@ const basicKyc = (function basicKyc() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
+			const loadIdTypes = (countryCode) => {
 				if (countryCode) {
 					const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.basic_kyc;
 					const constrainedIDTypes = Object.keys(generalConstraints[countryCode].id_types);
@@ -228,7 +229,7 @@ const basicKyc = (function basicKyc() {
 					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
-			}
+			};
 
 			selectCountry.addEventListener('change', (e) => {
 				loadIdTypes(e.target.value);
@@ -300,14 +301,10 @@ const basicKyc = (function basicKyc() {
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow(true);
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, ' ');
-	}
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
@@ -370,7 +367,7 @@ const basicKyc = (function basicKyc() {
 
 		EndUserConsent.addEventListener(
 			'SmileIdentity::ConsentDenied',
-			(event) => {
+			() => {
 				referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 				closeWindow();
 			},

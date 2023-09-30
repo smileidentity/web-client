@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const eKYC = (function eKYC() {
 	'use strict';
 
@@ -14,11 +15,11 @@ const eKYC = (function eKYC() {
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
 	const pages = [];
-	let config;
 	let activeScreen;
+	let config;
 	let consent_information;
-	 let id_info;
-	   let partner_params;
+	let id_info;
+	let partner_params;
 	let productConstraints;
 
 	let EndUserConsent;
@@ -95,15 +96,10 @@ const eKYC = (function eKYC() {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 
-			try {
 				getPartnerParams();
 				const { partnerConstraints, generalConstraints } = await getProductConstraints();
-				partnerProductConstraints = partnerConstraints;
 				productConstraints = generalConstraints;
 				initializeSession(generalConstraints, partnerConstraints);
-			} catch (e) {
-				throw e;
-			}
 		}
 	}, false);
 
@@ -193,7 +189,7 @@ const eKYC = (function eKYC() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
+			const loadIdTypes = (countryCode) => {
 				if (countryCode) {
 					const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.enhanced_kyc;
 					const constrainedIDTypes = Object.keys(generalConstraints[countryCode].id_types);
@@ -227,7 +223,7 @@ const eKYC = (function eKYC() {
 					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
-			}
+			};
 
 			selectCountry.addEventListener('change', (e) => {
 				loadIdTypes(e.target.value);
@@ -295,14 +291,10 @@ const eKYC = (function eKYC() {
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow(true);
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, ' ');
-	}
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
@@ -358,7 +350,7 @@ const eKYC = (function eKYC() {
 			}
 		}, false);
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', (event) => {
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', () => {
 			referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);

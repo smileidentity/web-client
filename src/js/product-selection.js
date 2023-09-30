@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const productSelection = (function productSelection() {
 	'use strict';
 
@@ -43,8 +44,8 @@ const productSelection = (function productSelection() {
 		throw new Error('Cannot find the full name of the id_type');
 	}
 
-	function transformIdTypesToVerificationMethodMap(config, services) {
-		return config.id_types.reduce((idSelectionMap, { country, id_type, verification_method }) => {
+	function transformIdTypesToVerificationMethodMap(localConfig, services) {
+		return localConfig.id_types.reduce((idSelectionMap, { country, id_type, verification_method }) => {
 			idSelectionMap[country] = idSelectionMap[country] || {
 				name: services.hosted_web.doc_verification[country].name,
 				id_types: {},
@@ -58,7 +59,7 @@ const productSelection = (function productSelection() {
 		}, {});
 	}
 
-	function loadIdTypes(verificationMethodMap, idTypeSelector, countryCode) {
+	function loadIdTypes(localVerificationMethodMap, idTypeSelector, countryCode) {
 		if (countryCode) {
 			// ACTION: Reset ID Type <select>
 			idTypeSelector.innerHTML = '';
@@ -68,12 +69,12 @@ const productSelection = (function productSelection() {
 			idTypeSelector.appendChild(initialOption);
 
 			// ACTION: Load ID Types as <option>s
-			const idTypes = Object.keys(verificationMethodMap[countryCode].id_types);
+			const idTypes = Object.keys(localVerificationMethodMap[countryCode].id_types);
 			const isSingleIdType = idTypes.length === 1;
 			idTypes.forEach((idType) => {
 				const option = document.createElement('option');
 				option.setAttribute('value', idType);
-				option.textContent = verificationMethodMap[countryCode].id_types[idType].name;
+				option.textContent = localVerificationMethodMap[countryCode].id_types[idType].name;
 
 				if (isSingleIdType) {
 					option.setAttribute('selected', true);
@@ -101,18 +102,18 @@ const productSelection = (function productSelection() {
 		return verificationMethodMap[country].id_types[id_type].verification_method;
 	}
 
-	function initializeForm(form, verificationMethodMap) {
+	function initializeForm(form, localVerificationMethodMap) {
 		const countrySelector = form.querySelector('#country');
 		const idTypeSelector = form.querySelector('#id_type');
 
 		countrySelector.addEventListener('change', (e) => {
-			loadIdTypes(verificationMethodMap, idTypeSelector, e.target.value);
+			loadIdTypes(localVerificationMethodMap, idTypeSelector, e.target.value);
 		});
 
-		const countries = Object.keys(verificationMethodMap);
+		const countries = Object.keys(localVerificationMethodMap);
 		const isSingleCountry = countries.length === 1;
 		countries.forEach((countryCode) => {
-			const country = verificationMethodMap[countryCode];
+			const country = localVerificationMethodMap[countryCode];
 
 			const option = document.createElement('option');
 			option.setAttribute('value', countryCode);
@@ -120,7 +121,7 @@ const productSelection = (function productSelection() {
 
 			if (isSingleCountry) {
 				option.setAttribute('selected', true);
-				loadIdTypes(verificationMethodMap, idTypeSelector, countryCode);
+				loadIdTypes(localVerificationMethodMap, idTypeSelector, countryCode);
 			}
 
 			countrySelector.appendChild(option);

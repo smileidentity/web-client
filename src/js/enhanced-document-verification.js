@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 	'use strict';
 
@@ -15,8 +16,8 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 	let config;
 	let activeScreen;
 	let id_info;
-	 let images;
-	 let partner_params;
+	let images;
+	let partner_params;
 	let productConstraints;
 
 	const LoadingScreen = document.querySelector('#loading-screen');
@@ -47,14 +48,9 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 		if (event.data && event.data.includes('SmileIdentity::Configuration')) {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
-
-			try {
 				productConstraints = await getProductConstraints();
 				initializeSession(productConstraints);
 				getPartnerParams();
-			} catch (e) {
-				throw e;
-			}
 		}
 	}, false);
 
@@ -117,7 +113,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
+			const loadIdTypes = (countryCode) => {
 				if (countryCode) {
 					const constrainedIDTypes = Object.keys(productConstraints[countryCode].id_types);
 					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : constrainedIDTypes;
@@ -151,7 +147,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
-			}
+			};
 
 			// ACTION: Load Countries as <option>s
 			validCountries.forEach((country) => {
@@ -198,6 +194,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 		}
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	function initiateDemoMode() {
 		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
@@ -217,27 +214,23 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 		handleFormSubmit(event);
 	}, false);
 
-	SmartCameraWeb.addEventListener('backExit', (event) => {
+	SmartCameraWeb.addEventListener('backExit', () => {
 		setActiveScreen(SelectIDType);
 	}, false);
 
-	SmartCameraWeb.addEventListener('close', (event) => {
+	SmartCameraWeb.addEventListener('close', () => {
 		closeWindow();
 	}, false);
 
-	RetryUploadButton.addEventListener('click', (event) => {
+	RetryUploadButton.addEventListener('click', () => {
 		retryUpload();
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow();
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, ' ');
-	}
 
 	function getPartnerParams() {
 		function parseJWT(token) {
@@ -284,8 +277,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 
 		try {
 			[uploadURL, fileToUpload] = await Promise.all([getUploadURL(), createZip()]);
-
-			const fileUploaded = uploadZip(fileToUpload, uploadURL);
+			uploadZip(fileToUpload, uploadURL);
 		} catch (error) {
 			displayErrorMessage('Something went wrong');
 			console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
@@ -373,7 +365,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
 		const request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
-		request.upload.addEventListener('load', (e) => request.response);
+		request.upload.addEventListener('load', () => request.response);
 
 		request.upload.addEventListener('error', (e) => {
 			setActiveScreen(UploadFailureScreen);

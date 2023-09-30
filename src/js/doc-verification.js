@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const documentVerification = (function documentVerification() {
 	'use strict';
 
@@ -13,11 +14,11 @@ const documentVerification = (function documentVerification() {
 	const referenceWindow = window.parent;
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
-	let config;
 	let activeScreen;
+	let config;
 	let id_info;
-	 let images;
-	  let partner_params;
+	let images;
+	let partner_params;
 	let productConstraints;
 
 	const LoadingScreen = document.querySelector('#loading-screen');
@@ -49,13 +50,9 @@ const documentVerification = (function documentVerification() {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 
-			try {
 				productConstraints = await getProductConstraints();
 				initializeSession(productConstraints);
 				getPartnerParams();
-			} catch (e) {
-				throw e;
-			}
 		}
 	}, false);
 
@@ -118,7 +115,7 @@ const documentVerification = (function documentVerification() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
+			const loadIdTypes = (countryCode) => {
 				if (countryCode) {
 					const constrainedIDTypes = Object.keys(productConstraints[countryCode].id_types);
 					const validIDTypes = config.id_selection ? config.id_selection[countryCode] : constrainedIDTypes;
@@ -152,7 +149,7 @@ const documentVerification = (function documentVerification() {
 					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
-			}
+			};
 
 			// ACTION: Load Countries as <option>s
 			validCountries.forEach((country) => {
@@ -199,6 +196,7 @@ const documentVerification = (function documentVerification() {
 		}
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	function initiateDemoMode() {
 		const demoTips = document.querySelectorAll('.demo-tip');
 		Array.prototype.forEach.call(demoTips, (tip) => {
@@ -218,27 +216,23 @@ const documentVerification = (function documentVerification() {
 		handleFormSubmit(event);
 	}, false);
 
-	SmartCameraWeb.addEventListener('backExit', (event) => {
+	SmartCameraWeb.addEventListener('backExit', () => {
 		setActiveScreen(SelectIDType);
 	}, false);
 
-	SmartCameraWeb.addEventListener('close', (event) => {
+	SmartCameraWeb.addEventListener('close', () => {
 		closeWindow();
 	}, false);
 
-	RetryUploadButton.addEventListener('click', (event) => {
+	RetryUploadButton.addEventListener('click', () => {
 		retryUpload();
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow();
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, ' ');
-	}
 
 	function getPartnerParams() {
 		function parseJWT(token) {
@@ -289,7 +283,7 @@ const documentVerification = (function documentVerification() {
 			event.target.disabled = true;
 			[uploadURL, fileToUpload] = await Promise.all([getUploadURL(), createZip()]);
 
-			const fileUploaded = uploadZip(fileToUpload, uploadURL);
+			uploadZip(fileToUpload, uploadURL);
 			event.target.disabled = false;
 		} catch (error) {
 			event.target.disabled = false;
@@ -379,7 +373,7 @@ const documentVerification = (function documentVerification() {
 		const request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
-		request.upload.addEventListener('load', (e) => request.response);
+		request.upload.addEventListener('load', () => request.response);
 
 		request.upload.addEventListener('error', (e) => {
 			setActiveScreen(UploadFailureScreen);

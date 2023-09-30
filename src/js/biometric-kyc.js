@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const biometricKyc = (function biometricKyc() {
 	'use strict';
 
@@ -103,15 +104,10 @@ const biometricKyc = (function biometricKyc() {
 			config = JSON.parse(event.data);
 			activeScreen = LoadingScreen;
 
-			try {
 				getPartnerParams();
 				const { partnerConstraints, generalConstraints } = await getProductConstraints();
-				partnerProductConstraints = partnerConstraints;
 				productConstraints = generalConstraints;
 				initializeSession(generalConstraints, partnerConstraints);
-			} catch (e) {
-				throw e;
-			}
 		}
 	}, false);
 
@@ -191,7 +187,7 @@ const biometricKyc = (function biometricKyc() {
 			// ACTION: Enable select screen
 			setActiveScreen(SelectIDType);
 
-			function loadIdTypes(countryCode) {
+			const loadIdTypes = (countryCode) => {
 				if (countryCode) {
 					const validIDTypes = config.id_selection ? config.id_selection : partnerConstraints.idSelection.biometric_kyc;
 					const constrainedIDTypes = Object.keys(generalConstraints[countryCode].id_types);
@@ -225,7 +221,7 @@ const biometricKyc = (function biometricKyc() {
 					option.textContent = '--Select Country First--';
 					selectIDType.appendChild(option);
 				}
-			}
+			};
 
 			selectCountry.addEventListener('change', (e) => {
 				loadIdTypes(e.target.value);
@@ -289,12 +285,12 @@ const biometricKyc = (function biometricKyc() {
 			setActiveScreen(IDInfoForm);
 		}
 	}, false);
-	SmartCameraWeb.addEventListener('backExit', (event) => {
+	SmartCameraWeb.addEventListener('backExit', () => {
 		SmartCameraWeb.reset();
 		const page = pages.pop();
 		setActiveScreen(page);
 	}, false);
-	SmartCameraWeb.addEventListener('close', (event) => {
+	SmartCameraWeb.addEventListener('close', () => {
 		closeWindow(true);
 	}, false);
 
@@ -311,19 +307,15 @@ const biometricKyc = (function biometricKyc() {
 		setActiveScreen(page);
 	}, false);
 
-	RetryUploadButton.addEventListener('click', (event) => {
+	RetryUploadButton.addEventListener('click', () => {
 		retryUpload();
 	}, false);
 
 	CloseIframeButtons.forEach((button) => {
-		button.addEventListener('click', (event) => {
+		button.addEventListener('click', () => {
 			closeWindow(true);
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, ' ');
-	}
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;
@@ -379,7 +371,7 @@ const biometricKyc = (function biometricKyc() {
 			}
 		}, false);
 
-		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', (event) => {
+		EndUserConsent.addEventListener('SmileIdentity::ConsentDenied', () => {
 			referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
 			closeWindow();
 		}, false);
@@ -591,7 +583,7 @@ const biometricKyc = (function biometricKyc() {
 			if (event && event.target) event.target.disabled = true;
 			[uploadURL, fileToUpload] = await Promise.all([getUploadURL(), createZip()]);
 
-			const fileUploaded = uploadZip(fileToUpload, uploadURL);
+			uploadZip(fileToUpload, uploadURL);
 			if (event && event.target) event.target.disabled = false;
 		} catch (error) {
 			if (event && event.target) event.target.disabled = false;
@@ -672,7 +664,7 @@ const biometricKyc = (function biometricKyc() {
 		const request = new XMLHttpRequest();
 		request.open('PUT', destination);
 
-		request.upload.addEventListener('load', (e) => request.response);
+		request.upload.addEventListener('load', () => request.response);
 
 		request.upload.addEventListener('error', (e) => {
 			setActiveScreen(UploadFailureScreen);

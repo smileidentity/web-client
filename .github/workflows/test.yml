@@ -8,8 +8,12 @@ jobs:
     steps:
       - name: checkout code, and install dependencies
         uses: actions/checkout@v3
+      - name: set node version
+        uses: actions/setup-node@v3
         with:
-          build: npm ci
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
       - name: run tests
         uses: cypress-io/github-action@v5
         with:

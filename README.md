@@ -20,8 +20,6 @@
 
 2. **Installing Dependencies**:
 
-    In each subdirectory of this mono-repo, run:
-
    ```sh
    npm install
    ```

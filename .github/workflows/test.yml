@@ -25,7 +25,7 @@ jobs:
           for i in {1..4}; do
             # Adjust the end index for the last group if there's a remainder
             [[ "$i" -eq 4 && "$REMAINDER" -gt 0 ]] && end=$(($end + $REMAINDER))
-            group=$(echo ${FILES[@]:$start:$end-$start} | jq -R -s -c 'split(" ")')
+            group=$(echo ${FILES[@]:$start:$end-$start} | tr -d '\n' | jq -R -s -c 'split(" ")')
             groups+=("$group")
             start=$end
             end=$(($end + $GROUP_SIZE))

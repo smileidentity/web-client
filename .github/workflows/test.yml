@@ -31,16 +31,15 @@ jobs:
             end=$(($end + $GROUP_SIZE))
           done
 
-          echo "matrix=[${groups[*]}]" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
-
+          echo "matrix=[${groups[*]}]" >> $GITHUB_ENV
+          echo "Generated matrix: $MATRIX"
   test:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        group: ${{fromJson(needs.prepare.outputs.matrix)}}
+        index: [0, 1, 2, 3]
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -50,13 +49,13 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
+      - run: echo ${{ env.matrix }}
       - name: run tests
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
           build:dist: npm run build:dist
           start: npm start
-          spec: ${{ join(',', matrix.group) }}
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()

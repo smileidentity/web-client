@@ -9,14 +9,15 @@ on:
       - synchronize
   push:
     branches: [ 'main' ]
-defaults:
-  run:
-    working-directory: ./smart-camera-web
+
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-  deploy-preview:
+  deploy-preview-camera-web:
     needs: [test]
+    defaults:
+      run:
+        working-directory: ./smart-camera-web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,8 +29,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: set destination directory
-        id: set_dest_dir
-        run: echo "DEST_DIR=js/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
+        id: set_dest_dir_camera_web
+        run: echo "DEST_DIR_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
       - name: deploy preview to s3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -39,4 +40,34 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          DEST_DIR: ${{ steps.set_dest_dir.outputs.DEST_DIR }}
+          DEST_DIR: ${{ env.DEST_DIR_CAMERA_WEB }}
+
+  deploy-preview-hosted-web:
+    needs: [test]
+    defaults:
+      run:
+        working-directory: ./hosted-web-integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build && npm run build:dist
+      - name: set destination directory
+        id: set_dest_dir_hosted_web
+        run: echo "DEST_DIR_HOSTED_WEB=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+      - name: deploy preview to s3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "./dist"
+          DEST_DIR: ${{ env.DEST_DIR_HOSTED_WEB }}

@@ -4,21 +4,33 @@ on:
     types:
       - opened
       - ready_for_review
-defaults:
-  run:
-    working-directory: ./smart-camera-web
+
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: get dest dir
-        id: get_dest_dir
-        run: echo "DEST_DIR=js/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
-      - name: share preview url as PR comment
+      
+      - name: get dest dir for camera-web
+        id: get_dest_dir_camera_web
+        working-directory: ./smart-camera-web
+        run: echo "DEST_DIR_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+
+      - name: get dest dir for hosted-web
+        id: get_dest_dir_hosted_web
+        working-directory: ./hosted-web-integration
+        run: echo "DEST_DIR_HOSTED_WEB=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+
+      - name: share preview urls as PR comment
         uses: unsplash/comment-on-pr@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: "This branch has been deployed to s3 / cloudfront.\n\n✅ Preview URL: https://cdn.smileidentity.com/${{ steps.get_dest_dir.outputs.DEST_DIR }}/smart-camera-web.js"
+          msg: |
+            This branch has been deployed to s3 / cloudfront.
+            
+            ✅ Preview URL for Smart Camera Web: 
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_CAMERA_WEB }}/smart-camera-web.js
 
+            ✅ Preview URL for Hosted Web Integration: 
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_HOSTED_WEB }}/js/script.js

@@ -1,0 +1,35 @@
+{
+  "name": "@smile_identity/smart-camera-web",
+  "version": "1.0.0-beta.23",
+  "description": "WebComponent for smartly capturing images on the web, for use with SmileIdentity",
+  "main": "smart-camera-web.js",
+  "scripts": {
+    "build": "npx nyc instrument --compact=false smart-camera-web.js cypress/pages/instrumented",
+    "start": "npx serve -p 8000 cypress/pages",
+    "lint": "eslint $(git ls-files '*.js') --max-warnings=0",
+    "test": "npx cypress run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smileidentity/smart-camera-web.git"
+  },
+  "keywords": [
+    "WebComponent",
+    "WebRTC"
+  ],
+  "author": "Tams Sokari <tams@smileidentity.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smileidentity/smart-camera-web/issues"
+  },
+  "homepage": "https://github.com/smileidentity/smart-camera-web#readme",
+  "dependencies": {
+    "@cypress/code-coverage": "^3.11.0",
+    "cypress": "^12.17.3",
+    "eslint": "^8.46.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-cypress": "^2.14.0",
+    "eslint-plugin-import": "^2.28.0",
+    "serve": "^14.2.0"
+  }
+}

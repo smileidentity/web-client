@@ -31,7 +31,8 @@ jobs:
             end=$(($end + $GROUP_SIZE))
           done
 
-          echo "::set-output name=matrix::[${groups[*]}]"
+          echo "matrix=[${groups[*]}]" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
 
   test:
     needs: prepare

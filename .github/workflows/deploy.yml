@@ -2,7 +2,9 @@ name: deploy
 on:
   push:
     tags: v[1-9]+.[0-9]+.[0-9]+*
-
+defaults:
+  run:
+    working-directory: ./smart-camera-web
 jobs:
   test:
     uses: ./.github/workflows/test.yml

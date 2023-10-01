@@ -4,7 +4,9 @@ on:
     types:
       - opened
       - ready_for_review
-
+defaults:
+  run:
+    working-directory: ./smart-camera-web
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest

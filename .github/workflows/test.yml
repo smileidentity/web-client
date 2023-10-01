@@ -4,6 +4,9 @@ on:
 jobs:
   test-smart-camera-web:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./smart-camera-web
     steps:
       - uses: actions/checkout@v3
       - name: set node version
@@ -12,34 +15,28 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-        working-directory: ./smart-camera-web
       - run: npm run lint
-        working-directory: ./smart-camera-web
       - name: run tests
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
           start: npm start
-          working-directory: ./smart-camera-web
-  test-hosted-web:
+  test-hosted-web-integration:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./hosted-web-integration
     steps:
       - name: checkout code, and install dependencies
         uses: actions/checkout@v3
-      - name: set node version
-        uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-      - run: npm ci
-        working-directory: ./hosted-web-integration
+          build: npm ci
       - name: run tests
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
           build:dist: npm run build:dist
           start: npm start
-          working-directory: ./hosted-web-integration
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()

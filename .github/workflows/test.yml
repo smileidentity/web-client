@@ -3,23 +3,62 @@ on:
   workflow_call:
 
 jobs:
-  test:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: checkout code, and install dependencies
-        uses: actions/checkout@v3
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Generate test groups
+        id: set-matrix
+        run: |
+          FILES=($(git ls-files cypress/**/*.cy.js))
+          TOTAL=${#FILES[@]}
+          GROUP_SIZE=$(($TOTAL / 4))
+          REMAINDER=$(($TOTAL % 4))
+
+          start=0
+          end=$GROUP_SIZE
+          groups=()
+
+          for i in {1..4}; do
+            # Adjust the end index for the last group if there's a remainder
+            [[ "$i" -eq 4 && "$REMAINDER" -gt 0 ]] && end=$(($end + $REMAINDER))
+            group=$(echo ${FILES[@]:$start:$end-$start} | jq -R -s -c 'split(" ")')
+            groups+=("$group")
+            start=$end
+            end=$(($end + $GROUP_SIZE))
+          done
+
+          echo "::set-output name=matrix::[${groups[*]}]"
+
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ${{fromJson(needs.prepare.outputs.matrix)}}
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
         with:
-          build: npm ci
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
       - name: run tests
         uses: cypress-io/github-action@v5
         with:
           build: npm run build
           build:dist: npm run build:dist
           start: npm start
+          spec: ${{ join(',', matrix.group) }}
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-

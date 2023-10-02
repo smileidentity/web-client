@@ -22,6 +22,7 @@ jobs:
         with:
           start: npm start
           working-directory: ./smart-camera-web
+          wait-on: 'http://localhost:8000'
   test-hosted-web-integration:
     runs-on: ubuntu-latest
     defaults:
@@ -40,6 +41,7 @@ jobs:
         with:
           start: npm start
           working-directory: ./hosted-web-integration
+          wait-on: 'http://localhost:8000'
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()

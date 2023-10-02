@@ -11,11 +11,11 @@
 		"copy:dist": "mkdir -p dist && cp -r src/* dist",
 		"instrument": "nyc instrument src build",
 		"preinstrument": "npm run clean",
-		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"prestart": "npm run clean && npm run copy && npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
 		"watch": "watch 'npm run prestart' src",
-		"test": "npx cypress run"
+		"test": "npx cypress run",
+		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},
 	"repository": {
 		"type": "git",

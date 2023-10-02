@@ -10,6 +10,7 @@
 		"copy": "mkdir -p build && cp -r src/* build && cp cypress/pages/*.html build",
 		"copy:dist": "mkdir -p dist && cp -r src/* dist",
 		"instrument": "nyc instrument src build",
+		"preinstrument": "npm run clean",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"prestart": "npm run clean && npm run copy && npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",

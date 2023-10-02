@@ -7,15 +7,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code, and install dependencies
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
         with:
-          build: npm ci
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
       - name: run tests
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         with:
-          build: npm run build
-          build:dist: npm run build:dist
           start: npm start
+          wait-on: 'http://localhost:8000'
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()

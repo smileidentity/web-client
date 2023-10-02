@@ -8,6 +8,7 @@ on:
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: actions/checkout@v4
       - name: get dest dir

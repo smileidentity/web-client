@@ -6,6 +6,12 @@ module.exports = {
     es2021: true,
   },
   extends: 'airbnb-base',
+  ignorePatterns: [
+    'build/',
+    'dist/',
+    'libs/',
+    'node_modules/',
+  ],
   globals: {
     validate: 'readonly',
     JSZip: 'readonly',

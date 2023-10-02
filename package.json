@@ -30,11 +30,11 @@
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
 	"devDependencies": {
-		"@cypress/code-coverage": "3.9.11",
-		"cypress": "^12.5.1",
+		"@cypress/code-coverage": "3.12.1",
+		"cypress": "^13.3.0",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
-		"serve": "13.0.2",
-		"terser": "5.9.0"
+		"serve": "14.2.1",
+		"terser": "5.20.0"
 	}
 }

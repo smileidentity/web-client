@@ -4,20 +4,21 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build": "npm run instrument && npm run copy",
-		"prebuild:dist": "rm -rf dist",
-		"postbuild:dist": "npm run copy:dist",
 		"build:dist": "mkdir -p dist/js && echo src/js/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/js/$(basename $1 .js).min.js' argv0 && cp -r dist/js build",
+		"build": "npm run instrument && npm run copy",
 		"clean": "rm -rf build dist",
-		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
 		"copy:dist": "cp -r src/* dist && cp -r libs dist",
+		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
 		"instrument": "nyc instrument src build",
+		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"lint": "eslint \"**/*.js\"",
+		"postbuild:dist": "npm run copy:dist",
+		"prebuild:dist": "rm -rf dist",
 		"preinstrument": "npm run clean",
 		"prestart": "npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
-		"watch": "watch 'npm run prestart' src",
-		"test": "npx cypress run"
+		"test": "npx cypress run",
+		"watch": "watch 'npm run prestart' src"
 	},
 	"repository": {
 		"type": "git",
@@ -37,6 +38,7 @@
 		"eslint-plugin-import": "^2.28.1",
 		"eslint": "^8.50.0",
 		"nyc": "15.1.0",
+		"prettier": "^3.0.3",
 		"serve": "14.2.1",
 		"terser": "5.20.0"
 	}

@@ -4,11 +4,12 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"clean": "rm -rf build dist",
-		"copy": "mkdir -p build && cp -r src/* build && cp cypress/pages/*.html build",
 		"build:dist": "for file in src/js/*.js; do esbuild $file --bundle --minify --outfile=dist/js/$(basename $file .js).min.js; done",
 		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
+		"clean": "rm -rf build dist",
+		"copy": "mkdir -p build && cp -r src/* build && cp cypress/pages/*.html build",
 		"instrument": "nyc instrument src build",
+		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"prestart": "npm run clean && npm run copy && npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
 		"test": "npx cypress run",
@@ -28,6 +29,8 @@
 		"@cypress/code-coverage": "3.12.1",
 		"cypress": "^13.3.0",
 		"esbuild": "^0.19.4",
+		"nyc": "15.1.0",
+		"prettier": "^3.0.3",
 		"serve": "14.2.1"
 	},
 	"dependencies": {

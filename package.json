@@ -16,7 +16,8 @@
 		"prestart": "npm run build && npm run build:dist",
 		"start": "npx serve -p 8000 build",
 		"watch": "watch 'npm run prestart' src",
-		"test": "npx cypress run"
+		"test": "npx cypress run",
+		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},
 	"repository": {
 		"type": "git",
@@ -32,6 +33,7 @@
 		"@cypress/code-coverage": "3.12.1",
 		"cypress": "^13.3.0",
 		"nyc": "15.1.0",
+		"prettier": "^3.0.3",
 		"serve": "14.2.1",
 		"terser": "5.20.0"
 	}

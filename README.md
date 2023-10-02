@@ -4,7 +4,7 @@
 
 ## Overview
 
-This repository provides a self-hosted integration for Smile Identity on the Web. It encompasses a comprehensive set of utilities for KYC processes, biometric verification, and more. Public documentation [here](https://docs.usesmileid.com/integration-options/web-mobile-web/web-integration).
+This repository provides a self-hosted integration for Smile ID on the Web. It encompasses a comprehensive set of utilities for KYC processes, biometric verification, and more. Public documentation [here](https://docs.usesmileid.com/integration-options/web-mobile-web/web-integration).
 
 ## Prerequisites
 

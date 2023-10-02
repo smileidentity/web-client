@@ -3,18 +3,32 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-defaults:
-  run:
-    working-directory: ./hosted-web-integration
 jobs:
-    lint:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: set node version
-          uses: actions/setup-node@v3
-          with:
-            node-version-file: '.nvmrc'
-            cache: 'npm'
-        - run: npm ci
-        - run: npm run lint:html
+  lint-hosted-web-integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./hosted-web-integration
+    steps:
+      - uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint:html
+  lint-smart-camera-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./smart-camera-web
+    steps:
+      - uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint

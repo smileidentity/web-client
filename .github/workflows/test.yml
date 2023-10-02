@@ -7,15 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code, and install dependencies
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
-      - run: npm run build:dist
+      - name: lint
+        run: npm run lint
       - name: run tests
         uses: cypress-io/github-action@v6
         with:

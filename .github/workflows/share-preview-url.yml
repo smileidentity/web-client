@@ -9,7 +9,7 @@ jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: get dest dir
         id: get_dest_dir
         run: echo "DEST_DIR=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"

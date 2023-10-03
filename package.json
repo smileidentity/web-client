@@ -6,7 +6,7 @@
 	"scripts": {
 		"build:dist": "NODE_ENV=production node esbuild.js",
 		"build": "NODE_ENV=development node esbuild.js",
-		"clean": "rimraf build dist",
+		"clean": "rm -rf build dist",
 		"instrument": "nyc instrument src build",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"lint": "eslint \"**/*.js\"",
@@ -29,7 +29,6 @@
 	"dependencies": {
 		"esbuild": "^0.19.4",
 		"jszip": "^3.10.1",
-		"rimraf": "^5.0.5",
 		"validate.js": "^0.13.1"
 	},
 	"devDependencies": {

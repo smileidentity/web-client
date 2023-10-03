@@ -1,6 +1,6 @@
 const JSZip = require("jszip");
 
-var documentVerification = (function documentVerification() {
+(function documentVerification() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and

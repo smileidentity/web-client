@@ -1,6 +1,6 @@
 const validate = require("validate.js");
 
-var eKYC = (function eKYC() {
+(function eKYC() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and

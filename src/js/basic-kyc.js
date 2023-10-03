@@ -1,6 +1,6 @@
 const validate = require("validate.js");
 
-var basicKyc = (function basicKyc() {
+(function basicKyc() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and

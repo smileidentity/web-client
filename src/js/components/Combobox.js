@@ -5,7 +5,7 @@ function generateId(prefix) {
 
 // check if element is visible in browser view port
 function isElementInView(element) {
-  var bounding = element.getBoundingClientRect();
+  const bounding = element.getBoundingClientRect();
 
   return (
     bounding.top >= 0 &&
@@ -175,9 +175,6 @@ class ComboboxTrigger extends HTMLElement {
   }
 
   handleKeyDown(event) {
-    let flag = false;
-    let altKey = event.altKey;
-
     if (event.ctrlKey || event.shiftKey) {
       return;
     }
@@ -256,14 +253,12 @@ class ComboboxTrigger extends HTMLElement {
       event.preventDefault();
       if (this.getAttribute("expanded") === "true") {
         this.toggleExpansionState();
-      } else {
-        if (this.inputTrigger) {
-          this.inputTrigger.value = "";
+      } else if (this.inputTrigger) {
+        this.inputTrigger.value = "";
 
-          this.listbox.dispatchEvent(
-            new CustomEvent("Combobox::Listbox::Filter", { detail: "" }),
-          );
-        }
+        this.listbox.dispatchEvent(
+          new CustomEvent("Combobox::Listbox::Filter", { detail: "" }),
+        );
       }
     }
 
@@ -314,7 +309,7 @@ class ComboboxTrigger extends HTMLElement {
     this.listbox.dispatchEvent(
       new CustomEvent("Combobox::Listbox::Focus", {
         detail: {
-          direction: direction,
+          direction,
         },
       }),
     );
@@ -458,7 +453,7 @@ class ComboboxListbox extends HTMLElement {
     this.setSelected(event.detail.direction);
   }
 
-  handleReset(event) {
+  handleReset() {
     this.optionNodes.forEach((node) => node.setAttribute("tabindex", "-1"));
   }
 
@@ -467,7 +462,7 @@ class ComboboxListbox extends HTMLElement {
       (node) => node.tagName === "INPUT",
     )[0];
 
-    if (this.inputTrigger) {
+    if (inputTrigger) {
       this.setAttribute("search-term", event.detail.label);
     }
   }
@@ -536,10 +531,6 @@ class ComboboxListbox extends HTMLElement {
 window.customElements.define("smileid-combobox-listbox", ComboboxListbox);
 
 class ComboboxOption extends HTMLElement {
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     this.setAttribute("role", "option");
     this.setAttribute("tabindex", "-1");

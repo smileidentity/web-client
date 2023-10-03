@@ -76,7 +76,8 @@ const prebuild = () => {
   copyFiles("cypress/pages", "*.html", "build");
 };
 
-const files = fs.readdirSync("src/js/", { recursive: true }).filter(file => file.endsWith('.js'));
+const files = fs
+  .readdirSync("src/js/", { recursive: true }).filter(file => file.endsWith('.js'));
 
 if (process.env.NODE_ENV === "development") {
   prebuild();

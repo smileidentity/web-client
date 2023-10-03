@@ -4,18 +4,12 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build": "npm run instrument && npm run copy",
-		"prebuild:dist": "rm -rf dist",
-		"postbuild:dist": "npm run copy:dist",
-		"build:dist": "mkdir -p dist/js && echo src/js/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/js/$(basename $1 .js).min.js' argv0 && cp -r dist/js build",
-		"clean": "rm -rf build dist",
-		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
-		"copy:dist": "cp -r src/* dist && cp -r libs dist",
+		"build:dist": "NODE_ENV=production node esbuild.js",
+		"build": "NODE_ENV=development node esbuild.js",
+		"clean": "rimraf build dist",
 		"instrument": "nyc instrument src build",
-		"preinstrument": "npm run clean",
-		"prestart": "npm run build && npm run build:dist",
-		"start": "npx serve -p 8000 build",
-		"watch": "watch 'npm run prestart' src",
+		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
+		"start": "npm run build && npx serve -p 8000 build",
 		"test": "npx cypress run",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},
@@ -32,9 +26,14 @@
 	"devDependencies": {
 		"@cypress/code-coverage": "3.12.1",
 		"cypress": "^13.3.0",
+		"esbuild": "^0.19.4",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
-		"serve": "14.2.1",
-		"terser": "5.20.0"
+		"rimraf": "^5.0.5",
+		"serve": "14.2.1"
+	},
+	"dependencies": {
+		"jszip": "^3.10.1",
+		"validate.js": "^0.13.1"
 	}
 }

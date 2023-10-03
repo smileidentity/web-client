@@ -1,3 +1,5 @@
+const validate = require("validate.js");
+
 var basicKyc = (function basicKyc() {
 	"use strict";
 

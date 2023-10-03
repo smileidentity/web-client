@@ -81,5 +81,5 @@ NOTE: the `npm start` command must be running in a separate terminal window.
 Jest tests are located in the `/tests/` directory. To run Jest tests, execute:
 
 ```bash
-npx jest
+npm run test:unit
 ```

@@ -9,7 +9,7 @@
 		"clean": "rm -rf build dist",
 		"instrument": "nyc instrument src build",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')",
-		"lint": "eslint \"**/*.js\"",
+		"lint": "eslint \"**/*.{cjs,js}\"",
 		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
 		"start": "npm run build && npx serve -p 8000 build",
 		"test": "npx cypress run"

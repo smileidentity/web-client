@@ -59,6 +59,10 @@ This repository provides a self-hosted integration for Smile ID on the Web. It e
 
 ## Testing
 
+This project uses both Cypress for end-to-end tests and Jest for unit tests.
+
+### Cypress
+
 Run Cypress tests using:
 
 ```bash
@@ -67,7 +71,15 @@ npm test
 
 NOTE: the `npm start` command must be running in a separate terminal window.
 
-### Cypress Configuration & Pages
+#### Cypress Configuration & Pages
 
 - `cypress.config.js`: Main Cypress configuration file.
 - `cypress/pages/`: Contains all the utility pages.
+
+### Jest
+
+Jest tests are located in the `/tests/` directory. To run Jest tests, execute:
+
+```bash
+npx jest
+```

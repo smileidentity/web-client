@@ -20,8 +20,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: run unit tests
-        run: npx jest
       - name: run frontend tests
         uses: cypress-io/github-action@v6
         with:

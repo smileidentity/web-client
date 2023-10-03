@@ -1,16 +1,8 @@
 const validate = require("validate.js");
+const { endpoints } = require("./common");
 
 var basicKyc = (function basicKyc() {
 	"use strict";
-
-	// NOTE: In order to support prior integrations, we have `live` and
-	// `production` pointing to the same URL
-	const endpoints = {
-		development: "https://devapi.smileidentity.com",
-		sandbox: "https://testapi.smileidentity.com",
-		live: "https://api.smileidentity.com",
-		production: "https://api.smileidentity.com",
-	};
 
 	const referenceWindow = window.parent;
 	referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
@@ -315,10 +307,6 @@ var basicKyc = (function basicKyc() {
 			closeWindow(true);
 		}, false);
 	});
-
-	function toHRF(string) {
-		return string.replace(/\_/g, " ");
-	}
 
 	function customizeConsentScreen() {
 		const partnerDetails = config.partner_details;

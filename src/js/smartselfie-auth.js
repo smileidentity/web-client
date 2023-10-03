@@ -1,16 +1,8 @@
 const JSZip = require('jszip');
+const { endpoints } = require("./common");
 
 var SmartSelfie = (function SmartSelfie() {
   "use strict";
-
-  // NOTE: In order to support prior integrations, we have `live` and
-  // `production` pointing to the same URL
-  const endpoints = {
-    development: "https://devapi.smileidentity.com/v1",
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
-  };
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');

@@ -570,8 +570,6 @@ describe("Preselected Country and ID Type", () => {
 
     cy.getIFrameBody().find("#id_type").should("not.exist");
 
-    cy.getIFrameBody().find("#id_type").should("not.be.visible");
-
     cy.getIFrameBody().find("smart-camera-web").should("be.visible");
 
     cy.getIFrameBody()

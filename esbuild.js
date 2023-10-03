@@ -1,7 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const esbuild = require("esbuild");
-const rimraf = require("rimraf");
+import fs from "fs";
+import path from "path";
+import esbuild from "esbuild";
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -59,7 +58,9 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * and copies necessary files.
  */
 const prebuildDist = () => {
-  rimraf.sync("dist");
+  if (fs.existsSync("dist")) {
+    fs.rmSync("build", { recursive: true });
+  }
   ensureDirSync("dist");
   copySync("src", "dist", (file) => !file.endsWith(".js"));
 };
@@ -70,7 +71,9 @@ const prebuildDist = () => {
  * copies necessary files, and copies HTML pages from cypress.
  */
 const prebuild = () => {
-  rimraf.sync("build");
+  if (fs.existsSync("build")) {
+    fs.rmSync("build", { recursive: true });
+  }
   ensureDirSync("build");
   copySync("src", "build", (file) => !file.endsWith(".js"));
   copyFiles("cypress/pages", "*.html", "build");

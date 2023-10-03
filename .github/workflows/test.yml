@@ -1,10 +1,16 @@
 name: test
 on:
   workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: checkout code, and install dependencies
         uses: actions/checkout@v4
@@ -14,7 +20,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: run tests
+      - name: run frontend tests
         uses: cypress-io/github-action@v6
         with:
           start: npm start

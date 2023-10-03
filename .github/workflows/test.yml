@@ -10,6 +10,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: checkout code, and install dependencies
         uses: actions/checkout@v4

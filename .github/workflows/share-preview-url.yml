@@ -9,6 +9,7 @@ jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
     permissions: write-all
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: get dest dir

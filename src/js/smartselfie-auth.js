@@ -1,6 +1,6 @@
-const JSZip = require('jszip');
+const JSZip = require("jszip");
 
-var SmartSelfie = (function SmartSelfie() {
+(function SmartSelfie() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -13,7 +13,7 @@ var SmartSelfie = (function SmartSelfie() {
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
+  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
 
   const labels = {
     2: {
@@ -25,63 +25,64 @@ var SmartSelfie = (function SmartSelfie() {
       upload: "Registering User",
     },
   };
-  var config;
-  var activeScreen;
-  var id_info, images, partner_params;
+  let config;
+  let activeScreen;
+  let id_info;
+  let images;
+  let partner_params;
 
-  var SmartCameraWeb = document.querySelector("smart-camera-web");
-  var UploadProgressScreen = document.querySelector("#upload-progress-screen");
-  var UploadFailureScreen = document.querySelector("#upload-failure-screen");
-  var CompleteScreen = document.querySelector("#complete-screen");
+  const SmartCameraWeb = document.querySelector("smart-camera-web");
+  const UploadProgressScreen = document.querySelector(
+    "#upload-progress-screen",
+  );
+  const UploadFailureScreen = document.querySelector("#upload-failure-screen");
+  const CompleteScreen = document.querySelector("#complete-screen");
 
-  var CloseIframeButton = document.querySelector("#close-iframe");
-  var RetryUploadButton = document.querySelector("#retry-upload");
+  const CloseIframeButton = document.querySelector("#close-iframe");
+  const RetryUploadButton = document.querySelector("#retry-upload");
 
-  var fileToUpload, uploadURL;
+  let fileToUpload;
+  let uploadURL;
 
   window.addEventListener(
     "message",
     async (event) => {
       if (event.data && event.data.includes("SmileIdentity::Configuration")) {
-        try {
-          config = JSON.parse(event.data);
-          partner_params = getPartnerParams();
-          id_info = {};
-          setActiveScreen(SmartCameraWeb);
-        } catch (e) {
-          throw e;
-        }
+        config = JSON.parse(event.data);
+        partner_params = getPartnerParams();
+        id_info = {};
+        setActiveScreen(SmartCameraWeb);
       }
     },
-    false
+    false,
   );
 
   SmartCameraWeb.addEventListener(
     "imagesComputed",
     (event) => {
       images = event.detail.images;
-      var title = document.querySelector("#uploadTitle");
+      const title = document.querySelector("#uploadTitle");
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
     },
-    false
+    false,
   );
 
   RetryUploadButton.addEventListener(
     "click",
-    (event) => {
+    () => {
       retryUpload();
     },
-    false
+    false,
   );
 
   CloseIframeButton.addEventListener(
     "click",
-    (event) => {
+    () => {
       closeWindow(true);
     },
-    false
+    false,
   );
 
   function parseJWT(token) {
@@ -98,15 +99,15 @@ var SmartSelfie = (function SmartSelfie() {
      * 5. decode the URI Component to a JSON string
      * 6. parse the JSON string to a javascript object
      */
-    var base64Url = token.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
         .map(function (c) {
-          return "%" + c.charCodeAt(0).toString(16);
+          return `%${c.charCodeAt(0).toString(16)}`;
         })
-        .join("")
+        .join(""),
     );
 
     return JSON.parse(jsonPayload);
@@ -114,7 +115,7 @@ var SmartSelfie = (function SmartSelfie() {
 
   function getPartnerParams() {
     const { partner_params: partnerParams } = parseJWT(config.token);
-    partner_params = { ...partnerParams, ...(config.partner_params || {}) }
+    partner_params = { ...partnerParams, ...(config.partner_params || {}) };
     return partner_params;
   }
 
@@ -124,8 +125,8 @@ var SmartSelfie = (function SmartSelfie() {
     activeScreen = node;
   }
 
-  async function handleFormSubmit(event) {
-    const errorMessage = document.querySelector('.validation-message');
+  async function handleFormSubmit() {
+    const errorMessage = document.querySelector(".validation-message");
     if (errorMessage) errorMessage.remove();
 
     try {
@@ -135,8 +136,10 @@ var SmartSelfie = (function SmartSelfie() {
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage('Something went wrong');
-      console.error(`SmileIdentity - ${error.name || error.message}: ${error.cause}`);
+      displayErrorMessage("Something went wrong");
+      console.error(
+        `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
+      );
     }
   }
 
@@ -168,7 +171,7 @@ var SmartSelfie = (function SmartSelfie() {
         },
         id_info,
         images,
-      })
+      }),
     );
 
     try {
@@ -181,9 +184,9 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   async function getUploadURL() {
-    var payload = {
-      source_sdk: config.sdk || 'hosted_web',
-      source_sdk_version: config.sdk_version || 'v1.1.0',
+    const payload = {
+      source_sdk: config.sdk || "hosted_web",
+      source_sdk_version: config.sdk_version || "v1.1.0",
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
       callback_url: config.callback_url,
@@ -214,10 +217,10 @@ var SmartSelfie = (function SmartSelfie() {
 
   function uploadZip(file, destination) {
     // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
-    let request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
-    request.upload.addEventListener("load", function (e) {
+    request.upload.addEventListener("load", function () {
       return request.response;
     });
 
@@ -249,13 +252,15 @@ var SmartSelfie = (function SmartSelfie() {
   }
 
   function retryUpload() {
-    var fileUploaded = uploadZip(fileToUpload, uploadURL);
+    const fileUploaded = uploadZip(fileToUpload, uploadURL);
 
     return fileUploaded;
   }
 
   function closeWindow(userTriggered) {
-    const message = userTriggered ? "SmileIdentity::Close" : "SmileIdentity::Close::System";
+    const message = userTriggered
+      ? "SmileIdentity::Close"
+      : "SmileIdentity::Close::System";
     referenceWindow.postMessage(message, "*");
   }
 

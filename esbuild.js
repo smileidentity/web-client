@@ -22,6 +22,7 @@ const ensureDirSync = (dirPath) => {
 const copySync = (srcDir, destDir, filterFn) => {
   const entries = fs.readdirSync(srcDir, { withFileTypes: true });
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const entry of entries) {
     const srcPath = path.join(srcDir, entry.name);
     const destPath = path.join(destDir, entry.name);

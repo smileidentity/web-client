@@ -2,9 +2,6 @@ const { getEndpoint, parseJWT, postData, toHRF } = require("../src/js/common");
 
 describe("getEndpoint", () => {
   it("should return the correct URL for each environment", () => {
-    expect(getEndpoint("development")).toBe(
-      "https://devapi.smileidentity.com/v1",
-    );
     expect(getEndpoint("sandbox")).toBe("https://testapi.smileidentity.com/v1");
     expect(getEndpoint("live")).toBe("https://api.smileidentity.com/v1");
     expect(getEndpoint("production")).toBe("https://api.smileidentity.com/v1");

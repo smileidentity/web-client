@@ -21,11 +21,15 @@ module.exports = {
         sourceType: "script",
       },
     },
+    {
+      files: ["*.test.js"],
+      extends: ["plugin:jest/recommended", "plugin:jest/style"],
+    },
   ],
   parserOptions: {
     ecmaVersion: "latest",
   },
-  plugins: ["cypress", "prettier"],
+  plugins: ["cypress", "jest", "prettier"],
   rules: {
     "class-methods-use-this": 0,
     "func-names": 0,

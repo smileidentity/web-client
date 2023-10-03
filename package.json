@@ -4,17 +4,13 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build": "for file in src/js/*.js; do esbuild $file --bundle --outfile=build/js/$(basename $file .js).min.js; done",
-		"build:dist": "for file in src/js/*.js; do esbuild $file --bundle --minify --outfile=dist/js/$(basename $file .js).min.js; done",
-		"clean": "rm -rf build dist",
-		"copy": "mkdir -p build && cp -r src/* build && cp cypress/pages/*.html build",
-		"copy:dist": "mkdir -p dist && cp -r src/* dist",
+		"clean": "rimraf build dist",
+		"build": "NODE_ENV=development node esbuild.js",
+		"start": "npm run build && npx serve -p 8000 build",
+		"build:dist": "NODE_ENV=production node esbuild.js",
+		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
 		"instrument": "nyc instrument src build",
-		"preinstrument": "npm run clean",
-		"prestart": "npm run clean && npm run copy && npm run build && npm run build:dist",
-		"start": "npx serve -p 8000 build",
-		"watch": "watch 'npm run prestart' src",
-		"test": "npx cypress run",
+		"test": "cypress run",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},
 	"repository": {
@@ -33,6 +29,7 @@
 		"esbuild": "^0.19.4",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
+		"rimraf": "^5.0.5",
 		"serve": "14.2.1"
 	},
 	"dependencies": {

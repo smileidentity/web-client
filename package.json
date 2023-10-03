@@ -4,19 +4,14 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"build:dist": "mkdir -p dist/js && echo src/js/*.js | xargs -n1 sh -c 'npx terser $1 --mangle --compress --output dist/js/$(basename $1 .js).min.js' argv0 && cp -r dist/js build",
-		"build": "npm run instrument && npm run copy",
-		"clean": "rm -rf build dist",
-		"copy:dist": "cp -r src/* dist && cp -r libs dist",
-		"copy": "cp -r src/* build && cp -r libs build && cp cypress/pages/*.html build",
+		"build:dist": "NODE_ENV=production node esbuild.js",
+		"build": "NODE_ENV=development node esbuild.js",
+		"clean": "rimraf build dist",
 		"instrument": "nyc instrument src build",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"lint": "eslint \"**/*.js\"",
-		"postbuild:dist": "npm run copy:dist",
-		"prebuild:dist": "rm -rf dist",
-		"preinstrument": "npm run clean",
-		"prestart": "npm run build && npm run build:dist",
-		"start": "npx serve -p 8000 build",
+		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
+		"start": "npm run build && npx serve -p 8000 build",
 		"test": "npx cypress run",
 		"watch": "watch 'npm run prestart' src"
 	},
@@ -33,15 +28,20 @@
 	"devDependencies": {
 		"@cypress/code-coverage": "3.12.1",
 		"cypress": "^13.3.0",
-		"eslint": "^8.50.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-cypress": "^2.15.1",
 		"eslint-plugin-import": "^2.28.1",
 		"eslint-plugin-prettier": "^5.0.0",
+		"eslint": "^8.50.0",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
-		"serve": "14.2.1",
-		"terser": "5.20.0"
+		"serve": "14.2.1"
+	},
+	"dependencies": {
+		"esbuild": "^0.19.4",
+		"jszip": "^3.10.1",
+		"rimraf": "^5.0.5",
+		"validate.js": "^0.13.1"
 	}
 }

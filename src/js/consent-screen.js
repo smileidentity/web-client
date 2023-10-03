@@ -652,7 +652,9 @@ class EndUserConsent extends HTMLElement {
 
     this.idRequiresTotpConsent = ["BVN_MFA"];
     this.templateString = templateString.bind(this);
-    this.render = () => this.templateString();
+    this.render = () => {
+      return this.templateString();
+    };
 
     this.attachShadow({ mode: "open" });
   }

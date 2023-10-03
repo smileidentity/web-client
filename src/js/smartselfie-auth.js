@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-const SmartSelfie = (function SmartSelfie() {
+const JSZip = require("jszip");
+
+(function SmartSelfie() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -103,7 +104,9 @@ const SmartSelfie = (function SmartSelfie() {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
-        .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+        .map(function (c) {
+          return `%${c.charCodeAt(0).toString(16)}`;
+        })
         .join(""),
     );
 
@@ -217,9 +220,11 @@ const SmartSelfie = (function SmartSelfie() {
     const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
-    request.upload.addEventListener("load", () => request.response);
+    request.upload.addEventListener("load", function () {
+      return request.response;
+    });
 
-    request.upload.addEventListener("error", (e) => {
+    request.upload.addEventListener("error", function (e) {
       setActiveScreen(UploadFailureScreen);
       throw new Error("uploadZip failed", { cause: e });
     });

@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-const eKYC = (function eKYC() {
+const validate = require("validate.js");
+
+(function eKYC() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -18,11 +19,11 @@ const eKYC = (function eKYC() {
   let activeScreen;
   let config;
   let consent_information;
+  let EndUserConsent;
   let id_info;
   let partner_params;
   let productConstraints;
 
-  let EndUserConsent;
   const LoadingScreen = document.querySelector("#loading-screen");
   const SelectIDType = document.querySelector("#select-id-type");
   const IDInfoForm = document.querySelector("#id-info");
@@ -104,7 +105,6 @@ const eKYC = (function eKYC() {
       if (event.data && event.data.includes("SmileIdentity::Configuration")) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
-
         getPartnerParams();
         const { partnerConstraints, generalConstraints } =
           await getProductConstraints();
@@ -522,7 +522,9 @@ const eKYC = (function eKYC() {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split("")
-          .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+          .map(function (c) {
+            return `%${c.charCodeAt(0).toString(16)}`;
+          })
           .join(""),
       );
 

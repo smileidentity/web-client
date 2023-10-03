@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-const productSelection = (function productSelection() {
+(function productSelection() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -55,8 +54,8 @@ const productSelection = (function productSelection() {
     throw new Error("Cannot find the full name of the id_type");
   }
 
-  function transformIdTypesToVerificationMethodMap(localConfig, services) {
-    return localConfig.id_types.reduce(
+  function transformIdTypesToVerificationMethodMap(idTypes, services) {
+    return idTypes.reduce(
       (idSelectionMap, { country, id_type, verification_method }) => {
         idSelectionMap[country] = idSelectionMap[country] || {
           name: services.hosted_web.doc_verification[country].name,
@@ -256,7 +255,7 @@ const productSelection = (function productSelection() {
             const services = await servicesResponse.json();
 
             verificationMethodMap = transformIdTypesToVerificationMethodMap(
-              config,
+              config.id_types,
               services,
             );
             initializeForm(SelectIdType, verificationMethodMap);

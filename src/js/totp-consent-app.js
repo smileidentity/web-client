@@ -1,5 +1,7 @@
 "use strict";
 
+const validate = require("validate.js");
+
 function postData(url, data) {
   return fetch(url, {
     method: "POST",
@@ -499,7 +501,9 @@ class TotpBasedConsent extends HTMLElement {
     super();
 
     this.templateString = markup.bind(this);
-    this.render = () => this.templateString();
+    this.render = () => {
+      return this.templateString();
+    };
 
     this.attachShadow({ mode: "open" });
 

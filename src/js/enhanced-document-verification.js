@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-const enhancedDocumentVerification = (function enhancedDocumentVerification() {
+const JSZip = require("jszip");
+
+(function enhancedDocumentVerification() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -52,6 +53,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
       if (event.data && event.data.includes("SmileIdentity::Configuration")) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
+
         productConstraints = await getProductConstraints();
         initializeSession(productConstraints);
         getPartnerParams();
@@ -296,7 +298,9 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split("")
-          .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+          .map(function (c) {
+            return `%${c.charCodeAt(0).toString(16)}`;
+          })
           .join(""),
       );
 
@@ -322,6 +326,7 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
         getUploadURL(),
         createZip(),
       ]);
+
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
       displayErrorMessage("Something went wrong");
@@ -415,9 +420,11 @@ const enhancedDocumentVerification = (function enhancedDocumentVerification() {
     const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
-    request.upload.addEventListener("load", () => request.response);
+    request.upload.addEventListener("load", function () {
+      return request.response;
+    });
 
-    request.upload.addEventListener("error", (e) => {
+    request.upload.addEventListener("error", function (e) {
       setActiveScreen(UploadFailureScreen);
       throw new Error("uploadZip failed", { cause: e });
     });

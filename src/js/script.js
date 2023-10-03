@@ -19,7 +19,7 @@
 * @param { Object[] } [config.id_types] - list of the id types and their
 * verification_methods
 * @param { Object[] } config.id_types[]. - list of the id types and their
-* @param { string } config.id_type[].country -
+* @param { string } config.id_type[].country - 
 * @param { string } config.id_type[].id_type - list of the id types and their
 * @param { string } config.id_type[].verification_method - one of
 * SmileIdentity's verification_methods
@@ -42,7 +42,7 @@
 	consent. Ensure that your authorization matches this in the sandbox
 	environment before publishing to end users
 */
-const SmileIdentity = (function () {
+window.SmileIdentity = (function () {
   "use strict";
 
   function getSiteURL() {
@@ -51,7 +51,7 @@ const SmileIdentity = (function () {
     return qualifiedURL;
   }
 
-  const sidConfig = {
+  const innerConfig = {
     siteURL: getSiteURL(),
   };
 
@@ -86,7 +86,7 @@ const SmileIdentity = (function () {
 
     iframe.setAttribute(
       "src",
-      `${sidConfig.siteURL}${getIFrameURL(productName)}`,
+      `${innerConfig.siteURL}${getIFrameURL(productName)}`,
     );
     iframe.setAttribute("id", "smile-identity-hosted-web-integration");
     iframe.setAttribute("name", "smile-identity-hosted-web-integration");
@@ -203,7 +203,6 @@ const SmileIdentity = (function () {
     targetWindow.postMessage(JSON.stringify(config), "*");
   }
 
-  // eslint-disable-next-line no-shadow
   function SmileIdentity(config) {
     const configIsValid = isConfigValid(config);
 
@@ -228,7 +227,7 @@ const SmileIdentity = (function () {
             case "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated":
               return handleConsentRejection(config, event.data);
             default:
-              return null;
+              return undefined;
           }
         },
         false,
@@ -238,5 +237,3 @@ const SmileIdentity = (function () {
 
   return SmileIdentity;
 })();
-
-window.SmileIdentity = SmileIdentity;

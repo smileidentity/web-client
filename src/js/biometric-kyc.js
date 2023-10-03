@@ -1,5 +1,7 @@
-// eslint-disable-next-line no-unused-vars
-const biometricKyc = (function biometricKyc() {
+const JSZip = require("jszip");
+const validate = require("validate.js");
+
+(function biometricKyc() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -15,14 +17,14 @@ const biometricKyc = (function biometricKyc() {
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
 
   const pages = [];
-  let config;
   let activeScreen;
+  let config;
   let consent_information;
+  let EndUserConsent;
   let id_info;
   let images;
   let partner_params;
   let productConstraints;
-  let EndUserConsent;
 
   const LoadingScreen = document.querySelector("#loading-screen");
   const SelectIDType = document.querySelector("#select-id-type");
@@ -558,7 +560,9 @@ const biometricKyc = (function biometricKyc() {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split("")
-          .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+          .map(function (c) {
+            return `%${c.charCodeAt(0).toString(16)}`;
+          })
           .join(""),
       );
 
@@ -798,9 +802,11 @@ const biometricKyc = (function biometricKyc() {
     const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
-    request.upload.addEventListener("load", () => request.response);
+    request.upload.addEventListener("load", function () {
+      return request.response;
+    });
 
-    request.upload.addEventListener("error", (e) => {
+    request.upload.addEventListener("error", function (e) {
       setActiveScreen(UploadFailureScreen);
       throw new Error("uploadZip failed", { cause: e });
     });

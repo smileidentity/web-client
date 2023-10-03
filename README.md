@@ -55,6 +55,7 @@ This repository provides a self-hosted integration for Smile ID on the Web. It e
 - `.gitignore`: Specifies files to ignore in git. These include [./dist](./dist) and [./build](./build).
 - `.nvmrc`: Node Version Manager configuration file.
 - `.nycrc`: [NYC](https://github.com/istanbuljs/nyc) configuration file.
+- `esbuild.js`: [esbuild](https://esbuild.github.io/) configuration file.
 
 ## Testing
 

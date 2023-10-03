@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-const documentVerification = (function documentVerification() {
+const JSZip = require("jszip");
+
+(function documentVerification() {
   "use strict";
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -14,8 +15,8 @@ const documentVerification = (function documentVerification() {
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
 
-  let activeScreen;
   let config;
+  let activeScreen;
   let id_info;
   let images;
   let partner_params;
@@ -298,7 +299,9 @@ const documentVerification = (function documentVerification() {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split("")
-          .map((c) => `%${c.charCodeAt(0).toString(16)}`)
+          .map(function (c) {
+            return `%${c.charCodeAt(0).toString(16)}`;
+          })
           .join(""),
       );
 
@@ -423,9 +426,11 @@ const documentVerification = (function documentVerification() {
     const request = new XMLHttpRequest();
     request.open("PUT", destination);
 
-    request.upload.addEventListener("load", () => request.response);
+    request.upload.addEventListener("load", function () {
+      return request.response;
+    });
 
-    request.upload.addEventListener("error", (e) => {
+    request.upload.addEventListener("error", function (e) {
       setActiveScreen(UploadFailureScreen);
       throw new Error("uploadZip failed", { cause: e });
     });

@@ -77,7 +77,8 @@ const prebuild = () => {
 };
 
 const files = fs
-  .readdirSync("src/js/", { recursive: true }).filter(file => file.endsWith('.js'));
+  .readdirSync("src/js/", { recursive: true })
+  .filter(file => file.endsWith('.js'));
 
 if (process.env.NODE_ENV === "development") {
   prebuild();

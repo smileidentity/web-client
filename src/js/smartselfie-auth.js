@@ -1,3 +1,5 @@
+const JSZip = require('jszip');
+
 var SmartSelfie = (function SmartSelfie() {
   "use strict";
 

@@ -1,3 +1,6 @@
+const JSZip = require('jszip');
+const validate = require("validate.js");
+
 var biometricKyc = function biometricKyc() {
 	'use strict';
 

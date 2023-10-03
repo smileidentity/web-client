@@ -1,4 +1,5 @@
 'use strict';
+const validate = require("validate.js");
 
 function postData(url, data) {
 	return fetch(url, {

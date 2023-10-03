@@ -1,3 +1,5 @@
+const JSZip = require('jszip');
+
 var documentVerification = function documentVerification() {
 	'use strict';
 

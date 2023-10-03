@@ -38,7 +38,7 @@ const parseJWT = (token) => {
     atob(base64)
       .split("")
       .map(function (c) {
-        return "%" + c.charCodeAt(0).toString(16);
+        return `%${c.charCodeAt(0).toString(16)}`;
       })
       .join(""),
   );

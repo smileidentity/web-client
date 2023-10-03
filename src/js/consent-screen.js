@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 function templateString() {
-	return `
+  return `
 		<style>
 			*,
 			*::before,
@@ -291,8 +291,8 @@ function templateString() {
 
 		<div id='consent-screen'>
 			<section class='flow center'>
-				<div class="nav ${this.hideBack ? 'justify-right' : ''}">
-					<div class="back-wrapper" ${this.hideBack ? 'hidden' : ''}>
+				<div class="nav ${this.hideBack ? "justify-right" : ""}">
+					<div class="back-wrapper" ${this.hideBack ? "hidden" : ""}>
 						<button type='button' data-type='icon' id="back-button" class="back-button">
 							<svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M8.56418 14.4005L1.95209 7.78842L8.56418 1.17633" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -308,7 +308,7 @@ function templateString() {
 					</button>
 				</div>
 				<img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
-				<p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
+				<p class='demo-tip' ${this.demoMode ? "" : "hidden"}>
 					<svg aria-hidden='true' width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<rect x="4.46045" y="4.46069" width="47.7205" height="47.7205" rx="23.8603" fill="white"/>
 						<path fill-rule="evenodd" clip-rule="evenodd" d="M35.1578 25.7487H34.2813V23.1195C34.2813 20.2273 31.915 17.861 29.0229 17.861C26.1307 17.861 23.7644 20.2273 23.7644 23.1195V25.7487H22.888C21.3981 25.7487 20.2588 26.888 20.2588 28.3779V34.5128C20.2588 36.0027 21.3981 37.142 22.888 37.142H35.1578C36.6476 37.142 37.787 36.0027 37.787 34.5128V28.3779C37.787 26.888 36.6476 25.7487 35.1578 25.7487ZM25.5171 23.1194C25.5171 21.1913 27.0946 19.6138 29.0227 19.6138C30.9508 19.6138 32.5283 21.1913 32.5283 23.1194V25.7487H25.5171V23.1194ZM35.1577 35.3892C35.6836 35.3892 36.0342 35.0386 36.0342 34.5128V28.3779C36.0342 27.8521 35.6836 27.5015 35.1577 27.5015H22.888C22.3622 27.5015 22.0116 27.8521 22.0116 28.3779V34.5128C22.0116 35.0386 22.3622 35.3892 22.888 35.3892H35.1577Z" fill="#2D9CDB"/>
@@ -448,7 +448,9 @@ function templateString() {
 			<section class='callout | flow center' style='--flow-space: 2.5rem; margin: var(--flow-space) auto;'>
 				<p>
 					You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
-					<a class='theme' href='${this.partnerPolicyURL}' rel='noreferer noopener' target='_blank'>here</a>
+					<a class='theme' href='${
+            this.partnerPolicyURL
+          }' rel='noreferer noopener' target='_blank'>here</a>
 				</p>
 
 				<p style='--flow-space: .75rem'>
@@ -645,176 +647,199 @@ function templateString() {
 }
 
 class EndUserConsent extends HTMLElement {
-	constructor() {
-		super();
+  constructor() {
+    super();
 
-		this.idRequiresTotpConsent = ['BVN_MFA'];
-		this.templateString = templateString.bind(this);
-		this.render = () => {
-			return this.templateString();
-		}
+    this.idRequiresTotpConsent = ["BVN_MFA"];
+    this.templateString = templateString.bind(this);
+    this.render = () => {
+      return this.templateString();
+    };
 
-		this.attachShadow({ mode: 'open' });
-	}
+    this.attachShadow({ mode: "open" });
+  }
 
-	connectedCallback() {
-		this.pages = [];
-		const template = document.createElement('template');
-		template.innerHTML = this.render();
+  connectedCallback() {
+    this.pages = [];
+    const template = document.createElement("template");
+    template.innerHTML = this.render();
 
-		this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-		this.consentScreen = this.shadowRoot.querySelector('#consent-screen');
-		this.totpConsentApp = this.shadowRoot.querySelector('totp-consent-app');
-		this.consentRejectedScreen = this.shadowRoot.querySelector('#consent-rejected-screen');
+    this.consentScreen = this.shadowRoot.querySelector("#consent-screen");
+    this.totpConsentApp = this.shadowRoot.querySelector("totp-consent-app");
+    this.consentRejectedScreen = this.shadowRoot.querySelector(
+      "#consent-rejected-screen",
+    );
 
-		this.allowButton = this.shadowRoot.querySelector('#allow');
-		this.rejectButton = this.shadowRoot.querySelector('#cancel');
-		this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
-		this.confirmConsentRejectionButton = this.shadowRoot.querySelector('#confirm-consent-rejection');
-		this.backButton = this.shadowRoot.querySelector('#back-button')
-		var CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.allowButton = this.shadowRoot.querySelector("#allow");
+    this.rejectButton = this.shadowRoot.querySelector("#cancel");
+    this.backToConsentButton =
+      this.shadowRoot.querySelector("#back-to-consent");
+    this.confirmConsentRejectionButton = this.shadowRoot.querySelector(
+      "#confirm-consent-rejection",
+    );
+    this.backButton = this.shadowRoot.querySelector("#back-button");
+    const CloseIframeButtons =
+      this.shadowRoot.querySelectorAll(".close-iframe");
 
-		this.allowButton.addEventListener('click', e => this.handleConsentGrant(e));
-		this.rejectButton.addEventListener('click', e => this.handleConsentGrant(e));
+    this.allowButton.addEventListener("click", (e) =>
+      this.handleConsentGrant(e),
+    );
+    this.rejectButton.addEventListener("click", (e) =>
+      this.handleConsentGrant(e),
+    );
 
-		this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
-		this.confirmConsentRejectionButton.addEventListener('click', e => this.handleConsentRejection(e));
+    this.backToConsentButton.addEventListener("click", () =>
+      this.setActiveScreen(this.consentScreen),
+    );
+    this.confirmConsentRejectionButton.addEventListener("click", (e) =>
+      this.handleConsentRejection(e),
+    );
 
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated', e => this.handleTotpConsentEvents(e));
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentGranted::TOTP', e => this.handleTotpConsentEvents(e));
-		this.totpConsentApp.addEventListener('SmileIdentity::ConsentDenied::Back', e => this.handleBackEvents(e));
+    this.totpConsentApp.addEventListener(
+      "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
+      (e) => this.handleTotpConsentEvents(e),
+    );
+    this.totpConsentApp.addEventListener(
+      "SmileIdentity::ConsentGranted::TOTP",
+      (e) => this.handleTotpConsentEvents(e),
+    );
+    this.totpConsentApp.addEventListener(
+      "SmileIdentity::ConsentDenied::Back",
+      (e) => this.handleBackEvents(e),
+    );
 
-		this.backButton.addEventListener('click', (e) => {
-			this.handleBackEvents(e);
-		});
+    this.backButton.addEventListener("click", (e) => {
+      this.handleBackEvents(e);
+    });
 
-		CloseIframeButtons.forEach((button) => {
-			button.addEventListener('click', event => {
-				this.closeWindow();
-			}, false);
-		});
+    CloseIframeButtons.forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          this.closeWindow();
+        },
+        false,
+      );
+    });
 
-		this.activeScreen = this.consentScreen;
-	}
+    this.activeScreen = this.consentScreen;
+  }
 
-	setActiveScreen(screen) {
-		this.activeScreen.hidden = true;
-		screen.hidden = false;
-		this.activeScreen = screen;
-	}
+  setActiveScreen(screen) {
+    this.activeScreen.hidden = true;
+    screen.hidden = false;
+    this.activeScreen = screen;
+  }
 
-	get baseUrl() {
-		return this.getAttribute('base-url');
-	}
+  get baseUrl() {
+    return this.getAttribute("base-url");
+  }
 
-	get country() {
-		return this.getAttribute('country');
-	}
+  get country() {
+    return this.getAttribute("country");
+  }
 
-	get demoMode() {
-		return this.hasAttribute('demo-mode') ? true : false
-	}
+  get demoMode() {
+    return !!this.hasAttribute("demo-mode");
+  }
 
-	get hideBack() {
-		return this.hasAttribute('hide-back-to-host');
-	}
+  get hideBack() {
+    return this.hasAttribute("hide-back-to-host");
+  }
 
-	get idHint() {
-		return this.getAttribute('id-hint') || 'Your BVN should be 11 digits long';
-	}
+  get idHint() {
+    return this.getAttribute("id-hint") || "Your BVN should be 11 digits long";
+  }
 
-	get idRegex() {
-		return this.getAttribute('id-regex');
-	}
+  get idRegex() {
+    return this.getAttribute("id-regex");
+  }
 
-	get idType() {
-		return this.getAttribute('id-type');
-	}
+  get idType() {
+    return this.getAttribute("id-type");
+  }
 
-	get idTypeLabel() {
-		return this.getAttribute('id-type-label');
-	}
+  get idTypeLabel() {
+    return this.getAttribute("id-type-label");
+  }
 
-	get partnerId() {
-		return this.getAttribute('partner-id');
-	}
+  get partnerId() {
+    return this.getAttribute("partner-id");
+  }
 
-	get partnerName() {
-		return this.getAttribute('partner-name');
-	}
+  get partnerName() {
+    return this.getAttribute("partner-name");
+  }
 
-	get partnerLogoURL() {
-		return this.getAttribute('partner-logo');
-	}
+  get partnerLogoURL() {
+    return this.getAttribute("partner-logo");
+  }
 
-	get partnerPolicyURL() {
-		return this.getAttribute('policy-url');
-	}
+  get partnerPolicyURL() {
+    return this.getAttribute("policy-url");
+  }
 
-	get themeColor() {
-		return this.getAttribute('theme-color') || '#043C93';
-	}
+  get themeColor() {
+    return this.getAttribute("theme-color") || "#043C93";
+  }
 
-	get token() {
-		return this.getAttribute('token');
-	}
+  get token() {
+    return this.getAttribute("token");
+  }
 
-	handleConsentGrant(e) {
-		const granted = e.target === this.allowButton;
+  handleConsentGrant(e) {
+    const granted = e.target === this.allowButton;
 
-		if (granted) {
-			if (this.idRequiresTotpConsent.includes(this.idType)) {
-				this.setActiveScreen(this.totpConsentApp);
-				this.pages.push(this.consentScreen);
-			} else {
-				this.dispatchEvent(
-					new CustomEvent('SmileIdentity::ConsentGranted', {
-						detail: {
-							consented: {
-								personal_details: granted,
-								contact_information: granted,
-								document_information: granted,
-							}
-						}
-					})
-				);
-			}
-		} else {
-			this.setActiveScreen(this.consentRejectedScreen);
-		}
-	}
+    if (granted) {
+      if (this.idRequiresTotpConsent.includes(this.idType)) {
+        this.setActiveScreen(this.totpConsentApp);
+        this.pages.push(this.consentScreen);
+      } else {
+        this.dispatchEvent(
+          new CustomEvent("SmileIdentity::ConsentGranted", {
+            detail: {
+              consented: {
+                personal_details: granted,
+                contact_information: granted,
+                document_information: granted,
+              },
+            },
+          }),
+        );
+      }
+    } else {
+      this.setActiveScreen(this.consentRejectedScreen);
+    }
+  }
 
-	handleConsentRejection(e) {
-		this.dispatchEvent(
-			new CustomEvent('SmileIdentity::ConsentDenied')
-		);
-	}
+  handleConsentRejection() {
+    this.dispatchEvent(new CustomEvent("SmileIdentity::ConsentDenied"));
+  }
 
-	handleTotpConsentEvents(e) {
-		const customEvent = new CustomEvent(e.type, {
-			detail: {
-				...e.detail
-			}
-		});
-		this.dispatchEvent(customEvent);
-	}
+  handleTotpConsentEvents(e) {
+    const customEvent = new CustomEvent(e.type, {
+      detail: {
+        ...e.detail,
+      },
+    });
+    this.dispatchEvent(customEvent);
+  }
 
-	handleBackEvents(e){
-		const page = this.pages.pop();
-		if (page) {
-			this.setActiveScreen(page);
-		}else{
-			this.dispatchEvent(
-				new CustomEvent('SmileIdentity::Exit')
-			);
-		}
-	}
+  handleBackEvents() {
+    const page = this.pages.pop();
+    if (page) {
+      this.setActiveScreen(page);
+    } else {
+      this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    }
+  }
 
-	closeWindow() {
-		const referenceWindow = window.parent;
-		referenceWindow.postMessage('SmileIdentity::Close', '*');
-	}
+  closeWindow() {
+    const referenceWindow = window.parent;
+    referenceWindow.postMessage("SmileIdentity::Close", "*");
+  }
 }
 
-window.customElements.define('end-user-consent', EndUserConsent);
+window.customElements.define("end-user-consent", EndUserConsent);

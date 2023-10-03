@@ -1,5 +1,5 @@
 const validate = require("validate.js");
-const { getEndpoint } = require("./common");
+const { getEndpoint, postData } = require("./common");
 
 (function eKYC() {
   "use strict";
@@ -23,19 +23,6 @@ const { getEndpoint } = require("./common");
   let disableBackOnFirstScreen = false;
 
   const CloseIframeButtons = document.querySelectorAll(".close-iframe");
-
-  function postData(url = "", data = {}) {
-    return fetch(url, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-  }
 
   async function getProductConstraints() {
     try {

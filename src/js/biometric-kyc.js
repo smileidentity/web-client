@@ -1,6 +1,6 @@
 const JSZip = require("jszip");
 const validate = require("validate.js");
-const { getEndpoint } = require("./common");
+const { getEndpoint, postData } = require("./common");
 
 (function biometricKyc() {
   "use strict";
@@ -34,19 +34,6 @@ const { getEndpoint } = require("./common");
 
   let fileToUpload;
   let uploadURL;
-
-  function postData(url = "", data = {}) {
-    return fetch(url, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-  }
 
   async function getProductConstraints() {
     try {

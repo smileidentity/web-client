@@ -4,12 +4,12 @@
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {
-		"clean": "rimraf build dist",
-		"build": "NODE_ENV=development node esbuild.js",
-		"start": "npm run build && npx serve -p 8000 build",
 		"build:dist": "NODE_ENV=production node esbuild.js",
-		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
+		"build": "NODE_ENV=development node esbuild.js",
+		"clean": "rimraf build dist",
 		"instrument": "nyc instrument src build",
+		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
+		"start": "npm run build && npx serve -p 8000 build",
 		"test": "npx cypress run",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')"
 	},

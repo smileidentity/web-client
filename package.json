@@ -12,20 +12,29 @@
 		"lint": "eslint \"**/*.js\"",
 		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
 		"start": "npm run build && npx serve -p 8000 build",
-		"test": "npx cypress run"
+		"test": "npx cypress run",
+		"test:unit": "NODE_OPTIONS=--experimental-vm-modules jest"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/smileidentity/hosted-web-integration.git"
 	},
+	"type": "module",
 	"keywords": [],
 	"author": "tams sokari <tams@smileidentity.com>",
 	"bugs": {
 		"url": "https://github.com/smileidentity/hosted-web-integration/issues"
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
+	"dependencies": {
+		"esbuild": "^0.19.4",
+		"jszip": "^3.10.1",
+		"rimraf": "^5.0.5",
+		"validate.js": "^0.13.1"
+	},
 	"devDependencies": {
 		"@cypress/code-coverage": "3.12.1",
+		"@jest/globals": "^29.7.0",
 		"cypress": "^13.3.0",
 		"eslint": "^8.50.0",
 		"eslint-config-airbnb-base": "^15.0.0",
@@ -35,14 +44,10 @@
 		"eslint-plugin-jest": "^27.4.2",
 		"eslint-plugin-prettier": "^5.0.0",
 		"jest": "^29.7.0",
+		"jest-environment-jsdom": "^29.7.0",
+		"jest-environment-node": "^29.7.0",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
 		"serve": "14.2.1"
-	},
-	"dependencies": {
-		"esbuild": "^0.19.4",
-		"jszip": "^3.10.1",
-		"rimraf": "^5.0.5",
-		"validate.js": "^0.13.1"
 	}
 }

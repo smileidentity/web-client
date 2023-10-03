@@ -1,4 +1,5 @@
-const { getEndpoint, parseJWT, postData, toHRF } = require("../src/js/common");
+import { jest } from "@jest/globals";
+import { getEndpoint, parseJWT, postData, toHRF } from "../src/js/common";
 
 describe("getEndpoint", () => {
   it("should return the correct URL for each environment", () => {

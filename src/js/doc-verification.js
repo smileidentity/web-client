@@ -1,5 +1,5 @@
-const JSZip = require("jszip");
-const { getEndpoint, parseJWT } = require("./common");
+import JSZip from "jszip";
+import { getEndpoint, parseJWT } from "./common";
 
 (function documentVerification() {
   "use strict";

@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Returns the appropriate endpoint for the specified environment.
  *
@@ -59,9 +57,4 @@ const postData = (url = "", data = {}) =>
 
 const toHRF = (string) => string.replace(/\_/g, " ");
 
-module.exports = {
-  getEndpoint,
-  parseJWT,
-  postData,
-  toHRF,
-};
+export { getEndpoint, parseJWT, postData, toHRF };

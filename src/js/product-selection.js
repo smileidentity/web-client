@@ -1,4 +1,4 @@
-const { getEndpoint } = require("./common");
+import { getEndpoint } from "./common";
 
 (function productSelection() {
   "use strict";

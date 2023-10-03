@@ -1,6 +1,6 @@
-const JSZip = require("jszip");
-const validate = require("validate.js");
-const { getEndpoint, parseJWT, postData } = require("./common");
+import JSZip from "jszip";
+import validate from "validate.js";
+import { getEndpoint, parseJWT, postData } from "./common";
 
 (function biometricKyc() {
   "use strict";

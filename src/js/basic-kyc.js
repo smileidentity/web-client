@@ -1,5 +1,5 @@
-const validate = require("validate.js");
-const { getEndpoint, parseJWT, postData } = require("./common");
+import validate from "validate.js";
+import { getEndpoint, parseJWT, postData } from "./common";
 
 (function basicKyc() {
   "use strict";

@@ -12,8 +12,7 @@
 		"lint": "eslint \"**/*.js\"",
 		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
 		"start": "npm run build && npx serve -p 8000 build",
-		"test": "npx cypress run",
-		"watch": "watch 'npm run prestart' src"
+		"test": "npx cypress run"
 	},
 	"repository": {
 		"type": "git",

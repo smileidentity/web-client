@@ -4,8 +4,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-unit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - name: run unit tests
+        run: npx jest
+  test-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: checkout code, and install dependencies
         uses: actions/checkout@v4
@@ -15,8 +28,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: run unit tests
-        run: npx jest
       - name: run frontend tests
         uses: cypress-io/github-action@v6
         with:

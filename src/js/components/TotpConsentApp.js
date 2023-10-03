@@ -1,7 +1,7 @@
 "use strict";
 
 const validate = require("validate.js");
-const { postData } = require("./common");
+const { postData } = require("../common");
 
 function markup() {
   return `

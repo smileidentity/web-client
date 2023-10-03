@@ -6,7 +6,7 @@
 	"scripts": {
 		"build:dist": "NODE_ENV=production node esbuild.js",
 		"build": "NODE_ENV=development node esbuild.js",
-		"clean": "rimraf build dist",
+		"clean": "rm -rf build dist",
 		"instrument": "nyc instrument src build",
 		"lint:html": "npx prettier --write $(git ls-files '*.html')",
 		"lint": "eslint \"**/*.js\"",
@@ -18,29 +18,30 @@
 		"type": "git",
 		"url": "git+https://github.com/smileidentity/hosted-web-integration.git"
 	},
+	"type": "module",
 	"keywords": [],
 	"author": "tams sokari <tams@smileidentity.com>",
 	"bugs": {
 		"url": "https://github.com/smileidentity/hosted-web-integration/issues"
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
+	"dependencies": {
+		"esbuild": "^0.19.4",
+		"jszip": "^3.10.1",
+		"validate.js": "^0.13.1"
+	},
 	"devDependencies": {
 		"@cypress/code-coverage": "3.12.1",
 		"cypress": "^13.3.0",
+		"eslint": "^8.50.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-cypress": "^2.15.1",
 		"eslint-plugin-import": "^2.28.1",
+		"eslint-plugin-jest": "^27.4.2",
 		"eslint-plugin-prettier": "^5.0.0",
-		"eslint": "^8.50.0",
 		"nyc": "15.1.0",
 		"prettier": "^3.0.3",
 		"serve": "14.2.1"
-	},
-	"dependencies": {
-		"esbuild": "^0.19.4",
-		"jszip": "^3.10.1",
-		"rimraf": "^5.0.5",
-		"validate.js": "^0.13.1"
 	}
 }

@@ -1,6 +1,11 @@
 name: test
 on:
   workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -14,7 +19,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: run tests
+      - name: run unit tests
+        run: npx jest
+      - name: run frontend tests
         uses: cypress-io/github-action@v6
         with:
           start: npm start

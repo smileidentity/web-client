@@ -1,5 +1,5 @@
 const validate = require("validate.js");
-const { endpoints } = require("./common");
+const { getEndpoint, parseJWT, postData } = require("./common");
 
 var basicKyc = (function basicKyc() {
 	"use strict";
@@ -23,19 +23,6 @@ var basicKyc = (function basicKyc() {
 
 	var CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
-	function postData(url = '', data = {}) {
-		return fetch(url, {
-			method: 'POST',
-			mode: 'cors',
-			cache: 'no-cache',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
-		});
-	}
-
 	async function getProductConstraints() {
 		try {
 			const productsConfigPayload = {
@@ -44,9 +31,9 @@ var basicKyc = (function basicKyc() {
 				partner_params
 			}
 	
-			const productsConfigUrl = `${endpoints[config.environment]}/v1/products_config`;
+			const productsConfigUrl = `${getEndpoint(config.environment)}/v1/products_config`;
 			const productsConfigPromise = postData(productsConfigUrl, productsConfigPayload);
-			const servicesPromise = fetch(`${endpoints[config.environment]}/v1/services`);
+			const servicesPromise = fetch(`${getEndpoint(config.environment)}/v1/services`);
 			const [productsConfigResponse, servicesResponse] = await Promise.all([
 				productsConfigPromise,
 				servicesPromise
@@ -317,7 +304,7 @@ var basicKyc = (function basicKyc() {
 			main.removeChild(EndUserConsent);
 		}
 		EndUserConsent = document.createElement("end-user-consent");
-		EndUserConsent.setAttribute('base-url', `${endpoints[config.environment] || config.environment}/v1`);
+		EndUserConsent.setAttribute('base-url', `${getEndpoint(config.environment) || config.environment}/v1`);
 		EndUserConsent.setAttribute('country', id_info.country);
 		EndUserConsent.setAttribute('id-regex', productConstraints[id_info.country]['id_types'][id_info.id_type]['id_number_regex']);
 		EndUserConsent.setAttribute('id-type', id_info.id_type);
@@ -449,36 +436,7 @@ var basicKyc = (function basicKyc() {
 	}
 
 	function getPartnerParams() {
-		function parseJWT(token) {
-			/**
-			 * A JSON Web Token (JWT) uses a base64 URL encoded string in it's body.
-			 *
-			 * in order to get a regular JSON string, we would follow these steps:
-			 *
-			 * 1. get the body of a JWT string
-			 * 2. replace the base64 URL delimiters ( - and _ ) with regular URL delimiters ( + and / )
-			 * 3. convert the regular base64 string to a string
-			 * 4. encode the string from above as a URIComponent,
-			 *		ref: just above this - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent#examples
-			 * 5. decode the URI Component to a JSON string
-			 * 6. parse the JSON string to a javascript object
-			 */
-			var base64Url = token.split(".")[1];
-			var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-			var jsonPayload = decodeURIComponent(
-				atob(base64)
-					.split("")
-					.map(function (c) {
-						return "%" + c.charCodeAt(0).toString(16);
-					})
-					.join("")
-			);
-
-			return JSON.parse(jsonPayload);
-		}
-
 		const { partner_params: partnerParams } = parseJWT(config.token);
-
 		partner_params = { ...partnerParams, ...(config.partner_params || {}) };
 	}
 
@@ -671,7 +629,7 @@ var basicKyc = (function basicKyc() {
 			source_sdk_version: config.sdk_version || "v1.1.0"
 		};
 
-		const URL = `${endpoints[config.environment]}/v2/verify_async`;
+		const URL = `${getEndpoint(config.environment)}/v2/verify_async`;
 		const response = await postData(URL, payload);
 		const json = await response.json();
 

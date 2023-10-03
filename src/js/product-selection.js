@@ -1,4 +1,4 @@
-const { endpoints } = require("./common");
+const { getEndpoint } = require("./common");
 
 var productSelection = (function productSelection() {
 	'use strict';
@@ -206,7 +206,7 @@ var productSelection = (function productSelection() {
 					activeScreen = LoadingScreen;
 
 					try {
-						const servicesResponse = await fetch(`${endpoints[config.environment]}/v1/services`);
+						const servicesResponse = await fetch(`${getEndpoint(config.environment)}/v1/services`);
 
 						if (servicesResponse.ok) {
 							const services = await servicesResponse.json();

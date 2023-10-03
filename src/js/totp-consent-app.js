@@ -1,18 +1,6 @@
 'use strict';
 const validate = require("validate.js");
-
-function postData(url, data) {
-	return fetch(url, {
-		method: 'POST',
-		mode: 'cors',
-		cache: 'no-cache',
-		headers: {
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(data)
-	});
-}
+const { postData } = require("./common");
 
 function markup() {
 	return `

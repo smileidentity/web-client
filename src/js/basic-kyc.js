@@ -1,4 +1,4 @@
-const validate = require("validate.js");
+import validate from "validate.js";
 
 (function basicKyc() {
   "use strict";

@@ -1,4 +1,4 @@
-describe("smartselfie authentication ", () => {
+describe("smartselfie authentication", () => {
   beforeEach(() => {
     cy.visit("/smartselfie");
 

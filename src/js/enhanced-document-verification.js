@@ -1,4 +1,4 @@
-const JSZip = require("jszip");
+import JSZip from "jszip";
 
 (function enhancedDocumentVerification() {
   "use strict";

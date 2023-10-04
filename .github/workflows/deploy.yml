@@ -1,9 +1,8 @@
-name: deploy v1
+name: deploy production - v1
 
 on:
   push:
-    tags: v1
-    branches: main
+    tags: v1*
 
 jobs:
   test:

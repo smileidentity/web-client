@@ -25,6 +25,7 @@ jobs:
         with:
           start: npm start
           wait-on: 'http://localhost:8000'
+          env: MINIFY=true
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()

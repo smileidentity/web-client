@@ -91,6 +91,7 @@ if (process.env.NODE_ENV === "development") {
 
 const devOptions = {
   bundle: true,
+  minify: process.env.MINIFY === "true",
 };
 
 const prodOptions = {

@@ -95,8 +95,6 @@ When you're ready to create a new release for this project, follow the steps bel
    git commit -m "Bump version to [NEW_VERSION]"
    ```
 
-   Replace `[NEW_VERSION]` with your new version number.
-
 3. Push a new tag:
 
    Tag the new commit with the version number and push the tag to the repository:
@@ -105,5 +103,3 @@ When you're ready to create a new release for this project, follow the steps bel
    git tag v[NEW_VERSION]
    git push origin v[NEW_VERSION]
    ```
-
-   Again, replace `[NEW_VERSION]` with your new version number.

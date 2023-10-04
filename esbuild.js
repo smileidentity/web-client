@@ -95,7 +95,7 @@ const devOptions = {
 
 const prodOptions = {
   bundle: true,
-  minify: false,
+  minify: true,
 };
 
 files.forEach((file) => {

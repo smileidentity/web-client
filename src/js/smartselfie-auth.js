@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { version as sdkVersion } from "../../package.json";
 
 (function SmartSelfie() {
   "use strict";
@@ -186,7 +187,7 @@ import JSZip from "jszip";
   async function getUploadURL() {
     const payload = {
       source_sdk: config.sdk || "hosted_web",
-      source_sdk_version: config.sdk_version || "v1.1.0",
+      source_sdk_version: config.sdk_version || sdkVersion,
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
       callback_url: config.callback_url,

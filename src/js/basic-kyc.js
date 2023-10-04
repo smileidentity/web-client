@@ -1,4 +1,5 @@
 import validate from "validate.js";
+import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {
   "use strict";
@@ -723,7 +724,7 @@ import validate from "validate.js";
       callback_url,
       token,
       source_sdk: config.sdk || "hosted_web",
-      source_sdk_version: config.sdk_version || "v1.1.0",
+      source_sdk_version: config.sdk_version || sdkVersion,
     };
 
     const URL = `${endpoints[config.environment]}/v2/verify_async`;

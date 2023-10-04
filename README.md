@@ -71,3 +71,39 @@ NOTE: the `npm start` command must be running in a separate terminal window.
 
 - `cypress.config.js`: Main Cypress configuration file.
 - `cypress/pages/`: Contains all the utility pages.
+
+## Creating a Release
+
+When you're ready to create a new release for this project, follow the steps below:
+
+1. Bump the version in the `package.json` file:
+
+   You can do this manually or use npm commands to update the version. For example, to bump a patch:
+
+   ```bash
+   npm version patch
+   ```
+
+   This will increase the patch version (e.g., from v1.0.0 to v1.0.1). Similarly, you can use `npm version minor` or `npm version major` for minor and major version bumps respectively.
+
+2. Commit the change:
+
+   If you used the npm version command, it will automatically commit the change for you with a commit message like "1.0.1". If you updated the `package.json` file manually, ensure you commit the change:
+
+   ```bash
+   git add package.json
+   git commit -m "Bump version to [NEW_VERSION]"
+   ```
+
+   Replace `[NEW_VERSION]` with your new version number.
+
+3. Push a new tag:
+
+   Tag the new commit with the version number and push the tag to the repository:
+
+   ```bash
+   git tag v[NEW_VERSION]
+   git push origin v[NEW_VERSION]
+   ```
+
+   Again, replace `[NEW_VERSION]` with your new version number.

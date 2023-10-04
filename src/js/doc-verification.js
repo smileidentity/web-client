@@ -191,11 +191,14 @@ import JSZip from "jszip";
       ).id_types;
 
       if (config.id_selection) {
-        return countryIdTypes.filter((idType) =>
-          config.id_selection[countryCode].find(
-            (validIdType) => validIdType === idType.code,
-          ),
-        );
+        return countryIdTypes.filter((idType) => {
+          return config.id_selection[countryCode].find((validIdType) => {
+            if (validIdType === "Others") {
+              return !idType.code;
+            }
+            return validIdType === idType.code;
+          });
+        });
       }
 
       return countryIdTypes;
@@ -268,12 +271,14 @@ import JSZip from "jszip";
           console.error(
             `SmileIdentity - ${countryCode}-${idSelectionIdType} has been deprecated`,
           );
-          constraints[countryIndex].id_types.push({
-            code: idSelectionIdType,
-            has_back: false,
-            name: legacyConstraints[countryCode].id_types[idSelectionIdType]
-              .label,
-          });
+          if (idSelectionIdType !== "Others") {
+            constraints[countryIndex].id_types.push({
+              code: idSelectionIdType,
+              has_back: false,
+              name: legacyConstraints[countryCode].id_types[idSelectionIdType]
+                .label,
+            });
+          }
         });
       });
 

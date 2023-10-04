@@ -116,6 +116,20 @@ describe("legacy support - preselected country / id_types", () => {
     cy.visit("/document-verification-legacy-id_types");
   });
 
+  it("should show the Others input when selected", () => {
+    cy.getIFrameBody()
+      .find("smileid-combobox-trigger input")
+      .type("South Africa");
+
+    cy.getIFrameBody().find('smileid-combobox-option[value="ZA"]').click();
+
+    cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+
+    cy.getIFrameBody()
+      .find('smileid-combobox-option[value=""]')
+      .should("be.visible");
+  });
+
   it("should allow legacy id_types without capturing the back", () => {
     cy.selectZAGREENBOOKIDType();
 

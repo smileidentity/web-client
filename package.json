@@ -17,8 +17,11 @@
     "WebComponent",
     "WebRTC"
   ],
+  "files": [
+    "smart-camera-web.js"
+  ],
   "author": "Tams Sokari <tams@smileidentity.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/smileidentity/smart-camera-web/issues"
   },

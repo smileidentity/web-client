@@ -1,6 +1,6 @@
 {
 	"name": "@smile_identity/web-page",
-	"version": "1.0.0",
+	"version": "v1.1.0",
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"main": "inline.js",
 	"scripts": {

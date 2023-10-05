@@ -923,4 +923,4 @@ class TotpBasedConsent extends HTMLElement {
   }
 }
 
-window.customElements.define("totp-consent-app", TotpBasedConsent);
+export default TotpBasedConsent;

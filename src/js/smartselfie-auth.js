@@ -1,3 +1,4 @@
+import "@smile_identity/smart-camera-web";
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 

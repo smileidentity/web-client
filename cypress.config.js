@@ -1,4 +1,4 @@
-import { defineConfig } from "cypress"; // eslint-disable-line import/no-extraneous-dependencies
+import { defineConfig } from "cypress";
 
 const config = defineConfig({
   e2e: {

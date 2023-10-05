@@ -29,6 +29,7 @@ module.exports = {
   rules: {
     "class-methods-use-this": 0,
     "func-names": 0,
+    "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
     "max-len": 0,
     "no-console": ["error", { allow: ["error"] }],
     "no-param-reassign": 0,

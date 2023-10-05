@@ -842,4 +842,4 @@ class EndUserConsent extends HTMLElement {
   }
 }
 
-window.customElements.define("end-user-consent", EndUserConsent);
+export default EndUserConsent;

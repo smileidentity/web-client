@@ -1,4 +1,5 @@
 import validate from "validate.js";
+import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
 
 (function eKYC() {
@@ -15,6 +16,7 @@ import TotpBasedConsent from "./components/TotpConsentApp";
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  window.customElements.define("end-user-consent", ConsentScreen);
   window.customElements.define("totp-consent-app", TotpBasedConsent);
 
   const pages = [];

@@ -110,27 +110,27 @@ import JSZip from "jszip";
     const autocomplete = document.createElement("smileid-combobox");
     autocomplete.setAttribute("id", "country");
     autocomplete.innerHTML = `
-			<smileid-combobox-trigger
-				${isSingleCountry ? "disabled" : ""}
-				${isSingleCountry ? `value="${countries[0].name}"` : ""}
-				label="Search Country">
-			</smileid-combobox-trigger>
+      <smileid-combobox-trigger
+        ${isSingleCountry ? "disabled" : ""}
+        ${isSingleCountry ? `value="${countries[0].name}"` : ""}
+        label="Search Country">
+      </smileid-combobox-trigger>
 
-			<smileid-combobox-listbox empty-label="No country found">
-				${countries
+      <smileid-combobox-listbox empty-label="No country found">
+        ${countries
           .map(
             (country) =>
               `
-						<smileid-combobox-option ${
+            <smileid-combobox-option ${
               isSingleCountry ? 'aria-selected="true" ' : ""
             }value="${country.code}" label="${country.name}">
-							${country.name}
-						</smileid-combobox-option>
-					`,
+              ${country.name}
+            </smileid-combobox-option>
+          `,
           )
           .join("\n")}
-			</smileid-combobox-listbox>
-		`;
+      </smileid-combobox-listbox>
+    `;
 
     placeholderElement.replaceWith(autocomplete);
 
@@ -146,18 +146,18 @@ import JSZip from "jszip";
     }
 
     combobox.innerHTML = `
-			<smileid-combobox-trigger type="button" label="Select Document">
-			</smileid-combobox-trigger>
+      <smileid-combobox-trigger type="button" label="Select Document">
+      </smileid-combobox-trigger>
 
-			<smileid-combobox-listbox empty-label="No country found">
-				${idTypes
+      <smileid-combobox-listbox empty-label="No country found">
+        ${idTypes
           .map(
             (idType) =>
               `
-						<smileid-combobox-option value="${idType.code}" label="${idType.name}">
-							<div>
-								<p>${idType.name}</p>
-								${
+            <smileid-combobox-option value="${idType.code}" label="${idType.name}">
+              <div>
+                <p>${idType.name}</p>
+                ${
                   idType.name === "Others" ||
                   (idType.example && idType.example.length > 1)
                     ? `<small>${
@@ -165,13 +165,13 @@ import JSZip from "jszip";
                       }${idType.example.join(", ")}</small>`
                     : ""
                 }
-							</div>
-						</smileid-combobox-option>
-					`,
+              </div>
+            </smileid-combobox-option>
+          `,
           )
           .join("\n")}
-			</smileid-combobox-listbox>
-		`;
+      </smileid-combobox-listbox>
+    `;
 
     if (idTypeSelector.hidden) {
       idTypeSelector.appendChild(combobox);

@@ -274,7 +274,7 @@ import { version as sdkVersion } from "../../package.json";
           console.error(
             `SmileIdentity - ${countryCode}-${idSelectionIdType} has been deprecated`,
           );
-          if (idSelectionIdType !== "Others") {
+          if (idSelectionIdType.toLowerCase() !== "others") {
             constraints[countryIndex].id_types.push({
               code: idSelectionIdType,
               has_back: false,

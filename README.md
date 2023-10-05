@@ -1,7 +1,7 @@
 # hosted-web-integration
 
-[![Cypress Tests](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy-staging.yml)
-[![Cypress Tests](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy.yml/badge.svg)](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy.yml)
+[![Staging Status](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy-staging.yml)
+[![Production Status](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy.yml/badge.svg)](https://github.com/smileidentity/hosted-web-integration/actions/workflows/deploy.yml)
 
 ## Overview
 

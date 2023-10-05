@@ -1,4 +1,5 @@
 import validate from "validate.js";
+import TotpBasedConsent from "./components/TotpConsentApp";
 
 (function basicKyc() {
   "use strict";
@@ -14,6 +15,7 @@ import validate from "validate.js";
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  window.customElements.define("totp-consent-app", TotpBasedConsent);
 
   const pages = [];
   let activeScreen;

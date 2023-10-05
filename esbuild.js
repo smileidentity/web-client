@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import esbuild from "esbuild";
+import { glob } from "glob";
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -79,10 +80,6 @@ const prebuild = () => {
   copyFiles("cypress/pages", "*.html", "build");
 };
 
-const files = fs
-  .readdirSync("src/js/", { recursive: true })
-  .filter((file) => file.endsWith(".js"));
-
 if (process.env.NODE_ENV === "development") {
   prebuild();
 } else {
@@ -99,21 +96,21 @@ const prodOptions = {
   minify: true,
 };
 
+const files = glob.sync("src/js/**/*.js");
+
 files.forEach((file) => {
   const baseName = path.basename(file, ".js");
-  const dir = path.dirname(file);
-
   if (process.env.NODE_ENV === "development") {
     esbuild.build({
       ...devOptions,
-      entryPoints: [`src/js/${file}`],
-      outfile: `build/js/${dir}/${baseName}.min.js`,
+      entryPoints: [file],
+      outfile: `build/js/${baseName}.min.js`,
     });
   } else {
     esbuild.build({
       ...prodOptions,
       entryPoints: [`src/js/${file}`],
-      outfile: `dist/js/${dir}/${baseName}.min.js`,
+      outfile: `dist/js/${baseName}.min.js`,
     });
   }
 });

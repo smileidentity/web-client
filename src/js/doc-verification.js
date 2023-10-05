@@ -154,7 +154,9 @@ import JSZip from "jszip";
           .map(
             (idType) =>
               `
-            <smileid-combobox-option value="${idType.code}" label="${idType.name}">
+            <smileid-combobox-option value="${idType.code}" label="${
+              idType.name
+            }">
               <div>
                 <p>${idType.name}</p>
                 ${

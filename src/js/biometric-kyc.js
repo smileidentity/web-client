@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import validate from "validate.js";
+import "@smile_identity/smart-camera-web";
 import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
 

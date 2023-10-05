@@ -1,3 +1,4 @@
+import "@smile_identity/smart-camera-web";
 import JSZip from "jszip";
 
 (function documentVerification() {

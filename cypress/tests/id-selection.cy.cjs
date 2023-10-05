@@ -204,6 +204,10 @@ describe("No ID Selection", () => {
 });
 
 describe("Preselected Country", () => {
+  beforeEach(() => {
+    cy.loadIDOptions();
+  });
+
   it("basic_kyc", () => {
     cy.visit("/basic_kyc_pre_select_country");
 
@@ -326,7 +330,11 @@ describe("Preselected Country", () => {
 
     cy.getIFrameBody().find("#country").should("contain", "Nigeria");
 
-    cy.getIFrameBody().find("#id_type").select("PASSPORT");
+    cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+
+    cy.getIFrameBody()
+      .find('smileid-combobox-option[value="PASSPORT"]')
+      .click();
 
     cy.getIFrameBody().find("#submitConfig").click();
 
@@ -429,6 +437,10 @@ describe("Preselected Country", () => {
 });
 
 describe("Preselected Country and ID Type", () => {
+  beforeEach(() => {
+    cy.loadIDOptions();
+  });
+
   it("basic_kyc", () => {
     cy.visit("/basic_kyc_pre_select_id_type");
 
@@ -556,9 +568,7 @@ describe("Preselected Country and ID Type", () => {
 
     cy.loadIDOptions();
 
-    cy.getIFrameBody().find("#country").should("not.be.visible");
-
-    cy.getIFrameBody().find("#id_type").should("not.be.visible");
+    cy.getIFrameBody().find("#id_type").should("not.exist");
 
     cy.getIFrameBody().find("smart-camera-web").should("be.visible");
 

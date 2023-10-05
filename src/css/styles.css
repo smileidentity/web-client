@@ -175,7 +175,7 @@ select {
     right 10px top 50%,
     0 0;
   background-size:
-    12px auto,
+    24px auto,
     100%;
 }
 
@@ -215,6 +215,7 @@ button[data-variant="outline"] {
 
 button[data-variant="ghost"] {
   color: var(--button-color);
+  padding: 0px;
 }
 
 button:hover,
@@ -295,6 +296,10 @@ button[data-type="icon"] {
   --flow-space: 1.5rem;
 }
 
+.input-group > * {
+  --flow-space: 1.5rem;
+}
+
 .justify-right {
   justify-content: end !important;
 }
@@ -304,6 +309,11 @@ button[data-type="icon"] {
   justify-content: space-between;
 }
 
+.back-wrapper {
+  display: flex;
+  align-items: center;
+}
+
 .back-button {
   display: block !important;
 }
@@ -311,7 +321,7 @@ button[data-type="icon"] {
 .back-button-text {
   font-size: 11px;
   line-height: 11px;
-  color: #3886f7;
+  color: rgb(21, 31, 114);
 }
 
 .user-details {
@@ -423,4 +433,128 @@ button[data-type="icon"] {
     stroke-dasharray: 90, 150;
     stroke-dashoffset: -124;
   }
+}
+
+/**
+ * Combobox Styles
+ */
+smileid-combobox {
+  display: block;
+  position: relative;
+  inline-size: 100%;
+}
+
+smileid-combobox-trigger {
+  border: 1px solid #d1d8d6;
+  border-radius: 0.5rem;
+  display: block;
+  inline-size: 100%;
+}
+
+smileid-combobox-trigger > * {
+  inline-size: 100%;
+  block-size: 3rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+smileid-combobox-trigger svg {
+  margin-inline-end: 0.5rem;
+  flex-shrink: 0;
+}
+
+smileid-combobox-trigger input {
+  appearance: none;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+}
+
+smileid-combobox-trigger button {
+  color: initial;
+  display: initial;
+  font-size: initial;
+  font-weight: initial;
+  text-align: initial;
+  background-repeat: no-repeat, repeat;
+  background-position:
+    right 1rem top 50%,
+    0 0;
+  background-size:
+    24px auto,
+    100%;
+}
+
+smileid-combobox-trigger input ~ button {
+  display: block;
+  padding: 0px;
+  flex-shrink: 0;
+  background-position: right 0px;
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+smileid-combobox-trigger[expanded="true"] button {
+  background-image: url(../img/icons/chevron-up.svg);
+}
+
+smileid-combobox-trigger[expanded="false"] button {
+  background-image: url(../img/icons/chevron-down.svg);
+}
+
+smileid-combobox-trigger:focus-within {
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+smileid-combobox-trigger button:focus,
+smileid-combobox-trigger input:focus {
+  outline: none;
+}
+
+smileid-combobox-listbox {
+  background-color: white;
+
+  inline-size: 100%;
+  max-block-size: 10rem;
+
+  margin-block-start: 0.5rem;
+  flex-direction: column;
+  overflow-y: scroll;
+  border: 1px solid black;
+  border-radius: 0.25rem;
+
+  position: absolute;
+  top: 3rem;
+  z-index: 1;
+}
+
+smileid-combobox-trigger[expanded="false"] ~ smileid-combobox-listbox {
+  display: none;
+}
+
+smileid-combobox-trigger[expanded="true"] ~ smileid-combobox-listbox {
+  display: flex;
+}
+
+smileid-combobox-option {
+  box-sizing: border-box;
+  inline-size: 100%;
+  display: block;
+  padding: 0.75rem 1rem;
+}
+
+smileid-combobox-option:hover,
+smileid-combobox-option[tabindex="0"] {
+  background-color: #f9f0e7;
+}
+
+smileid-combobox-option[aria-selected] {
+  background-color: #151f72;
+  color: #fff;
+}
+
+smileid-combobox-option[hidden] {
+  display: none;
 }

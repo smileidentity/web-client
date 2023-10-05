@@ -21,8 +21,12 @@ describe("Verification Method Selection", () => {
     });
 
     describe("doc_verification", () => {
-      it("should redirect to the biometric kyc sequence in a nested iframe", () => {
-        cy.selectPASSPORTIDType();
+      it("should redirect to the document verification sequence in a nested iframe", () => {
+        cy.getIFrameBody().find("#country").select("NG");
+
+        cy.getIFrameBody().find("#id_type").select("PASSPORT");
+
+        cy.getIFrameBody().find("#submitConfig").click();
 
         cy.getIFrameBody()
           .find(
@@ -37,7 +41,7 @@ describe("Verification Method Selection", () => {
     });
 
     describe("enhanced_kyc", () => {
-      it("should redirect to the biometric kyc sequence in a nested iframe", () => {
+      it("should redirect to the enhanced kyc sequence in a nested iframe", () => {
         cy.selectNINIDType();
 
         cy.getIFrameBody()

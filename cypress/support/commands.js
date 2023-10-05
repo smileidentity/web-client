@@ -42,6 +42,10 @@ Cypress.Commands.add("loadIDOptions", () => {
 
   cy.intercept("GET", "**/v1/services", { fixture: "services.json" });
 
+  cy.intercept("POST", "**/v1/valid_documents", {
+    fixture: "valid_documents.json",
+  });
+
   cy.intercept("POST", "**/v1/products_config", {
     fixture: "products_config.json",
   });
@@ -133,9 +137,33 @@ Cypress.Commands.add("selectPASSPORTIDType", () => {
 
   cy.log("selectingPASSPORTIDType");
 
-  cy.getIFrameBody().find("#country").select("NG");
+  cy.getIFrameBody().find("smileid-combobox-trigger input").type("Nigeria");
 
-  cy.getIFrameBody().find("#id_type").select("PASSPORT");
+  cy.getIFrameBody().find('smileid-combobox-option[value="NG"]').click();
+
+  cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+
+  cy.getIFrameBody().find('smileid-combobox-option[value="PASSPORT"]').click();
+
+  cy.getIFrameBody().find("#submitConfig").click();
+});
+
+Cypress.Commands.add("selectZAGREENBOOKIDType", () => {
+  cy.loadIDOptions();
+
+  cy.log("selectingPASSPORTIDType");
+
+  cy.getIFrameBody()
+    .find("smileid-combobox-trigger input")
+    .type("South Africa");
+
+  cy.getIFrameBody().find('smileid-combobox-option[value="ZA"]').click();
+
+  cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+
+  cy.getIFrameBody()
+    .find('smileid-combobox-option[value="GREEN_BOOK"]')
+    .click();
 
   cy.getIFrameBody().find("#submitConfig").click();
 });

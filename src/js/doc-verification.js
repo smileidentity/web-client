@@ -193,7 +193,7 @@ import JSZip from "jszip";
       if (config.id_selection) {
         return countryIdTypes.filter((idType) => {
           return config.id_selection[countryCode].find((validIdType) => {
-            if (validIdType === "Others") {
+            if (validIdType.toLowerCase() === "others") {
               return !idType.code;
             }
             return validIdType === idType.code;

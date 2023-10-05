@@ -16,6 +16,7 @@ import TotpBasedConsent from "./components/TotpConsentApp";
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+
   window.customElements.define("end-user-consent", ConsentScreen);
   window.customElements.define("totp-consent-app", TotpBasedConsent);
 

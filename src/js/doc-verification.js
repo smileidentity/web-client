@@ -7,7 +7,6 @@ import { version as sdkVersion } from "../../package.json";
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: "https://devapi.smileidentity.com/v1",
     sandbox: "https://testapi.smileidentity.com/v1",
     live: "https://api.smileidentity.com/v1",
     production: "https://api.smileidentity.com/v1",
@@ -21,7 +20,6 @@ import { version as sdkVersion } from "../../package.json";
   let id_info;
   let images;
   let partner_params;
-  let productConstraints;
 
   const LoadingScreen = document.querySelector("#loading-screen");
   const SelectIDType = document.querySelector("#select-id-type");
@@ -39,8 +37,51 @@ import { version as sdkVersion } from "../../package.json";
   let uploadURL;
 
   async function getProductConstraints() {
+    const payload = {
+      token: config.token,
+      partner_id: config.partner_details.partner_id,
+    };
+
+    const fetchConfig = {
+      cache: "no-cache",
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(payload),
+    };
+
     try {
-      const response = await fetch(`${endpoints[config.environment]}/services`);
+      const response = await fetch(
+        `${endpoints[config.environment]}/valid_documents`,
+        fetchConfig,
+      );
+      const json = await response.json();
+
+      return json.valid_documents;
+    } catch (e) {
+      throw new Error("Failed to get supported ID types", { cause: e });
+    }
+  }
+
+  async function getLegacyProductConstraints() {
+    const fetchConfig = {
+      cache: "no-cache",
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    };
+
+    try {
+      const response = await fetch(
+        `${endpoints[config.environment]}/services`,
+        fetchConfig,
+      );
       const json = await response.json();
 
       return json.hosted_web.doc_verification;
@@ -56,7 +97,7 @@ import { version as sdkVersion } from "../../package.json";
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
 
-        productConstraints = await getProductConstraints();
+        const productConstraints = await getProductConstraints();
         initializeSession(productConstraints);
         getPartnerParams();
       }
@@ -64,11 +105,120 @@ import { version as sdkVersion } from "../../package.json";
     false,
   );
 
-  function initializeSession(constraints) {
-    const supportedCountries = Object.keys(constraints)
-      .map((countryCode) => ({
-        code: countryCode,
-        name: constraints[countryCode].name,
+  function loadCountrySelector(countries, placeholderElement) {
+    const isSingleCountry = countries.length === 1;
+
+    const autocomplete = document.createElement("smileid-combobox");
+    autocomplete.setAttribute("id", "country");
+    autocomplete.innerHTML = `
+      <smileid-combobox-trigger
+        ${isSingleCountry ? "disabled" : ""}
+        ${isSingleCountry ? `value="${countries[0].name}"` : ""}
+        label="Search Country">
+      </smileid-combobox-trigger>
+
+      <smileid-combobox-listbox empty-label="No country found">
+        ${countries
+          .map(
+            (country) =>
+              `
+            <smileid-combobox-option ${
+              isSingleCountry ? 'aria-selected="true" ' : ""
+            }value="${country.code}" label="${country.name}">
+              ${country.name}
+            </smileid-combobox-option>
+          `,
+          )
+          .join("\n")}
+      </smileid-combobox-listbox>
+    `;
+
+    placeholderElement.replaceWith(autocomplete);
+
+    return autocomplete;
+  }
+
+  function loadIdTypeSelector(idTypes) {
+    const idTypeSelector = document.querySelector("#id-type-selector");
+    let combobox = document.querySelector('smileid-combobox[id="id_type"]');
+    if (!combobox) {
+      combobox = document.createElement("smileid-combobox");
+      combobox.setAttribute("id", "id_type");
+    }
+
+    combobox.innerHTML = `
+      <smileid-combobox-trigger type="button" label="Select Document">
+      </smileid-combobox-trigger>
+
+      <smileid-combobox-listbox empty-label="No country found">
+        ${idTypes
+          .map(
+            (idType) =>
+              `
+            <smileid-combobox-option value="${idType.code}" label="${
+              idType.name
+            }">
+              <div>
+                <p>${idType.name}</p>
+                ${
+                  idType.name === "Others" ||
+                  (idType.example && idType.example.length > 1)
+                    ? `<small>${
+                        idType.example.length > 1 ? "e.g. " : ""
+                      }${idType.example.join(", ")}</small>`
+                    : ""
+                }
+              </div>
+            </smileid-combobox-option>
+          `,
+          )
+          .join("\n")}
+      </smileid-combobox-listbox>
+    `;
+
+    if (idTypeSelector.hidden) {
+      idTypeSelector.appendChild(combobox);
+      idTypeSelector.removeAttribute("hidden");
+    }
+
+    return combobox;
+  }
+
+  async function initializeSession(constraints) {
+    let selectedCountry;
+    let selectedIdType;
+
+    function loadIdTypes(countryCode) {
+      const countryIdTypes = constraints.find(
+        (item) => item.country.code === countryCode,
+      ).id_types;
+
+      if (config.id_selection) {
+        return countryIdTypes.filter((idType) => {
+          return config.id_selection[countryCode].find((validIdType) => {
+            if (validIdType.toLowerCase() === "others") {
+              return !idType.code;
+            }
+            return validIdType === idType.code;
+          });
+        });
+      }
+
+      return countryIdTypes;
+    }
+
+    function initialiseIdTypeSelector(country, selectIdType) {
+      const idTypes = loadIdTypes(country);
+      const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
+      idTypeSelector.addEventListener("change", (e) => {
+        selectedIdType = e.detail.value;
+      });
+    }
+
+    const supportedCountries = constraints
+      .map(({ country: { name, code } }) => ({
+        code,
+        name,
       }))
       .sort((a, b) => {
         if (a.name < b.name) {
@@ -84,13 +234,64 @@ import { version as sdkVersion } from "../../package.json";
     let validCountries = [];
 
     if (config.id_selection) {
+      /**
+       * when id selection list is made, we have two sources for id_types:
+       *  1. `valid_documents`, the new approach
+       *  2. `services`, the old approach
+       *
+       * what we want to do is extend the `valid_documents` entries with the
+       * entries from `services` that are not present.
+       *
+       * the steps to do that are:
+       * 1. Get the legacyConstraints
+       * 2. Add the absent entries to the new constraints `id_types` in the same
+       *       format
+       */
+      const legacyConstraints = await getLegacyProductConstraints();
+      Object.keys(config.id_selection).forEach((countryCode) => {
+        /**
+         * 1. find out if the country code is in the new constraints list
+         * 2. find out if the id_type is in the id_types list
+         *   2.1. if in the list, continue
+         *   2.3. if not in the list, log a deprecated message, and add it
+         */
+        const isCountrySupported = supportedCountries.includes(countryCode);
+
+        if (!isCountrySupported) {
+          throw new Error(`SmileIdentity - ${countryCode} is not supported`);
+        }
+
+        const countryIndex = constraints.findIndex(
+          (entry) => entry.country.code === countryCode,
+        );
+
+        config.id_selection[countryCode].forEach((idSelectionIdType) => {
+          const isIdTypeSupported = constraints[countryIndex].id_types.find(
+            (constrainedIdType) => idSelectionIdType === constrainedIdType.code,
+          );
+
+          if (isIdTypeSupported) return;
+          console.error(
+            `SmileIdentity - ${countryCode}-${idSelectionIdType} has been deprecated`,
+          );
+          if (idSelectionIdType.toLowerCase() !== "others") {
+            constraints[countryIndex].id_types.push({
+              code: idSelectionIdType,
+              has_back: false,
+              name: legacyConstraints[countryCode].id_types[idSelectionIdType]
+                .label,
+            });
+          }
+        });
+      });
+
       const selectedCountryList = Object.keys(config.id_selection);
       validCountries = supportedCountries.filter((value) =>
         selectedCountryList.includes(value),
       );
 
       if (validCountries.length === 1) {
-        const selectedCountry = validCountries[0];
+        selectedCountry = validCountries[0];
         id_info = {
           country: validCountries[0],
         };
@@ -98,10 +299,16 @@ import { version as sdkVersion } from "../../package.json";
         const idTypes = config.id_selection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === "string") {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
+          const documentCaptureConfig = constraints
+            .find((entry) => entry.country.code === selectedCountry)
+            .id_types.find((entry) => entry.code === id_info.id_type);
 
           // ACTION: set initial screen
           SmartCameraWeb.setAttribute("document-type", id_info.id_type);
           // ACTION: set document capture mode
+          if (documentCaptureConfig.has_back) {
+            SmartCameraWeb.setAttribute("capture-id", "back");
+          }
           if (config.document_capture_modes) {
             SmartCameraWeb.setAttribute(
               "document-capture-modes",
@@ -118,9 +325,19 @@ import { version as sdkVersion } from "../../package.json";
       validCountries = supportedCountries;
     }
 
+    const countries = validCountries.map((countryCode) => {
+      const countryObject = constraints.find(
+        (entry) => entry.country.code === countryCode,
+      ).country;
+
+      return {
+        code: countryCode,
+        name: countryObject.name,
+      };
+    });
+
     if (!id_info || !id_info.id_type) {
       const selectCountry = SelectIDType.querySelector("#country");
-      const selectIDType = SelectIDType.querySelector("#id_type");
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',
       );
@@ -131,86 +348,40 @@ import { version as sdkVersion } from "../../package.json";
       // ACTION: Enable select screen
       setActiveScreen(SelectIDType);
 
-      const loadIdTypes = (countryCode) => {
-        if (countryCode) {
-          const constrainedIDTypes = Object.keys(
-            productConstraints[countryCode].id_types,
-          );
-          const validIDTypes = config.id_selection
-            ? config.id_selection[countryCode]
-            : constrainedIDTypes;
-          const selectedIDTypes = validIDTypes.filter((value) =>
-            constrainedIDTypes.includes(value),
-          );
+      // ACTION: Load Countries using combobox
+      const countrySelector = loadCountrySelector(countries, selectCountry);
+      countrySelector.addEventListener("change", (e) => {
+        selectedCountry = e.detail ? e.detail.value : "";
 
-          // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
-          const initialOption = document.createElement("option");
-          initialOption.setAttribute("value", "");
-          initialOption.textContent = "--Please Select--";
-          selectIDType.appendChild(initialOption);
-
-          // ACTION: Load ID Types as <option>s
-          selectedIDTypes.forEach((IDType) => {
-            const option = document.createElement("option");
-            option.setAttribute("value", IDType);
-            option.textContent =
-              productConstraints[countryCode].id_types[IDType].label;
-            selectIDType.appendChild(option);
-          });
-
-          // ACTION: Enable ID Type Selection
-          selectIDType.disabled = false;
-        } else {
-          // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
-
-          // ACTION: Load the default <option>
-          const option = document.createElement("option");
-          option.disabled = true;
-          option.setAttribute("value", "");
-          option.textContent = "--Select Country First--";
-          selectIDType.appendChild(option);
-        }
-      };
-
-      // ACTION: Load Countries as <option>s
-      validCountries.forEach((country) => {
-        const countryObject = productConstraints[country];
-
-        if (countryObject) {
-          const option = document.createElement("option");
-          option.setAttribute("value", country);
-          option.textContent = constraints[country].name;
-
-          if (id_info && id_info.country && country === id_info.country) {
-            option.setAttribute("selected", true);
-            selectCountry.value = country;
-            selectCountry.disabled = true;
-            loadIdTypes(country);
-          }
-
-          selectCountry.appendChild(option);
-        }
+        // ACTION: Load id types using combobox
+        initialiseIdTypeSelector(selectedCountry);
       });
 
-      selectCountry.addEventListener("change", (e) => {
-        loadIdTypes(e.target.value);
-      });
+      if (id_info && id_info.country) {
+        selectedCountry = id_info.country;
+
+        // ACTION: Load id types using combobox
+        initialiseIdTypeSelector(selectedCountry);
+      }
 
       hostedWebConfigForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const selectedCountry = selectCountry.value;
-        const selectedIDType = selectIDType.value;
 
         // ACTION: set up `id_info`
         id_info = {
           country: selectedCountry,
-          id_type: selectedIDType,
+          id_type: selectedIdType,
         };
 
-        SmartCameraWeb.setAttribute("document-type", selectedIDType);
+        SmartCameraWeb.setAttribute("document-type", selectedIdType);
+        const documentCaptureConfig = constraints
+          .find((entry) => entry.country.code === selectedCountry)
+          .id_types.find((entry) => entry.code === selectedIdType);
+
         // ACTION: set document capture mode
+        if (documentCaptureConfig.has_back) {
+          SmartCameraWeb.setAttribute("capture-id", "back");
+        }
         if (config.document_capture_modes) {
           SmartCameraWeb.setAttribute(
             "document-capture-modes",
@@ -220,20 +391,6 @@ import { version as sdkVersion } from "../../package.json";
         setActiveScreen(SmartCameraWeb);
       });
     }
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  function initiateDemoMode() {
-    const demoTips = document.querySelectorAll(".demo-tip");
-    Array.prototype.forEach.call(demoTips, (tip) => {
-      tip.hidden = false;
-    });
-
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "js/demo-doc-verification.min.js";
-
-    document.body.appendChild(script);
   }
 
   SmartCameraWeb.addEventListener(

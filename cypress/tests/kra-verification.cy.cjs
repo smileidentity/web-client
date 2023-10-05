@@ -91,6 +91,7 @@ describe("KRA PIN verification enhanced kyc", () => {
       },
     ).as("submitIdVerification");
 
+    cy.loadIDOptions();
     cy.visit("/kra-verification-ekyc");
 
     cy.selectKRAType();

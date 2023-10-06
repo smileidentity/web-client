@@ -71,8 +71,6 @@ class Combobox extends HTMLElement {
   }
 }
 
-window.customElements.define("smileid-combobox", Combobox);
-
 class ComboboxTrigger extends HTMLElement {
   constructor() {
     super();
@@ -320,8 +318,6 @@ class ComboboxTrigger extends HTMLElement {
   }
 }
 
-window.customElements.define("smileid-combobox-trigger", ComboboxTrigger);
-
 class ComboboxListbox extends HTMLElement {
   constructor() {
     super();
@@ -528,8 +524,6 @@ class ComboboxListbox extends HTMLElement {
   }
 }
 
-window.customElements.define("smileid-combobox-listbox", ComboboxListbox);
-
 class ComboboxOption extends HTMLElement {
   connectedCallback() {
     this.setAttribute("role", "option");
@@ -577,4 +571,9 @@ class ComboboxOption extends HTMLElement {
   }
 }
 
-window.customElements.define("smileid-combobox-option", ComboboxOption);
+export default Combobox = {
+  Root: Combobox,
+  Trigger: ComboboxTrigger,
+  List: ComboboxListbox,
+  Option: ComboboxOption,
+};

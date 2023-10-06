@@ -38,7 +38,7 @@ function maintainScrollVisibility(activeElement, scrollParent) {
   }
 }
 
-class Combobox extends HTMLElement {
+class ComboboxRoot extends HTMLElement {
   constructor() {
     super();
 
@@ -571,8 +571,8 @@ class ComboboxOption extends HTMLElement {
   }
 }
 
-export default Combobox = {
-  Root: Combobox,
+export default {
+  Root: ComboboxRoot,
   Trigger: ComboboxTrigger,
   List: ComboboxListbox,
   Option: ComboboxOption,

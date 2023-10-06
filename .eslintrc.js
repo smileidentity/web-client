@@ -6,6 +6,10 @@ module.exports = {
     es2021: true,
   },
   extends: 'airbnb-base',
+  ignorePatterns: [
+    'cypress/pages/instrumented/**',
+    'node_modules/',
+  ],
   parserOptions: {
     ecmaVersion: 'latest',
   },

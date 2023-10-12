@@ -304,6 +304,19 @@
         </p>
 
         <form name="user-details" class="flow">
+          <fieldset hidden id='bank-code' data-variant='start'>
+            <label class="required" for="bank_code"> Bank </label>
+
+            <select
+              aria-required="true"
+              name="bank_code"
+              id="bank_code"
+              required
+            >
+              <option key="" value="">--Select Bank--</option>
+            </select>
+          </fieldset>
+
           <div hidden id="id-number" class="input-group flow">
             <label class="required" for="id_number"> ID Number </label>
 

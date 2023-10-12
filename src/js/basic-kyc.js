@@ -1,6 +1,7 @@
 import validate from "validate.js";
 import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
+import Combobox from './components/Combobox';
 import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {
@@ -21,12 +22,18 @@ import { version as sdkVersion } from "../../package.json";
   window.customElements.define("end-user-consent", ConsentScreen);
   window.customElements.define("totp-consent-app", TotpBasedConsent);
 
+  window.customElements.define("smileid-combobox", Combobox.Root);
+  window.customElements.define("smileid-combobox-trigger", Combobox.Trigger);
+  window.customElements.define("smileid-combobox-listbox", Combobox.List);
+  window.customElements.define("smileid-combobox-option", Combobox.Option);
+
   const pages = [];
   let activeScreen;
   let config;
   let consent_information;
   let id_info;
   let partner_params;
+  let ngBankCodes;
   let productConstraints;
   let EndUserConsent;
 
@@ -77,6 +84,7 @@ import { version as sdkVersion } from "../../package.json";
       if (productsConfigResponse.ok && servicesResponse.ok) {
         const partnerConstraints = await productsConfigResponse.json();
         const generalConstraints = await servicesResponse.json();
+        ngBankCodes = generalConstraints.bank_codes;
 
         const previewBvnMfa = config.previewBVNMFA;
         if (previewBvnMfa) {
@@ -123,6 +131,7 @@ import { version as sdkVersion } from "../../package.json";
     },
     false,
   );
+
 
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
@@ -466,6 +475,38 @@ import { version as sdkVersion } from "../../package.json";
     );
   }
 
+  function loadBankCodes(bankCodes, placeholderElement) {
+    const autocomplete = document.createElement("smileid-combobox");
+    autocomplete.setAttribute("id", "bank_code");
+    autocomplete.innerHTML = `
+      <smileid-combobox-trigger
+        label="Search Bank">
+      </smileid-combobox-trigger>
+
+      <smileid-combobox-listbox empty-label="No bank found">
+        ${bankCodes
+          .map(
+            (bank) =>
+              `
+                <smileid-combobox-option
+                  value="${bank.code}"
+                  label="${bank.name}"
+                >
+                  ${bank.name}
+                </smileid-combobox-option>
+              `,
+          )
+          .join("\n")}
+      </smileid-combobox-listbox>
+    `;
+    placeholderElement.replaceWith(autocomplete);
+    autocomplete.addEventListener('change', (e) => {
+      id_info.bank_code = e.detail ? e.detail.value : '';
+    });
+
+    return autocomplete;
+  }
+
   function setFormInputs() {
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
@@ -505,6 +546,16 @@ import { version as sdkVersion } from "../../package.json";
     if (showCitizenship) {
       const Citizenship = IDInfoForm.querySelector("fieldset#citizenships");
       Citizenship.hidden = false;
+    }
+
+    const showBankCode = requiredFields.some((fieldName) =>
+      fieldName.includes("bank_code"),
+    );
+
+    if (showBankCode) {
+      const BankCode = IDInfoForm.querySelector("fieldset#bank-code");
+      loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
+      BankCode.hidden = false;
     }
   }
 
@@ -638,6 +689,19 @@ import { version as sdkVersion } from "../../package.json";
       };
     }
 
+    const showBankCode = requiredFields.some((fieldName) =>
+      fieldName.includes("bank_code"),
+    );
+
+    if (showBankCode) {
+      validationConstraints.bank_code = {
+        presence: {
+          allowEmpty: false,
+          message: "is required",
+        },
+      };
+    }
+
     const validation = validate(payload, validationConstraints);
 
     if (validation) {
@@ -672,7 +736,7 @@ import { version as sdkVersion } from "../../package.json";
     const form = IDInfoForm.querySelector("form");
 
     const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
+    const payload = Object.assign({}, id_info, Object.fromEntries(formData.entries()));
 
     const isInvalid = validateInputs(payload);
 

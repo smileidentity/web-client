@@ -27,6 +27,7 @@ import { version as sdkVersion } from "../../package.json";
   let EndUserConsent;
   let id_info;
   let partner_params;
+  let ngBankCodes;
   let productConstraints;
 
   const LoadingScreen = document.querySelector("#loading-screen");
@@ -76,6 +77,7 @@ import { version as sdkVersion } from "../../package.json";
       if (productsConfigResponse.ok && servicesResponse.ok) {
         const partnerConstraints = await productsConfigResponse.json();
         const generalConstraints = await servicesResponse.json();
+        ngBankCodes = generalConstraints.bank_codes;
 
         const previewBvnMfa = config.previewBVNMFA;
         if (previewBvnMfa) {
@@ -465,6 +467,38 @@ import { version as sdkVersion } from "../../package.json";
     );
   }
 
+  function loadBankCodes(bankCodes, placeholderElement) {
+    const autocomplete = document.createElement("smileid-combobox");
+    autocomplete.setAttribute("id", "bank_code");
+    autocomplete.innerHTML = `
+      <smileid-combobox-trigger
+        label="Search Bank">
+      </smileid-combobox-trigger>
+
+      <smileid-combobox-listbox empty-label="No bank found">
+        ${bankCodes
+          .map(
+            (bank) =>
+              `
+                <smileid-combobox-option
+                  value="${bank.code}"
+                  label="${bank.name}"
+                >
+                  ${bank.name}
+                </smileid-combobox-option>
+              `,
+          )
+          .join("\n")}
+      </smileid-combobox-listbox>
+    `;
+    placeholderElement.replaceWith(autocomplete);
+    autocomplete.addEventListener('change', (e) => {
+      id_info.bank_code = e.detail ? e.detail.value : '';
+    });
+
+    return autocomplete;
+  }
+
   function setFormInputs() {
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
@@ -504,6 +538,16 @@ import { version as sdkVersion } from "../../package.json";
     if (showCitizenship) {
       const Citizenship = IDInfoForm.querySelector("fieldset#citizenships");
       Citizenship.hidden = false;
+    }
+
+    const showBankCode = requiredFields.some((fieldName) =>
+      fieldName.includes("bank_code"),
+    );
+
+    if (showBankCode) {
+      const BankCode = IDInfoForm.querySelector("fieldset#bank-code");
+      loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
+      BankCode.hidden = false;
     }
   }
 
@@ -637,6 +681,19 @@ import { version as sdkVersion } from "../../package.json";
       };
     }
 
+    const showBankCode = requiredFields.some((fieldName) =>
+      fieldName.includes("bank_code"),
+    );
+
+    if (showBankCode) {
+      validationConstraints.bank_code = {
+        presence: {
+          allowEmpty: false,
+          message: "is required",
+        },
+      };
+    }
+
     const validation = validate(payload, validationConstraints);
 
     if (validation) {
@@ -673,7 +730,7 @@ import { version as sdkVersion } from "../../package.json";
     const form = IDInfoForm.querySelector("form");
 
     const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
+    const payload = Object.assign({}, id_info, Object.fromEntries(formData.entries()));
 
     const isInvalid = validateInputs(payload);
 

@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
-import Combobox from './components/Combobox';
+import Combobox from "./components/Combobox";
 import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {
@@ -131,7 +131,6 @@ import { version as sdkVersion } from "../../package.json";
     },
     false,
   );
-
 
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
@@ -500,8 +499,8 @@ import { version as sdkVersion } from "../../package.json";
       </smileid-combobox-listbox>
     `;
     placeholderElement.replaceWith(autocomplete);
-    autocomplete.addEventListener('change', (e) => {
-      id_info.bank_code = e.detail ? e.detail.value : '';
+    autocomplete.addEventListener("change", (e) => {
+      id_info.bank_code = e.detail ? e.detail.value : "";
     });
 
     return autocomplete;
@@ -554,7 +553,7 @@ import { version as sdkVersion } from "../../package.json";
 
     if (showBankCode) {
       const BankCode = IDInfoForm.querySelector("fieldset#bank-code");
-      loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
+      loadBankCodes(ngBankCodes, BankCode.querySelector("#bank_code"));
       BankCode.hidden = false;
     }
   }
@@ -736,7 +735,7 @@ import { version as sdkVersion } from "../../package.json";
     const form = IDInfoForm.querySelector("form");
 
     const formData = new FormData(form);
-    const payload = Object.assign({}, id_info, Object.fromEntries(formData.entries()));
+    const payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
 
     const isInvalid = validateInputs(payload);
 

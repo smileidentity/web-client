@@ -18,8 +18,8 @@ jobs:
       - name: set node version
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          cache: "npm"
       - run: npm ci
       - run: npm run build && npm run build:dist
       - name: set destination directory
@@ -36,4 +36,3 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: "./dist"
           DEST_DIR: ${{ steps.set_dest_dir.outputs.DEST_DIR }}
-

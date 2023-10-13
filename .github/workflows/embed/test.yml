@@ -17,14 +17,14 @@ jobs:
       - name: set node version
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          cache: "npm"
       - run: npm ci
       - name: run frontend tests
         uses: cypress-io/github-action@v6
         with:
           start: npm start
-          wait-on: 'http://localhost:8000'
+          wait-on: "http://localhost:8000"
           env: MINIFY=true
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
@@ -32,4 +32,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-

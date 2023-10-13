@@ -16,8 +16,8 @@ jobs:
       - name: set node version
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          cache: "npm"
       - run: npm ci
       - run: npm run build && npm run build:dist
       - name: deploy to s3 / cloudfront

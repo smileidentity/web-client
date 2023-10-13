@@ -1,5 +1,5 @@
 name: lint
-on: 
+on:
   push:
     branches:
       - main
@@ -11,17 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-    lint:
-      runs-on: ubuntu-latest
-      timeout-minutes: 5
-      steps:
-        - uses: actions/checkout@v4
-        - name: set node version
-          uses: actions/setup-node@v3
-          with:
-            node-version-file: '.nvmrc'
-            cache: 'npm'
-        - run: npm ci
-        - run: npm run lint:html
-        - name: lint js
-          run: npm run lint
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint:html
+      - name: lint js
+        run: npm run lint

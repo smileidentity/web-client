@@ -1,5 +1,5 @@
 name: share-preview-url
-'on':
+on:
   pull_request:
     types:
       - opened
@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: get dest dir for web components
         id: get_dest_dir_components
         working-directory: ./packages/components
@@ -29,12 +30,10 @@ jobs:
             This branch has been deployed to s3 / cloudfront.
 
 
-            ✅ Preview URL for Components / Smart Camera Web: 
+            ✅ Preview URL for Components / Smart Camera Web:
 
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_COMPONENTS
-            }}/smart-camera-web.js
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_COMPONENTS }}/smart-camera-web.js
 
             ✅ Preview URL for Embed: 
 
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED
-            }}/js/script.min.js
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js

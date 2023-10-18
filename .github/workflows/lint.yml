@@ -1,12 +1,10 @@
 name: lint
-
-on:
+on: 
   push:
     branches:
       - main
   pull_request:
   workflow_dispatch:
-
 jobs:
   lint-components:
     runs-on: ubuntu-latest
@@ -14,27 +12,33 @@ jobs:
       run:
         working-directory: ./packages/components
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: './packages/components/package-lock.json'
-      - run: npm ci
-      - run: npm run lint
+          cache-dependency-path: ./packages/components/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: lint
+        run: npm run lint
   lint-embed:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./packages/embed
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: './packages/embed/package-lock.json'
-      - run: npm ci
-      - run: 'npm run lint:html'
+          cache-dependency-path: ./packages/embed/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: lint html
+        run: npm run lint:html

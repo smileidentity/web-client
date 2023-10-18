@@ -34,6 +34,5 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: './packages/embed/package-lock.json'
-      - run: pwd
       - run: npm ci
       - run: 'npm run lint:html'

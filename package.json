@@ -1,0 +1,19 @@
+{
+  "name": "@smileid/web",
+  "version": "1.0.0",
+  "description": "A collection of SmileID browser clients and components",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Web",
+    "Components",
+    "Web",
+    "Embed",
+    "SmileID"
+  ],
+  "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
+  "license": "MIT"
+}

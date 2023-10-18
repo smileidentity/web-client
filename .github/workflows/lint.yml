@@ -18,7 +18,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: pwd
+          cache-dependency-path: './packages/components/package-lock.json'
       - run: npm ci
       - run: npm run lint
   lint-embed:
@@ -33,6 +33,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: './packages/embed/package-lock.json'
       - run: pwd
       - run: npm ci
       - run: 'npm run lint:html'

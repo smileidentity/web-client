@@ -1,0 +1,68 @@
+name: deploy
+on:
+  push:
+    tags: v*
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  components:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./packages/components
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: get version number
+        id: get_version
+        run: |
+          echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+      - name: set destination directory
+        id: set_destination
+        env:
+          TAG: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          echo "DEST_DIR_COMPONENTS=js/$TAG" >> $GITHUB_OUTPUT
+      - name: deploy to s3 / cloudfront
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js'
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR_COMPONENTS }}
+  embed:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./packages/embed
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: ./packages/embed/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build site
+        run: npm run build && npm run build:dist
+      - name: deploy to s3 / cloudfront
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "./dist"
+          DEST_DIR: "inline/v1"

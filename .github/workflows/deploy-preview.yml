@@ -1,5 +1,5 @@
 name: deploy-preview
-on: 
+on:
   workflow_call:
   pull_request:
     branches:
@@ -22,15 +22,18 @@ jobs:
         working-directory: ./packages/components
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: './packages/components/package-lock.json'
-      - run: npm ci
-      - run: npm run build
+          cache-dependency-path: ./packages/components/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: npm run build
       - name: set destination directory
         id: set_dest_dir_camera_web
         run: >-
@@ -56,15 +59,18 @@ jobs:
         working-directory: ./packages/embed
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: set node version
-      - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: './packages/embed/package-lock.json'
-      - run: npm ci
-      - run: 'npm run build && npm run build:dist'
+          cache-dependency-path: ./packages/embed/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: 'npm run build && npm run build:dist'
       - name: set destination directory
         id: set_dest_dir_hosted_web
         run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"

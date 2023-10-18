@@ -1,5 +1,5 @@
 name: deploy-preview
-'on':
+on:
   workflow_call:
   pull_request:
     branches:

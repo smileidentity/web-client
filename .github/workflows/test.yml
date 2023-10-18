@@ -2,7 +2,7 @@ name: test
 on:
   workflow_call:
 jobs:
-  test-components:
+  components:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,7 +26,7 @@ jobs:
           start: npm start
           working-directory: ./packages/components
           wait-on: 'http://localhost:8000'
-  test-embed:
+  embed:
     runs-on: ubuntu-latest
     defaults:
       run:

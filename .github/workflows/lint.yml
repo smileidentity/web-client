@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  lint-components:
+  components:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,7 +24,7 @@ jobs:
         run: npm ci
       - name: lint
         run: npm run lint
-  lint-embed:
+  embed:
     runs-on: ubuntu-latest
     defaults:
       run:

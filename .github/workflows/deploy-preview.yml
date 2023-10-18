@@ -6,7 +6,6 @@ on:
       - main
     types:
       - opened
-      - edited
       - synchronize
   push:
     branches:
@@ -14,7 +13,7 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-  deploy-preview-components:
+  components:
     needs:
       - test
     defaults:
@@ -51,7 +50,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
           AWS_REGION: '${{ secrets.AWS_REGION }}'
           DEST_DIR: '${{ env.DEST_DIR_COMPONENTS }}'
-  deploy-preview-embed:
+  embed:
     needs:
       - test
     defaults:

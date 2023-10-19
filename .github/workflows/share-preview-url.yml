@@ -4,21 +4,36 @@ on:
     types:
       - opened
       - ready_for_review
-
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
     permissions: write-all
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - name: get dest dir
-        id: get_dest_dir
-        run: echo "DEST_DIR=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
-      - name: share preview url as PR comment
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: get dest dir for web components
+        id: get_dest_dir_components
+        working-directory: ./packages/components
+        run: >-
+          echo "DEST_DIR_COMPONENTS=js/preview-$GITHUB_HEAD_REF" >>
+          "$GITHUB_ENV"
+      - name: get dest dir for web embed
+        id: get_dest_dir_embed
+        working-directory: ./packages/embed
+        run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+      - name: share preview urls as PR comment
         uses: unsplash/comment-on-pr@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         with:
-          msg: "This branch has been deployed to s3 / cloudfront.\n\n✅ Preview URL: https://cdn.smileidentity.com/${{ steps.get_dest_dir.outputs.DEST_DIR }}/js/script.js"
+          msg: >
+            This branch has been deployed to s3 / cloudfront.
 
+
+            ✅ Preview URL for Components / Smart Camera Web:
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_COMPONENTS }}/smart-camera-web.js
+
+            ✅ Preview URL for Embed: 
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js

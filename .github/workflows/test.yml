@@ -1,35 +1,56 @@
 name: test
 on:
   workflow_call:
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  test:
+  components:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./packages/components
     steps:
-      - name: checkout code, and install dependencies
+      - name: checkout code
         uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-      - run: npm ci
-      - name: run frontend tests
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ./packages/components/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: npm run build
+      - name: run tests
         uses: cypress-io/github-action@v6
         with:
           start: npm start
+          working-directory: ./packages/components
           wait-on: 'http://localhost:8000'
-          env: MINIFY=true
+  embed:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/embed
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ./packages/embed/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: run tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          working-directory: ./packages/embed
+          wait-on: 'http://localhost:8000'
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-

@@ -1,46 +1,19 @@
 {
-	"name": "@smile_identity/web-page",
-	"version": "v1.2.1",
-	"description": "Self Hosted Integration for Smile Identity on the Web",
-	"main": "inline.js",
-	"scripts": {
-		"build:dist": "NODE_ENV=production node esbuild.js",
-		"build": "NODE_ENV=development node esbuild.js",
-		"clean": "rm -rf build dist",
-		"instrument": "nyc instrument src build",
-		"lint:html": "npx prettier --write $(git ls-files '*.html')",
-		"lint": "eslint \"**/*.{cjs,js}\"",
-		"start:dist": "npm run build:dist && npx serve -p 8000 dist",
-		"start": "npm run build && npx serve -p 8000 build",
-		"test": "npx cypress run"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/smileidentity/hosted-web-integration.git"
-	},
-	"type": "module",
-	"keywords": [],
-	"author": "tams sokari <tams@smileidentity.com>",
-	"bugs": {
-		"url": "https://github.com/smileidentity/hosted-web-integration/issues"
-	},
-	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
-	"devDependencies": {
-		"@cypress/code-coverage": "3.12.4",
-		"@smile_identity/smart-camera-web": "^1.0.0",
-		"cypress": "^13.3.1",
-		"esbuild": "^0.19.4",
-		"eslint": "^8.51.0",
-		"eslint-config-airbnb-base": "^15.0.0",
-		"eslint-config-prettier": "^9.0.0",
-		"eslint-plugin-cypress": "^2.15.1",
-		"eslint-plugin-import": "^2.28.1",
-		"eslint-plugin-jest": "^27.4.2",
-		"eslint-plugin-prettier": "^5.0.1",
-		"jszip": "^3.10.1",
-		"nyc": "15.1.0",
-		"prettier": "^3.0.3",
-		"serve": "14.2.1",
-		"validate.js": "^0.13.1"
-	}
+  "name": "@smileid/web",
+  "version": "1.0.0",
+  "description": "A collection of SmileID browser clients and components",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Web",
+    "Components",
+    "Web",
+    "Embed",
+    "SmileID"
+  ],
+  "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
+  "license": "MIT"
 }

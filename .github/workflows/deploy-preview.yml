@@ -1,39 +1,86 @@
 name: deploy-preview
 on:
+  workflow_call:
   pull_request:
+    branches:
+      - main
     types:
       - opened
-      - edited
       - synchronize
-
+  push:
+    branches:
+      - main
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-  deploy-preview:
-    needs: [test]
+  components:
+    needs:
+      - test
+    defaults:
+      run:
+        working-directory: ./packages/components
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build && npm run build:dist
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ./packages/components/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: npm run build
       - name: set destination directory
-        id: set_dest_dir
-        run: echo "DEST_DIR=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_OUTPUT"
+        id: set_dest_dir_camera_web
+        run: >-
+          echo "DEST_DIR_COMPONENTS=js/preview-$GITHUB_HEAD_REF" >>
+          "$GITHUB_ENV"
       - name: deploy preview to s3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
-          args: --follow-symlinks --delete
+          args: >-
+            --follow-symlinks --delete --exclude '*' --include
+            'packages/components/smart-camera-web.js'
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: "./dist"
-          DEST_DIR: ${{ steps.set_dest_dir.outputs.DEST_DIR }}
-
+          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}'
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_REGION: '${{ secrets.AWS_REGION }}'
+          DEST_DIR: '${{ env.DEST_DIR_COMPONENTS }}'
+  embed:
+    needs:
+      - test
+    defaults:
+      run:
+        working-directory: ./packages/embed
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: ./packages/embed/package-lock.json
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: 'npm run build && npm run build:dist'
+      - name: set destination directory
+        id: set_dest_dir_hosted_web
+        run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+      - name: deploy preview to s3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: '--follow-symlinks --delete'
+        env:
+          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}'
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_REGION: '${{ secrets.AWS_REGION }}'
+          SOURCE_DIR: ./packages/embed/dist
+          DEST_DIR: '${{ env.DEST_DIR_EMBED }}'

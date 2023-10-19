@@ -4,7 +4,7 @@
 ## Overview
 
 ### Components
-[Components f.k.a Smart Camera Web](packages/components) is a package that 
+[Components f.k.a. Smart Camera Web](packages/components) is a package that 
 contains web-components used in the browser with SmileID systems.
 
 It currently publishes `smart-camera-web` which is a Web Component that works
@@ -13,7 +13,7 @@ together with the [Server to Server](https://docs.smileidentity.com/server-to-se
 For more detailed information, you can refer to the [packages/components documentation](./packages/components/README.md).
 
 ### Embed
-[Embed f.k.a Hosted Web Integration](packages/embed) is a package that contains two items:
+[Embed f.k.a. Hosted Web Integration](packages/embed) is a package that contains two items:
 
 1. A configuration script which creates an iframe that serves some of the
     SmileID product recipes.

@@ -27,7 +27,7 @@
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
 	"devDependencies": {
-		"@cypress/code-coverage": "3.12.4",
+		"@cypress/code-coverage": "3.12.6",
 		"@smile_identity/smart-camera-web": "^1.0.0",
 		"cypress": "^13.3.2",
 		"esbuild": "^0.19.5",

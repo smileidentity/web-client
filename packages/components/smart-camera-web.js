@@ -1186,13 +1186,13 @@ class PoweredBySmileId extends HTMLElement {
 }
 
 class SmileIdCanvas {
-  static hasMoreThanNColors(data, n=16) {
+  static hasMoreThanNColors(data, n = 16) {
     const colors = new Set();
     for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
-        colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
-        if (colors.size > n) {
-          return true;
-        }
+      colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+      if (colors.size > n) {
+        return true;
+      }
     }
     return false;
   }
@@ -1578,7 +1578,8 @@ class SmartCameraWeb extends HTMLElement {
     }
   }
 
-  _drawImage(canvas, testImages = false, video = this._video,) {
+  /* eslint-disable consistent-return */
+  _drawImage(canvas, testImages = false, video = this._video) {
     this.resetErrorMessage();
     try {
       const context = canvas.getContext('2d');
@@ -1596,21 +1597,23 @@ class SmartCameraWeb extends HTMLElement {
       );
 
       if (testImages) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
         const hasManyColors = SmileIdCanvas.hasMoreThanNColors(imageData.data);
 
-        if (!hasManyColors) {
-          this.selectSelfie.disabled = true;
-          throw new Error("Selfie image does not show adequate detail. Check that your camera is unblocked, and that there is enough light.");
+        if (hasManyColors) {
+          return context;
         }
+        this.selectSelfie.disabled = true;
+        throw new Error('Selfie image does not show adequate detail. Check that your camera is unblocked, and that there is enough light.');
+      } else {
+        return context;
       }
-
-      return context;
     } catch (error) {
       this.handleError(error);
     }
   }
+  /* eslint-enable consistent-return */
 
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');

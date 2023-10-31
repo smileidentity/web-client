@@ -20,6 +20,7 @@ module.exports = {
     indent: ['error', 2],
     'max-classes-per-file': 'off',
     'max-len': 'off',
+    'no-bitwise': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
     'no-plusplus': 'off',
     'no-underscore-dangle': 'off',

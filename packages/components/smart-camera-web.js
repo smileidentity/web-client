@@ -1,4 +1,4 @@
-const VERSION = '1.0.0-beta.23';
+const VERSION = '1.2.0';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
@@ -1185,7 +1185,21 @@ class PoweredBySmileId extends HTMLElement {
   }
 }
 
+class SmileIdCanvas {
+  static hasMoreThanNColors(data, n=16) {
+    const colors = new Set();
+    for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
+        colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+        if (colors.size > n) {
+          return true;
+        }
+    }
+    return false;
+  }
+}
+
 window.customElements.define('powered-by-smile-id', PoweredBySmileId);
+
 class SmartCameraWeb extends HTMLElement {
   constructor() {
     super();
@@ -1564,22 +1578,38 @@ class SmartCameraWeb extends HTMLElement {
     }
   }
 
-  _drawImage(canvas, video = this._video) {
-    const context = canvas.getContext('2d');
+  _drawImage(canvas, testImages = false, video = this._video,) {
+    this.resetErrorMessage();
+    try {
+      const context = canvas.getContext('2d');
 
-    context.drawImage(
-      video,
-      0,
-      0,
-      video.videoWidth,
-      video.videoHeight,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
+      context.drawImage(
+        video,
+        0,
+        0,
+        video.videoWidth,
+        video.videoHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
 
-    return context;
+      if (testImages) {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+
+        const hasManyColors = SmileIdCanvas.hasMoreThanNColors(imageData.data);
+
+        if (!hasManyColors) {
+          this.selectSelfie.disabled = true;
+          throw new Error("Selfie image does not show adequate detail. Check that your camera is unblocked, and that there is enough light.");
+        }
+      }
+
+      return context;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   _capturePOLPhoto() {
@@ -1597,7 +1627,8 @@ class SmartCameraWeb extends HTMLElement {
     canvas.width = 480;
     canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
-    this._drawImage(canvas);
+    // NOTE: we want to test the image quality of the reference photo
+    this._drawImage(canvas, true);
 
     const image = canvas.toDataURL('image/jpeg');
 

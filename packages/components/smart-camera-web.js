@@ -1631,7 +1631,7 @@ class SmartCameraWeb extends HTMLElement {
     canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
-    this._drawImage(canvas, true);
+    this._drawImage(canvas, this.enableImageTests);
 
     const image = canvas.toDataURL('image/jpeg');
 
@@ -1898,6 +1898,10 @@ class SmartCameraWeb extends HTMLElement {
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
     return value.includes('camera') && value.includes('upload');
+  }
+
+  get enableImageTests() {
+    return this.hasAttribute('enable-image-tests');
   }
 
   get doNotUpload() {

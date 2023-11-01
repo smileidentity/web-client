@@ -1189,6 +1189,7 @@ class SmileIdCanvas {
   static hasMoreThanNColors(data, n = 16) {
     const colors = new Set();
     for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
+      // eslint-disable-next-line no-bitwise
       colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
       if (colors.size > n) {
         return true;

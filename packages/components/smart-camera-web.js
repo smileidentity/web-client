@@ -1185,18 +1185,16 @@ class PoweredBySmileId extends HTMLElement {
   }
 }
 
-class SmileIdCanvas {
-  static hasMoreThanNColors(data, n = 16) {
-    const colors = new Set();
-    for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
-      // eslint-disable-next-line no-bitwise
-      colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
-      if (colors.size > n) {
-        return true;
-      }
-    }
-    return false;
-  }
+function hasMoreThanNColors(data, n = 16) {
+	const colors = new Set();
+	for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
+		// eslint-disable-next-line no-bitwise
+		colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+		if (colors.size > n) {
+			return true;
+		}
+	}
+	return false;
 }
 
 window.customElements.define('powered-by-smile-id', PoweredBySmileId);
@@ -1600,9 +1598,9 @@ class SmartCameraWeb extends HTMLElement {
       if (!disableImageTests) {
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-        const hasManyColors = SmileIdCanvas.hasMoreThanNColors(imageData.data);
+        const hasEnoughColors = hasMoreThanNColors(imageData.data);
 
-        if (hasManyColors) {
+        if (hasEnoughColors) {
           return context;
         }
         this.selectSelfie.disabled = true;

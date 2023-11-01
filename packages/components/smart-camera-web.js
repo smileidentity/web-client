@@ -1606,7 +1606,7 @@ class SmartCameraWeb extends HTMLElement {
           return context;
         }
         this.selectSelfie.disabled = true;
-        throw new Error('Selfie image does not show adequate detail. Check that your camera is unblocked, and that there is enough light.');
+        throw new Error('Unable to access webcam - please try using a different device');
       } else {
         return context;
       }

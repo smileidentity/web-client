@@ -1186,15 +1186,15 @@ class PoweredBySmileId extends HTMLElement {
 }
 
 function hasMoreThanNColors(data, n = 16) {
-	const colors = new Set();
-	for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
-		// eslint-disable-next-line no-bitwise
-		colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
-		if (colors.size > n) {
-			return true;
-		}
-	}
-	return false;
+  const colors = new Set();
+  for (let i = 0; i < Math.min(data.length, 10000); i += 4) {
+    // eslint-disable-next-line no-bitwise
+    colors.add((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+    if (colors.size > n) {
+      return true;
+    }
+  }
+  return false;
 }
 
 window.customElements.define('powered-by-smile-id', PoweredBySmileId);

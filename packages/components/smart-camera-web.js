@@ -1580,7 +1580,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   /* eslint-disable consistent-return */
-  _drawImage(canvas, testImages = false, video = this._video) {
+  _drawImage(canvas, disableImageTests = false, video = this._video) {
     this.resetErrorMessage();
     try {
       const context = canvas.getContext('2d');
@@ -1597,7 +1597,7 @@ class SmartCameraWeb extends HTMLElement {
         canvas.height,
       );
 
-      if (testImages) {
+      if (!disableImageTests) {
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
         const hasManyColors = SmileIdCanvas.hasMoreThanNColors(imageData.data);
@@ -1632,7 +1632,7 @@ class SmartCameraWeb extends HTMLElement {
     canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
-    this._drawImage(canvas, this.enableImageTests);
+    this._drawImage(canvas, this.disableImageTests);
 
     const image = canvas.toDataURL('image/jpeg');
 
@@ -1901,8 +1901,8 @@ class SmartCameraWeb extends HTMLElement {
     return value.includes('camera') && value.includes('upload');
   }
 
-  get enableImageTests() {
-    return this.hasAttribute('enable-image-tests');
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests');
   }
 
   get doNotUpload() {

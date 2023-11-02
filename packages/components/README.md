@@ -52,7 +52,7 @@ import '@smile_identity/smart-camera-web'
 For instance:
 
 ```html
-<script src="https://cdn.smileidentity.com/js/v1.0.0-beta.7/smart-camera-web.js"></script>
+<script src="https://cdn.smileidentity.com/js/v1.0.1/smart-camera-web.js"></script>
 ```
 
 ### Usage

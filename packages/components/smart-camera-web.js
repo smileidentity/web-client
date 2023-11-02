@@ -695,6 +695,22 @@ function scwTemplateString() {
     </div>
   </div>
 
+  <div hidden id='failed-image-test-screen' class='flow center'>
+    <div class='section | flow'>
+      <p class='color-red | center font-size-large'>
+        Unable to access webcam
+      </p>
+      <p class='color-red | center font-size-large'>
+        Please try using a different device
+      </p>
+
+      ${this.hideAttribution ? '' : `
+        <powered-by-smile-id></powered-by-smile-id>
+      `}
+    </div>
+  </div>
+
+
   <div hidden id='review-screen' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav justify-right">
@@ -1260,6 +1276,7 @@ class SmartCameraWeb extends HTMLElement {
     this.requestScreen = this.shadowRoot.querySelector('#request-screen');
     this.activeScreen = this.requestScreen;
     this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
+    this.failedImageTestScreen = this.shadowRoot.querySelector('#failed-image-test-screen');
     this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
     this.idEntryScreen = this.shadowRoot.querySelector('#id-entry-screen');
     this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
@@ -1577,49 +1594,43 @@ class SmartCameraWeb extends HTMLElement {
     }
   }
 
-  /* eslint-disable consistent-return */
-  _drawImage(canvas, disableImageTests = false, video = this._video) {
+  _drawImage(canvas, enableImageTests = true, video = this._video) {
     this.resetErrorMessage();
-    try {
-      const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
 
-      context.drawImage(
-        video,
-        0,
-        0,
-        video.videoWidth,
-        video.videoHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      );
+    context.drawImage(
+      video,
+      0,
+      0,
+      video.videoWidth,
+      video.videoHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
 
-      if (!disableImageTests) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    if (enableImageTests) {
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-        const hasEnoughColors = hasMoreThanNColors(imageData.data);
+      const hasEnoughColors = hasMoreThanNColors(imageData.data);
 
-        if (hasEnoughColors) {
-          return context;
-        }
-        this.selectSelfie.disabled = true;
-        throw new Error('Unable to access webcam - please try using a different device');
-      } else {
+      if (hasEnoughColors) {
         return context;
       }
-    } catch (error) {
-      this.handleError(error);
+      throw new Error('Unable to capture webcam images - Please try another device');
+    } else {
+      return context;
     }
   }
-  /* eslint-enable consistent-return */
 
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');
     canvas.width = 240;
     canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
-    this._drawImage(canvas);
+    // NOTE: we do not want to test POL images
+    this._drawImage(canvas, false);
 
     this._rawImages.push(canvas.toDataURL('image/jpeg'));
   }
@@ -1630,7 +1641,7 @@ class SmartCameraWeb extends HTMLElement {
     canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
-    this._drawImage(canvas, this.disableImageTests);
+    this._drawImage(canvas, !this.disableImageTests);
 
     const image = canvas.toDataURL('image/jpeg');
 
@@ -1740,27 +1751,31 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _stopVideoStream(stream) {
-    clearTimeout(this._videoStreamTimeout);
-    clearInterval(this._imageCaptureInterval);
-    clearInterval(this._drawingInterval);
-    this.smileCTA.style.animation = 'none';
+    try {
+      clearTimeout(this._videoStreamTimeout);
+      clearInterval(this._imageCaptureInterval);
+      clearInterval(this._drawingInterval);
+      this.smileCTA.style.animation = 'none';
 
-    this._capturePOLPhoto(); // NOTE: capture the last photo
-    this._captureReferencePhoto();
-    stream.getTracks().forEach((track) => track.stop());
+      this._capturePOLPhoto(); // NOTE: capture the last photo
+      this._captureReferencePhoto();
+      stream.getTracks().forEach((track) => track.stop());
 
-    this.reviewImage.src = this._referenceImage;
+      this.reviewImage.src = this._referenceImage;
 
-    const totalNoOfFrames = this._rawImages.length;
+      const totalNoOfFrames = this._rawImages.length;
 
-    const livenessFramesIndices = getLivenessFramesIndices(totalNoOfFrames);
+      const livenessFramesIndices = getLivenessFramesIndices(totalNoOfFrames);
 
-    this._data.images = this._data.images.concat(livenessFramesIndices.map((imageIndex) => ({
-      image: this._rawImages[imageIndex].split(',')[1],
-      image_type_id: 6,
-    })));
+      this._data.images = this._data.images.concat(livenessFramesIndices.map((imageIndex) => ({
+        image: this._rawImages[imageIndex].split(',')[1],
+        image_type_id: 6,
+      })));
 
-    this.setActiveScreen(this.reviewScreen);
+      this.setActiveScreen(this.reviewScreen);
+    } catch (error) {
+      this.setActiveScreen(this.failedImageTestScreen);
+    }
   }
 
   _stopIDVideoStream(stream = this._IDStream) {

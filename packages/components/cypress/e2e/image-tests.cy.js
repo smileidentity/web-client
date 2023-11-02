@@ -35,11 +35,17 @@ context('SmartCameraWeb - Image Tests', () => {
       .get('smart-camera-web')
       .shadow()
       .find('#review-screen')
+      .should('not.be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('#failed-image-test-screen')
       .should('be.visible');
 
     cy.get('smart-camera-web')
       .shadow()
-      .find('#error')
-      .should('contain.text', 'Unable to access webcam - please try using a different device');
+      .find('#failed-image-test-screen p')
+      .should('contain.text', 'Unable to access webcam');
   });
 });

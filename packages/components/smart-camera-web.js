@@ -696,11 +696,66 @@ function scwTemplateString() {
   </div>
 
   <div hidden id='failed-image-test-screen' class='flow center'>
-    <div class='section | flow'>
+    <div class='section | flow center'>
+      <svg
+        aria-hidden="true"
+        style="--flow-space: 4rem"
+        xmlns="http://www.w3.org/2000/svg"
+        width="139"
+        height="138"
+        fill="none"
+      >
+        <path
+          fill="#F97B6A"
+          d="M116.163 120.944 87.496 92.3l6.572-6.572 28.644 28.667-6.549 6.549Z"
+        />
+        <path
+          fill="#F97B6A"
+          d="m130.439 135.334-21.981-21.982a4.717 4.717 0 0 1 0-6.662 4.717 4.717 0 0 1 6.662 0l21.982 21.981a4.72 4.72 0 0 1 0 6.663 4.72 4.72 0 0 1-6.663 0Z"
+        />
+        <path
+          fill="url(#a)"
+          d="m128.876 136.739-28.282-28.282c-.657-.657-.657-1.722 0-2.402l7.229-7.229a1.71 1.71 0 0 1 2.403 0l28.281 28.282c.657.657.657 1.722 0 2.402l-7.229 7.229c-.68.657-1.745.657-2.402 0Z"
+        />
+        <path
+          fill="url(#b)"
+          d="M54.737 0C24.903 0 .726 24.173.726 54c0 29.805 24.177 54 53.988 54 29.834 0 54.012-24.173 54.012-54S84.548 0 54.736 0Zm0 97.998c-23.953 0-43.353-19.713-43.353-44.02 0-24.308 19.4-43.998 43.353-43.998C78.689 9.98 98.09 29.692 98.09 54c0 24.308-19.423 43.998-43.353 43.998Z"
+        />
+        <path
+          fill="#FF6A56"
+          fill-rule="evenodd"
+          d="M63.704 66.92a3.688 3.688 0 1 0 5.216-5.216L60.216 53l8.705-8.704a3.688 3.688 0 0 0-5.216-5.216L55 47.785l-8.704-8.705a3.688 3.688 0 1 0-5.216 5.216L49.785 53l-8.704 8.704a3.688 3.688 0 0 0 5.215 5.216L55 58.216l8.704 8.704Z"
+          clip-rule="evenodd"
+        />
+        <defs>
+          <linearGradient
+            id="a"
+            x1="100.084"
+            x2="139.007"
+            y1="117.787"
+            y2="117.787"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#FF6551" />
+            <stop offset="1" stop-color="#FF9F92" />
+          </linearGradient>
+          <linearGradient
+            id="b"
+            x1=".676"
+            x2="108.745"
+            y1="54.012"
+            y2="54.012"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#FF6551" />
+            <stop offset="1" stop-color="#FF9F92" />
+          </linearGradient>
+        </defs>
+      </svg>
       <p class='color-red | center font-size-large'>
-        Unable to access webcam
+        Unable to use webcam images
       </p>
-      <p class='color-red | center font-size-large'>
+      <p class='center font-size-large'>
         Please try using a different device
       </p>
 

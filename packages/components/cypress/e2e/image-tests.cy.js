@@ -46,6 +46,6 @@ context('SmartCameraWeb - Image Tests', () => {
     cy.get('smart-camera-web')
       .shadow()
       .find('#failed-image-test-screen p')
-      .should('contain.text', 'Unable to access webcam');
+      .should('contain.text', 'Unable to use webcam images');
   });
 });

@@ -223,6 +223,12 @@ Cypress.Commands.add("navigateThroughTotpConsentApp", () => {
 });
 
 Cypress.Commands.add("navigateThroughCameraScreens", () => {
+  cy.log("SmartCameraWeb: disable image tests");
+
+  cy.getIFrameBody()
+    .find("smart-camera-web")
+    .invoke("attr", "disable-image-tests", "true");
+
   cy.log("navigatingThroughCameraScreens");
 
   cy.getIFrameBody()

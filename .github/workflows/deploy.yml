@@ -25,7 +25,7 @@ jobs:
         env:
           TAG: ${{ steps.package-version.outputs.current-version }}
         run: |
-          echo "DEST_DIR_COMPONENTS=js/$TAG" >> $GITHUB_OUTPUT
+          echo "DEST_DIR_COMPONENTS=js/v$TAG" >> $GITHUB_OUTPUT
       - name: deploy to s3 / cloudfront
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -66,5 +66,5 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: "./dist"
+          SOURCE_DIR: "./packages/embed/dist"
           DEST_DIR: "inline/v1"

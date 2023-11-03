@@ -753,10 +753,13 @@ function scwTemplateString() {
         </defs>
       </svg>
       <p class='color-red | center font-size-large'>
-        Unable to use webcam images
+        Device not supported
       </p>
-      <p class='center font-size-large'>
-        Please try using a different device
+      <p class='center'>
+        We are unable to use images captured on this device.
+      </p>
+      <p class='center'>
+        Please try using a different device.
       </p>
 
       ${this.hideAttribution ? '' : `

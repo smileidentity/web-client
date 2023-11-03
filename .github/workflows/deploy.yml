@@ -25,7 +25,7 @@ jobs:
         env:
           TAG: ${{ steps.package-version.outputs.current-version }}
         run: |
-          echo "DEST_DIR_COMPONENTS=js/$TAG" >> $GITHUB_OUTPUT
+          echo "DEST_DIR_COMPONENTS=js/v$TAG" >> $GITHUB_OUTPUT
       - name: deploy to s3 / cloudfront
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:

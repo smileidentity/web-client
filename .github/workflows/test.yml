@@ -19,6 +19,7 @@ jobs:
       - name: run tests
         uses: cypress-io/github-action@v6
         with:
+          install: false
           start: npm start
           working-directory: ./packages/components
           wait-on: 'http://localhost:8000'
@@ -37,6 +38,7 @@ jobs:
       - name: run tests
         uses: cypress-io/github-action@v6
         with:
+          install: false
           start: npm start
           working-directory: ./packages/embed
           wait-on: 'http://localhost:8000'

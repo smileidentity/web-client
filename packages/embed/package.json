@@ -32,7 +32,7 @@
 		"validate.js": "^0.13.1"
 	},
 	"devDependencies": {
-		"@cypress/code-coverage": "3.12.6",
+		"@cypress/code-coverage": "3.12.9",
 		"cypress": "^13.3.3",
 		"esbuild": "^0.19.5",
 		"eslint": "^8.52.0",

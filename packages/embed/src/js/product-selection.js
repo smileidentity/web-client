@@ -4,9 +4,9 @@
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    sandbox: "https://testapi.smileidentity.com",
-    live: "https://api.smileidentity.com",
-    production: "https://api.smileidentity.com",
+    sandbox: "https://testapi.smileidentity.com/v1",
+    live: "https://api.smileidentity.com/v1",
+    production: "https://api.smileidentity.com/v1",
   };
 
   const referenceWindow = window.parent;
@@ -36,32 +36,115 @@
     activeScreen = element;
   }
 
-  function getIdTypeName(country, id_type, services) {
-    if (
-      services.hosted_web.doc_verification[country] &&
-      services.hosted_web.doc_verification[country].id_types[id_type]
-    ) {
-      return services.hosted_web.doc_verification[country].id_types[id_type]
-        .label;
+  async function getProductConstraints() {
+    const payload = {
+      token: config.token,
+      partner_id: config.partner_details.partner_id,
+    };
+
+    const fetchConfig = {
+      cache: "no-cache",
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(payload),
+    };
+
+    try {
+      const response = await fetch(
+        `${endpoints[config.environment]}/valid_documents`,
+        fetchConfig,
+      );
+      const json = await response.json();
+
+      return json.valid_documents;
+    } catch (e) {
+      throw new Error("Failed to get supported ID types", { cause: e });
     }
-    if (
-      services.hosted_web.enhanced_kyc[country] &&
-      services.hosted_web.enhanced_kyc[country].id_types[id_type]
-    ) {
-      return services.hosted_web.enhanced_kyc[country].id_types[id_type].label;
-    }
-    throw new Error("Cannot find the full name of the id_type");
   }
 
-  function transformIdTypesToVerificationMethodMap(idTypes, services) {
+  async function getLegacyProductConstraints() {
+    const fetchConfig = {
+      cache: "no-cache",
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    };
+
+    try {
+      const response = await fetch(
+        `${endpoints[config.environment]}/services`,
+        fetchConfig,
+      );
+      const json = await response.json();
+
+      return json.hosted_web;
+    } catch (e) {
+      throw new Error("Failed to get supported ID types", { cause: e });
+    }
+  }
+
+  function getIdTypeName(
+    country,
+    id_type,
+    productConstraints,
+    legacyProductConstraints,
+  ) {
+    const validDocumentsCountry = productConstraints.find(
+      (item) => item.country.code === country,
+    );
+
+    if (!validDocumentsCountry) {
+      throw new Error(`SmileIdentity - ${country} is not supported`);
+    }
+
+    let validIdType = validDocumentsCountry.id_types.find(
+      (item) => item.code === id_type,
+    );
+
+    if (!validIdType) {
+      const legacyValidIdType =
+        legacyProductConstraints.doc_verification[country].id_types[id_type] ||
+        legacyProductConstraints.enhanced_kyc[country].id_types[id_type];
+      if (legacyValidIdType) {
+        validIdType = {
+          name: legacyValidIdType.label,
+        };
+      }
+    }
+
+    if (!validIdType) {
+      throw new Error(`SmileIdentity - ${country} ${id_type} is not supported`);
+    }
+
+    return validIdType.name;
+  }
+
+  function transformIdTypesToVerificationMethodMap(
+    idTypes,
+    productConstraints,
+    legacyProductConstraints,
+  ) {
     return idTypes.reduce(
       (idSelectionMap, { country, id_type, verification_method }) => {
         idSelectionMap[country] = idSelectionMap[country] || {
-          name: services.hosted_web.doc_verification[country].name,
+          name: productConstraints.find((item) => item.country.code === country)
+            ?.country?.name,
           id_types: {},
         };
         idSelectionMap[country].id_types[id_type] = {
-          name: getIdTypeName(country, id_type, services),
+          name: getIdTypeName(
+            country,
+            id_type,
+            productConstraints,
+            legacyProductConstraints,
+          ),
           verification_method,
         };
 
@@ -246,21 +329,18 @@
           config = JSON.parse(event.data);
           activeScreen = LoadingScreen;
 
-          const servicesResponse = await fetch(
-            `${endpoints[config.environment]}/v1/services`,
+          const constraintsPromises = [
+            getProductConstraints(),
+            getLegacyProductConstraints(),
+          ];
+          const [productConstraints, legacyConstraints] =
+            await Promise.all(constraintsPromises);
+          verificationMethodMap = transformIdTypesToVerificationMethodMap(
+            config.id_types,
+            productConstraints,
+            legacyConstraints,
           );
-
-          if (servicesResponse.ok) {
-            const services = await servicesResponse.json();
-
-            verificationMethodMap = transformIdTypesToVerificationMethodMap(
-              config.id_types,
-              services,
-            );
-            initializeForm(SelectIdType, verificationMethodMap);
-          } else {
-            throw Error("Failed to get supported ID types");
-          }
+          initializeForm(SelectIdType, verificationMethodMap);
         } else if (event.data.includes("SmileIdentity::ChildPageReady")) {
           publishMessage(config);
         }

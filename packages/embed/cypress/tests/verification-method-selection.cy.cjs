@@ -1,4 +1,7 @@
 describe("Verification Method Selection", () => {
+  beforeEach(() => {
+    cy.loadIDOptions();
+  });
   describe("multiple countries / id_types", () => {
     beforeEach(() => {
       cy.visit("/verification-method-selection");
@@ -36,6 +39,24 @@ describe("Verification Method Selection", () => {
             "have.attr",
             "src",
             "http://localhost:8000/doc-verification.html",
+          );
+      });
+
+      it("should redirect to the enhanced document verification sequence in a nested iframe", () => {
+        cy.getIFrameBody().find("#country").select("ZA");
+
+        cy.getIFrameBody().find("#id_type").select("IDENTITY_CARD");
+
+        cy.getIFrameBody().find("#submitConfig").click();
+
+        cy.getIFrameBody()
+          .find(
+            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
+          )
+          .should(
+            "have.attr",
+            "src",
+            "http://localhost:8000/enhanced-document-verification.html",
           );
       });
     });

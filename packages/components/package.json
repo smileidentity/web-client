@@ -1,0 +1,12 @@
+{
+	"name": "@smileid/components",
+	"version": "1.0.0",
+	"private": "true",
+	"exports": {
+		".": "./index.js",
+		"./combobox": "./combobox/src/index.js"
+	},
+	"description": "A collection of Web Components used by SmileID",
+	"keywords": [ "Web Components" ],
+	"author": "SmileID <support@usesmileid.com> (https://usesmileid.com)"
+}

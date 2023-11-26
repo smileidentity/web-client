@@ -1,7 +1,7 @@
 import validate from "validate.js";
+import "@smileid/components/combobox";
 import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
-import Combobox from "./components/Combobox";
 import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {
@@ -21,11 +21,6 @@ import { version as sdkVersion } from "../../package.json";
 
   window.customElements.define("end-user-consent", ConsentScreen);
   window.customElements.define("totp-consent-app", TotpBasedConsent);
-
-  window.customElements.define("smileid-combobox", Combobox.Root);
-  window.customElements.define("smileid-combobox-trigger", Combobox.Trigger);
-  window.customElements.define("smileid-combobox-listbox", Combobox.List);
-  window.customElements.define("smileid-combobox-option", Combobox.Option);
 
   const pages = [];
   let activeScreen;

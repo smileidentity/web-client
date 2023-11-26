@@ -1,8 +1,7 @@
 {
-  "name": "@smile_identity/smart-camera-web",
+  "name": "@smileid/components",
   "version": "1.0.2",
   "description": "WebComponent for smartly capturing images on the web, for use with SmileIdentity",
-  "main": "smart-camera-web.js",
   "scripts": {
     "build": "npx nyc instrument --compact=false smart-camera-web.js cypress/pages/instrumented",
     "start": "npx serve -p 8000 cypress/pages",
@@ -17,6 +16,10 @@
     "WebComponent",
     "WebRTC"
   ],
+  "exports": {
+    ".": "./src/components/index.js",
+    "./smart-camera-web": "./smart-camera-web.js"
+  },
   "files": [
     "smart-camera-web.js"
   ],

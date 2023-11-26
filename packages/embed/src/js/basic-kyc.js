@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import ConsentScreen from "./components/ConsentScreen";
 import TotpBasedConsent from "./components/TotpConsentApp";
-import Combobox from "./components/Combobox";
+import { Combobox } from "@smileid/components";
 import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {

@@ -196,7 +196,7 @@ Cypress.Commands.add("getTotpConsentApp", () => {
   cy.getIFrameBody()
     .find("end-user-consent")
     .shadow()
-    .find("totp-consent-app")
+    .find("totp-consent")
     .shadow();
 });
 

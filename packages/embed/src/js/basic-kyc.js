@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import "@smileid/components/combobox";
 import "@smileid/components/end-user-consent";
-import TotpBasedConsent from "./components/TotpConsentApp";
+import "@smileid/components/totp-consent";
 import { version as sdkVersion } from "../../package.json";
 
 (function basicKyc() {
@@ -18,8 +18,6 @@ import { version as sdkVersion } from "../../package.json";
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
-
-  window.customElements.define("totp-consent-app", TotpBasedConsent);
 
   const pages = [];
   let activeScreen;

@@ -504,7 +504,7 @@ function markup() {
 	`;
 }
 
-class TotpBasedConsent extends HTMLElement {
+class TotpConsent extends HTMLElement {
   constructor() {
     super();
 
@@ -923,4 +923,10 @@ class TotpBasedConsent extends HTMLElement {
   }
 }
 
-export default TotpBasedConsent;
+if ("customElements" in window) {
+  window.customElements.define('totp-consent', TotpConsent);
+}
+
+export {
+  TotpConsent,
+};

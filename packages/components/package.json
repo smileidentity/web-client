@@ -5,9 +5,15 @@
 	"exports": {
 		".": "./index.js",
 		"./combobox": "./combobox/src/index.js",
-		"./end-user-consent": "./end-user-consent/src/index.js"
+		"./end-user-consent": "./end-user-consent/src/index.js",
+		"./totp-consent": "./totp-consent/src/index.js"
 	},
 	"description": "A collection of Web Components used by SmileID",
-	"keywords": [ "Web Components" ],
-	"author": "SmileID <support@usesmileid.com> (https://usesmileid.com)"
+	"keywords": [
+		"Web Components"
+	],
+	"author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
+	"dependencies": {
+		"validate.js": "^0.13.1"
+	}
 }

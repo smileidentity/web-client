@@ -28,6 +28,7 @@
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
 	"dependencies": {
 		"@smile_identity/smart-camera-web": "file:../smart-camera-web",
+		"@smileid/components": "file:../components",
 		"jszip": "^3.10.1",
 		"validate.js": "^0.13.1"
 	},

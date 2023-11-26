@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import validate from "validate.js";
 import "@smile_identity/smart-camera-web";
-import ConsentScreen from "./components/ConsentScreen";
+import "@smileid/components/end-user-consent";
 import TotpBasedConsent from "./components/TotpConsentApp";
 import { version as sdkVersion } from "../../package.json";
 
@@ -20,7 +20,6 @@ import { version as sdkVersion } from "../../package.json";
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
 
-  window.customElements.define("end-user-consent", ConsentScreen);
   window.customElements.define("totp-consent-app", TotpBasedConsent);
 
   const pages = [];

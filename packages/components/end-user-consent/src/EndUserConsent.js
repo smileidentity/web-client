@@ -480,7 +480,7 @@ function templateString() {
       </section>
     </div>
 
-    <totp-consent-app
+    <totp-consent
       hidden
       base-url='${this.baseUrl}'
       country='${this.country}'
@@ -492,7 +492,7 @@ function templateString() {
       partner-name='${this.partnerName}'
       token='${this.token}'
     >
-    </totp-consent-app>
+    </totp-consent>
 
     <div hidden id='consent-rejected-screen' class='flow'>
       <section class='flow center'>
@@ -674,7 +674,7 @@ class EndUserConsent extends HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
     this.consentScreen = this.shadowRoot.querySelector("#consent-screen");
-    this.totpConsentApp = this.shadowRoot.querySelector("totp-consent-app");
+    this.totpConsentApp = this.shadowRoot.querySelector("totp-consent");
     this.consentRejectedScreen = this.shadowRoot.querySelector(
       "#consent-rejected-screen",
     );

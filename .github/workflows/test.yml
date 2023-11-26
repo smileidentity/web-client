@@ -2,11 +2,11 @@ name: test
 on:
   workflow_call:
 jobs:
-  components:
+  smart-camera-web:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/components
+        working-directory: ./packages/smart-camera-web
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
         with:
           install: false
           start: npm start
-          working-directory: ./packages/components
+          working-directory: ./packages/smart-camera-web
           wait-on: 'http://localhost:8000'
   embed:
     runs-on: ubuntu-latest

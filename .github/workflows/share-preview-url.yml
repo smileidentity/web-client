@@ -11,11 +11,11 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
-      - name: get dest dir for web components
-        id: get_dest_dir_components
-        working-directory: ./packages/components
+      - name: get dest dir for web smart-camera-web
+        id: get_dest_dir_smart_camera_web
+        working-directory: ./packages/smart-camera-web
         run: >-
-          echo "DEST_DIR_COMPONENTS=js/preview-$GITHUB_HEAD_REF" >>
+          echo "DEST_DIR_SMART_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >>
           "$GITHUB_ENV"
       - name: get dest dir for web embed
         id: get_dest_dir_embed
@@ -30,9 +30,9 @@ jobs:
             This branch has been deployed to s3 / cloudfront.
 
 
-            ✅ Preview URL for Components / Smart Camera Web:
+            ✅ Preview URL for Smart Camera Web:
 
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_COMPONENTS }}/smart-camera-web.js
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/smart-camera-web.js
 
             ✅ Preview URL for Embed: 
 

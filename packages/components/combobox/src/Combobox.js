@@ -106,15 +106,15 @@ class ComboboxTrigger extends HTMLElement {
     this.innerHTML = `${
       this.type === "text"
         ? `
-				<div>
-					<input ${this.value ? `value="${this.value}" ` : ""}${
+        <div>
+          <input ${this.value ? `value="${this.value}" ` : ""}${
             this.disabled ? " disabled " : ""
           }type="text" placeholder="${this.label}" />
-					<button ${this.disabled ? "disabled " : ""}tabindex='-1' type='button'>
-						<span class="visually-hidden">Toggle</span>
-					</button>
-				</div>
-			`
+          <button ${this.disabled ? "disabled " : ""}tabindex='-1' type='button'>
+            <span class="visually-hidden">Toggle</span>
+          </button>
+        </div>
+      `
         : `<button ${this.disabled ? "disabled " : ""}type="button">${
             this.value || this.label
           }</button>`
@@ -335,10 +335,10 @@ class ComboboxListbox extends HTMLElement {
 
   get emptyState() {
     return `
-			<p id='empty-state' style="text-align: center;">
-				${this.emptyLabel || "No items"}
-			</p>
-		`;
+      <p id='empty-state' style="text-align: center;">
+        ${this.emptyLabel || "No items"}
+      </p>
+    `;
   }
 
   connectedCallback() {
@@ -571,9 +571,21 @@ class ComboboxOption extends HTMLElement {
   }
 }
 
-export default {
-  Root: ComboboxRoot,
-  Trigger: ComboboxTrigger,
-  List: ComboboxListbox,
-  Option: ComboboxOption,
+const Root = ComboboxRoot;
+const Trigger = ComboboxTrigger;
+const List = ComboboxListbox;
+const Option = ComboboxOption;
+
+if ("customElements" in window) {
+  window.customElements.define('smileid-combobox', Root);
+  window.customElements.define('smileid-combobox-trigger', Trigger);
+  window.customElements.define('smileid-combobox-listbox', List);
+  window.customElements.define('smileid-combobox-option', Option);
+}
+
+export {
+  Root,
+  Trigger,
+  List,
+  Option,
 };

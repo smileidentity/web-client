@@ -3,14 +3,15 @@
 
 ## Overview
 
-### Components
-[Components f.k.a. Smart Camera Web](packages/components) is a package that 
-contains web-components used in the browser with SmileID systems.
+### Smart-Camera-Web
+[Smart Camera Web](packages/smart-camera-web) is a package that
+contains a web-component used to capture images in the browser for use within
+SmileID systems.
 
-It currently publishes `smart-camera-web` which is a Web Component that works
-together with the [Server to Server](https://docs.smileidentity.com/server-to-server) libraries.
+It is WebRTC Powered Web Component that works together with the
+SmileID [Server to Server](https://docs.smileidentity.com/server-to-server) libraries.
 
-For more detailed information, you can refer to the [packages/components documentation](./packages/components/README.md).
+For more detailed information, you can refer to the [packages/smart-camera-web documentation](./packages/smart-camera-web/README.md).
 
 ### Embed
 [Embed f.k.a. Hosted Web Integration](packages/embed) is a package that contains two items:
@@ -46,10 +47,10 @@ Detailed information about this can be found in the [packages/embed documentatio
 Both projects in this mono-repo come equipped with test suites to ensure code
 quality and functionality. Here's how to run them:
 
-1. **Components**:
+1. **Smart-Camera-Web**:
 
    ```sh
-   cd packages/components
+   cd packages/smart-camera-web
    npm test
    ```
 

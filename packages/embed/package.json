@@ -1,5 +1,5 @@
 {
-	"name": "@smile_identity/web-page",
+	"name": "@smileid/embed",
 	"version": "v1.2.3",
 	"description": "Self Hosted Integration for Smile Identity on the Web",
 	"private": true,
@@ -27,7 +27,8 @@
 	},
 	"homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
 	"dependencies": {
-		"@smile_identity/smart-camera-web": "file:../components",
+		"@smile_identity/smart-camera-web": "file:../smart-camera-web",
+		"@smileid/components": "file:../components",
 		"jszip": "^3.10.1",
 		"validate.js": "^0.13.1"
 	},

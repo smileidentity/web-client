@@ -1,7 +1,7 @@
 import "@smile_identity/smart-camera-web";
+import "@smileid/components/combobox";
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
-import Combobox from "./components/Combobox";
 
 (function documentVerification() {
   "use strict";
@@ -16,11 +16,6 @@ import Combobox from "./components/Combobox";
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
-
-  window.customElements.define("smileid-combobox", Combobox.Root);
-  window.customElements.define("smileid-combobox-trigger", Combobox.Trigger);
-  window.customElements.define("smileid-combobox-listbox", Combobox.List);
-  window.customElements.define("smileid-combobox-option", Combobox.Option);
 
   let config;
   let activeScreen;

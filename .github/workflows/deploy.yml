@@ -5,13 +5,13 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-  components:
+  smart-camera-web:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:
       run:
-        working-directory: ./packages/components
+        working-directory: ./packages/smart-camera-web
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -19,13 +19,13 @@ jobs:
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
         with:
-          path: packages/components
+          path: packages/smart-camera-web
       - name: set destination directory
         id: set_destination
         env:
           TAG: ${{ steps.package-version.outputs.current-version }}
         run: |
-          echo "DEST_DIR_COMPONENTS=js/v$TAG" >> $GITHUB_OUTPUT
+          echo "DEST_DIR_SMART_CAMERA_WEB=js/v$TAG" >> $GITHUB_OUTPUT
       - name: deploy to s3 / cloudfront
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
@@ -34,9 +34,9 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: ./packages/components
+          SOURCE_DIR: ./packages/smart-camera-web
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR_COMPONENTS }}
+          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
     needs: [test]
     runs-on: ubuntu-latest

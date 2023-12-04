@@ -558,3 +558,32 @@ smileid-combobox-option[aria-selected] {
 smileid-combobox-option[hidden] {
   display: none;
 }
+
+.document-tips {
+	margin-block-start: 1.5rem;
+	display: flex;
+	align-items: center;
+	text-align: initial;
+}
+
+.document-tips svg {
+	flex-shrink: 0;
+	margin-inline-end: 1rem;
+}
+
+.document-tips p {
+	margin-block: 0;
+}
+
+.document-tips p:first-of-type {
+	font-size; 1.875rem;
+	font-weight: bold
+}
+
+[type='file'] {
+	display: none;
+}
+
+.document-tips > * + * {
+	margin-inline-start; 1em;
+}

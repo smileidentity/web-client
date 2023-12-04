@@ -15,6 +15,7 @@
 	],
 	"author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
 	"dependencies": {
+		"signature_pad": "4.1.7",
 		"validate.js": "^0.13.1"
 	}
 }

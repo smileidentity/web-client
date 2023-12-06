@@ -3,7 +3,7 @@ import SignaturePadCore from "signature_pad";
 class SmartFileUpload {
   static memoryLimit = 2048000;
 
-  static supportedTypes = ['image/png', 'image/svg+xml'];
+  static supportedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
 
   static getHumanSize(numberOfBytes) {
     // Approximate to the closest prefixed unit
@@ -52,7 +52,7 @@ class SmartFileUpload {
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
-      throw new Error('Unsupported file format. Please ensure that you are providing a PNG or SVG image');
+      throw new Error('Unsupported file format. Please ensure that you are providing a JPG, PNG or SVG image');
     }
 
     if (file.size > SmartFileUpload.memoryLimit) {
@@ -77,8 +77,11 @@ class SignaturePad extends HTMLElement {
     style.textContent = `
 :host {
   display: block;
-  block-size: 30rem;
+  block-size: auto;
   inline-size: 25rem;
+  --color-active: #001096;
+  --color-default: #2D2B2A;
+  --color-disabled: #848282;
 }
 
 :host::part(upload) {
@@ -111,6 +114,10 @@ class SignaturePad extends HTMLElement {
   block-size: 25rem;
 }
 
+:host::part(upload-preview-image) {
+  inline-size: 25rem;
+}
+
 .visually-hidden {
   clip: rect(0 0 0 0); 
   clip-path: inset(50%);
@@ -140,6 +147,15 @@ label svg + * {
   display: none;
 }
 
+.center {
+  text-align: center;
+  margin-inline: auto;
+}
+
+.color-red {
+  color: red;
+}
+
 button[data-variant="icon"] {
   appearance: none;
   -webkit-appearance: none;
@@ -156,7 +172,37 @@ button[data-variant="text"] {
   display: inline-flex;
   align-items: baseline;
 }
-    `;
+
+button[data-variant="solid"] {
+  --button-color: var(--color-default);
+  border-radius: 2.5rem;
+  border: 0;
+  background-color: transparent;
+  color: #fff;
+  cursor: pointer;
+  inline-size: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  padding: .75rem 1.5rem;
+  text-align: center;
+  background-color: var(--button-color);
+  border: 2px solid var(--button-color);
+}
+
+button:hover,
+button:focus,
+button:active {
+  --button-color: var(--color-active);
+}
+
+button:disabled {
+  --button-color: var(--color-disabled);
+}
+`;
+
 
     const wrapper = document.createElement('div');
     const errorMessage = document.createElement('div');
@@ -167,23 +213,14 @@ button[data-variant="text"] {
     const signatureControls = document.createElement('div');
     signatureControls.innerHTML = `
       <div part="signature-controls" id="controls">
-        <button data-variant="icon" type="button" name="publish" id="publish">
-          <span class="visually-hidden">
-            Publish Signature
-          </span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="18" height="18" version="1.0">
-            <path d="M7.689 404.614s115.165 129.688 138.198 182.664h99.042C286.39 460.596 447.62 158.16 585.82 52.208c28.633-36.814-43.298-52.01-101.346-27.64-87.486 36.73-252.488 317.169-283.307 384.653-43.762 11.516-89.829-73.706-89.829-73.706L7.69 404.615z" style="fill:#0b0;fill-opacity:1;fill-rule:evenodd;stroke:#000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
-          </svg>
-        </button>
-        
         <button data-variant="icon" type="button" name="clear" id="clear">
           <span class="visually-hidden">
             Clear Signature
           </span>
-          <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 600 600" width="18" height="18" id="svg2">
-            <defs id="defs5"/>
-            <path d="M 3.2256306,500.60601 C 3.2256306,491.25372 43.758136,444.29477 93.297856,396.25279 C 142.83758,348.21081 190.58002,301.56316 199.39218,292.59134 C 208.20433,283.61953 199.05159,231.54121 179.05273,176.86176 C 137.62307,63.587785 133.84657,25.920941 162.44557,11.22195 C 201.53416,-8.8683761 255.17957,20.811156 300.20945,87.440355 L 345.82828,154.94098 L 431.49626,85.021183 C 487.8258,39.04656 528.03591,18.570758 548.9095,25.231984 C 590.2087,38.411479 614.04278,89.982978 582.83295,98.634538 C 547.40845,108.45442 400.79201,294.00339 401.07018,328.6626 C 401.20186,345.07435 422.03434,388.63634 447.36457,425.46705 C 465.23081,451.44496 489.24604,471.94435 479.71274,486.03505 L 428.75193,561.35761 C 418.86818,575.96632 382.36042,537.01753 339.11325,499.2103 L 263.67191,433.25848 L 180.03742,515.74309 C 134.03845,561.10962 91.093734,597.99391 84.60471,597.70816 C 78.115704,597.42239 3.2256306,509.95831 3.2256306,500.60601 z" id="X" style="fill:#f60000;fill-opacity:1;stroke:none;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
+          <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="18" viewBox="0 0 17 18">
+            <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor" />
           </svg>
+        </svg>
         </button>
       </div>
     `;
@@ -214,10 +251,35 @@ button[data-variant="text"] {
       </p>
     `;
 
+    const publishSignatureContainer = document.createElement('p');
+    publishSignatureContainer.innerHTML = `
+      <button data-variant="solid" type="button" name="publish" id="publish">
+        <span>
+          Continue
+        </span>
+        <svg
+          aria-hidden="true"
+          width="25"
+          height="24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 12h11m0 0-4.588-4M18 12l-4.588 4"
+            stroke="#fff"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    `
+
     wrapper.appendChild(errorMessage);
     wrapper.appendChild(signatureControls);
     wrapper.appendChild(canvas);
-    wrapper.appendChild(uploadControl);
+    if (this.allowUpload) wrapper.appendChild(uploadControl);
+    wrapper.appendChild(publishSignatureContainer);
 
     shadow.appendChild(style);
     shadow.appendChild(wrapper);
@@ -228,15 +290,16 @@ button[data-variant="text"] {
     this.errorMessage = errorMessage.querySelector('#error');
 
     // Signature Pad Controls
-    this.publishSignatureButton = signatureControls.querySelector('#publish');
-    this.publishSignatureButton.addEventListener('click', () => this.publishSignature());
-
     this.clearSignatureButton = signatureControls.querySelector('#clear');
     this.clearSignatureButton.addEventListener('click', () => this.clearSignature());
 
     // Upload Controls
     this.uploadSignatureButton = uploadControl.querySelector("#upload-signature");
     this.uploadSignatureButton.addEventListener('change', (event) => this.uploadSignature(event));
+
+    // Publish Signature
+    this.publishSignatureButton = publishSignatureContainer.querySelector('#publish');
+    this.publishSignatureButton.addEventListener('click', () => this.publishSignature());
   }
 
   disconnectedCallback() {
@@ -245,10 +308,10 @@ button[data-variant="text"] {
     this.uploadSignatureButton.removeEventListener('change', (event) => this.uploadSignature(event));
   }
 
-  publishSignature(uploadedImage) {
+  publishSignature() {
     try {
       this.resetErrorMessage();
-      let image = uploadedImage;
+      let image = this.shadowRoot.querySelector('img').src;
       if (!image && !this.core.isEmpty()) {
         image = this.core.toDataURL();
       }
@@ -261,7 +324,7 @@ button[data-variant="text"] {
           }
         ));
       } else {
-        throw new Error("No signature present. Upload or draw a signature");
+        throw new Error(`No signature present. ${this.allowUpload ? "Draw or upload" : "Draw"} a signature`);
       }
     } catch (error) {
       this.handleError(error.message);
@@ -278,7 +341,25 @@ button[data-variant="text"] {
 
   clearSignature() {
     this.resetErrorMessage();
+    const canvas = this.shadowRoot.querySelector('canvas');
+    const img = this.shadowRoot.querySelector('img');
+    img.setAttribute('part', 'upload-preview-image')
+
+    if (img) {
+      img.remove();
+      canvas.removeAttribute('hidden');
+    }
+
     this.core.clear();
+  }
+
+  previewUpload(fileData) {
+    const canvas = this.shadowRoot.querySelector('canvas');
+
+    const img = document.createElement('img');
+    img.src = fileData;
+    canvas.setAttribute('hidden', true);
+    canvas.insertAdjacentElement("afterend", img);
   }
 
   async uploadSignature(event) {
@@ -289,10 +370,15 @@ button[data-variant="text"] {
       // validate file, and convert file to data url
       const fileData = await SmartFileUpload.retrieve(files);
 
-      this.publishSignature(fileData);
+      // swap out canvas for an image for preview
+      this.previewUpload(fileData);
     } catch (error) {
       this.handleError(error.message);
     }
+  }
+
+  get allowUpload() {
+    return this.hasAttribute('allow-upload');
   }
 }
 

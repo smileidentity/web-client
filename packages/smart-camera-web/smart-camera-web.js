@@ -762,7 +762,7 @@ function scwTemplateString() {
       <powered-by-smile-id></powered-by-smile-id>
     `}
   </div>
-
+  <selfie-instructions></selfie-instructions>
   <div hidden id='id-entry-screen' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav">

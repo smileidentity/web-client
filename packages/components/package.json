@@ -7,7 +7,8 @@
 		"./combobox": "./combobox/src/index.js",
 		"./end-user-consent": "./end-user-consent/src/index.js",
 		"./totp-consent": "./totp-consent/src/index.js",
-		"./selfie-instruction": "./selfie-instruction/src/index.js"
+		"./selfie-instruction": "./instruction/src/SelfieInstruction.js",
+		"./document-instruction": "./instruction/src/DocumentInstruction.js"
 	},
 	"description": "A collection of Web Components used by SmileID",
 	"keywords": [

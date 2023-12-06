@@ -1,3 +1,0 @@
-export {
- SelfieInstruction 
-} from './SelfieInstruction';

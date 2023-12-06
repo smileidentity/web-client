@@ -1,6 +1,6 @@
 import "@smile_identity/smart-camera-web";
 import "@smileid/components/combobox";
-import "@smileid/components/instructions/DocumentInstruction";
+import "@smileid/components/document-instruction";
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 

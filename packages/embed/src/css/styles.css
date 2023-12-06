@@ -304,6 +304,20 @@ button[data-type="icon"] {
   justify-content: end !important;
 }
 
+.checkbox-input {
+	display: flex;
+	align-items: center;
+}
+
+.checkbox-input input {
+	inline-size: auto;
+}
+
+.checkbox-input label {
+	margin-inline-start: .5rem;
+	text-align: initial;
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
@@ -586,4 +600,29 @@ smileid-combobox-option[hidden] {
 
 .document-tips > * + * {
 	margin-inline-start; 1em;
+}
+
+.document-list {
+	padding: 0px;
+}
+
+.document-list li {
+	list-style: none;
+	background-color: #F9F0E7;
+	padding: 1rem;
+	border-radius: .5rem;
+}
+
+.document-list li + li {
+	margin-block-start: 1rem;
+}
+
+.document-list a {
+	color: initial;
+	text-decoration: none;
+	margin: 0px;
+}
+
+smileid-signature-pad {
+	margin-inline: auto;
 }

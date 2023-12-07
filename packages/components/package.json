@@ -1,19 +1,34 @@
 {
-	"name": "@smileid/components",
-	"version": "1.0.0",
-	"private": "true",
-	"exports": {
-		".": "./index.js",
-		"./combobox": "./combobox/src/index.js",
-		"./end-user-consent": "./end-user-consent/src/index.js",
-		"./totp-consent": "./totp-consent/src/index.js"
-	},
-	"description": "A collection of Web Components used by SmileID",
-	"keywords": [
-		"Web Components"
-	],
-	"author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
-	"dependencies": {
-		"validate.js": "^0.13.1"
-	}
+  "name": "@smileid/components",
+  "version": "1.0.0",
+  "private": "true",
+  "exports": {
+    ".": "./index.js",
+    "./combobox": "./combobox/src/index.js",
+    "./end-user-consent": "./end-user-consent/src/index.js",
+    "./totp-consent": "./totp-consent/src/index.js"
+  },
+  "description": "A collection of Web Components used by SmileID",
+  "keywords": [
+    "Web Components"
+  ],
+  "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
+  "dependencies": {
+    "validate.js": "^0.13.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^7.6.4",
+    "@storybook/addon-links": "^7.6.4",
+    "@storybook/blocks": "^7.6.4",
+    "@storybook/web-components": "^7.6.4",
+    "@storybook/web-components-vite": "^7.6.4",
+    "lit": "^3.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.6.4"
+  },
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  }
 }

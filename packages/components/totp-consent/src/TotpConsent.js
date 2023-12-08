@@ -37,8 +37,8 @@ function markup() {
 				--color-richblue: #043C93;
 				--color-theme: ${this.themeColor};
 
-				--color-active: #001096;
-				--color-default: #2D2B2A;
+				--color-active: #2D2B2A;
+				--color-default: #001096;
 				--color-disabled: #848282;
 			}
 

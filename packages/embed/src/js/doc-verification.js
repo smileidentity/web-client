@@ -1,6 +1,7 @@
 import "@smile_identity/smart-camera-web";
 import "@smileid/components/combobox";
-import "@smileid/components/document-instruction";
+import '@smileid/components/instructions';
+
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 
@@ -317,6 +318,9 @@ import { version as sdkVersion } from "../../package.json";
               "document-capture-modes",
               config.document_capture_modes.join(","),
             );
+          }
+          if (config.hide_document_instructions) {
+            SmartCameraWeb.setAttribute("hide-document-instructions", true);
           }
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web

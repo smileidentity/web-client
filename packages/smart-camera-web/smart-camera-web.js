@@ -763,7 +763,11 @@ function scwTemplateString() {
     `}
   </div>
   <selfie-instruction hidden></selfie-instruction>
-  <document-instruction hidden id='id-entry-screen'></document-instruction>
+  <document-instruction hidden
+  document-capture-modes='camera, upload'
+   ${this.showNavigation ? 'show-navigation' : ''}
+  id='id-entry-screen' title='Submit${this.captureBackOfID ? ' the Front of' : ''} Your ID'>
+  </document-instruction>
   <div hidden id='id-entry-screen-1' class='flow center'>
   ${this.showNavigation ? `
     <div class="nav">
@@ -1334,6 +1338,7 @@ class SmartCameraWeb extends HTMLElement {
       });
     }
 
+    if (!this.hideDocumentInstructions) this.idEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
     if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
     if (this.skipBackOfDocumentPhotoButton) this.skipBackOfDocumentPhotoButton.addEventListener('click', () => this._skipBackDocument());
     if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
@@ -1930,6 +1935,10 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideDocumentInstructions() {
     return this.hasAttribute('hide-document-instructions');
+  }
+
+  get hideDocumentCapture() {
+    return this.hasAttribute('hide-document-capture');
   }
 }
 

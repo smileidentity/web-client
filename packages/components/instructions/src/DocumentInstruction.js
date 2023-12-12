@@ -591,7 +591,7 @@ function templateString() {
 			? `
 	<label id='upload-photo-label' data-variant='${this.supportBothCaptureModes ? "outline" : "solid"
 			}' class='button'>
-		<input type='file' onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
+		<input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
 		<span>Upload Photo</span>
 	</label>
 	`

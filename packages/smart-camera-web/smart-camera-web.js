@@ -319,6 +319,29 @@ function scwTemplateString() {
       scale: 1.75;
     }
 
+    .header-title {
+      color: var(--web-digital-blue, #001096);
+      text-align: center;
+
+      /* h1 */
+      font-family: DM Sans;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 36px; /* 150% */
+    }
+    .description {
+      color: var(--neutral-off-black, #2D2B2A);
+      text-align: center;
+  
+      /* p */
+      font-family: DM Sans;
+      font-size: 0.875rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 18px;
+    }
+
     @media (max-aspect-ratio: 1/1) {
       #review-image {
         transform: scaleX(-1) translateY(-10%);
@@ -463,7 +486,7 @@ function scwTemplateString() {
     }
 
     .id-video-container.landscape .image-frame {
-      border-width: 10rem 1rem;
+      border-width: 9rem 1.2rem;
       border-color: rgba(0, 0, 0, 0.7);
       border-style: solid;
       height: auto;
@@ -495,6 +518,9 @@ function scwTemplateString() {
       background-color: rgba(0, 0, 0, 1);
     }
 
+    #id-review-screen .id-video-container.landscape {
+      min-height: 18rem;
+  }
     #id-review-screen .id-video-container.portrait, #back-of-id-review-screen .id-video-container.portrait {
       height: calc((200px * 1.4) + 100px);
     }
@@ -936,31 +962,27 @@ function scwTemplateString() {
         </button>
       </div>
     ` : ''}
-    <h1>Review ID Card</h1>
+    <h1 class="header-title">
+      Is the document clear and readable?
+    </h1>
+    <p class="description">Make sure all corners of the document 
+    are visible and there is no glare</p>
     <div class='section | flow'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
-        <div class='actions'>
-          <button id='re-capture-id-image' class='button icon-btn' type='button'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
-              <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
-            </svg>
-            <span class='visually-hidden'>Re-Capture</span>
-          </button>
-          <button id='select-id-image' class='button icon-btn' type='button'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox='0 0 41 41' height="40" width="40">
-              <circle cx="20.5" cy="20.5" r="20" stroke="#fff"/>
-              <path d="M12.3 20.5l6.15 6.15 12.3-12.3" stroke="#fff" stroke-width="3.075" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class='visually-hidden'>Accept Image</span>
-          </button>
-        </div>
-
         <img
           alt='your ID card'
           id='id-review-image'
           src=''
           width='396'
         />
+      </div>
+      <div class='flow action-buttons'>
+        <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
+          Yes, my ID is readable
+        </button>
+        <button data-variant='ghost full-width' class='button' type='button' id='re-capture-id-image'>
+          No, retake photo
+        </button>
       </div>
 
       ${this.hideAttribution ? '' : `

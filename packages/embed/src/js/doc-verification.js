@@ -319,12 +319,12 @@ import { version as sdkVersion } from "../../package.json";
               config.document_capture_modes.join(","),
             );
           }
-          if (config.hide_document_instructions) {
-            SmartCameraWeb.setAttribute("hide-document-instructions", true);
+          if (config.skip_document_instructions) {
+            SmartCameraWeb.setAttribute("skip-document-instructions", true);
           }
 
-          if (config.hide_document_capture) {
-            SmartCameraWeb.setAttribute("hide-document-capture", true);
+          if (config.skip_document_capture) {
+            SmartCameraWeb.setAttribute("skip-document-capture", true);
           }
 
           // Hide the back button that takes the user back to the id selection screen
@@ -400,11 +400,11 @@ import { version as sdkVersion } from "../../package.json";
             config.document_capture_modes.join(","),
           );
         }
-        if (config.hide_document_instructions) {
-          SmartCameraWeb.setAttribute("hide-document-instructions", true);
+        if (config.skip_document_instructions) {
+          SmartCameraWeb.setAttribute("skip-document-instructions", true);
         }
-        if (config.hide_document_capture) {
-          SmartCameraWeb.setAttribute("hide-document-capture", true);
+        if (config.skip_document_capture) {
+          SmartCameraWeb.setAttribute("skip-document-capture", true);
         }
         setActiveScreen(SmartCameraWeb);
       });

@@ -1343,14 +1343,14 @@ class SmartCameraWeb extends HTMLElement {
       });
     }
 
-    if (!this.hideDocumentInstructions) {
+    if (!this.skipDocumentInstructions) {
       this.idEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
       this.idEntryScreen.addEventListener('DocumentInstruction::DocumentChange', (e) => this._uploadDocument(e));
       this.backOfIdEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
       this.backOfIdEntryScreen.addEventListener('DocumentInstruction::DocumentChange', (e) => this._uploadDocument(e));
       this.backOfIdEntryScreen.addEventListener('DocumentInstruction::SkipDocumentBack', () => this._skipBackDocument());
       this.backOfIdEntryScreen.addEventListener('SmileIdentity::Exit', async () => {
-        if (this.hideDocumentInstructions) {
+        if (this.skipDocumentInstructions) {
           this.setActiveScreen(this.reviewScreen);
         } else {
           this.setActiveScreen(this.idEntryScreen);
@@ -1841,9 +1841,9 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _selectSelfie() {
-    if (!this.captureID || this.hideDocumentCapture) {
+    if (!this.captureID || this.skipDocumentCapture) {
       this._publishSelectedImages();
-    } else if (this.hideDocumentInstructions) {
+    } else if (this.skipDocumentInstructions) {
       this._startIDCamera();
     } else {
       this.setActiveScreen(this.idEntryScreen);
@@ -1956,12 +1956,12 @@ class SmartCameraWeb extends HTMLElement {
     return this.getAttribute('document-capture-modes') === 'camera';
   }
 
-  get hideDocumentInstructions() {
-    return this.hasAttribute('hide-document-instructions');
+  get skipDocumentInstructions() {
+    return this.hasAttribute('skip-document-instructions');
   }
 
-  get hideDocumentCapture() {
-    return this.hasAttribute('hide-document-capture');
+  get skipDocumentCapture() {
+    return this.hasAttribute('skip-document-capture');
   }
 }
 

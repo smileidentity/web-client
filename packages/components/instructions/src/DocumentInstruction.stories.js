@@ -9,7 +9,8 @@ export default meta;
 export const DocumentInstruction = {
     render: () => `
         <document-instruction
-            show-navigation="true"
+            show-navigation
+            document-capture-modes="camera,upload"
         >
         </document->
     `,

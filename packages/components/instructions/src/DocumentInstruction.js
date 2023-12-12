@@ -628,6 +628,7 @@ class DocumentInstruction extends HTMLElement {
 
 		this.backButton = this.shadowRoot.querySelector("#back-button");
 		this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
+		this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
 
 		const CloseIframeButtons =
 			this.shadowRoot.querySelectorAll(".close-iframe");
@@ -650,6 +651,14 @@ class DocumentInstruction extends HTMLElement {
 			this.dispatchEvent(
 				new CustomEvent("DocumentInstruction::StartCamera", {
 				  detail: {},
+				}),
+			  );
+		});
+
+		if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => {
+			this.dispatchEvent(
+				new CustomEvent("DocumentInstruction::DocumentChange", {
+				  detail: {files: e.target.files},
 				}),
 			  );
 		});
@@ -696,6 +705,5 @@ class DocumentInstruction extends HTMLElement {
 if ("customElements" in window) {
 	window.customElements.define("document-instruction", DocumentInstruction);
 }
-console.log("loaded");
 
 export { DocumentInstruction };

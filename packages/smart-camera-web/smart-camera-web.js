@@ -768,6 +768,11 @@ function scwTemplateString() {
    ${this.showNavigation ? 'show-navigation' : ''}
   id='id-entry-screen' title='Submit${this.captureBackOfID ? ' the Front of' : ''} Your ID'>
   </document-instruction>
+  <document-instruction hidden
+  document-capture-modes='camera, upload'
+   ${this.showNavigation ? 'show-navigation' : ''}
+  id='back-of-id-entry-screen' title='Submit Back of ID'>
+  </document-instruction>
   <div hidden id='id-entry-screen-1' class='flow center'>
   ${this.showNavigation ? `
     <div class="nav">
@@ -964,7 +969,7 @@ function scwTemplateString() {
     </div>
   </div>
 
-  <div hidden id='back-of-id-entry-screen' class='flow center'>
+  <div hidden id='back-of-id-entry-screen-2' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav">
         <div class="back-wrapper">
@@ -1338,12 +1343,26 @@ class SmartCameraWeb extends HTMLElement {
       });
     }
 
-    if (!this.hideDocumentInstructions) this.idEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
-    if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
-    if (this.skipBackOfDocumentPhotoButton) this.skipBackOfDocumentPhotoButton.addEventListener('click', () => this._skipBackDocument());
-    if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
-    if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
-    if (this.uploadBackOfDocumentPhotoButton) this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
+    if (!this.hideDocumentInstructions) {
+      this.idEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
+      this.idEntryScreen.addEventListener('DocumentInstruction::DocumentChange', (e) => this._uploadDocument(e));
+      this.backOfIdEntryScreen.addEventListener('DocumentInstruction::StartCamera', () => this._startIDCamera());
+      this.backOfIdEntryScreen.addEventListener('DocumentInstruction::DocumentChange', (e) => this._uploadDocument(e));
+      this.backOfIdEntryScreen.addEventListener('DocumentInstruction::SkipDocumentBack', () => this._skipBackDocument());
+      this.backOfIdEntryScreen.addEventListener('SmileIdentity::Exit', async () => {
+        if (this.hideDocumentInstructions) {
+          this.setActiveScreen(this.reviewScreen);
+        } else {
+          this.setActiveScreen(this.idEntryScreen);
+        }
+        await this._startIDCamera();
+      });
+    }
+    // if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
+    // if (this.skipBackOfDocumentPhotoButton) this.skipBackOfDocumentPhotoButton.addEventListener('click', () => this._skipBackDocument());
+    // if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
+    // if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
+    // if (this.uploadBackOfDocumentPhotoButton) this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
 
     this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
     this.backToIdEntryButton = this.shadowRoot.querySelector('#back-button-id-entry');
@@ -1669,9 +1688,11 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   async _uploadDocument(event) {
+    console.error('event', event);
     this.resetErrorMessage();
     try {
-      const { files } = event.target;
+      const isFrontDocument = this.activeScreen === this.idEntryScreen || this.activeScreen === this.reviewScreen;
+      const { files } = event.detail;
 
       // validate file, and convert file to data url
       const fileData = await SmartFileUpload.retrieve(files);
@@ -1683,11 +1704,11 @@ class SmartCameraWeb extends HTMLElement {
         //
         // we are only interested in the base64 segment, so we extract it
         image: fileData.split(',')[1],
-        image_type_id: this.activeScreen === this.idEntryScreen ? 3 : 7,
+        image_type_id: isFrontDocument ? 3 : 7,
       });
 
       // add file to preview state
-      const nextScreen = this.activeScreen === this.idEntryScreen ? this.IDReviewScreen : this.backOfIDReviewScreen;
+      const nextScreen = isFrontDocument ? this.IDReviewScreen : this.backOfIDReviewScreen;
       const previewImage = nextScreen.querySelector('img');
       previewImage.src = fileData;
 
@@ -1807,7 +1828,7 @@ class SmartCameraWeb extends HTMLElement {
         },
       });
 
-      if (this.activeScreen === this.idEntryScreen) {
+      if (this.activeScreen === this.idEntryScreen || this.activeScreen === this.reviewScreen) {
         this.setActiveScreen(this.IDCameraScreen);
       } else if (this.activeScreen === this.backOfIdEntryScreen) {
         this.setActiveScreen(this.backOfIDCameraScreen);
@@ -1822,6 +1843,8 @@ class SmartCameraWeb extends HTMLElement {
   _selectSelfie() {
     if (!this.captureID) {
       this._publishSelectedImages();
+    } else if (this.hideDocumentInstructions) {
+      this._startIDCamera();
     } else {
       this.setActiveScreen(this.idEntryScreen);
     }

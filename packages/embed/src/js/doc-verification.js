@@ -322,6 +322,7 @@ import { version as sdkVersion } from "../../package.json";
           if (config.hide_document_instructions) {
             SmartCameraWeb.setAttribute("hide-document-instructions", true);
           }
+
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web
           SmartCameraWeb.setAttribute("hide-back-to-host", true);
@@ -394,6 +395,9 @@ import { version as sdkVersion } from "../../package.json";
             "document-capture-modes",
             config.document_capture_modes.join(","),
           );
+        }
+        if (config.hide_document_instructions) {
+          SmartCameraWeb.setAttribute("hide-document-instructions", true);
         }
         setActiveScreen(SmartCameraWeb);
       });

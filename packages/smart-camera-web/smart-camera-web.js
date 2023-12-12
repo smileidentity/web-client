@@ -1841,7 +1841,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _selectSelfie() {
-    if (!this.captureID) {
+    if (!this.captureID || this.hideDocumentCapture) {
       this._publishSelectedImages();
     } else if (this.hideDocumentInstructions) {
       this._startIDCamera();

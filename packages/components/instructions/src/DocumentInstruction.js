@@ -285,8 +285,15 @@ function templateString() {
 		padding-bottom: 2rem;
 	  }
 
-      .instructions {
+	  .instructions-wrapper {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2rem;
         margin-block-start: 2rem;
+		margin-block-end: 4rem;
+	  }
+      .instructions {
         display: flex;
         align-items: center;
         text-align: initial;
@@ -301,6 +308,10 @@ function templateString() {
         margin-block: 0;
       }
 
+	  .instruction-body {
+		font-size: 0.75rem;
+	  }
+
       h1 {
         color: var(--web-digital-blue, #001096);
         text-align: center;
@@ -312,14 +323,23 @@ function templateString() {
         line-height: 36px; /* 150% */
       }
 
-      .tip-header {
-        color: var(--web-digital-blue, #001096);
+	  .p2 {
+		font-size: 1rem;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 1rem;
+	  }
 
-        /* h2 */
-        font-size: 1rem;
-        font-style: normal;
-        font-weight: 700;
+      .instruction-header {
+        color: var(--web-digital-blue, #001096);
       }
+
+	  .h2 {
+		font-size: 1rem;
+		font-style: normal;
+		font-weight: 700;
+		line-height: 1.5rem;
+	  }
 	</style>
 	<div id="document-instruction-screen" class="flow center">
 		<section className="main">
@@ -402,7 +422,7 @@ function templateString() {
 		  Please follow the instructions below.
 		  </p>
 		</header>
-		<div class="flow">
+		<div class="flow instructions-wrapper">
 			<div class="instructions">
 				<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -479,8 +499,8 @@ function templateString() {
 				</defs>
 				</svg>
 				<div class="instruction">
-				<p class="tip-header">Good Light</p>
-				<p>
+				<p class="instruction-header h2">Good Light</p>
+				<p class="instruction-body p2">
 					Make sure you are in a well-lit environment where your face is
 					clear and visible
 				</p>
@@ -568,8 +588,8 @@ function templateString() {
 			</defs>
 			</svg>
 			<div>
-				<p class="tip-header">Clear Image</p>
-				<p>
+				<p class="instruction-header h2">Clear Image</p>
+				<p class="instruction-body p2">
 					Hold your phone steady so the selfie is clear and sharp. Don't
 					take blurry images.
 				</p>

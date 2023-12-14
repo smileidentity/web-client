@@ -796,6 +796,7 @@ function scwTemplateString() {
   <document-instruction hidden
   document-capture-modes='camera, upload'
    ${this.showNavigation ? 'show-navigation' : ''}
+   ${this.documentCaptureModes ? `document-capture-modes='${this.documentCaptureModes}'` : ''}
   id='id-entry-screen' title='Submit${this.captureBackOfID ? ' the Front of' : ''} Your ID'>
   </document-instruction>
   <document-instruction hidden

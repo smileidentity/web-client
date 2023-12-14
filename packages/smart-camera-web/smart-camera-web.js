@@ -957,7 +957,8 @@ function scwTemplateString() {
     </div>
   </div>
 
-  <div hidden id='id-review-screen' class='flow center'>
+  <id-review hidden src='' show-navigation hide-back-to-host id='id-review-screen'></id-review>
+  <div hidden id='id-review-screen-1' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
@@ -1158,8 +1159,8 @@ function scwTemplateString() {
       `}
     </div>
   </div>
-
-  <div hidden id='back-of-id-review-screen' class='flow center'>
+  <id-review hidden id='back-of-id-review-screen'></id-review>
+  <div hidden id='back-of-id-review-screen-1' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button' id='back-review-screen-close' class='close-iframe icon-btn'>
@@ -1337,8 +1338,8 @@ class SmartCameraWeb extends HTMLElement {
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
     this.captureBackOfIDImage = this.shadowRoot.querySelector('#capture-back-of-id-image');
     this.reviewImage = this.shadowRoot.querySelector('#review-image');
-    this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
-    this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-image');
+    this.IDReviewImage = this.shadowRoot.querySelector('#id-review-screen');
+    this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-screen');
 
     this.reStartImageCapture = this.shadowRoot.querySelector('#restart-image-capture');
     this.reCaptureIDImage = this.shadowRoot.querySelector('#re-capture-id-image');
@@ -1433,11 +1434,11 @@ class SmartCameraWeb extends HTMLElement {
       this._selectSelfie();
     });
 
-    this.selectIDImage.addEventListener('click', () => {
+    this.IDReviewScreen.addEventListener('IdReview::SelectImage', () => {
       this._selectIDImage();
     });
 
-    this.selectBackOfIDImage.addEventListener('click', () => {
+    this.backOfIDReviewScreen.addEventListener('IdReview::SelectImage', () => {
       this._selectIDImage(true);
     });
 
@@ -1453,11 +1454,11 @@ class SmartCameraWeb extends HTMLElement {
       this._reStartImageCapture();
     });
 
-    this.reCaptureIDImage.addEventListener('click', () => {
+    this.IDReviewScreen.addEventListener('IdReview::ReCaptureID', () => {
       this._reCaptureIDImage();
     });
 
-    this.reCaptureBackOfIDImage.addEventListener('click', () => {
+    this.backOfIDReviewScreen.addEventListener('IdReview::ReCaptureID', () => {
       this._reCaptureIDImage();
     });
   }
@@ -1637,9 +1638,9 @@ class SmartCameraWeb extends HTMLElement {
     const image = this._drawIDImage();
 
     if (this.activeScreen === this.IDCameraScreen) {
-      this.IDReviewImage.src = image;
+      this.IDReviewImage.setAttribute('src', image);
     } else {
-      this.backOfIDReviewImage.src = image;
+      this.backOfIDReviewImage.setAttribute('src', image);
     }
 
     this._data.images.push({

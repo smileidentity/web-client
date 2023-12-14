@@ -12,6 +12,6 @@ export const DocumentInstruction = {
             show-navigation
             document-capture-modes="camera,upload"
         >
-        </document->
+        </document-instruction>
     `,
 }

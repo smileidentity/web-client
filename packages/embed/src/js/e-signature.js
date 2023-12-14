@@ -242,8 +242,9 @@ function getHumanSize(numberOfBytes) {
     }[contentType];
 
     return new File(
-      new Blob([uInt8Array], { type: contentType }),
+      [new Blob([uInt8Array], { type: contentType })],
       `signature.${ext}`,
+      { type: contentType },
     );
   }
 

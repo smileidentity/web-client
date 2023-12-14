@@ -220,7 +220,7 @@ function getHumanSize(numberOfBytes) {
 
   ReviewSignatureScreen.querySelector("#uploadSignature").addEventListener(
     "click",
-    () => submitSignature()
+    () => submitSignature(),
   );
 
   function dataURLToObject(dataURL) {
@@ -452,6 +452,7 @@ function getHumanSize(numberOfBytes) {
 
       if (json.error) throw new Error(json.error);
 
+      setActiveScreen(CompleteScreen);
       return json;
     } catch (error) {
       throw new Error("signature submission failed", { cause: error });

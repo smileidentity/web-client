@@ -170,7 +170,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('#id-entry-screen')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
@@ -241,7 +243,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('#id-entry-screen')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
@@ -274,7 +278,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-review-screen .id-video-container.landscape img')
+      .find('#id-review-screen')
+      .shadow()
+      .find('.id-video-container.landscape img')
       .should('not.have.css', 'transform', 'none');
   });
 
@@ -309,7 +315,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('#id-entry-screen')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
@@ -330,6 +338,8 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
+      .find('#id-review-screen')
+      .shadow()
       .find('#re-capture-id-image')
       .click();
 
@@ -348,7 +358,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('#id-entry-screen')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
@@ -413,7 +425,9 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('#id-entry-screen')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
@@ -433,6 +447,8 @@ context('SmartCameraWeb', () => {
 
     cy
       .get('smart-camera-web')
+      .shadow()
+      .find('#id-review-screen')
       .shadow()
       .find('#select-id-image')
       .click();

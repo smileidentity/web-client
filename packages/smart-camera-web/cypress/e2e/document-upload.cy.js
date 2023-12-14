@@ -22,13 +22,17 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen #take-photo')
+        .find('#id-entry-screen')
+        .shadow()
+        .find('#take-photo')
         .should('be.visible');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen #upload-photo-label')
+        .find('#id-entry-screen')
+        .shadow()
+        .find('#upload-photo-label')
         .should('not.exist');
     });
   });

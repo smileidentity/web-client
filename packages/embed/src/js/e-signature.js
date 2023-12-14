@@ -213,7 +213,7 @@ function getHumanSize(numberOfBytes) {
       name.textContent = personal_info.name;
       const image = ReviewSignatureScreen.querySelector("#preview-signature");
       image.src = event.detail;
-      signature = dataURLToObject(event.detail);
+      signature = dataURLToBlob(event.detail);
       setActiveScreen(ReviewSignatureScreen);
     },
   );
@@ -223,7 +223,7 @@ function getHumanSize(numberOfBytes) {
     () => submitSignature(),
   );
 
-  function dataURLToObject(dataURL) {
+  function dataURLToBlog(dataURL) {
     // Code taken from https://github.com/ebidel/filer.js
     const parts = dataURL.split(";base64,");
     const contentType = parts[0].split(":")[1];
@@ -235,17 +235,7 @@ function getHumanSize(numberOfBytes) {
       uInt8Array[i] = raw.charCodeAt(i);
     }
 
-    const ext = {
-      "image/svg+xml": "svg",
-      "image/png": "png",
-      "image/jpeg": "jpeg",
-    }[contentType];
-
-    return {
-      data: new Blob([uInt8Array], { type: contentType }),
-      name: `signature.${ext}`,
-      type: contentType,
-    };
+    return new Blob([uInt8Array], { type: contentType });
   }
 
   function setActiveScreen(node) {
@@ -433,10 +423,8 @@ function getHumanSize(numberOfBytes) {
 
     formData.append("ids", config.document_ids.join(","));
     formData.append("name", personal_info.name);
-    formData.append("document_read_at", new Date());
-    formData.append("image[data]", signature.data);
-    formData.append("image[name]", signature.name);
-    formData.append("image[type]", signature.type);
+    formData.append("document_read_at", (new Date()).toISOString());
+    formData.append("image", signature);
 
     const URL = `${
       endpoints[config.environment] || config.environment

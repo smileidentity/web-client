@@ -476,7 +476,7 @@ class IdReview extends HTMLElement {
 				}),
 			);
 		});
-		this.selectIDImage.addEventListener('click', () => {
+		this.reCaptureIDImage.addEventListener('click', () => {
 			this.dispatchEvent(
 				new CustomEvent("IdReview::ReCaptureID", {
 					detail: {},

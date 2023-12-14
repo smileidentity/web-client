@@ -412,8 +412,9 @@ function getHumanSize(numberOfBytes) {
   async function submitSignature() {
     // ACTION: Build the request headers
     const headers = {
-      "SMILEID-PARTNER-ID": config.partner_details.partner_id,
-      "SMILEID-TOKEN": config.token,
+      "SmileID-Partner-ID": config.partner_details.partner_id,
+      "SmileID-Token": config.token,
+      "Content-Type": "multipart/form-data",
     };
 
     // ACTION: Build the request body

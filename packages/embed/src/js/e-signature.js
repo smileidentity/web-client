@@ -274,7 +274,7 @@ function getHumanSize(numberOfBytes) {
 
     if (validation) {
       handleValidationErrors(validation);
-      const submitButton = PersonalInfoForm.querySelector("[type="button"]");
+      const submitButton = PersonalInfoForm.querySelector("[type='button']");
       submitButton.removeAttribute("disabled");
     }
 

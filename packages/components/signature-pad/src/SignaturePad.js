@@ -78,14 +78,14 @@ class SignaturePad extends HTMLElement {
 :host {
   display: block;
   block-size: auto;
-  inline-size: 25rem;
-  --color-active: #001096;
-  --color-default: #2D2B2A;
+  inline-size: 30rem;
+  --color-active: #2D2B2A;
+  --color-default: #001096;
   --color-disabled: #848282;
 }
 
 :host::part(upload) {
-  text-align: right;
+  text-align: center;
 }
 
 :host::part(signature-controls) {
@@ -110,12 +110,8 @@ class SignaturePad extends HTMLElement {
     linear-gradient(var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
     var(--dot-color);
   border-radius: 2rem;
-  inline-size: 25rem;
-  block-size: 25rem;
-}
-
-:host::part(upload-preview-image) {
-  inline-size: 25rem;
+  inline-size: 30rem;
+  block-size: 15rem;
 }
 
 .visually-hidden {
@@ -203,7 +199,6 @@ button:disabled {
 }
 `;
 
-
     const wrapper = document.createElement('div');
     const errorMessage = document.createElement('div');
     errorMessage.innerHTML = `
@@ -289,6 +284,13 @@ button:disabled {
     // Error Message
     this.errorMessage = errorMessage.querySelector('#error');
 
+    // Canvas Resize / Sizing - helps keep the pen in line. use ResizeObserver instead
+		/*
+    if (window) {
+      window.onresize = this.resizeCanvas();
+    }
+		*/
+
     // Signature Pad Controls
     this.clearSignatureButton = signatureControls.querySelector('#clear');
     this.clearSignatureButton.addEventListener('click', () => this.clearSignature());
@@ -308,12 +310,40 @@ button:disabled {
     this.uploadSignatureButton.removeEventListener('change', (event) => this.uploadSignature(event));
   }
 
+  // Adjust canvas coordinate space taking into account pixel ratio,
+  // to make it look crisp on mobile devices.
+  // This also causes canvas to be cleared.
+  resizeCanvas() {
+    // When zoomed out to less than 100%, for some very strange reason,
+    // some browsers report devicePixelRatio as less than 1
+    // and only part of the canvas is cleared then.
+    const canvas = this.shadowRoot.querySelector('canvas');
+    const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+
+    // This part causes the canvas to be cleared
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+
+    // This library does not listen for canvas changes, so after the canvas is automatically
+    // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+    // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+    // that the state of this library is consistent with visual state of the canvas, you
+    // have to clear it manually.
+    //signaturePad.clear();
+
+    // If you want to keep the drawing on resize instead of clearing it you can reset the data.
+    this.core.fromData(this.core.toData());
+		console.log('got to the end of the resizeCanvas method');
+  }
+
   publishSignature() {
     try {
       this.resetErrorMessage();
-      let image = this.shadowRoot.querySelector('img').src;
+      const previewImage = this.shadowRoot.querySelector('img');
+      let image = previewImage ? previewImage.src : undefined;
       if (!image && !this.core.isEmpty()) {
-        image = this.core.toDataURL();
+        image = this.core.toDataURL('image/svg+xml');
       }
 
       if (image) {
@@ -343,7 +373,6 @@ button:disabled {
     this.resetErrorMessage();
     const canvas = this.shadowRoot.querySelector('canvas');
     const img = this.shadowRoot.querySelector('img');
-    img.setAttribute('part', 'upload-preview-image')
 
     if (img) {
       img.remove();
@@ -355,9 +384,10 @@ button:disabled {
 
   previewUpload(fileData) {
     const canvas = this.shadowRoot.querySelector('canvas');
-
+    
     const img = document.createElement('img');
     img.src = fileData;
+    img.setAttribute('part', 'upload-preview-image')
     canvas.setAttribute('hidden', true);
     canvas.insertAdjacentElement("afterend", img);
   }
@@ -369,7 +399,7 @@ button:disabled {
 
       // validate file, and convert file to data url
       const fileData = await SmartFileUpload.retrieve(files);
-
+      
       // swap out canvas for an image for preview
       this.previewUpload(fileData);
     } catch (error) {

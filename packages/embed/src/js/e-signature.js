@@ -188,6 +188,15 @@ function getHumanSize(numberOfBytes) {
     setActiveScreen(DocumentReviewScreen),
   );
 
+  DocumentReviewScreen.querySelector('#i_agree').addEventListener('change', (event) => {
+    const button = DocumentReviewScreen.querySelector('#agreeToTerms');
+    if (event.target.checked) {
+      button.removeAttribute('disabled');
+    } else {
+      button.setAttribute('disabled', true);
+    }
+  });
+
   DocumentReviewScreen.querySelector("#agreeToTerms").addEventListener(
     "click",
     agreeToTerms,
@@ -196,10 +205,8 @@ function getHumanSize(numberOfBytes) {
   SignatureScreen.querySelector("smileid-signature-pad").addEventListener(
     "signature-pad.publish",
     (event) => {
-      const lastName = ReviewSignatureScreen.querySelector('#last_name');
-      lastName.textContent = personal_info.last_name;
-      const otherNames = ReviewSignatureScreen.querySelector('#other_names');
-      otherNames.textContent = personal_info.other_names;
+      const name = ReviewSignatureScreen.querySelector('#name');
+      name.textContent = personal_info.name;
       const image = ReviewSignatureScreen.querySelector('#preview-signature');
       image.src = event.detail;
       setActiveScreen(ReviewSignatureScreen);
@@ -220,13 +227,7 @@ function getHumanSize(numberOfBytes) {
 
   function validateInputs(payload) {
     const validationConstraints = {
-      last_name: {
-        presence: {
-          allowEmpty: false,
-          message: "is required",
-        },
-      },
-      other_names: {
+      name: {
         presence: {
           allowEmpty: false,
           message: "is required",

@@ -413,7 +413,7 @@
             </div>
           </fieldset>
 
-          <button data-variant="solid" type="button" id="agreeToTerms">
+          <button data-variant="solid" type="button" disabled id="agreeToTerms">
             Continue
             <svg
               aria-hidden="true"
@@ -507,26 +507,13 @@
         <form name="user-details" class="flow">
           <fieldset id="names" class="flow" data-variant="start">
             <div class="input-group flow">
-              <label class="required" for="last_name"> Last Name </label>
+              <label class="required" for="name"> Full Name </label>
 
               <input
                 aria-required="true"
-                id="last_name"
-                name="last_name"
-                placeholder="Momodu"
-                required=""
-                type="text"
-              />
-            </div>
-
-            <div class="input-group flow">
-              <label class="required" for="first_name"> Other Names </label>
-
-              <input
-                aria-required="true"
-                id="other_names"
-                name="other_names"
-                placeholder="Jane Nezifah"
+                id="name"
+                name="name"
+                placeholder="James Momodu"
                 required=""
                 type="text"
               />
@@ -704,16 +691,9 @@
 
         <div class='flow'>
           <p>
-            <strong>Last Name</strong>
+            <strong>Full Name</strong>
             <br />
-            <span id="last_name">
-            </span>
-          </p>
-
-          <p class="input-group flow">
-            <strong>Other Names </strong>
-            <br />
-            <span id="other_names">
+            <span id="name">
             </span>
           </p>
 

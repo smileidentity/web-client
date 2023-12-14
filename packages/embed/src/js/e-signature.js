@@ -414,7 +414,6 @@ function getHumanSize(numberOfBytes) {
     const headers = {
       "SmileID-Partner-ID": config.partner_details.partner_id,
       "SmileID-Token": config.token,
-      "Content-type": "multipart/form-data",
     };
 
     // ACTION: Build the request body

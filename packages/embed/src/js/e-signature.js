@@ -218,9 +218,9 @@ function getHumanSize(numberOfBytes) {
     },
   );
 
-  SignatureReviewScreen.querySelector("#uploadSignature").addEventListener(
+  ReviewSignatureScreen.querySelector("#uploadSignature").addEventListener(
     "click",
-    () => this.submitSignature()
+    () => submitSignature()
   );
 
   function dataURLToObject(dataURL) {
@@ -426,8 +426,8 @@ function getHumanSize(numberOfBytes) {
       }),
     );
     formData.append("callback_url", config.callback_url);
-    formData.eppend("source_sdk", config.sdk || "hosted_web");
-    formData.eppend("source_sdk_version", config.sdk_version || sdkVersion);
+    formData.append("source_sdk", config.sdk || "hosted_web");
+    formData.append("source_sdk_version", config.sdk_version || sdkVersion);
     formData.append("smile_client_id", config.partner_details.partner_id);
 
     formData.append("ids", config.document_ids.join(","));

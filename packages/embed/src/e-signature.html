@@ -662,7 +662,7 @@
           <img id="preview-signature" />
         </div>
 
-        <div class="flow" style="--flow-space: 0.5rem">
+        <div class="flow">
           <button data-variant="solid" type="button" id="uploadSignature">
             Yes, my details are correct
             <svg
@@ -681,7 +681,12 @@
               />
             </svg>
           </button>
-          <button data-variant="outline" type="button" id="uploadSignature">
+          <button
+            style="margin-block-start: 0.5rem"
+            data-variant="outline"
+            type="button"
+            class="back-button"
+          >
             No, change them
             <svg
               aria-hidden="true"

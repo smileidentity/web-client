@@ -21,19 +21,6 @@ function getHumanSize(numberOfBytes) {
 (function eSignature() {
   "use strict";
 
-  function postData(url = "", data = {}) {
-    return fetch(url, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-  }
-
   function closeWindow(userTriggered) {
     const message = userTriggered
       ? "SmileIdentity::Close"
@@ -81,10 +68,10 @@ function getHumanSize(numberOfBytes) {
     );
   });
 
-  const BackButtons = document.querySelectorAll('.back-button');
-  BackButtons.forEach(button => {
+  const BackButtons = document.querySelectorAll(".back-button");
+  BackButtons.forEach((button) => {
     button.addEventListener(
-      'click',
+      "click",
       (event) => {
         event.preventDefault();
         const screen = screens.pop();
@@ -100,11 +87,12 @@ function getHumanSize(numberOfBytes) {
   let partner_params;
   let documents;
   let personal_info;
+  let signature;
 
   function getPartnerParams() {
     function parseJWT(token) {
       /**
-       * A JSON Web Token (JWT) uses a base64 URL encoded string in it's body.
+       * A JSON Web Token (JWT) uses a base64 URL encoded string in it"s body.
        *
        * in order to get a regular JSON string, we would follow these steps:
        *
@@ -225,9 +213,40 @@ function getHumanSize(numberOfBytes) {
       name.textContent = personal_info.name;
       const image = ReviewSignatureScreen.querySelector("#preview-signature");
       image.src = event.detail;
+      signature = dataURLToObject(event.detail);
       setActiveScreen(ReviewSignatureScreen);
     },
   );
+
+  SignatureReviewScreen.querySelector("#uploadSignature").addEventListener(
+    "click",
+    () => this.submitSignature()
+  );
+
+  function dataURLToObject(dataURL) {
+    // Code taken from https://github.com/ebidel/filer.js
+    const parts = dataURL.split(";base64,");
+    const contentType = parts[0].split(":")[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    const ext = {
+      "image/svg+xml": "svg",
+      "image/png": "png",
+      "image/jpeg": "jpeg",
+    }[contentType];
+
+    return {
+      data: new Blob([uInt8Array], { type: contentType }),
+      name: `signature.${ext}`,
+      type: contentType,
+    };
+  }
 
   function setActiveScreen(node) {
     activeScreen.hidden = true;
@@ -255,7 +274,7 @@ function getHumanSize(numberOfBytes) {
 
     if (validation) {
       handleValidationErrors(validation);
-      const submitButton = PersonalInfoForm.querySelector('[type="button"]');
+      const submitButton = PersonalInfoForm.querySelector("[type="button"]");
       submitButton.removeAttribute("disabled");
     }
 
@@ -279,7 +298,7 @@ function getHumanSize(numberOfBytes) {
     });
   }
 
-  function handleFormSubmit(event) {
+  function handlePersonalInfoSubmit(event) {
     if (event) {
       event.preventDefault();
       resetForm();
@@ -306,7 +325,7 @@ function getHumanSize(numberOfBytes) {
   PersonalInfoForm.querySelector("#submitForm").addEventListener(
     "click",
     (event) => {
-      handleFormSubmit(event);
+      handlePersonalInfoSubmit(event);
     },
     false,
   );
@@ -343,7 +362,7 @@ function getHumanSize(numberOfBytes) {
                       <path fill="#2C2C2C" d="M4.704 13.623v-.02l.01-.01h.01c.038 0 .087 0 .136-.009H5.377c.156 0 .302.02.449.068a.783.783 0 0 1 .312.186.69.69 0 0 1 .176.273c.039.107.058.224.058.341 0 .137-.029.284-.078.41a.78.78 0 0 1-.224.283 1.098 1.098 0 0 1-.722.215H5.142v.986s-.009 0-.009.01H4.723c-.01 0-.01-.01-.01-.01V14.286l-.01-.663Zm.449 1.337H5.357c.069 0 .147-.01.215-.02a.622.622 0 0 0 .186-.078.335.335 0 0 0 .126-.156.724.724 0 0 0 .05-.244.48.48 0 0 0-.147-.36.543.543 0 0 0-.166-.089.887.887 0 0 0-.225-.029H5.152v.976ZM6.821 13.633v-.02l.01-.01h.664c.185 0 .38.03.556.098.146.059.283.156.39.273.108.127.186.264.234.43.059.175.078.36.078.546.01.234-.039.469-.117.693-.126.322-.39.576-.732.683a1.333 1.333 0 0 1-.439.068h-.634s-.01 0-.01-.01V13.634Zm.459 2.332H7.485c.107 0 .224-.02.322-.059a.683.683 0 0 0 .254-.185c.078-.098.136-.205.175-.322.04-.146.069-.302.059-.459 0-.146-.02-.292-.059-.439a.874.874 0 0 0-.166-.292.55.55 0 0 0-.253-.166.84.84 0 0 0-.313-.05H7.26l.02 1.972ZM9.72 16.326v.02s0 .01-.01.01H9.27V13.602s.01 0 .01-.01h1.406s.01 0 .01.01c0 0 0 .01.01.01v.01l.009.088.01.088.01.088.01.087v.02s0 .01-.01.01c0 0-.01 0-.01.01H9.71v.79h.917s.01 0 .01.01v.39s0 .01-.01.01H9.71v1.102l.01.01Z"/>
                     </svg>
 
-                    <div class='flow'>
+                    <div class="flow">
                       <p>${document.name}<p>
                       <p>${getHumanSize(document.size)}<p>
                     </div>
@@ -388,6 +407,54 @@ function getHumanSize(numberOfBytes) {
 
     const main = document.querySelector("main");
     main.prepend(p);
+  }
+
+  async function submitSignature() {
+    // ACTION: Build the request headers
+    const headers = {
+      "SMILEID-PARTNER-ID": config.partner_details.partner_id,
+      "SMILEID-TOKEN": config.token,
+    };
+
+    // ACTION: Build the request body
+    const formData = new FormData();
+    formData.append(
+      "partner_params",
+      JSON.stringify({
+        ...partner_params,
+        job_type: 12,
+      }),
+    );
+    formData.append("callback_url", config.callback_url);
+    formData.eppend("source_sdk", config.sdk || "hosted_web");
+    formData.eppend("source_sdk_version", config.sdk_version || sdkVersion);
+    formData.append("smile_client_id", config.partner_details.partner_id);
+
+    formData.append("ids", config.document_ids.join(","));
+    formData.append("name", personal_info.name);
+    formData.append("document_read_at", new Date());
+    formData.append("image[data]", signature.data);
+    formData.append("image[name]", signature.name);
+    formData.append("image[type]", signature.type);
+
+    const URL = `${
+      endpoints[config.environment] || config.environment
+    }/documents/sign`;
+
+    try {
+      const response = await fetch(URL, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+      const json = await response.json();
+
+      if (json.error) throw new Error(json.error);
+
+      return json;
+    } catch (error) {
+      throw new Error("signature submission failed", { cause: error });
+    }
   }
 
   function complete() {

@@ -188,14 +188,17 @@ function getHumanSize(numberOfBytes) {
     setActiveScreen(DocumentReviewScreen),
   );
 
-  DocumentReviewScreen.querySelector('#i_agree').addEventListener('change', (event) => {
-    const button = DocumentReviewScreen.querySelector('#agreeToTerms');
-    if (event.target.checked) {
-      button.removeAttribute('disabled');
-    } else {
-      button.setAttribute('disabled', true);
-    }
-  });
+  DocumentReviewScreen.querySelector("#i_agree").addEventListener(
+    "change",
+    (event) => {
+      const button = DocumentReviewScreen.querySelector("#agreeToTerms");
+      if (event.target.checked) {
+        button.removeAttribute("disabled");
+      } else {
+        button.setAttribute("disabled", true);
+      }
+    },
+  );
 
   DocumentReviewScreen.querySelector("#agreeToTerms").addEventListener(
     "click",
@@ -205,13 +208,13 @@ function getHumanSize(numberOfBytes) {
   SignatureScreen.querySelector("smileid-signature-pad").addEventListener(
     "signature-pad.publish",
     (event) => {
-      const name = ReviewSignatureScreen.querySelector('#name');
+      const name = ReviewSignatureScreen.querySelector("#name");
       name.textContent = personal_info.name;
-      const image = ReviewSignatureScreen.querySelector('#preview-signature');
+      const image = ReviewSignatureScreen.querySelector("#preview-signature");
       image.src = event.detail;
       setActiveScreen(ReviewSignatureScreen);
-    }
-  )
+    },
+  );
 
   function setActiveScreen(node) {
     activeScreen.hidden = true;

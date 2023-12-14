@@ -81,6 +81,19 @@ function getHumanSize(numberOfBytes) {
     );
   });
 
+  const BackButtons = document.querySelectorAll('.back-button');
+  BackButtons.forEach(button => {
+    button.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        const screen = screens.pop();
+        setActiveScreen(screen);
+      },
+      false,
+    );
+  });
+
   const screens = [];
   let activeScreen;
   let config;

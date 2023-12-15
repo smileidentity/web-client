@@ -215,6 +215,14 @@ function templateString() {
       .id-side {
         padding-bottom: 0.5rem;
       }
+
+      .circle-progress {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
 	</style>
 	<div id='id-camera-screen' class='flow center flex-column'>
     ${this.showNavigation ? `
@@ -238,7 +246,11 @@ function templateString() {
       </div>
     ` : ''}
     <h2 class='h2 color-digital-blue'>Nigeria National ID Card</h2>
-    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+    <div class="circle-progress" id="loader">
+        <p class="spinner"></p>
+        <p style="--flow-space: 4rem">Checking permissions</p>
+        </div> 
+    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
       <div class='id-video-container landscape'>
         <video id='id-video' class='flow' playsinline autoplay muted></video>
         <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
@@ -252,7 +264,7 @@ function templateString() {
     </div>
     <h2 class='h2 color-digital-blue reset-margin-block id-side'>Front of National ID Card</h2>
     <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
-    <div class='actions' >
+    <div class='actions' hidden>
       <button id='capture-id-image' class='button icon-btn | center' type='button'>
         <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
@@ -285,27 +297,7 @@ class IdCaptureScreen extends HTMLElement {
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
-   this.setUpEventListeners();
-
-
-    // window.addEventListener('IDCapture::Start', async () => {
-    //   try {
-    //     const stream = await navigator.mediaDevices.getUserMedia({
-    //       audio: false,
-    //       video: {
-    //         facingMode: 'environment',
-    //         width: { min: 1280 },
-    //         // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-    //         // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-    //         // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-    //         zoom: isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-    //       },
-    //     });
-    //     this.handleIDStream(stream);
-    //   } catch (e) {
-    //     this.handleError(e)
-    //   }
-    // });
+    this.setUpEventListeners();
   }
 
   async getUserMedia() {
@@ -453,6 +445,8 @@ class IdCaptureScreen extends HTMLElement {
 
     video.onloadedmetadata = () => {
     	this.shadowRoot.querySelector('.actions').hidden = false;
+      this.shadowRoot.querySelector('#loader').hidden = true;  
+      this.shadowRoot.querySelector('.video-section').hidden = false;
     };
 
     if (!videoExists) {
@@ -536,13 +530,14 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host'];
+    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready'];
   }
 
   attributeChangedCallback(name) {
     console.log("attributeChangedCallback", name);
     switch (name) {
     case 'title':
+    case 'data-camera-ready':
     case 'hidden':
       this.shadowRoot.innerHTML = this.render();
       this.setUpEventListeners();

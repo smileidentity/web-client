@@ -323,6 +323,32 @@ ${typography}
 	display: flex;
     flex-direction: column;
   }
+
+  @keyframes spin {
+	0% {
+		transform: translate3d(-50%, -50%, 0) rotate(0deg);
+	}
+	100% {
+		transform: translate3d(-50%, -50%, 0) rotate(360deg);
+	}
+}
+
+.spinner {
+	animation: 1.5s linear infinite spin;
+	animation-play-state: inherit;
+	border: solid 5px #cfd0d1;
+	border-bottom-color: var(--color-active);
+	border-radius: 50%;
+	content: "";
+	display: block;
+	height: 25px;
+	width: 25px;
+	will-change: transform;
+	position: relative;
+	top: .675rem;
+	left: 1.25rem;
+	}
+
 </style>`
 
 export default styles;

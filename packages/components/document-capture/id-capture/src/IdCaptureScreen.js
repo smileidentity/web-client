@@ -203,12 +203,20 @@ function templateString() {
 
       .description {
         width: 66%;
+        align-self: center;
+        padding-bottom: 1.75rem;
+      }
+      .reset-margin-block {
+        margin-block: 0;
       }
       .align-items-center {
         align-items: center;
       }
+      .id-side {
+        padding-bottom: 0.5rem;
+      }
 	</style>
-	<div id='id-camera-screen' class='flow center flex-column align-items-center'>
+	<div id='id-camera-screen' class='flow center flex-column'>
     ${this.showNavigation ? `
       <div class="nav">
         <div class="back-wrapper">
@@ -229,7 +237,7 @@ function templateString() {
         </button>
       </div>
     ` : ''}
-    <h1>Take ID Card Photo</h1>
+    <h2 class='h2 color-digital-blue'>Nigeria National ID Card</h2>
     <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container landscape'>
         <video id='id-video' class='flow' playsinline autoplay muted></video>
@@ -242,8 +250,8 @@ function templateString() {
         </svg>
       </div>
     </div>
-    <p class='h2 color-digital-blue'>Front of National ID Card</p>
-    <p class='h4 color-digital-blue description'>Make sure all corners are visible and there is no glare.</p>
+    <h2 class='h2 color-digital-blue reset-margin-block id-side'>Front of National ID Card</h2>
+    <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
     <div class='actions' >
       <button id='capture-id-image' class='button icon-btn | center' type='button'>
         <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">

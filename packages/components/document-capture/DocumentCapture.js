@@ -2,6 +2,7 @@ import './id-capture/src'
 import './id-review/src'
 import './instructions/src'
 import { SmartCamera } from "../domain/camera/SmartCamera";
+import { Router } from '../router/router';
 
 class DocumentCapture extends HTMLElement {
 	constructor() {
@@ -15,9 +16,16 @@ class DocumentCapture extends HTMLElement {
 			<id-review hidden></id-review>
 		`;
 
-		this.idCapture = this.querySelector('id-capture');
 		this.documentInstruction = this.querySelector('document-instruction');
+		this.idCapture = this.querySelector('id-capture');
 		this.idReview = this.querySelector('id-review');
+
+		if (this.hideInstructions) {
+			Router.setActiveScreen(this.idCapture);
+		}else{
+			Router.setActiveScreen(this.documentInstruction);
+		}
+
 		this.documentInstruction.addEventListener('DocumentInstruction::StartCamera', async () => {
 			await SmartCamera.getMedia({
 				audio: false,
@@ -31,17 +39,15 @@ class DocumentCapture extends HTMLElement {
 				},
 			});
 
-			this.documentInstruction.setAttribute('hidden', '');
-			this.idCapture.removeAttribute('hidden');
+			Router.setActiveScreen(this.idCapture);
 		});
 
 		this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
-			console.log("event.detail.image", event.detail);
-			this.idCapture.setAttribute('hidden', '');
 			this.idReview.setAttribute('data-image', event.detail.image);
-			this.idReview.removeAttribute('hidden');
+			Router.setActiveScreen(this.idReview);
 		});
 	}
+
 
 	get hideInstructions() {
 		return this.hasAttribute('hide-instructions');

@@ -323,7 +323,7 @@ class IdCaptureScreen extends HTMLElement {
 
     this.handleIDStream(SmartCamera.stream);
   }
-  
+
   _captureIDImage() {
     const image = this._drawIDImage();
 

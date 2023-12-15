@@ -534,7 +534,6 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   attributeChangedCallback(name) {
-    console.log("attributeChangedCallback", name);
     switch (name) {
     case 'title':
     case 'data-camera-ready':

@@ -1,5 +1,4 @@
 import "@smile_identity/smart-camera-web";
-import '@smileid/components/instructions';
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 

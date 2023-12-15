@@ -171,9 +171,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
-      .shadow()
-      .find('#take-photo')
+      .find('#id-entry-screen #take-photo')
       .click();
 
     cy
@@ -244,9 +242,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
-      .shadow()
-      .find('#take-photo')
+      .find('#id-entry-screen #take-photo')
       .click();
 
     cy
@@ -314,9 +310,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
-      .shadow()
-      .find('#take-photo')
+      .find('#id-entry-screen #take-photo')
       .click();
 
     cy
@@ -355,9 +349,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
-      .shadow()
-      .find('#take-photo')
+      .find('#id-entry-screen #take-photo')
       .click();
 
     cy
@@ -422,9 +414,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
-      .shadow()
-      .find('#take-photo')
+      .find('#id-entry-screen #take-photo')
       .click();
 
     cy

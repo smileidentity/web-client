@@ -22,17 +22,13 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#take-photo')
+        .find('#id-entry-screen #take-photo')
         .should('be.visible');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .should('not.exist');
     });
   });
@@ -62,17 +58,13 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#take-photo')
+        .find('#id-entry-screen #take-photo')
         .should('not.exist');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .should('be.visible');
     });
 
@@ -82,17 +74,13 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .should('be.visible');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .selectFile('cypress/fixtures/just-right.png');
 
       cy
@@ -114,17 +102,13 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .should('be.visible');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .selectFile('cypress/fixtures/too-large.png');
 
       cy
@@ -160,17 +144,13 @@ describe('SmartCameraWeb - Document Upload', () => {
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#take-photo')
+        .find('#id-entry-screen #take-photo')
         .should('be.visible');
 
       cy
         .get('smart-camera-web')
         .shadow()
-        .find('#id-entry-screen')
-        .shadow()
-        .find('#upload-photo-label')
+        .find('#id-entry-screen #upload-photo-label')
         .should('be.visible');
     });
   });

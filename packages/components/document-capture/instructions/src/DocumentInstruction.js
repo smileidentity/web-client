@@ -385,7 +385,7 @@ class DocumentInstruction extends HTMLElement {
 	}
 }
 
-if ("customElements" in window) {
+if ("customElements" in window && !customElements.get("document-instruction")) {
 	window.customElements.define("document-instruction", DocumentInstruction);
 }
 

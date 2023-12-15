@@ -40,7 +40,7 @@ class DocumentCapture extends HTMLElement {
 	}
 }
 
-if ('customElements' in window) {
+if ('customElements' in window && !customElements.get('document-capture')) {
 	customElements.define('document-capture', DocumentCapture);
 }
 

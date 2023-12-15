@@ -1,5 +1,7 @@
 "use strict";
 import { SmartCamera } from "../../../domain/camera/SmartCamera";
+import styles from '../../../styles';
+
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -15,195 +17,16 @@ function hasMoreThanNColors(data, n = 16) {
 
 function templateString() {
   return `
-	<link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    ${styles}
 	<style>
-	:host {
-        --color-active: #001096;
-        --color-default: #2d2b2a;
-        --color-disabled: #848282;
-      }
-
-      * {
-        font-family: "DM Sans", sans-serif;
-      }
-
-      [hidden] {
-        display: none !important;
-      }
-
-      [disabled] {
-        cursor: not-allowed !important;
-        filter: grayscale(75%);
-      }
-
-      .visually-hidden {
-        border: 0;
-        clip: rect(1px 1px 1px 1px);
-        clip: rect(1px, 1px, 1px, 1px);
-        height: auto;
-        margin: 0;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        white-space: nowrap;
-        width: 1px;
-      }
-
-      img {
-        height: auto;
-        max-width: 100%;
-        transform: scaleX(-1);
-      }
-
-      video {
-        background-color: black;
-      }
-
-      a {
-        color: currentColor;
-        text-decoration: none;
-      }
-
-      svg {
-        max-width: 100%;
-      }
-
-      .color-gray {
-        color: #797979;
-      }
-
-      .color-red {
-        color: red;
-      }
-
-      .color-richblue {
-        color: #4e6577;
-      }
-
-      .color-richblue-shade {
-        color: #0e1b42;
-      }
-
-      .color-digital-blue {
-        color: #001096 !important;
-      }
-
-      .color-deep-blue {
-        color: #001096;
-      }
-
-      .center {
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .font-size-small {
-        font-size: 0.75rem;
-      }
-
-      .font-size-large {
-        font-size: 1.5rem;
-      }
-
-      .text-transform-uppercase {
-        text-transform: uppercase;
-      }
-
-      [id*=-"screen"] {
-        min-block-size: 100%;
-      }
-
-      [data-variant~="full-width"] {
-        inline-size: 100%;
-      }
-
-      .flow > * + * {
-        margin-top: var(--flow-space, 1rem);
-      }
-
-      .button {
-        --button-color: var(--color-default);
-        -webkit-appearance: none;
-        appearance: none;
-        border-radius: 2.5rem;
-        border: 0;
-        background-color: transparent;
-        color: #fff;
-        cursor: pointer;
-        display: block;
-        font-size: 18px;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        text-align: center;
-      }
-
-      .button:hover,
-      .button:focus,
-      .button:active {
-        --button-color: var(--color-active);
-      }
-
-      .button:disabled {
-        --button-color: var(--color-disabled);
-      }
-
-      .button[data-variant~="solid"] {
-        background-color: var(--button-color);
-        border: 2px solid var(--button-color);
-      }
-
-      .button[data-variant~="outline"] {
-        color: var(--button-color);
-        border: 2px solid var(--button-color);
-      }
-
-      .button[data-variant~="ghost"] {
-        padding: 0px;
-        color: var(--button-color);
-        background-color: transparent;
-      }
-
-      .icon-btn {
-        appearance: none;
-        background: none;
-        border: none;
-        color: hsl(0deg 0% 94%);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px 8px;
-      }
-      .justify-right {
-        justify-content: end !important;
-      }
-      .nav {
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .back-wrapper {
-        display: flex;
-        align-items: center;
-      }
-
-      .back-button-text {
-        font-size: 11px;
-        line-height: 11px;
-        color: rgb(21, 31, 114);
-      }
-      .section {
+      .video-section {
         border: 1px solid transparent;
-        border-radius: 0.5rem;
+        /* border-radius: 0.5rem; */
         margin-left: auto;
         margin-right: auto;
         max-width: 35ch;
-        padding: 1rem;
+        padding: 0;
+        height: 15rem;
       }
 
       .selfie-review-image {
@@ -221,51 +44,7 @@ function templateString() {
         }
       }
 
-      .tips,
-      .powered-by {
-        align-items: center;
-        border-radius: 0.25rem;
-        color: #4e6577;
-        display: flex;
-        justify-content: center;
-        letter-spacing: 0.075em;
-      }
 
-      .powered-by {
-        box-shadow: 0px 2.57415px 2.57415px rgba(0, 0, 0, 0.06);
-        display: inline-flex;
-        font-size: 0.5rem;
-      }
-
-      .tips {
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 17rem;
-      }
-
-      .tips > * + *,
-      .powered-by > * + * {
-        display: inline-block;
-        margin-left: 0.5em;
-      }
-
-      .powered-by .company {
-        color: #18406d;
-        font-weight: 700;
-        letter-spacing: 0.15rem;
-      }
-
-      .logo-mark {
-        background-color: #004071;
-        display: inline-block;
-        padding: 0.25em 0.5em;
-      }
-
-      .logo-mark svg {
-        height: auto;
-        justify-self: center;
-        width: 0.75em;
-      }
 
       #id-capture-screen,
       #back-of-id-capture-screen {
@@ -282,21 +61,9 @@ function templateString() {
         margin-block: 0 !important;
       }
 
-	  .description {
-		color: var(--neutral-off-black, #2D2B2A);
-		text-align: center;
-
-		/* p */
-		font-family: DM Sans;
-		font-size: 0.875rem;
-		font-style: normal;
-		font-weight: 400;
-		line-height: 18px;
-	  }
-
-	  .padding-bottom-2 {
-		padding-bottom: 2rem;
-	  }
+      .padding-bottom-2 {
+        padding-bottom: 2rem;
+        }
 
       .instructions {
         margin-block-start: 2rem;
@@ -399,7 +166,7 @@ function templateString() {
   
       .id-video-container.landscape {
         /* min-height: calc((2 * 10rem) + 176px); */
-        width: 20rem;
+        width: calc((2 * 4rem) + 154px);
       }
   
       .id-video-container.portrait .image-frame-portrait {
@@ -416,14 +183,14 @@ function templateString() {
       }
   
       .id-video-container.landscape .image-frame {
-        border-width: 2rem 3rem;
+        border-width: 2rem 3.9rem;
         border-color: #fff;
         border-style: solid;
         height: auto;
-        width: 92%;
+        width: calc((2 * 4rem) + 158px);
         position: absolute;
         top: -22px;
-        left: -35px;
+        left: -52px;
         z-index: 2;
       }
   
@@ -432,11 +199,16 @@ function templateString() {
         transform: translateX(-50%) translateY(2%);
         z-index: 1;
         width: 24rem;
-        /* block-size: 100%;
       }
-      
+
+      .description {
+        width: 66%;
+      }
+      .align-items-center {
+        align-items: center;
+      }
 	</style>
-	<div id='id-camera-screen' class='flow center'>
+	<div id='id-camera-screen' class='flow center flex-column align-items-center'>
     ${this.showNavigation ? `
       <div class="nav">
         <div class="back-wrapper">
@@ -458,7 +230,7 @@ function templateString() {
       </div>
     ` : ''}
     <h1>Take ID Card Photo</h1>
-    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container landscape'>
         <video id='id-video' class='flow' playsinline autoplay muted></video>
         <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
@@ -470,12 +242,13 @@ function templateString() {
         </svg>
       </div>
     </div>
-    <p>Make sure all corners are visible and there is no glare</p>
-    <div class='actions' hidden>
+    <p class='h2 color-digital-blue'>Front of National ID Card</p>
+    <p class='h4 color-digital-blue description'>Make sure all corners are visible and there is no glare.</p>
+    <div class='actions' >
       <button id='capture-id-image' class='button icon-btn | center' type='button'>
         <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
-          </svg>
+        </svg>
         <span class='visually-hidden'>Capture</span>
       </button>
     </div>
@@ -504,55 +277,27 @@ class IdCaptureScreen extends HTMLElement {
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
-    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
-    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.backButton = this.shadowRoot.querySelector("#back-button");
+   this.setUpEventListeners();
 
-    if (SmartCamera.stream) {
-      console.log('stream exists', SmartCamera.stream);
-      this.handleIDStream(SmartCamera.stream);
-    } else {
-      this.getUserMedia()
-    }
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
 
-    this.backButton && this.backButton.addEventListener("click", (e) => {
-      this.handleBackEvents(e);
-    });
-
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          this.closeWindow();
-        },
-        false
-      );
-    });
-
-    this.captureIDImage.addEventListener('click', () => {
-      this._captureIDImage();
-    });
-
-    window.addEventListener('IDCapture::Start', async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: 'environment',
-            width: { min: 1280 },
-            // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-            // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-            // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-            zoom: isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-          },
-        });
-        this.handleIDStream(stream);
-      } catch (e) {
-        this.handleError(e)
-      }
-    });
+    // window.addEventListener('IDCapture::Start', async () => {
+    //   try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({
+    //       audio: false,
+    //       video: {
+    //         facingMode: 'environment',
+    //         width: { min: 1280 },
+    //         // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
+    //         // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
+    //         // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
+    //         zoom: isSamsungMultiCameraDevice() ? 2.0 : 1.0,
+    //       },
+    //     });
+    //     this.handleIDStream(stream);
+    //   } catch (e) {
+    //     this.handleError(e)
+    //   }
+    // });
   }
 
   async getUserMedia() {
@@ -630,7 +375,7 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   handleIDStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('video'); //!!this.querySelector('video');
+    const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {
       video = this.shadowRoot.querySelector('video');
@@ -649,15 +394,15 @@ class IdCaptureScreen extends HTMLElement {
     }
     video.play();
 
-    // const videoContainer = this.shadowRoot.querySelector('.id-video-container')
+    const videoContainer = this.shadowRoot.querySelector('.id-video-container')
 
-    // video.onloadedmetadata = () => {
-    // 	videoContainer.querySelector('.actions').hidden = false;
-    // };
+    video.onloadedmetadata = () => {
+    	this.shadowRoot.querySelector('.actions').hidden = false;
+    };
 
-    // if (!videoExists) {
-    // 	videoContainer.prepend(video);
-    // }
+    if (!videoExists) {
+    	videoContainer.prepend(video);
+    }
 
     this._IDStream = stream;
     this._IDVideo = video;
@@ -665,6 +410,36 @@ class IdCaptureScreen extends HTMLElement {
 
   _stopIDVideoStream(stream = this._IDStream) {
     stream.getTracks().forEach((track) => track.stop());
+  }
+  setUpEventListeners() {
+    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
+    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
+    this.backButton = this.shadowRoot.querySelector("#back-button");
+
+    if (SmartCamera.stream) {
+      this.handleIDStream(SmartCamera.stream);
+    }
+
+    const CloseIframeButtons =
+      this.shadowRoot.querySelectorAll(".close-iframe");
+
+    this.backButton && this.backButton.addEventListener("click", (e) => {
+      this.handleBackEvents(e);
+    });
+
+    CloseIframeButtons.forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          this.closeWindow();
+        },
+        false
+      );
+    });
+
+    this.captureIDImage.addEventListener('click', () => {
+      this._captureIDImage();
+    });
   }
 
   get hideBack() {
@@ -691,10 +466,32 @@ class IdCaptureScreen extends HTMLElement {
     const value = this.documentCaptureModes;
     return value.includes("camera") && value.includes("upload");
   }
+
   get title() {
     return this.getAttribute('title') || 'Submit Front of ID';
   }
 
+  get hidden() {
+    return this.getAttribute('hidden');
+  }
+
+  static get observedAttributes() {
+    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host'];
+  }
+
+  attributeChangedCallback(name) {
+    console.log("attributeChangedCallback", name);
+    switch (name) {
+    case 'title':
+    case 'hidden':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
+    }
+  }
+  
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
   }
@@ -705,7 +502,7 @@ class IdCaptureScreen extends HTMLElement {
   }
 }
 
-if ("customElements" in window) {
+if ("customElements" in window && !customElements.get('id-capture')) {
   window.customElements.define("id-capture", IdCaptureScreen);
 }
 

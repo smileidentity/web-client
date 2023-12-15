@@ -400,7 +400,7 @@ class IdReview extends HTMLElement {
 	}
 
 	static get observedAttributes() {
-		return ['hide-back-to-host', 'show-navigation', 'src'];
+		return ['hide-back-to-host', 'show-navigation', 'data-image'];
 	}
 
 	get hideBack() {
@@ -420,7 +420,7 @@ class IdReview extends HTMLElement {
 	}
 
 	get imageSrc() {
-		return this.getAttribute("src");
+		return this.getAttribute("data-image");
 	}
 
 	get title() {
@@ -438,7 +438,7 @@ class IdReview extends HTMLElement {
 
 	attributeChangedCallback(name) {
 		switch (name) {
-			case 'src':
+			case 'data-image':
 			case 'hide-back-to-host':
 			case 'show-navigation':
 				this.shadowRoot.innerHTML = this.render();
@@ -486,7 +486,7 @@ class IdReview extends HTMLElement {
 	}
 }
 
-if ("customElements" in window) {
+if ("customElements" in window && !customElements.get("id-review")) {
 	window.customElements.define("id-review", IdReview);
 }
 

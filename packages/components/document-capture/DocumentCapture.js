@@ -17,6 +17,7 @@ class DocumentCapture extends HTMLElement {
 
 		this.idCapture = this.querySelector('id-capture');
 		this.documentInstruction = this.querySelector('document-instruction');
+		this.idReview = this.querySelector('id-review');
 		this.documentInstruction.addEventListener('DocumentInstruction::StartCamera', async () => {
 			await SmartCamera.getMedia({
 				audio: false,
@@ -32,7 +33,14 @@ class DocumentCapture extends HTMLElement {
 
 			this.documentInstruction.setAttribute('hidden', '');
 			this.idCapture.removeAttribute('hidden');
-		})
+		});
+
+		this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
+			console.log("event.detail.image", event.detail);
+			this.idCapture.setAttribute('hidden', '');
+			this.idReview.setAttribute('data-image', event.detail.image);
+			this.idReview.removeAttribute('hidden');
+		});
 	}
 
 	get hideInstructions() {

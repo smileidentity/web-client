@@ -323,33 +323,80 @@ class IdCaptureScreen extends HTMLElement {
 
     this.handleIDStream(SmartCamera.stream);
   }
+  
   _captureIDImage() {
     const image = this._drawIDImage();
 
-    if (this.activeScreen === this.IDCameraScreen) {
-      this.IDReviewImage.src = image;
-    } else {
-      this.backOfIDReviewImage.src = image;
-    }
-
-    this._data.images.push({
-      image: image.split(',')[1],
-      image_type_id: this.activeScreen === this.IDCameraScreen ? 3 : 7,
-    });
-
     this._stopIDVideoStream();
-
-    if (this.activeScreen === this.IDCameraScreen) {
-      this.setActiveScreen(this.IDReviewScreen);
-    } else {
-      this.setActiveScreen(this.backOfIDReviewScreen);
-    }
 
     this.dispatchEvent(new CustomEvent('IDCapture::ImageCaptured', {
       detail: {
         image,
       },
     }));
+  }
+
+  _drawIDImage(video = this._IDVideo) {
+    const canvas = document.createElement('canvas');
+    if (this.isPortraitCaptureView) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw the video frame onto the canvas
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the dimensions of the video preview frame
+      const previewWidth = PORTRAIT_ID_PREVIEW_WIDTH;
+      const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
+
+      // Define the padding value
+      const paddingPercent = 0.5; // 50% of the preview dimensions;
+      const paddedWidth = previewWidth * (1 + paddingPercent);
+      const paddedHeight = previewHeight * (1 + paddingPercent);
+
+      // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
+      const cropWidth = paddedWidth;
+      const cropHeight = paddedHeight;
+      const cropLeft = (canvas.width - cropWidth) / 2;
+      const cropTop = (canvas.height - cropHeight) / 2;
+
+      // Create a new canvas element for the cropped image
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = cropWidth;
+      croppedCanvas.height = cropHeight;
+
+      // Draw the cropped image onto the new canvas
+      const croppedCtx = croppedCanvas.getContext('2d');
+      croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+      return croppedCanvas.toDataURL('image/jpeg');
+    }
+
+    canvas.width = 2240;
+    canvas.height = 1260;
+
+    const context = canvas.getContext('2d');
+    const aspectRatio = video.videoWidth / video.videoHeight;
+
+    // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
+    if (aspectRatio < 1) {
+      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
+      const videoBox = video.getBoundingClientRect();
+      const frameBox = imageFrame.getBoundingClientRect();
+
+      const sourceXOffset = ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
+      const sourceYOffset = ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
+      const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
+      const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
+
+      canvas.height = (canvas.width * frameBox.height) / frameBox.width;
+
+      context.drawImage(video, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg');
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg');
   }
 
   _drawImage(canvas, enableImageTests = true, video = SmartCamera.stream) {
@@ -419,6 +466,7 @@ class IdCaptureScreen extends HTMLElement {
   _stopIDVideoStream(stream = this._IDStream) {
     stream.getTracks().forEach((track) => track.stop());
   }
+  
   setUpEventListeners() {
     this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
@@ -481,6 +529,10 @@ class IdCaptureScreen extends HTMLElement {
 
   get hidden() {
     return this.getAttribute('hidden');
+  }
+
+  get isBackOfId() {
+    return this.hasAttribute('isBackOfId');
   }
 
   static get observedAttributes() {

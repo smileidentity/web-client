@@ -10,7 +10,7 @@ export const IdReview = {
     render: () => `
         <id-review
             show-navigation
-            src="https://placehold.co/600x400"
+            data-image="https://placehold.co/600x400"
         >
         </id-review>
     `,

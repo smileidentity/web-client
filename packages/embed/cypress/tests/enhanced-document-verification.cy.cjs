@@ -45,9 +45,7 @@ describe("enhanced document verification", () => {
     cy.getIFrameBody()
       .find("smart-camera-web")
       .shadow()
-      .find("#id-entry-screen")
-      .shadow()
-      .find("#take-photo")
+      .find("#id-entry-screen #take-photo")
       .click();
 
     cy.getIFrameBody()

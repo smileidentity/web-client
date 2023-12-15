@@ -1,8 +1,5 @@
 import "@smile_identity/smart-camera-web";
 import "@smileid/components/combobox";
-import '@smileid/components/instructions';
-import '@smileid/components/id-review';
-
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 
@@ -320,14 +317,6 @@ import { version as sdkVersion } from "../../package.json";
               config.document_capture_modes.join(","),
             );
           }
-          if (config.skip_document_instructions) {
-            SmartCameraWeb.setAttribute("skip-document-instructions", true);
-          }
-
-          if (config.skip_document_capture) {
-            SmartCameraWeb.setAttribute("skip-document-capture", true);
-          }
-
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web
           SmartCameraWeb.setAttribute("hide-back-to-host", true);
@@ -400,12 +389,6 @@ import { version as sdkVersion } from "../../package.json";
             "document-capture-modes",
             config.document_capture_modes.join(","),
           );
-        }
-        if (config.skip_document_instructions) {
-          SmartCameraWeb.setAttribute("skip-document-instructions", true);
-        }
-        if (config.skip_document_capture) {
-          SmartCameraWeb.setAttribute("skip-document-capture", true);
         }
         setActiveScreen(SmartCameraWeb);
       });

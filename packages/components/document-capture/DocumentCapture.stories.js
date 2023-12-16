@@ -31,3 +31,13 @@ export const DocumentCaptureHideBackOfId = {
         </document-capture>
     `,
 }
+
+export const DocumentCaptureHideInstructionNBackOfId = {
+    render: () => `
+        <document-capture
+			hide-back-of-id
+            hide-instructions
+		>
+        </document-capture>
+    `,
+}

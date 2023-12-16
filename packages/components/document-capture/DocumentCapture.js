@@ -2,8 +2,8 @@ import './id-capture/src'
 import './id-review/src'
 import './instructions/src'
 import { SmartCamera } from "../domain/camera/SmartCamera";
-import { Router } from '../router/router';
 import { IMAGE_TYPE  } from "../domain/Constants";
+
 const VERSION = '1.0.2';
 
 async function getPermissions(captureScreen) {
@@ -25,6 +25,7 @@ async function getPermissions(captureScreen) {
 class DocumentCapture extends HTMLElement {
 	constructor() {
 		super();
+		this.activeScreen = null;
 	}
 
 	connectedCallback() {
@@ -53,20 +54,27 @@ class DocumentCapture extends HTMLElement {
 		this.thankYouScreen = this.querySelector('thank-you');
 
 		if (this.hideInstructions) {
-			Router.setActiveScreen(this.idCapture);
 			getPermissions(this.idCapture);
+			this.setActiveScreen(this.idCapture);
 		}else{
-			Router.setActiveScreen(this.documentInstruction);
+			this.setActiveScreen(this.documentInstruction);
 		}
 
 		this.setUpEventListeners();
 	}
-
+	disconnectedCallback() {
+		SmartCamera.stopMedia();
+		if (this.activeScreen) {
+		  this.activeScreen.removeAttribute('hidden');
+		}
+		this.activeScreen = null;
+		this.innerHTML = '';
+	  }
 
 	setUpEventListeners() {
 		this.documentInstruction.addEventListener('DocumentInstruction::StartCamera', async () => {
+			this.setActiveScreen(this.idCapture);
 			await getPermissions(this.idCapture);
-			Router.setActiveScreen(this.idCapture);
 		});
 
 		this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
@@ -75,14 +83,14 @@ class DocumentCapture extends HTMLElement {
 				image: event.detail.image.split(',')[1],
 				image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
 			  });
-			Router.setActiveScreen(this.idReview);
+			this.setActiveScreen(this.idReview);
 			SmartCamera.stopMedia();
 		});
 
 		this.idReview.addEventListener('IdReview::ReCaptureID', async (event) => {
 			this.idReview.removeAttribute('data-image');
 			this._data.images.pop();
-			Router.setActiveScreen(this.idCapture);
+			this.setActiveScreen(this.idCapture);
 			await getPermissions(this.idCapture);
 		});
 
@@ -90,7 +98,7 @@ class DocumentCapture extends HTMLElement {
 			if (this.hideBackOfId) {
 				this._publishSelectedImages();
 			}else {
-				Router.setActiveScreen(this.idCaptureBack);
+				this.setActiveScreen(this.idCaptureBack);
 				await getPermissions(this.idCaptureBack);
 			}
 		});
@@ -101,14 +109,14 @@ class DocumentCapture extends HTMLElement {
 				image: event.detail.image.split(',')[1],
 				image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
 			  });
-			Router.setActiveScreen(this.backOfIdReview);
+			this.setActiveScreen(this.backOfIdReview);
 			SmartCamera.stopMedia();
 		});
 
 		this.backOfIdReview.addEventListener('IdReview::ReCaptureID', async (event) => {
 			this.backOfIdReview.removeAttribute('data-image');
 			this._data.images.pop();
-			Router.setActiveScreen(this.idCaptureBack);
+			this.setActiveScreen(this.idCaptureBack);
 			await getPermissions(this.idCaptureBack);
 		});
 
@@ -120,7 +128,7 @@ class DocumentCapture extends HTMLElement {
 		this.dispatchEvent(
 		  new CustomEvent('imagesComputed', { detail: this._data }),
 		);
-		Router.setActiveScreen(this.thankYouScreen);
+		this.setActiveScreen(this.thankYouScreen);
 	}
 
 
@@ -130,6 +138,12 @@ class DocumentCapture extends HTMLElement {
 
 	get hideBackOfId() {
 		return this.hasAttribute('hide-back-of-id');
+	}
+
+	setActiveScreen(screen) {
+		this.activeScreen?.setAttribute('hidden', '');
+		screen.removeAttribute('hidden');
+		this.activeScreen = screen;
 	}
 }
 

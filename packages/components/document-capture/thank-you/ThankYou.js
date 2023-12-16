@@ -8,7 +8,7 @@ class ThankYou extends HTMLElement {
 	connectedCallback() {
 		this.innerHTML = `
 		${styles}
-		<div hidden id='thanks-screen' class='flow center'>
+		<div id='thanks-screen' class='flow center'>
 			<div class='section | flow'>
 			<h1>Thank you</h1>
 			${this.hideAttribution ? '' : `

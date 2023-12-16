@@ -22,3 +22,12 @@ export const DocumentCaptureHiddenInstructions = {
         </document-capture>
     `,
 }
+
+export const DocumentCaptureHideBackOfId = {
+    render: () => `
+        <document-capture
+			hide-back-of-id
+		>
+        </document-capture>
+    `,
+}

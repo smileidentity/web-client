@@ -245,7 +245,7 @@ function templateString() {
         </button>
       </div>
     ` : ''}
-    <h2 class='h2 color-digital-blue'>Nigeria National ID Card</h2>
+    <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
         <p class="spinner"></p>
         <p style="--flow-space: 4rem">Checking permissions</p>
@@ -262,7 +262,7 @@ function templateString() {
         </svg>
       </div>
     </div>
-    <h2 class='h2 color-digital-blue reset-margin-block id-side'>Front of National ID Card</h2>
+    <h2 class='h2 color-digital-blue reset-margin-block id-side'>${this.IdSides[this.sideOfId]} of ${this.idType}</h2>
     <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
     <div class='actions' hidden>
       <button id='capture-id-image' class='button icon-btn | center' type='button'>
@@ -290,6 +290,10 @@ class IdCaptureScreen extends HTMLElement {
     };
 
     this.attachShadow({ mode: "open" });
+    this.IdSides = {
+      front: "Front",
+      back: "Back",
+    };
   }
 
   connectedCallback() {
@@ -462,7 +466,6 @@ class IdCaptureScreen extends HTMLElement {
   }
   
   setUpEventListeners() {
-    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
     this.backButton = this.shadowRoot.querySelector("#back-button");
 
@@ -525,8 +528,20 @@ class IdCaptureScreen extends HTMLElement {
     return this.getAttribute('hidden');
   }
 
+  get sideOfId() {
+    return (this.getAttribute('side-of-id') || 'front').toLowerCase();
+  }
+
+  get isFrontOfId() {
+    return this.sideOfId === 'front';
+  }
+
   get isBackOfId() {
-    return this.hasAttribute('isBackOfId');
+    return !this.isFrontOfId;
+  }
+
+  get idType() {
+    return this.getAttribute('id-type');
   }
 
   static get observedAttributes() {

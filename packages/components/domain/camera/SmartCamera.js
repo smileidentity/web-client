@@ -22,6 +22,7 @@ class SmartCamera {
 	static stopMedia() {
 		if (SmartCamera.stream) {
 			SmartCamera.stream.getTracks().forEach(track => track.stop());
+			SmartCamera.stream = null;
 		}
 	}
 

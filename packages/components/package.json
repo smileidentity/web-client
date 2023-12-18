@@ -17,7 +17,7 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^7.6.4",
+    "@storybook/addon-essentials": "^7.6.5",
     "@storybook/addon-links": "^7.6.4",
     "@storybook/blocks": "^7.6.4",
     "@storybook/web-components": "^7.6.4",

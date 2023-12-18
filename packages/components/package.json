@@ -22,6 +22,6 @@
     "@storybook/blocks": "^7.6.4",
     "@storybook/web-components": "^7.6.4",
     "@storybook/web-components-vite": "^7.6.4",
-    "storybook": "^7.6.4"
+    "storybook": "^7.6.5"
   }
 }

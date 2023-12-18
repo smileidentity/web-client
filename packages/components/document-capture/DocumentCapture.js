@@ -1,10 +1,10 @@
 import './id-capture/src'
 import './id-review/src'
-import './instructions/src'
+import './document-instructions/src'
 import { SmartCamera } from "../domain/camera/SmartCamera";
 import { IMAGE_TYPE  } from "../domain/Constants";
-
-const VERSION = '1.0.2';
+import { version as COMPONENTS_VERSION } from "../package.json";
+import styles from '../styles';
 
 async function getPermissions(captureScreen) {
 	await SmartCamera.getMedia({
@@ -30,6 +30,7 @@ class DocumentCapture extends HTMLElement {
 
 	connectedCallback() {
 		this.innerHTML = `
+			${styles}
 			<document-instruction ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
 			<id-capture side-of-id='Front' id-type='National ID' ${this.hideInstructions ? '' : 'hidden'} ></id-capture>
 			<id-capture id='back-of-id' side-of-id='Back' id-type='National ID' hidden ></id-capture>
@@ -40,9 +41,8 @@ class DocumentCapture extends HTMLElement {
 
 		this._data = {
 			images: [],
-			partner_params: {
-			  libraryVersion: VERSION,
-			  permissionGranted: false,
+			meta: {
+			  libraryVersion: COMPONENTS_VERSION,
 			},
 		  };
 
@@ -83,8 +83,8 @@ class DocumentCapture extends HTMLElement {
 				image: event.detail.image.split(',')[1],
 				image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
 			  });
-			this.setActiveScreen(this.idReview);
 			SmartCamera.stopMedia();
+			this.setActiveScreen(this.idReview);
 		});
 
 		this.idReview.addEventListener('IdReview::ReCaptureID', async (event) => {
@@ -128,7 +128,6 @@ class DocumentCapture extends HTMLElement {
 		this.dispatchEvent(
 		  new CustomEvent('imagesComputed', { detail: this._data }),
 		);
-		this.setActiveScreen(this.thankYouScreen);
 	}
 
 

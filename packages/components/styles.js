@@ -42,7 +42,6 @@ ${typography}
   img {
 	height: auto;
 	max-width: 100%;
-	transform: scaleX(-1);
   }
 
   video {

@@ -546,7 +546,7 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   get idType() {
-    return this.getAttribute('id-type');
+    return this.getAttribute('id-type') || "Document";
   }
 
   get cameraError() {

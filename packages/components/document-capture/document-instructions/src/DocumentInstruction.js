@@ -1,4 +1,6 @@
 "use strict";
+import SmartFileUpload from "../../../domain/SmartFileUpload";
+import Utils from "../../../domain/Util";
 import styles from "../../../styles";
 
 function templateString() {
@@ -258,6 +260,8 @@ function templateString() {
 				</p>
 			</div>
 		</div>
+		<div id="error" class='color-red'>
+		</div>
 		</div>
 		</section>
 	<section className="footer">
@@ -313,8 +317,7 @@ class DocumentInstruction extends HTMLElement {
 		this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
 		this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
 
-		const CloseIframeButtons =
-			this.shadowRoot.querySelectorAll(".close-iframe");
+		const CloseIframeButtons = this.shadowRoot.querySelectorAll(".close-iframe");
 
 		this.backButton && this.backButton.addEventListener("click", (e) => {
 			this.handleBackEvents(e);
@@ -333,17 +336,27 @@ class DocumentInstruction extends HTMLElement {
 		if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => {
 			this.dispatchEvent(
 				new CustomEvent("DocumentInstruction::StartCamera", {
-				  detail: {},
+					detail: {},
 				}),
-			  );
+			);
 		});
 
-		if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => {
-			this.dispatchEvent(
-				new CustomEvent("DocumentInstruction::DocumentChange", {
-				  detail: {files: e.target.files},
-				}),
-			  );
+		if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', async (event) => {
+			this.shadowRoot.querySelector('#error').innerHTML = '';
+			try {
+				const { files } = event.target;
+
+				// validate file, and convert file to data url
+				const fileData = await SmartFileUpload.retrieve(files);
+
+				this.dispatchEvent(
+					new CustomEvent("DocumentInstruction::DocumentChange", {
+						detail: { image: fileData },
+					}),
+				);
+			} catch (error) {
+				this.shadowRoot.querySelector('#error').innerHTML = Utils.handleError(error);
+			}
 		});
 	}
 

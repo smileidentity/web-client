@@ -32,6 +32,15 @@ export const DocumentCaptureHideBackOfId = {
     `,
 }
 
+export const DocumentCaptureAllowAttributes = {
+    render: () => `
+        <document-capture
+        document-capture-modes='camera,upload'
+		>
+        </document-capture>
+    `,
+}
+
 export const DocumentCaptureHideInstructionNBackOfId = {
     render: () => `
         <document-capture

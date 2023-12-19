@@ -37,14 +37,22 @@ class DocumentCapture extends HTMLElement {
 		this.innerHTML = `
 			${styles}
 			<div>
-			<document-instruction ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
-			<id-capture side-of-id='Front' id-type='National ID' ${this.hideInstructions ? '' : 'hidden'} ></id-capture>
-			<id-capture id='back-of-id' side-of-id='Back' id-type='National ID' hidden ></id-capture>
+			<document-instruction ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
+			<id-capture side-of-id='Front'
+			${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
+			${this.documentCaptureModes}
+			></id-capture>
+			<document-instruction id='document-instruction-back' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-instruction>
+			<id-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
+			${this.documentCaptureModes}
+			hidden 
+			></id-capture>
 			<id-review hidden></id-review>
 			<id-review id='back-of-id-review' hidden></id-review>
-			<thank-you hidden></thank-you>
 			</div>
 		`;
+
+		console.log("documentCaptureModes", this.documentCaptureModes);
 
 		this._data = {
 			images: [],
@@ -54,6 +62,7 @@ class DocumentCapture extends HTMLElement {
 		};
 
 		this.documentInstruction = this.querySelector('document-instruction');
+		this.documentInstructionBack = this.querySelector('#document-instruction-back');
 		this.idCapture = this.querySelector('id-capture');
 		this.idReview = this.querySelector('id-review');
 		this.idCaptureBack = this.querySelector('#back-of-id');
@@ -83,6 +92,14 @@ class DocumentCapture extends HTMLElement {
 			this.setActiveScreen(this.idCapture);
 			await getPermissions(this.idCapture);
 		});
+		this.documentInstruction.addEventListener('DocumentInstruction::DocumentChange', async (event) => {
+			this.idReview.setAttribute('data-image', event.detail.image);
+			this._data.images.push({
+				image: event.detail.image.split(',')[1],
+				image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
+			});
+			this.setActiveScreen(this.idReview);
+		});
 
 		this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
 			this.idReview.setAttribute('data-image', event.detail.image);
@@ -94,22 +111,42 @@ class DocumentCapture extends HTMLElement {
 			this.setActiveScreen(this.idReview);
 		});
 
-		this.idReview.addEventListener('IdReview::ReCaptureID', async (event) => {
+		this.idReview.addEventListener('IdReview::ReCaptureID', async () => {
 			this.idReview.removeAttribute('data-image');
 			this._data.images.pop();
-			this.setActiveScreen(this.idCapture);
-			await getPermissions(this.idCapture);
+			if (this.hideInstructions) {
+				this.setActiveScreen(this.idCapture);
+				await getPermissions(this.idCapture);
+			}else {
+				this.setActiveScreen(this.documentInstruction);
+			}
 		});
 
 		this.idReview.addEventListener('IdReview::SelectImage', async () => {
 			if (this.hideBackOfId) {
 				this._publishSelectedImages();
-			} else {
+			} else if (this.hideInstructions) {
 				this.setActiveScreen(this.idCaptureBack);
 				await getPermissions(this.idCaptureBack);
+			} else {
+				this.setActiveScreen(this.documentInstructionBack);
 			}
 		});
 
+		this.documentInstructionBack.addEventListener('DocumentInstruction::StartCamera', async () => {
+			this.setActiveScreen(this.idCaptureBack);
+			await getPermissions(this.idCaptureBack);
+		});
+
+		this.documentInstructionBack.addEventListener('DocumentInstruction::DocumentChange', async (event) => {
+			console.log("image", event.detail.image);
+			this.idReview.setAttribute('data-image', event.detail.image);
+			this._data.images.push({
+				image: event.detail.image.split(',')[1],
+				image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
+			});
+			this.setActiveScreen(this.backOfIdReview);
+		});
 		this.idCaptureBack.addEventListener('IDCapture::ImageCaptured', (event) => {
 			this.backOfIdReview.setAttribute('data-image', event.detail.image);
 			this._data.images.push({
@@ -123,8 +160,12 @@ class DocumentCapture extends HTMLElement {
 		this.backOfIdReview.addEventListener('IdReview::ReCaptureID', async (event) => {
 			this.backOfIdReview.removeAttribute('data-image');
 			this._data.images.pop();
-			this.setActiveScreen(this.idCaptureBack);
-			await getPermissions(this.idCaptureBack);
+			if (this.hideInstructions) {
+				this.setActiveScreen(this.idCaptureBack);
+				await getPermissions(this.idCaptureBack);
+			}else {
+				this.setActiveScreen(this.documentInstructionBack);
+			}
 		});
 
 		this.backOfIdReview.addEventListener('IdReview::SelectImage', () => {
@@ -144,6 +185,19 @@ class DocumentCapture extends HTMLElement {
 
 	get hideBackOfId() {
 		return this.hasAttribute('hide-back-of-id');
+	}
+
+	get showNavigation() {
+		return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+	}
+
+	get title() {
+		return this.hasAttribute('title') ? `title=${this.getAttribute('title')}` : '';
+	}
+
+
+	get documentCaptureModes() {
+		return this.hasAttribute('document-capture-modes') ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'` : '';
 	}
 
 	setActiveScreen(screen) {

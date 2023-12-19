@@ -29,6 +29,9 @@ function templateString() {
         height: 15rem;
       }
 
+      .img {
+        transform: scaleX(1);
+      }
       .selfie-review-image {
         overflow: hidden;
         aspect-ratio: 1/1;
@@ -247,9 +250,11 @@ function templateString() {
     ` : ''}
     <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
-        <p class="spinner"></p>
-        <p style="--flow-space: 4rem">Checking permissions</p>
-        </div> 
+    ${this.cameraError ? `` : `<p class="spinner"></p>`}
+        ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` :
+      `<p style="--flow-space: 4rem">Checking permissions</p>`
+    }
+    </div>
     <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
       <div class='id-video-container landscape'>
         <video id='id-video' class='flow' playsinline autoplay muted></video>
@@ -448,13 +453,13 @@ class IdCaptureScreen extends HTMLElement {
     const videoContainer = this.shadowRoot.querySelector('.id-video-container')
 
     video.onloadedmetadata = () => {
-    	this.shadowRoot.querySelector('.actions').hidden = false;
-      this.shadowRoot.querySelector('#loader').hidden = true;  
+      this.shadowRoot.querySelector('.actions').hidden = false;
+      this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.video-section').hidden = false;
     };
 
     if (!videoExists) {
-    	videoContainer.prepend(video);
+      videoContainer.prepend(video);
     }
 
     this._IDStream = stream;
@@ -464,7 +469,7 @@ class IdCaptureScreen extends HTMLElement {
   _stopIDVideoStream(stream = this._IDStream) {
     stream.getTracks().forEach((track) => track.stop());
   }
-  
+
   setUpEventListeners() {
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
     this.backButton = this.shadowRoot.querySelector("#back-button");
@@ -544,23 +549,28 @@ class IdCaptureScreen extends HTMLElement {
     return this.getAttribute('id-type');
   }
 
+  get cameraError() {
+    return this.getAttribute('data-camera-error');
+  }
+
   static get observedAttributes() {
-    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready'];
+    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready', 'data-camera-error'];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'data-camera-ready':
-    case 'hidden':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'title':
+      case 'data-camera-ready':
+      case 'data-camera-error':
+      case 'hidden':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
-  
+
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
   }

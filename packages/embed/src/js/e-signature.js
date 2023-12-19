@@ -183,6 +183,10 @@ function getHumanSize(numberOfBytes) {
   const ReviewSignatureScreen = document.querySelector(
     "#review-signature-screen",
   );
+  const UploadProgressScreen = document.querySelector(
+    "#upload-progress-screen",
+  );
+  const UploadFailedScreen = document.querySelector("#upload-failure-screen");
   const CompleteScreen = document.querySelector("#complete-screen");
 
   EntryScreen.querySelector("#getStarted").addEventListener("click", () =>
@@ -219,6 +223,11 @@ function getHumanSize(numberOfBytes) {
   );
 
   ReviewSignatureScreen.querySelector("#uploadSignature").addEventListener(
+    "click",
+    () => submitSignature(),
+  );
+
+  UploadFailedScreen.querySelector("#retry-upload").addEventListener(
     "click",
     () => submitSignature(),
   );
@@ -440,6 +449,7 @@ function getHumanSize(numberOfBytes) {
     }/documents/sign`;
 
     try {
+      setActiveScreen(UploadProgressScreen);
       const response = await fetch(URL, {
         method: "POST",
         headers,
@@ -452,6 +462,7 @@ function getHumanSize(numberOfBytes) {
       setActiveScreen(CompleteScreen);
       return json;
     } catch (error) {
+      setActiveScreen(UploadFailedScreen);
       throw new Error("signature submission failed", { cause: error });
     }
   }

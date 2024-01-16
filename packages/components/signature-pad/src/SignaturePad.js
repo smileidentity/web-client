@@ -407,8 +407,12 @@ button:disabled {
 
   previewUpload(fileData) {
     const canvas = this.shadowRoot.querySelector("canvas");
+    let img = this.shadowRoot.querySelector("img");
 
-    const img = document.createElement("img");
+    if (!img) {
+      img = document.createElement("img");
+    }
+
     img.src = fileData;
     img.setAttribute("part", "upload-preview-image");
     canvas.setAttribute("hidden", true);

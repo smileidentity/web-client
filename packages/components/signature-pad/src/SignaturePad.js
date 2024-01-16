@@ -239,7 +239,7 @@ button:disabled {
       <p part="upload">
         <strong>or</strong>
         <label>
-          <input type='file' onclick='this.value=null;' id='upload-signature' accept='image/png, image/svg+xml' />
+          <input type='file' onclick='this.value=null;' id='upload-signature' accept='image/jpeg, image/png, image/svg+xml' />
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
             <rect width="16" height="16" fill="#F9F0E7" rx="2"/>
             <mask id="sign" width="16" height="16" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha">

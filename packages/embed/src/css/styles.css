@@ -626,3 +626,7 @@ smileid-combobox-option[hidden] {
 smileid-signature-pad {
 	margin-inline: auto;
 }
+
+[id='preview-signature'] {
+  max-inline-size: 10rem;
+}

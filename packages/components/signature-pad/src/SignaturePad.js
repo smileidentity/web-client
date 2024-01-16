@@ -114,7 +114,8 @@ class SignaturePad extends HTMLElement {
     var(--dot-color);
   border-radius: 2rem;
   inline-size: 30rem;
-  block-size: 15rem;
+  max-inline-size: 100%;
+  aspect-ratio: 2 / 1;
 }
 
 .visually-hidden {
@@ -209,21 +210,22 @@ button:disabled {
     `;
 
     const signatureControls = document.createElement("div");
+    signatureControls.setAttribute('id', 'controls');
+    signatureControls.setAttribute('part', 'signature-controls');
     signatureControls.innerHTML = `
-      <div part="signature-controls" id="controls">
-        <button data-variant="icon" type="button" name="clear" id="clear">
-          <span class="visually-hidden">
-            Clear Signature
-          </span>
-          <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="18" viewBox="0 0 17 18">
-            <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor" />
-          </svg>
+      <button data-variant="icon" type="button" name="clear" id="clear">
+        <span class="visually-hidden">
+          Clear Signature
+        </span>
+        <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="18" viewBox="0 0 17 18">
+          <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor" />
         </svg>
-        </button>
-      </div>
+      </button>
     `;
 
     const canvas = document.createElement("canvas");
+    canvas.width = '300';
+    canvas.height = '150';
     canvas.setAttribute("id", "signature-canvas");
     canvas.setAttribute("part", "canvas");
 
@@ -288,11 +290,9 @@ button:disabled {
     this.errorMessage = errorMessage.querySelector("#error");
 
     // Canvas Resize / Sizing - helps keep the pen in line. use ResizeObserver instead
-    /*
     if (window) {
       window.onresize = this.resizeCanvas();
     }
-		*/
 
     // Signature Pad Controls
     this.clearSignatureButton = signatureControls.querySelector("#clear");
@@ -338,8 +338,8 @@ button:disabled {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
     // This part causes the canvas to be cleared
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
+    canvas.width = (canvas.offsetWidth || canvas.width) * ratio;
+    canvas.height = (canvas.offsetHeight || canvas.height) * ratio;
     canvas.getContext("2d").scale(ratio, ratio);
 
     // This library does not listen for canvas changes, so after the canvas is automatically
@@ -351,7 +351,6 @@ button:disabled {
 
     // If you want to keep the drawing on resize instead of clearing it you can reset the data.
     this.core.fromData(this.core.toData());
-    console.log("got to the end of the resizeCanvas method");
   }
 
   publishSignature() {

@@ -19,11 +19,11 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^7.6.4",
-    "@storybook/addon-links": "^7.6.4",
-    "@storybook/blocks": "^7.6.4",
+    "@storybook/addon-essentials": "^7.6.7",
+    "@storybook/addon-links": "^7.6.8",
+    "@storybook/blocks": "^7.6.8",
     "@storybook/web-components": "^7.6.4",
-    "@storybook/web-components-vite": "^7.6.4",
-    "storybook": "^7.6.4"
+    "@storybook/web-components-vite": "^7.6.7",
+    "storybook": "^7.6.7"
   }
 }

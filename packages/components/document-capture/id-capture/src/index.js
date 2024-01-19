@@ -1,3 +1,0 @@
-export {
-	IdCaptureScreen 
-   } from './IdCaptureScreen';

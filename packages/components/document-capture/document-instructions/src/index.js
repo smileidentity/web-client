@@ -1,3 +1,0 @@
-export {
- DocumentInstruction 
-} from './DocumentInstruction';

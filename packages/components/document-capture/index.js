@@ -1,0 +1,3 @@
+export {
+	DocumentCapture
+} from './DocumentCapture';

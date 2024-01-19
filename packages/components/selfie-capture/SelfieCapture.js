@@ -672,8 +672,7 @@ class SelfieCaptureScreen extends HTMLElement {
       })));
 
     } catch (error) {
-      console.log("stop-error", error);
-      //   this.setActiveScreen(this.failedImageTestScreen);
+      // Todo: handle error
     }
   }
 
@@ -822,10 +821,6 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.hasAttribute("hide-attribution");
   }
 
-  get documentCaptureModes() {
-    return this.getAttribute("document-capture-modes") || "camera";
-  }
-
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
     return value.includes("camera") && value.includes("upload");
@@ -839,21 +834,6 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.getAttribute('hidden');
   }
 
-  get sideOfId() {
-    return (this.getAttribute('side-of-id') || 'front').toLowerCase();
-  }
-
-  get isFrontOfId() {
-    return this.sideOfId === 'front';
-  }
-
-  get isBackOfId() {
-    return !this.isFrontOfId;
-  }
-
-  get idType() {
-    return this.getAttribute('id-type') || "Document";
-  }
 
   get cameraError() {
     return this.getAttribute('data-camera-error');

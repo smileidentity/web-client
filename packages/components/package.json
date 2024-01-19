@@ -6,8 +6,7 @@
     ".": "./index.js",
     "./combobox": "./combobox/src/index.js",
     "./end-user-consent": "./end-user-consent/src/index.js",
-    "./totp-consent": "./totp-consent/src/index.js",
-    "./document-capture": "./document-capture/src/index.js"
+    "./totp-consent": "./totp-consent/src/index.js"
   },
   "description": "A collection of Web Components used by SmileID",
   "keywords": [

@@ -608,7 +608,6 @@ class SelfieCaptureScreen extends HTMLElement {
       },
     };
     this._rawImages = [];
-    await getPermissions(this);
     // this.handleStream(SmartCamera.stream);
   }
 
@@ -671,6 +670,7 @@ class SelfieCaptureScreen extends HTMLElement {
         image_type_id: IMAGE_TYPE.LIVENESS_IMAGE_BASE64,
       })));
 
+      this._publishImages();
     } catch (error) {
       // Todo: handle error
     }
@@ -703,6 +703,12 @@ class SelfieCaptureScreen extends HTMLElement {
       image: image.split(',')[1],
       image_type_id: IMAGE_TYPE.SELFIE_IMAGE_BASE64,
     });
+  }
+
+  _publishImages() {
+    this.dispatchEvent(new CustomEvent('SelfieCapture::ImageCaptured', {
+      detail: this._data,
+    }));
   }
 
   resetErrorMessage() {

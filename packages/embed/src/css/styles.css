@@ -333,8 +333,7 @@ button[data-type="icon"] {
 }
 
 .back-button-text {
-  font-size: 11px;
-  line-height: 11px;
+  line-height: 1;
   color: rgb(21, 31, 114);
 }
 

@@ -611,6 +611,14 @@ function templateString() {
 		  </p>
 		</div>
 	  </div>
+	  <section class='flow' style='--flow-space: 2.5rem'>
+		<button id='allow' data-variant='solid full-width' class='button'>
+			Allow
+		</button>
+		<button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem'>
+			Cancel
+		</button>
+	   </section>
 	</div>
 	${this.hideAttribution ? '' : `
 	<powered-by-smile-id></powered-by-smile-id>
@@ -637,6 +645,7 @@ class SelfieInstruction extends HTMLElement {
 
 		this.shadowRoot.appendChild(template.content.cloneNode(true));
 
+		this.allowButton = this.shadowRoot.querySelector("#allow");
 		this.backButton = this.shadowRoot.querySelector("#back-button");
 		const CloseIframeButtons =
 			this.shadowRoot.querySelectorAll(".close-iframe");
@@ -644,6 +653,11 @@ class SelfieInstruction extends HTMLElement {
 		this.backButton && this.backButton.addEventListener("click", (e) => {
 			this.handleBackEvents(e);
 		});
+
+		this.allowButton && this.allowButton.addEventListener("click", () => {
+			this.dispatchEvent(new CustomEvent("SelfieInstruction::StartCamera"));
+		});
+
 
 		CloseIframeButtons.forEach((button) => {
 			button.addEventListener(

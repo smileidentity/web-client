@@ -174,7 +174,8 @@ function templateString() {
       </div>
     ` : ''}
     <h1 class="header-title">
-      Is the document clear and readable?
+	Is you whole face visible 
+	and clear in this photo?
     </h1>
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
@@ -189,10 +190,10 @@ function templateString() {
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-          Yes, my ID is readable
+          Yes, use this
         </button>
         <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-image'>
-          No, retake photo
+          No, Retake Selfie
         </button>
       </div>
       ${this.hideAttribution ? '' : `

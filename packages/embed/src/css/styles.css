@@ -91,21 +91,14 @@ main {
   padding: 2rem;
   overflow-y: scroll;
   position: absolute;
-  max-height: 100vh;
 }
 
 @media screen and (min-width: 40rem) {
   main {
     padding: 2rem 5rem;
-    top: 50%;
+    top: 4rem;
     left: 50%;
-    transform: translate(-50%, -50%);
-  }
-}
-
-@media screen and (min-width: 80rem) {
-  main {
-    max-height: 80%;
+    transform: translateX(-50%);
   }
 }
 

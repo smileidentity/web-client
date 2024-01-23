@@ -229,8 +229,8 @@ button:disabled {
     `;
 
     const canvas = document.createElement("canvas");
-    canvas.width = '300';
-    canvas.height = '150';
+    canvas.width = '480';
+    canvas.height = '240';
     canvas.setAttribute("id", "signature-canvas");
     canvas.setAttribute("part", "canvas");
 

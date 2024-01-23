@@ -299,11 +299,11 @@ button[data-type="icon"] {
 
 .checkbox-input {
 	display: flex;
-	align-items: center;
 }
 
 .checkbox-input input {
-	inline-size: auto;
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
 }
 
 .checkbox-input label {

@@ -1,13 +1,13 @@
-import "./EndUserConsent";
+import './EndUserConsent';
 
 const meta = {
-    component: "end-user-consent",
+  component: 'end-user-consent',
 };
 
 export default meta;
 
 export const EndUserConsent = {
-    render: () => `
+  render: () => `
         <end-user-consent
             country="NG"
             id-type="NATIONAL_ID"
@@ -20,4 +20,4 @@ export const EndUserConsent = {
         >
         </end-user-consent>
     `,
-}
+};

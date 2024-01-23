@@ -1,3 +1,4 @@
+import { SmartCamera } from "../domain/camera/SmartCamera";
 import "./SelfieCapture";
 
 const meta = {
@@ -7,7 +8,12 @@ const meta = {
 export default meta;
 
 export const SelfieCapture = {
-    render: () => `
+    loaders: [
+        async () => ({
+            permissionGranted: await SmartCamera.getMedia({audio: false,video: true}),
+        }),
+      ],
+    render: (args, { loaded: { permissionGranted } }) => `
         <selfie-capture
         >
         </selfie-capture>

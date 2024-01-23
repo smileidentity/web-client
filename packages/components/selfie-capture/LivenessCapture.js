@@ -73,8 +73,7 @@ class LivenessCapture extends HTMLElement {
 	}
 
 	setUpEventListeners() {
-		this.selfieInstruction.addEventListener('selfieInstruction::StartCamera', async () => {
-			console.log("selfieInstruction::StartCamera");
+		this.selfieInstruction.addEventListener('SelfieInstruction::StartCamera', async () => {
 			await getPermissions(this.selfieCapture);
 			this.setActiveScreen(this.selfieCapture);
 		});

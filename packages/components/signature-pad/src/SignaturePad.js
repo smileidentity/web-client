@@ -82,6 +82,7 @@ class SignaturePad extends HTMLElement {
   display: block;
   block-size: auto;
   inline-size: 30rem;
+  max-inline-size: 100%;
   position: relative;
   --color-active: #2D2B2A;
   --color-default: #001096;
@@ -229,8 +230,33 @@ button:disabled {
     `;
 
     const canvas = document.createElement("canvas");
-    canvas.width = '480';
-    canvas.height = '240';
+
+    // TODO: calculate the width / height relative to closest visible element
+    /**
+     * NOTE: In order to make this responsive, we need to calculate the width
+     * / height of the canvas element relative to the closest visible element
+     *
+     * Within our consuming context, we do follow these steps:
+     * - Find the closest ancestor that is visible
+     * - Find the visible child of that ancestor
+     * - Get the reference width / inline-size of the element
+     * - Compute the canvas.height as the lesser of the reference width or the
+     *   inline size of the canvas set in CSS
+     * - Compute the canvas.height as half the size of the canvas.width or the
+     *   block size computed by the aspect-ratio property
+     */
+
+    const closestVisibleAncestor = this.parentElement.closest(':not([hidden])');
+    const visibleChild = closestVisibleAncestor.querySelector(':not([hidden])');
+    const containerWidth = visibleChild.offsetWidth;
+
+    const remInPx = getComputedStyle(document.documentElement).fontSize.split('px')[0];
+    const componentMaxInlineSize = 30 * remInPx; // 30rem from the style declaration
+    const aspectRatio = 2; // 2 from the canvas style aspect ratio declaration
+
+    canvas.width = containerWidth < componentMaxInlineSize ? containerWidth : componentMaxInlineSize;
+    canvas.height = (containerWidth < componentMaxInlineSize ? containerWidth : componentMaxInlineSize) / aspectRatio;
+
     canvas.setAttribute("id", "signature-canvas");
     canvas.setAttribute("part", "canvas");
 

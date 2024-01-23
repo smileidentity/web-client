@@ -1,6 +1,5 @@
 "use strict";
 import SmartFileUpload from "../../../domain/SmartFileUpload";
-import Utils from "../../../domain/Util";
 import styles from "../../../styles";
 
 function templateString() {
@@ -80,7 +79,7 @@ function templateString() {
 		</defs>
 	  </svg>
 			<h1>${this.title}</h1>
-		<p class="description">
+		<p class="description text-sm font-normal">
 			We'll use it to verify your identity.
 		  </p>
 		  <p class="description padding-bottom-2">
@@ -164,8 +163,8 @@ function templateString() {
 				</defs>
 				</svg>
 				<div class="instruction">
-				<p class="instruction-header h2">Good Light</p>
-				<p class="instruction-body p2">
+				<p class="instruction-header font-bold text-base">Good Light</p>
+				<p class="instruction-body text-xs font-medium">
 					Make sure you are in a well-lit environment where your face is
 					clear and visible
 				</p>
@@ -253,8 +252,8 @@ function templateString() {
 			</defs>
 			</svg>
 			<div>
-				<p class="instruction-header h2">Clear Image</p>
-				<p class="instruction-body p2">
+				<p class="instruction-header font-bold text-base">Clear Image</p>
+				<p class="instruction-body text-xs font-medium">
 					Hold your phone steady so the selfie is clear and sharp. Don't
 					take blurry images.
 				</p>
@@ -355,7 +354,7 @@ class DocumentInstruction extends HTMLElement {
 					}),
 				);
 			} catch (error) {
-				this.shadowRoot.querySelector('#error').innerHTML = Utils.handleError(error);
+				this.shadowRoot.querySelector('#error').innerHTML = error.message;
 			}
 		});
 	}

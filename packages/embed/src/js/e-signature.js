@@ -1,6 +1,7 @@
 import validate from "validate.js";
 import { version as sdkVersion } from "../../package.json";
 import "@smileid/components/signature-pad";
+import "@smileid/components/navigation";
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
@@ -68,11 +69,19 @@ function getHumanSize(numberOfBytes) {
     activeScreen = node;
   }
 
-  const CloseIframeButtons = document.querySelectorAll(".close-iframe");
+  const NavigationTargets = document.querySelectorAll("smileid-navigation");
+  NavigationTargets.forEach(navigationTarget => {
+    navigationTarget.addEventListener(
+      "navigation.back",
+      () => {
+        const screen = visitedScreens.pop();
+        setActiveScreen(screen, false);
+      },
+      false,
+    );
 
-  CloseIframeButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
+    navigationTarget.addEventListener(
+      "navigation.close",
       () => {
         closeWindow(true);
       },
@@ -80,6 +89,7 @@ function getHumanSize(numberOfBytes) {
     );
   });
 
+  // NOTE: this exception is for inline back navigations
   const BackButtons = document.querySelectorAll(".back-button");
   BackButtons.forEach((button) => {
     button.addEventListener(

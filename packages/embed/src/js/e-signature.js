@@ -56,6 +56,18 @@ function getHumanSize(numberOfBytes) {
     );
   }
 
+  const visitedScreens = [];
+  let activeScreen;
+
+  function setActiveScreen(node, navigatingForward = true) {
+    activeScreen.hidden = true;
+    node.hidden = false;
+    if (navigatingForward) {
+      visitedScreens.push(activeScreen);
+    }
+    activeScreen = node;
+  }
+
   const CloseIframeButtons = document.querySelectorAll(".close-iframe");
 
   CloseIframeButtons.forEach((button) => {
@@ -74,15 +86,13 @@ function getHumanSize(numberOfBytes) {
       "click",
       (event) => {
         event.preventDefault();
-        const screen = screens.pop();
-        setActiveScreen(screen);
+        const screen = visitedScreens.pop();
+        setActiveScreen(screen, false);
       },
       false,
     );
   });
 
-  const screens = [];
-  let activeScreen;
   let config;
   let partner_params;
   let documents;
@@ -257,13 +267,6 @@ function getHumanSize(numberOfBytes) {
     );
   }
 
-  function setActiveScreen(node) {
-    activeScreen.hidden = true;
-    node.hidden = false;
-    screens.push(activeScreen);
-    activeScreen = node;
-  }
-
   function initializeSession(documents) {
     loadDocuments(documents, DocumentReviewScreen);
     setActiveScreen(EntryScreen);
@@ -335,16 +338,6 @@ function getHumanSize(numberOfBytes) {
     "click",
     (event) => {
       handlePersonalInfoSubmit(event);
-    },
-    false,
-  );
-
-  PersonalInfoScreen.querySelector("#back-button").addEventListener(
-    "click",
-    (event) => {
-      event.preventDefault();
-      const screen = screens.pop();
-      setActiveScreen(screen);
     },
     false,
   );

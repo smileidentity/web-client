@@ -82,6 +82,7 @@ class SignaturePad extends HTMLElement {
   display: block;
   block-size: auto;
   inline-size: 30rem;
+  position: relative;
   --color-active: #2D2B2A;
   --color-default: #001096;
   --color-disabled: #848282;
@@ -92,9 +93,9 @@ class SignaturePad extends HTMLElement {
 }
 
 :host::part(signature-controls) {
-  text-align: right;
-  position: relative;
-  top: 3rem;
+  display: inline-flex;
+  position: absolute;
+  top: 1rem;
   right: 1rem;
 }
 
@@ -293,7 +294,7 @@ button:disabled {
     // Error Message
     this.errorMessage = errorMessage.querySelector("#error");
 
-    // Canvas Resize / Sizing - helps keep the pen in line. use ResizeObserver instead
+    // Canvas Resize / Sizing
     if (window) {
       window.onresize = this.resizeCanvas();
     }

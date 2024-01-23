@@ -21,3 +21,7 @@ export const IMAGE_TYPE = {
 	/** ID_CARD_BACK_IMAGE_BASE64 Base64 encoded back of ID card image (.jpg or .png) */
 	ID_CARD_BACK_IMAGE_BASE64: 7,
 };
+
+export const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
+export const PORTRAIT_ID_PREVIEW_WIDTH = 396;
+export const PORTRAIT_ID_PREVIEW_HEIGHT = 527;

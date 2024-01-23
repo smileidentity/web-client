@@ -1,4 +1,5 @@
 "use strict";
+import { PORTRAIT_ID_PREVIEW_HEIGHT, PORTRAIT_ID_PREVIEW_WIDTH } from "../../../domain/Constants";
 import { SmartCamera } from "../../../domain/camera/SmartCamera";
 import styles from '../../../styles';
 

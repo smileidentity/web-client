@@ -1,24 +1,24 @@
-import "./Navigation";
+import './Navigation';
 
 const meta = {
-    component: "smileid-navigation",
+  component: 'smileid-navigation',
 };
 
 export default meta;
 
 export const Navigation = {
-    render: () => `
+  render: () => `
         <smileid-navigation
         >
         </smileid-navigation>
     `,
-}
+};
 
 export const NavigationWithBackHidden = {
-    render: () => `
+  render: () => `
         <smileid-navigation
           hide-back
         >
         </smileid-navigation>
     `,
-}
+};

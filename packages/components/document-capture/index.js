@@ -1,3 +1,3 @@
-export {
-	DocumentCapture
-} from './DocumentCapture';
+import DocumentCapture from './DocumentCapture';
+
+export default DocumentCapture;

@@ -1,3 +1,3 @@
-export {
- DocumentInstruction 
-} from './DocumentInstruction';
+import DocumentInstruction from './DocumentInstruction';
+
+export default DocumentInstruction;

@@ -1,17 +1,17 @@
-import "./index";
+import './index';
 
 const meta = {
-    component: "document-instruction",
+  component: 'document-instruction',
 };
 
 export default meta;
 
 export const DocumentInstruction = {
-    render: () => `
+  render: () => `
         <document-instruction
             show-navigation
             document-capture-modes="camera,upload"
         >
         </document-instruction>
     `,
-}
+};

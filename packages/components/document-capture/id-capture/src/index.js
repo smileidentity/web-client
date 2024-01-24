@@ -1,3 +1,3 @@
-export {
-	IdCaptureScreen 
-   } from './IdCaptureScreen';
+import IdCaptureScreen from './IdCaptureScreen';
+
+export default IdCaptureScreen;

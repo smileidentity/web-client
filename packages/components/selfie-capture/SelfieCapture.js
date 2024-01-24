@@ -1,9 +1,7 @@
-"use strict";
 import { IMAGE_TYPE } from '../domain/Constants';
-import { version as COMPONENTS_VERSION } from "../package.json";
-import { SmartCamera } from '../domain/camera/SmartCamera';
+import { version as COMPONENTS_VERSION } from '../package.json';
+import SmartCamera from '../domain/camera/SmartCamera';
 import styles from '../styles';
-import Utils from '../domain/Util';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -18,7 +16,6 @@ function hasMoreThanNColors(data, n = 16) {
   }
   return false;
 }
-
 
 function getLivenessFramesIndices(totalNoOfFrames, numberOfFramesRequired = DEFAULT_NO_OF_LIVENESS_FRAMES) {
   const selectedFrames = [];
@@ -60,7 +57,7 @@ function getLivenessFramesIndices(totalNoOfFrames, numberOfFramesRequired = DEFA
 function templateString() {
   return `
     ${styles}
-	<style>
+  <style>
   :host {
     --color-active: #2D2B2A;
     --color-default: #001096;
@@ -505,8 +502,8 @@ function templateString() {
   .document-tips > * + * {
     margin-inline-start; 1em;
   }
-	</style>
-	<div id='camera-screen' class='flow center'>
+  </style>
+  <div id='camera-screen' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
         ${this.hideBackToHost ? '' : `
@@ -560,19 +557,17 @@ function templateString() {
   `;
 }
 
-
 async function getPermissions(captureScreen) {
   try {
     await SmartCamera.getMedia({
       audio: false,
-      video: true
+      video: true,
     });
     captureScreen?.removeAttribute('data-camera-error');
     captureScreen?.setAttribute('data-camera-ready', true);
   } catch (error) {
-    console.log("error", error);
     captureScreen?.removeAttribute('data-camera-ready');
-    captureScreen?.setAttribute('data-camera-error', Utils.handleError(error));
+    captureScreen?.setAttribute('data-camera-error', SmartCamera.handleError(error));
   }
 }
 
@@ -580,19 +575,17 @@ class SelfieCaptureScreen extends HTMLElement {
   constructor() {
     super();
     this.templateString = templateString.bind(this);
-    this.render = () => {
-      return this.templateString();
-    };
+    this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
-    this.videoContainer = this.shadowRoot.querySelector(".video-container > .video");
+    this.videoContainer = this.shadowRoot.querySelector('.video-container > .video');
     this.init();
     this.setUpEventListeners();
   }
@@ -608,14 +601,12 @@ class SelfieCaptureScreen extends HTMLElement {
       },
     };
     this._rawImages = [];
-    // this.handleStream(SmartCamera.stream);
   }
 
   reset() {
     this.disconnectedCallback();
     this.connectedCallback();
   }
-
 
   _startImageCapture() {
     this.startImageCapture.disabled = true;
@@ -765,7 +756,7 @@ class SelfieCaptureScreen extends HTMLElement {
     }
     video.play();
     this._video = video;
-    const videoContainer = this.shadowRoot.querySelector('.video-container > .video')
+    const videoContainer = this.shadowRoot.querySelector('.video-container > .video');
     this._data.permissionGranted = true;
 
     video.onloadedmetadata = () => {
@@ -780,39 +771,47 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.backButton = this.shadowRoot.querySelector("#back-button");
+    this.backButton = this.shadowRoot.querySelector('#back-button');
     this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
 
-    if (SmartCamera.stream) {
-      this.handleStream(SmartCamera.stream);
-    }
-
-    this.startImageCapture.addEventListener("click", () => {
+    this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();
     });
 
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-    this.backButton && this.backButton.addEventListener("click", (e) => {
-      this.handleBackEvents(e);
-    });
+    if (this.backButton) {
+      this.backButton.addEventListener('click', (e) => {
+        this.handleBackEvents(e);
+      });
+    }
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
-        false
+        false,
       );
     });
+
+    if (SmartCamera.stream) {
+      this.handleStream(SmartCamera.stream);
+    } else if (this.hasAttribute('data-camera-ready')) {
+      getPermissions(this);
+    }
+  }
+
+  disconnectedCallback() {
+    SmartCamera.stopMedia();
+    clearTimeout(this._videoStreamTimeout);
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get showNavigation() {
@@ -820,16 +819,16 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes("camera") && value.includes("upload");
+    return value.includes('camera') && value.includes('upload');
   }
 
   get title() {
@@ -840,41 +839,40 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.getAttribute('hidden');
   }
 
-
   get cameraError() {
     return this.getAttribute('data-camera-error');
   }
 
   static get observedAttributes() {
-    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready', 'data-camera-error'];
+    return ['title', 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready', 'data-camera-error'];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case 'title':
-      case 'data-camera-ready':
-      case 'data-camera-error':
-      case 'hidden':
-        this.shadowRoot.innerHTML = this.render();
-        this.setUpEventListeners();
-        break;
-      default:
-        break;
+    case 'title':
+    case 'data-camera-ready':
+    case 'data-camera-error':
+    case 'hidden':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
     }
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
   }
 
   closeWindow() {
     const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 }
 
-if ("customElements" in window && !customElements.get('selfie-capture')) {
-  window.customElements.define("selfie-capture", SelfieCaptureScreen);
+if ('customElements' in window && !customElements.get('selfie-capture')) {
+  window.customElements.define('selfie-capture', SelfieCaptureScreen);
 }
 
 export default SelfieCaptureScreen;

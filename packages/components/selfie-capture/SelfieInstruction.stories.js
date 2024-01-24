@@ -1,17 +1,17 @@
-import "./SelfieInstruction";
+import './SelfieInstruction';
 
 const meta = {
-    component: "selfie-instruction",
+  component: 'selfie-instruction',
 };
 
 export default meta;
 
 export const SelfieInstruction = {
-    render: () => `
+  render: () => `
         <selfie-instruction
             show-navigation
             selfie-capture-modes="camera,upload"
         >
         </selfie-instruction>
     `,
-}
+};

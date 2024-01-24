@@ -1,5 +1,3 @@
-"use strict";
-
 function templateString() {
   return `
     <style>
@@ -296,8 +294,8 @@ function templateString() {
 
     <div id='consent-screen'>
       <section class='flow center'>
-        <div class="nav ${this.hideBack ? "justify-right" : ""}">
-          <div class="back-wrapper" ${this.hideBack ? "hidden" : ""}>
+        <div class="nav ${this.hideBack ? 'justify-right' : ''}">
+          <div class="back-wrapper" ${this.hideBack ? 'hidden' : ''}>
             <button type='button' data-type='icon' id="back-button" class="back-button">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
                 <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
@@ -315,7 +313,7 @@ function templateString() {
           </button>
         </div>
         <img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
-        <p class='demo-tip' ${this.demoMode ? "" : "hidden"}>
+        <p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
           <svg aria-hidden='true' width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="4.46045" y="4.46069" width="47.7205" height="47.7205" rx="23.8603" fill="white"/>
             <path fill-rule="evenodd" clip-rule="evenodd" d="M35.1578 25.7487H34.2813V23.1195C34.2813 20.2273 31.915 17.861 29.0229 17.861C26.1307 17.861 23.7644 20.2273 23.7644 23.1195V25.7487H22.888C21.3981 25.7487 20.2588 26.888 20.2588 28.3779V34.5128C20.2588 36.0027 21.3981 37.142 22.888 37.142H35.1578C36.6476 37.142 37.787 36.0027 37.787 34.5128V28.3779C37.787 26.888 36.6476 25.7487 35.1578 25.7487ZM25.5171 23.1194C25.5171 21.1913 27.0946 19.6138 29.0227 19.6138C30.9508 19.6138 32.5283 21.1913 32.5283 23.1194V25.7487H25.5171V23.1194ZM35.1577 35.3892C35.6836 35.3892 36.0342 35.0386 36.0342 34.5128V28.3779C36.0342 27.8521 35.6836 27.5015 35.1577 27.5015H22.888C22.3622 27.5015 22.0116 27.8521 22.0116 28.3779V34.5128C22.0116 35.0386 22.3622 35.3892 22.888 35.3892H35.1577Z" fill="#2D9CDB"/>
@@ -456,8 +454,8 @@ function templateString() {
         <p>
           You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
           <a class='theme' href='${
-            this.partnerPolicyURL
-          }' rel='noreferer noopener' target='_blank'>here</a>
+  this.partnerPolicyURL
+}' rel='noreferer noopener' target='_blank'>here</a>
         </p>
 
         <p style='--flow-space: .75rem'>
@@ -657,73 +655,61 @@ class EndUserConsent extends HTMLElement {
   constructor() {
     super();
 
-    this.idRequiresTotpConsent = ["BVN_MFA"];
+    this.idRequiresTotpConsent = ['BVN_MFA'];
     this.templateString = templateString.bind(this);
-    this.render = () => {
-      return this.templateString();
-    };
+    this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
     this.pages = [];
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.consentScreen = this.shadowRoot.querySelector("#consent-screen");
-    this.totpConsentApp = this.shadowRoot.querySelector("totp-consent");
+    this.consentScreen = this.shadowRoot.querySelector('#consent-screen');
+    this.totpConsentApp = this.shadowRoot.querySelector('totp-consent');
     this.consentRejectedScreen = this.shadowRoot.querySelector(
-      "#consent-rejected-screen",
+      '#consent-rejected-screen',
     );
 
-    this.allowButton = this.shadowRoot.querySelector("#allow");
-    this.rejectButton = this.shadowRoot.querySelector("#cancel");
-    this.backToConsentButton =
-      this.shadowRoot.querySelector("#back-to-consent");
+    this.allowButton = this.shadowRoot.querySelector('#allow');
+    this.rejectButton = this.shadowRoot.querySelector('#cancel');
+    this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
     this.confirmConsentRejectionButton = this.shadowRoot.querySelector(
-      "#confirm-consent-rejection",
+      '#confirm-consent-rejection',
     );
-    this.backButton = this.shadowRoot.querySelector("#back-button");
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
+    this.backButton = this.shadowRoot.querySelector('#back-button');
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-    this.allowButton.addEventListener("click", (e) =>
-      this.handleConsentGrant(e),
-    );
-    this.rejectButton.addEventListener("click", (e) =>
-      this.handleConsentGrant(e),
-    );
+    this.allowButton.addEventListener('click', (e) => this.handleConsentGrant(e));
+    this.rejectButton.addEventListener('click', (e) => this.handleConsentGrant(e));
 
-    this.backToConsentButton.addEventListener("click", () =>
-      this.setActiveScreen(this.consentScreen),
-    );
-    this.confirmConsentRejectionButton.addEventListener("click", (e) =>
-      this.handleConsentRejection(e),
-    );
+    this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
+    this.confirmConsentRejectionButton.addEventListener('click', (e) => this.handleConsentRejection(e));
 
     this.totpConsentApp.addEventListener(
-      "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
+      'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
       (e) => this.handleTotpConsentEvents(e),
     );
     this.totpConsentApp.addEventListener(
-      "SmileIdentity::ConsentGranted::TOTP",
+      'SmileIdentity::ConsentGranted::TOTP',
       (e) => this.handleTotpConsentEvents(e),
     );
     this.totpConsentApp.addEventListener(
-      "SmileIdentity::ConsentDenied::Back",
+      'SmileIdentity::ConsentDenied::Back',
       (e) => this.handleBackEvents(e),
     );
 
-    this.backButton.addEventListener("click", (e) => {
+    this.backButton.addEventListener('click', (e) => {
       this.handleBackEvents(e);
     });
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
@@ -741,59 +727,59 @@ class EndUserConsent extends HTMLElement {
   }
 
   get baseUrl() {
-    return this.getAttribute("base-url");
+    return this.getAttribute('base-url');
   }
 
   get country() {
-    return this.getAttribute("country");
+    return this.getAttribute('country');
   }
 
   get demoMode() {
-    return !!this.hasAttribute("demo-mode");
+    return !!this.hasAttribute('demo-mode');
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get idHint() {
-    return this.getAttribute("id-hint") || "Your BVN should be 11 digits long";
+    return this.getAttribute('id-hint') || 'Your BVN should be 11 digits long';
   }
 
   get idRegex() {
-    return this.getAttribute("id-regex");
+    return this.getAttribute('id-regex');
   }
 
   get idType() {
-    return this.getAttribute("id-type");
+    return this.getAttribute('id-type');
   }
 
   get idTypeLabel() {
-    return this.getAttribute("id-type-label");
+    return this.getAttribute('id-type-label');
   }
 
   get partnerId() {
-    return this.getAttribute("partner-id");
+    return this.getAttribute('partner-id');
   }
 
   get partnerName() {
-    return this.getAttribute("partner-name");
+    return this.getAttribute('partner-name');
   }
 
   get partnerLogoURL() {
-    return this.getAttribute("partner-logo");
+    return this.getAttribute('partner-logo');
   }
 
   get partnerPolicyURL() {
-    return this.getAttribute("policy-url");
+    return this.getAttribute('policy-url');
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get token() {
-    return this.getAttribute("token");
+    return this.getAttribute('token');
   }
 
   handleConsentGrant(e) {
@@ -805,12 +791,12 @@ class EndUserConsent extends HTMLElement {
         this.pages.push(this.consentScreen);
       } else {
         this.dispatchEvent(
-          new CustomEvent("SmileIdentity::ConsentGranted", {
+          new CustomEvent('SmileIdentity::ConsentGranted', {
             detail: {
               consented: {
-                personal_details: granted,
                 contact_information: granted,
                 document_information: granted,
+                personal_details: granted,
               },
             },
           }),
@@ -822,7 +808,7 @@ class EndUserConsent extends HTMLElement {
   }
 
   handleConsentRejection() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::ConsentDenied"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::ConsentDenied'));
   }
 
   handleTotpConsentEvents(e) {
@@ -839,20 +825,21 @@ class EndUserConsent extends HTMLElement {
     if (page) {
       this.setActiveScreen(page);
     } else {
-      this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+      this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
     }
   }
 
   closeWindow() {
     const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 }
 
-if ("customElements" in window) {
+if ('customElements' in window) {
   window.customElements.define('end-user-consent', EndUserConsent);
 }
 
 export {
-  EndUserConsent
+  // eslint-disable-next-line import/prefer-default-export
+  EndUserConsent,
 };

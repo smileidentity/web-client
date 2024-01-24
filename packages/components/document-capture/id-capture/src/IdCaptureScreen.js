@@ -1,7 +1,9 @@
-"use strict";
-import { SmartCamera } from "../../../domain/camera/SmartCamera";
+import {
+  PORTRAIT_ID_PREVIEW_HEIGHT,
+  PORTRAIT_ID_PREVIEW_WIDTH,
+} from '../../../domain/Constants';
+import SmartCamera from '../../../domain/camera/SmartCamera';
 import styles from '../../../styles';
-
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -18,7 +20,7 @@ function hasMoreThanNColors(data, n = 16) {
 function templateString() {
   return `
     ${styles}
-	<style>
+  <style>
       .video-section {
         border: 1px solid transparent;
         /* border-radius: 0.5rem; */
@@ -57,7 +59,7 @@ function templateString() {
         flex-direction: column;
         max-block-size: 100%;
         max-inline-size: 40ch;
-		justify-content: space-between;
+    justify-content: space-between;
       }
 
       #id-capture-screen header p {
@@ -226,9 +228,10 @@ function templateString() {
         justify-content: center;
         height: 100%;
       }
-	</style>
-	<div id='id-camera-screen' class='flow center flex-column'>
-    ${this.showNavigation ? `
+  </style>
+  <div id='id-camera-screen' class='flow center flex-column'>
+    ${this.showNavigation
+    ? `
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-id-entry" class="back-button icon-btn">
@@ -247,13 +250,16 @@ function templateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+    : ''
+}
     <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
-    ${this.cameraError ? `` : `<p class="spinner"></p>`}
-        ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` :
-      `<p style="--flow-space: 4rem">Checking permissions</p>`
-    }
+    ${this.cameraError ? '' : '<p class="spinner"></p>'}
+        ${this.cameraError
+    ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
+    : '<p style="--flow-space: 4rem">Checking permissions</p>'
+}
     </div>
     <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
       <div class='id-video-container landscape'>
@@ -278,9 +284,12 @@ function templateString() {
       </button>
     </div>
 
-      ${this.hideAttribution ? '' : `
+      ${this.hideAttribution
+    ? ''
+    : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+}
     </div>
   </div>
   `;
@@ -290,19 +299,17 @@ class IdCaptureScreen extends HTMLElement {
   constructor() {
     super();
     this.templateString = templateString.bind(this);
-    this.render = () => {
-      return this.templateString();
-    };
+    this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
     this.IdSides = {
-      front: "Front",
-      back: "Back",
+      back: 'Back',
+      front: 'Front',
     };
   }
 
   connectedCallback() {
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -330,11 +337,13 @@ class IdCaptureScreen extends HTMLElement {
 
     this._stopIDVideoStream();
 
-    this.dispatchEvent(new CustomEvent('IDCapture::ImageCaptured', {
-      detail: {
-        image,
-      },
-    }));
+    this.dispatchEvent(
+      new CustomEvent('IDCapture::ImageCaptured', {
+        detail: {
+          image,
+        },
+      }),
+    );
   }
 
   _drawIDImage(video = this._IDVideo) {
@@ -369,7 +378,17 @@ class IdCaptureScreen extends HTMLElement {
 
       // Draw the cropped image onto the new canvas
       const croppedCtx = croppedCanvas.getContext('2d');
-      croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      croppedCtx.drawImage(
+        canvas,
+        cropLeft,
+        cropTop,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight,
+      );
 
       return croppedCanvas.toDataURL('image/jpeg');
     }
@@ -382,7 +401,9 @@ class IdCaptureScreen extends HTMLElement {
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
     if (aspectRatio < 1) {
-      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
+      const imageFrame = this.activeScreen.querySelector(
+        '[class*="image-frame"]:not([hidden]) [href*="image-frame"]',
+      );
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
@@ -393,7 +414,17 @@ class IdCaptureScreen extends HTMLElement {
 
       canvas.height = (canvas.width * frameBox.height) / frameBox.width;
 
-      context.drawImage(video, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+      context.drawImage(
+        video,
+        sourceXOffset,
+        sourceYOffset,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
       return canvas.toDataURL('image/jpeg');
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -424,7 +455,9 @@ class IdCaptureScreen extends HTMLElement {
       if (hasEnoughColors) {
         return context;
       }
-      throw new Error('Unable to capture webcam images - Please try another device');
+      throw new Error(
+        'Unable to capture webcam images - Please try another device',
+      );
     } else {
       return context;
     }
@@ -450,7 +483,7 @@ class IdCaptureScreen extends HTMLElement {
     }
     video.play();
 
-    const videoContainer = this.shadowRoot.querySelector('.id-video-container')
+    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
 
     video.onloadedmetadata = () => {
       this.shadowRoot.querySelector('.actions').hidden = false;
@@ -472,26 +505,26 @@ class IdCaptureScreen extends HTMLElement {
 
   setUpEventListeners() {
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.backButton = this.shadowRoot.querySelector("#back-button");
+    this.backButton = this.shadowRoot.querySelector('#back-button');
 
     if (SmartCamera.stream) {
       this.handleIDStream(SmartCamera.stream);
     }
 
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
-
-    this.backButton && this.backButton.addEventListener("click", (e) => {
-      this.handleBackEvents(e);
-    });
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    if (this.backButton) {
+      this.backButton.addEventListener('click', (e) => {
+        this.handleBackEvents(e);
+      });
+    }
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
-        false
+        false,
       );
     });
 
@@ -501,7 +534,7 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get showNavigation() {
@@ -509,20 +542,20 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   get documentCaptureModes() {
-    return this.getAttribute("document-capture-modes") || "camera";
+    return this.getAttribute('document-capture-modes') || 'camera';
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes("camera") && value.includes("upload");
+    return value.includes('camera') && value.includes('upload');
   }
 
   get title() {
@@ -546,7 +579,7 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   get idType() {
-    return this.getAttribute('id-type') || "Document";
+    return this.getAttribute('id-type') || 'Document';
   }
 
   get cameraError() {
@@ -554,35 +587,41 @@ class IdCaptureScreen extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["title", 'hidden', 'show-navigation', 'hide-back-to-host', 'data-camera-ready', 'data-camera-error'];
+    return [
+      'title',
+      'hidden',
+      'show-navigation',
+      'hide-back-to-host',
+      'data-camera-ready',
+      'data-camera-error',
+    ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case 'title':
-      case 'data-camera-ready':
-      case 'data-camera-error':
-      case 'hidden':
-        this.shadowRoot.innerHTML = this.render();
-        this.setUpEventListeners();
-        break;
-      default:
-        break;
+    case 'title':
+    case 'data-camera-ready':
+    case 'data-camera-error':
+    case 'hidden':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
     }
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
   }
 
   closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    window.parent.postMessage('SmileIdentity::Close', '*');
   }
 }
 
-if ("customElements" in window && !customElements.get('id-capture')) {
-  window.customElements.define("id-capture", IdCaptureScreen);
+if ('customElements' in window && !customElements.get('id-capture')) {
+  window.customElements.define('id-capture', IdCaptureScreen);
 }
 
-export { IdCaptureScreen };
+export default IdCaptureScreen;

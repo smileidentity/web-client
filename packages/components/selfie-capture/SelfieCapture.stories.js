@@ -1,21 +1,20 @@
-import { SmartCamera } from "../domain/camera/SmartCamera";
-import "./SelfieCapture";
+import SmartCamera from '../domain/camera/SmartCamera';
+import './SelfieCapture';
 
 const meta = {
-    component: "selfie-capture",
+  component: 'selfie-capture',
 };
 
 export default meta;
 
 export const SelfieCapture = {
-    loaders: [
-        async () => ({
-            permissionGranted: await SmartCamera.getMedia({audio: false,video: true}),
-        }),
-      ],
-    render: (args, { loaded: { permissionGranted } }) => `
-        <selfie-capture
-        >
+  loaders: [
+    async () => ({
+      permissionGranted: await SmartCamera.getMedia({ audio: false, video: true }),
+    }),
+  ],
+  render: () => `
+        <selfie-capture>
         </selfie-capture>
     `,
-}
+};

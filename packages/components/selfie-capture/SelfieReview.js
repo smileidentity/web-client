@@ -1,14 +1,12 @@
-"use strict";
-
-import styles from "../styles"
+import styles from '../styles';
 
 function templateString() {
-	return `
+  return `
   ${styles}
-	<style>
-	  .retake-photo.button[data-variant~="ghost"] {
-		color: #FF5805;
-	  }
+    <style>
+      .retake-photo.button[data-variant~="ghost"] {
+        color: #FF5805;
+      }
       .icon-btn {
         appearance: none;
         background: none;
@@ -36,13 +34,13 @@ function templateString() {
         line-height: 11px;
         color: rgb(21, 31, 114);
       }
-	  .section {
-		border-radius: .5rem;
-		margin-left: auto;
-		margin-right: auto;
-		max-width: 35ch;
-		padding: 1rem;
-	  }
+      .section {
+        border-radius: .5rem;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 35ch;
+        padding: 1rem;
+      }
       .selfie-review-image {
         overflow: hidden;
         aspect-ratio: 1/1;
@@ -94,33 +92,33 @@ function templateString() {
         justify-self: center;
         width: 0.75em;
       }
-	  #id-review-screen .id-video-container.landscape {
-		height: auto;
-	  }
+      #id-review-screen .id-video-container.landscape {
+        height: auto;
+      }
       #id-review-screen header p {
         margin-block: 0 !important;
       }
-	  .description {
-		color: var(--neutral-off-black, #2D2B2A);
-		text-align: center;
-		/* p */
-		font-family: DM Sans;
-		font-size: 0.875rem;
-		font-style: normal;
-		font-weight: 400;
-		line-height: 18px;
-	  }
-	  .padding-bottom-2 {
-		padding-bottom: 2rem;
-	  }
-	  .instructions-wrapper {
-		display: inline-flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 2rem;
+      .description {
+        color: var(--neutral-off-black, #2D2B2A);
+        text-align: center;
+        /* p */
+        font-family: DM Sans;
+        font-size: 0.875rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 18px;
+      }
+      .padding-bottom-2 {
+        padding-bottom: 2rem;
+      }
+      .instructions-wrapper {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2rem;
         margin-block-start: 2rem;
-		margin-block-end: 4rem;
-	  }
+        margin-block-end: 4rem;
+      }
       .instructions {
         display: flex;
         align-items: center;
@@ -133,9 +131,9 @@ function templateString() {
       .instructions p {
         margin-block: 0;
       }
-	  .instruction-body {
-		font-size: 0.75rem;
-	  }
+      .instruction-body {
+        font-size: 0.75rem;
+      }
       h1 {
         color: var(--web-digital-blue, #001096);
         text-align: center;
@@ -145,23 +143,23 @@ function templateString() {
         font-weight: 700;
         line-height: 36px; /* 150% */
       }
-	  .p2 {
-		font-size: 1rem;
-		font-style: normal;
-		font-weight: 500;
-		line-height: 1rem;
-	  }
+      .p2 {
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 1rem;
+      }
       .instruction-header {
         color: var(--web-digital-blue, #001096);
       }
-	  .h2 {
-		font-size: 1rem;
-		font-style: normal;
-		font-weight: 700;
-		line-height: 1.5rem;
-	  }
-	</style>
-	<div id='id-review-screen' class='flow center'>
+      .h2 {
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 1.5rem;
+      }
+    </style>
+    <div id='id-review-screen' class='flow center'>
     ${this.showNavigation ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
@@ -174,19 +172,19 @@ function templateString() {
       </div>
     ` : ''}
     <h1 class="header-title">
-	Is you whole face visible 
-	and clear in this photo?
+    Is you whole face visible 
+    and clear in this photo?
     </h1>
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         ${this.imageSrc ? `<img
-		alt='your ID card'
-		id='id-review-image'
-		src='${this.imageSrc}'
-		width='396'
-	  />` : ''}
+        alt='your ID card'
+        id='id-review-image'
+        src='${this.imageSrc}'
+        width='396'
+      />` : ''}
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
@@ -205,113 +203,111 @@ function templateString() {
 }
 
 class SelfieReview extends HTMLElement {
-	constructor() {
-		super();
-		this.templateString = templateString.bind(this);
-		this.render = () => {
-			return this.templateString();
-		};
+  constructor() {
+    super();
+    this.templateString = templateString.bind(this);
+    this.render = () => this.templateString();
 
-		this.attachShadow({ mode: "open" });
-	}
+    this.attachShadow({ mode: 'open' });
+  }
 
-	connectedCallback() {
-		const template = document.createElement("template");
-		template.innerHTML = this.render();
-		this.shadowRoot.innerHTML = '';
-		this.shadowRoot.appendChild(template.content.cloneNode(true));
-		this.setUpEventListeners();
-	}
+  connectedCallback() {
+    const template = document.createElement('template');
+    template.innerHTML = this.render();
+    this.shadowRoot.innerHTML = '';
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.setUpEventListeners();
+  }
 
-	static get observedAttributes() {
-		return ['hide-back-to-host', 'show-navigation', 'data-image'];
-	}
+  static get observedAttributes() {
+    return ['hide-back-to-host', 'show-navigation', 'data-image'];
+  }
 
-	get hideBack() {
-		return this.hasAttribute("hide-back-to-host");
-	}
+  get hideBack() {
+    return this.hasAttribute('hide-back-to-host');
+  }
 
-	get showNavigation() {
-		return this.hasAttribute('show-navigation');
-	}
+  get showNavigation() {
+    return this.hasAttribute('show-navigation');
+  }
 
-	get themeColor() {
-		return this.getAttribute("theme-color") || "#043C93";
-	}
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#043C93';
+  }
 
-	get hideAttribution() {
-		return this.hasAttribute("hide-attribution");
-	}
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution');
+  }
 
-	get imageSrc() {
-		return this.getAttribute("data-image");
-	}
+  get imageSrc() {
+    return this.getAttribute('data-image');
+  }
 
-	get title() {
-		return this.getAttribute('title') || 'Submit Front of ID';
-	}
+  get title() {
+    return this.getAttribute('title') || 'Submit Front of ID';
+  }
 
-	handleBackEvents() {
-		this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
-	}
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+  }
 
-	closeWindow() {
-		const referenceWindow = window.parent;
-		referenceWindow.postMessage("SmileIdentity::Close", "*");
-	}
+  closeWindow() {
+    const referenceWindow = window.parent;
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
+  }
 
-	attributeChangedCallback(name) {
-		switch (name) {
-			case 'data-image':
-			case 'hide-back-to-host':
-			case 'show-navigation':
-				this.shadowRoot.innerHTML = this.render();
-				this.setUpEventListeners();
-				break;
-			default:
-				break;
-		}
-	}
+  attributeChangedCallback(name) {
+    switch (name) {
+    case 'data-image':
+    case 'hide-back-to-host':
+    case 'show-navigation':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
+    }
+  }
 
-	setUpEventListeners() {
-		this.selectImage = this.shadowRoot.querySelector('#select-id-image');
-		this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
-		const CloseIframeButtons =
-			this.shadowRoot.querySelectorAll(".close-iframe");
+  setUpEventListeners() {
+    this.selectImage = this.shadowRoot.querySelector('#select-id-image');
+    this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-		this.backButton && this.backButton.addEventListener("click", (e) => {
-			this.handleBackEvents(e);
-		});
+    if (this.backButton) {
+      this.backButton.addEventListener('click', (e) => {
+        this.handleBackEvents(e);
+      });
+    }
+    CloseIframeButtons.forEach((button) => {
+      button.addEventListener(
+        'click',
+        () => {
+          this.closeWindow();
+        },
+        false,
+      );
+    });
 
-		CloseIframeButtons.forEach((button) => {
-			button.addEventListener(
-				"click",
-				() => {
-					this.closeWindow();
-				},
-				false
-			);
-		});
-
-		this.selectImage.addEventListener('click', () => {
-			this.dispatchEvent(
-				new CustomEvent("SelfieReview::SelectImage", {
-					detail: {},
-				}),
-			);
-		});
-		this.reCaptureImage.addEventListener('click', () => {
-			this.dispatchEvent(
-				new CustomEvent("SelfieReview::ReCapture", {
-					detail: {},
-				}),
-			);
-		});
-	}
+    this.selectImage.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent('SelfieReview::SelectImage', {
+          detail: {},
+        }),
+      );
+    });
+    this.reCaptureImage.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent('SelfieReview::ReCapture', {
+          detail: {},
+        }),
+      );
+    });
+  }
 }
 
-if ("customElements" in window && !customElements.get("selfie-review")) {
-	window.customElements.define("selfie-review", SelfieReview);
+if ('customElements' in window && !customElements.get('selfie-review')) {
+  window.customElements.define('selfie-review', SelfieReview);
 }
 
-export { SelfieReview };
+export default SelfieReview;

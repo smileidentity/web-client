@@ -1,3 +1,3 @@
-export {
-	IdReview 
-} from './IdReview';
+import IdReview from './IdReview';
+
+export default IdReview;

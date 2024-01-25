@@ -117,6 +117,7 @@ class SignaturePad extends HTMLElement {
 
 :host::part(upload-preview-image) {
   max-inline-size: 10rem;
+  margin-inline: auto;
 }
 
 .visually-hidden {
@@ -226,7 +227,6 @@ button:disabled {
 
     const canvas = document.createElement('canvas');
 
-    // TODO: calculate the width / height relative to closest visible element
     /**
      * NOTE: In order to make this responsive, we need to calculate the width
      * / height of the canvas element relative to the closest visible element

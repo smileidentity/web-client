@@ -1,12 +1,6 @@
-'use strict';
-
 class Navigation extends HTMLElement {
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.attachShadow({ mode: 'open' });
 
     const style = document.createElement('style');
     style.textContent = `
@@ -98,7 +92,7 @@ button[data-type="icon"] {
         />
       </svg>
       <span part="back-button-text">Back</span>
-    `
+    `;
 
     const closeButton = document.createElement('button');
     closeButton.setAttribute('class', 'close-button');
@@ -148,13 +142,13 @@ button[data-type="icon"] {
 
   handleBack() {
     this.dispatchEvent(
-      new CustomEvent('navigation.back')
+      new CustomEvent('navigation.back'),
     );
   }
 
   handleClose() {
     this.dispatchEvent(
-      new CustomEvent('navigation.close')
+      new CustomEvent('navigation.close'),
     );
   }
 
@@ -163,8 +157,8 @@ button[data-type="icon"] {
   }
 }
 
-if ("customElements" in window) {
-  window.customElements.define("smileid-navigation", Navigation);
+if ('customElements' in window) {
+  window.customElements.define('smileid-navigation', Navigation);
 }
 
-export { Navigation };
+export default Navigation;

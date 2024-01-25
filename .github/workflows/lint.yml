@@ -6,6 +6,20 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  components:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/components
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v3
+      - name: install dependencies
+        run: npm ci
+      - name: lint
+        run: npm run lint
   smart-camera-web:
     runs-on: ubuntu-latest
     defaults:

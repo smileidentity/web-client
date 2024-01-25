@@ -117,6 +117,7 @@ class SignaturePad extends HTMLElement {
 
 :host::part(upload-preview-image) {
   max-inline-size: 10rem;
+  margin-inline: auto;
 }
 
 .visually-hidden {

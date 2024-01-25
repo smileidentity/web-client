@@ -1,22 +1,21 @@
-import SignaturePadCore from "signature_pad";
+import SignaturePadCore from 'signature_pad';
 
 class SmartFileUpload {
   static memoryLimit = 2048000;
 
-  static supportedTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+  static supportedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
 
   static getHumanSize(numberOfBytes) {
     // Approximate to the closest prefixed unit
-    const units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const exponent = Math.min(
       Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
       units.length - 1,
     );
     const approx = numberOfBytes / 1024 ** exponent;
-    const output =
-      exponent === 0
-        ? `${numberOfBytes} bytes`
-        : `${approx.toFixed(0)} ${units[exponent]}`;
+    const output = exponent === 0
+      ? `${numberOfBytes} bytes`
+      : `${approx.toFixed(0)} ${units[exponent]}`;
 
     return output;
   }
@@ -31,7 +30,7 @@ class SmartFileUpload {
       reader.onerror = () => {
         reject(
           new Error(
-            "An error occurred reading the file. Please check the file, and try again",
+            'An error occurred reading the file. Please check the file, and try again',
           ),
         );
       };
@@ -41,14 +40,14 @@ class SmartFileUpload {
 
   static async retrieve(files) {
     if (files.length > 1) {
-      throw new Error("Only one file upload is permitted at a time");
+      throw new Error('Only one file upload is permitted at a time');
     }
 
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
       throw new Error(
-        "Unsupported file format. Please ensure that you are providing a JPG, PNG or SVG image",
+        'Unsupported file format. Please ensure that you are providing a JPG, PNG or SVG image',
       );
     }
 
@@ -69,14 +68,10 @@ class SmartFileUpload {
 }
 
 class SignaturePad extends HTMLElement {
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.attachShadow({ mode: 'open' });
 
-    const style = document.createElement("style");
+    const style = document.createElement('style');
     style.textContent = `
 :host {
   display: block;
@@ -209,13 +204,13 @@ button:disabled {
 }
 `;
 
-    const wrapper = document.createElement("div");
-    const errorMessage = document.createElement("div");
+    const wrapper = document.createElement('div');
+    const errorMessage = document.createElement('div');
     errorMessage.innerHTML = `
       <p id="error" class="color-red | center"><p>
     `;
 
-    const signatureControls = document.createElement("div");
+    const signatureControls = document.createElement('div');
     signatureControls.setAttribute('id', 'controls');
     signatureControls.setAttribute('part', 'signature-controls');
     signatureControls.innerHTML = `
@@ -229,7 +224,7 @@ button:disabled {
       </button>
     `;
 
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
 
     // TODO: calculate the width / height relative to closest visible element
     /**
@@ -257,11 +252,11 @@ button:disabled {
     canvas.width = containerWidth < componentMaxInlineSize ? containerWidth : componentMaxInlineSize;
     canvas.height = (containerWidth < componentMaxInlineSize ? containerWidth : componentMaxInlineSize) / aspectRatio;
 
-    canvas.setAttribute("id", "signature-canvas");
-    canvas.setAttribute("part", "canvas");
+    canvas.setAttribute('id', 'signature-canvas');
+    canvas.setAttribute('part', 'canvas');
 
-    const uploadControl = document.createElement("div");
-    uploadControl.setAttribute("id", "signature-upload-wrapper");
+    const uploadControl = document.createElement('div');
+    uploadControl.setAttribute('id', 'signature-upload-wrapper');
     uploadControl.innerHTML = `
       <p part="upload">
         <strong>or</strong>
@@ -282,7 +277,7 @@ button:disabled {
       </p>
     `;
 
-    const publishSignatureContainer = document.createElement("p");
+    const publishSignatureContainer = document.createElement('p');
     publishSignatureContainer.innerHTML = `
       <button data-variant="solid" type="button" name="publish" id="publish">
         <span>
@@ -318,7 +313,7 @@ button:disabled {
     this.core = new SignaturePadCore(canvas);
 
     // Error Message
-    this.errorMessage = errorMessage.querySelector("#error");
+    this.errorMessage = errorMessage.querySelector('#error');
 
     // Canvas Resize / Sizing
     if (window) {
@@ -326,36 +321,22 @@ button:disabled {
     }
 
     // Signature Pad Controls
-    this.clearSignatureButton = signatureControls.querySelector("#clear");
-    this.clearSignatureButton.addEventListener("click", () =>
-      this.clearSignature(),
-    );
+    this.clearSignatureButton = signatureControls.querySelector('#clear');
+    this.clearSignatureButton.addEventListener('click', () => this.clearSignature());
 
     // Upload Controls
-    this.uploadSignatureButton =
-      uploadControl.querySelector("#upload-signature");
-    this.uploadSignatureButton.addEventListener("change", (event) =>
-      this.uploadSignature(event),
-    );
+    this.uploadSignatureButton = uploadControl.querySelector('#upload-signature');
+    this.uploadSignatureButton.addEventListener('change', (event) => this.uploadSignature(event));
 
     // Publish Signature
-    this.publishSignatureButton =
-      publishSignatureContainer.querySelector("#publish");
-    this.publishSignatureButton.addEventListener("click", () =>
-      this.publishSignature(),
-    );
+    this.publishSignatureButton = publishSignatureContainer.querySelector('#publish');
+    this.publishSignatureButton.addEventListener('click', () => this.publishSignature());
   }
 
   disconnectedCallback() {
-    this.publishSignatureButton.removeEventListener("click", () =>
-      this.publishSignature(),
-    );
-    this.clearSignatureButton.removeEventListener("click", () =>
-      this.clearSignature(),
-    );
-    this.uploadSignatureButton.removeEventListener("change", (event) =>
-      this.uploadSignature(event),
-    );
+    this.publishSignatureButton.removeEventListener('click', () => this.publishSignature());
+    this.clearSignatureButton.removeEventListener('click', () => this.clearSignature());
+    this.uploadSignatureButton.removeEventListener('change', (event) => this.uploadSignature(event));
   }
 
   // Adjust canvas coordinate space taking into account pixel ratio,
@@ -365,20 +346,20 @@ button:disabled {
     // When zoomed out to less than 100%, for some very strange reason,
     // some browsers report devicePixelRatio as less than 1
     // and only part of the canvas is cleared then.
-    const canvas = this.shadowRoot.querySelector("canvas");
+    const canvas = this.shadowRoot.querySelector('canvas');
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
     // This part causes the canvas to be cleared
     canvas.width = (canvas.offsetWidth || canvas.width) * ratio;
     canvas.height = (canvas.offsetHeight || canvas.height) * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
+    canvas.getContext('2d').scale(ratio, ratio);
 
     // This library does not listen for canvas changes, so after the canvas is automatically
     // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
     // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
     // that the state of this library is consistent with visual state of the canvas, you
     // have to clear it manually.
-    //signaturePad.clear();
+    // signaturePad.clear();
 
     // If you want to keep the drawing on resize instead of clearing it you can reset the data.
     this.core.fromData(this.core.toData());
@@ -387,22 +368,22 @@ button:disabled {
   publishSignature() {
     try {
       this.resetErrorMessage();
-      const previewImage = this.shadowRoot.querySelector("img");
+      const previewImage = this.shadowRoot.querySelector('img');
       let image = previewImage ? previewImage.src : undefined;
       if (!image && !this.core.isEmpty()) {
-        image = this.core.toDataURL("image/svg+xml");
+        image = this.core.toDataURL('image/svg+xml');
       }
 
       if (image) {
         this.dispatchEvent(
-          new CustomEvent("signature-pad.publish", {
+          new CustomEvent('signature-pad.publish', {
             detail: image,
           }),
         );
       } else {
         throw new Error(
           `No signature present. ${
-            this.allowUpload ? "Draw or upload" : "Draw"
+            this.allowUpload ? 'Draw or upload' : 'Draw'
           } a signature`,
         );
       }
@@ -412,7 +393,7 @@ button:disabled {
   }
 
   resetErrorMessage() {
-    this.errorMessage.textContent = "";
+    this.errorMessage.textContent = '';
   }
 
   handleError(error) {
@@ -421,29 +402,29 @@ button:disabled {
 
   clearSignature() {
     this.resetErrorMessage();
-    const canvas = this.shadowRoot.querySelector("canvas");
-    const img = this.shadowRoot.querySelector("img");
+    const canvas = this.shadowRoot.querySelector('canvas');
+    const img = this.shadowRoot.querySelector('img');
 
     if (img) {
       img.remove();
-      canvas.removeAttribute("hidden");
+      canvas.removeAttribute('hidden');
     }
 
     this.core.clear();
   }
 
   previewUpload(fileData) {
-    const canvas = this.shadowRoot.querySelector("canvas");
-    let img = this.shadowRoot.querySelector("img");
+    const canvas = this.shadowRoot.querySelector('canvas');
+    let img = this.shadowRoot.querySelector('img');
 
     if (!img) {
-      img = document.createElement("img");
+      img = document.createElement('img');
     }
 
     img.src = fileData;
-    img.setAttribute("part", "upload-preview-image");
-    canvas.setAttribute("hidden", true);
-    canvas.insertAdjacentElement("afterend", img);
+    img.setAttribute('part', 'upload-preview-image');
+    canvas.setAttribute('hidden', true);
+    canvas.insertAdjacentElement('afterend', img);
   }
 
   async uploadSignature(event) {
@@ -462,12 +443,12 @@ button:disabled {
   }
 
   get allowUpload() {
-    return this.hasAttribute("allow-upload");
+    return this.hasAttribute('allow-upload');
   }
 }
 
-if ("customElements" in window) {
-  window.customElements.define("smileid-signature-pad", SignaturePad);
+if ('customElements' in window) {
+  window.customElements.define('smileid-signature-pad', SignaturePad);
 }
 
-export { SignaturePad };
+export default SignaturePad;

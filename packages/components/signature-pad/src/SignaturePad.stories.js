@@ -1,24 +1,24 @@
-import "./SignaturePad";
+import './SignaturePad';
 
 const meta = {
-    component: "smileid-signature-pad",
+  component: 'smileid-signature-pad',
 };
 
 export default meta;
 
 export const SignaturePad = {
-    render: () => `
+  render: () => `
         <smileid-signature-pad
         >
         </smileid-signature-pad>
     `,
-}
+};
 
 export const SignaturePadWithUploads = {
-    render: () => `
+  render: () => `
         <smileid-signature-pad
           allow-upload
         >
         </smileid-signature-pad>
     `,
-}
+};

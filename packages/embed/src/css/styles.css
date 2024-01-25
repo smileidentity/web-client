@@ -91,21 +91,14 @@ main {
   padding: 2rem;
   overflow-y: scroll;
   position: absolute;
-  max-height: 100vh;
 }
 
 @media screen and (min-width: 40rem) {
   main {
     padding: 2rem 5rem;
-    top: 50%;
+    top: 4rem;
     left: 50%;
-    transform: translate(-50%, -50%);
-  }
-}
-
-@media screen and (min-width: 80rem) {
-  main {
-    max-height: 80%;
+    transform: translateX(-50%);
   }
 }
 
@@ -304,6 +297,20 @@ button[data-type="icon"] {
   justify-content: end !important;
 }
 
+.checkbox-input {
+	display: flex;
+}
+
+.checkbox-input input {
+	inline-size: 1.25rem;
+	block-size: 1.25rem;
+}
+
+.checkbox-input label {
+	margin-inline-start: .5rem;
+	text-align: initial;
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
@@ -319,8 +326,7 @@ button[data-type="icon"] {
 }
 
 .back-button-text {
-  font-size: 11px;
-  line-height: 11px;
+  line-height: 1;
   color: rgb(21, 31, 114);
 }
 
@@ -557,4 +563,62 @@ smileid-combobox-option[aria-selected] {
 
 smileid-combobox-option[hidden] {
   display: none;
+}
+
+.document-tips {
+	margin-block-start: 1.5rem;
+	display: flex;
+	align-items: center;
+	text-align: initial;
+}
+
+.document-tips svg {
+	flex-shrink: 0;
+	margin-inline-end: 1rem;
+}
+
+.document-tips p {
+	margin-block: 0;
+}
+
+.document-tips p:first-of-type {
+	font-size; 1.875rem;
+	font-weight: bold
+}
+
+[type='file'] {
+	display: none;
+}
+
+.document-tips > * + * {
+	margin-inline-start; 1em;
+}
+
+.document-list {
+	padding: 0px;
+}
+
+.document-list li {
+	list-style: none;
+	background-color: #F9F0E7;
+	padding: 1rem;
+	border-radius: .5rem;
+}
+
+.document-list li + li {
+	margin-block-start: 1rem;
+}
+
+.document-list a {
+	color: initial;
+	text-decoration: none;
+	margin: 0px;
+}
+
+smileid-signature-pad {
+	margin-inline: auto;
+}
+
+[id='preview-signature'] {
+  max-inline-size: 10rem;
 }

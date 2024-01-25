@@ -69,6 +69,8 @@ window.SmileIdentity = (function () {
         return "./../doc-verification.html";
       case "enhanced_document_verification":
         return "./../enhanced-document-verification.html";
+      case "e_signature":
+        return "./../e-signature.html";
       case "basic_kyc":
       case "identity_verification":
         return "./../basic-kyc.html";
@@ -136,6 +138,12 @@ window.SmileIdentity = (function () {
     }
   }
 
+  function handleError(config, error) {
+    if (config.onError) {
+      config.onError(error);
+    }
+  }
+
   const requiredPartnerDetails = [
     "name",
     "logo_url",
@@ -191,6 +199,25 @@ window.SmileIdentity = (function () {
       );
     }
 
+    if (
+      config.product === 'e_signature' &&
+      !config.document_ids
+    ) {
+      throw new Error(
+        "SmileIdentity: `document_ids` field is required for `e_signature` product type",
+      );
+    }
+
+    if (
+      config.product === 'e_signature' &&
+      config.document_ids &&
+      !Array.isArray(config.document_ids)
+    ) {
+      throw new Error(
+        "SmileIdentity: `document_ids` must be an array containing ids of documents uploaded for `e_signature`",
+      );
+    }
+
     return true;
   }
 
@@ -204,34 +231,42 @@ window.SmileIdentity = (function () {
   }
 
   function SmileIdentity(config) {
-    const configIsValid = isConfigValid(config);
+    try {
+      const configIsValid = isConfigValid(config);
 
-    if (configIsValid) {
-      createIframe(config.product);
+      if (configIsValid) {
+        createIframe(config.product);
 
-      window.addEventListener(
-        "message",
-        (event) => {
-          const tag = event.data.message || event.data;
+        window.addEventListener(
+          "message",
+          (event) => {
+            const tag = event.data.message || event.data;
 
-          switch (tag) {
-            case "SmileIdentity::ChildPageReady":
-              return publishConfigToIFrame(config);
-            case "SmileIdentity::Close":
-              return closeIFrame(config, true);
-            case "SmileIdentity::Close::System":
-              return closeIFrame(config, false);
-            case "SmileIdentity::Success":
-              return handleSuccess(config);
-            case "SmileIdentity::ConsentDenied":
-            case "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated":
-              return handleConsentRejection(config, event.data);
-            default:
-              return undefined;
-          }
-        },
-        false,
-      );
+            switch (tag) {
+              case "SmileIdentity::ChildPageReady":
+                return publishConfigToIFrame(config);
+              case "SmileIdentity::Close":
+                return closeIFrame(config, true);
+              case "SmileIdentity::Close::System":
+                return closeIFrame(config, false);
+              case "SmileIdentity::Success":
+                return handleSuccess(config);
+              case "SmileIdentity::ConsentDenied":
+              case "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated":
+                return handleConsentRejection(config, event.data);
+              case "SmileIdentity::Error":
+                return handleError(config, event.data);
+              default:
+                return undefined;
+            }
+          },
+          false,
+        );
+      }
+    } catch (error) {
+      if (config.onError) {
+        config.onError(error.message);
+      }
     }
   }
 

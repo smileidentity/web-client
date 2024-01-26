@@ -248,7 +248,6 @@ ${typography}
 
   #document-instruction-screen,
   #back-of-document-instruction-screen {
-    38rem
     padding-block: 2rem;
     display: flex;
     flex-direction: column;

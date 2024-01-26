@@ -3,7 +3,6 @@ import styles from '../../styles';
 
 function templateString() {
   return `
-  ${styles}
     <style>
       *,
       *::before,
@@ -22,6 +21,7 @@ function templateString() {
         --color-success: #1EB244;
         --color-failure: #FFEDEB;
         --color-failure-tint: #F86B58;
+        --color-danger: #FF5805;
        
         --color-primary-blue: #151F72;
         --color-richblue: #043C93;
@@ -200,10 +200,9 @@ function templateString() {
       }
 
       .callout {
-        border: 0.8px solid #DEEAEF;
-        border-radius: .5rem;
         font-size: .875rem;
         padding: 1rem 1.5rem;
+        max-width: 20.6875rem;
       }
 
       .processing-list {
@@ -218,7 +217,7 @@ function templateString() {
       .processing-list__items {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 1rem;
       }
 
       .processing-list__items > * + p {
@@ -311,8 +310,11 @@ function templateString() {
       .company-name svg {
         margin-right: .5rem;
       }
+      #cancel {
+        color: var(--color-danger);
+      }
     </style>
-
+    ${styles}
     <div id='consent-screen'>
       <section class='flow center'>
         <div class="nav ${this.hideBack ? 'justify-right' : ''}">
@@ -345,7 +347,7 @@ function templateString() {
             This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
           </span>
         </p>
-        <h1>
+        <h1 class='text-base font-bold'>
           <span class='theme'>${this.partnerName}</span>
           wants to access your
           <span class='theme'>${this.idTypeLabel}</span>
@@ -405,7 +407,7 @@ function templateString() {
         </li>
       </ul>
 
-      <section class='callout | flow center' style='--flow-space: 2.5rem; margin: var(--flow-space) auto;'>
+      <section class='callout | flow center' style='--flow-space: 2rem; margin: var(--flow-space) auto;'>
         <p>
           You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
           <a class='theme' href='${this.partnerPolicyURL
@@ -413,11 +415,9 @@ function templateString() {
         </p>
 
         <p style='--flow-space: .75rem'>
-          By choosing "Allow",
-          you grant
+          By choosing "Allow", you grant
           <span class='theme'>${this.partnerName}</span>
-          consent to process your personal data
-          to offer you this service
+          consent to process your personal data to offer you this service
         </p>
       </section>
 
@@ -426,7 +426,7 @@ function templateString() {
           Allow
         </button>
 
-        <button id='cancel' data-variant='outline' style='--flow-space: 1.5rem'>
+        <button id='cancel' data-variant='ghost' class='color-danger' style='--flow-space: 1.5rem'>
           Cancel
         </button>
       </section>

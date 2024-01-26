@@ -1,9 +1,9 @@
 import './SelfieCapture';
 import './SelfieReview';
 import './SelfieInstruction';
-import SmartCamera from '../domain/camera/SmartCamera';
-import { version as COMPONENTS_VERSION } from '../package.json';
-import styles from '../styles';
+import SmartCamera from '../../domain/camera/SmartCamera';
+import { version as COMPONENTS_VERSION } from '../../package.json';
+import styles from '../../styles';
 
 async function getPermissions(captureScreen) {
   try {

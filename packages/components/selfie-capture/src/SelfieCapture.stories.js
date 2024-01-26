@@ -1,4 +1,4 @@
-import SmartCamera from '../domain/camera/SmartCamera';
+import SmartCamera from '../../domain/camera/SmartCamera';
 import './SelfieCapture';
 
 const meta = {

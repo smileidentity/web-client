@@ -1,7 +1,7 @@
-import { IMAGE_TYPE } from '../domain/Constants';
-import { version as COMPONENTS_VERSION } from '../package.json';
-import SmartCamera from '../domain/camera/SmartCamera';
-import styles from '../styles';
+import { IMAGE_TYPE } from '../../domain/Constants';
+import { version as COMPONENTS_VERSION } from '../../package.json';
+import SmartCamera from '../../domain/camera/SmartCamera';
+import styles from '../../styles';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 

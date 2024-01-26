@@ -5,11 +5,12 @@
   "exports": {
     ".": "./index.js",
     "./combobox": "./combobox/src/index.js",
+    "./document-capture": "./document-capture/src/index.js",
+    "./liveness-capture": "./liveness-capture/src/index.js",
     "./end-user-consent": "./end-user-consent/src/index.js",
     "./navigation": "./navigation/src/index.js",
     "./signature-pad": "./signature-pad/src/index.js",
-    "./totp-consent": "./totp-consent/src/index.js",
-    "./document-capture": "./document-capture/src/index.js"
+    "./totp-consent": "./totp-consent/src/index.js"
   },
   "scripts": {
     "lint": "eslint . --ext .js",

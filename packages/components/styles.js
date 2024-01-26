@@ -75,7 +75,7 @@ ${typography}
   }
 
   .color-digital-blue {
-    color: #001096 !important;
+    color: var(--web-digital-blue) !important;
   }
 
   .color-deep-blue {
@@ -301,17 +301,6 @@ ${typography}
 
   .instruction-body {
     font-size: 0.75rem;
-  }
-
-  h1 {
-    color: var(--web-digital-blue, #001096);
-    text-align: center;
-
-    /* h1 */
-    font-size: 1.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 36px; /* 150% */
   }
 
   .instruction-header {

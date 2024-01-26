@@ -15,7 +15,7 @@ export const EndUserConsent = {
             partner-id="007"
             partner-name="SmileID Stories"
             policy-url="https://usesmileid.com/privacy-policy"
-            theme-color="#000000"
+            theme-color="#001096"
             partner-logo="https://portal.smileidentity.com/favicon.ico"
         >
         </end-user-consent>

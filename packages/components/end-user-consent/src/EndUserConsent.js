@@ -1,3 +1,5 @@
+import styles from '../../styles';
+
 function templateString() {
   return `
     <style>
@@ -18,7 +20,9 @@ function templateString() {
         --color-success: #1EB244;
         --color-failure: #FFEDEB;
         --color-failure-tint: #F86B58;
-
+        --color-danger: #FF5805;
+       
+        --color-primary-blue: #151F72;
         --color-richblue: #043C93;
         --color-theme: ${this.themeColor};
       }
@@ -195,26 +199,41 @@ function templateString() {
       }
 
       .callout {
-        border: 0.8px solid #DEEAEF;
-        border-radius: .5rem;
         font-size: .875rem;
         padding: 1rem 1.5rem;
+        max-width: 20.6875rem;
       }
 
       .processing-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        padding-top: 2rem;
+
       }
 
       .processing-list__items {
         display: flex;
         align-items: center;
+        gap: 1rem;
       }
 
       .processing-list__items > * + p {
         margin-left: 1rem;
       }
 
-      .processing-list__items > :last-child {
-        margin-left: auto;
+      .processing-list__items-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .processing-list__item__title {
+        color: #151F72;
+      }
+
+      .processing-list__items-item__description {
+        width: 269px
       }
 
       .theme {
@@ -290,8 +309,11 @@ function templateString() {
       .company-name svg {
         margin-right: .5rem;
       }
+      #cancel {
+        color: var(--color-danger);
+      }
     </style>
-
+    ${styles}
     <div id='consent-screen'>
       <section class='flow center'>
         <div class="nav ${this.hideBack ? 'justify-right' : ''}">
@@ -324,146 +346,77 @@ function templateString() {
             This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
           </span>
         </p>
-        <h1>
+        <h1 class='text-base font-bold'>
           <span class='theme'>${this.partnerName}</span>
           wants to access your
           <span class='theme'>${this.idTypeLabel}</span>
           information
         </h1>
-        <p class='color-grey'>
+        <p class='text-base font-normal'>
           This will allow ${this.partnerName} to:
         </p>
       </section>
 
-      <ul role='list' class='processing-list flow' style='--flow-space: 2.5rem; margin: var(--flow-space) auto;'>
+      <ul role='list' class='processing-list flow' style='--flow-space: 0rem; margin: var(--flow-space) auto;'>
         <li class='processing-list__items'>
-          <svg width="23" height="23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="22.723" height="22.575" rx="4.537" fill="#2F718D"/>
-            <path d="M5.681 6.773c0-.621.511-1.13 1.136-1.13h5.68c.626 0 1.137.509 1.137 1.13 0 .62-.511 1.128-1.136 1.128h-5.68A1.136 1.136 0 0 1 5.68 6.773ZM5.68 11.288c0-.62.512-1.129 1.137-1.129h9.089c.625 0 1.136.508 1.136 1.129 0 .62-.511 1.129-1.136 1.129h-9.09a1.136 1.136 0 0 1-1.135-1.129ZM5.68 15.803c0-.621.512-1.13 1.137-1.13h2.272c.625 0 1.136.509 1.136 1.13 0 .62-.511 1.128-1.136 1.128H6.817a1.136 1.136 0 0 1-1.136-1.128Z" fill="#fff"/>
-          </svg>
-          <p>
-            Process your personal details
-          </p>
-          <div class='tooltip'>
-            <button class='tooltip__trigger' type='button' data-type='icon'>
-              <svg width="17" height="17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <symbol id='info-icon'>
-                  <ellipse cx="8.512" cy="8.463" rx="7.512" ry="7.463" stroke="#043C93" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M8.512 6.473c.692 0 1.252-.557 1.252-1.244 0-.687-.56-1.244-1.252-1.244-.691 0-1.252.557-1.252 1.244 0 .687.56 1.244 1.252 1.244ZM7.51 7.663a.8.8 0 0 0 0 1.6h.202v3.18a.8.8 0 0 0 .8.8h1.002a.8.8 0 0 0 0-1.6h-.202v-3.18a.8.8 0 0 0-.8-.8H7.51Z" fill="#043C93"/>
-                </symbol>
-                <use href='#info-icon' />
-              </svg>
-              <span class='visually-hidden'>Details</span>
-            </button>
-            <div class='tooltip__content'>
-              <svg width="16" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <symbol id='shield-icon'>
-                  <g clip-path="url(#a)">
-                    <path d="m5.666 9.196 1.556 1.81 3.111-3.62m4.37-3.635c-.16.01-.32.015-.481.015C11.832 3.766 9.651 2.72 8 1 6.348 2.72 4.168 3.766 1.778 3.766a8.15 8.15 0 0 1-.481-.015A12.57 12.57 0 0 0 1 6.481C1 11.541 3.974 15.794 8 17c4.025-1.206 7-5.458 7-10.519 0-.943-.104-1.857-.297-2.73Z" stroke="#2D9CDB" stroke-width="1.535" stroke-linecap="round" stroke-linejoin="round"/>
-                  </g>
-                  <defs>
-                    <clipPath id="a">
-                      <path fill="#fff" d="M0 0h16v18H0z"/>
-                    </clipPath>
-                  </defs>
-                </symbol>
-                <use href='#shield-icon' />
-              </svg>
-
-              <div class='flow'>
-                <p class='title'>
-                  Personal Details
-                </p>
-
-                <p class='description'>
-                  Partner can process your names, DOB, and gender.
-                </p>
-              </div>
-            </div>
-          </div>
+          <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path opacity="0.4" d="M9.49983 0C13.0841 0 15.9894 2.90479 15.9894 6.4883C15.9894 10.0718 13.0841 12.9766 9.49983 12.9766C5.91561 12.9766 3.01025 10.0718 3.01025 6.4883C3.01025 2.90479 5.91561 0 9.49983 0Z" fill="#5E646E"/>
+            <path d="M1.47086 20.2288H17.5251C18.0342 20.2288 18.5313 20.1561 19 20.0227C18.3413 15.3646 14.3409 11.7811 9.50001 11.7811C4.65909 11.7811 0.658656 15.3646 0 20.0227C0.468737 20.1561 0.961716 20.2288 1.4749 20.2288" fill="#151F72"/>
+            <path d="M14.9238 19.0148L13.8262 17.931C13.8262 17.931 13.6341 17.7956 13.5244 17.7956C13.4146 17.7956 13.3049 17.8498 13.2226 17.931C13.1402 18.0123 13.0854 18.1207 13.0854 18.2291C13.0854 18.3374 13.1402 18.4458 13.2226 18.5271L14.622 19.9089C14.622 19.9089 14.814 20.0443 14.9238 20.0443C15.0335 20.0443 15.1433 19.9901 15.2256 19.9089L17.8323 17.335C17.8323 17.335 17.9421 17.1724 17.9421 17.0369C17.9421 16.9015 17.9146 16.8202 17.8323 16.7389C17.75 16.6576 17.6677 16.6305 17.5579 16.6305C17.4482 16.6305 17.3384 16.6576 17.2835 16.7389L15.0061 18.9877L14.9238 19.0148ZM15.5 24C15.5 24 15.4177 24 15.3902 24C15.3628 24 15.3354 24 15.3079 24C14.0457 23.6207 13.0305 22.8621 12.2073 21.7241C11.4116 20.5862 11 19.3128 11 17.931V15.2217C11 15.0591 11.0549 14.8965 11.1646 14.734C11.2744 14.5714 11.4116 14.4901 11.5488 14.4089L15.1982 13.0542C15.1982 13.0542 15.3902 13 15.5 13C15.6098 13 15.6921 13 15.8018 13.0542L19.4512 14.4089C19.6159 14.4631 19.753 14.5714 19.8354 14.734C19.9177 14.8965 20 15.032 20 15.2217V17.931C20 19.3128 19.5884 20.5862 18.7927 21.7241C17.9969 22.8621 16.9543 23.6478 15.6921 24H15.5Z" fill="#2CC05C"/>
+          </svg>        
+          <div class='processing-list__items-item'>
+            <p class='font-medium text-base processing-list__item__title'>Process your personal details</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your names, DoB and gender</p>
+          </div
         </li>
-
         <li class='processing-list__items'>
-          <svg width="23" height="23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="22.723" height="22.575" rx="4.537" fill="#2F8D60"/>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M15.71 8.518a.286.286 0 0 0 .054.082c.054.055.054.164.054.218v6.546c0 .927-.709 1.636-1.636 1.636H7.636C6.71 17 6 16.29 6 15.364V6.636C6 5.71 6.71 5 7.636 5H12c.055 0 .164 0 .218.055.055 0 .11.054.164.109l3.273 3.272a.284.284 0 0 1 .054.082Zm-1.746-.245-1.418-1.418v1.418h1.418Zm.218 7.636H7.636c-.327 0-.545-.218-.545-.545V6.636c0-.327.218-.545.545-.545h3.818v2.727c0 .327.219.546.546.546h2.727v6c0 .327-.218.545-.545.545Zm-1.09-3.818c.326 0 .544-.218.544-.545 0-.328-.218-.546-.545-.546H8.727c-.327 0-.545.218-.545.546 0 .327.218.545.545.545h4.364Zm.544 1.636c0 .328-.218.546-.545.546H8.727c-.327 0-.545-.218-.545-.546 0-.327.218-.545.545-.545h4.364c.327 0 .546.218.546.545ZM8.727 8.818c-.327 0-.545.218-.545.546 0 .327.218.545.545.545h1.091c.328 0 .546-.218.546-.545 0-.328-.218-.546-.546-.546h-1.09Z" fill="#fff"/>
+          <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.0226 7.222C14.8323 7.222 14.642 7.152 14.4918 7.002L12.4888 5.002C12.3491 4.86086 12.2708 4.67043 12.2708 4.472C12.2708 4.27357 12.3491 4.08313 12.4888 3.942C12.7792 3.652 13.2599 3.652 13.5504 3.942L15.0226 5.412L18.4978 1.952C18.7882 1.662 19.269 1.662 19.5594 1.952C19.8498 2.242 19.8498 2.722 19.5594 3.012L15.5534 7.012C15.4032 7.142 15.2129 7.222 15.0226 7.222Z" fill="#2CC05C"/>
+            <path opacity="0.4" d="M9.80472 12.71L6.5298 15.98C6.16926 15.66 5.81874 15.33 5.47822 14.99C4.46547 13.972 3.5314 12.8789 2.68403 11.72C1.8628 10.58 1.2018 9.44 0.721083 8.31C0.240361 7.17 0 6.08 0 5.04C0 4.36 0.12018 3.71 0.360541 3.11C0.600902 2.5 0.981474 1.94 1.51227 1.44C2.15323 0.81 2.85429 0.5 3.5954 0.5C3.87582 0.5 4.15624 0.56 4.40662 0.68C4.66701 0.8 4.89735 0.98 5.07762 1.24L7.40111 4.51C7.58138 4.76 7.71158 4.99 7.80171 5.21C7.89185 5.42 7.94192 5.63 7.94192 5.82C7.94192 6.06 7.87182 6.3 7.73161 6.53C7.60141 6.76 7.41113 7 7.17077 7.24L6.40962 8.03C6.29946 8.14 6.24938 8.27 6.24938 8.43C6.24938 8.51 6.2594 8.58 6.27943 8.66C6.30947 8.74 6.33952 8.8 6.35955 8.86C6.53982 9.19 6.85028 9.62 7.29095 10.14C7.74162 10.66 8.22234 11.19 8.74313 11.72C9.10367 12.07 9.45419 12.41 9.80472 12.71Z" fill="#5E646E"/>
+            <path d="M20 16.83C19.9987 17.2074 19.9131 17.5798 19.7496 17.92C19.5794 18.28 19.359 18.62 19.0686 18.94C18.5779 19.48 18.037 19.87 17.4261 20.12C17.4161 20.12 17.4061 20.13 17.3961 20.13C16.8052 20.37 16.1642 20.5 15.4732 20.5C14.4517 20.5 13.36 20.26 12.2083 19.77C11.0566 19.28 9.90483 18.62 8.76312 17.79C8.37253 17.5 7.98195 17.21 7.61139 16.9L10.8863 13.63C11.1667 13.84 11.4171 14 11.6274 14.11C11.6775 14.13 11.7376 14.16 11.8077 14.19C11.8878 14.22 11.9679 14.23 12.0581 14.23C12.2283 14.23 12.3585 14.17 12.4687 14.06L13.2298 13.31C13.4802 13.06 13.7206 12.87 13.9509 12.75C14.1813 12.61 14.4116 12.54 14.662 12.54C14.8523 12.54 15.0526 12.58 15.2729 12.67C15.4932 12.76 15.7236 12.89 15.9739 13.06L19.2889 15.41C19.5493 15.59 19.7296 15.8 19.8397 16.05C19.9399 16.3 20 16.55 20 16.83Z" fill="#151F72"/>
           </svg>
-          <p>
-            Process your contact information
-          </p>
-          <div class='tooltip'>
-            <button class='tooltip__trigger' type='button' data-type='icon'>
-              <svg width="17" height="17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <use href='#info-icon' />
-              </svg>
-              <span class='visually-hidden'>Details</span>
-            </button>
-            <div class='tooltip__content'>
-              <svg width="16" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <use href='#shield-icon' />
-              </svg>
-
-              <div class='flow'>
-                <p class='title'>
-                  Contact Information
-                </p>
-
-                <p class='description'>
-                  Partner can process your phone numbers and address
-                </p>
-              </div>
-            </div>
-          </div>
+          <div class='processing-list__items-item'>
+            <p class='font-medium text-base processing-list__item__title'>Process your contact information</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your phone numbers and address</p>
+          </div
         </li>
-
         <li class='processing-list__items'>
-          <svg width="23" height="23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="22.723" height="22.575" rx="4.537" fill="#2F4F8D"/>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M15.16 9.408a.238.238 0 0 1-.045-.067c-.011-.023-.023-.046-.045-.068l-3.187-3.167c-.046-.045-.091-.09-.137-.09-.045-.045-.136-.045-.182-.045H8.377c-.774 0-1.366.588-1.366 1.357v7.237c0 .769.592 1.357 1.366 1.357h5.463c.774 0 1.366-.588 1.366-1.357V9.589c0-.045 0-.135-.045-.18Zm-3.14-1.9 1.638 1.629H12.02V7.509Zm-3.643 7.51h5.464c.273 0 .455-.182.455-.453v-4.523h-2.732c-.273 0-.455-.181-.455-.453V6.875H8.377c-.273 0-.455.181-.455.453v7.237c0 .271.182.452.455.452Z" fill="#fff"/>
+          <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect opacity="0.4" y="2" width="19" height="16" rx="4" fill="#5E646E"/>
+            <path d="M0 8H19V14C19 16.2091 17.2091 18 15 18H4C1.79086 18 0 16.2091 0 14V8Z" fill="#151F72"/>
+            <path d="M4.66669 9C5.77129 9 6.66669 9.89539 6.66669 11C6.66669 12.1046 5.77129 13 4.66669 13C3.56208 13 2.66669 12.1046 2.66669 11C2.66669 9.89539 3.56208 9 4.66669 9Z" fill="#2CC05C"/>
+            <path d="M2.41287 15H6.91933C7.06224 15 7.20176 14.9771 7.33333 14.935C7.14845 13.4645 6.02552 12.3333 4.66667 12.3333C3.30781 12.3333 2.18489 13.4645 2 14.935C2.13158 14.9771 2.26996 15 2.41401 15" fill="#2CC05C"/>
+            <rect x="10" y="10" width="7" height="1" rx="0.5" fill="#2CC05C"/>
+            <rect x="10" y="12" width="5.25" height="1" rx="0.5" fill="#2CC05C"/>
+            <rect x="10" y="14" width="3.5" height="1" rx="0.5" fill="#2CC05C"/>
+            <g clip-path="url(#clip0_641_419)">
+              <path d="M17.7221 0.583344H15.2779C14.2162 0.583344 13.5833 1.21626 13.5833 2.27793V4.71918C13.5833 5.78376 14.2162 6.41668 15.2779 6.41668H17.7191C18.7808 6.41668 19.4137 5.78376 19.4137 4.72209V2.27793C19.4166 1.21626 18.7837 0.583344 17.7221 0.583344Z" fill="#151F72"/>
+              <path d="M16.0859 4.54474C16.0279 4.54469 15.9723 4.52161 15.9313 4.48058L15.1059 3.65516C15.0652 3.614 15.0424 3.55845 15.0424 3.50058C15.0424 3.4427 15.0652 3.38716 15.1059 3.34599C15.1904 3.26141 15.3304 3.26141 15.415 3.34599L16.0859 4.01683L17.585 2.51766C17.6696 2.43308 17.8096 2.43308 17.8942 2.51766C17.9788 2.60224 17.9788 2.74224 17.8942 2.82683L16.2404 4.48058C16.1995 4.52161 16.1439 4.54469 16.0859 4.54474Z" fill="#2CC05C"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_641_419">
+              <rect width="7" height="7" fill="white" transform="translate(13)"/>
+              </clipPath>
+            </defs>
           </svg>
-          <p>
-            Process your document information
-          </p>
-          <div class='tooltip'>
-            <button class='tooltip__trigger' type='button' data-type='icon'>
-              <svg width="17" height="17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <use href='#info-icon' />
-              </svg>
-              <span class='visually-hidden'>Details</span>
-            </button>
-            <div class='tooltip__content'>
-              <svg width="16" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <use href='#shield-icon' />
-              </svg>
-
-              <div class='flow'>
-                <p class='title'>
-                  Document Information
-                </p>
-
-                <p class='description'>
-                  Partner can process your Photo, ID expiration date, country of issuance, and document number.
-                </p>
-              </div>
-            </div>
-          </div>
+          <div class='processing-list__items-item'>
+            <p class='font-medium text-base processing-list__item__title'>Process your document information</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your photo, ID expiration date, country of issuance and document number</p>
+          </div
         </li>
       </ul>
 
-      <section class='callout | flow center' style='--flow-space: 2.5rem; margin: var(--flow-space) auto;'>
+      <section class='callout | flow center' style='--flow-space: 2rem; margin: var(--flow-space) auto;'>
         <p>
           You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
-          <a class='theme' href='${
-  this.partnerPolicyURL
+          <a class='theme' href='${this.partnerPolicyURL
 }' rel='noreferer noopener' target='_blank'>here</a>
         </p>
 
         <p style='--flow-space: .75rem'>
-          By choosing "Allow",
-          you grant
+          By choosing "Allow", you grant
           <span class='theme'>${this.partnerName}</span>
-          consent to process your personal data
-          to offer you this service
+          consent to process your personal data to offer you this service
         </p>
       </section>
 
@@ -472,7 +425,7 @@ function templateString() {
           Allow
         </button>
 
-        <button id='cancel' data-variant='outline' style='--flow-space: 1.5rem'>
+        <button id='cancel' data-variant='ghost' class='color-danger' style='--flow-space: 1.5rem'>
           Cancel
         </button>
       </section>
@@ -775,7 +728,7 @@ class EndUserConsent extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#151F72';
   }
 
   get token() {

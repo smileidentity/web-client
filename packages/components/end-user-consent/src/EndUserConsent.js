@@ -1,5 +1,4 @@
 import styles from '../../styles';
-// import typography from '../../typography';
 
 function templateString() {
   return `

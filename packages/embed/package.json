@@ -35,7 +35,7 @@
 	"devDependencies": {
 		"@cypress/code-coverage": "3.12.18",
 		"cypress": "^13.6.0",
-		"esbuild": "^0.19.11",
+		"esbuild": "^0.20.0",
 		"eslint": "^8.56.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-config-prettier": "^9.1.0",

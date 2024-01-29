@@ -1,3 +1,5 @@
+import styles from '../styles';
+
 function templateString() {
   return `
     <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -305,6 +307,7 @@ function templateString() {
         font-weight: 700;
       }
     </style>
+    ${styles}
     <div id="id-entry-screen" class="flow center">
     ${this.showNavigation ? `
     <div class="nav">
@@ -401,7 +404,7 @@ function templateString() {
           </clipPath>
         </defs>
       </svg>
-      <h1>Next, we'll take a quick selfie</h1>
+      <h1 class='text-2xl color-digital-blue font-bold'>Next, we'll take a quick selfie</h1>
     </header>
     <div class="flow">
       <div class="instructions">

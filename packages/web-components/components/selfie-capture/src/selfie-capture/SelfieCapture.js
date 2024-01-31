@@ -537,10 +537,8 @@ function templateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    `
-        : ""
-    }
-    <h1>Take a Selfie</h1>
+    ` : ''}
+    <h1 class='text-2xl color-digital-blue font-bold'>Take a Selfie</h1>
 
     <div class='section | flow'>
       <div class='video-container'>

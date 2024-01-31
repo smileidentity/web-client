@@ -3,7 +3,6 @@ import styles from '@smileid/styles';
 
 function templateString() {
   return `
-    ${styles}
     <div id="document-instruction-screen" class="flow center">
         <section className="main">
         ${
@@ -78,7 +77,7 @@ function templateString() {
           </clipPath>
         </defs>
       </svg>
-            <h1>${this.title}</h1>
+            <h1 class='text-2xl color-digital-blue font-bold'>${this.title}</h1>
         <p class="description text-sm font-normal">
             We'll use it to verify your identity.
           </p>
@@ -290,6 +289,7 @@ function templateString() {
 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </section>
   </div>
+  ${styles}
   `;
 }
 

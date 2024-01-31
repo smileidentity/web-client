@@ -184,6 +184,19 @@ function templateString() {
       font-weight: 700;
       line-height: 1.5rem;
     }
+    .id-video-container {
+      position: relative;
+    }
+    .overlay {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      height: 100%;
+      border: 26px solid #fff;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
   </style>
   <div id='id-review-screen' class='flow center'>
     ${
@@ -215,9 +228,8 @@ function templateString() {
     id='id-review-image'
     src='${this.imageSrc}'
     width='396'
-    />`
-    : ''
-}
+    />` : ''}
+    <div class='overlay'></div>
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>

@@ -2,7 +2,7 @@ import typography from "./typography";
 
 const styles = `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link
-  href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
 />
 <style>
@@ -75,7 +75,7 @@ ${typography}
   }
 
   .color-digital-blue {
-    color: #001096 !important;
+    color: var(--web-digital-blue) !important;
   }
 
   .color-deep-blue {
@@ -248,7 +248,6 @@ ${typography}
 
   #document-instruction-screen,
   #back-of-document-instruction-screen {
-    38rem
     padding-block: 2rem;
     display: flex;
     flex-direction: column;
@@ -302,17 +301,6 @@ ${typography}
 
   .instruction-body {
     font-size: 0.75rem;
-  }
-
-  h1 {
-    color: var(--web-digital-blue, #001096);
-    text-align: center;
-
-    /* h1 */
-    font-size: 1.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 36px; /* 150% */
   }
 
   .instruction-header {

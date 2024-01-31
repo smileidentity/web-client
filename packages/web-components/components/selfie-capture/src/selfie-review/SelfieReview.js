@@ -159,6 +159,7 @@ function templateString() {
         line-height: 1.5rem;
       }
     </style>
+    ${styles}
     <div id='id-review-screen' class='flow center'>
     ${
       this.showNavigation
@@ -172,10 +173,8 @@ function templateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    `
-        : ""
-    }
-    <h1 class="header-title">
+    ` : ''}
+    <h1 class="header-title text-2xl color-digital-blue font-bold">
     Is you whole face visible 
     and clear in this photo?
     </h1>

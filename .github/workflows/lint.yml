@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          cache-dependency-path: ../../package-lock.json
+          cache-dependency-path: package-lock.json
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          cache-dependency-path: ../../package-lock.json
+          cache-dependency-path: package-lock.json
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -52,7 +52,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          cache-dependency-path: ../../package-lock.json
+          cache-dependency-path: package-lock.json
       - name: install dependencies
         run: npm ci
       - name: lint html

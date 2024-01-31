@@ -15,7 +15,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
       - name: set node version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -29,7 +29,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
       - name: set node version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -43,7 +43,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
       - name: set node version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
       - name: lint html

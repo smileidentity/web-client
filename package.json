@@ -17,8 +17,8 @@
   ],
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "workspaces": [
-    "packages/components/*",
-    "packages/*"
+    "packages/web-components/*/*",
+    "packages/embed"
   ],
   "license": "MIT"
 }

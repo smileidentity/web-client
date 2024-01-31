@@ -1,0 +1,1 @@
+export { SelfieCapture } from "./SelfieCapture";

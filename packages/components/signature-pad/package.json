@@ -20,7 +20,7 @@
     "signature_pad": "^4.1.7"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^7.6.7",
+    "@storybook/addon-essentials": "^7.6.12",
     "@storybook/addon-links": "^7.6.10",
     "@storybook/blocks": "^7.6.8",
     "@storybook/web-components": "^7.6.4",

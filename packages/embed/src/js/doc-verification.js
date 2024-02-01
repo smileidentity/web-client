@@ -1,5 +1,5 @@
 import "@smile_identity/smart-camera-web";
-import "@smileid/wc-combobox";
+import "@smileid/components/combobox";
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
 

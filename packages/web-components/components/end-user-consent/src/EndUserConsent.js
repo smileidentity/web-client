@@ -1,4 +1,5 @@
 import styles from '@smileid/styles';
+import '@smileid/wc-totp-consent';
 
 function templateString() {
   return `

@@ -1,7 +1,8 @@
 {
-  "name": "@smile_identity/wc-document-capture",
-  "version": "1.0.0-alpha",
+  "name": "@smile/wc-document-capture",
+  "version": "1.0.0",
   "license": "MIT",
+  "private": true,
   "exports": {
     ".": "./src/index.js"
   },

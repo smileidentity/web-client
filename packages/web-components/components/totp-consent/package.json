@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --ext .js --fix"
   },
   "dependencies": {
-    "@smileid/styles": "file:../../styles"
+    "@smileid/styles": "file:../../styles",
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.7",

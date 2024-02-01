@@ -601,7 +601,6 @@ smileid-combobox-option[hidden] {
 .document-list li {
 	list-style: none;
 	background-color: #F9F0E7;
-	padding: 1rem;
 	border-radius: .5rem;
 }
 
@@ -611,8 +610,36 @@ smileid-combobox-option[hidden] {
 
 .document-list a {
 	color: initial;
+	padding: 1rem;
 	text-decoration: none;
 	margin: 0px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.document-meta {
+	display: flex;
+	align-items: center;
+	text-align: initial;
+}
+
+.document-meta p {
+	margin-block: 0;
+}
+
+.document-meta p:first-of-type {
+	font-weight: bold;
+}
+
+.document-meta svg {
+	margin-inline-end: 1rem;
+}
+
+.document-list li:has(a:hover),
+.document-list li:has(a:focus) {
+	background-color: #f7dec5;
 }
 
 smileid-signature-pad {

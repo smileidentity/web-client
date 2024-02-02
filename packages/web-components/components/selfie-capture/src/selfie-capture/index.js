@@ -1,1 +1,1 @@
-export { SelfieCapture } from "./SelfieCapture";
+export { SelfieCapture } from './SelfieCapture';

@@ -1,4 +1,4 @@
-import styles from "@smileid/styles";
+import styles from '@smileid/styles';
 
 function templateString() {
   return `
@@ -162,8 +162,8 @@ function templateString() {
     ${styles}
     <div id='id-review-screen' class='flow center'>
     ${
-      this.showNavigation
-        ? `
+  this.showNavigation
+    ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -181,17 +181,17 @@ function templateString() {
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
+      <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         ${
-          this.imageSrc
-            ? `<img
+  this.imageSrc
+    ? `<img
         alt='your ID card'
         id='id-review-image'
         src='${this.imageSrc}'
         width='396'
       />`
-            : ""
-        }
+    : ''
+}
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
@@ -202,12 +202,12 @@ function templateString() {
         </button>
       </div>
       ${
-        this.hideAttribution
-          ? ""
-          : `
+  this.hideAttribution
+    ? ''
+    : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-      }
+}
     </div>
   </div>
   `;
@@ -219,81 +219,80 @@ class SelfieReview extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
-    this.shadowRoot.innerHTML = "";
+    this.shadowRoot.innerHTML = '';
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.setUpEventListeners();
   }
 
   static get observedAttributes() {
-    return ["hide-back-to-host", "show-navigation", "data-image"];
+    return ['hide-back-to-host', 'show-navigation', 'data-image'];
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get showNavigation() {
-    return this.hasAttribute("show-navigation");
+    return this.hasAttribute('show-navigation');
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   get imageSrc() {
-    return this.getAttribute("data-image");
+    return this.getAttribute('data-image');
   }
 
   get title() {
-    return this.getAttribute("title") || "Submit Front of ID";
+    return this.getAttribute('title') || 'Submit Front of ID';
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
   }
 
   closeWindow() {
     const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case "data-image":
-      case "hide-back-to-host":
-      case "show-navigation":
-        this.shadowRoot.innerHTML = this.render();
-        this.setUpEventListeners();
-        break;
-      default:
-        break;
+    case 'data-image':
+    case 'hide-back-to-host':
+    case 'show-navigation':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
     }
   }
 
   setUpEventListeners() {
-    this.selectImage = this.shadowRoot.querySelector("#select-id-image");
-    this.reCaptureImage = this.shadowRoot.querySelector("#re-capture-image");
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
+    this.selectImage = this.shadowRoot.querySelector('#select-id-image');
+    this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
     if (this.backButton) {
-      this.backButton.addEventListener("click", (e) => {
+      this.backButton.addEventListener('click', (e) => {
         this.handleBackEvents(e);
       });
     }
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
@@ -301,16 +300,16 @@ class SelfieReview extends HTMLElement {
       );
     });
 
-    this.selectImage.addEventListener("click", () => {
+    this.selectImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent("SelfieReview::SelectImage", {
+        new CustomEvent('SelfieReview::SelectImage', {
           detail: {},
         }),
       );
     });
-    this.reCaptureImage.addEventListener("click", () => {
+    this.reCaptureImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent("SelfieReview::ReCapture", {
+        new CustomEvent('SelfieReview::ReCapture', {
           detail: {},
         }),
       );
@@ -318,8 +317,8 @@ class SelfieReview extends HTMLElement {
   }
 }
 
-if ("customElements" in window && !customElements.get("selfie-review")) {
-  window.customElements.define("selfie-review", SelfieReview);
+if ('customElements' in window && !customElements.get('selfie-review')) {
+  window.customElements.define('selfie-review', SelfieReview);
 }
 
 export default SelfieReview;

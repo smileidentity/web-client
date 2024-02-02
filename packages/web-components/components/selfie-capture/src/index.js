@@ -1,3 +1,3 @@
-import LivenessCapture from "./LivenessCapture";
+import LivenessCapture from './LivenessCapture';
 
 export default LivenessCapture;

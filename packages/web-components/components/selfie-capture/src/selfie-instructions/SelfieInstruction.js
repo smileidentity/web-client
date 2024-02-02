@@ -310,8 +310,8 @@ function templateString() {
     ${styles}
     <div id="id-entry-screen" class="flow center">
     ${
-      this.showNavigation
-        ? `
+  this.showNavigation
+    ? `
     <div class="nav">
       <div class="back-wrapper">
         <button
@@ -367,8 +367,8 @@ function templateString() {
       </button>
     </div>
     `
-        : ""
-    }
+    : ''
+}
     <header>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -626,12 +626,12 @@ function templateString() {
        </section>
     </div>
     ${
-      this.hideAttribution
-        ? ""
-        : `
+  this.hideAttribution
+    ? ''
+    : `
     <powered-by-smile-id></powered-by-smile-id>
     `
-    }
+}
   </div>
   `;
 }
@@ -642,35 +642,34 @@ class SelfieInstruction extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
     this.pages = [];
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.allowButton = this.shadowRoot.querySelector("#allow");
-    this.backButton = this.shadowRoot.querySelector("#back-button");
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
+    this.allowButton = this.shadowRoot.querySelector('#allow');
+    this.backButton = this.shadowRoot.querySelector('#back-button');
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
     if (this.backButton) {
-      this.backButton.addEventListener("click", (e) => {
+      this.backButton.addEventListener('click', (e) => {
         this.handleBackEvents(e);
       });
     }
     if (this.allowButton) {
-      this.allowButton.addEventListener("click", () => {
-        this.dispatchEvent(new CustomEvent("SelfieInstruction::StartCamera"));
+      this.allowButton.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('SelfieInstruction::StartCamera'));
       });
     }
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
@@ -680,29 +679,29 @@ class SelfieInstruction extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
   }
 
   closeWindow() {
     const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 }
 
-if ("customElements" in window) {
-  window.customElements.define("selfie-instruction", SelfieInstruction);
+if ('customElements' in window) {
+  window.customElements.define('selfie-instruction', SelfieInstruction);
 }
 
 export default SelfieInstruction;

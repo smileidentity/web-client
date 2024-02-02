@@ -3,37 +3,37 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: "airbnb-base",
+  extends: 'airbnb-base',
   overrides: [
     {
       env: {
         node: true,
       },
-      files: [".eslintrc.{js,cjs}"],
+      files: ['.eslintrc.{js,cjs}'],
       parserOptions: {
-        sourceType: "script",
+        sourceType: 'script',
       },
     },
   ],
   parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
   rules: {
-    "class-methods-use-this": "off",
-    indent: ["error", 2],
-    "max-classes-per-file": "off",
-    "max-len": "off",
-    "no-console": ["error", { allow: ["warn", "error", "info"] }],
-    "no-param-reassign": "off",
-    "no-plusplus": "off",
-    "no-underscore-dangle": "off",
-    "no-unused-vars": [
-      "error",
-      { args: "after-used", ignoreRestSiblings: false, vars: "all" },
+    'class-methods-use-this': 'off',
+    indent: ['error', 2],
+    'max-classes-per-file': 'off',
+    'max-len': 'off',
+    'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
+    'no-param-reassign': 'off',
+    'no-plusplus': 'off',
+    'no-underscore-dangle': 'off',
+    'no-unused-vars': [
+      'error',
+      { args: 'after-used', ignoreRestSiblings: false, vars: 'all' },
     ],
-    "prefer-destructuring": [
-      "error",
+    'prefer-destructuring': [
+      'error',
       {
         array: false,
         object: true,
@@ -42,6 +42,6 @@ module.exports = {
         enforceForRenamedProperties: false,
       },
     ],
-    "sort-keys": "error",
+    'sort-keys': 'error',
   },
 };

@@ -1,7 +1,7 @@
-import "./SelfieReview";
+import './SelfieReview';
 
 const meta = {
-  component: "selfie-review",
+  component: 'selfie-review',
 };
 
 export default meta;

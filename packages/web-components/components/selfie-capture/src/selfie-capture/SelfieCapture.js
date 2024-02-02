@@ -1,7 +1,7 @@
-import { IMAGE_TYPE } from "@smileid/constants";
-import { version as COMPONENTS_VERSION } from "../../package.json";
-import SmartCamera from "@smileid/camera";
-import styles from "@smileid/styles";
+import { IMAGE_TYPE } from '@smileid/constants';
+import SmartCamera from '@smileid/camera';
+import styles from '@smileid/styles';
+import { version as COMPONENTS_VERSION } from '../../package.json';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -25,7 +25,7 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      "SmartCameraWeb: Minimum required no of frames is ",
+      'SmartCameraWeb: Minimum required no of frames is ',
       numberOfFramesRequired,
     );
   }
@@ -511,13 +511,13 @@ function templateString() {
   </style>
   <div id='camera-screen' class='flow center'>
     ${
-      this.showNavigation
-        ? `
-      <div class="nav back-to-host-nav${this.hideBackToHost ? " justify-right" : ""}">
+  this.showNavigation
+    ? `
+      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
         ${
-          this.hideBackToHost
-            ? ""
-            : `
+  this.hideBackToHost
+    ? ''
+    : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -528,7 +528,7 @@ function templateString() {
             <div class="back-button-text">Back</div>
           </div>
         `
-        }
+}
         <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
             <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
@@ -562,12 +562,12 @@ function templateString() {
       </button>
 
       ${
-        this.hideAttribution
-          ? ""
-          : `
+  this.hideAttribution
+    ? ''
+    : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-      }
+}
     </div>
   </div>
   `;
@@ -579,12 +579,12 @@ async function getPermissions(captureScreen) {
       audio: false,
       video: true,
     });
-    captureScreen?.removeAttribute("data-camera-error");
-    captureScreen?.setAttribute("data-camera-ready", true);
+    captureScreen?.removeAttribute('data-camera-error');
+    captureScreen?.setAttribute('data-camera-ready', true);
   } catch (error) {
-    captureScreen?.removeAttribute("data-camera-ready");
+    captureScreen?.removeAttribute('data-camera-ready');
     captureScreen?.setAttribute(
-      "data-camera-error",
+      'data-camera-error',
       SmartCamera.handleError(error),
     );
   }
@@ -596,16 +596,16 @@ class SelfieCaptureScreen extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.videoContainer = this.shadowRoot.querySelector(
-      ".video-container > .video",
+      '.video-container > .video',
     );
     this.init();
     this.setUpEventListeners();
@@ -638,7 +638,7 @@ class SelfieCaptureScreen extends HTMLElement {
     // NOTE: initialise image outline
     const imageOutlineLength = this.imageOutline.getTotalLength();
     // Clear any previous transition
-    this.imageOutline.style.transition = "none";
+    this.imageOutline.style.transition = 'none';
     // Set up the starting positions
     this.imageOutline.style.strokeDasharray = `${imageOutlineLength} ${imageOutlineLength}`;
     this.imageOutline.style.strokeDashoffset = imageOutlineLength;
@@ -648,7 +648,7 @@ class SelfieCaptureScreen extends HTMLElement {
     // Define our transition
     this.imageOutline.style.transition = `stroke-dashoffset ${this._videoStreamDurationInMS / 1000}s ease-in-out`;
     // Go!
-    this.imageOutline.style.strokeDashoffset = "0";
+    this.imageOutline.style.strokeDashoffset = '0';
 
     this.smileCTA.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
 
@@ -666,7 +666,7 @@ class SelfieCaptureScreen extends HTMLElement {
       clearTimeout(this._videoStreamTimeout);
       clearInterval(this._imageCaptureInterval);
       clearInterval(this._drawingInterval);
-      this.smileCTA.style.animation = "none";
+      this.smileCTA.style.animation = 'none';
 
       this._capturePOLPhoto(); // NOTE: capture the last photo
       this._captureReferencePhoto();
@@ -679,7 +679,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
       this._data.images = this._data.images.concat(
         livenessFramesIndices.map((imageIndex) => ({
-          image: this._rawImages[imageIndex].split(",")[1],
+          image: this._rawImages[imageIndex].split(',')[1],
           image_type_id: IMAGE_TYPE.LIVENESS_IMAGE_BASE64,
         })),
       );
@@ -691,51 +691,49 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   _capturePOLPhoto() {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = 240;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
 
-    this._rawImages.push(canvas.toDataURL("image/jpeg"));
+    this._rawImages.push(canvas.toDataURL('image/jpeg'));
   }
 
   _captureReferencePhoto() {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = 480;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);
 
-    const image = canvas.toDataURL("image/jpeg");
+    const image = canvas.toDataURL('image/jpeg');
 
     this._referenceImage = image;
 
     this._data.images.push({
-      image: image.split(",")[1],
+      image: image.split(',')[1],
       image_type_id: IMAGE_TYPE.SELFIE_IMAGE_BASE64,
     });
   }
 
   _publishImages() {
     this.dispatchEvent(
-      new CustomEvent("SelfieCapture::ImageCaptured", {
+      new CustomEvent('SelfieCapture::ImageCaptured', {
         detail: this._data,
       }),
     );
   }
 
   resetErrorMessage() {
-    this.errorMessage.textContent = "";
+    this.errorMessage.textContent = '';
   }
 
   _drawImage(canvas, enableImageTests = true, video = this._video) {
     // this.resetErrorMessage();
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
 
     context.drawImage(
       video,
@@ -758,7 +756,7 @@ class SelfieCaptureScreen extends HTMLElement {
         return context;
       }
       throw new Error(
-        "Unable to capture webcam images - Please try another device",
+        'Unable to capture webcam images - Please try another device',
       );
     } else {
       return context;
@@ -766,19 +764,19 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
-    const videoExists = this.shadowRoot.querySelector("video");
+    const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {
-      video = this.shadowRoot.querySelector("video");
+      video = this.shadowRoot.querySelector('video');
     } else {
-      video = document.createElement("video");
+      video = document.createElement('video');
     }
 
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
 
-    if ("srcObject" in video) {
+    if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
@@ -786,7 +784,7 @@ class SelfieCaptureScreen extends HTMLElement {
     video.play();
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
-      ".video-container > .video",
+      '.video-container > .video',
     );
     this._data.permissionGranted = true;
 
@@ -802,29 +800,28 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.backButton = this.shadowRoot.querySelector("#back-button");
+    this.backButton = this.shadowRoot.querySelector('#back-button');
     this.startImageCapture = this.shadowRoot.querySelector(
-      "#start-image-capture",
+      '#start-image-capture',
     );
-    this.imageOutline = this.shadowRoot.querySelector("#image-outline path");
-    this.smileCTA = this.shadowRoot.querySelector("#smile-cta");
+    this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
+    this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
 
-    this.startImageCapture.addEventListener("click", () => {
+    this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();
     });
 
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll(".close-iframe");
+    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
     if (this.backButton) {
-      this.backButton.addEventListener("click", (e) => {
+      this.backButton.addEventListener('click', (e) => {
         this.handleBackEvents(e);
       });
     }
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(
-        "click",
+        'click',
         () => {
           this.closeWindow();
         },
@@ -834,7 +831,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     if (SmartCamera.stream) {
       this.handleStream(SmartCamera.stream);
-    } else if (this.hasAttribute("data-camera-ready")) {
+    } else if (this.hasAttribute('data-camera-ready')) {
       getPermissions(this);
     }
   }
@@ -845,75 +842,75 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get showNavigation() {
-    return this.hasAttribute("show-navigation");
+    return this.hasAttribute('show-navigation');
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes("camera") && value.includes("upload");
+    return value.includes('camera') && value.includes('upload');
   }
 
   get title() {
-    return this.getAttribute("title") || "Submit Front of ID";
+    return this.getAttribute('title') || 'Submit Front of ID';
   }
 
   get hidden() {
-    return this.getAttribute("hidden");
+    return this.getAttribute('hidden');
   }
 
   get cameraError() {
-    return this.getAttribute("data-camera-error");
+    return this.getAttribute('data-camera-error');
   }
 
   static get observedAttributes() {
     return [
-      "title",
-      "hidden",
-      "show-navigation",
-      "hide-back-to-host",
-      "data-camera-ready",
-      "data-camera-error",
+      'title',
+      'hidden',
+      'show-navigation',
+      'hide-back-to-host',
+      'data-camera-ready',
+      'data-camera-error',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case "title":
-      case "data-camera-ready":
-      case "data-camera-error":
-      case "hidden":
-        this.shadowRoot.innerHTML = this.render();
-        this.setUpEventListeners();
-        break;
-      default:
-        break;
+    case 'title':
+    case 'data-camera-ready':
+    case 'data-camera-error':
+    case 'hidden':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
     }
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("SmileIdentity::Exit"));
+    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
   }
 
   closeWindow() {
     const referenceWindow = window.parent;
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 }
 
-if ("customElements" in window && !customElements.get("selfie-capture")) {
-  window.customElements.define("selfie-capture", SelfieCaptureScreen);
+if ('customElements' in window && !customElements.get('selfie-capture')) {
+  window.customElements.define('selfie-capture', SelfieCaptureScreen);
 }
 
 export default SelfieCaptureScreen;

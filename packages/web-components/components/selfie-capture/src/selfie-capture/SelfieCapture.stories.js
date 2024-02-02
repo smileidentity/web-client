@@ -1,8 +1,8 @@
-import SmartCamera from "@smileid/camera";
-import "./SelfieCapture";
+import SmartCamera from '@smileid/camera';
+import './SelfieCapture';
 
 const meta = {
-  component: "selfie-capture",
+  component: 'selfie-capture',
 };
 
 export default meta;

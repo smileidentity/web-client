@@ -1,7 +1,7 @@
-import "./LivenessCapture";
+import './LivenessCapture';
 
 const meta = {
-  component: "liveness-capture",
+  component: 'liveness-capture',
 };
 
 export default meta;

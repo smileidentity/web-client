@@ -427,7 +427,7 @@
 
         <div class="flow">
           <button data-variant="solid" type="button" id="uploadSignature">
-            Yes, my details are correct
+            Yes, it's correct
             <svg
               aria-hidden="true"
               width="25"
@@ -437,7 +437,7 @@
             >
               <path
                 d="M7 12h11m0 0-4.588-4M18 12l-4.588 4"
-                stroke="#fff"
+                stroke="currentColor"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -445,13 +445,13 @@
             </svg>
           </button>
           <button
-            style="margin-block-start: 0.5rem"
+            style="margin-block-start: 0.5rem; display: flex !important"
             data-variant="outline"
             type="button"
             class="back-button"
           >
-            No, change them
             <svg
+              style="transform: rotate(.5turn);"
               aria-hidden="true"
               width="25"
               height="24"
@@ -460,12 +460,13 @@
             >
               <path
                 d="M7 12h11m0 0-4.588-4M18 12l-4.588 4"
-                stroke="#fff"
+                stroke="currentColor"
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
             </svg>
+            No, change them
           </button>
         </div>
 

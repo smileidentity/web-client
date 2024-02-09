@@ -1,1 +1,0 @@
-export { SelfieInstructions } from './SelfieInstruction';

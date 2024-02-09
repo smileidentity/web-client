@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import validate from "validate.js";
 import "@smile_identity/smart-camera-web";
-import "@smileid/components/end-user-consent";
+import "@smileid/web-components/end-user-consent/src/EndUserConsent";
 import { version as sdkVersion } from "../../package.json";
 
 (function biometricKyc() {

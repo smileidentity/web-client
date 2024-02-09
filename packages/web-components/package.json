@@ -1,21 +1,16 @@
 {
-  "name": "@smileid/components",
-  "version": "1.0.0",
+  "name": "@smileid/web-components",
+  "version": "1.0.0-alpha.1",
   "license": "MIT",
-  "exports": {
-    "./combobox": "component/combobox/src/index.js",
-    "./document-capture": "components/document-capture/src/index.js",
-    "./end-user-consent": "component/end-user-consent/src/index.js",
-    "./navigation": "component/navigation/src/index.js",
-    "./selfie-capture": "components/selfie-capture/src/index.js",
-    "./signature-pad": "component/signature-pad/src/index.js",
-    "./totp-consent": "component/totp-consent/src/index.js"
-  },
   "scripts": {
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "format": "npx prettier --write",
     "storybook": "npm run storybook"
+  },
+  "dependencies": {
+    "signature_pad": "^4.1.7",
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.7",
@@ -32,8 +27,5 @@
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.2",
     "storybook": "^7.6.7"
-  },
-  "workspaces": [
-    "components/*"
-  ]
+  }
 }

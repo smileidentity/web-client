@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import { version as sdkVersion } from "../../package.json";
-import "@smileid/web-components/signature-pad/src/SignaturePad";
-import "@smileid/web-components/navigation/src/Navigation";
+import "@smileid/web-components/components/signature-pad/src/SignaturePad";
+import "@smileid/web-components/components/navigation/src/Navigation";
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
@@ -143,9 +143,11 @@ function getHumanSize(numberOfBytes) {
     partner_params = { ...partnerParams, ...(config.partner_params || {}) };
   }
 
+  // eslint-disable-next-line consistent-return
   async function getDocuments() {
     try {
       const {
+        // eslint-disable-next-line no-unused-vars
         callback_url,
         token,
         partner_details: { partner_id },
@@ -166,10 +168,9 @@ function getHumanSize(numberOfBytes) {
       const result = await response.json();
       if (response.ok) {
         return result;
-      } else {
-        handleBadDocuments(result.error);
-        closeWindow();
       }
+      handleBadDocuments(result.error);
+      closeWindow();
     } catch (e) {
       handleBadDocuments(e);
       closeWindow();
@@ -260,7 +261,7 @@ function getHumanSize(numberOfBytes) {
     const rawLength = raw.length;
     const uInt8Array = new Uint8Array(rawLength);
 
-    for (let i = 0; i < rawLength; ++i) {
+    for (let i = 0; i < rawLength; i += 1) {
       uInt8Array[i] = raw.charCodeAt(i);
     }
 
@@ -277,6 +278,7 @@ function getHumanSize(numberOfBytes) {
     );
   }
 
+  // eslint-disable-next-line no-shadow
   function initializeSession(documents) {
     loadDocuments(documents, DocumentReviewScreen);
     setActiveScreen(EntryScreen);
@@ -352,6 +354,7 @@ function getHumanSize(numberOfBytes) {
     false,
   );
 
+  // eslint-disable-next-line no-shadow
   function loadDocuments(documents, containerElement) {
     const placeholderElement = containerElement.querySelector(".document-list");
     const list = document.createElement("div");
@@ -473,6 +476,7 @@ function getHumanSize(numberOfBytes) {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   function complete() {
     setActiveScreen(CompleteScreen);
     handleSuccess();

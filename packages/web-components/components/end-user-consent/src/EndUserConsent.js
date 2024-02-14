@@ -1,4 +1,4 @@
-import styles from '../../styles/src/styles';
+import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 
 function templateString() {

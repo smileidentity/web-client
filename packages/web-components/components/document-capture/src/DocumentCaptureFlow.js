@@ -1,11 +1,11 @@
-import { IMAGE_TYPE } from '../../domain/constants/src/Constants';
-import styles from '../../styles/src/styles';
-import SmartCamera from '../../domain/camera/src/SmartCamera';
+import { IMAGE_TYPE } from '../../../domain/constants/src/Constants';
+import styles from '../../../styles/src/styles';
+import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import './id-capture';
 import './id-review';
 import './document-instructions';
-import { version as COMPONENTS_VERSION } from '../../package.json';
+import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen) {
   try {
@@ -31,7 +31,7 @@ async function getPermissions(captureScreen) {
   }
 }
 
-class DocumentCapture extends HTMLElement {
+class DocumentCaptureFlow extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
@@ -226,8 +226,8 @@ class DocumentCapture extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture')) {
-  customElements.define('document-capture', DocumentCapture);
+if ('customElements' in window && !customElements.get('document-capture-flow')) {
+  customElements.define('document-capture-flow', DocumentCaptureFlow);
 }
 
-export default DocumentCapture;
+export default DocumentCaptureFlow;

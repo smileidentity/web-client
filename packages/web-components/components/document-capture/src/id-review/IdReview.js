@@ -1,4 +1,4 @@
-import styles from '../../../styles/src/styles';
+import styles from '../../../../styles/src/styles';
 
 function templateString() {
   return `

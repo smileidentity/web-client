@@ -1,9 +1,9 @@
-import SmartCamera from '../../../domain/camera/src/SmartCamera';
-import styles from '../../../styles/src/styles';
+import SmartCamera from '../../../../domain/camera/src/SmartCamera';
+import styles from '../../../../styles/src/styles';
 import {
   PORTRAIT_ID_PREVIEW_HEIGHT,
   PORTRAIT_ID_PREVIEW_WIDTH,
-} from '../../../domain/constants/src/Constants';
+} from '../../../../domain/constants/src/Constants';
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();

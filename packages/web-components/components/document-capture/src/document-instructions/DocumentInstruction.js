@@ -1,5 +1,5 @@
-import SmartFileUpload from '../../../domain/file-upload/src/SmartFileUpload';
-import styles from '../../../styles/src/styles';
+import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
+import styles from '../../../../styles/src/styles';
 
 function templateString() {
   return `

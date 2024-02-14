@@ -2,6 +2,10 @@
   "name": "@smileid/web-components",
   "version": "1.0.0-alpha.1",
   "license": "MIT",
+  "exports": {
+    "document-capture": "./components/document-capture/src/index.js",
+    "signature-pad": "./components/signature-pad/src/index.js"
+  },
   "scripts": {
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",

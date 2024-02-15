@@ -7,6 +7,9 @@
 [Components](packages/components) is package containing web components used in
 the web client.
 
+This provides the necessary views to capture id document images, selfie images and liveness images used in verifications.
+Form more detailed information, you can refer to th [packages/components documentations](./packages/components/README.md)
+
 ### Embed
 [Embed f.k.a. Hosted Web Integration](packages/embed) is a package that contains two items:
 

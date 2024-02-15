@@ -76,6 +76,29 @@ If you handle the permissions by yourself, make sure to set `data-camera-ready` 
 
 If there is an error while requesting permissions or capturing the document, the `DocumentCapture` component will handle it and set the data-camera-error attribute with the error message.
 
+### Event Handlers
+
+To receive the images after they have been captured, you can listen to the custom event `imagesComputed`. The data posted to this event is of the structure.
+
+```json
+detail = {
+ images: [
+  {image: "base64 image", image_type_id: ""}
+ ],
+ meta: {
+  version: "version of the library in use"
+ }
+}
+```
+
+usage:
+
+```js
+document.querySelector('document-capture').addEventListener('imagesComputed', function(event) {
+ console.log(event.detail);
+});
+```
+
 ### Dependencies
 
 The `DocumentCapture` component depends on the following modules:

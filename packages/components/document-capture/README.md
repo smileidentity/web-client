@@ -54,9 +54,9 @@ Usage:
 <document-capture show-navigation></document-capture>
 ```
 
-#### title
+#### document-capture-modes
 
-This attribute sets the title of the document capture component. It requires a value.
+This attribute sets the modes for the document capture process. It requires a value, which should be a string of comma-separated modes. Available options are `camera`, `upload` or `camera,upload`.
 
 Usage:
 
@@ -64,7 +64,6 @@ Usage:
 <document-capture document-capture-modes="camera,upload"></document-capture>
 ```
 
-This attribute sets the modes for the document capture process. It requires a value, which should be a string of comma-separated modes. [camera,upload]
 
 ### Permissions
 

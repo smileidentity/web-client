@@ -81,7 +81,7 @@ document.querySelector('liveness-capture').addEventListener('imagesComputed', fu
 
 The `LivenessCapture` component depends on the following modules:
 
-* selfie-capture
+* [selfie-capture](./selfie-capture/README.md)
 * selfie-review
 * selfie-instructions
 * SmartCamera

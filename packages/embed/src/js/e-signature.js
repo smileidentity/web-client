@@ -105,7 +105,6 @@ function getHumanSize(numberOfBytes) {
 
   let config;
   let partner_params;
-  let documents;
   let personal_info;
   let signature;
 
@@ -146,7 +145,6 @@ function getHumanSize(numberOfBytes) {
   async function getDocuments() {
     try {
       const {
-        callback_url,
         token,
         partner_details: { partner_id },
       } = config;
@@ -166,10 +164,8 @@ function getHumanSize(numberOfBytes) {
       const result = await response.json();
       if (response.ok) {
         return result;
-      } else {
-        handleBadDocuments(result.error);
-        closeWindow();
       }
+      throw new Error(result.error);
     } catch (e) {
       handleBadDocuments(e);
       closeWindow();
@@ -184,7 +180,7 @@ function getHumanSize(numberOfBytes) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
         getPartnerParams();
-        documents = (await getDocuments()).documents;
+        const documents = (await getDocuments()).documents;
         initializeSession(documents);
       }
     },
@@ -260,7 +256,7 @@ function getHumanSize(numberOfBytes) {
     const rawLength = raw.length;
     const uInt8Array = new Uint8Array(rawLength);
 
-    for (let i = 0; i < rawLength; ++i) {
+    for (let i = 0; i < rawLength; i += 1) {
       uInt8Array[i] = raw.charCodeAt(i);
     }
 
@@ -465,7 +461,7 @@ function getHumanSize(numberOfBytes) {
 
       if (json.error) throw new Error(json.error);
 
-      setActiveScreen(CompleteScreen);
+      complete();
       return json;
     } catch (error) {
       setActiveScreen(UploadFailedScreen);

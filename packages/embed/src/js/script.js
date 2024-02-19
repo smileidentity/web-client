@@ -199,17 +199,14 @@ window.SmileIdentity = (function () {
       );
     }
 
-    if (
-      config.product === 'e_signature' &&
-      !config.document_ids
-    ) {
+    if (config.product === "e_signature" && !config.document_ids) {
       throw new Error(
         "SmileIdentity: `document_ids` field is required for `e_signature` product type",
       );
     }
 
     if (
-      config.product === 'e_signature' &&
+      config.product === "e_signature" &&
       config.document_ids &&
       !Array.isArray(config.document_ids)
     ) {

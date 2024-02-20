@@ -40,7 +40,7 @@ npm install @smile_identity/smart-camera-web@<version>
 Then, in your VueJS, AngularJS, or React component:
 
 ```js
-import '@smile_identity/smart-camera-web'
+import '@smile_identity/smart-camera-web';
 ```
 
 #### Install via CDN
@@ -73,7 +73,7 @@ After installation and necessary imports:
       <smart-camera-web capture-id></smart-camera-web>
       ```
 
-      You'll initially see this image:
+      Initially, you'll see this image:
       ![Request Image](https://cdn.smileidentity.com/images/smart-camera-web/request.jpg)
 
       After granting access, the capture screen appears:
@@ -108,7 +108,7 @@ After installation and necessary imports:
         };
 
         try {
-        const response = await fetch('/', options)
+        const response = await fetch('/', options);
         const json = await response.json();
 
         return json;
@@ -136,7 +136,9 @@ After installation and necessary imports:
     const express = require('express');
     const { v4: UUID } = require('uuid');
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV ===
+
+ 'development') {
     const dotenv = require('dotenv');
 
     dotenv.config();
@@ -197,7 +199,7 @@ After installation and necessary imports:
     app.listen(process.env.PORT || 4000);
     ```
 
-    This can also be achieved using other Server to Server libraries.
+    This approach can also be achieved using other Server to Server libraries.
 
 ## Compatibility
 

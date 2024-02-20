@@ -1,24 +1,33 @@
 {
   "name": "@smileid/web-components",
-  "version": "1.0.0-alpha.1",
-  "license": "MIT",
+  "version": "1.0.0",
+  "private": "true",
   "exports": {
-    "document-capture": "./components/document-capture/src/index.js",
-    "signature-pad": "./components/signature-pad/src/index.js"
+    ".": "./web-components/components/index.js",
+    "./combobox": "./web-components/components/combobox/src/index.js",
+    "./document-capture": "./web-components/components/document-capture/src/index.js",
+    "./end-user-consent": "./web-components/components/end-user-consent/src/index.js",
+    "./navigation": "./web-components/components/navigation/src/index.js",
+    "./signature-pad": "./web-components/components/signature-pad/src/index.js",
+    "./totp-consent": "./web-components/components/totp-consent/src/index.js"
   },
   "scripts": {
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
-    "format": "npx prettier --write",
-    "storybook": "npm run storybook"
+    "lint:html": "npx prettier --write $(git ls-files '*.html')"
   },
+  "description": "A collection of Web Components used by SmileID",
+  "keywords": [
+    "Web Components"
+  ],
+  "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
     "signature_pad": "^4.1.7",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.12",
-    "@storybook/addon-links": "^7.6.10",
+    "@storybook/addon-links": "^7.6.15",
     "@storybook/blocks": "^7.6.15",
     "@storybook/web-components": "^7.6.4",
     "@storybook/web-components-vite": "^7.6.12",

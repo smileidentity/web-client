@@ -80,12 +80,14 @@ If there is an error while requesting permissions or capturing the document, the
 To receive the images after they have been captured, you can listen to the custom event `imagesComputed`. The data posted to this event is of the structure.
 
 ```json
-detail = {
- images: [
-  {image: "base64 image", image_type_id: ""}
- ],
- meta: {
-  version: "version of the library in use"
+{
+ "detail": {
+  "images": [
+   {"image": "base64 image", "image_type_id": ""}
+  ],
+  "meta": {
+   "version": "version of the library in use"
+  }
  }
 }
 ```

@@ -1,6 +1,6 @@
 import validate from "validate.js";
-import "@smileid/web-components/components/combobox/src/Combobox";
-import "@smileid/web-components/components/end-user-consent/src/EndUserConsent";
+import "@smileid/web-components/combobox";
+import "@smileid/web-components/end-user-consent";
 import { version as sdkVersion } from "../../package.json";
 
 (function eKYC() {

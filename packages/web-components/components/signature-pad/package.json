@@ -1,29 +1,23 @@
 {
-  "name": "@smileid/web-components",
+  "name": "@smileid/signature-pad",
   "version": "1.0.0",
   "private": "true",
   "exports": {
-    ".": "./components/index.js",
-    "./combobox": "./components/combobox/src/index.js",
-    "./document-capture": "./components/document-capture/src/index.js",
-    "./end-user-consent": "./components/end-user-consent/src/index.js",
-    "./navigation": "./components/navigation/src/index.js",
-    "./signature-pad": "./components/signature-pad/src/index.js",
-    "./totp-consent": "./components/totp-consent/src/index.js"
+    ".": "./index.js"
   },
   "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix",
-    "lint:html": "npx prettier --write $(git ls-files '*.html')"
+    "lint:fix": "eslint . --ext .js --fix"
   },
-  "description": "A collection of Web Components used by SmileID",
+  "description": "A component to capture signatures using the signature_pad library, and uploads",
   "keywords": [
     "Web Components"
   ],
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
-    "signature_pad": "^4.1.7",
-    "validate.js": "^0.13.1"
+    "signature_pad": "^4.1.7"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.12",

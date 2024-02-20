@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import { version as sdkVersion } from "../../package.json";
-import "@smileid/web-components/components/signature-pad/src/SignaturePad";
-import "@smileid/web-components/components/navigation/src/Navigation";
+import "@smileid/web-components/signature-pad";
+import "@smileid/web-components/navigation";
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
@@ -105,7 +105,6 @@ function getHumanSize(numberOfBytes) {
 
   let config;
   let partner_params;
-  let documents;
   let personal_info;
   let signature;
 
@@ -147,8 +146,6 @@ function getHumanSize(numberOfBytes) {
   async function getDocuments() {
     try {
       const {
-        // eslint-disable-next-line no-unused-vars
-        callback_url,
         token,
         partner_details: { partner_id },
       } = config;
@@ -169,8 +166,7 @@ function getHumanSize(numberOfBytes) {
       if (response.ok) {
         return result;
       }
-      handleBadDocuments(result.error);
-      closeWindow();
+      throw new Error(result.error);
     } catch (e) {
       handleBadDocuments(e);
       closeWindow();
@@ -185,7 +181,7 @@ function getHumanSize(numberOfBytes) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
         getPartnerParams();
-        documents = (await getDocuments()).documents;
+        const documents = (await getDocuments()).documents;
         initializeSession(documents);
       }
     },
@@ -468,7 +464,7 @@ function getHumanSize(numberOfBytes) {
 
       if (json.error) throw new Error(json.error);
 
-      setActiveScreen(CompleteScreen);
+      complete();
       return json;
     } catch (error) {
       setActiveScreen(UploadFailedScreen);

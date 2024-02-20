@@ -157,7 +157,6 @@ document.querySelector('selfie-capture').addEventListener('SelfieCapture::ImageC
 });
 ```
 
-
 ### SelfieReview web component
 
 This component is used to allow the user verify the accuracy of the capture.

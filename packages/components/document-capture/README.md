@@ -102,9 +102,9 @@ document.querySelector('document-capture').addEventListener('imagesComputed', fu
 
 The `DocumentCapture` component depends on the following modules:
 
-* id-capture
-* id-review
-* document-instructions
+* [document-instructions](./document-instructions/src/README.md)
+* [id-capture](./id-capture/src/README.md)
+* [id-review](./id-review/src/README.md)
 * SmartCamera
 
 These modules are are imported when you use the `DocumentCapture` component in your projects.

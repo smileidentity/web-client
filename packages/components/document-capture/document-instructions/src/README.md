@@ -41,5 +41,5 @@ This attribute sets the modes for the document capture process. It requires a va
 Usage:
 
 ```html
-<document-capture document-capture-modes="camera,upload"></document-capture>
+<document-instruction document-capture-modes="camera,upload"></document-instruction>
 ```

@@ -22,7 +22,7 @@ You can use the DocumentCapture component in your HTML like any other HTML eleme
 
 ### DocumentCapture Web Component Attributes
 
-You can you a mixture of the following attributes to configure the behaviour of the component.
+You can use a mixture of the following attributes to configure the behaviour of the component.
 
 ### hide-instructions
 

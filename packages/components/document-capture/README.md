@@ -109,7 +109,7 @@ The `DocumentCapture` component depends on the following modules:
 * [id-review](./id-review/src/README.md)
 * SmartCamera
 
-These modules are are imported when you use the `DocumentCapture` component in your projects.
+These modules are imported when you use the `DocumentCapture` component in your projects.
 
 ### Compatibility
 

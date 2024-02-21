@@ -136,9 +136,7 @@ After installation and necessary imports:
     const express = require('express');
     const { v4: UUID } = require('uuid');
 
-    if (process.env.NODE_ENV ===
-
- 'development') {
+    if (process.env.NODE_ENV === 'development') {
     const dotenv = require('dotenv');
 
     dotenv.config();

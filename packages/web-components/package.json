@@ -8,6 +8,7 @@
     "./document-capture": "./components/document-capture/src/index.js",
     "./end-user-consent": "./components/end-user-consent/src/index.js",
     "./navigation": "./components/navigation/src/index.js",
+    "./selfie-capture": "./components/selfie-capture/src/index.js",
     "./signature-pad": "./components/signature-pad/src/index.js",
     "./totp-consent": "./components/totp-consent/src/index.js"
   },

@@ -2,11 +2,11 @@
 
 ## Overview
 
-The `DocumentCapture` is a custom web component designed to capture documents using a camera. It uses the `SmartCamera` module to interact with the device's camera and handle permissions.
+The `DocumentCapture` is a bespoke web component designed for capturing document images using a camera. It leverages the `SmartCamera` module for camera interaction and permission management.
 
 ### Importing the Component
 
-To use the DocumentCapture component, you need to import it into your JavaScript file:
+To utilize the DocumentCapture component within your project, import it into your JavaScript file as follows:
 
 ```js
 import '@smileid/components/document-capture';
@@ -14,51 +14,43 @@ import '@smileid/components/document-capture';
 
 ### Using the Component
 
-You can use the DocumentCapture component in your HTML like any other HTML element:
+The DocumentCapture component can be embedded in your HTML similarly to any standard HTML element:
 
 ```html
 <document-capture></document-capture>
 ```
 
-### DocumentCapture Web Component Attributes
+### Attributes
 
-You can use a mixture of the following attributes to configure the behavior of the component.
+Customize the component's behavior with the following attributes:
 
-#### hide-instructions
+#### `hide-instructions`
 
-This attribute, when present, hides the instructions for the document capture process. It does not require a value.
-
-Usage:
+Omits the capture instructions. This attribute is boolean and does not require a value.
 
 ```html
 <document-capture hide-instructions></document-capture>
 ```
 
-#### hide-back-of-id
+#### `hide-back-of-id`
 
-This attribute, when present, hides the option to capture the back of the ID. It does not require a value.
-
-Usage:
+Excludes the option to capture the ID's back side. This attribute is boolean.
 
 ```html
 <document-capture hide-back-of-id></document-capture>
 ```
 
-#### show-navigation
+#### `show-navigation`
 
-This attribute, when present, shows the navigation controls for the document capture process. It does not require a value.
-
-Usage:
+Displays navigation controls for the capture process. This attribute is boolean.
 
 ```html
 <document-capture show-navigation></document-capture>
 ```
 
-#### document-capture-modes
+#### `document-capture-modes`
 
-This attribute sets the modes for the document capture process. It requires a value, which should be a string of comma-separated modes. Available options are `camera`, `upload`, or `camera,upload`.
-
-Usage:
+Specifies the capture modes, accepting `camera`, `upload`, or both. Value required.
 
 ```html
 <document-capture document-capture-modes="camera,upload"></document-capture>
@@ -66,50 +58,50 @@ Usage:
 
 ### Permissions
 
-The `DocumentCapture` component requires camera permissions to function. It will automatically request these permissions when used. If the permissions are granted, it will remove the `data-camera-error` attribute from the capture screen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.
+Camera permissions are essential for functionality. The component requests permissions automatically. Upon granting, `data-camera-ready` is set to true, and `data-camera-error` is removed. Denied permissions result in `data-camera-error` being set with an error message.
 
-If you handle the permissions yourself, make sure to set `data-camera-ready` and `data-camera-error` appropriately.
+For manual permission handling, appropriately set `data-camera-ready` and `data-camera-error`.
 
 ### Error Handling
 
-If there is an error while requesting permissions or capturing the document, the `DocumentCapture` component will handle it and set the `data-camera-error` attribute with the error message.
+Errors during permission requests or document capture are managed by the component, setting `data-camera-error` with the respective error message.
 
 ### Event Handlers
 
-To receive the images after they have been captured, you can listen to the custom event `imagesComputed`. The data posted to this event has the structure:
+Capture events emit `imagesComputed`, providing captured images and metadata:
 
 ```json
 {
- "detail": {
-  "images": [
-   {"image": "base64 image", "image_type_id": ""}
-  ],
-  "meta": {
-   "version": "version of the library in use"
+  "detail": {
+    "images": [
+      {"image": "base64-encoded image", "image_type_id": ""}
+    ],
+    "meta": {
+      "version": "library version"
+    }
   }
- }
 }
 ```
 
-Usage:
+To handle this event:
 
 ```js
 document.querySelector('document-capture').addEventListener('imagesComputed', function(event) {
- console.log(event.detail);
+  console.log(event.detail);
 });
 ```
 
 ### Dependencies
 
-The `DocumentCapture` component depends on the following modules:
+`DocumentCapture` relies on the following modules:
 
-* [document-instructions](./document-instructions/src/README.md)
-* [id-capture](./id-capture/src/README.md)
-* [id-review](./id-review/src/README.md)
-* SmartCamera
+- [document-instructions](./document-instructions/src/README.md)
+- [id-capture](./id-capture/src/README.md)
+- [id-review](./id-review/src/README.md)
+- [SmartCamera](/packages/smart-camera-web/README.md)
 
-These modules are imported when you use the `DocumentCapture` component in your projects.
+These dependencies are automatically imported with the component.
 
 ### Compatibility
 
-The DocumentCapture component is designed to work on all modern browsers that support custom web components. However, it includes a special case for multi-camera Samsung devices to mitigate blurry images at the edges. Please report any issues found on other devices to our support team.
+Designed for modern browsers supporting custom web components, with specific enhancements for multi-camera Samsung devices to prevent blurry image edges. Report compatibility issues with other devices to our support team.

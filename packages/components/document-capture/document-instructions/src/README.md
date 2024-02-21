@@ -1,18 +1,16 @@
-# Usage Guide for Document Instruction Web Component
+# Document Instruction Web Component Guide
 
 ## Importing the Component
 
-First, you need to import the DocumentInstruction component into your JavaScript file:
+To incorporate the DocumentInstruction component into your project, import it into your JavaScript file as follows:
 
 ```js
-import from '@smileid/document-capture';
+import '@smileid/document-capture/document-instructions';
 ```
 
 ## Using the Component
 
-The `DocumentInstruction` component is a function that returns a template string. This string represents an HTML structure that can be inserted into your web page.
-
-Here's an example of how to use it:
+The `DocumentInstruction` component is designed to provide users with guidance for capturing document images. It can be integrated into your web page as a custom HTML element:
 
 ```html
 <document-instruction></document-instruction>
@@ -20,26 +18,34 @@ Here's an example of how to use it:
 
 ### Customizing the Component
 
-#### show-navigation
+Adjust the component's behavior and appearance using the following attributes:
 
-This attribute, when present, shows the navigation controls for the document capture process. It does not require a value.
+#### `show-navigation`
 
-Usage:
+Displays navigation controls, facilitating user interaction during the document capture process. This attribute is boolean and does not require a value.
 
 ```html
 <document-instruction show-navigation></document-instruction>
 ```
 
-#### document-capture-modes
+#### `document-capture-modes`
 
-This attribute sets the modes for the document capture process. It requires a value, which should be a string of comma-separated modes. Available options are `camera`, `upload` or `camera,upload`.
+Determines the available modes for document capture. This attribute accepts a comma-separated string specifying the modes:
 
-* camera - The user can only capture and id document image via the camera
-* upload - The user can only upload an id document image
-* camera,upload - The user can choose to upload or capture iva the camera
-
-Usage:
+- `camera`: Enables capturing document images using the camera.
+- `upload`: Allows uploading document images from the device.
+- `camera,upload`: Offers users a choice between capturing images using the camera or uploading from the device.
 
 ```html
 <document-instruction document-capture-modes="camera,upload"></document-instruction>
 ```
+
+## Example
+
+Here is a complete example demonstrating how to embed the `DocumentInstruction` component with navigation controls and both capture modes enabled:
+
+```html
+<document-instruction show-navigation document-capture-modes="camera,upload"></document-instruction>
+```
+
+This setup provides an intuitive interface for users, enabling them to receive instructions, navigate through the capture process, and choose their preferred method of document image submission.

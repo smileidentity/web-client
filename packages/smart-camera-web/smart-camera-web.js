@@ -1,3 +1,6 @@
+import '@smileid/web-components/selfie-capture';
+import '@smileid/web-components/document-capture';
+
 const VERSION = '1.0.2';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;

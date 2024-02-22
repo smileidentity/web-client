@@ -23,7 +23,7 @@ contains a web-component used to capture images in the browser for use within
 SmileID systems.
 
 It is WebRTC Powered Web Component that works together with the
-SmileID [Server to Server](https://docs.smileidentity.com/server-to-server) libraries.
+SmileID [Server to Server](https://docs.usesmileid.com/server-to-server) libraries.
 
 For more detailed information, you can refer to the [packages/smart-camera-web documentation](./packages/smart-camera-web/README.md).
 

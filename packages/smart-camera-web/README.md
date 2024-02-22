@@ -2,9 +2,9 @@
 
 ![Build Status](https://github.com/smileidentity/smart-camera-web/actions/workflows/deploy-preview.yml/badge.svg)
 
-`SmartCameraWeb` is a [Web Component](https://developer.mozilla.org/en-US/docs/Web/Web_Components) designed to capture images including selfies, liveness images, and ID Document images for use with SmileIdentity. It interfaces with the [Server to Server](https://docs.smileidentity.com/server-to-server) libraries, serving as a user interface client.
+`SmartCameraWeb` is a [Web Component](https://developer.mozilla.org/en-US/docs/Web/Web_Components) designed to capture images including selfies, liveness images, and ID Document images for use with SmileIdentity. It interfaces with the [Server to Server](https://docs.usesmileid.com/server-to-server) libraries, serving as a user interface client.
 
-Explore an [example full stack integration](https://glitch.com/edit/#!/smart-camera-web-demo-node) using our [NodeJS](https://docs.smileidentity.com/server-to-server/javascript) library.
+Explore an [example full stack integration](https://glitch.com/edit/#!/smart-camera-web-demo-node) using our [NodeJS](https://docs.usesmileid.com/server-to-server/javascript) library.
 
 ## Getting Started
 
@@ -17,13 +17,13 @@ To integrate `SmartCameraWeb`, follow these steps:
 
 ### Choose a Server to Server Library
 
-Supported [Server to Server Libraries](https://docs.smileidentity.com/server-to-server) include:
+Supported [Server to Server Libraries](https://docs.usesmileid.com/server-to-server) include:
 
-- [Java](https://docs.smileidentity.com/server-to-server/java)
-- [NodeJS](https://docs.smileidentity.com/server-to-server/javascript)
-- [PHP](https://docs.smileidentity.com/server-to-server/php)
-- [Python](https://docs.smileidentity.com/server-to-server/python)
-- [Ruby](https://docs.smileidentity.com/server-to-server/ruby)
+- [Java](https://docs.usesmileid.com/server-to-server/java)
+- [NodeJS](https://docs.usesmileid.com/server-to-server/javascript)
+- [PHP](https://docs.usesmileid.com/server-to-server/php)
+- [Python](https://docs.usesmileid.com/server-to-server/python)
+- [Ruby](https://docs.usesmileid.com/server-to-server/ruby)
 
 > **Note**: Code samples in this documentation utilize the NodeJS Server to Server library.
 
@@ -190,7 +190,7 @@ After installation and necessary imports:
     });
 
     // NOTE: This can be used to process responses. don't forget to add it as a callback option in the `connection` config on L22
-    // https://docs.smileidentity.com/further-reading/faqs/how-do-i-setup-a-callback
+    // https://docs.usesmileid.com/further-reading/faqs/how-do-i-setup-a-callback
     app.post('/callback', (req, res, next) => {
     });
 

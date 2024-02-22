@@ -6,7 +6,7 @@ The `IdCapture` is a custom web component designed to capture documents using a 
 
 ### Importing the Component
 
-To use the IdCapture component, you need to import it in your JavaScript file:
+To use the IdCapture component, you need to import it into your JavaScript file:
 
 ```js
 import '@smileid/components/id-capture';
@@ -22,7 +22,7 @@ You can use the IdCapture component in your HTML like any other HTML element:
 
 ### IdCapture Web Component Attributes
 
-You can you a mixture of the following attributes to configure the behaviour of the component.
+You can use a mixture of the following attributes to configure the behavior of the component.
 
 #### hide-back-of-id
 
@@ -44,43 +44,44 @@ Usage:
 <id-capture show-navigation></id-capture>
 ```
 
-
 ### Permissions
 
-The `IdCapture` component requires camera permissions to function. It will automatically request these permissions when it is used. If the permissions are granted, it will remove the `data-camera-error` attribute from the captureScreen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.
+The `IdCapture` component requires camera permissions to function. It will automatically request these permissions when used. If the permissions are granted, it will remove the `data-camera-error` attribute from the capture screen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.
 
-If you handle the permissions by yourself, make sure to set `data-camera-ready` and `data-camera-error` appropriately.
+If you handle the permissions yourself, make sure to set `data-camera-ready` and `data-camera-error` appropriately.
 
 ### Error Handling
 
-If there is an error while requesting permissions or capturing the document, the `IdCapture` component will handle it and set the data-camera-error attribute with the error message.
+If there is an error while requesting permissions or capturing the document, the `IdCapture` component will handle it and set the `data-camera-error` attribute with the error message.
 
 ### Event Handlers
 
-To receive the images after they have been captured, you can listen to the custom event `IDCapture::ImageCaptured`. The data posted to this event is of the structure.
+To receive the images after they have been captured, you can listen to the custom event `IDCapture::ImageCaptured`. The data posted to this event has the structure:
 
 ```json
-detail = {
-  image: "base64 image",
+{
+ "detail": {
+  "image": "base64 image"
+ }
 }
 ```
 
-usage:
+Usage:
 
 ```js
-document.querySelector('id-capture').addEventListener('imagesComputed', function(event) {
+document.querySelector('id-capture').addEventListener('IDCapture::ImageCaptured', function(event) {
  console.log(event.detail);
 });
 ```
 
 ### Dependencies
 
-The `IdCapture` component depends on the following modules:
+The `IdCapture` component depends on the following module:
 
 * SmartCamera
 
-These modules are are imported when you use the `IdCapture` component in your projects.
+This module is imported when you use the `IdCapture` component in your projects.
 
 ### Compatibility
 
-The IdCapture component is designed to work on all modern browsers that support custom web components. However, it has a special case for multi-camera Samsung devices to mitigate blurry images at the edges. Please report any other issues found on other devices to our support team.
+The IdCapture component is designed to work on all modern browsers that support custom web components. However, it includes a special case for multi-camera Samsung devices to mitigate blurry images at the edges. Please report any issues found on other devices to our support team.

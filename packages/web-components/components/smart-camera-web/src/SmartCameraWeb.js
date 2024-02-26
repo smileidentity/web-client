@@ -2,9 +2,9 @@ import { IMAGE_TYPE } from '../../../domain/constants/src/Constants';
 import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
-import './id-capture';
-import './id-review';
-import './document-instructions';
+import '../../document-capture/src';
+import '../../selfie-capture/src';
+
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen) {
@@ -31,7 +31,7 @@ async function getPermissions(captureScreen) {
   }
 }
 
-class DocumentCaptureFlow extends HTMLElement {
+class SmartCameraWeb extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
@@ -41,18 +41,9 @@ class DocumentCaptureFlow extends HTMLElement {
     this.innerHTML = `
       ${styles}
       <div>
-      <document-instruction ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
-      <id-capture side-of-id='Front'
-      ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
-      ${this.documentCaptureModes}
-      ></id-capture>
-      <document-instruction id='document-instruction-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-instruction>
-      <id-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
-      ${this.documentCaptureModes}
-      hidden 
-      ></id-capture>
-      <id-review hidden></id-review>
-      <id-review id='back-of-id-review' hidden></id-review>
+        <camera-permission ></camera-permission>
+        <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
+        <selfie-capture ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.documentCaptureModes}></selfie-capture>
       </div>
     `;
 
@@ -227,7 +218,7 @@ class DocumentCaptureFlow extends HTMLElement {
 }
 
 if ('customElements' in window && !customElements.get('document-capture-flow')) {
-  customElements.define('document-capture-flow', DocumentCaptureFlow);
+  customElements.define('document-capture-flow', SmartCameraWeb);
 }
 
-export default DocumentCaptureFlow;
+export default SmartCameraWeb;

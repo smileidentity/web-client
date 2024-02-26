@@ -1,3 +1,3 @@
-import DocumentCaptureFlow from './DocumentCaptureFlow';
+import DocumentCapture from './DocumentCapture';
 
-export default DocumentCaptureFlow;
+export default DocumentCapture;

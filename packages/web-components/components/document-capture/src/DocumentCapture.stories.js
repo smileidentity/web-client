@@ -1,44 +1,44 @@
 import './index';
 
 const meta = {
-  component: 'document-capture-flow',
+  component: 'document-capture',
 };
 
 export default meta;
 
 export const DocumentCapture = {
   render: () => `
-        <document-capture-flow>
-        </document-capture-flow>
+        <document-capture>
+        </document-capture>
     `,
 };
 
 export const DocumentCaptureHiddenInstructions = {
   render: () => `
-        <document-capture-flow hide-instructions>
-        </document-capture-flow>
+        <document-capture hide-instructions>
+        </document-capture>
     `,
 };
 
 export const DocumentCaptureHideBackOfId = {
   render: () => `
-        <document-capture-flow
+        <document-capture
             hide-back-of-id
         >
-        </document-capture-flow>
+        </document-capture>
     `,
 };
 
 export const DocumentCaptureAllowAttributes = {
   render: () => `
-        <document-capture-flow document-capture-flow-modes='camera,upload'>
-        </document-capture-flow>
+        <document-capture document-capture-modes='camera,upload'>
+        </document-capture>
     `,
 };
 
 export const DocumentCaptureHideInstructionNBackOfId = {
   render: () => `
-        <document-capture-flow hide-back-of-id hide-instructions>
-        </document-capture-flow>
+        <document-capture hide-back-of-id hide-instructions>
+        </document-capture>
     `,
 };

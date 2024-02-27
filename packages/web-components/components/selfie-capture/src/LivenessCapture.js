@@ -1,23 +1,13 @@
 import './selfie-capture';
-import './selfie-review';
 import './selfie-instructions';
+import './selfie-review';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen) {
   try {
-    await SmartCamera.getMedia({
-      audio: false,
-      video: {
-        facingMode: 'environment',
-        width: { min: 1280 },
-        // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-        // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-        // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-        zoom: SmartCamera.isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-      },
-    });
+    await SmartCamera.getMedia({ audio: false, video: true });
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
   } catch (error) {
@@ -29,7 +19,7 @@ async function getPermissions(captureScreen) {
   }
 }
 
-class SelfieCaptureFlow extends HTMLElement {
+class LivenessCapture extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
@@ -109,16 +99,9 @@ class SelfieCaptureFlow extends HTMLElement {
     });
 
     this.selfieReview.addEventListener(
-      'selfieReview::SelectImage',
+      'SelfieReview::SelectImage',
       async () => {
-        if (this.hideBackOfId) {
-          this._publishSelectedImages();
-        } else if (this.hideInstructions) {
-          this.setActiveScreen(this.selfieCaptureBack);
-          await getPermissions(this.selfieCaptureBack);
-        } else {
-          this.setActiveScreen(this.selfieInstructionBack);
-        }
+        this._publishSelectedImages();
       },
     );
   }
@@ -148,8 +131,8 @@ class SelfieCaptureFlow extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('selfie-capture-flow')) {
-  customElements.define('selfie-capture-flow', SelfieCaptureFlow);
+if ('customElements' in window && !customElements.get('liveness-capture')) {
+  customElements.define('liveness-capture', LivenessCapture);
 }
 
-export default SelfieCaptureFlow;
+export default LivenessCapture;

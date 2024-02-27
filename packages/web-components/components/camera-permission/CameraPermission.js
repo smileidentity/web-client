@@ -53,6 +53,10 @@ function templateString() {
       </button>
     </div>
   ` : ''}
+        <div class='flow center'>
+          <p class='color-red | center' id='error'>
+          </p>
+        </div>
         <div class='section | flow camera-permission-wrapper'>
            <div class='center camera-permission'>
                 <svg xmlns="http://www.w3.org/2000/svg" width="43" height="33" viewBox="0 0 43 33" fill="none">
@@ -89,7 +93,7 @@ function templateString() {
             <p class='text-2xl font-bold'>We need access to your camera so that we can capture your details.</p>
             <div class='flow action-buttons'>
                 <button data-variant='solid full-width' class='button' type='button' id='request-permission'>
-                    Request Camera Permission
+                  Request Camera Access
                 </button>
                 <powered-by-smile-id></powered-by-smile-id>
             </div>
@@ -109,7 +113,9 @@ class CameraPermission extends HTMLElement {
   }
 
   setUpEventListeners() {
+    const errorMessage = this.shadowRoot.querySelector('#error');
     const permissionButton = this.shadowRoot.getElementById('request-permission');
+    errorMessage.textContent = '';
     permissionButton.addEventListener('click', async () => {
       permissionButton.setAttribute('disabled', true);
       try {
@@ -120,6 +126,7 @@ class CameraPermission extends HTMLElement {
         this.dispatchEvent(new CustomEvent('camera-permission-granted'));
       } catch (error) {
         this.dispatchEvent(new CustomEvent('camera-permission-denied', { detail: error }));
+        errorMessage.textContent = SmartCamera.handleCameraError(error);
       }
       permissionButton.removeAttribute('disabled');
     });

@@ -175,8 +175,7 @@ function templateString() {
       </div>
     ` : ''}
     <h1 class="header-title text-2xl color-digital-blue font-bold">
-    Is your whole face visible 
-    and clear in this photo?
+      Is your whole face visible and clear in this photo?
     </h1>
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>

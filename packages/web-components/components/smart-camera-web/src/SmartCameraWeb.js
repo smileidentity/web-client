@@ -1,4 +1,3 @@
-import { IMAGE_TYPE } from '../../../domain/constants/src/Constants';
 import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
@@ -7,45 +6,27 @@ import '../../selfie-capture/src';
 
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
-async function getPermissions(captureScreen) {
-  try {
-    await SmartCamera.getMedia({
-      audio: false,
-      video: {
-        facingMode: 'environment',
-        width: { min: 1280 },
-        // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-        // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-        // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-        zoom: SmartCamera.isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-      },
-    });
-    captureScreen.removeAttribute('data-camera-error');
-    captureScreen.setAttribute('data-camera-ready', true);
-  } catch (error) {
-    captureScreen.removeAttribute('data-camera-ready');
-    captureScreen.setAttribute(
-      'data-camera-error',
-      SmartCamera.handleError(error),
-    );
-  }
+function scwTemplateString() {
+  return `
+  ${styles}
+  <div>
+    <camera-permission hidden ${this.showNavigation} ${this.hideBackToHost}></camera-permission>
+    <liveness-capture ${this.title} ${this.showNavigation} hidden ></liveness-capture>
+    <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  hidden></document-instruction>
+  </div>
+`;
 }
-
 class SmartCameraWeb extends HTMLElement {
   constructor() {
     super();
+    this.scwTemplateString = scwTemplateString.bind(this);
+    this.render = () => this.scwTemplateString();
+    this.attachShadow({ mode: 'open' });
     this.activeScreen = null;
   }
 
   connectedCallback() {
-    this.innerHTML = `
-      ${styles}
-      <div>
-        <camera-permission ></camera-permission>
-        <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-instruction>
-        <selfie-capture ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.documentCaptureModes}></selfie-capture>
-      </div>
-    `;
+    this.shadowRoot.innerHTML = this.render();
 
     this._data = {
       images: [],
@@ -54,24 +35,11 @@ class SmartCameraWeb extends HTMLElement {
       },
     };
 
-    this.documentInstruction = this.querySelector('document-instruction');
-    this.documentInstructionBack = this.querySelector(
-      '#document-instruction-back',
-    );
-    this.idCapture = this.querySelector('id-capture');
-    this.idReview = this.querySelector('id-review');
-    this.idCaptureBack = this.querySelector('#back-of-id');
-    this.backOfIdReview = this.querySelector('#back-of-id-review');
-    this.thankYouScreen = this.querySelector('thank-you');
-
-    if (this.hideInstructions) {
-      getPermissions(this.idCapture);
-      this.setActiveScreen(this.idCapture);
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+      this.setUpEventListeners();
     } else {
-      this.setActiveScreen(this.documentInstruction);
+      this.shadowRoot.innerHTML = '<h1 class="error-message">Your browser does not support this integration</h1>';
     }
-
-    this.setUpEventListeners();
   }
 
   disconnectedCallback() {
@@ -84,99 +52,28 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.documentInstruction.addEventListener(
-      'DocumentInstruction::StartCamera',
-      async () => {
-        this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
-      },
-    );
-    this.documentInstruction.addEventListener(
-      'DocumentInstruction::DocumentChange',
-      async (event) => {
-        this.idReview.setAttribute('data-image', event.detail.image);
-        this._data.images.push({
-          image: event.detail.image.split(',')[1],
-          image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
-        });
-        this.setActiveScreen(this.idReview);
-      },
-    );
+    this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
+    this.livenessCapture = this.shadowRoot.querySelector('liveness-capture');
+    this.documentCapture = this.shadowRoot.querySelector('document-capture');
 
-    this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
-      this.idReview.setAttribute('data-image', event.detail.image);
-      this._data.images.push({
-        image: event.detail.image.split(',')[1],
-        image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
-      });
-      SmartCamera.stopMedia();
-      this.setActiveScreen(this.idReview);
+    if (SmartCamera.stream) {
+      this.setActiveScreen(this.livenessCapture);
+    } else {
+      this.setActiveScreen(this.cameraPermission);
+    }
+    this.cameraPermission.addEventListener('camera-permission-granted', () => {
+      this.setActiveScreen(this.livenessCapture);
+      this.livenessCapture.removeAttribute('data-camera-error');
+      this.livenessCapture.setAttribute('data-camera-ready', true);
     });
 
-    this.idReview.addEventListener('IdReview::ReCaptureID', async () => {
-      this.idReview.removeAttribute('data-image');
-      this._data.images.pop();
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
-      } else {
-        this.setActiveScreen(this.documentInstruction);
-      }
+    this.livenessCapture.addEventListener('imagesComputed', (event) => {
+      this._data.images = event.detail.images;
+      this.setActiveScreen(this.documentCapture);
     });
 
-    this.idReview.addEventListener('IdReview::SelectImage', async () => {
-      if (this.hideBackOfId) {
-        this._publishSelectedImages();
-      } else if (this.hideInstructions) {
-        this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
-      } else {
-        this.setActiveScreen(this.documentInstructionBack);
-      }
-    });
-
-    this.documentInstructionBack.addEventListener(
-      'DocumentInstruction::StartCamera',
-      async () => {
-        this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
-      },
-    );
-
-    this.documentInstructionBack.addEventListener(
-      'DocumentInstruction::DocumentChange',
-      async (event) => {
-        this.idReview.setAttribute('data-image', event.detail.image);
-        this._data.images.push({
-          image: event.detail.image.split(',')[1],
-          image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
-        });
-        this.setActiveScreen(this.backOfIdReview);
-      },
-    );
-    this.idCaptureBack.addEventListener('IDCapture::ImageCaptured', (event) => {
-      this.backOfIdReview.setAttribute('data-image', event.detail.image);
-      this._data.images.push({
-        image: event.detail.image.split(',')[1],
-        image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
-      });
-      this.setActiveScreen(this.backOfIdReview);
-      SmartCamera.stopMedia();
-    });
-
-    this.backOfIdReview.addEventListener('IdReview::ReCaptureID', async () => {
-      this.backOfIdReview.removeAttribute('data-image');
-      this._data.images.pop();
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
-      } else {
-        this.setActiveScreen(this.documentInstructionBack);
-      }
-    });
-
-    this.backOfIdReview.addEventListener('IdReview::SelectImage', () => {
-      this._publishSelectedImages();
+    this.documentCapture.addEventListener('imagesComputed', (event) => {
+      this._data.images = [...this._data.images, ...event.detail.images];
     });
   }
 
@@ -198,6 +95,10 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get hideBackToHost() {
+    return this.hasAttribute('hide-back-to-host') ? 'hide-back-to-host' : '';
+  }
+
   get title() {
     return this.hasAttribute('title')
       ? `title=${this.getAttribute('title')}`
@@ -217,8 +118,8 @@ class SmartCameraWeb extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-flow')) {
-  customElements.define('document-capture-flow', SmartCameraWeb);
+if ('customElements' in window && !customElements.get('smart-camera-web')) {
+  customElements.define('smart-camera-web', SmartCameraWeb);
 }
 
 export default SmartCameraWeb;

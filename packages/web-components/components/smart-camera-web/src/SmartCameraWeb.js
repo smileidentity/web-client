@@ -48,7 +48,25 @@ class SmartCameraWeb extends HTMLElement {
       this.activeScreen.removeAttribute('hidden');
     }
     this.activeScreen = null;
-    this.innerHTML = '';
+    this.shadowRoot.innerHTML = '';
+  }
+
+  static get observedAttributes() {
+    return ['document-capture-modes', 'document-type', 'hide-back-to-host', 'show-navigation'];
+  }
+
+  attributeChangedCallback(name) {
+    switch (name) {
+    case 'document-capture-modes':
+    case 'document-type':
+    case 'hide-back-to-host':
+    case 'show-navigation':
+      this.shadowRoot.innerHTML = this.render();
+      this.setUpEventListeners();
+      break;
+    default:
+      break;
+    }
   }
 
   setUpEventListeners() {
@@ -75,6 +93,11 @@ class SmartCameraWeb extends HTMLElement {
     this.documentCapture.addEventListener('imagesComputed', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
     });
+  }
+
+  reset() {
+    this.disconnectedCallback();
+    this.connectedCallback();
   }
 
   _publishSelectedImages() {

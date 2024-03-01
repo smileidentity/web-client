@@ -39,6 +39,17 @@ module.exports = {
       },
     ],
     indent: ['error', 2],
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: [
+          'esbuild.js',
+          'cypress.config.js',
+          '**/*{.,_,-}{test,spec}.js', // tests where the extension or filename suffix denotes that it is a test
+        ],
+        optionalDependencies: false,
+      },
+    ],
     'max-classes-per-file': 'off',
     'max-len': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],

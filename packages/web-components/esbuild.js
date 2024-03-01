@@ -84,7 +84,7 @@ const prebuild = () => {
   }
   ensureDirSync('cypress/pages/instrumentation');
   copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
-  // copyFiles('cypress/pages', '*.html', 'build');
+  copyFiles('cypress/pages', '*.html', 'build');
 };
 
 // const files = fs

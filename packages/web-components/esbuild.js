@@ -81,14 +81,11 @@ const prebuild = () => {
   if (fs.existsSync('build')) {
     fs.rmSync('build', { recursive: true });
   }
+  ensureDirSync('build');
   ensureDirSync('cypress/pages/instrumentation');
   copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
   copyFiles('cypress/pages', '*.html', 'build');
 };
-
-// const files = fs
-//   .readdirSync('components', { recursive: true })
-//   .filter((file) => file.endsWith('.js'));
 
 if (process.env.NODE_ENV === 'development') {
   prebuild();
@@ -106,7 +103,6 @@ const prodOptions = {
   minify: true,
 };
 
-// files.forEach((file) => {
 if (process.env.NODE_ENV === 'development') {
   esbuild.build({
     ...devOptions,
@@ -120,4 +116,3 @@ if (process.env.NODE_ENV === 'development') {
     outdir: 'dist/js',
   });
 }
-// });

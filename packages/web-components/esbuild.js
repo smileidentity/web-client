@@ -81,7 +81,6 @@ const prebuild = () => {
   if (fs.existsSync('build')) {
     fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync('dist');
   ensureDirSync('build');
   // copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
   copyFiles('cypress/pages', '*.html', 'build');

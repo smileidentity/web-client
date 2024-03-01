@@ -4,6 +4,7 @@ module.exports = {
     es2021: true,
   },
   extends: 'airbnb-base',
+  ignorePatterns: ['build/', 'dist/', 'libs/', 'node_modules/'],
   overrides: [
     {
       env: {
@@ -18,6 +19,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    babelOptions: {
+      plugins: [
+        '@babel/plugin-syntax-import-assertions',
+      ],
+    },
   },
   rules: {
     'class-methods-use-this': 'off',
@@ -30,18 +36,6 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-unused-vars': [
       'error',
-      { args: 'after-used', ignoreRestSiblings: false, vars: 'all' },
     ],
-    'prefer-destructuring': [
-      'error',
-      {
-        array: false,
-        object: true,
-      },
-      {
-        enforceForRenamedProperties: false,
-      },
-    ],
-    'sort-keys': 'error',
   },
 };

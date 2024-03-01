@@ -658,6 +658,7 @@ class TotpConsent extends HTMLElement {
       const errorDiv = document.createElement('div');
       errorDiv.setAttribute('id', `${field}-hint`);
       errorDiv.setAttribute('class', 'validation-message');
+      // eslint-disable-next-line prefer-destructuring
       errorDiv.textContent = errors[field][0];
 
       input.insertAdjacentElement('afterend', errorDiv);

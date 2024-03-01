@@ -16,7 +16,7 @@
   "scripts": {
     "build": "NODE_ENV=development node esbuild.js",
     "clean": "rm -rf build dist",
-    "start": "npm run build && npx serve -p 8000 cypress/pages",
+    "start": "npm run build && npx serve -p 8000 build",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "lint:html": "npx prettier --write $(git ls-files '*.html')"

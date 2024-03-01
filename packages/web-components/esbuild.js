@@ -81,10 +81,8 @@ const prebuild = () => {
   if (fs.existsSync('build')) {
     fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync('dist');
   ensureDirSync('build');
-  ensureDirSync('cypress/pages/instrumentation');
-  copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
+  // copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
   copyFiles('cypress/pages', '*.html', 'build');
 };
 
@@ -108,7 +106,7 @@ if (process.env.NODE_ENV === 'development') {
   esbuild.build({
     ...devOptions,
     entryPoints: exportPaths,
-    outdir: 'cypress/pages/instrumentation/js',
+    outdir: 'build/js',
   });
 } else {
   esbuild.build({

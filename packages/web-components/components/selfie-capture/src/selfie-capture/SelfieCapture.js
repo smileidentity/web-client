@@ -757,7 +757,7 @@ class SelfieCaptureScreen extends HTMLElement {
         return context;
       }
       throw new Error(
-        `Unable to capture webcam images - Please try another device ${enableImageTests}`,
+        'Unable to capture webcam images - Please try another device',
       );
     } else {
       return context;

@@ -27,7 +27,6 @@ module.exports = {
   ],
   rules: {
     'class-methods-use-this': 'off',
-    indent: ['error', 2],
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -39,6 +38,7 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
+    indent: ['error', 2],
     'max-classes-per-file': 'off',
     'max-len': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
@@ -47,6 +47,18 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-unused-vars': [
       'error',
+      { args: 'after-used', ignoreRestSiblings: false, vars: 'all' },
     ],
+    'prefer-destructuring': [
+      'error',
+      {
+        array: false,
+        object: true,
+      },
+      {
+        enforceForRenamedProperties: false,
+      },
+    ],
+    'sort-keys': 'error',
   },
 };

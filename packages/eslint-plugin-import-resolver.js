@@ -1,3 +1,10 @@
+/**
+ * NOTE: eslint-plugin-import does not yet support ESM Modules.
+ * In order to support it within our monorepo, we have to use a custom
+ * import/resolver that adds support for this.
+ *
+ * CREDIT: https://gist.github.com/danielweck/cd63af8e9a8b3492abacc312af9f28fd
+ */
 const path = require('path');
 const { resolve: resolveExports } = require('resolve.exports');
 

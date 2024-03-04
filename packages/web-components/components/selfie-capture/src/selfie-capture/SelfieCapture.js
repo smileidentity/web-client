@@ -758,7 +758,7 @@ class SelfieCaptureScreen extends HTMLElement {
         return context;
       }
       throw new Error(
-        'Unable to capture webcam images - Please try another device',
+        `Unable to capture webcam images - Please try another device ${enableImageTests}`,
       );
     } else {
       return context;
@@ -783,10 +783,10 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-
-    video.onloadedmetadata = () => {
+    if (!SmartCamera.playing) {
+      SmartCamera.playing = true;
       video.play();
-    };
+    }
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',

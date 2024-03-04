@@ -3,6 +3,7 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import '../../document-capture/src';
 import '../../selfie-capture/src';
+import '../../camera-permission/CameraPermission';
 
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 

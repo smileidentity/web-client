@@ -16,7 +16,6 @@ async function getPermissions(captureScreen) {
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
   } catch (error) {
-    console.error(error);
     captureScreen.removeAttribute('data-camera-ready');
     captureScreen.setAttribute(
       'data-camera-error',

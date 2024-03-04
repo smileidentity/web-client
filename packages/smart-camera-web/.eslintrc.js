@@ -26,9 +26,4 @@ module.exports = {
     'no-unused-vars': ['error', { args: 'after-used', ignoreRestSiblings: false, vars: 'all' }],
     'sort-keys': 'error',
   },
-  settings: {
-    'import/resolver': {
-      '../eslint-plugin-import-resolver.js': { someConfig: 1 },
-    },
-  },
 };

@@ -1,6 +1,3 @@
-# build packages
-build
-
 # Logs
 logs
 *.log
@@ -34,7 +31,6 @@ coverage
 #cypress test output
 cypress/screenshots
 cypress/videos
-packages/web-components/cypress/pages/instrumentation
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt

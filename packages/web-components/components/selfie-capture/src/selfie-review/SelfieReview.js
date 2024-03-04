@@ -98,6 +98,42 @@ function templateString() {
       #id-review-screen header p {
         margin-block: 0 !important;
       }
+      .id-video-container.portrait {
+        width: 100%;
+        position: relative;
+        height: calc(200px * 1.4);
+      }
+    
+      .id-video-container.portrait img {
+        width: calc(213px + 0.9rem);
+        height: 100%;
+        position: absolute;
+        top: 239px;
+        left: 161px;
+        padding-bottom: calc((214px * 1.4) / 3);
+        padding-top: calc((191px * 1.4) / 3);
+        object-fit: cover;
+    
+        transform: translateX(-50%) translateY(-50%);
+        z-index: 1;
+        block-size: 100%;
+      }
+    
+      .video-container,
+      .id-video-container.landscape {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+      }
+
+      .video-container img {
+        background-color: black;
+        position: absolute;
+        left: 50%;
+        height: calc(100% - 6px);
+        clip-path: ellipse(101px 118px);
+      }
+
       .description {
         color: var(--neutral-off-black, #2D2B2A);
         text-align: center;

@@ -3,6 +3,7 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import '../../document-capture/src';
 import '../../selfie-capture/src';
+import '../../camera-permission/CameraPermission';
 
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
@@ -10,9 +11,9 @@ function scwTemplateString() {
   return `
   ${styles}
   <div>
-    <camera-permission hidden ${this.showNavigation} ${this.hideBackToHost}></camera-permission>
-    <liveness-capture ${this.title} ${this.showNavigation} hidden ></liveness-capture>
-    <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  hidden></document-instruction>
+    <camera-permission ${this.showNavigation} ${this.hideBackToHost} ${this.hideAttribution} hidden></camera-permission>
+    <liveness-capture ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} hidden ></liveness-capture>
+    <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-instruction>
   </div>
 `;
 }
@@ -132,6 +133,14 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('document-capture-modes')
       ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
       : '';
+  }
+
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
+  }
+
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
   setActiveScreen(screen) {

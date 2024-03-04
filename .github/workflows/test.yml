@@ -48,3 +48,28 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+  web-components:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/web-components
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: run tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          start: npm start
+          working-directory: ./packages/web-components
+          wait-on: 'http://localhost:8000'
+      - name: upload test failure artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

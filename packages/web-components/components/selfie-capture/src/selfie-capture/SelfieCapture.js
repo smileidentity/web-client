@@ -585,7 +585,7 @@ async function getPermissions(captureScreen) {
     captureScreen?.removeAttribute('data-camera-ready');
     captureScreen?.setAttribute(
       'data-camera-error',
-      SmartCamera.handleError(error),
+      SmartCamera.handleCameraError(error),
     );
   }
 }
@@ -686,6 +686,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
       this._publishImages();
     } catch (error) {
+      console.error(error);
       // Todo: handle error
     }
   }
@@ -756,7 +757,7 @@ class SelfieCaptureScreen extends HTMLElement {
         return context;
       }
       throw new Error(
-        'Unable to capture webcam images - Please try another device',
+        `Unable to capture webcam images - Please try another device ${enableImageTests}`,
       );
     } else {
       return context;
@@ -781,7 +782,10 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
+    if (!SmartCamera.playing) {
+      SmartCamera.playing = true;
+      video.play();
+    }
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
@@ -874,22 +878,24 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.getAttribute('data-camera-error');
   }
 
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests');
+  }
+
   static get observedAttributes() {
     return [
       'title',
       'hidden',
       'show-navigation',
       'hide-back-to-host',
-      'data-camera-ready',
-      'data-camera-error',
+      // 'data-camera-ready',
+      // 'data-camera-error',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
     case 'title':
-    case 'data-camera-ready':
-    case 'data-camera-error':
     case 'hidden':
       this.shadowRoot.innerHTML = this.render();
       this.setUpEventListeners();

@@ -14,7 +14,7 @@ async function getPermissions(captureScreen) {
     captureScreen.removeAttribute('data-camera-ready');
     captureScreen.setAttribute(
       'data-camera-error',
-      SmartCamera.handleError(error),
+      SmartCamera.handleCameraError(error),
     );
   }
 }
@@ -30,8 +30,8 @@ class LivenessCapture extends HTMLElement {
             ${styles}
             <div>
             <selfie-instruction ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></selfie-instruction>
-            <selfie-capture hidden></selfie-capture>
-            <selfie-review hidden></selfie-review>
+            <selfie-capture ${this.showNavigation} ${this.disableImageTests} hidden></selfie-capture>
+            <selfie-review ${this.showNavigation} hidden></selfie-review>
             </div>
         `;
 
@@ -122,6 +122,10 @@ class LivenessCapture extends HTMLElement {
 
   get showNavigation() {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+  }
+
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
   }
 
   setActiveScreen(screen) {

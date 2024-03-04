@@ -95,10 +95,11 @@ document.querySelector('document-capture').addEventListener('imagesComputed', fu
 
 `DocumentCapture` relies on the following modules:
 
-- [document-instructions](./document-instructions/src/README.md)
-- [id-capture](./id-capture/src/README.md)
-- [id-review](./id-review/src/README.md)
-- [SmartCamera](/packages/smart-camera-web/README.md)
+- [document-instructions](./document-instructions/README.md)
+- [id-capture](./id-capture/README.md)
+- [id-review](./id-review/README.md)
+- [SmartCamera](../../../domain/camera/src/README.md)
+- [FileUpload](../../../domain/file-upload/README.md)
 
 These dependencies are automatically imported with the component.
 

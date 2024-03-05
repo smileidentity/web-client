@@ -24,7 +24,7 @@ async function getPermissions(captureScreen) {
   }
 }
 
-class DocumentCapture extends HTMLElement {
+class DocumentCaptureFlow extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
@@ -219,8 +219,8 @@ class DocumentCapture extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture')) {
-  customElements.define('document-capture', DocumentCapture);
+if ('customElements' in window && !customElements.get('document-capture-flow')) {
+  customElements.define('document-capture-flow', DocumentCaptureFlow);
 }
 
-export default DocumentCapture;
+export default DocumentCaptureFlow;

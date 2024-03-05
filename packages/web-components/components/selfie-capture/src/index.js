@@ -1,5 +1,5 @@
-import LivenessCapture from './LivenessCapture';
+import SelfieCaptureFlow from './SelfieCaptureFlow';
 import SelfieCapture from './selfie-capture/SelfieCapture';
 
-export default LivenessCapture;
+export default SelfieCaptureFlow;
 export { SelfieCapture };

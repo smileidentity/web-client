@@ -131,8 +131,8 @@ class SelfieCaptureFlow extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('liveness-capture-flow')) {
-  customElements.define('liveness-capture-flow', SelfieCaptureFlow);
+if ('customElements' in window && !customElements.get('selfie-capture-flow')) {
+  customElements.define('selfie-capture-flow', SelfieCaptureFlow);
 }
 
 export default SelfieCaptureFlow;

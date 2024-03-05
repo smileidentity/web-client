@@ -1,8 +1,6 @@
 class SmartCamera {
   static stream = null;
 
-  static playing = false;
-
   static async getMedia(constraints) {
     SmartCamera.stream = await navigator.mediaDevices.getUserMedia(constraints);
     return SmartCamera.stream;
@@ -20,7 +18,6 @@ class SmartCamera {
   static stopMedia() {
     if (SmartCamera.stream) {
       SmartCamera.stream.getTracks().forEach((track) => track.stop());
-      SmartCamera.playing = false;
       SmartCamera.stream = null;
     }
   }
@@ -37,7 +34,6 @@ class SmartCamera {
   }
 
   static handleCameraError(e) {
-    console.error(e);
     switch (e.name) {
     case 'NotAllowedError':
     case 'SecurityError':

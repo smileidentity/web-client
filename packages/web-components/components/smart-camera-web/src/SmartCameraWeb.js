@@ -13,7 +13,7 @@ function scwTemplateString() {
   <div>
     <camera-permission ${this.showNavigation} ${this.hideBackToHost} ${this.hideAttribution} hidden></camera-permission>
     <liveness-capture ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} hidden ></liveness-capture>
-    <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-instruction>
+    <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-instruction>
   </div>
 `;
 }

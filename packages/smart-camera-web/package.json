@@ -25,18 +25,14 @@
   "bugs": {
     "url": "https://github.com/smileidentity/smart-camera-web/issues"
   },
-  "dependencies": {
-    "@smileid/web-components": "file:../web-components"
-  },
   "homepage": "https://github.com/smileidentity/smart-camera-web#readme",
   "devDependencies": {
-    "@cypress/code-coverage": "^3.12.19",
+    "@cypress/code-coverage": "^3.12.26",
     "cypress": "^13.5.1",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-import": "^2.29.1",
-    "resolve.exports": "^2.0.2",
     "serve": "^14.2.1"
   }
 }

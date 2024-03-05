@@ -31,7 +31,11 @@ export const DocumentCaptureHideBackOfId = {
 
 export const DocumentCaptureAllowAttributes = {
   render: () => `
+<<<<<<<< HEAD:packages/web-components/components/document-capture/src/DocumentCaptureFlow.stories.js
         <document-capture-flow document-capture-flow-modes='camera,upload'>
+========
+        <document-capture-flow document-capture-modes='camera,upload'>
+>>>>>>>> f9f5b59 (revert unintended changes):packages/web-components/components/document-capture/src/DocumentCaptureFlow.js.stories.js
         </document-capture-flow>
     `,
 };

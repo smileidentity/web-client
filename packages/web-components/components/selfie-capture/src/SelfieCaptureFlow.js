@@ -19,7 +19,7 @@ async function getPermissions(captureScreen) {
   }
 }
 
-class LivenessCapture extends HTMLElement {
+class SelfieCaptureFlow extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
@@ -131,8 +131,8 @@ class LivenessCapture extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('liveness-capture')) {
-  customElements.define('liveness-capture', LivenessCapture);
+if ('customElements' in window && !customElements.get('liveness-capture-flow')) {
+  customElements.define('liveness-capture-flow', SelfieCaptureFlow);
 }
 
-export default LivenessCapture;
+export default SelfieCaptureFlow;

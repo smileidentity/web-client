@@ -1,7 +1,7 @@
 import validate from "validate.js";
 import { version as sdkVersion } from "../../package.json";
-import "@smileid/components/signature-pad";
-import "@smileid/components/navigation";
+import "@smileid/web-components/signature-pad";
+import "@smileid/web-components/navigation";
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit

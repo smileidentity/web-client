@@ -29,7 +29,17 @@ module.exports = {
   rules: {
     "class-methods-use-this": 0,
     "func-names": 0,
-    "import/no-extraneous-dependencies": ["error", { devDependencies: true }],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        devDependencies: [
+          "esbuild.js",
+          "cypress.config.js",
+          "**/*{.,_,-}{test,spec}.js", // tests where the extension or filename suffix denotes that it is a test
+        ],
+        optionalDependencies: false,
+      },
+    ],
     "max-len": 0,
     "no-console": ["error", { allow: ["error"] }],
     "no-param-reassign": 0,
@@ -42,5 +52,10 @@ module.exports = {
     camelcase: 0,
     indent: 0,
     strict: 0,
+  },
+  settings: {
+    "import/resolver": {
+      "../eslint-plugin-import-resolver.js": { someConfig: 1 },
+    },
   },
 };

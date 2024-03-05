@@ -142,7 +142,6 @@ function getHumanSize(numberOfBytes) {
     partner_params = { ...partnerParams, ...(config.partner_params || {}) };
   }
 
-  // eslint-disable-next-line consistent-return
   async function getDocuments() {
     try {
       const {
@@ -274,7 +273,6 @@ function getHumanSize(numberOfBytes) {
     );
   }
 
-  // eslint-disable-next-line no-shadow
   function initializeSession(documents) {
     loadDocuments(documents, DocumentReviewScreen);
     setActiveScreen(EntryScreen);
@@ -350,7 +348,6 @@ function getHumanSize(numberOfBytes) {
     false,
   );
 
-  // eslint-disable-next-line no-shadow
   function loadDocuments(documents, containerElement) {
     const placeholderElement = containerElement.querySelector(".document-list");
     const list = document.createElement("div");
@@ -472,7 +469,6 @@ function getHumanSize(numberOfBytes) {
     }
   }
 
-  // eslint-disable-next-line no-unused-vars
   function complete() {
     setActiveScreen(CompleteScreen);
     handleSuccess();

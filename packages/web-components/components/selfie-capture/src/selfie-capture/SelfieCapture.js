@@ -888,8 +888,6 @@ class SelfieCaptureScreen extends HTMLElement {
       'hidden',
       'show-navigation',
       'hide-back-to-host',
-      // 'data-camera-ready',
-      // 'data-camera-error',
     ];
   }
 

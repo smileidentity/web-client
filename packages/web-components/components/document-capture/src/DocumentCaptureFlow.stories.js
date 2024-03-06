@@ -31,7 +31,7 @@ export const DocumentCaptureHideBackOfId = {
 
 export const DocumentCaptureAllowAttributes = {
   render: () => `
-        <document-capture-flow document-capture-modes='camera,upload'>
+        <document-capture-flow document-capture-flow-modes='camera,upload'>
         </document-capture-flow>
     `,
 };

@@ -80,7 +80,7 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       this.setActiveScreen(this.livenessCapture);
     }
-    this.cameraPermission.addEventListener('camera-permission-granted', () => {
+    this.cameraPermission.addEventListener('camera-permission.granted', () => {
       this.setActiveScreen(this.livenessCapture);
       this.livenessCapture.removeAttribute('data-camera-error');
       this.livenessCapture.setAttribute('data-camera-ready', true);

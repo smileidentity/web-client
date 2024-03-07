@@ -146,7 +146,7 @@ class ComboboxTrigger extends HTMLElement {
       this.parentElement.querySelectorAll('smileid-combobox-option'),
     );
     this.options.forEach((node) => {
-      node.addEventListener('Combobox::Option::Select', this.handleSelection);
+      node.addEventListener('combobox.option.select', this.handleSelection);
     });
   }
 
@@ -163,7 +163,7 @@ class ComboboxTrigger extends HTMLElement {
     if (this.options) {
       this.options.forEach((node) => {
         node.removeEventListener(
-          'Combobox::Option::Select',
+          'combobox.option.select',
           this.handleSelection,
         );
       });
@@ -253,7 +253,7 @@ class ComboboxTrigger extends HTMLElement {
         this.inputTrigger.value = '';
 
         this.listbox.dispatchEvent(
-          new CustomEvent('Combobox::Listbox::Filter', { detail: '' }),
+          new CustomEvent('combobox.listbox.filter', { detail: '' }),
         );
       }
     }
@@ -282,7 +282,7 @@ class ComboboxTrigger extends HTMLElement {
 
     this.toggleExpansionState();
     this.parentElement.dispatchEvent(
-      new CustomEvent('change', {
+      new CustomEvent('combobox.change', {
         detail: {
           value: event.detail.value,
         },
@@ -296,14 +296,14 @@ class ComboboxTrigger extends HTMLElement {
     }
 
     this.listbox.dispatchEvent(
-      new CustomEvent('Combobox::Listbox::Filter', { detail: value }),
+      new CustomEvent('combobox.listbox.filter', { detail: value }),
     );
   }
 
   focusListbox(direction) {
     this.resetListbox();
     this.listbox.dispatchEvent(
-      new CustomEvent('Combobox::Listbox::Focus', {
+      new CustomEvent('combobox.listbox.focus', {
         detail: {
           direction,
         },
@@ -312,7 +312,7 @@ class ComboboxTrigger extends HTMLElement {
   }
 
   resetListbox() {
-    this.listbox.dispatchEvent(new CustomEvent('Combobox::Listbox::Reset'));
+    this.listbox.dispatchEvent(new CustomEvent('combobox.listbox.reset'));
   }
 }
 
@@ -343,9 +343,9 @@ class ComboboxListbox extends HTMLElement {
     this.setAttribute('role', 'listbox');
     this.setAttribute('id', generateId('listbox'));
 
-    this.addEventListener('Combobox::Listbox::Filter', this.handleFilter);
-    this.addEventListener('Combobox::Listbox::Focus', this.handleFocus);
-    this.addEventListener('Combobox::Listbox::Reset', this.handleReset);
+    this.addEventListener('combobox.listbox.filter', this.handleFilter);
+    this.addEventListener('combobox.listbox.focus', this.handleFocus);
+    this.addEventListener('combobox.listbox.reset', this.handleReset);
 
     this.triggers = Array.from(
       this.parentElement.querySelectorAll(
@@ -364,7 +364,7 @@ class ComboboxListbox extends HTMLElement {
 
     this.optionNodes.forEach((node) => {
       node.addEventListener(
-        'Combobox::Option::Select',
+        'combobox.option.select',
         this.handleOptionSelection,
       );
     });
@@ -375,12 +375,12 @@ class ComboboxListbox extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.removeEventListener('Combobox::Listbox::Filter', this.handleFilter);
-    this.removeEventListener('Combobox::Listbox::Focus', this.handleFocus);
-    this.removeEventListener('Combobox::Listbox::Reset', this.handleReset);
+    this.removeEventListener('combobox.listbox.filter', this.handleFilter);
+    this.removeEventListener('combobox.listbox.focus', this.handleFocus);
+    this.removeEventListener('combobox.listbox.reset', this.handleReset);
     this.optionNodes.forEach((node) => {
       node.removeEventListener(
-        'Combobox::Option::Select',
+        'combobox.option.select',
         this.handleOptionSelection,
       );
     });
@@ -549,7 +549,7 @@ class ComboboxOption extends HTMLElement {
     this.setAttribute('aria-selected', true);
 
     this.dispatchEvent(
-      new CustomEvent('Combobox::Option::Select', {
+      new CustomEvent('combobox.option.select', {
         detail: {
           id: this.getAttribute('id'),
           label: this.label,

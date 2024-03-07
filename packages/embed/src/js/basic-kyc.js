@@ -490,7 +490,7 @@ import { version as sdkVersion } from "../../package.json";
       </smileid-combobox-listbox>
     `;
     placeholderElement.replaceWith(autocomplete);
-    autocomplete.addEventListener("change", (e) => {
+    autocomplete.addEventListener("combobox.change", (e) => {
       id_info.bank_code = e.detail ? e.detail.value : "";
     });
 

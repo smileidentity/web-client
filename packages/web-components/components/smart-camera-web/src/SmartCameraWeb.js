@@ -103,7 +103,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
   }
 

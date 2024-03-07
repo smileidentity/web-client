@@ -766,6 +766,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
+    this.init();
     const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {
@@ -783,10 +784,10 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    if (!SmartCamera.playing) {
-      SmartCamera.playing = true;
+
+    video.onloadedmetadata = () => {
       video.play();
-    }
+    };
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',

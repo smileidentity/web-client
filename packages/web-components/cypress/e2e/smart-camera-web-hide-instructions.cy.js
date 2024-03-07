@@ -1,42 +1,70 @@
 context('SmartCameraWeb', () => {
   beforeEach(() => {
-    cy.visit('/smart-camera-web');
+    cy.visit('/smart-camera-web-hide-instructions');
   });
 
-  it('should start from the instructions screen', () => {
+  it('should start from the request camera screen', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('be.visible');
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .should('contain.text', "Next, we'll take a quick selfie");
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('selfie-instruction')
-      .shadow()
-      .find('#allow')
-      .click();
+      .should('contain.text', 'Request Camera Access');
   });
 
-  it('should switch from the instruction screen to the camera screen on clicking "Allow"', () => {
+  it('should switch from the request screen to the selfie capture screen on clicking "Request Camera Access"', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
+      .find('camera-permission')
+      .shadow()
+      .should('not.be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
       .find('selfie-instruction')
+      .should('not.be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .should('be.visible');
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .should('contain.text', 'Take a Selfie');
+  });
+
+  it('should have a 8000ms timer', () => {
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('camera-permission')
+      .shadow()
+      .find('#request-camera-access')
+      .click();
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -74,19 +102,20 @@ context('SmartCameraWeb', () => {
       .should('be.visible');
   });
 
-  it('should have a timer for the capture', () => {
+  it('should switch from the selfie screen to the review screen on clicking "Take Selfie"', () => {
+    cy.clock();
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -108,7 +137,7 @@ context('SmartCameraWeb', () => {
       .find('#start-image-capture')
       .click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy
       .get('smart-camera-web')
@@ -128,15 +157,15 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -177,20 +206,20 @@ context('SmartCameraWeb', () => {
       .should('not.be.visible');
   });
 
-  it('should switch from the review screen back to the selfie instruction screen on clicking "Re-take selfie"', () => {
+  it('should switch from the review screen back to the selfie capture screen on clicking "Re-take selfie"', () => {
     cy.clock();
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -245,7 +274,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('selfie-capture')
       .should('be.visible');
   });
 
@@ -254,15 +283,15 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -324,15 +353,15 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .shadow()
-      .find('#allow')
+      .find('#request-camera-access')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('not.be.visible');
 
     cy
@@ -354,7 +383,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('camera-permission')
       .should('be.visible');
   });
 });

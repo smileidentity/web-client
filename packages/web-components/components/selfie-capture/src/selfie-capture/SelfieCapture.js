@@ -607,11 +607,11 @@ class SelfieCaptureScreen extends HTMLElement {
     this.videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
     );
-    this.init();
+
     this.setUpEventListeners();
   }
 
-  async init() {
+  init() {
     this._videoStreamDurationInMS = 7800;
     this._imageCaptureIntervalInMS = 200;
 
@@ -765,6 +765,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
+    this.init();
     const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {
@@ -782,10 +783,10 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    if (!SmartCamera.playing) {
-      SmartCamera.playing = true;
+
+    video.onloadedmetadata = () => {
       video.play();
-    }
+    };
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
@@ -884,15 +885,17 @@ class SelfieCaptureScreen extends HTMLElement {
 
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
+      'data-camera-ready',
+      // 'title',
+      // 'hidden',
+      // 'show-navigation',
+      // 'hide-back-to-host',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
+    case 'data-camera-ready':
     case 'title':
     case 'hidden':
       this.shadowRoot.innerHTML = this.render();

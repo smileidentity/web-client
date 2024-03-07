@@ -11,7 +11,8 @@ function scwTemplateString() {
   return `
   ${styles}
   <div>
-    <selfie-capture-flow ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ></selfie-capture-flow>
+    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <selfie-capture-flow ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-flow>
     <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-flow>
   </div>
 `;
@@ -74,7 +75,16 @@ class SmartCameraWeb extends HTMLElement {
     this.livenessCapture = this.shadowRoot.querySelector('selfie-capture-flow');
     this.documentCapture = this.shadowRoot.querySelector('document-capture-flow');
 
-    this.setActiveScreen(this.livenessCapture);
+    if (this.hideInstructions) {
+      this.setActiveScreen(this.cameraPermission);
+    } else {
+      this.setActiveScreen(this.livenessCapture);
+    }
+    this.cameraPermission.addEventListener('camera-permission-granted', () => {
+      this.setActiveScreen(this.livenessCapture);
+      this.livenessCapture.removeAttribute('data-camera-error');
+      this.livenessCapture.setAttribute('data-camera-ready', true);
+    });
 
     this.livenessCapture.addEventListener('imagesComputed', (event) => {
       this._data.images = event.detail.images;
@@ -98,7 +108,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get hideInstructions() {
-    return this.hasAttribute('hide-instructions');
+    return this.hasAttribute('hide-instructions') ? 'hide-instructions' : '';
   }
 
   get hideBackOfId() {

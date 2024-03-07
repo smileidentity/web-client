@@ -29,9 +29,9 @@ class SelfieCaptureFlow extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-instruction ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></selfie-instruction>
-            <selfie-capture ${this.showNavigation} ${this.disableImageTests} hidden></selfie-capture>
-            <selfie-review ${this.showNavigation} hidden></selfie-review>
+            <selfie-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideInstructions ? 'hidden' : ''}></selfie-instruction>
+            <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+            <selfie-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-review>
             </div>
         `;
 
@@ -46,8 +46,11 @@ class SelfieCaptureFlow extends HTMLElement {
     this.selfieCapture = this.querySelector('selfie-capture');
     this.selfieReview = this.querySelector('selfie-review');
 
-    if (this.hideInstructions) {
+    if (this.hideInstructions && !this.hasAttribute('hidden')) {
       getPermissions(this.selfieCapture);
+    }
+
+    if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
     } else {
       this.setActiveScreen(this.selfieInstruction);
@@ -116,6 +119,10 @@ class SelfieCaptureFlow extends HTMLElement {
     return this.hasAttribute('hide-instructions');
   }
 
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+  }
+
   get hideBackOfId() {
     return this.hasAttribute('hide-back-of-id');
   }
@@ -132,6 +139,26 @@ class SelfieCaptureFlow extends HTMLElement {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
+  }
+
+  static get observedAttributes() {
+    return [
+      'title',
+      'hidden',
+      'show-navigation',
+      'hide-back-to-host',
+    ];
+  }
+
+  attributeChangedCallback(name) {
+    switch (name) {
+    case 'title':
+    case 'hidden':
+      this.connectedCallback();
+      break;
+    default:
+      break;
+    }
   }
 }
 

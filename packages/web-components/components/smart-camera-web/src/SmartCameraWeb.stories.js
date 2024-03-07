@@ -13,6 +13,13 @@ export const SmartCameraWeb = {
     `,
 };
 
+export const SmartCameraWebWithOutInstructions = {
+  render: () => `
+        <smart-camera-web hide-instructions>
+        </smart-camera-web>
+    `,
+};
+
 export const SmartCameraWebWithOutNavigation = {
   render: () => `
         <smart-camera-web>

@@ -298,7 +298,7 @@ class IdReview extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('document-review.cancelled'));
   }
 
   closeWindow() {
@@ -343,14 +343,14 @@ class IdReview extends HTMLElement {
 
     this.selectIDImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('IdReview::SelectImage', {
+        new CustomEvent('document-review.accepted', {
           detail: {},
         }),
       );
     });
     this.reCaptureIDImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('IdReview::ReCaptureID', {
+        new CustomEvent('document-review.rejected', {
           detail: {},
         }),
       );

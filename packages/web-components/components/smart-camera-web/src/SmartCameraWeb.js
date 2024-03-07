@@ -91,7 +91,7 @@ class SmartCameraWeb extends HTMLElement {
       this.setActiveScreen(this.documentCapture);
     });
 
-    this.documentCapture.addEventListener('imagesComputed', (event) => {
+    this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
     });
   }

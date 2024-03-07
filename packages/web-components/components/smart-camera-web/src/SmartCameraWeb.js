@@ -86,7 +86,7 @@ class SmartCameraWeb extends HTMLElement {
       this.livenessCapture.setAttribute('data-camera-ready', true);
     });
 
-    this.livenessCapture.addEventListener('imagesComputed', (event) => {
+    this.livenessCapture.addEventListener('selfie-capture-screens.publish', (event) => {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });

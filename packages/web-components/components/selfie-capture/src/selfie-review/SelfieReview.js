@@ -294,7 +294,7 @@ class SelfieReview extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('selfie-review.cancelled'));
   }
 
   closeWindow() {
@@ -337,14 +337,14 @@ class SelfieReview extends HTMLElement {
 
     this.selectImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('SelfieReview::SelectImage', {
+        new CustomEvent('selfie-review.accepted', {
           detail: {},
         }),
       );
     });
     this.reCaptureImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('SelfieReview::ReCapture', {
+        new CustomEvent('selfie-review.rejected', {
           detail: {},
         }),
       );

@@ -93,6 +93,7 @@ class SmartCameraWeb extends HTMLElement {
 
     this.documentCapture.addEventListener('imagesComputed', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
+      this._publishSelectedImages();
     });
   }
 

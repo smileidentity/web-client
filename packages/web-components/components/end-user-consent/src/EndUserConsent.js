@@ -646,15 +646,15 @@ class EndUserConsent extends HTMLElement {
     this.confirmConsentRejectionButton.addEventListener('click', (e) => this.handleConsentRejection(e));
 
     this.totpConsentApp.addEventListener(
-      'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
+      'end-user-consent.totp.denied.contact-methods-outdated',
       (e) => this.handleTotpConsentEvents(e),
     );
     this.totpConsentApp.addEventListener(
-      'SmileIdentity::ConsentGranted::TOTP',
+      'end-user-consent.totp.granted',
       (e) => this.handleTotpConsentEvents(e),
     );
     this.totpConsentApp.addEventListener(
-      'SmileIdentity::ConsentDenied::Back',
+      'end-user-consent.totp.cancelled',
       (e) => this.handleBackEvents(e),
     );
 

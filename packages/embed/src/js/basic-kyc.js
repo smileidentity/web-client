@@ -388,7 +388,7 @@ import { version as sdkVersion } from "../../package.json";
       initiateDemoMode();
     }
     EndUserConsent.addEventListener(
-      "SmileIdentity::Exit",
+      "end-user-consent.cancelled",
       () => {
         setActiveScreen(SelectIDType);
       },
@@ -396,7 +396,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "SmileIdentity::ConsentGranted",
+      "end-user-consent.granted",
       (event) => {
         consent_information = event.detail;
 
@@ -408,7 +408,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "SmileIdentity::ConsentGranted::TOTP",
+      "end-user-consent.totp.granted",
       (event) => {
         consent_information = event.detail;
 
@@ -423,7 +423,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "SmileIdentity::ConsentDenied",
+      "end-user-consent.denied",
       () => {
         referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
         closeWindow();
@@ -432,7 +432,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
+      "end-user-consent.totp.denied.contact-methods-outdated",
       (event) => {
         referenceWindow.postMessage(event.detail, "*");
         closeWindow();

@@ -746,7 +746,7 @@ class EndUserConsent extends HTMLElement {
         this.pages.push(this.consentScreen);
       } else {
         this.dispatchEvent(
-          new CustomEvent('SmileIdentity::ConsentGranted', {
+          new CustomEvent('end-user-consent.granted', {
             detail: {
               consented: {
                 contact_information: granted,
@@ -763,7 +763,7 @@ class EndUserConsent extends HTMLElement {
   }
 
   handleConsentRejection() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::ConsentDenied'));
+    this.dispatchEvent(new CustomEvent('end-user-consent.denied'));
   }
 
   handleTotpConsentEvents(e) {
@@ -780,7 +780,7 @@ class EndUserConsent extends HTMLElement {
     if (page) {
       this.setActiveScreen(page);
     } else {
-      this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+      this.dispatchEvent(new CustomEvent('end-user-consent.cancelled'));
     }
   }
 

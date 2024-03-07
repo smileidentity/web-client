@@ -620,7 +620,7 @@ class TotpConsent extends HTMLElement {
       this.setActiveScreen(page);
     } else {
       this.dispatchEvent(
-        new CustomEvent('SmileIdentity::ConsentDenied::Back', {}),
+        new CustomEvent('end-user-consent.denied.cancelled', {}),
       );
     }
   }
@@ -879,7 +879,7 @@ class TotpConsent extends HTMLElement {
   }
 
   handleTotpConsentGrant() {
-    const customEvent = new CustomEvent('SmileIdentity::ConsentGranted::TOTP', {
+    const customEvent = new CustomEvent('end-user-consent.totp.granted', {
       detail: {
         consented: {
           contact_information: true,
@@ -895,7 +895,7 @@ class TotpConsent extends HTMLElement {
   }
 
   handleTotpConsentContactMethodsOutdated() {
-    const tag = 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated';
+    const tag = 'end-user-consent.totp.denied.contact-methods-outdated';
     const customEvent = new CustomEvent(tag, {
       detail: {
         data: {

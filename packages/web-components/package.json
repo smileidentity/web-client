@@ -5,10 +5,10 @@
   "exports": {
     ".": "./index.js",
     "./combobox": "./components/combobox/src/index.js",
-    "./document-capture": "./components/document-capture/src/index.js",
+    "./document-capture": "./components/document/src/index.js",
     "./end-user-consent": "./components/end-user-consent/src/index.js",
     "./navigation": "./components/navigation/src/index.js",
-    "./selfie-capture": "./components/selfie-capture/src/index.js",
+    "./selfie-capture": "./components/selfie/src/index.js",
     "./signature-pad": "./components/signature-pad/src/index.js",
     "./totp-consent": "./components/totp-consent/src/index.js",
     "./smart-camera-web": "./components/smart-camera-web/src/SmartCameraWeb.js"

@@ -51,8 +51,8 @@ function templateString() {
 
 
 
-      #id-capture-screen,
-      #back-of-id-capture-screen {
+      #document-capture-screen,
+      #back-of-document-capture-screen {
         block-size: 45rem;
         padding-block: 2rem;
         display: flex;
@@ -62,7 +62,7 @@ function templateString() {
     justify-content: space-between;
       }
 
-      #id-capture-screen header p {
+      #document-capture-screen header p {
         margin-block: 0 !important;
       }
 
@@ -298,7 +298,7 @@ function templateString() {
   `;
 }
 
-class IdCaptureScreen extends HTMLElement {
+class DocumentCapture extends HTMLElement {
   constructor() {
     super();
     this.templateString = templateString.bind(this);
@@ -616,8 +616,8 @@ class IdCaptureScreen extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('id-capture')) {
-  window.customElements.define('id-capture', IdCaptureScreen);
+if ('customElements' in window && !customElements.get('document-capture')) {
+  window.customElements.define('document-capture', DocumentCapture);
 }
 
-export default IdCaptureScreen;
+export default DocumentCapture;

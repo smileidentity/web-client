@@ -2,26 +2,26 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import './index';
 
 const meta = {
-  component: 'id-capture',
+  component: 'document-capture',
   render: () => `
-    <id-capture
+    <document-capture
         show-navigation
         document-capture-modes="camera,upload"
     >
-    </id-capture>
+    </document-capture>
 `,
 };
 
 export default meta;
 
-export const IdCaptureScreenPendingPermission = {
+export const DocumentCapturePendingPermission = {
   loaders: [
     async () => ({
       'data-camera-ready': SmartCamera.stopMedia(),
     }),
   ],
 };
-export const IdCaptureScreen = {
+export const DocumentCapture = {
   loaders: [
     async () => ({
       'data-camera-ready': await SmartCamera.getMedia({

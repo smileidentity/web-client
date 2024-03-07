@@ -11,9 +11,8 @@ function scwTemplateString() {
   return `
   ${styles}
   <div>
-    <camera-permission ${this.showNavigation} ${this.hideBackToHost} ${this.hideAttribution} hidden></camera-permission>
-    <liveness-capture ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} hidden ></liveness-capture>
-    <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-instruction>
+    <selfie-capture-flow ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ></selfie-capture-flow>
+    <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-flow>
   </div>
 `;
 }
@@ -72,19 +71,10 @@ class SmartCameraWeb extends HTMLElement {
 
   setUpEventListeners() {
     this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
-    this.livenessCapture = this.shadowRoot.querySelector('liveness-capture');
-    this.documentCapture = this.shadowRoot.querySelector('document-capture');
+    this.livenessCapture = this.shadowRoot.querySelector('selfie-capture-flow');
+    this.documentCapture = this.shadowRoot.querySelector('document-capture-flow');
 
-    if (SmartCamera.stream) {
-      this.setActiveScreen(this.livenessCapture);
-    } else {
-      this.setActiveScreen(this.cameraPermission);
-    }
-    this.cameraPermission.addEventListener('camera-permission-granted', () => {
-      this.setActiveScreen(this.livenessCapture);
-      this.livenessCapture.removeAttribute('data-camera-error');
-      this.livenessCapture.setAttribute('data-camera-ready', true);
-    });
+    this.setActiveScreen(this.livenessCapture);
 
     this.livenessCapture.addEventListener('imagesComputed', (event) => {
       this._data.images = event.detail.images;

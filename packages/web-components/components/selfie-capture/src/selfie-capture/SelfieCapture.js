@@ -766,7 +766,6 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
-    this.init();
     const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {

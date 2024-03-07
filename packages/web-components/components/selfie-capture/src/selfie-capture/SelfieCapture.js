@@ -608,8 +608,6 @@ class SelfieCaptureScreen extends HTMLElement {
       '.video-container > .video',
     );
     this.init();
-
-    this.setUpEventListeners();
   }
 
   init() {
@@ -623,6 +621,8 @@ class SelfieCaptureScreen extends HTMLElement {
       },
     };
     this._rawImages = [];
+
+    this.setUpEventListeners();
   }
 
   reset() {
@@ -885,21 +885,23 @@ class SelfieCaptureScreen extends HTMLElement {
 
   static get observedAttributes() {
     return [
+      'data-camera-error',
       'data-camera-ready',
-      // 'title',
-      // 'hidden',
-      // 'show-navigation',
-      // 'hide-back-to-host',
+      'hidden',
+      'hide-back-to-host',
+      'show-navigation',
+      'title',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
+    case 'data-camera-error':
     case 'data-camera-ready':
-    case 'title':
     case 'hidden':
+    case 'title':
       this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
+      this.init();
       break;
     default:
       break;

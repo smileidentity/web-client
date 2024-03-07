@@ -607,6 +607,7 @@ class SelfieCaptureScreen extends HTMLElement {
     this.videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
     );
+    this.init();
 
     this.setUpEventListeners();
   }
@@ -765,7 +766,6 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
-    this.init();
     const videoExists = this.shadowRoot.querySelector('video');
     let video = null;
     if (videoExists) {

@@ -620,7 +620,7 @@ class TotpConsent extends HTMLElement {
       this.setActiveScreen(page);
     } else {
       this.dispatchEvent(
-        new CustomEvent('end-user-consent.denied.cancelled', {}),
+        new CustomEvent('end-user-consent.totp.cancelled', {}),
       );
     }
   }

@@ -440,6 +440,14 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
+      "end-user-consent.totp.cancelled",
+      () => {
+        setActiveScreen(SelectIDType);
+      },
+      false,
+    );
+
+    EndUserConsent.addEventListener(
       "end-user-consent.granted",
       (event) => {
         consent_information = event.detail;

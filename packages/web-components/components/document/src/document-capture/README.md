@@ -9,7 +9,7 @@ The `IdCapture` is a custom web component designed to capture documents using a 
 To use the IdCapture component, you need to import it into your JavaScript file:
 
 ```js
-import '@smileid/components/id-capture';
+import '@smileid/components/document-capture';
 ```
 
 ### Using the Component
@@ -17,7 +17,7 @@ import '@smileid/components/id-capture';
 You can use the IdCapture component in your HTML like any other HTML element:
 
 ```html
-<id-capture></id-capture>
+<document-capture></document-capture>
 ```
 
 ### IdCapture Web Component Attributes
@@ -31,7 +31,7 @@ This attribute, when present, hides the option to capture the back of the ID. It
 Usage:
 
 ```html
-<id-capture hide-back-of-id></id-capture>
+<document-capture hide-back-of-id></document-capture>
 ```
 
 #### show-navigation
@@ -41,7 +41,7 @@ This attribute, when present, shows the navigation controls for the document cap
 Usage:
 
 ```html
-<id-capture show-navigation></id-capture>
+<document-capture show-navigation></document-capture>
 ```
 
 ### Permissions
@@ -69,7 +69,7 @@ To receive the images after they have been captured, you can listen to the custo
 Usage:
 
 ```js
-document.querySelector('id-capture').addEventListener('IDCapture::ImageCaptured', function(event) {
+document.querySelector('document-capture').addEventListener('IDCapture::ImageCaptured', function(event) {
  console.log(event.detail);
 });
 ```

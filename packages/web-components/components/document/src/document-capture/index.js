@@ -1,3 +1,3 @@
-import IdCaptureScreen from './DocumentCapture';
+import DocumentCapture from './DocumentCapture';
 
-export default IdCaptureScreen;
+export default DocumentCapture;

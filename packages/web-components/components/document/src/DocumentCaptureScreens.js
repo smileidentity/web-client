@@ -35,15 +35,15 @@ class DocumentCaptureScreens extends HTMLElement {
       ${styles}
       <div>
       <document-capture-instructions ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
-      <id-capture side-of-id='Front'
+      <document-capture side-of-id='Front'
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
       ${this.documentCaptureModes}
-      ></id-capture>
+      ></document-capture>
       <document-capture-instructions id='document-capture-instructions-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
-      <id-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
+      <document-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
       ${this.documentCaptureModes}
       hidden 
-      ></id-capture>
+      ></document-capture>
       <document-review hidden></document-review>
       <document-review id='back-of-document-review' hidden></document-review>
       </div>
@@ -60,7 +60,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack = this.querySelector(
       '#document-capture-instructions-back',
     );
-    this.idCapture = this.querySelector('id-capture');
+    this.idCapture = this.querySelector('document-capture');
     this.idReview = this.querySelector('document-review');
     this.idCaptureBack = this.querySelector('#back-of-id');
     this.backOfIdReview = this.querySelector('#back-of-document-review');

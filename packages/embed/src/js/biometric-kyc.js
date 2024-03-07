@@ -479,7 +479,7 @@ import { version as sdkVersion } from "../../package.json";
     EndUserConsent.addEventListener(
       "end-user-consent.totp.denied.contact-methods-outdated",
       (event) => {
-        referenceWindow.postMessage(event.detail, "*");
+        referenceWindow.postMessage("SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated", "*");
         closeWindow();
       },
       false,

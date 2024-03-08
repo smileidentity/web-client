@@ -2,7 +2,7 @@
 
 These components can be used to capture id document or liveness images
 
-1. [`document-capture`](./document/README.md)
+1. [`document-capture-screens`](./document/README.md)
 2. [`selfie-capture-screens`](./selfie/README.md)
 
 ## Orchestration

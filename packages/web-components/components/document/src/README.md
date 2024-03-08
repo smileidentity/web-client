@@ -93,7 +93,7 @@ document.querySelector('document-capture').addEventListener('imagesComputed', fu
 
 ### Dependencies
 
-`DocumentCapture` relies on the following modules:
+`DocumentCaptureScreens` relies on the following modules:
 
 - [document-instructions](./document-instructions/README.md)
 - [document-capture](./document-capture/README.md)

@@ -80,18 +80,18 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       this.setActiveScreen(this.livenessCapture);
     }
-    this.cameraPermission.addEventListener('camera-permission-granted', () => {
+    this.cameraPermission.addEventListener('camera-permission.granted', () => {
       this.setActiveScreen(this.livenessCapture);
       this.livenessCapture.removeAttribute('data-camera-error');
       this.livenessCapture.setAttribute('data-camera-ready', true);
     });
 
-    this.livenessCapture.addEventListener('imagesComputed', (event) => {
+    this.livenessCapture.addEventListener('selfie-capture-screens.publish', (event) => {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });
 
-    this.documentCapture.addEventListener('imagesComputed', (event) => {
+    this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
       this._publishSelectedImages();
     });
@@ -104,7 +104,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
   }
 

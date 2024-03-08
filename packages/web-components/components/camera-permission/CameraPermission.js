@@ -123,9 +123,9 @@ class CameraPermission extends HTMLElement {
           audio: false,
           video: true,
         });
-        this.dispatchEvent(new CustomEvent('camera-permission-granted'));
+        this.dispatchEvent(new CustomEvent('camera-permission.granted'));
       } catch (error) {
-        this.dispatchEvent(new CustomEvent('camera-permission-denied', { detail: error }));
+        this.dispatchEvent(new CustomEvent('camera-permission.denied', { detail: error }));
         errorMessage.textContent = SmartCamera.handleCameraError(error);
       }
       permissionButton.removeAttribute('disabled');

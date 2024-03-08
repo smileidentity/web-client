@@ -87,14 +87,14 @@ class DocumentCaptureFlow extends HTMLElement {
 
   setUpEventListeners() {
     this.documentInstruction.addEventListener(
-      'DocumentInstruction::StartCamera',
+      'document-capture-instructions.capture',
       async () => {
         this.setActiveScreen(this.idCapture);
         await getPermissions(this.idCapture);
       },
     );
     this.documentInstruction.addEventListener(
-      'DocumentInstruction::DocumentChange',
+      'document-capture-instructions.upload',
       async (event) => {
         this.idReview.setAttribute('data-image', event.detail.image);
         this._data.images.push({
@@ -105,7 +105,7 @@ class DocumentCaptureFlow extends HTMLElement {
       },
     );
 
-    this.idCapture.addEventListener('IDCapture::ImageCaptured', (event) => {
+    this.idCapture.addEventListener('document-capture.publish', (event) => {
       this.idReview.setAttribute('data-image', event.detail.image);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -115,7 +115,7 @@ class DocumentCaptureFlow extends HTMLElement {
       this.setActiveScreen(this.idReview);
     });
 
-    this.idReview.addEventListener('IdReview::ReCaptureID', async () => {
+    this.idReview.addEventListener('document-review.rejected', async () => {
       this.idReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -126,7 +126,7 @@ class DocumentCaptureFlow extends HTMLElement {
       }
     });
 
-    this.idReview.addEventListener('IdReview::SelectImage', async () => {
+    this.idReview.addEventListener('document-review.accepted', async () => {
       if (this.hideBackOfId) {
         this._publishSelectedImages();
       } else if (this.hideInstructions) {
@@ -138,7 +138,7 @@ class DocumentCaptureFlow extends HTMLElement {
     });
 
     this.documentInstructionBack.addEventListener(
-      'DocumentInstruction::StartCamera',
+      'document-capture-instructions.capture',
       async () => {
         this.setActiveScreen(this.idCaptureBack);
         await getPermissions(this.idCaptureBack);
@@ -146,7 +146,7 @@ class DocumentCaptureFlow extends HTMLElement {
     );
 
     this.documentInstructionBack.addEventListener(
-      'DocumentInstruction::DocumentChange',
+      'document-capture-instructions.upload',
       async (event) => {
         this.idReview.setAttribute('data-image', event.detail.image);
         this._data.images.push({
@@ -156,7 +156,7 @@ class DocumentCaptureFlow extends HTMLElement {
         this.setActiveScreen(this.backOfIdReview);
       },
     );
-    this.idCaptureBack.addEventListener('IDCapture::ImageCaptured', (event) => {
+    this.idCaptureBack.addEventListener('document-capture.publish', (event) => {
       this.backOfIdReview.setAttribute('data-image', event.detail.image);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -166,7 +166,7 @@ class DocumentCaptureFlow extends HTMLElement {
       SmartCamera.stopMedia();
     });
 
-    this.backOfIdReview.addEventListener('IdReview::ReCaptureID', async () => {
+    this.backOfIdReview.addEventListener('document-review.rejected', async () => {
       this.backOfIdReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -177,14 +177,14 @@ class DocumentCaptureFlow extends HTMLElement {
       }
     });
 
-    this.backOfIdReview.addEventListener('IdReview::SelectImage', () => {
+    this.backOfIdReview.addEventListener('document-review.accepted', () => {
       this._publishSelectedImages();
     });
   }
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('document-capture-screens.publish', { detail: this._data }),
     );
   }
 

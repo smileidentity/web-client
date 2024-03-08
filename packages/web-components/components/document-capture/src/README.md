@@ -68,7 +68,7 @@ Errors during permission requests or document capture are managed by the compone
 
 ### Event Handlers
 
-Capture events emit `imagesComputed`, providing captured images and metadata:
+Capture events emit `document-capture-screens.publish`, providing captured images and metadata:
 
 ```json
 {
@@ -86,7 +86,7 @@ Capture events emit `imagesComputed`, providing captured images and metadata:
 To handle this event:
 
 ```js
-document.querySelector('document-capture').addEventListener('imagesComputed', function(event) {
+document.querySelector('document-capture').addEventListener('document-capture-screens.publish', function(event) {
   console.log(event.detail);
 });
 ```

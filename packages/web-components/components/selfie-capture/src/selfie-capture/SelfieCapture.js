@@ -723,7 +723,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _publishImages() {
     this.dispatchEvent(
-      new CustomEvent('SelfieCapture::ImageCaptured', {
+      new CustomEvent('selfie-capture.publish', {
         detail: this._data,
       }),
     );
@@ -909,7 +909,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('selfie-capture.cancelled'));
   }
 
   closeWindow() {

@@ -70,7 +70,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .should('be.visible');
   });
 
@@ -120,7 +120,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .should('be.visible');
   });
 
@@ -224,13 +224,13 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .should('be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .shadow()
       .find('#re-capture-image')
       .click();
@@ -238,7 +238,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .shadow()
       .should('not.be.visible');
 
@@ -296,13 +296,13 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .should('be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .shadow()
       .find('#select-id-image')
       .click();
@@ -310,7 +310,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-review')
+      .find('selfie-capture-review')
       .shadow()
       .should('not.be.visible');
   });

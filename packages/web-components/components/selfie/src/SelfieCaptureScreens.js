@@ -1,6 +1,6 @@
 import './selfie-capture';
-import './selfie-instructions';
-import './selfie-review';
+import './selfie-capture-instructions';
+import './selfie-capture-review';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import { version as COMPONENTS_VERSION } from '../../../package.json';
@@ -31,7 +31,7 @@ class SelfieCaptureScreens extends HTMLElement {
             <div>
             <selfie-capture-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideInstructions ? 'hidden' : ''}></selfie-capture-instruction>
             <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
-            <selfie-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-review>
+            <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -44,7 +44,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
     this.selfieInstruction = this.querySelector('selfie-capture-instruction');
     this.selfieCapture = this.querySelector('selfie-capture');
-    this.selfieReview = this.querySelector('selfie-review');
+    this.selfieReview = this.querySelector('selfie-capture-review');
 
     if (this.hideInstructions && !this.hasAttribute('hidden')) {
       getPermissions(this.selfieCapture);

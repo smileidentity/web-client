@@ -1,17 +1,17 @@
 import './SelfieReview';
 
 const meta = {
-  component: 'selfie-review',
+  component: 'selfie-capture-review',
 };
 
 export default meta;
 
 export const SelfieReview = {
   render: () => `
-        <selfie-review
+        <selfie-capture-review
             show-navigation
             data-image="https://placehold.co/600x400"
         >
-        </selfie-review>
+        </selfie-capture-review>
     `,
 };

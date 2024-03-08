@@ -1,26 +1,26 @@
-# LivenessCapture Web Component
+# SelfieCaptureScreens Web Component
 
 ## Overview
 
-The `LivenessCapture` is a custom web component designed to capture selfies and liveness images using a camera. It uses the `SmartCamera` module to interact with the device's camera and handle permissions.
+The `SelfieCaptureScreens` is a custom web component designed to capture selfies and liveness images using a camera. It uses the `SmartCamera` module to interact with the device's camera and handle permissions.
 
 ### Importing the Component
 
-To use the LivenessCapture component, you need to import it into your JavaScript file:
+To use the SelfieCaptureScreens component, you need to import it into your JavaScript file:
 
 ```js
-import '@smileid/components/selfie-capture';
+import '@smileid/web-components/selfie-capture-screens';
 ```
 
 ### Using the Component
 
-You can use the LivenessCapture component in your HTML like any other HTML element:
+You can use the SelfieCaptureScreens component in your HTML like any other HTML element:
 
 ```html
-<liveness-capture></liveness-capture>
+<selfie-capture-screens></selfie-capture-screens>
 ```
 
-### LivenessCapture Web Component Attributes
+### SelfieCaptureScreens Web Component Attributes
 
 You can use a mixture of the following attributes to configure the behavior of the component.
 
@@ -31,7 +31,7 @@ This attribute, when present, hides the instructions for the liveness capture pr
 Usage:
 
 ```html
-<liveness-capture hide-instructions></liveness-capture>
+<selfie-capture-screens hide-instructions></selfie-capture-screens>
 ```
 
 #### show-navigation
@@ -41,18 +41,18 @@ This attribute, when present, shows the navigation controls for the liveness cap
 Usage:
 
 ```html
-<liveness-capture show-navigation></liveness-capture>
+<selfie-capture-screens show-navigation></selfie-capture-screens>
 ```
 
 ### Permissions
 
-The `LivenessCapture` component requires camera permissions to function. It will automatically request these permissions when used. If the permissions are granted, it will remove the `data-camera-error` attribute from the capture screen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.
+The `SelfieCaptureScreens` component requires camera permissions to function. It will automatically request these permissions when used. If the permissions are granted, it will remove the `data-camera-error` attribute from the capture screen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.
 
 If you handle the permissions yourself, make sure to set `data-camera-ready` and `data-camera-error` appropriately.
 
 ### Error Handling
 
-If there is an error while requesting permissions or capturing the images, the `LivenessCapture` component will handle it and set the `data-camera-error` attribute with the error message.
+If there is an error while requesting permissions or capturing the images, the `SelfieCaptureScreens` component will handle it and set the `data-camera-error` attribute with the error message.
 
 ### Event Handlers
 
@@ -74,21 +74,21 @@ To receive the images after they have been captured, you can listen to the custo
 Usage:
 
 ```js
-document.querySelector('liveness-capture').addEventListener('selfie-capture-screens.publish', function(event) {
+document.querySelector('selfie-capture-screens').addEventListener('selfie-capture-screens.publish', function(event) {
  console.log(event.detail);
 });
 ```
 
 ### Dependencies
 
-The `LivenessCapture` component depends on the following modules:
+The `SelfieCaptureScreens` component depends on the following modules:
 
 * [selfie-capture](#selfiecapture-web-component)
-* [selfie-review](#selfie-review-web-component)
+* [selfie-capture-review](#selfie-capture-review-web-component)
 * Selfie-instructions
 * SmartCamera
 
-These modules are imported when you use the `LivenessCapture` component in your projects.
+These modules are imported when you use the `SelfieCaptureScreens` component in your projects.
 
 ### SelfieCapture Web Component
 
@@ -101,7 +101,7 @@ The `SelfieCapture` is a custom web component designed to capture selfies and li
 To use the SelfieCapture component, you need to import it into your JavaScript file:
 
 ```js
-import '@smileid/components/selfie-capture';
+import '@smileid/web-components/selfie-capture';
 ```
 
 ### Using the Component
@@ -163,7 +163,7 @@ document.querySelector('selfie-capture').addEventListener('selfie-capture.publis
 });
 ```
 
-### SelfieReview Web Component
+### SelfieCaptureReview Web Component
 
 This component is used to allow the user to verify the accuracy of the capture.
 The user can choose to use the captured image or recapture a new selfie.
@@ -171,23 +171,23 @@ The user can choose to use the captured image or recapture a new selfie.
 Usage:
 
 ```html
-<selfie-review data-image="base64 image" show-navigation hide-back-to-host></selfie-review>
+<selfie-capture-review data-image="base64 image" show-navigation hide-back-to-host></selfie-capture-review>
 ```
 
 When a user accepts an image, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-review').addEventListener('selfie-review.accepted', function(event) {
+document.querySelector('selfie-capture-review').addEventListener('selfie-review.accepted', function(event) {
 });
 ```
 
 When a user wants to recapture a selfie, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-review').addEventListener('selfie-review.rejected', function(event) {
+document.querySelector('selfie-capture-review').addEventListener('selfie-review.rejected', function(event) {
 });
 ```
 
 ### Compatibility
 
-The LivenessCapture component is designed to work on all modern browsers that support custom web components. However, it includes a special case for multi-camera Samsung devices to mitigate blurry images at the edges. Please report any issues found on other devices to our support team.
+The SelfieCaptureScreens component is designed to work on all modern browsers that support custom web components. However, it includes a special case for multi-camera Samsung devices to mitigate blurry images at the edges. Please report any issues found on other devices to our support team.

@@ -251,7 +251,7 @@ function templateString() {
     padding: 1rem;
   }
 
-  .selfie-review-image {
+  .selfie-capture-review-image {
     overflow: hidden;
     aspect-ratio: 1/1;
   }
@@ -431,15 +431,15 @@ function templateString() {
     max-width: 90%;
   }
 
-  #document-review-screen .id-video-container,
-  #back-of-document-review-screen .id-video-container {
+  #document-capture-review-screen .id-video-container,
+  #back-of-document-capture-review-screen .id-video-container {
     background-color: rgba(0, 0, 0, 1);
   }
 
-  #document-review-screen .id-video-container.portrait, #back-of-document-review-screen .id-video-container.portrait {
+  #document-capture-review-screen .id-video-container.portrait, #back-of-document-capture-review-screen .id-video-container.portrait {
     height: calc((200px * 1.4) + 100px);
   }
-  #document-review-screen .id-video-container.portrait img, #back-of-document-review-screen .id-video-container.portrait img {
+  #document-capture-review-screen .id-video-container.portrait img, #back-of-document-capture-review-screen .id-video-container.portrait img {
     height: 280px;
     width: 200px;
     padding-top: 14px;

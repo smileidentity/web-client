@@ -3,8 +3,8 @@ import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import './document-capture';
-import './document-review';
-import './document-instructions';
+import './document-capture-review';
+import './document-capture-instructions';
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen) {
@@ -44,8 +44,8 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.documentCaptureModes}
       hidden 
       ></document-capture>
-      <document-review hidden></document-review>
-      <document-review id='back-of-document-review' hidden></document-review>
+      <document-capture-review id='front-of-document-capture-review' hidden></document-capture-review>
+      <document-capture-review id='back-of-document-capture-review' hidden></document-capture-review>
       </div>
     `;
 
@@ -61,9 +61,9 @@ class DocumentCaptureScreens extends HTMLElement {
       '#document-capture-instructions-back',
     );
     this.idCapture = this.querySelector('document-capture');
-    this.idReview = this.querySelector('document-review');
+    this.idReview = this.querySelector('#front-of-document-capture-review');
     this.idCaptureBack = this.querySelector('#back-of-id');
-    this.backOfIdReview = this.querySelector('#back-of-document-review');
+    this.backOfIdReview = this.querySelector('#back-of-document-capture-review');
     this.thankYouScreen = this.querySelector('thank-you');
 
     if (this.hideInstructions) {

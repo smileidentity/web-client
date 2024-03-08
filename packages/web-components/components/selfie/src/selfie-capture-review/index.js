@@ -1,3 +1,3 @@
-import SelfieReview from './SelfieReview';
+import SelfieCaptureReview from './SelfieCaptureReview';
 
-export default SelfieReview;
+export default SelfieCaptureReview;

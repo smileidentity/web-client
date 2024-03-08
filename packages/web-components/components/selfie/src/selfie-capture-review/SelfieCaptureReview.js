@@ -248,7 +248,7 @@ function templateString() {
   `;
 }
 
-class SelfieReview extends HTMLElement {
+class SelfieCaptureReview extends HTMLElement {
   constructor() {
     super();
     this.templateString = templateString.bind(this);
@@ -353,7 +353,7 @@ class SelfieReview extends HTMLElement {
 }
 
 if ('customElements' in window && !customElements.get('selfie-capture-review')) {
-  window.customElements.define('selfie-capture-review', SelfieReview);
+  window.customElements.define('selfie-capture-review', SelfieCaptureReview);
 }
 
-export default SelfieReview;
+export default SelfieCaptureReview;

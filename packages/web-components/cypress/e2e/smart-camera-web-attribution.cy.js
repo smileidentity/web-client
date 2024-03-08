@@ -4,7 +4,7 @@ describe('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('selfie-capture-instruction')
       .shadow()
       .find('powered-by-smile-id')
       .should('be.visible');
@@ -15,7 +15,7 @@ describe('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-instruction')
+      .find('selfie-capture-instruction')
       .shadow()
       .get('powered-by-smile-id')
       .should('not.exist');

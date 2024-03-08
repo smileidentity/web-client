@@ -186,7 +186,7 @@ ${typography}
   }
 
 
-  .selfie-review-image {
+  .selfie-capture-review-image {
     overflow: hidden;
     aspect-ratio: 1/1;
   }
@@ -247,8 +247,8 @@ ${typography}
     width: 0.75em;
   }
 
-  #document-instruction-screen,
-  #back-of-document-instruction-screen {
+  #document-capture-instructions-screen,
+  #back-of-document-capture-instructions-screen {
     padding-block: 2rem;
     display: flex;
     flex-direction: column;
@@ -257,7 +257,7 @@ ${typography}
     justify-content: space-between;
   }
 
-  #document-instruction-screen header p {
+  #document-capture-instructions-screen header p {
     margin-block: 0 !important;
   }
 

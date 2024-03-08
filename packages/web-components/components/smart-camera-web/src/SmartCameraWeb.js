@@ -1,8 +1,8 @@
 import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
-import '../../document-capture/src';
-import '../../selfie-capture/src';
+import '../../document/src';
+import '../../selfie/src';
 import '../../camera-permission/CameraPermission';
 
 import { version as COMPONENTS_VERSION } from '../../../package.json';
@@ -12,8 +12,8 @@ function scwTemplateString() {
   ${styles}
   <div>
     <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
-    <selfie-capture-flow ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-flow>
-    <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-flow>
+    <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-screens>
+    <document-capture-screens ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -72,21 +72,21 @@ class SmartCameraWeb extends HTMLElement {
 
   setUpEventListeners() {
     this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
-    this.livenessCapture = this.shadowRoot.querySelector('selfie-capture-flow');
-    this.documentCapture = this.shadowRoot.querySelector('document-capture-flow');
+    this.SelfieCaptureScreens = this.shadowRoot.querySelector('selfie-capture-screens');
+    this.documentCapture = this.shadowRoot.querySelector('document-capture-screens');
 
     if (this.hideInstructions) {
       this.setActiveScreen(this.cameraPermission);
     } else {
-      this.setActiveScreen(this.livenessCapture);
+      this.setActiveScreen(this.SelfieCaptureScreens);
     }
     this.cameraPermission.addEventListener('camera-permission.granted', () => {
-      this.setActiveScreen(this.livenessCapture);
-      this.livenessCapture.removeAttribute('data-camera-error');
-      this.livenessCapture.setAttribute('data-camera-ready', true);
+      this.setActiveScreen(this.SelfieCaptureScreens);
+      this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+      this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
 
-    this.livenessCapture.addEventListener('selfie-capture-screens.publish', (event) => {
+    this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.publish', (event) => {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });

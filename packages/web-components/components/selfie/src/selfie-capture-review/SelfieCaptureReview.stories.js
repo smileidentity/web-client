@@ -1,4 +1,4 @@
-import './SelfieReview';
+import './SelfieCaptureReview';
 
 const meta = {
   component: 'selfie-capture-review',
@@ -6,7 +6,7 @@ const meta = {
 
 export default meta;
 
-export const SelfieReview = {
+export const SelfieCaptureReview = {
   render: () => `
         <selfie-capture-review
             show-navigation

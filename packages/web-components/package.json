@@ -3,24 +3,30 @@
   "version": "1.0.0",
   "private": "true",
   "exports": {
-    ".": "./components/index.js",
+    ".": "./index.js",
     "./combobox": "./components/combobox/src/index.js",
-    "./document-capture": "./components/document-capture/src/index.js",
+    "./document-capture": "./components/document/src/index.js",
     "./end-user-consent": "./components/end-user-consent/src/index.js",
     "./navigation": "./components/navigation/src/index.js",
-    "./selfie-capture": "./components/selfie-capture/src/index.js",
+    "./selfie-capture": "./components/selfie/src/index.js",
     "./signature-pad": "./components/signature-pad/src/index.js",
-    "./totp-consent": "./components/totp-consent/src/index.js"
+    "./totp-consent": "./components/totp-consent/src/index.js",
+    "./smart-camera-web": "./components/smart-camera-web/src/SmartCameraWeb.js"
   },
   "scripts": {
-    "lint": "eslint . --ext .js",
+    "build": "NODE_ENV=development node esbuild.js",
+    "clean": "rm -rf build dist",
     "lint:fix": "eslint . --ext .js --fix",
-    "lint:html": "npx prettier --write $(git ls-files '*.html')"
+    "lint:html": "npx prettier --write $(git ls-files '*.html')",
+    "lint": "eslint . --ext .js",
+    "start": "npm run build && npx serve -p 8000 build",
+    "test": "npx cypress run"
   },
   "description": "A collection of Web Components used by SmileID",
   "keywords": [
     "Web Components"
   ],
+  "type": "module",
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
     "signature_pad": "^4.1.7",
@@ -32,6 +38,8 @@
     "@storybook/blocks": "^7.6.17",
     "@storybook/web-components": "^7.6.4",
     "@storybook/web-components-vite": "^7.6.12",
+    "cypress": "^13.6.6",
+    "esbuild": "^0.20.1",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

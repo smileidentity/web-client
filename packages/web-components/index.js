@@ -1,7 +1,9 @@
-import DocumentFlow from './components/document-capture/src';
-import SelfieCaptureFlow from './components/selfie-capture/src';
+import DocumentCaptureScreens from './components/document/src';
+import SelfieCaptureScreens from './components/selfie/src';
+import SmartCameraWeb from './components/smart-camera-web/src/SmartCameraWeb';
 
 export {
-  DocumentFlow,
-  SelfieCaptureFlow,
+  DocumentCaptureScreens,
+  SelfieCaptureScreens,
+  SmartCameraWeb,
 };

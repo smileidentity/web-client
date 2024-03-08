@@ -2,18 +2,18 @@ class SmartCamera {
   static stream = null;
 
   static async getMedia(constraints) {
-    SmartCamera.stream = await navigator.mediaDevices.getUserMedia({
-      ...constraints,
-      video: {
-        ...constraints.video,
-        // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
-        // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
-        // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
-        zoom: SmartCamera.isSamsungMultiCameraDevice() ? 2.0 : 1.0,
-      },
-    });
+    SmartCamera.stream = await navigator.mediaDevices.getUserMedia(constraints);
     return SmartCamera.stream;
   }
+
+  static environmentOptions = {
+    facingMode: 'environment',
+    width: { min: 1280 },
+    // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
+    // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
+    // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."
+    zoom: SmartCamera.isSamsungMultiCameraDevice() ? 2.0 : 1.0,
+  };
 
   static stopMedia() {
     if (SmartCamera.stream) {

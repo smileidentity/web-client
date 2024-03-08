@@ -585,7 +585,7 @@ async function getPermissions(captureScreen) {
     captureScreen?.removeAttribute('data-camera-ready');
     captureScreen?.setAttribute(
       'data-camera-error',
-      SmartCamera.handleError(error),
+      SmartCamera.handleCameraError(error),
     );
   }
 }
@@ -608,10 +608,9 @@ class SelfieCaptureScreen extends HTMLElement {
       '.video-container > .video',
     );
     this.init();
-    this.setUpEventListeners();
   }
 
-  async init() {
+  init() {
     this._videoStreamDurationInMS = 7800;
     this._imageCaptureIntervalInMS = 200;
 
@@ -622,6 +621,8 @@ class SelfieCaptureScreen extends HTMLElement {
       },
     };
     this._rawImages = [];
+
+    this.setUpEventListeners();
   }
 
   reset() {
@@ -686,6 +687,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
       this._publishImages();
     } catch (error) {
+      console.error(error);
       // Todo: handle error
     }
   }
@@ -721,7 +723,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _publishImages() {
     this.dispatchEvent(
-      new CustomEvent('SelfieCapture::ImageCaptured', {
+      new CustomEvent('selfie-capture.publish', {
         detail: this._data,
       }),
     );
@@ -781,7 +783,10 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
+
+    video.onloadedmetadata = () => {
+      video.play();
+    };
     this._video = video;
     const videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
@@ -874,25 +879,29 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.getAttribute('data-camera-error');
   }
 
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests');
+  }
+
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
-      'data-camera-ready',
       'data-camera-error',
+      'data-camera-ready',
+      'hidden',
+      'hide-back-to-host',
+      'show-navigation',
+      'title',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'data-camera-ready':
     case 'data-camera-error':
+    case 'data-camera-ready':
     case 'hidden':
+    case 'title':
       this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
+      this.init();
       break;
     default:
       break;
@@ -900,7 +909,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('selfie-capture.cancelled'));
   }
 
   closeWindow() {

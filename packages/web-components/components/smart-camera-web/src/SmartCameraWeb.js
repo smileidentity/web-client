@@ -3,6 +3,7 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import '../../document-capture/src';
 import '../../selfie-capture/src';
+import '../../camera-permission/CameraPermission';
 
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
@@ -10,9 +11,9 @@ function scwTemplateString() {
   return `
   ${styles}
   <div>
-    <camera-permission hidden ${this.showNavigation} ${this.hideBackToHost}></camera-permission>
-    <liveness-capture ${this.title} ${this.showNavigation} hidden ></liveness-capture>
-    <document-capture ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  hidden></document-instruction>
+    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <selfie-capture-flow ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-flow>
+    <document-capture-flow ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-flow>
   </div>
 `;
 }
@@ -71,27 +72,28 @@ class SmartCameraWeb extends HTMLElement {
 
   setUpEventListeners() {
     this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
-    this.livenessCapture = this.shadowRoot.querySelector('liveness-capture');
-    this.documentCapture = this.shadowRoot.querySelector('document-capture');
+    this.livenessCapture = this.shadowRoot.querySelector('selfie-capture-flow');
+    this.documentCapture = this.shadowRoot.querySelector('document-capture-flow');
 
-    if (SmartCamera.stream) {
-      this.setActiveScreen(this.livenessCapture);
-    } else {
+    if (this.hideInstructions) {
       this.setActiveScreen(this.cameraPermission);
+    } else {
+      this.setActiveScreen(this.livenessCapture);
     }
-    this.cameraPermission.addEventListener('camera-permission-granted', () => {
+    this.cameraPermission.addEventListener('camera-permission.granted', () => {
       this.setActiveScreen(this.livenessCapture);
       this.livenessCapture.removeAttribute('data-camera-error');
       this.livenessCapture.setAttribute('data-camera-ready', true);
     });
 
-    this.livenessCapture.addEventListener('imagesComputed', (event) => {
+    this.livenessCapture.addEventListener('selfie-capture-screens.publish', (event) => {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });
 
-    this.documentCapture.addEventListener('imagesComputed', (event) => {
+    this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
+      this._publishSelectedImages();
     });
   }
 
@@ -102,12 +104,12 @@ class SmartCameraWeb extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
   }
 
   get hideInstructions() {
-    return this.hasAttribute('hide-instructions');
+    return this.hasAttribute('hide-instructions') ? 'hide-instructions' : '';
   }
 
   get hideBackOfId() {
@@ -132,6 +134,14 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('document-capture-modes')
       ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
       : '';
+  }
+
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
+  }
+
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
   setActiveScreen(screen) {

@@ -56,7 +56,7 @@ If there is an error while requesting permissions or capturing the images, the `
 
 ### Event Handlers
 
-To receive the images after they have been captured, you can listen to the custom event `imagesComputed`. The data posted to this event has the structure:
+To receive the images after they have been captured, you can listen to the custom event `selfie-capture-screens.publish`. The data posted to this event has the structure:
 
 ```json
 {
@@ -74,7 +74,7 @@ To receive the images after they have been captured, you can listen to the custo
 Usage:
 
 ```js
-document.querySelector('liveness-capture').addEventListener('imagesComputed', function(event) {
+document.querySelector('liveness-capture').addEventListener('selfie-capture-screens.publish', function(event) {
  console.log(event.detail);
 });
 ```
@@ -138,7 +138,7 @@ If there is an error while requesting permissions or capturing the images, the `
 
 ### Event Handlers
 
-To receive the images after they have been captured, you can listen to the custom event `SelfieCapture::ImageCaptured`. The data posted to this event has the structure:
+To receive the images after they have been captured, you can listen to the custom event `selfie-capture.publish`. The data posted to this event has the structure:
 
 ```json
 {
@@ -158,7 +158,7 @@ base64 image", "image_type_id": ""}
 Usage:
 
 ```js
-document.querySelector('selfie-capture').addEventListener('SelfieCapture::ImageCaptured', function(event) {
+document.querySelector('selfie-capture').addEventListener('selfie-capture.publish', function(event) {
  console.log(event.detail);
 });
 ```
@@ -177,14 +177,14 @@ Usage:
 When a user accepts an image, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-review').addEventListener('SelfieReview::SelectImage', function(event) {
+document.querySelector('selfie-review').addEventListener('selfie-review.accepted', function(event) {
 });
 ```
 
 When a user wants to recapture a selfie, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-review').addEventListener('SelfieReview::ReCapture', function(event) {
+document.querySelector('selfie-review').addEventListener('selfie-review.rejected', function(event) {
 });
 ```
 

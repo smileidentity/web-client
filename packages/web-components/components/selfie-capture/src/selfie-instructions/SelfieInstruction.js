@@ -1,4 +1,5 @@
 import styles from '../../../../styles/src/styles';
+import '../../../navigation/src';
 
 function templateString() {
   return `
@@ -257,8 +258,8 @@ function templateString() {
         width: 0.75em;
       }
 
-      #id-entry-screen,
-      #back-of-id-entry-screen {
+      #selfie-instruction-screen,
+      #back-of-selfie-instruction-screen {
         block-size: 45rem;
         padding-block: 2rem;
         display: flex;
@@ -267,7 +268,7 @@ function templateString() {
         max-inline-size: 40ch;
       }
 
-      #id-entry-screen header p {
+      #selfie-instruction-screen header p {
         margin-block: 0 !important;
       }
 
@@ -308,67 +309,8 @@ function templateString() {
       }
     </style>
     ${styles}
-    <div id="id-entry-screen" class="flow center">
-    ${
-  this.showNavigation
-    ? `
-    <div class="nav">
-      <div class="back-wrapper">
-        <button
-          type="button"
-          data-type="icon"
-          id="back-button-selfie"
-          class="back-button icon-btn"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-          >
-            <path
-              fill="#DBDBC4"
-              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"
-              opacity=".4"
-            />
-            <path
-              fill="#001096"
-              d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"
-            />
-          </svg>
-        </button>
-        <div class="back-button-text">Back</div>
-      </div>
-      <button
-        data-type="icon"
-        type="button"
-        id="id-entry-close"
-        class="close-iframe icon-btn"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="none"
-        >
-          <path
-            fill="#DBDBC4"
-            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"
-            opacity=".4"
-          />
-          <path
-            fill="#91190F"
-            d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"
-          />
-        </svg>
-        <span class="visually-hidden"
-          >Close SmileIdentity Verification frame</span
-        >
-      </button>
-    </div>
-    `
-    : ''
-}
+    <div id="selfie-instruction-screen" class="flow center">
+   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <header>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -663,7 +605,7 @@ class SelfieInstruction extends HTMLElement {
     }
     if (this.allowButton) {
       this.allowButton.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('SelfieInstruction::StartCamera'));
+        this.dispatchEvent(new CustomEvent('selfie-capture-instructions.capture'));
       });
     }
 
@@ -691,7 +633,11 @@ class SelfieInstruction extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('selfie-capture-instructions.cancelled'));
+  }
+
+  get showNavigation() {
+    return this.hasAttribute('show-navigation');
   }
 
   closeWindow() {
@@ -700,7 +646,7 @@ class SelfieInstruction extends HTMLElement {
   }
 }
 
-if ('customElements' in window) {
+if ('customElements' in window && !window.customElements.get('selfie-instruction')) {
   window.customElements.define('selfie-instruction', SelfieInstruction);
 }
 

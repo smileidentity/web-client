@@ -14,7 +14,7 @@ async function getPermissions(captureScreen) {
     captureScreen.removeAttribute('data-camera-ready');
     captureScreen.setAttribute(
       'data-camera-error',
-      SmartCamera.handleError(error),
+      SmartCamera.handleCameraError(error),
     );
   }
 }
@@ -29,9 +29,9 @@ class SelfieCaptureFlow extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-instruction ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></selfie-instruction>
-            <selfie-capture hidden></selfie-capture>
-            <selfie-review hidden></selfie-review>
+            <selfie-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideInstructions ? 'hidden' : ''}></selfie-instruction>
+            <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+            <selfie-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-review>
             </div>
         `;
 
@@ -46,8 +46,11 @@ class SelfieCaptureFlow extends HTMLElement {
     this.selfieCapture = this.querySelector('selfie-capture');
     this.selfieReview = this.querySelector('selfie-review');
 
-    if (this.hideInstructions) {
+    if (this.hideInstructions && !this.hasAttribute('hidden')) {
       getPermissions(this.selfieCapture);
+    }
+
+    if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
     } else {
       this.setActiveScreen(this.selfieInstruction);
@@ -67,7 +70,7 @@ class SelfieCaptureFlow extends HTMLElement {
 
   setUpEventListeners() {
     this.selfieInstruction.addEventListener(
-      'SelfieInstruction::StartCamera',
+      'selfie-capture-instructions.capture',
       async () => {
         await getPermissions(this.selfieCapture);
         this.setActiveScreen(this.selfieCapture);
@@ -75,7 +78,7 @@ class SelfieCaptureFlow extends HTMLElement {
     );
 
     this.selfieCapture.addEventListener(
-      'SelfieCapture::ImageCaptured',
+      'selfie-capture.publish',
       (event) => {
         this.selfieReview.setAttribute(
           'data-image',
@@ -87,7 +90,7 @@ class SelfieCaptureFlow extends HTMLElement {
       },
     );
 
-    this.selfieReview.addEventListener('SelfieReview::ReCapture', async () => {
+    this.selfieReview.addEventListener('selfie-review.rejected', async () => {
       this.selfieReview.removeAttribute('data-image');
       this._data.images = [];
       if (this.hideInstructions) {
@@ -99,7 +102,7 @@ class SelfieCaptureFlow extends HTMLElement {
     });
 
     this.selfieReview.addEventListener(
-      'SelfieReview::SelectImage',
+      'selfie-review.accepted',
       async () => {
         this._publishSelectedImages();
       },
@@ -108,12 +111,16 @@ class SelfieCaptureFlow extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('selfie-capture-screens.publish', { detail: this._data }),
     );
   }
 
   get hideInstructions() {
     return this.hasAttribute('hide-instructions');
+  }
+
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
   get hideBackOfId() {
@@ -124,10 +131,34 @@ class SelfieCaptureFlow extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get disableImageTests() {
+    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
+  }
+
   setActiveScreen(screen) {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
+  }
+
+  static get observedAttributes() {
+    return [
+      'title',
+      'hidden',
+      'show-navigation',
+      'hide-back-to-host',
+    ];
+  }
+
+  attributeChangedCallback(name) {
+    switch (name) {
+    case 'title':
+    case 'hidden':
+      this.connectedCallback();
+      break;
+    default:
+      break;
+    }
   }
 }
 

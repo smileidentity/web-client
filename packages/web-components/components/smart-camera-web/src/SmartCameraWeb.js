@@ -72,21 +72,21 @@ class SmartCameraWeb extends HTMLElement {
 
   setUpEventListeners() {
     this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
-    this.livenessCapture = this.shadowRoot.querySelector('selfie-capture-screens');
+    this.SelfieCaptureScreens = this.shadowRoot.querySelector('selfie-capture-screens');
     this.documentCapture = this.shadowRoot.querySelector('document-capture-screens');
 
     if (this.hideInstructions) {
       this.setActiveScreen(this.cameraPermission);
     } else {
-      this.setActiveScreen(this.livenessCapture);
+      this.setActiveScreen(this.SelfieCaptureScreens);
     }
     this.cameraPermission.addEventListener('camera-permission-granted', () => {
-      this.setActiveScreen(this.livenessCapture);
-      this.livenessCapture.removeAttribute('data-camera-error');
-      this.livenessCapture.setAttribute('data-camera-ready', true);
+      this.setActiveScreen(this.SelfieCaptureScreens);
+      this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+      this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
 
-    this.livenessCapture.addEventListener('imagesComputed', (event) => {
+    this.SelfieCaptureScreens.addEventListener('imagesComputed', (event) => {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });

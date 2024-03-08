@@ -95,9 +95,9 @@ document.querySelector('document-capture').addEventListener('imagesComputed', fu
 
 `DocumentCaptureScreens` relies on the following modules:
 
-- [document-instructions](./document-instructions/README.md)
+- [document-capture-instructions](./document-capture-instructions/README.md)
 - [document-capture](./document-capture/README.md)
-- [document-review](./document-review/README.md)
+- [document-capture-review](./document-capture-review/README.md)
 - [SmartCamera](../../../domain/camera/src/README.md)
 - [FileUpload](../../../domain/file-upload/README.md)
 

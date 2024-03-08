@@ -197,7 +197,7 @@ function templateString() {
         padding: 1rem;
       }
 
-      .selfie-review-image {
+      .selfie-capture-review-image {
         overflow: hidden;
         aspect-ratio: 1/1;
       }

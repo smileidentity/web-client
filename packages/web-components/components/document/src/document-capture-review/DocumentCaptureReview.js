@@ -44,7 +44,7 @@ function templateString() {
       padding: 1rem;
     }
 
-    .selfie-review-image {
+    .selfie-capture-review-image {
       overflow: hidden;
       aspect-ratio: 1/1;
     }
@@ -105,11 +105,11 @@ function templateString() {
       width: 0.75em;
     }
 
-    #document-review-screen .id-video-container.landscape {
+    #document-capture-review-screen .id-video-container.landscape {
     height: auto;
     }
 
-    #document-review-screen header p {
+    #document-capture-review-screen header p {
       margin-block: 0 !important;
     }
 
@@ -198,12 +198,12 @@ function templateString() {
       -webkit-box-sizing: border-box;
     }
   </style>
-  <div id='document-review-screen' class='flow center'>
+  <div id='document-capture-review-screen' class='flow center'>
     ${
   this.showNavigation
     ? `
       <div class="nav justify-right">
-        <button data-type='icon' type='button'  id='document-review-screen-close' class='close-iframe icon-btn'>
+        <button data-type='icon' type='button'  id='document-capture-review-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
             <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
             <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
@@ -225,7 +225,7 @@ function templateString() {
   this.imageSrc
     ? `<img
     alt='your ID card'
-    id='document-review-image'
+    id='document-capture-review-image'
     src='${this.imageSrc}'
     width='396'
     />` : ''}
@@ -358,8 +358,8 @@ class IdReview extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-review')) {
-  window.customElements.define('document-review', IdReview);
+if ('customElements' in window && !customElements.get('document-capture-review')) {
+  window.customElements.define('document-capture-review', IdReview);
 }
 
 export default IdReview;

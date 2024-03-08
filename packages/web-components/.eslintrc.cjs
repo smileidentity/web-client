@@ -1,9 +1,12 @@
 module.exports = {
   env: {
     browser: true,
+    commonjs: true,
+    'cypress/globals': true,
     es2021: true,
   },
   extends: 'airbnb-base',
+  ignorePatterns: ['build/', 'instrumentation', 'dist/', 'libs/', 'node_modules/'],
   overrides: [
     {
       env: {
@@ -19,8 +22,22 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
+  plugins: [
+    'cypress',
+  ],
   rules: {
     'class-methods-use-this': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: [
+          'esbuild.js',
+          'cypress.config.js',
+          '**/*{.,_,-}{test,spec}.js', // tests where the extension or filename suffix denotes that it is a test
+        ],
+        optionalDependencies: false,
+      },
+    ],
     indent: ['error', 2],
     'max-classes-per-file': 'off',
     'max-len': 'off',

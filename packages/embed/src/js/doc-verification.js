@@ -212,7 +212,7 @@ import { version as sdkVersion } from "../../package.json";
     function initialiseIdTypeSelector(country, selectIdType) {
       const idTypes = loadIdTypes(country);
       const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
-      idTypeSelector.addEventListener("change", (e) => {
+      idTypeSelector.addEventListener("combobox.change", (e) => {
         selectedIdType = e.detail.value;
       });
     }

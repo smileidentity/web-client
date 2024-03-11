@@ -92,19 +92,19 @@ function templateString() {
         justify-self: center;
         width: 0.75em;
       }
-      #document-capture-review-screen .id-video-container.landscape {
+      #document-capture-review-screen .selfie-review-container.landscape {
         height: auto;
       }
       #document-capture-review-screen header p {
         margin-block: 0 !important;
       }
-      .id-video-container.portrait {
+      .selfie-review-container.portrait {
         width: 100%;
         position: relative;
         height: calc(200px * 1.4);
       }
     
-      .id-video-container.portrait img {
+      .selfie-review-container.portrait img {
         width: calc(213px + 0.9rem);
         height: 100%;
         position: absolute;
@@ -119,14 +119,14 @@ function templateString() {
         block-size: 100%;
       }
     
-      .video-container,
-      .id-video-container.landscape {
-        position: relative;
-        z-index: 1;
-        width: 100%;
+      .selfie-container,
+      .selfie-review-container.landscape {
+        height: auto;
+        clip-path: inset(15% 20% 20% 20% round 10px);
+        overflow: hidden;
       }
 
-      .video-container img {
+      .selfie-container img {
         background-color: black;
         position: absolute;
         left: 50%;
@@ -216,7 +216,7 @@ function templateString() {
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+      <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         ${
   this.imageSrc
     ? `<img

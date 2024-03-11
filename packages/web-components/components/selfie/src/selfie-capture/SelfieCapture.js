@@ -326,13 +326,13 @@ function templateString() {
     }
   }
 
-  .id-video-container.portrait {
+  .selfie-video-container.portrait {
     width: 100%;
     position: relative;
     height: calc(200px * 1.4);
   }
 
-  .id-video-container.portrait video {
+  .selfie-video-container.portrait video {
     width: calc(213px + 0.9rem);
     height: 100%;
     position: absolute;
@@ -348,7 +348,7 @@ function templateString() {
   }
 
   .video-container,
-  .id-video-container.landscape {
+  .selfie-video-container.landscape {
     position: relative;
     z-index: 1;
     width: 100%;
@@ -356,7 +356,7 @@ function templateString() {
 
   .video-container #smile-cta,
   .video-container video,
-  .id-video-container.landscape video {
+  .selfie-video-container.landscape video {
     left: 50%;
     min-width: auto;
     position: absolute;
@@ -374,23 +374,23 @@ function templateString() {
 
   .video-container video {
     min-height: 100%;
-    transform: scaleX(-1) translateX(50%) translateY(-50%);
+    transform: scaleX(-1) translateX(31%) translateY(-50%);
   }
 
   .video-container .video {
     background-color: black;
     position: absolute;
-    left: 50%;
+    left: 11.7%;
     height: calc(100% - 6px);
-    clip-path: ellipse(101px 118px);
+    clip-path: polygon(4.28665px 125.3px, 4.28665px 125.3px, 4.49965005px 122.0613px, 4.8146504px 118.0504px, 5.28565135px 113.3651px, 5.9666532px 108.1032px, 6.91165625px 102.3625px, 8.1746608px 96.2408px, 9.80966715px 89.8359px, 11.8706756px 83.2456px, 14.41168645px 76.5677px, 17.4867px 69.9px, 17.4867px 69.9px, 23.9941003px 58.5292px, 31.6379024px 47.9936px, 40.3305081px 38.3784px, 49.9843192px 29.7688px, 60.5117375px 22.25px, 71.8251648px 15.9072px, 83.8370029px 10.8256px, 96.4596536px 7.0904px, 109.6055187px 4.7868px, 123.187px 4px, 123.187px 4px, 142.5271px 5.582px, 160.8478px 10.164px, 177.9097px 17.5px, 193.4734px 27.344px, 207.2995px 39.45px, 219.1486px 53.572px, 228.7813px 69.464px, 235.9582px 86.88px, 240.4399px 105.574px, 241.987px 125.3px, 241.987px 125.3px, 241.8532px 130.5988px, 241.4806px 136.7424px, 240.9124px 143.5016px, 240.1918px 150.6472px, 239.362px 157.95px, 238.4662px 165.1808px, 237.5476px 172.1104px, 236.6494px 178.5096px, 235.8148px 184.1492px, 235.087px 188.8px, 235.087px 188.8px, 234.312865px 193.255954px, 233.49052px 197.702752px, 232.620055px 202.139998px, 231.70156px 206.567296px, 230.735125px 210.98425px, 229.72084px 215.390464px, 228.658795px 219.785542px, 227.54908px 224.169088px, 226.391785px 228.540706px, 225.187px 232.9px, 225.187px 232.9px, 218.8858px 250.6322px, 211.2574px 267.1296px, 202.4746px 282.2434px, 192.7102px 295.8248px, 182.137px 307.725px, 170.9278px 317.7952px, 159.2554px 325.8866px, 147.2926px 331.8504px, 135.2122px 335.5378px, 123.187px 336.8px, 123.187px 336.8px, 107.6219187px 334.8202px, 93.0708536px 329.3016px, 79.5998029px 320.8754px, 67.2747648px 310.1728px, 56.1617375px 297.825px, 46.3267192px 284.4632px, 37.8357081px 270.7186px, 30.7547024px 257.2224px, 25.1497003px 244.6058px, 21.0867px 233.5px, 21.0867px 233.5px, 19.575px 228.4517px, 18.1131px 223.0296px, 16.7208px 217.4179px, 15.4179px 211.8008px, 14.2242px 206.3625px, 13.1595px 201.2872px, 12.2436px 196.7591px, 11.4963px 192.9624px, 10.9374px 190.0813px, 10.5867px 188.3px, 10.5867px 188.3px, 9.33028645px 181.3358px, 8.1554756px 174.6824px, 7.08386715px 168.2786px, 6.1370608px 162.0632px, 5.33665625px 155.975px, 4.7042532px 149.9528px, 4.26145135px 143.9354px, 4.0298504px 137.8616px, 4.03105005px 131.6702px, 4.28665px 125.3px);
   }
 
-  .id-video-container.landscape {
+  .selfie-video-container.landscape {
     min-height: calc((2 * 10rem) + 198px);
     height: auto;
   }
 
-  .id-video-container.portrait .image-frame-portrait {
+  .selfie-video-container.portrait .image-frame-portrait {
     border-width: 0.9rem;
     border-color: rgba(0, 0, 0, 0.7);
     border-style: solid;
@@ -403,7 +403,7 @@ function templateString() {
     height: calc(200px * 1.4);
   }
 
-  .id-video-container.landscape .image-frame {
+  .selfie-video-container.landscape .image-frame {
     border-width: 10rem 1rem;
     border-color: rgba(0, 0, 0, 0.7);
     border-style: solid;
@@ -415,7 +415,7 @@ function templateString() {
     z-index: 2;
   }
 
-  .id-video-container.landscape video {
+  .selfie-video-container.landscape video {
     width: 100%;
     transform: translateX(-50%) translateY(-50%);
     z-index: 1;
@@ -423,7 +423,7 @@ function templateString() {
     block-size: 100%;
   }
 
-  .id-video-container.landscape img {
+  .selfie-video-container.landscape img {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -431,15 +431,15 @@ function templateString() {
     max-width: 90%;
   }
 
-  #document-capture-review-screen .id-video-container,
-  #back-of-document-capture-review-screen .id-video-container {
+  #document-capture-review-screen .selfie-video-container,
+  #back-of-document-capture-review-screen .selfie-video-container {
     background-color: rgba(0, 0, 0, 1);
   }
 
-  #document-capture-review-screen .id-video-container.portrait, #back-of-document-capture-review-screen .id-video-container.portrait {
+  #document-capture-review-screen .selfie-video-container.portrait, #back-of-document-capture-review-screen .selfie-video-container.portrait {
     height: calc((200px * 1.4) + 100px);
   }
-  #document-capture-review-screen .id-video-container.portrait img, #back-of-document-capture-review-screen .id-video-container.portrait img {
+  #document-capture-review-screen .selfie-video-container.portrait img, #back-of-document-capture-review-screen .selfie-video-container.portrait img {
     height: 280px;
     width: 200px;
     padding-top: 14px;
@@ -456,8 +456,8 @@ function templateString() {
     z-index: 2;
   }
 
-  #back-of-id-camera-screen .id-video-container.portrait .actions,
-  #id-camera-screen .id-video-container.portrait .actions {
+  #back-of-id-camera-screen .selfie-video-container.portrait .actions,
+  #id-camera-screen .selfie-video-container.portrait .actions {
     top: 145%;
     width: calc(200px * 1.4);
   }
@@ -544,9 +544,9 @@ function templateString() {
       <div class='video-container'>
         <div class='video'>
         </div>
-        <svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="var(--color-default)" stroke-width="7.13965"/>
-        </svg>
+        <svg id="image-outline" xmlns="http://www.w3.org/2000/svg" width="246" height="341" viewBox="0 0 246 341" fill="none">
+  <path d="M4.19998 125.3C4.79998 115.9 6.19998 92 17.4 69.9C37.1 30.7 77.2 4 123.1 4C189 4 241.9 58.1 241.9 125.3C241.9 141.3 237.2 175.2 235 188.8C232.501 203.668 229.196 218.39 225.1 232.9C206.5 293.9 162.9 336.8 123.1 336.8C69.6 336.8 31.9 267.3 21 233.5C15.9 217.5 11.3 192.2 10.5 188.3C6.19998 164.5 2.89998 146.9 4.19998 125.3Z" stroke="#001096" stroke-width="8" stroke-miterlimit="10"/>
+</svg>
         <p id='smile-cta' class='color-gray'>SMILE</p>
       </div>
 

@@ -116,7 +116,11 @@ import { version as sdkVersion } from "../../package.json";
   window.addEventListener(
     "message",
     async (event) => {
-      if (event.data && event.data.includes("SmileIdentity::Configuration")) {
+      if (
+        event.data &&
+        typeof event.data === "string" &&
+        event.data.includes("SmileIdentity::Configuration")
+      ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
 
@@ -487,7 +491,10 @@ import { version as sdkVersion } from "../../package.json";
     EndUserConsent.addEventListener(
       "end-user-consent.totp.denied.contact-methods-outdated",
       (event) => {
-        referenceWindow.postMessage("SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated", "*");
+        referenceWindow.postMessage(
+          "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
+          "*",
+        );
         closeWindow();
       },
       false,

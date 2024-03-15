@@ -52,7 +52,11 @@ import { version as sdkVersion } from "../../package.json";
   window.addEventListener(
     "message",
     async (event) => {
-      if (event.data && event.data.includes("SmileIdentity::Configuration")) {
+      if (
+        event.data &&
+        typeof event.data === "string" &&
+        event.data.includes("SmileIdentity::Configuration")
+      ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
 

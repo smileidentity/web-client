@@ -640,10 +640,6 @@ class SelfieCaptureInstructions extends HTMLElement {
     return this.hasAttribute('show-navigation');
   }
 
-  get showNavigation() {
-    return this.hasAttribute('show-navigation');
-  }
-
   closeWindow() {
     const referenceWindow = window.parent;
     referenceWindow.postMessage('SmileIdentity::Close', '*');

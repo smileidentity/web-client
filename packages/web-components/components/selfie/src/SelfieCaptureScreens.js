@@ -77,6 +77,14 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     );
 
+    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      if (this.hideInstructions) {
+        this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
+      } else {
+        this.setActiveScreen(this.selfieInstruction);
+      }
+    });
+
     this.selfieCapture.addEventListener(
       'selfie-capture.publish',
       (event) => {

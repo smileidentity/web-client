@@ -1,4 +1,4 @@
-import "@smile_identity/smart-camera-web";
+import "@smileid/web-components/smart-camera-web";
 import "@smileid/web-components/combobox";
 import JSZip from "jszip";
 import { version as sdkVersion } from "../../package.json";
@@ -396,7 +396,7 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   SmartCameraWeb.addEventListener(
-    "imagesComputed",
+    "smart-camera-web.publish",
     (event) => {
       images = event.detail.images;
       setActiveScreen(UploadProgressScreen);

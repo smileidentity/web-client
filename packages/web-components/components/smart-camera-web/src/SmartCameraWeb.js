@@ -90,16 +90,29 @@ class SmartCameraWeb extends HTMLElement {
       this._data.images = event.detail.images;
       this.setActiveScreen(this.documentCapture);
     });
+    this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.back', () => {
+      if (!this.hideInstructions) {
+        this.setActiveScreen(this.cameraPermission);
+      }
+    });
 
     this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
       this._publishSelectedImages();
+    });
+    this.documentCapture.addEventListener('document-capture-screens.back', () => {
+      this.setActiveScreen(this.SelfieCaptureScreens);
+      this.reset();
     });
   }
 
   reset() {
     this.disconnectedCallback();
     this.connectedCallback();
+  }
+
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
   }
 
   _publishSelectedImages() {

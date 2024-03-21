@@ -310,7 +310,7 @@ function templateString() {
     </style>
     ${styles}
     <div id="selfie-capture-instruction-screen" class="flow center">
-   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <header>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -595,33 +595,29 @@ class SelfieCaptureInstructions extends HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
     this.allowButton = this.shadowRoot.querySelector('#allow');
-    this.backButton = this.shadowRoot.querySelector('#back-button');
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
+
     if (this.allowButton) {
       this.allowButton.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('selfie-capture-instructions.capture'));
       });
     }
 
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
-    });
+    this.navigation.addEventListener(
+      'navigation.close',
+      () => {
+        this.closeWindow();
+      },
+      false,
+    );
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute('hide-back');
   }
 
   get themeColor() {

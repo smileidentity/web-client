@@ -76,6 +76,9 @@ class SelfieCaptureScreens extends HTMLElement {
         this.setActiveScreen(this.selfieCapture);
       },
     );
+    this.selfieInstruction.addEventListener('selfie-capture-instructions.cancelled', () => {
+      this.handleBackEvents();
+    });
 
     this.selfieCapture.addEventListener(
       'selfie-capture.publish',
@@ -139,6 +142,10 @@ class SelfieCaptureScreens extends HTMLElement {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
+  }
+
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
   }
 
   static get observedAttributes() {

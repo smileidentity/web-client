@@ -2,6 +2,7 @@ import { IMAGE_TYPE } from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import { version as COMPONENTS_VERSION } from '../../../../package.json';
+import '../../../navigation/src';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -510,34 +511,7 @@ function templateString() {
   }
   </style>
   <div id='camera-screen' class='flow center'>
-    ${
-  this.showNavigation
-    ? `
-      <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
-        ${
-  this.hideBackToHost
-    ? ''
-    : `
-          <div class="back-wrapper back-to-host-wrapper">
-            <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
-                <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
-              </svg>
-            </button>
-            <div class="back-button-text">Back</div>
-          </div>
-        `
-}
-        <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
-            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
-          </svg>
-          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-        </button>
-      </div>
-    ` : ''}
+    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h1 class='text-2xl color-digital-blue font-bold'>Take a Selfie</h1>
 
     <div class='section | flow'>
@@ -847,7 +821,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute('hide-back');
   }
 
   get showNavigation() {

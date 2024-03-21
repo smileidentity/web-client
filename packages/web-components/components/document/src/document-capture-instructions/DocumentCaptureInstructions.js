@@ -333,9 +333,7 @@ class DocumentInstruction extends HTMLElement {
     if (this.takeDocumentPhotoButton) {
       this.takeDocumentPhotoButton.addEventListener('click', () => {
         this.dispatchEvent(
-          new CustomEvent('DocumentInstruction::StartCamera', {
-            detail: {},
-          }),
+          new CustomEvent('document-capture-instructions.capture'),
         );
       });
     }
@@ -352,7 +350,7 @@ class DocumentInstruction extends HTMLElement {
             const fileData = await SmartFileUpload.retrieve(files);
 
             this.dispatchEvent(
-              new CustomEvent('DocumentInstruction::DocumentChange', {
+              new CustomEvent('document-capture-instructions.upload', {
                 detail: { image: fileData },
               }),
             );
@@ -394,7 +392,7 @@ class DocumentInstruction extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('document-capture-instructions.cancelled'));
   }
 
   closeWindow() {

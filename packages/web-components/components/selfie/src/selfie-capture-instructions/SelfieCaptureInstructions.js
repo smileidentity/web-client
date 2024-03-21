@@ -605,7 +605,7 @@ class SelfieCaptureInstructions extends HTMLElement {
     }
     if (this.allowButton) {
       this.allowButton.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('SelfieInstruction::StartCamera'));
+        this.dispatchEvent(new CustomEvent('selfie-capture-instructions.capture'));
       });
     }
 
@@ -633,7 +633,11 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('selfie-capture-instructions.cancelled'));
+  }
+
+  get showNavigation() {
+    return this.hasAttribute('show-navigation');
   }
 
   get showNavigation() {

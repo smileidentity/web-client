@@ -334,7 +334,7 @@ class DocumentCapture extends HTMLElement {
     this._stopIDVideoStream();
 
     this.dispatchEvent(
-      new CustomEvent('IDCapture::ImageCaptured', {
+      new CustomEvent('document-capture.publish', {
         detail: {
           image,
         },
@@ -608,7 +608,7 @@ class DocumentCapture extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('SmileIdentity::Exit'));
+    this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
   }
 
   closeWindow() {

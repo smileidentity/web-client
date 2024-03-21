@@ -70,7 +70,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   setUpEventListeners() {
     this.selfieInstruction.addEventListener(
-      'SelfieInstruction::StartCamera',
+      'selfie-capture-instructions.capture',
       async () => {
         await getPermissions(this.selfieCapture);
         this.setActiveScreen(this.selfieCapture);
@@ -78,7 +78,7 @@ class SelfieCaptureScreens extends HTMLElement {
     );
 
     this.selfieCapture.addEventListener(
-      'SelfieCapture::ImageCaptured',
+      'selfie-capture.publish',
       (event) => {
         this.selfieReview.setAttribute(
           'data-image',
@@ -90,7 +90,7 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     );
 
-    this.selfieReview.addEventListener('SelfieReview::ReCapture', async () => {
+    this.selfieReview.addEventListener('selfie-review.rejected', async () => {
       this.selfieReview.removeAttribute('data-image');
       this._data.images = [];
       if (this.hideInstructions) {
@@ -102,7 +102,7 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     this.selfieReview.addEventListener(
-      'SelfieReview::SelectImage',
+      'selfie-review.accepted',
       async () => {
         this._publishSelectedImages();
       },
@@ -111,7 +111,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('imagesComputed', { detail: this._data }),
+      new CustomEvent('selfie-capture-screens.publish', { detail: this._data }),
     );
   }
 

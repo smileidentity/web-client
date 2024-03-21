@@ -56,7 +56,7 @@ If there is an error while requesting permissions or capturing the document, the
 
 ### Event Handlers
 
-To receive the images after they have been captured, you can listen to the custom event `IDCapture::ImageCaptured`. The data posted to this event has the structure:
+To receive the images after they have been captured, you can listen to the custom event `document-capture.publish`. The data posted to this event has the structure:
 
 ```json
 {
@@ -69,7 +69,7 @@ To receive the images after they have been captured, you can listen to the custo
 Usage:
 
 ```js
-document.querySelector('document-capture').addEventListener('IDCapture::ImageCaptured', function(event) {
+document.querySelector('document-capture').addEventListener('document-capture.publish', function(event) {
  console.log(event.detail);
 });
 ```

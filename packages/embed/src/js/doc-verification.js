@@ -212,7 +212,7 @@ import { version as sdkVersion } from "../../package.json";
     function initialiseIdTypeSelector(country, selectIdType) {
       const idTypes = loadIdTypes(country);
       const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
-      idTypeSelector.addEventListener("change", (e) => {
+      idTypeSelector.addEventListener("combobox.change", (e) => {
         selectedIdType = e.detail.value;
       });
     }
@@ -352,7 +352,7 @@ import { version as sdkVersion } from "../../package.json";
 
       // ACTION: Load Countries using combobox
       const countrySelector = loadCountrySelector(countries, selectCountry);
-      countrySelector.addEventListener("change", (e) => {
+      countrySelector.addEventListener("combobox.change", (e) => {
         selectedCountry = e.detail ? e.detail.value : "";
 
         // ACTION: Load id types using combobox

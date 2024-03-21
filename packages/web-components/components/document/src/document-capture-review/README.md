@@ -20,20 +20,20 @@ To integrate the `IdReview` component into your web application, insert the cust
 
 ### Image Acceptance
 
-When a user confirms the captured image as acceptable, the `IdReview::SelectImage` event is emitted. Implement an event listener to handle this action:
+When a user confirms the captured image as acceptable, the `document-review.accepted` event is emitted. Implement an event listener to handle this action:
 
 ```js
-document.querySelector('document-capture-review').addEventListener('IdReview::SelectImage', function(event) {
+document.querySelector('document-capture-review').addEventListener('document-review.accepted', function(event) {
   // Handle the image acceptance action here
 });
 ```
 
 ### Recapture Request
 
-If the user decides to recapture the image, the `IdReview::ReCapture` event is triggered. Set up an event listener to manage this scenario:
+If the user decides to recapture the image, the `document-review.rejected` event is triggered. Set up an event listener to manage this scenario:
 
 ```js
-document.querySelector('document-capture-review').addEventListener('IdReview::ReCapture', function(event) {
+document.querySelector('document-capture-review').addEventListener('document-review.rejected', function(event) {
   // Handle the recapture request here
 });
 ```
@@ -48,12 +48,12 @@ Below is a sample implementation showcasing how to use the `IdReview` component 
 <script>
   const idReviewElement = document.querySelector('document-capture-review');
 
-  idReviewElement.addEventListener('IdReview::SelectImage', function(event) {
+  idReviewElement.addEventListener('document-review.accepted', function(event) {
     console.log('Image accepted by the user.');
     // Additional logic for accepted image
   });
 
-  idReviewElement.addEventListener('IdReview::ReCapture', function(event) {
+  idReviewElement.addEventListener('document-review.rejected', function(event) {
     console.log('User requested to recapture the image.');
     // Additional logic for image recapture
   });

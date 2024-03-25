@@ -21,6 +21,24 @@ function templateString() {
   return `
     ${styles}
   <style>
+      .video-item {
+        position: absolute;
+      }
+      .video-item::-webkit-media-controls-play-button {
+        display: none !important;
+        -webkit-appearance: none;
+      }
+
+      .video-overlay {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        bottom: 20px;
+        left: 20px;
+        box-shadow: 0px 0px 20px 56px rgba(0, 0, 0, 0.6);
+        border: 1px solid #ffffff;
+        border-radius: 10px;
+      }
       .video-section {
         border: 1px solid transparent;
         /* border-radius: 0.5rem; */
@@ -107,7 +125,9 @@ function templateString() {
       }
 
       video {
-        width: 20rem;
+        height: auto;
+        max-width: 155% !important;
+      object-fit: contain;
       }
 
       .id-video-container.portrait {
@@ -170,7 +190,7 @@ function templateString() {
       }
   
       .id-video-container.landscape {
-        /* min-height: calc((2 * 10rem) + 176px); */
+        min-height: calc((2 * 10rem) + 198px);
         width: calc((2 * 4rem) + 154px);
       }
   
@@ -228,6 +248,33 @@ function templateString() {
         justify-content: center;
         height: 100%;
       }
+
+      .overlay-container {
+        position: absolute;
+        /* width: auto; */
+        /* top: 0; */
+        margin-block-start: auto;
+        /* right: 0; */
+        /* bottom: 0; */
+        /* left: 0; */
+        outline: 37px solid white;
+        margin-block-end: auto;
+        height: 76%;
+        width: 91%;
+        max-width: 30.5rem;
+    }
+
+      
+    .webcam-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      max-height: 12rem;
+      width: 24.5rem;
+      align-self: center;
+  }
   </style>
   <div id='id-camera-screen' class='flow center flex-column'>
     ${
@@ -263,17 +310,16 @@ function templateString() {
     : '<p style="--flow-space: 4rem">Checking permissions</p>'
 }
     </div>
-    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
-      <div class='id-video-container landscape'>
-        <video id='id-video' class='flow' playsinline autoplay muted></video>
-        <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
-          <use href='#image-frame' />
-        </svg>
+    <div class='webcam-container landscape' hidden>
+    <div class='overlay-container'></div>
+      <video id='id-video-div' class='flow' playsinline autoplay muted></video>
+      <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
+        <use href='#image-frame' />
+      </svg>
 
-        <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
-          <use href='#image-frame-portrait' />
-        </svg>
-      </div>
+    <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
+      <use href='#image-frame-portrait' />
+    </svg>
     </div>
     <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.idType}</h2>
     <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
@@ -330,7 +376,6 @@ class DocumentCapture extends HTMLElement {
 
   _captureIDImage() {
     const image = this._drawIDImage();
-
     this._stopIDVideoStream();
 
     this.dispatchEvent(
@@ -397,9 +442,7 @@ class DocumentCapture extends HTMLElement {
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
     if (aspectRatio < 1) {
-      const imageFrame = this.activeScreen.querySelector(
-        '[class*="image-frame"]:not([hidden]) [href*="image-frame"]',
-      );
+      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
@@ -409,18 +452,7 @@ class DocumentCapture extends HTMLElement {
       const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
 
       canvas.height = (canvas.width * frameBox.height) / frameBox.width;
-
-      context.drawImage(
-        video,
-        sourceXOffset,
-        sourceYOffset,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      );
+      context.drawImage(video, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
       return canvas.toDataURL('image/jpeg');
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -471,7 +503,6 @@ class DocumentCapture extends HTMLElement {
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
-
     if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
@@ -479,13 +510,22 @@ class DocumentCapture extends HTMLElement {
     }
     video.play();
 
-    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
+    const videoContainer = this.shadowRoot.querySelector('.webcam-container');
 
     video.onloadedmetadata = () => {
+      this.shadowRoot.querySelector('.webcam-container').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
       this.shadowRoot.querySelector('#loader').hidden = true;
-      this.shadowRoot.querySelector('.video-section').hidden = false;
     };
+    video.addEventListener('canplay', () => {
+      const width = 320;
+      let height = video.videoHeight / (video.videoWidth / width);
+      if (Math.isNaN(height)) {
+        height = width / (4 / 3);
+      }
+      video.width = width;
+      video.height = height;
+    });
 
     if (!videoExists) {
       videoContainer.prepend(video);

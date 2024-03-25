@@ -42,6 +42,8 @@ function templateString() {
       margin-right: auto;
       max-width: 35ch;
       padding: 1rem;
+      display: flex;
+      flex-direction: column;
     }
 
     .selfie-capture-review-image {
@@ -197,6 +199,54 @@ function templateString() {
       -moz-box-sizing: border-box;
       -webkit-box-sizing: border-box;
     }
+
+    /*.overlay-container {
+      position: absolute;
+      margin-block-start: auto;
+      border: 37px solid white;
+      margin-block-end: auto;
+      height: 76%;
+      width: 91%;
+      max-width: 30.5rem;
+    }*/
+
+    .overlay-container {
+      position: absolute;
+      /* width: auto; */
+      /* top: 0; */
+      margin-block-start: auto;
+      /* right: 0; */
+      /* bottom: 0; */
+      /* left: 0; */
+      outline: 109px solid white;
+      margin-block-end: auto;
+      height: 62%;
+      width: 61%;
+      max-width: 30.5rem;
+    }
+    
+    .webcam-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      max-height: 21rem;
+      position: relative;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      max-height: 12rem;
+      width: 24.5rem;
+      align-self: center;
+    }
+    img {
+      height: auto;
+      max-width: 155% !important;
+      object-fit: contain;
+    }
   </style>
   <div id='document-capture-review-screen' class='flow center'>
     ${
@@ -220,16 +270,9 @@ function templateString() {
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
-        ${
-  this.imageSrc
-    ? `<img
-    alt='your ID card'
-    id='document-capture-review-image'
-    src='${this.imageSrc}'
-    width='396'
-    />` : ''}
-    <div class='overlay'></div>
+      <div class='webcam-container'>
+        <div class='overlay-container'></div>
+        ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' width='396' />` : ''}
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>

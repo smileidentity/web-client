@@ -311,15 +311,14 @@ function templateString() {
 }
     </div>
     <div class='webcam-container landscape' hidden>
-    <div class='overlay-container'></div>
+      <div class='overlay-container'></div>
       <video id='id-video-div' class='flow' playsinline autoplay muted></video>
       <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
         <use href='#image-frame' />
       </svg>
-
-    <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
-      <use href='#image-frame-portrait' />
-    </svg>
+      <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
+        <use href='#image-frame-portrait' />
+      </svg>
     </div>
     <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.idType}</h2>
     <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
@@ -441,8 +440,8 @@ class DocumentCapture extends HTMLElement {
     const aspectRatio = video.videoWidth / video.videoHeight;
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
-    if (aspectRatio < 1) {
-      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
+    if (aspectRatio < 1 || true) {
+      const imageFrame = this.shadowRoot.querySelector('[class*="image-frame"]:not([hidden])');
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
@@ -517,15 +516,15 @@ class DocumentCapture extends HTMLElement {
       this.shadowRoot.querySelector('.actions').hidden = false;
       this.shadowRoot.querySelector('#loader').hidden = true;
     };
-    video.addEventListener('canplay', () => {
-      const width = 320;
-      let height = video.videoHeight / (video.videoWidth / width);
-      if (Math.isNaN(height)) {
-        height = width / (4 / 3);
-      }
-      video.width = width;
-      video.height = height;
-    });
+    // video.addEventListener('canplay', () => {
+    //   const width = 320;
+    //   let height = video.videoHeight / (video.videoWidth / width);
+    //   if (Math.isNaN(height)) {
+    //     height = width / (4 / 3);
+    //   }
+    //   video.width = width;
+    //   video.height = height;
+    // });
 
     if (!videoExists) {
       videoContainer.prepend(video);

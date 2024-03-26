@@ -310,7 +310,7 @@ function templateString() {
     : '<p style="--flow-space: 4rem">Checking permissions</p>'
 }
     </div>
-    <div class='webcam-container landscape' hidden>
+    <div class='webcam-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'' hidden>
       <div class='overlay-container'></div>
       <video id='id-video-div' class='flow' playsinline autoplay muted></video>
       <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
@@ -615,6 +615,10 @@ class DocumentCapture extends HTMLElement {
 
   get idType() {
     return this.getAttribute('id-type') || 'Document';
+  }
+
+  get isPortraitCaptureView() {
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
 
   get cameraError() {

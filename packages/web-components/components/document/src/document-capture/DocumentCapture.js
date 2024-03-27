@@ -301,8 +301,6 @@ class DocumentCapture extends HTMLElement {
     const sourceWidthAdjusted = sourceWidth + (2 * pixelIncrease * widthRatio);
     const sourceHeightAdjusted = sourceHeight + (2 * pixelIncrease * heightRatio);
     canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
-    // canvas.width = sourceWidthAdjusted;
-    // canvas.height = sourceHeightAdjusted;
 
     context.drawImage(
       video,

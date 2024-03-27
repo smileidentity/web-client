@@ -56,22 +56,13 @@ function templateString() {
         margin: auto;
         padding: 0px;
       }
-    /*  .video-overlay {
-        position: absolute;
-        border-width: 1rem;
-        border-color: white;
-        border-style: solid;
-        width: 397px;
-        inset: 0px;
-        transform: scale(-1) translateX(-114px);
-      }*/
+
       .video-overlay {
         position: absolute;
         border-width: 1.75rem;
         border-color: white;
         border-style: solid;
         width: 397px;
-        /* inset: 9px; */
         padding: 6.4rem 6.8rem;
         transform: scale(-1) translateX(-115px) translateY(0px);
       }

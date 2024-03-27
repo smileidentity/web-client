@@ -87,6 +87,7 @@ function templateString() {
         min-height: 100px;
         text-align: center;
         position: relative;
+        background: white;
       }
       .video-overlay {
         position: absolute;
@@ -148,16 +149,11 @@ function templateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    `
-    : ''
-}
+    ` : ''}
     <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
-    ${this.cameraError ? '' : '<p class="spinner"></p>'}
-        ${this.cameraError
-    ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
-    : '<p style="--flow-space: 4rem">Checking permissions</p>'
-}
+        ${this.cameraError ? '' : '<p class="spinner"></p>'}
+        ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container'>
@@ -174,16 +170,9 @@ function templateString() {
               <span class='visually-hidden'>Capture</span>
             </button>
           </div>
+          ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
         </div>
       </div>
-    </div>
-
-      ${this.hideAttribution
-    ? ''
-    : `
-        <powered-by-smile-id></powered-by-smile-id>
-      `
-}
     </div>
   </div>
   `;

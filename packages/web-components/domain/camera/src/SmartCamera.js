@@ -8,7 +8,7 @@ class SmartCamera {
 
   static environmentOptions = {
     facingMode: 'environment',
-    width: { min: 1280 },
+    // width: { min: 1280 },
     // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
     // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
     // Zooming to 2X, matching the telephoto lens, doesn't solve it completely but mitigates it."

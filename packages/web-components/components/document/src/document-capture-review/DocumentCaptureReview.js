@@ -7,6 +7,95 @@ function templateString() {
     .retake-photo.button[data-variant~="ghost"] {
       color: #FF5805;
     }
+
+
+    @media (max-width: 600px) {
+      .id-camera-screen {
+        width: 100%;
+        height: 100vh;
+      }
+    
+      .section {
+        width: 100%;
+        height: 100vh;
+        justify-content: center;
+      }
+    }
+    
+    @media (min-width: 600px) {
+      .id-image-container {
+        width: 80%;
+        margin: auto;
+        padding: 0px;
+      }
+    
+      video {
+        object-fit: contain;
+        -webkit-tap-highlight-color: transparent;
+        content: normal;
+      }
+    
+      .id-image {
+        width: 100%;
+        min-height: 100px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .video-overlay {
+        position: absolute;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.48);
+        box-sizing: border-box;
+        inset: 0px;
+        width: 396px;
+      }
+    
+      .id-image-container {
+        width: 50%;
+        margin: auto;
+        padding: 0px;
+      }
+    }
+    .id-image-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    .id-image {
+      width: 100%;
+      min-height: 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+
+    }
+    .video-overlay {
+      position: absolute;
+      border-width: 1rem;
+      border-color: white;
+      border-style: solid;
+      width: 397px;
+      inset: 0px;
+      transform: scale(-1) translateX(-114px);
+    }
+    
+    .video-overlay .inner-border {
+      position: absolute;
+      border-width: 1rem;
+      border-color: #9394ab;
+      border-style: solid;
+      border-radius: 1rem;
+      inset: -8px;
+    }
+
+    .action-buttons {
+      width: 80%;
+    }
+
+
     .icon-btn {
       appearance: none;
       background: none;
@@ -36,20 +125,7 @@ function templateString() {
       line-height: 11px;
       color: rgb(21, 31, 114);
     }
-    .section {
-      border-radius: .5rem;
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 35ch;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-    }
 
-    .selfie-capture-review-image {
-      overflow: hidden;
-      aspect-ratio: 1/1;
-    }
 
     #review-image {
       scale: 1.75;
@@ -107,7 +183,7 @@ function templateString() {
       width: 0.75em;
     }
 
-    #document-capture-review-screen .id-video-container.landscape {
+    #document-capture-review-screen .id-image-container.landscape {
     height: auto;
     }
 
@@ -186,67 +262,6 @@ function templateString() {
       font-weight: 700;
       line-height: 1.5rem;
     }
-    .id-video-container {
-      position: relative;
-    }
-    .overlay {
-      position: absolute;
-      width: 100%;
-      top: 0;
-      height: 100%;
-      border: 26px solid #fff;
-      box-sizing: border-box;
-      -moz-box-sizing: border-box;
-      -webkit-box-sizing: border-box;
-    }
-
-    /*.overlay-container {
-      position: absolute;
-      margin-block-start: auto;
-      border: 37px solid white;
-      margin-block-end: auto;
-      height: 76%;
-      width: 91%;
-      max-width: 30.5rem;
-    }*/
-
-    .overlay-container {
-      position: absolute;
-      /* width: auto; */
-      /* top: 0; */
-      margin-block-start: auto;
-      /* right: 0; */
-      /* bottom: 0; */
-      /* left: 0; */
-      outline: 109px solid white;
-      margin-block-end: auto;
-      height: 62%;
-      width: 61%;
-      max-width: 30.5rem;
-    }
-    
-    .webcam-container {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      max-height: 21rem;
-      position: relative;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      max-height: 12rem;
-      width: 24.5rem;
-      align-self: center;
-    }
-    img {
-      height: auto;
-      max-width: 155% !important;
-      object-fit: contain;
-    }
   </style>
   <div id='document-capture-review-screen' class='flow center'>
     ${
@@ -270,17 +285,19 @@ function templateString() {
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='webcam-container'>
-        <div class='overlay-container'></div>
-        ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' width='396' />` : ''}
-      </div>
-      <div class='flow action-buttons'>
-        <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-          Yes, my ID is readable
-        </button>
-        <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-id-image'>
-          No, retake photo
-        </button>
+      <div class='id-image-container'>
+        <div class='id-image'>
+          <div class='video-overlay'></div>
+          ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' width='396' />` : ''}
+          </div>
+        <div class='flow action-buttons'>
+          <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
+            Yes, my ID is readable
+          </button>
+          <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-id-image'>
+            No, retake photo
+          </button>
+        </div>
       </div>
 
       ${

@@ -23,11 +23,22 @@ export const DocumentCapturePendingPermission = {
 };
 export const DocumentCapture = {
   loaders: [
-    async () => ({
-      'data-camera-ready': await SmartCamera.getMedia({
-        audio: false,
-        video: SmartCamera.environmentOptions,
-      }),
-    }),
+    async () => {
+      console.warn('attemp to get media');
+      try {
+        const result = await SmartCamera.getMedia({
+          audio: false,
+          video: SmartCamera.environmentOptions,
+        });
+        return {
+          'data-camera-ready': result,
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          'data-camera-error': SmartCamera.handleCameraError(error),
+        };
+      }
+    },
   ],
 };

@@ -64,7 +64,7 @@ function templateString() {
         border-style: solid;
         width: 397px;
         padding: 6.4rem 6.8rem;
-        transform: scale(-1) translateX(-115px) translateY(0px);
+        transform: scale(-1) translateX(-90px) translateY(0px);
       }
     }
     .id-image-container {
@@ -128,15 +128,6 @@ function templateString() {
     }
 
 
-    #review-image {
-      scale: 1.75;
-    }
-
-    @media (max-aspect-ratio: 1/1) {
-      #review-image {
-        transform: scaleX(-1) translateY(-10%);
-      }
-    }
 
     .tips,
     .powered-by {

@@ -99,11 +99,11 @@ function templateString() {
       
       .video-overlay .inner-border {
         position: absolute;
-        border-width: 1rem;
+        border-width: 0.25rem;
         border-color: #9394ab;
         border-style: solid;
-        border-radius: 1rem;
-        inset: -8px;
+        border-radius: 0.25rem;
+        inset: -1px;
       }
       
       .description {
@@ -126,7 +126,7 @@ function templateString() {
         align-items: center;
         justify-content: center;
         height: 100%;
-      }    
+      }
     </style>
   <div id='id-camera-screen' class='flow center'>
     ${this.showNavigation

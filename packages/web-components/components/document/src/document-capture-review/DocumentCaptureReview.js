@@ -28,45 +28,12 @@ function templateString() {
         border-style: solid;
         inset: 0px;
       }
+
+      img {
+        clip-path: polygon(10% 10%, 90% 10%, 90% 85%, 10% 85%);
+      }
     }
     
-    @media (min-width: 600px) {
-      .id-image-container {
-        width: 80%;
-        margin: auto;
-        padding: 0px;
-      }
-    
-      video {
-        object-fit: contain;
-        -webkit-tap-highlight-color: transparent;
-        content: normal;
-      }
-    
-      .id-image {
-        width: 100%;
-        min-height: 100px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .id-image-container {
-        width: 50%;
-        margin: auto;
-        padding: 0px;
-      }
-
-      .video-overlay {
-        position: absolute;
-        border-width: 1.75rem;
-        border-color: white;
-        border-style: solid;
-        width: 397px;
-        padding: 6.4rem 6.8rem;
-        transform: scale(-1) translateX(-90px) translateY(0px);
-      }
-    }
     .id-image-container {
       display: flex;
       flex-direction: column;
@@ -75,12 +42,16 @@ function templateString() {
     }
 
     .id-image {
-      width: 100%;
-      min-height: 100px;
+      max-width: fit-content;
+      height: auto;
       text-align: center;
       position: relative;
       overflow: hidden;
-
+    }
+    img {
+      height: 100%;
+      min-height: 100px;
+      clip-path: polygon(5% 5%, 95% 5%, 95% 90%, 5% 90%);
     }
 
     .video-overlay .inner-border {

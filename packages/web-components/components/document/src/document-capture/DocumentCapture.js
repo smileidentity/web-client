@@ -33,12 +33,30 @@ function templateString() {
         white-space: nowrap;
         width: 1px;
       }
+
+      .mobile-camera-screen video {
+        display: block;
+        object-fit: cover;
+        object-position: center;
+        width: 100%;
+      }
+
+      .id-video.mobile-camera-screen {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        max-height: 200px;
+        height: 180px;
+        width: 100%;
+        overflow: hidden;
+        margin: 0 auto;
+      }
       
       @media (max-width: 600px) {
-        .id-camera-screen {
+        /*.document-capture-screen {
           width: 100%;
           height: 100vh;
-        }
+        }*/
       
         .section {
           width: 100%;
@@ -48,11 +66,11 @@ function templateString() {
       }
       
       @media (min-width: 600px) {
-        .id-video-container {
+       /* .id-video-container {
           width: 80%;
           margin: auto;
           padding: 0px;
-        }
+        }*/
       
         video {
           object-fit: contain;
@@ -76,7 +94,7 @@ function templateString() {
         }
       
         .id-video-container {
-          width: 50%;
+          /* width: 50%; */
           margin: auto;
           padding: 0px;
         }
@@ -127,8 +145,15 @@ function templateString() {
         justify-content: center;
         height: 100%;
       }
+      #document-capture-screen {
+        padding-block: 2rem;
+        display: flex;
+        flex-direction: column;
+        max-block-size: 100%;
+        max-inline-size: 40ch;
+      }
     </style>
-  <div id='id-camera-screen' class='flow center'>
+  <div id='document-capture-screen' class='flow center'>
     ${this.showNavigation
     ? `
       <div class="nav">
@@ -150,7 +175,7 @@ function templateString() {
         </button>
       </div>
     ` : ''}
-    <h2 class='h2 color-digital-blue'>${this.idType}</h2>
+    <h2 class='h2 color-digital-blue'>${this.documentType}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
@@ -160,7 +185,7 @@ function templateString() {
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         </div>
         <div class='video-footer'>
-          <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.idType}</h2>
+          <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.documentType}</h2>
           <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
@@ -295,12 +320,53 @@ class DocumentCapture extends HTMLElement {
     const sourceXOffset = this.idCardRegion.x * widthRatio;
     const sourceYOffset = this.idCardRegion.y * heightRatio;
 
-    const pixelIncrease = 20;
+    const pixelIncrease = 60;
     const sourceXOffsetAdjusted = sourceXOffset - (pixelIncrease * widthRatio);
     const sourceYOffsetAdjusted = sourceYOffset - (pixelIncrease * heightRatio);
     const sourceWidthAdjusted = sourceWidth + (2 * pixelIncrease * widthRatio);
     const sourceHeightAdjusted = sourceHeight + (2 * pixelIncrease * heightRatio);
     canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
+    const aspectRatio = video.videoWidth / video.videoHeight;
+
+    if (aspectRatio < 1) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw the video frame onto the canvas
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the dimensions of the video preview frame
+      const previewWidth = PORTRAIT_ID_PREVIEW_WIDTH;
+      const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
+
+      // Define the padding value
+      const paddingPercent = 0.5; // 50% of the preview dimensions;
+      const paddedWidth = previewWidth * (1 + paddingPercent * 3.5);
+      const paddedHeight = previewHeight * (1 + paddingPercent);
+
+      // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
+      const cropWidth = paddedWidth;
+      const cropHeight = paddedHeight;
+      const cropLeft = (canvas.width - cropWidth) / 2;
+      const cropTop = (canvas.height - cropHeight) / 2;
+
+      // Create a new canvas element for the cropped image
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = cropWidth;
+      croppedCanvas.height = cropHeight;
+
+      // Draw the cropped image onto the new canvas
+      const croppedCtx = croppedCanvas.getContext('2d');
+      croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+      return {
+        image: croppedCanvas.toDataURL('image/jpeg'),
+        originalHeight: canvas.height,
+        originalWidth: canvas.width,
+        ...this.idCardRegion,
+      };
+    }
 
     context.drawImage(
       video,
@@ -363,7 +429,8 @@ class DocumentCapture extends HTMLElement {
       video = document.createElement('video');
     }
     const videoContainer = this.shadowRoot.querySelector('.id-video');
-    const width = videoContainer.clientWidth;
+    const MIN_WIDTH = 272;
+    const width = videoContainer.clientWidth < MIN_WIDTH ? MIN_WIDTH : videoContainer.clientWidth;
     video.style.width = `${width}px`;
     video.style.display = 'block';
     video.muted = true;
@@ -371,7 +438,6 @@ class DocumentCapture extends HTMLElement {
 
     video.autoplay = true;
     video.playsInline = true;
-    video.muted = true;
     if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
@@ -390,16 +456,20 @@ class DocumentCapture extends HTMLElement {
       const aspectRatio = videoWidth / videoHeight;
       const portrait = aspectRatio < 1;
 
-      const offset = 20;
-      const offsetHeight = videoHeight * ((portrait ? 60 : 30) / 100);
+      const offset = 30;
+      const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
       const offsetWidth = videoWidth * (offset / 100);
+
+      if (portrait) {
+        videoContainer.classList.add('mobile-camera-screen');
+      }
+
       this.idCardRegion = {
         height: videoHeight - offsetHeight,
         width: videoWidth - offsetWidth,
         x: offsetWidth / 2,
         y: offsetHeight / 2,
       };
-      console.warn(`idCardRegion: ${JSON.stringify(this.idCardRegion)}`);
 
       const videoOverlay = document.createElement('div');
       const shadeColor = 'white';
@@ -516,8 +586,8 @@ class DocumentCapture extends HTMLElement {
     return !this.isFrontOfId;
   }
 
-  get idType() {
-    return this.getAttribute('id-type') || 'Document';
+  get documentType() {
+    return this.getAttribute('document-type') || 'Document';
   }
 
   get isPortraitCaptureView() {

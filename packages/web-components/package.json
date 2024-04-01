@@ -37,7 +37,7 @@
     "@storybook/addon-links": "^7.6.15",
     "@storybook/blocks": "^7.6.17",
     "@storybook/web-components": "^7.6.4",
-    "@storybook/web-components-vite": "^7.6.12",
+    "@storybook/web-components-vite": "^8.0.5",
     "cypress": "^13.6.6",
     "esbuild": "^0.20.1",
     "eslint": "^8.57.0",

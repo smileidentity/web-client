@@ -108,14 +108,6 @@ class SmartCameraWeb extends HTMLElement {
       this.SelfieCaptureScreens.removeAttribute('data-camera-error');
       this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
-
-    window.addEventListener('SmileIdentity::Close', () => {
-      this.dispatchEvent(new CustomEvent('smart-camera-web.close'));
-    });
-
-    window.parent.addEventListener('SmileIdentity::Close', () => {
-      this.dispatchEvent(new CustomEvent('smart-camera-web.close'));
-    });
   }
 
   reset() {

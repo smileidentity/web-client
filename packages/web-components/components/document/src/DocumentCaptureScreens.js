@@ -39,7 +39,7 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
       ${this.documentCaptureModes}
       ></document-capture>
-      <document-capture-instructions id='document-capture-instructions-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
+      <document-capture-instructions  side-of-id='Back' id='document-capture-instructions-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
       <document-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
       ${this.documentCaptureModes}
       hidden 

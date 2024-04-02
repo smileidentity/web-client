@@ -779,7 +779,8 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.backButton = this.shadowRoot.querySelector('#back-button');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
+
     this.startImageCapture = this.shadowRoot.querySelector(
       '#start-image-capture',
     );
@@ -792,11 +793,9 @@ class SelfieCaptureScreen extends HTMLElement {
 
     const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(

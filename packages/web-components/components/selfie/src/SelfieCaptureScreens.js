@@ -29,7 +29,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-capture-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideInstructions ? 'hidden' : ''}></selfie-capture-instruction>
+            <selfie-capture-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instruction>
             <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
             <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
@@ -50,7 +50,10 @@ class SelfieCaptureScreens extends HTMLElement {
       getPermissions(this.selfieCapture);
     }
 
-    if (this.hideInstructions) {
+    if (this.getAttribute('initial-screen') === 'selfie-capture') {
+      getPermissions(this.selfieCapture);
+      this.setActiveScreen(this.selfieCapture);
+    } else if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
     } else {
       this.setActiveScreen(this.selfieInstruction);
@@ -93,6 +96,17 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     );
 
+    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      this.selfieCapture.reset();
+      SmartCamera.stopMedia();
+      if (this.hideInstructions) {
+        this.handleBackEvents();
+        return;
+      }
+
+      this.setActiveScreen(this.selfieInstruction);
+    });
+
     this.selfieReview.addEventListener('selfie-review.rejected', async () => {
       this.selfieReview.removeAttribute('data-image');
       this._data.images = [];
@@ -134,6 +148,10 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get hideBack() {
+    return this.hasAttribute('hide-back-to-host') ? 'hide-back' : '';
+  }
+
   get disableImageTests() {
     return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
   }
@@ -154,6 +172,7 @@ class SelfieCaptureScreens extends HTMLElement {
       'hidden',
       'show-navigation',
       'hide-back-to-host',
+      'initial-screen',
     ];
   }
 
@@ -161,6 +180,7 @@ class SelfieCaptureScreens extends HTMLElement {
     switch (name) {
     case 'title':
     case 'hidden':
+    case 'initial-screen':
       this.connectedCallback();
       break;
     default:

@@ -254,17 +254,15 @@ class DocumentInstruction extends HTMLElement {
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.backButton = this.shadowRoot.querySelector('#back-button');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
     this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
     this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
 
     const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
 
     CloseIframeButtons.forEach((button) => {
       button.addEventListener(

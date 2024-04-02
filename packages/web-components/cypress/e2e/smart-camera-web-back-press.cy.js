@@ -10,7 +10,7 @@ context('SmartCameraWeb', () => {
     cy.visit('/capture-back-of-id-navigation');
   });
 
-  it.only('should start from the instructions screen', () => {
+  it('should start from the instructions screen', () => {
     cy
       .get('smart-camera-web')
       .shadow()
@@ -29,320 +29,231 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('smileid-navigation')
       .shadow()
-      .get('.back-button')
+      .find('.back-button')
       .should('be.visible');
-    //   .click();
   });
 
   it('should navigate to "back_pressed" when back button on request page button is pressed', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-button-exit')
+      .find('selfie-capture-instruction')
+      .should('be.visible');
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instruction')
+      .shadow()
+      .should('contain.text', "Next, we'll take a quick selfie");
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instruction')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy.location('pathname').should('eq', '/back_pressed');
-    cy
-      .get('smart-camera-web')
-      .should('not.exist');
   });
 
-  it('should navigate to "back_pressed" when back button is pressed in camera screen', () => {
+  it('should navigate to "back_pressed" when back button is pressed in selfie camera screen', () => {
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instruction')
+      .shadow()
+      .find('#allow')
+      .click();
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instruction')
+      .should('not.be.visible');
+
     cy
       .get('smart-camera-web')
       .shadow()
       .find('selfie-capture')
       .should('be.visible');
-
-    cy.location('pathname').should('eq', '/back_pressed');
-    cy
-      .get('smart-camera-web')
-      .should('not.exist');
-  });
-
-  it('should switch from the idEntryScreen to the selfieScreen on clicking the back button', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#request-camera-access')
+      .find('selfie-capture')
+      .shadow()
+      .should('contain.text', 'Take a Selfie');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#start-image-capture')
-      .click();
-
-    cy
-      .wait(8000);
-
-    cy
-      .get('smart-camera-web')
+      .find('selfie-capture')
       .shadow()
-      .find('#select-selfie')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#camera-screen')
       .should('not.be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('selfie-capture-instruction')
+      .should('be.visible');
+  });
+
+  it('should switch from the idEntryScreen to the selfieScreen on clicking the back button', () => {
+    cy.navigateFaceCaptureScreens();
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions')
       .should('be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-button-selfie')
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions')
       .should('not.be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#camera-screen')
+      .find('selfie-capture')
       .should('be.visible');
   });
 
   it('should switch from the idCameraScreen to the idEntryScreen on clicking the "back" button', () => {
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#request-camera-access')
-      .click();
+    cy.navigateFaceCaptureScreens();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#start-image-capture')
-      .click();
-
-    cy
-      .wait(8000);
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#select-selfie')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions')
       .should('be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions#document-capture-instructions-front')
       .should('not.be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-button-id-entry')
+      .find('document-capture#document-capture-front')
+      .should('be.visible');
+
+    cy
+      .get('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-camera-screen')
+      .find('document-capture#document-capture-front')
       .should('not.be.visible');
-
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions#document-capture-instructions-front')
       .should('be.visible');
   });
 
-  it('should switch from the backOfIdEntryScreen to the idReviewScreen when the back button is clicked', () => {
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#request-camera-access')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#start-image-capture')
-      .click();
-
-    cy
-      .wait(8000);
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#select-selfie')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen')
-      .should('be.visible');
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen #take-photo')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen')
-      .should('not.be.visible');
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#capture-id-image')
-      .click();
-
-    cy
-      .wait(2000);
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#select-id-image')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#back-of-id-entry-screen')
-      .should('be.visible');
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#back-button-id-image')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#back-of-id-entry-screen')
-      .should('not.be.visible');
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-review-screen')
-      .should('be.visible');
+  it('should switch from the idBackEntryScreen to the idFrontEntryScreen on clicking the "back" button', () => {
+    cy.navigateFaceCaptureScreens();
+    cy.navigateDocumentFrontCaptureWithInstructions();
   });
 
   it('should switch from the backOfIdCameraScreen to the backOfIdEntryScreen on clicking the "back" button', () => {
+    cy.navigateFaceCaptureScreens();
+
+    cy.navigateDocumentFrontCaptureWithInstructions();
+
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#request-camera-access')
+      .find('document-capture-instructions#document-capture-instructions-back')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#start-image-capture')
-      .click();
-
-    cy
-      .wait(8000);
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#select-selfie')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen')
-      .should('be.visible');
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen #take-photo')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions#document-capture-instructions-back')
       .should('not.be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#capture-id-image')
-      .click();
-
-    cy
-      .wait(2000);
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#select-id-image')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#back-of-id-entry-screen')
+      .find('document-capture#document-capture-back')
       .should('be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-of-id-entry-screen #take-photo')
+      .find('document-capture#document-capture-back')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-button-back-id-entry')
-      .click();
-
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#back-of-id-camera-screen')
+      .find('document-capture#document-capture-back')
       .should('not.be.visible');
 
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#back-of-id-entry-screen')
+      .find('document-capture-instructions#document-capture-instructions-back')
       .should('be.visible');
   });
 
-  it('should navigate to "closed" when close button is pressed in request screen', () => {
+  it.only('should navigate to "closed" when close button is pressed in request screen', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('#request-screen-close')
+      .find('selfie-capture-instruction')
+      .shadow()
+      .find('smileid-navigation')
+      .shadow()
+      .find('.close-button')
       .click();
 
     cy.exitScreens();

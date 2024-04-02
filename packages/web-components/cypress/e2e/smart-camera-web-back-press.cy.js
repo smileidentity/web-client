@@ -245,7 +245,7 @@ context('SmartCameraWeb', () => {
       .should('be.visible');
   });
 
-  it.only('should navigate to "closed" when close button is pressed in request screen', () => {
+  it('should navigate to "closed" when close button is pressed in request screen', () => {
     cy
       .get('smart-camera-web')
       .shadow()

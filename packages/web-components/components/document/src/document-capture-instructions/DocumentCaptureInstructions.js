@@ -301,8 +301,7 @@ function templateString() {
                 <div class="instruction">
                 <p class="instruction-header font-bold text-base">Good Light</p>
                 <p class="instruction-body text-xs font-medium">
-                    Make sure you are in a well-lit environment where your face is
-                    clear and visible
+                  Make sure the image is taken in a well-lit environment where the ID document is easy to read.
                 </p>
             </div>
         </div>
@@ -390,8 +389,7 @@ function templateString() {
             <div>
                 <p class="instruction-header font-bold text-base">Clear Image</p>
                 <p class="instruction-body text-xs font-medium">
-                    Hold your phone steady so the selfie is clear and sharp. Don't
-                    take blurry images.
+                  Hold your camera steady so the words on the ID are not blurry.
                 </p>
             </div>
         </div>

@@ -324,7 +324,11 @@
   window.addEventListener(
     "message",
     async (event) => {
-      if (event.data) {
+      if (
+        event.data &&
+        typeof event.data === "string" &&
+        event.data.includes("SmileIdentity")
+      ) {
         if (event.data.includes("SmileIdentity::Configuration")) {
           config = JSON.parse(event.data);
           activeScreen = LoadingScreen;

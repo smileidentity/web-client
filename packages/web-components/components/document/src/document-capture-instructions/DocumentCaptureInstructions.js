@@ -1,7 +1,6 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 
-
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
   <path d="M15.3799 21.2759C15.3799 16.8576 18.9616 13.2759 23.3799 13.2759H64.2764C68.6947 13.2759 72.2764 16.8576 72.2764 21.2759V73.5517C72.2764 77.97 68.6947 81.5517 64.2764 81.5517H23.3799C18.9616 81.5517 15.3799 77.97 15.3799 73.5517V21.2759Z" fill="#F6C969"/>

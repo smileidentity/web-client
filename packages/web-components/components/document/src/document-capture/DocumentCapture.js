@@ -454,7 +454,10 @@ class DocumentCapture extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
+
+    video.onloadedmetadata = () => {
+      video.play();
+    };
 
     const videoContainer = this.shadowRoot.querySelector('.id-video-container');
 

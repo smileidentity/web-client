@@ -126,7 +126,7 @@ class SelfieCaptureScreens extends HTMLElement {
     );
 
     [this.selfieInstruction, this.selfieCapture, this.selfieReview].forEach((screen) => {
-      screen.addEventListener(`${this.selfieInstruction.nodeName.toLowerCase()}.close`, () => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => {
         this.handleCloseEvent();
       });
     });

@@ -93,10 +93,18 @@ function templateString() {
         justify-self: center;
         width: 0.75em;
       }
-      #document-capture-review-screen .id-video-container.landscape {
+      #selfie-capture-review-screen {
+        block-size: 45rem;
+        padding-block: 2rem;
+        display: flex;
+        flex-direction: column;
+        max-block-size: 100%;
+        max-inline-size: 40ch;
+      }
+      #selfie-capture-review-screen .id-video-container.landscape {
         height: auto;
       }
-      #document-capture-review-screen header p {
+      #selfie-capture-review-screen header p {
         margin-block: 0 !important;
       }
       .id-video-container.portrait {
@@ -197,7 +205,7 @@ function templateString() {
       }
     </style>
     ${styles}
-    <div id='document-capture-review-screen' class='flow center'>
+    <div id='selfie-capture-review-screen' class='flow center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title text-2xl color-digital-blue font-bold">
       Is your whole face visible and clear in this photo?

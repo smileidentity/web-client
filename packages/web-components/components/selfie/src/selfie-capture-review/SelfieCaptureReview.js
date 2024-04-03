@@ -291,11 +291,11 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-review.cancelled'));
+    this.dispatchEvent(new CustomEvent('selfie-capture-review.cancelled'));
   }
 
-  closeWindow() {
-    this.dispatchEvent(new CustomEvent('selfie-review.close'));
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-review.close'));
   }
 
   attributeChangedCallback(name) {
@@ -314,33 +314,25 @@ class SelfieCaptureReview extends HTMLElement {
   setUpEventListeners() {
     this.selectImage = this.shadowRoot.querySelector('#select-id-image');
     this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     this.selectImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-review.accepted', {
+        new CustomEvent('selfie-capture-review.accepted', {
           detail: {},
         }),
       );
     });
     this.reCaptureImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-review.rejected', {
+        new CustomEvent('selfie-capture-review.rejected', {
           detail: {},
         }),
       );

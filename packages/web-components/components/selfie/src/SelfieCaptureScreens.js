@@ -107,7 +107,7 @@ class SelfieCaptureScreens extends HTMLElement {
       this.setActiveScreen(this.selfieInstruction);
     });
 
-    this.selfieReview.addEventListener('selfie-review.rejected', async () => {
+    this.selfieReview.addEventListener('selfie-capture-review.rejected', async () => {
       this.selfieReview.removeAttribute('data-image');
       this._data.images = [];
       if (this.hideInstructions) {
@@ -119,7 +119,7 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     this.selfieReview.addEventListener(
-      'selfie-review.accepted',
+      'selfie-capture-review.accepted',
       async () => {
         this._publishSelectedImages();
       },

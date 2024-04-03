@@ -127,7 +127,7 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.idReview.addEventListener('document-review.rejected', async () => {
+    this.idReview.addEventListener('document-capture-review.rejected', async () => {
       this.idReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -138,7 +138,7 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.idReview.addEventListener('document-review.accepted', async () => {
+    this.idReview.addEventListener('document-capture-review.accepted', async () => {
       if (this.hideBackOfId) {
         this._publishSelectedImages();
       } else if (this.hideInstructions) {
@@ -201,7 +201,7 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.backOfIdReview.addEventListener('document-review.rejected', async () => {
+    this.backOfIdReview.addEventListener('document-capture-review.rejected', async () => {
       this.backOfIdReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -212,7 +212,7 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.backOfIdReview.addEventListener('document-review.accepted', () => {
+    this.backOfIdReview.addEventListener('document-capture-review.accepted', () => {
       this._publishSelectedImages();
     });
 
@@ -226,7 +226,7 @@ class DocumentCaptureScreens extends HTMLElement {
     ];
 
     screens.forEach((screen) => {
-      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvent());
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvents());
     });
   }
 
@@ -262,6 +262,10 @@ class DocumentCaptureScreens extends HTMLElement {
 
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent('document-capture-screens.cancelled'));
+  }
+
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture-screens.close'));
   }
 
   setActiveScreen(screen) {

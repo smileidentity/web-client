@@ -294,11 +294,11 @@ class IdReview extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('document-review.cancelled'));
+    this.dispatchEvent(new CustomEvent('document-capture-review.cancelled'));
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent('document-review.close'));
+    this.dispatchEvent(new CustomEvent('document-capture-review.close'));
   }
 
   attributeChangedCallback(name) {
@@ -330,14 +330,14 @@ class IdReview extends HTMLElement {
 
     this.selectIDImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('document-review.accepted', {
+        new CustomEvent('document-capture-review.accepted', {
           detail: {},
         }),
       );
     });
     this.reCaptureIDImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('document-review.rejected', {
+        new CustomEvent('document-capture-review.rejected', {
           detail: {},
         }),
       );

@@ -432,20 +432,6 @@ function templateString() {
     max-width: 90%;
   }
 
-  #document-capture-review-screen .id-video-container,
-  #back-of-document-capture-review-screen .id-video-container {
-    background-color: rgba(0, 0, 0, 1);
-  }
-
-  #document-capture-review-screen .id-video-container.portrait, #back-of-document-capture-review-screen .id-video-container.portrait {
-    height: calc((200px * 1.4) + 100px);
-  }
-  #document-capture-review-screen .id-video-container.portrait img, #back-of-document-capture-review-screen .id-video-container.portrait img {
-    height: 280px;
-    width: 200px;
-    padding-top: 14px;
-    transform: none;
-  }
   .actions {
     background-color: rgba(0, 0, 0, .7);
     bottom: 0;
@@ -467,7 +453,7 @@ function templateString() {
     min-height: calc((200px * 1.4) + 260px);
   }
 
-  #id-entry-screen,
+  #selfie-capture-screen,
   #back-of-id-entry-screen {
     block-size: 45rem;
     padding-block: 2rem;
@@ -477,7 +463,7 @@ function templateString() {
     max-inline-size: 40ch;
   }
 
-  #id-entry-screen header p {
+  #selfie-capture-screen header p {
     margin-block: 0 !important;
   }
 
@@ -510,7 +496,7 @@ function templateString() {
     margin-inline-start; 1em;
   }
   </style>
-  <div id='camera-screen' class='flow center'>
+  <div id='selfie-capture-screen' class='flow center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h1 class='text-2xl color-digital-blue font-bold'>Take a Selfie</h1>
 

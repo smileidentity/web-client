@@ -258,8 +258,7 @@ function templateString() {
         width: 0.75em;
       }
 
-      #selfie-capture-instruction-screen,
-      #back-of-selfie-capture-instruction-screen {
+      #selfie-capture-instruction-screen {
         block-size: 45rem;
         padding-block: 2rem;
         display: flex;

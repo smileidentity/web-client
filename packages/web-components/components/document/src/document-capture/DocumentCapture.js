@@ -60,7 +60,6 @@ function templateString() {
         flex-direction: column;
         max-block-size: 100%;
         max-inline-size: 40ch;
-    justify-content: space-between;
       }
 
       #document-capture-screen header p {
@@ -230,7 +229,7 @@ function templateString() {
         height: 100%;
       }
   </style>
-  <div id='id-camera-screen' class='flow center flex-column'>
+  <div id='document-capture-screen' class='flow center flex-column'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">

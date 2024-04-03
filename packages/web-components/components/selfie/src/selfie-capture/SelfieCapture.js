@@ -777,20 +777,12 @@ class SelfieCaptureScreen extends HTMLElement {
       this._startImageCapture();
     });
 
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
-
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.closeWindow();
     });
 
     if (SmartCamera.stream) {
@@ -872,8 +864,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+    this.dispatchEvent(new CustomEvent('selfie-capture.close'));
   }
 }
 

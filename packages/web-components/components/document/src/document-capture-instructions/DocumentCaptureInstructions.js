@@ -258,20 +258,12 @@ class DocumentInstruction extends HTMLElement {
     this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
     this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
 
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
-
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     if (this.takeDocumentPhotoButton) {
@@ -339,8 +331,8 @@ class DocumentInstruction extends HTMLElement {
     this.dispatchEvent(new CustomEvent('document-capture-instructions.cancelled'));
   }
 
-  closeWindow() {
-    window.parent.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture-instructions.close'));
   }
 }
 

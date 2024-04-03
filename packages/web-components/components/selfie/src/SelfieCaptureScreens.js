@@ -29,7 +29,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-capture-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instruction>
+            <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
             <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
             <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
@@ -42,7 +42,7 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     };
 
-    this.selfieInstruction = this.querySelector('selfie-capture-instruction');
+    this.selfieInstruction = this.querySelector('selfie-capture-instructions');
     this.selfieCapture = this.querySelector('selfie-capture');
     this.selfieReview = this.querySelector('selfie-capture-review');
 
@@ -124,6 +124,12 @@ class SelfieCaptureScreens extends HTMLElement {
         this._publishSelectedImages();
       },
     );
+
+    [this.selfieInstruction, this.selfieCapture, this.selfieReview].forEach((screen) => {
+      screen.addEventListener(`${this.selfieInstruction.nodeName.toLowerCase()}.close`, () => {
+        this.handleCloseEvent();
+      });
+    });
   }
 
   _publishSelectedImages() {
@@ -164,6 +170,10 @@ class SelfieCaptureScreens extends HTMLElement {
 
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
+  }
+
+  handleCloseEvent() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-screens.close'));
   }
 
   static get observedAttributes() {

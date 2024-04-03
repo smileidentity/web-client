@@ -484,19 +484,12 @@ class DocumentCapture extends HTMLElement {
       this.handleIDStream(SmartCamera.stream);
     }
 
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     this.captureIDImage.addEventListener('click', () => {
@@ -586,8 +579,8 @@ class DocumentCapture extends HTMLElement {
     this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
   }
 
-  closeWindow() {
-    window.parent.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture.close'));
   }
 }
 

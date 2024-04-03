@@ -215,6 +215,19 @@ class DocumentCaptureScreens extends HTMLElement {
     this.backOfIdReview.addEventListener('document-review.accepted', () => {
       this._publishSelectedImages();
     });
+
+    const screens = [
+      this.documentInstruction,
+      this.idCapture,
+      this.documentInstructionBack,
+      this.idCaptureBack,
+      this.idReview,
+      this.backOfIdReview,
+    ];
+
+    screens.forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvent());
+    });
   }
 
   _publishSelectedImages() {

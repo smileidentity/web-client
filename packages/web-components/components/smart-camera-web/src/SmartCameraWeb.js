@@ -108,6 +108,10 @@ class SmartCameraWeb extends HTMLElement {
       this.SelfieCaptureScreens.removeAttribute('data-camera-error');
       this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
+
+    [this.cameraPermission, this.SelfieCaptureScreens, this.documentCapture].forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvent());
+    });
   }
 
   reset() {
@@ -165,6 +169,10 @@ class SmartCameraWeb extends HTMLElement {
 
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
+  }
+
+  handleCloseEvent() {
+    this.dispatchEvent(new CustomEvent('smart-camera-web.close'));
   }
 }
 

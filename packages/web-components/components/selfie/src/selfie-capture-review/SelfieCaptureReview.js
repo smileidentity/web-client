@@ -287,8 +287,7 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+    this.dispatchEvent(new CustomEvent('selfie-review.close'));
   }
 
   attributeChangedCallback(name) {

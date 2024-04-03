@@ -297,9 +297,8 @@ class IdReview extends HTMLElement {
     this.dispatchEvent(new CustomEvent('document-review.cancelled'));
   }
 
-  closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-review.close'));
   }
 
   attributeChangedCallback(name) {
@@ -320,21 +319,13 @@ class IdReview extends HTMLElement {
     this.reCaptureIDImage = this.shadowRoot.querySelector(
       '#re-capture-id-image',
     );
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     this.selectIDImage.addEventListener('click', () => {

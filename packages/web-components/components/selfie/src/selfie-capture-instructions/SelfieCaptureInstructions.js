@@ -609,7 +609,7 @@ class SelfieCaptureInstructions extends HTMLElement {
     this.navigation.addEventListener(
       'navigation.close',
       () => {
-        this.closeWindow();
+        this.handleCloseEvents();
       },
       false,
     );
@@ -635,14 +635,13 @@ class SelfieCaptureInstructions extends HTMLElement {
     return this.hasAttribute('show-navigation');
   }
 
-  closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-instructions.close'));
   }
 }
 
-if ('customElements' in window && !window.customElements.get('selfie-capture-instruction')) {
-  window.customElements.define('selfie-capture-instruction', SelfieCaptureInstructions);
+if ('customElements' in window && !window.customElements.get('selfie-capture-instructions')) {
+  window.customElements.define('selfie-capture-instructions', SelfieCaptureInstructions);
 }
 
 export default SelfieCaptureInstructions;

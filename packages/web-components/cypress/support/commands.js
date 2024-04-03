@@ -35,7 +35,7 @@ Cypress.Commands.add('navigateFaceCaptureScreens', () => {
   cy
     .get('smart-camera-web')
     .shadow()
-    .find('selfie-capture-instruction')
+    .find('selfie-capture-instructions')
     .shadow()
     .find('#allow')
     .click();
@@ -43,7 +43,7 @@ Cypress.Commands.add('navigateFaceCaptureScreens', () => {
   cy
     .get('smart-camera-web')
     .shadow()
-    .find('selfie-capture-instruction')
+    .find('selfie-capture-instructions')
     .should('not.be.visible');
 
   cy

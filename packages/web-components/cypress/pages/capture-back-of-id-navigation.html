@@ -60,17 +60,12 @@
 			app.addEventListener('smart-camera-web.publish', async (e) => {
 				console.log(e.detail);
 			});
-
 			app.addEventListener('smart-camera-web.cancelled', async (e) => {
 				location.href = '/back_pressed'
 			})
 
 			app.addEventListener('smart-camera-web.close', async (e) => {
 				location.href = '/closed'
-			})
-
-			window.addEventListener('SmileIdentity::Close', async (e) => {
-				// location.href = '/closed'
 			})
 		</script>
 	</body>

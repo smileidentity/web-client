@@ -14,18 +14,18 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .should('be.visible');
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .should('contain.text', "Next, we'll take a quick selfie");
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .find('smileid-navigation')
       .shadow()
@@ -37,18 +37,18 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .should('be.visible');
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .should('contain.text', "Next, we'll take a quick selfie");
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .find('smileid-navigation')
       .shadow()
@@ -62,7 +62,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .find('#allow')
       .click();
@@ -70,7 +70,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .should('not.be.visible');
 
     cy
@@ -105,7 +105,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .should('be.visible');
   });
 
@@ -249,7 +249,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .shadow()
       .find('smileid-navigation')
       .shadow()

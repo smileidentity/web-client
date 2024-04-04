@@ -185,7 +185,7 @@ function templateString() {
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         </div>
         <div class='video-footer'>
-          <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.documentType}</h2>
+          <h2 class='h2 color-digital-blue reset-margin-block id-side'>${this.title}</h2>
           <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
@@ -567,7 +567,7 @@ class DocumentCapture extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute('title') || `${this.IdSides[this.sideOfId]} of ${this.documentName}`;
   }
 
   get hidden() {
@@ -590,6 +590,10 @@ class DocumentCapture extends HTMLElement {
     return this.getAttribute('document-type') || 'Document';
   }
 
+  get documentName() {
+    return this.getAttribute('document-name') || this.documentType;
+  }
+
   get isPortraitCaptureView() {
     return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
@@ -600,21 +604,25 @@ class DocumentCapture extends HTMLElement {
 
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
-      'data-camera-ready',
       'data-camera-error',
+      'data-camera-ready',
+      'document-name',
+      'document-type',
+      'hidden',
+      'hide-back-to-host',
+      'show-navigation',
+      'title',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'data-camera-ready':
     case 'data-camera-error':
+    case 'data-camera-ready':
+    case 'document-name':
+    case 'document-type':
     case 'hidden':
+    case 'title':
       this.shadowRoot.innerHTML = this.render();
       this.setUpEventListeners();
       break;

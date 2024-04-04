@@ -13,7 +13,7 @@ function scwTemplateString() {
   <div>
     <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
     <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-screens>
-    <document-capture-screens ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
+    <document-capture-screens document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -119,6 +119,14 @@ class SmartCameraWeb extends HTMLElement {
     this.dispatchEvent(
       new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
+  }
+
+  get documentType() {
+    return this.getAttribute('document-type');
+  }
+
+  get isPortraitCaptureView() {
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
 
   get hideInstructions() {

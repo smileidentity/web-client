@@ -12,7 +12,9 @@ function scwTemplateString() {
   ${styles}
   <div>
     <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
-    <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden></selfie-capture-screens>
+    <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
+      ${this.hideBackToHost}
+    ></selfie-capture-screens>
     <document-capture-screens ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
   </div>
 `;
@@ -91,9 +93,24 @@ class SmartCameraWeb extends HTMLElement {
       this.setActiveScreen(this.documentCapture);
     });
 
+    this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.cancelled', () => {
+      this.handleBackEvents();
+    });
+
     this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
       this._data.images = [...this._data.images, ...event.detail.images];
       this._publishSelectedImages();
+    });
+
+    this.documentCapture.addEventListener('document-capture-screens.cancelled', () => {
+      this.SelfieCaptureScreens.setAttribute('initial-screen', 'selfie-capture');
+      this.setActiveScreen(this.SelfieCaptureScreens);
+      this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+      this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
+    });
+
+    [this.cameraPermission, this.SelfieCaptureScreens, this.documentCapture].forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvent());
     });
   }
 
@@ -148,6 +165,14 @@ class SmartCameraWeb extends HTMLElement {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
+  }
+
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
+  }
+
+  handleCloseEvent() {
+    this.dispatchEvent(new CustomEvent('smart-camera-web.close'));
   }
 }
 

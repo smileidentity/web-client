@@ -29,7 +29,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-capture-instruction ${this.showNavigation} ${this.hideAttribution} ${this.hideInstructions ? 'hidden' : ''}></selfie-capture-instruction>
+            <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
             <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
             <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
@@ -42,7 +42,7 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     };
 
-    this.selfieInstruction = this.querySelector('selfie-capture-instruction');
+    this.selfieInstruction = this.querySelector('selfie-capture-instructions');
     this.selfieCapture = this.querySelector('selfie-capture');
     this.selfieReview = this.querySelector('selfie-capture-review');
 
@@ -50,7 +50,10 @@ class SelfieCaptureScreens extends HTMLElement {
       getPermissions(this.selfieCapture);
     }
 
-    if (this.hideInstructions) {
+    if (this.getAttribute('initial-screen') === 'selfie-capture') {
+      getPermissions(this.selfieCapture);
+      this.setActiveScreen(this.selfieCapture);
+    } else if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
     } else {
       this.setActiveScreen(this.selfieInstruction);
@@ -76,6 +79,9 @@ class SelfieCaptureScreens extends HTMLElement {
         this.setActiveScreen(this.selfieCapture);
       },
     );
+    this.selfieInstruction.addEventListener('selfie-capture-instructions.cancelled', () => {
+      this.handleBackEvents();
+    });
 
     this.selfieCapture.addEventListener(
       'selfie-capture.publish',
@@ -90,7 +96,18 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     );
 
-    this.selfieReview.addEventListener('selfie-review.rejected', async () => {
+    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      this.selfieCapture.reset();
+      SmartCamera.stopMedia();
+      if (this.hideInstructions) {
+        this.handleBackEvents();
+        return;
+      }
+
+      this.setActiveScreen(this.selfieInstruction);
+    });
+
+    this.selfieReview.addEventListener('selfie-capture-review.rejected', async () => {
       this.selfieReview.removeAttribute('data-image');
       this._data.images = [];
       if (this.hideInstructions) {
@@ -102,11 +119,17 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     this.selfieReview.addEventListener(
-      'selfie-review.accepted',
+      'selfie-capture-review.accepted',
       async () => {
         this._publishSelectedImages();
       },
     );
+
+    [this.selfieInstruction, this.selfieCapture, this.selfieReview].forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => {
+        this.handleCloseEvent();
+      });
+    });
   }
 
   _publishSelectedImages() {
@@ -131,6 +154,10 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get hideBack() {
+    return this.hasAttribute('hide-back-to-host') ? 'hide-back' : '';
+  }
+
   get disableImageTests() {
     return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
   }
@@ -141,12 +168,21 @@ class SelfieCaptureScreens extends HTMLElement {
     this.activeScreen = screen;
   }
 
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
+  }
+
+  handleCloseEvent() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-screens.close'));
+  }
+
   static get observedAttributes() {
     return [
       'title',
       'hidden',
       'show-navigation',
       'hide-back-to-host',
+      'initial-screen',
     ];
   }
 
@@ -154,6 +190,7 @@ class SelfieCaptureScreens extends HTMLElement {
     switch (name) {
     case 'title':
     case 'hidden':
+    case 'initial-screen':
       this.connectedCallback();
       break;
     default:

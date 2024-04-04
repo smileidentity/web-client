@@ -36,7 +36,7 @@ context('SmartCameraWeb', () => {
     cy
       .get('smart-camera-web')
       .shadow()
-      .find('selfie-capture-instruction')
+      .find('selfie-capture-instructions')
       .should('not.be.visible');
 
     cy

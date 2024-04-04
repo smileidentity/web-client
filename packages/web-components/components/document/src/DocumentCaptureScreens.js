@@ -34,13 +34,13 @@ class DocumentCaptureScreens extends HTMLElement {
     this.innerHTML = `
       ${styles}
       <div>
-      <document-capture-instructions ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
-      <document-capture side-of-id='Front'
+      <document-capture-instructions id='document-capture-instructions-front' ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
+      <document-capture id='document-capture-front' side-of-id='Front'
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
       ${this.documentCaptureModes}
       ></document-capture>
-      <document-capture-instructions  side-of-id='Back' id='document-capture-instructions-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
-      <document-capture id='back-of-id' side-of-id='Back' ${this.title} ${this.showNavigation}
+      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
+      <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
       ${this.documentCaptureModes}
       hidden 
       ></document-capture>
@@ -60,9 +60,9 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack = this.querySelector(
       '#document-capture-instructions-back',
     );
-    this.idCapture = this.querySelector('document-capture');
+    this.idCapture = this.querySelector('#document-capture-front');
     this.idReview = this.querySelector('#front-of-document-capture-review');
-    this.idCaptureBack = this.querySelector('#back-of-id');
+    this.idCaptureBack = this.querySelector('#document-capture-back');
     this.backOfIdReview = this.querySelector('#back-of-document-capture-review');
     this.thankYouScreen = this.querySelector('thank-you');
 
@@ -86,6 +86,10 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   setUpEventListeners() {
+    this.documentInstruction.addEventListener('document-capture-instructions.cancelled', () => {
+      this.handleBackEvents();
+    });
+
     this.documentInstruction.addEventListener(
       'document-capture-instructions.capture',
       async () => {
@@ -115,7 +119,15 @@ class DocumentCaptureScreens extends HTMLElement {
       this.setActiveScreen(this.idReview);
     });
 
-    this.idReview.addEventListener('document-review.rejected', async () => {
+    this.idCapture.addEventListener('document-capture.cancelled', () => {
+      if (this.hideInstructions) {
+        this.handleBackEvents();
+      } else {
+        this.setActiveScreen(this.documentInstruction);
+      }
+    });
+
+    this.idReview.addEventListener('document-capture-review.rejected', async () => {
       this.idReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -126,7 +138,7 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.idReview.addEventListener('document-review.accepted', async () => {
+    this.idReview.addEventListener('document-capture-review.accepted', async () => {
       if (this.hideBackOfId) {
         this._publishSelectedImages();
       } else if (this.hideInstructions) {
@@ -142,6 +154,20 @@ class DocumentCaptureScreens extends HTMLElement {
       async () => {
         this.setActiveScreen(this.idCaptureBack);
         await getPermissions(this.idCaptureBack);
+      },
+    );
+
+    this.documentInstructionBack.addEventListener(
+      'document-capture-instructions.cancelled',
+      async () => {
+        this.idReview.removeAttribute('data-image');
+        this._data.images.pop();
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.idCapture);
+          await getPermissions(this.idCapture);
+        } else {
+          this.setActiveScreen(this.documentInstruction);
+        }
       },
     );
 
@@ -166,7 +192,16 @@ class DocumentCaptureScreens extends HTMLElement {
       SmartCamera.stopMedia();
     });
 
-    this.backOfIdReview.addEventListener('document-review.rejected', async () => {
+    this.idCaptureBack.addEventListener('document-capture.cancelled', async () => {
+      if (this.hideInstructions) {
+        this.setActiveScreen(this.idCapture);
+        await getPermissions(this.idCapture);
+      } else {
+        this.setActiveScreen(this.documentInstructionBack);
+      }
+    });
+
+    this.backOfIdReview.addEventListener('document-capture-review.rejected', async () => {
       this.backOfIdReview.removeAttribute('data-image');
       this._data.images.pop();
       if (this.hideInstructions) {
@@ -177,8 +212,21 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.backOfIdReview.addEventListener('document-review.accepted', () => {
+    this.backOfIdReview.addEventListener('document-capture-review.accepted', () => {
       this._publishSelectedImages();
+    });
+
+    const screens = [
+      this.documentInstruction,
+      this.idCapture,
+      this.documentInstructionBack,
+      this.idCaptureBack,
+      this.idReview,
+      this.backOfIdReview,
+    ];
+
+    screens.forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvents());
     });
   }
 
@@ -210,6 +258,14 @@ class DocumentCaptureScreens extends HTMLElement {
     return this.hasAttribute('document-capture-modes')
       ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
       : '';
+  }
+
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture-screens.cancelled'));
+  }
+
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture-screens.close'));
   }
 
   setActiveScreen(screen) {

@@ -472,7 +472,7 @@ class DocumentCapture extends HTMLElement {
       } = this._calculateVideoOffset(video);
       const portrait = aspectRatio < 1;
 
-      if (portrait || true) {
+      if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
       }
       videoContainer.style.height = `${videoHeight}px`;
@@ -523,7 +523,6 @@ class DocumentCapture extends HTMLElement {
     if (!videoExists) {
       videoContainer.prepend(video);
     }
-    video.play();
 
     this._IDStream = stream;
     this._IDVideo = video;

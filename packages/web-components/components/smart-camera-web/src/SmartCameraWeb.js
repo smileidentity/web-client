@@ -94,7 +94,7 @@ class SmartCameraWeb extends HTMLElement {
     });
 
     this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.cancelled', () => {
-      if (!this.hideInstructions) {
+      if (this.hideInstructions) {
         this.setActiveScreen(this.cameraPermission);
       } else {
         this.handleBackEvents();

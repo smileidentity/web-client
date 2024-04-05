@@ -4,6 +4,7 @@ import {
   PORTRAIT_ID_PREVIEW_HEIGHT,
   PORTRAIT_ID_PREVIEW_WIDTH,
 } from '../../../../domain/constants/src/Constants';
+import '../../../navigation/src';
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -48,7 +49,7 @@ function templateString() {
         max-height: 200px;
         height: 180px;
         width: 100%;
-        overflow: hidden;
+        overflow: visible;
         margin: 0 auto;
       }
       
@@ -64,7 +65,26 @@ function templateString() {
           justify-content: center;
         }
       }
-      
+
+
+
+      #document-capture-screen,
+      #back-of-document-capture-screen {
+        block-size: 45rem;
+        padding-block: 2rem;
+        display: flex;
+        flex-direction: column;
+        max-block-size: 100%;
+        max-inline-size: 40ch;
+      }
+
+      #document-capture-screen header p {
+        margin-block: 0 !important;
+      }
+
+      .padding-bottom-2 {
+        padding-bottom: 2rem;
+      }
       @media (min-width: 600px) {
        /* .id-video-container {
           width: 80%;
@@ -90,7 +110,7 @@ function templateString() {
           border-style: solid;
           border-color: rgba(0, 0, 0, 0.48);
           box-sizing: border-box;
-          inset: 0px;
+          inset: -1px;
         }
       
         .id-video-container {
@@ -145,44 +165,17 @@ function templateString() {
         justify-content: center;
         height: 100%;
       }
-      #document-capture-screen {
-        padding-block: 2rem;
-        display: flex;
-        flex-direction: column;
-        max-block-size: 100%;
-        max-inline-size: 40ch;
-      }
-    </style>
-  <div id='document-capture-screen' class='flow center'>
-    ${this.showNavigation
-    ? `
-      <div class="nav">
-        <div class="back-wrapper">
-          <button type='button' data-type='icon' id="back-button-id-entry" class="back-button icon-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-              <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
-              <path fill="#001096" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
-            </svg>
-          </button>
-          <div class="back-button-text">Back</div>
-        </div>
-        <button data-type='icon' type='button' id='id-camera-close' class='close-iframe icon-btn'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
-            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
-          </svg>
-          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-        </button>
-      </div>
-    ` : ''}
-    <h2 class='h2 color-digital-blue'>${this.documentType}</h2>
+  </style>
+  <div id='document-capture-screen' class='flow center flex-column'>
+  <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container'>
-        <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+        <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
         </div>
         <div class='video-footer'>
           <h2 class='h2 color-digital-blue reset-margin-block id-side'>${this.title}</h2>
@@ -336,20 +329,26 @@ class DocumentCapture extends HTMLElement {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+      // const {
+      //   originalHeight, originalWidth,
+      // } = this._calculateVideoOffset(video);
+
       // Get the dimensions of the video preview frame
-      const previewWidth = PORTRAIT_ID_PREVIEW_WIDTH;
-      const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
+      // const previewWidth = originalHeight;
+      // const previewHeight = originalWidth;
 
       // Define the padding value
-      const paddingPercent = 0.5; // 50% of the preview dimensions;
-      const paddedWidth = previewWidth * (1 + paddingPercent * 3.5);
-      const paddedHeight = previewHeight * (1 + paddingPercent);
+      // const paddingPercent = 0.5 * 0; // 50% of the preview dimensions;
+      // const paddedWidth = previewWidth * (0 + paddingPercent * 3.5);
+      // const paddedHeight = previewHeight * (0 + paddingPercent);
+      const paddedWidth = canvas.width;
+      const paddedHeight = canvas.width / 1.53;
 
       // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
       const cropWidth = paddedWidth;
       const cropHeight = paddedHeight;
-      const cropLeft = (canvas.width - cropWidth) / 2;
-      const cropTop = (canvas.height - cropHeight) / 2;
+      const cropLeft = 0;
+      const cropTop = (canvas.height) / 2 - (paddedHeight / 2);
 
       // Create a new canvas element for the cropped image
       const croppedCanvas = document.createElement('canvas');
@@ -359,9 +358,20 @@ class DocumentCapture extends HTMLElement {
       // Draw the cropped image onto the new canvas
       const croppedCtx = croppedCanvas.getContext('2d');
       croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      const image = croppedCanvas.toDataURL('image/jpeg');
+
+      const videoContainer = this.shadowRoot.querySelector('.id-video-container');
+      const oldCroppedImage = videoContainer.querySelector('image#preview-cropped-image');
+      if (oldCroppedImage) {
+        videoContainer.removeChild(oldCroppedImage);
+      }
+      const croppedImage = document.createElement('img');
+      croppedImage.id = 'preview-cropped-image';
+      croppedImage.src = image;
+      videoContainer.appendChild(croppedImage);
 
       return {
-        image: croppedCanvas.toDataURL('image/jpeg'),
+        image,
         originalHeight: canvas.height,
         originalWidth: canvas.width,
         ...this.idCardRegion,
@@ -445,28 +455,39 @@ class DocumentCapture extends HTMLElement {
     }
 
     video.onloadedmetadata = () => {
-      this.shadowRoot.querySelector('.id-video').hidden = false;
-      this.shadowRoot.querySelector('.actions').hidden = false;
-      this.shadowRoot.querySelector('#loader').hidden = true;
+      video.play();
     };
 
+    // video.onloadedmetadata = () => {
+    //   this.shadowRoot.querySelector('.id-video').hidden = false;
+    //   this.shadowRoot.querySelector('.actions').hidden = false;
+    //   this.shadowRoot.querySelector('#loader').hidden = true;
+    // };
+
     const onVideoStart = () => {
-      const videoWidth = video.clientWidth;
-      const videoHeight = video.clientHeight;
-      const aspectRatio = videoWidth / videoHeight;
+      // const aspectRatio = videoWidth / videoHeight;
+      const {
+        aspectRatio,
+        offsetHeight, offsetWidth, videoHeight, videoWidth,
+      } = this._calculateVideoOffset(video);
       const portrait = aspectRatio < 1;
 
-      const offset = 30;
-      const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
-      const offsetWidth = videoWidth * (offset / 100);
-
-      if (portrait) {
+      if (portrait || true) {
         videoContainer.classList.add('mobile-camera-screen');
       }
+      videoContainer.style.height = `${videoHeight}px`;
+      videoContainer.style.width = `${videoWidth}px`;
+      videoContainer.style.maxHeight = `${videoHeight}px`;
+      const idCardRegionWidth = videoWidth - offsetWidth;
+      const idCardRegionHeight = videoHeight - offsetHeight;
 
+      const rightLeftBorderSize = 20; // (videoWidth - idCardRegionWidth) / 2;
+      const topBottomBorderSize = 20; // (videoHeight - idCardRegionHeight) / 2;
       this.idCardRegion = {
-        height: videoHeight - offsetHeight,
-        width: videoWidth - offsetWidth,
+        height: idCardRegionHeight,
+        rightLeftBorderSize,
+        topBottomBorderSize,
+        width: idCardRegionWidth,
         x: offsetWidth / 2,
         y: offsetHeight / 2,
       };
@@ -474,8 +495,7 @@ class DocumentCapture extends HTMLElement {
       const videoOverlay = document.createElement('div');
       const shadeColor = 'white';
       videoOverlay.classList.add('video-overlay');
-      const rightLeftBorderSize = (videoWidth - this.idCardRegion.width) / 2;
-      const topBottomBorderSize = (videoHeight - this.idCardRegion.height) / 2;
+
       videoOverlay.style.borderLeft = `${rightLeftBorderSize}px solid ${shadeColor}`;
       videoOverlay.style.borderRight = `${rightLeftBorderSize}px solid ${shadeColor}`;
       videoOverlay.style.borderTop = `${topBottomBorderSize}px solid ${shadeColor}`;
@@ -484,6 +504,7 @@ class DocumentCapture extends HTMLElement {
       videoOverlay.style.bottom = '0px';
       videoOverlay.style.left = '0px';
       videoOverlay.style.right = '0px';
+      videoOverlay.style.inset = '-1px';
 
       const innerBorder = document.createElement('div');
       innerBorder.classList.add('inner-border');
@@ -491,6 +512,9 @@ class DocumentCapture extends HTMLElement {
       videoContainer.appendChild(videoOverlay);
       window.parent.videoOverlay = videoOverlay;
       this.videoOverlay = videoOverlay;
+      this.shadowRoot.querySelector('.id-video').hidden = false;
+      this.shadowRoot.querySelector('.actions').hidden = false;
+      this.shadowRoot.querySelector('#loader').hidden = true;
       video.removeEventListener('playing', onVideoStart);
     };
 
@@ -505,33 +529,47 @@ class DocumentCapture extends HTMLElement {
     this._IDVideo = video;
   }
 
+  _calculateVideoOffset(video) {
+    const videoWidth = video.clientWidth;
+    const videoHeight = video.clientWidth / 1.53;
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    const originalWidth = video.videoWidth;
+    const originalHeight = video.videoWidth / 1.53;
+    const portrait = aspectRatio < 1;
+
+    const offset = 30;
+    const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
+    const offsetWidth = videoWidth * (offset / 100);
+
+    return {
+      aspectRatio,
+      offsetHeight,
+      offsetWidth,
+      originalHeight,
+      originalWidth,
+      videoHeight,
+      videoWidth,
+    };
+  }
+
   _stopIDVideoStream(stream = this._IDStream) {
     stream.getTracks().forEach((track) => track.stop());
   }
 
   setUpEventListeners() {
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.backButton = this.shadowRoot.querySelector('#back-button');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
     if (SmartCamera.stream) {
       this.handleIDStream(SmartCamera.stream);
     }
 
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
 
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     this.captureIDImage.addEventListener('click', () => {
@@ -635,8 +673,8 @@ class DocumentCapture extends HTMLElement {
     this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
   }
 
-  closeWindow() {
-    window.parent.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture.close'));
   }
 }
 

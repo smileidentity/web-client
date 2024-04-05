@@ -1,4 +1,5 @@
 import styles from '../../../../styles/src/styles';
+import '../../../navigation/src';
 
 function templateString() {
   return `
@@ -92,10 +93,18 @@ function templateString() {
         justify-self: center;
         width: 0.75em;
       }
-      #document-capture-review-screen .selfie-review-container.landscape {
+      #selfie-capture-review-screen {
+        block-size: 45rem;
+        padding-block: 2rem;
+        display: flex;
+        flex-direction: column;
+        max-block-size: 100%;
+        max-inline-size: 40ch;
+      }
+      #selfie-capture-review-screen .selfie-review-container.landscape {
         height: auto;
       }
-      #document-capture-review-screen header p {
+      #selfie-capture-review-screen header p {
         margin-block: 0 !important;
       }
       .selfie-review-container.portrait {
@@ -196,20 +205,8 @@ function templateString() {
       }
     </style>
     ${styles}
-    <div id='document-capture-review-screen' class='flow center'>
-    ${
-  this.showNavigation
-    ? `
-      <div class="nav justify-right">
-        <button data-type='icon' type='button'  id='document-capture-review-screen-close' class='close-iframe icon-btn'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-            <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
-            <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
-          </svg>
-          <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
-        </button>
-      </div>
-    ` : ''}
+    <div id='selfie-capture-review-screen' class='flow center'>
+    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title text-2xl color-digital-blue font-bold">
       Is your whole face visible and clear in this photo?
     </h1>
@@ -292,12 +289,11 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-review.cancelled'));
+    this.dispatchEvent(new CustomEvent('selfie-capture-review.cancelled'));
   }
 
-  closeWindow() {
-    const referenceWindow = window.parent;
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('selfie-capture-review.close'));
   }
 
   attributeChangedCallback(name) {
@@ -316,33 +312,25 @@ class SelfieCaptureReview extends HTMLElement {
   setUpEventListeners() {
     this.selectImage = this.shadowRoot.querySelector('#select-id-image');
     this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     this.selectImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-review.accepted', {
+        new CustomEvent('selfie-capture-review.accepted', {
           detail: {},
         }),
       );
     });
     this.reCaptureImage.addEventListener('click', () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-review.rejected', {
+        new CustomEvent('selfie-capture-review.rejected', {
           detail: {},
         }),
       );

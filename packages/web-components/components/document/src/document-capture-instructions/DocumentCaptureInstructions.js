@@ -1,66 +1,12 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
+import '../../../navigation/src';
 
 function templateString() {
   return `
     <div id="document-capture-instructions-screen" class="flow center">
         <section className="main">
-        ${
-  this.showNavigation
-    ? `
-            <div class="nav">
-                <div class="back-wrapper">
-                    <button
-                    type="button"
-                    data-type="icon"
-                    id="back-button"
-                    class="back-button icon-btn">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            fill="none">
-                            <path
-                            fill="#DBDBC4"
-                            d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"
-                            opacity=".4"
-                            />
-                            <path
-                            fill="#001096"
-                            d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
-                        </svg>
-                        <div class="back-button-text">Back</div>
-                    </button>
-                </div>
-                <button
-                    data-type="icon"
-                    type="button"
-                    id="id-entry-close"
-                    class="close-iframe icon-btn"
-                >
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    >
-                    <path
-                        fill="#DBDBC4"
-                        d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"
-                        opacity=".4"
-                    />
-                    <path
-                        fill="#91190F"
-                        d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"
-                    />
-                    </svg>
-                    <span class="visually-hidden"
-                    >Close SmileIdentity Verification frame</span
-                    >
-                </button>
-            </div>`
-    : ''
-}
+        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <header>
         <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" viewBox="0 0 51 78" fill="none">
         <g clip-path="url(#clip0_604_800)">
@@ -308,26 +254,16 @@ class DocumentInstruction extends HTMLElement {
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.backButton = this.shadowRoot.querySelector('#back-button');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
     this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
     this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
 
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    this.navigation.addEventListener('navigation.back', () => {
+      this.handleBackEvents();
+    });
 
-    if (this.backButton) {
-      this.backButton.addEventListener('click', (e) => {
-        this.handleBackEvents(e);
-      });
-    }
-
-    CloseIframeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          this.closeWindow();
-        },
-        false,
-      );
+    this.navigation.addEventListener('navigation.close', () => {
+      this.handleCloseEvents();
     });
 
     if (this.takeDocumentPhotoButton) {
@@ -395,8 +331,8 @@ class DocumentInstruction extends HTMLElement {
     this.dispatchEvent(new CustomEvent('document-capture-instructions.cancelled'));
   }
 
-  closeWindow() {
-    window.parent.postMessage('SmileIdentity::Close', '*');
+  handleCloseEvents() {
+    this.dispatchEvent(new CustomEvent('document-capture-instructions.close'));
   }
 }
 

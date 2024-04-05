@@ -177,14 +177,14 @@ Usage:
 When a user accepts an image, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-capture-review').addEventListener('selfie-review.accepted', function(event) {
+document.querySelector('selfie-capture-review').addEventListener('selfie-capture-review.accepted', function(event) {
 });
 ```
 
 When a user wants to recapture a selfie, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-capture-review').addEventListener('selfie-review.rejected', function(event) {
+document.querySelector('selfie-capture-review').addEventListener('selfie-capture-review.rejected', function(event) {
 });
 ```
 

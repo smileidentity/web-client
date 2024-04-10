@@ -159,6 +159,7 @@ import { version as sdkVersion } from '../../package.json';
         ${isSingleIdType ? 'disabled' : ''}
         ${isSingleIdType ? `value="${idTypes[0].name}"` : ''}
         label="Select Document"
+        type="button"
       >
       </smileid-combobox-trigger>
 

@@ -94,7 +94,9 @@ class CameraPermission extends HTMLElement {
 
   setUpEventListeners() {
     const errorMessage = this.shadowRoot.querySelector('#error');
-    const permissionButton = this.shadowRoot.getElementById('request-camera-access');
+    const permissionButton = this.shadowRoot.getElementById(
+      'request-camera-access',
+    );
     errorMessage.textContent = '';
     permissionButton.addEventListener('click', async () => {
       permissionButton.setAttribute('disabled', true);
@@ -105,7 +107,9 @@ class CameraPermission extends HTMLElement {
         });
         this.dispatchEvent(new CustomEvent('camera-permission.granted'));
       } catch (error) {
-        this.dispatchEvent(new CustomEvent('camera-permission.denied', { detail: error }));
+        this.dispatchEvent(
+          new CustomEvent('camera-permission.denied', { detail: error }),
+        );
         errorMessage.textContent = SmartCamera.handleCameraError(error);
       }
       permissionButton.removeAttribute('disabled');

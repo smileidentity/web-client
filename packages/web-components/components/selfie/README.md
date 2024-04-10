@@ -60,33 +60,33 @@ To receive the images after they have been captured, you can listen to the custo
 
 ```json
 {
- "detail": {
-  "images": [
-   {"image": "base64 image", "image_type_id": ""}
-  ],
-  "meta": {
-   "version": "version of the library in use"
+  "detail": {
+    "images": [{ "image": "base64 image", "image_type_id": "" }],
+    "meta": {
+      "version": "version of the library in use"
+    }
   }
- }
 }
 ```
 
 Usage:
 
 ```js
-document.querySelector('selfie-capture-screens').addEventListener('selfie-capture-screens.publish', function(event) {
- console.log(event.detail);
-});
+document
+  .querySelector('selfie-capture-screens')
+  .addEventListener('selfie-capture-screens.publish', function (event) {
+    console.log(event.detail);
+  });
 ```
 
 ### Dependencies
 
 The `SelfieCaptureScreens` component depends on the following modules:
 
-* [selfie-capture](#selfiecapture-web-component)
-* [selfie-capture-review](#selfie-capture-review-web-component)
-* Selfie-instructions
-* SmartCamera
+- [selfie-capture](#selfiecapture-web-component)
+- [selfie-capture-review](#selfie-capture-review-web-component)
+- Selfie-instructions
+- SmartCamera
 
 These modules are imported when you use the `SelfieCaptureScreens` component in your projects.
 
@@ -158,9 +158,11 @@ base64 image", "image_type_id": ""}
 Usage:
 
 ```js
-document.querySelector('selfie-capture').addEventListener('selfie-capture.publish', function(event) {
- console.log(event.detail);
-});
+document
+  .querySelector('selfie-capture')
+  .addEventListener('selfie-capture.publish', function (event) {
+    console.log(event.detail);
+  });
 ```
 
 ### SelfieCaptureReview Web Component
@@ -171,21 +173,27 @@ The user can choose to use the captured image or recapture a new selfie.
 Usage:
 
 ```html
-<selfie-capture-review data-image="base64 image" show-navigation hide-back-to-host></selfie-capture-review>
+<selfie-capture-review
+  data-image="base64 image"
+  show-navigation
+  hide-back-to-host
+></selfie-capture-review>
 ```
 
 When a user accepts an image, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-capture-review').addEventListener('selfie-capture-review.accepted', function(event) {
-});
+document
+  .querySelector('selfie-capture-review')
+  .addEventListener('selfie-capture-review.accepted', function (event) {});
 ```
 
 When a user wants to recapture a selfie, an event is triggered as shown below:
 
 ```js
-document.querySelector('selfie-capture-review').addEventListener('selfie-capture-review.rejected', function(event) {
-});
+document
+  .querySelector('selfie-capture-review')
+  .addEventListener('selfie-capture-review.rejected', function (event) {});
 ```
 
 ### Compatibility

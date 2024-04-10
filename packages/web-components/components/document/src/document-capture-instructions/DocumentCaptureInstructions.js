@@ -346,26 +346,26 @@ function templateString() {
     <section className="footer">
     <div class='flow'>
     ${
-  this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
-    ? `
+      this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
+        ? `
     <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
         Take Photo
     </button>
     `
-    : ''
-}
+        : ''
+    }
     ${
-  this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
-    ? `
+      this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
+        ? `
     <label id='upload-photo-label' data-variant='${
-  this.supportBothCaptureModes ? 'outline' : 'solid'
-}' class='button'>
+      this.supportBothCaptureModes ? 'outline' : 'solid'
+    }' class='button'>
         <input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
         <span>Upload Photo</span>
     </label>
     `
-    : ''
-}
+        : ''
+    }
 </div>
 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </section>
@@ -391,7 +391,8 @@ class DocumentInstruction extends HTMLElement {
 
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
     this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
-    this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
+    this.uploadDocumentPhotoButton =
+      this.shadowRoot.querySelector('#upload-photo');
 
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
@@ -475,7 +476,9 @@ class DocumentInstruction extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture-instructions.cancelled'));
+    this.dispatchEvent(
+      new CustomEvent('document-capture-instructions.cancelled'),
+    );
   }
 
   handleCloseEvents() {
@@ -483,8 +486,14 @@ class DocumentInstruction extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-instructions')) {
-  window.customElements.define('document-capture-instructions', DocumentInstruction);
+if (
+  'customElements' in window &&
+  !customElements.get('document-capture-instructions')
+) {
+  window.customElements.define(
+    'document-capture-instructions',
+    DocumentInstruction,
+  );
 }
 
 export default DocumentInstruction;

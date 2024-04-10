@@ -213,15 +213,15 @@ function templateString() {
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         ${
-  this.imageSrc
-    ? `<img
+          this.imageSrc
+            ? `<img
         alt='your ID card'
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
       />`
-    : ''
-}
+            : ''
+        }
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
@@ -232,12 +232,12 @@ function templateString() {
         </button>
       </div>
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -298,14 +298,14 @@ class SelfieCaptureReview extends HTMLElement {
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-image':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'data-image':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
@@ -338,7 +338,10 @@ class SelfieCaptureReview extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('selfie-capture-review')) {
+if (
+  'customElements' in window &&
+  !customElements.get('selfie-capture-review')
+) {
   window.customElements.define('selfie-capture-review', SelfieCaptureReview);
 }
 

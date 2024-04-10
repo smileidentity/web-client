@@ -37,7 +37,9 @@ Determines the available modes for document capture. This attribute accepts a co
 - `camera,upload`: Offers users a choice between capturing images using the camera or uploading from the device.
 
 ```html
-<document-capture-instructions document-capture-modes="camera,upload"></document-capture-instructions>
+<document-capture-instructions
+  document-capture-modes="camera,upload"
+></document-capture-instructions>
 ```
 
 ## Example
@@ -45,7 +47,10 @@ Determines the available modes for document capture. This attribute accepts a co
 Here is a complete example demonstrating how to embed the `DocumentInstruction` component with navigation controls and both capture modes enabled:
 
 ```html
-<document-capture-instructions show-navigation document-capture-modes="camera,upload"></document-capture-instructions>
+<document-capture-instructions
+  show-navigation
+  document-capture-modes="camera,upload"
+></document-capture-instructions>
 ```
 
 This setup provides an intuitive interface for users, enabling them to receive instructions, navigate through the capture process, and choose their preferred method of document image submission.

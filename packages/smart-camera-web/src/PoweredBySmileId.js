@@ -26,7 +26,9 @@ class PoweredBySmileId extends HTMLElement {
         </p>
       `;
 
-    this.attachShadow({ mode: 'open' }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: 'open' }).appendChild(
+      template.content.cloneNode(true),
+    );
   }
 }
 

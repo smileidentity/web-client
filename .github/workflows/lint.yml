@@ -6,6 +6,17 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: lint
+        run: npx prettier --check .
   web-components:
     runs-on: ubuntu-latest
     defaults:

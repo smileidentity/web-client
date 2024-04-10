@@ -8,12 +8,12 @@ function isElementInView(element) {
   const bounding = element.getBoundingClientRect();
 
   return (
-    bounding.top >= 0
-    && bounding.left >= 0
-    && bounding.bottom
-      <= (window.innerHeight || document.documentElement.clientHeight)
-    && bounding.right
-      <= (window.innerWidth || document.documentElement.clientWidth)
+    bounding.top >= 0 &&
+    bounding.left >= 0 &&
+    bounding.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight) &&
+    bounding.right <=
+      (window.innerWidth || document.documentElement.clientWidth)
   );
 }
 
@@ -108,16 +108,16 @@ class ComboboxTrigger extends HTMLElement {
         ? `
         <div>
           <input ${this.value ? `value="${this.value}" ` : ''}${
-  this.disabled ? ' disabled ' : ''
-}type="text" placeholder="${this.label}" />
+            this.disabled ? ' disabled ' : ''
+          }type="text" placeholder="${this.label}" />
           <button ${this.disabled ? 'disabled ' : ''}tabindex='-1' type='button'>
             <span class="visually-hidden">Toggle</span>
           </button>
         </div>
       `
         : `<button ${this.disabled ? 'disabled ' : ''}type="button">${
-          this.value || this.label
-        }</button>`
+            this.value || this.label
+          }</button>`
     }`;
 
     this.setAttribute('expanded', false);
@@ -157,7 +157,9 @@ class ComboboxTrigger extends HTMLElement {
     if (this.inputTrigger) {
       this.inputTrigger.removeEventListener('keydown', this.handleKeyDown);
       this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);
-      this.inputTrigger.removeEventListener('change', (e) => e.stopPropagation());
+      this.inputTrigger.removeEventListener('change', (e) =>
+        e.stopPropagation(),
+      );
     }
 
     if (this.options) {
@@ -178,65 +180,65 @@ class ComboboxTrigger extends HTMLElement {
     const { key } = event;
 
     switch (key) {
-    case 'Enter':
-    case 'Space':
-    case ' ':
-      if (this.getAttribute('expanded') === 'true') {
-        if (this.inputTrigger && (key === 'Space' || key === ' ')) {
-          this.resetListbox();
+      case 'Enter':
+      case 'Space':
+      case ' ':
+        if (this.getAttribute('expanded') === 'true') {
+          if (this.inputTrigger && (key === 'Space' || key === ' ')) {
+            this.resetListbox();
+          } else {
+            event.preventDefault();
+            const selectedOption = this.buttonTrigger.getAttribute(
+              'aria-activedescendant',
+            );
+            if (selectedOption) {
+              document.getElementById(selectedOption).click();
+            }
+          }
         } else {
           event.preventDefault();
-          const selectedOption = this.buttonTrigger.getAttribute(
-            'aria-activedescendant',
-          );
-          if (selectedOption) {
-            document.getElementById(selectedOption).click();
-          }
+          this.toggleExpansionState();
         }
-      } else {
+        break;
+      case 'Esc':
+      case 'Escape':
         event.preventDefault();
-        this.toggleExpansionState();
-      }
-      break;
-    case 'Esc':
-    case 'Escape':
-      event.preventDefault();
-      if (this.getAttribute('expanded') === 'true') {
-        this.toggleExpansionState();
-      }
-      break;
-    case 'Down':
-    case 'ArrowDown':
-      event.preventDefault();
-      if (this.getAttribute('expanded') !== 'true') {
-        this.toggleExpansionState();
-        this.focusListbox('First');
-      } else {
-        this.focusListbox('Down');
-      }
-      break;
-    case 'Up':
-    case 'ArrowUp':
-      event.preventDefault();
-      if (this.getAttribute('expanded') !== 'true') {
-        this.toggleExpansionState();
-        this.focusListbox('Last');
-      } else {
-        this.focusListbox('Up');
-      }
-      break;
-    case 'Left':
-    case 'ArrowLeft':
-    case 'Right':
-    case 'ArrowRight':
-    case 'Home':
-    case 'End':
-      this.resetListbox();
-      break;
-    case 'Tab':
-      break;
-    default:
-      break;
+        if (this.getAttribute('expanded') === 'true') {
+          this.toggleExpansionState();
+        }
+        break;
+      case 'Down':
+      case 'ArrowDown':
+        event.preventDefault();
+        if (this.getAttribute('expanded') !== 'true') {
+          this.toggleExpansionState();
+          this.focusListbox('First');
+        } else {
+          this.focusListbox('Down');
+        }
+        break;
+      case 'Up':
+      case 'ArrowUp':
+        event.preventDefault();
+        if (this.getAttribute('expanded') !== 'true') {
+          this.toggleExpansionState();
+          this.focusListbox('Last');
+        } else {
+          this.focusListbox('Up');
+        }
+        break;
+      case 'Left':
+      case 'ArrowLeft':
+      case 'Right':
+      case 'ArrowRight':
+      case 'Home':
+      case 'End':
+        this.resetListbox();
+        break;
+      case 'Tab':
+        break;
+      default:
+        break;
     }
   }
 
@@ -352,14 +354,18 @@ class ComboboxListbox extends HTMLElement {
         'smileid-combobox-trigger input, smileid-combobox-trigger button',
       ),
     );
-    this.triggers.forEach((node) => node.setAttribute('aria-controls', this.getAttribute('id')));
+    this.triggers.forEach((node) =>
+      node.setAttribute('aria-controls', this.getAttribute('id')),
+    );
 
     this.optionNodes = Array.from(
       this.querySelectorAll('smileid-combobox-option'),
     );
-    this.selectedNode = this.optionNodes.find(
-      (node) => !node.hasAttribute('hidden') && node.hasAttribute('aria-selected'),
-    ) || this.optionNodes.filter((node) => !node.hasAttribute('hidden'))[0];
+    this.selectedNode =
+      this.optionNodes.find(
+        (node) =>
+          !node.hasAttribute('hidden') && node.hasAttribute('aria-selected'),
+      ) || this.optionNodes.filter((node) => !node.hasAttribute('hidden'))[0];
     this.selectedNode.setAttribute('tabindex', '0');
 
     this.optionNodes.forEach((node) => {
@@ -392,17 +398,17 @@ class ComboboxListbox extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-    case 'search-term':
-      if (oldValue && !newValue) {
-        this.optionNodes.forEach((node) => {
-          node.removeAttribute('hidden');
-        });
-      } else if (newValue) {
-        this.filterNodes(newValue);
-      }
-      break;
-    default:
-      break;
+      case 'search-term':
+        if (oldValue && !newValue) {
+          this.optionNodes.forEach((node) => {
+            node.removeAttribute('hidden');
+          });
+        } else if (newValue) {
+          this.filterNodes(newValue);
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -411,8 +417,9 @@ class ComboboxListbox extends HTMLElement {
       const value = node.getAttribute('value').toLowerCase();
       const label = node.getAttribute('label').toLowerCase();
 
-      const containsSearchTerm = value.includes(searchTerm.toLowerCase())
-        || label.includes(searchTerm.toLowerCase());
+      const containsSearchTerm =
+        value.includes(searchTerm.toLowerCase()) ||
+        label.includes(searchTerm.toLowerCase());
 
       if (containsSearchTerm) {
         node.removeAttribute('hidden');
@@ -468,26 +475,26 @@ class ComboboxListbox extends HTMLElement {
 
     let nextIndex;
     switch (direction) {
-    case 'First':
-      nextIndex = 0;
-      break;
-    case 'Last':
-      nextIndex = lastIndex;
-      break;
-    case 'Up':
-      if (currentIndex === 0) {
-        nextIndex = lastIndex;
-      } else {
-        nextIndex = currentIndex - 1;
-      }
-      break;
-    default:
-      if (currentIndex === lastIndex) {
+      case 'First':
         nextIndex = 0;
-      } else {
-        nextIndex = currentIndex + 1;
-      }
-      break;
+        break;
+      case 'Last':
+        nextIndex = lastIndex;
+        break;
+      case 'Up':
+        if (currentIndex === 0) {
+          nextIndex = lastIndex;
+        } else {
+          nextIndex = currentIndex - 1;
+        }
+        break;
+      default:
+        if (currentIndex === lastIndex) {
+          nextIndex = 0;
+        } else {
+          nextIndex = currentIndex + 1;
+        }
+        break;
     }
 
     if (currentIndex !== nextIndex) {
@@ -511,7 +518,9 @@ class ComboboxListbox extends HTMLElement {
       newNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    this.triggers.forEach((node) => node.setAttribute('aria-activedescendant', newNode.id));
+    this.triggers.forEach((node) =>
+      node.setAttribute('aria-activedescendant', newNode.id),
+    );
   }
 }
 
@@ -540,7 +549,9 @@ class ComboboxOption extends HTMLElement {
   }
 
   select() {
-    const selectedOption = this.options.find((node) => node.getAttribute('aria-selected'));
+    const selectedOption = this.options.find((node) =>
+      node.getAttribute('aria-selected'),
+    );
 
     if (selectedOption) {
       selectedOption.removeAttribute('aria-selected');
@@ -572,6 +583,4 @@ if ('customElements' in window) {
   window.customElements.define('smileid-combobox-option', Option);
 }
 
-export {
-  Root, Trigger, List, Option,
-};
+export { Root, Trigger, List, Option };

@@ -146,7 +146,7 @@ import { version as sdkVersion } from '../../package.json';
 
   function loadIdTypeSelector(idTypes) {
     const isSingleIdType = idTypes.length === 1;
-    const idTypeSelector = document.querySelector("#id-type-selector");
+    const idTypeSelector = document.querySelector('#id-type-selector');
 
     let combobox = document.querySelector('smileid-combobox[id="id_type"]');
     if (!combobox) {
@@ -156,8 +156,8 @@ import { version as sdkVersion } from '../../package.json';
 
     combobox.innerHTML = `
       <smileid-combobox-trigger
-        ${isSingleIdType ? "disabled" : ""}
-        ${isSingleIdType ? `value="${idTypes[0].name}"` : ""}
+        ${isSingleIdType ? 'disabled' : ''}
+        ${isSingleIdType ? `value="${idTypes[0].name}"` : ''}
         label="Select Document"
       >
       </smileid-combobox-trigger>
@@ -210,8 +210,8 @@ import { version as sdkVersion } from '../../package.json';
           const itemInList = config.id_selection[countryCode].find(
             (validIdType) => {
               if (
-                validIdType === "" ||
-                validIdType.toLowerCase() === "others"
+                validIdType === '' ||
+                validIdType.toLowerCase() === 'others'
               ) {
                 return !idType.code;
               }
@@ -357,7 +357,7 @@ import { version as sdkVersion } from '../../package.json';
     });
 
     if (!id_info || id_info.id_type === undefined) {
-      const selectCountry = SelectIDType.querySelector("#country");
+      const selectCountry = SelectIDType.querySelector('#country');
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',
       );

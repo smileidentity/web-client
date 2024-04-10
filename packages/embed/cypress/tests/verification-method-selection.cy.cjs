@@ -13,7 +13,7 @@ describe('Verification Method Selection', () => {
 
         cy.getIFrameBody()
           .find(
-            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
           )
           .should(
             'have.attr',
@@ -33,7 +33,7 @@ describe('Verification Method Selection', () => {
 
         cy.getIFrameBody()
           .find(
-            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
           )
           .should(
             'have.attr',
@@ -51,7 +51,7 @@ describe('Verification Method Selection', () => {
 
         cy.getIFrameBody()
           .find(
-            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
           )
           .should(
             'have.attr',
@@ -67,7 +67,7 @@ describe('Verification Method Selection', () => {
 
         cy.getIFrameBody()
           .find(
-            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+            'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
           )
           .should('have.attr', 'src', 'http://localhost:8000/ekyc.html');
       });
@@ -92,7 +92,7 @@ describe('Verification Method Selection', () => {
 
       cy.getIFrameBody()
         .find(
-          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
         )
         .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
     });
@@ -116,36 +116,36 @@ describe('Verification Method Selection', () => {
 
       cy.getIFrameBody()
         .find(
-          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
         )
         .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
     });
   });
 
-  describe("global document verification", () => {
+  describe('global document verification', () => {
     beforeEach(() => {
-      cy.visit("/verification-method-global-document-verification");
+      cy.visit('/verification-method-global-document-verification');
     });
 
-    it("it goes directly to the web embed", () => {
+    it('it goes directly to the web embed', () => {
       cy.getIFrameBody()
-        .find("#country option:selected")
-        .should("have.text", "Afghanistan");
+        .find('#country option:selected')
+        .should('have.text', 'Afghanistan');
 
       cy.getIFrameBody()
-        .find("#id_type option:selected")
-        .should("have.text", "Others");
+        .find('#id_type option:selected')
+        .should('have.text', 'Others');
 
-      cy.getIFrameBody().find("#submitConfig").click();
+      cy.getIFrameBody().find('#submitConfig').click();
 
       cy.getIFrameBody()
         .find(
-          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]'
+          'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
         )
         .should(
-          "have.attr",
-          "src",
-          "http://localhost:8000/doc-verification.html"
+          'have.attr',
+          'src',
+          'http://localhost:8000/doc-verification.html',
         );
     });
   });

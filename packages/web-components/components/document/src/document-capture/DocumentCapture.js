@@ -168,7 +168,7 @@ function templateString() {
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h2 class='h2 color-digital-blue'>${this.documentName}</h2>
+    <h2 class='text-base font-bold color-digital-blue'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
@@ -178,8 +178,8 @@ function templateString() {
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
         </div>
         <div class='video-footer'>
-          <h2 class='h2 color-digital-blue reset-margin-block id-side'>${this.title}</h2>
-          <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
+          <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
+          <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">

@@ -26,11 +26,16 @@ class PoweredBySmileId extends HTMLElement {
         </p>
       `;
 
-    this.attachShadow({ mode: 'open' }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: 'open' }).appendChild(
+      template.content.cloneNode(true),
+    );
   }
 }
 
-if (window.customElements && !window.customElements.get('powered-by-smile-id')) {
+if (
+  window.customElements &&
+  !window.customElements.get('powered-by-smile-id')
+) {
   window.customElements.define('powered-by-smile-id', PoweredBySmileId);
 }
 

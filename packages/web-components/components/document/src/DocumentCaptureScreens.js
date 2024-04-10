@@ -39,7 +39,7 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
       ${this.documentCaptureModes}
       ></document-capture>
-      <document-capture-instructions id='document-capture-instructions-back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
+      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
       <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
       ${this.documentCaptureModes}
       hidden 
@@ -56,14 +56,18 @@ class DocumentCaptureScreens extends HTMLElement {
       },
     };
 
-    this.documentInstruction = this.querySelector('document-capture-instructions');
+    this.documentInstruction = this.querySelector(
+      'document-capture-instructions',
+    );
     this.documentInstructionBack = this.querySelector(
       '#document-capture-instructions-back',
     );
     this.idCapture = this.querySelector('#document-capture-front');
     this.idReview = this.querySelector('#front-of-document-capture-review');
     this.idCaptureBack = this.querySelector('#document-capture-back');
-    this.backOfIdReview = this.querySelector('#back-of-document-capture-review');
+    this.backOfIdReview = this.querySelector(
+      '#back-of-document-capture-review',
+    );
     this.thankYouScreen = this.querySelector('thank-you');
 
     if (this.hideInstructions) {
@@ -86,9 +90,12 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.documentInstruction.addEventListener('document-capture-instructions.cancelled', () => {
-      this.handleBackEvents();
-    });
+    this.documentInstruction.addEventListener(
+      'document-capture-instructions.cancelled',
+      () => {
+        this.handleBackEvents();
+      },
+    );
 
     this.documentInstruction.addEventListener(
       'document-capture-instructions.capture',
@@ -127,27 +134,33 @@ class DocumentCaptureScreens extends HTMLElement {
       }
     });
 
-    this.idReview.addEventListener('document-capture-review.rejected', async () => {
-      this.idReview.removeAttribute('data-image');
-      this._data.images.pop();
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
-      } else {
-        this.setActiveScreen(this.documentInstruction);
-      }
-    });
+    this.idReview.addEventListener(
+      'document-capture-review.rejected',
+      async () => {
+        this.idReview.removeAttribute('data-image');
+        this._data.images.pop();
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.idCapture);
+          await getPermissions(this.idCapture);
+        } else {
+          this.setActiveScreen(this.documentInstruction);
+        }
+      },
+    );
 
-    this.idReview.addEventListener('document-capture-review.accepted', async () => {
-      if (this.hideBackOfId) {
-        this._publishSelectedImages();
-      } else if (this.hideInstructions) {
-        this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
-      } else {
-        this.setActiveScreen(this.documentInstructionBack);
-      }
-    });
+    this.idReview.addEventListener(
+      'document-capture-review.accepted',
+      async () => {
+        if (this.hideBackOfId) {
+          this._publishSelectedImages();
+        } else if (this.hideInstructions) {
+          this.setActiveScreen(this.idCaptureBack);
+          await getPermissions(this.idCaptureBack);
+        } else {
+          this.setActiveScreen(this.documentInstructionBack);
+        }
+      },
+    );
 
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.capture',
@@ -192,29 +205,38 @@ class DocumentCaptureScreens extends HTMLElement {
       SmartCamera.stopMedia();
     });
 
-    this.idCaptureBack.addEventListener('document-capture.cancelled', async () => {
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
-      } else {
-        this.setActiveScreen(this.documentInstructionBack);
-      }
-    });
+    this.idCaptureBack.addEventListener(
+      'document-capture.cancelled',
+      async () => {
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.idCapture);
+          await getPermissions(this.idCapture);
+        } else {
+          this.setActiveScreen(this.documentInstructionBack);
+        }
+      },
+    );
 
-    this.backOfIdReview.addEventListener('document-capture-review.rejected', async () => {
-      this.backOfIdReview.removeAttribute('data-image');
-      this._data.images.pop();
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
-      } else {
-        this.setActiveScreen(this.documentInstructionBack);
-      }
-    });
+    this.backOfIdReview.addEventListener(
+      'document-capture-review.rejected',
+      async () => {
+        this.backOfIdReview.removeAttribute('data-image');
+        this._data.images.pop();
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.idCaptureBack);
+          await getPermissions(this.idCaptureBack);
+        } else {
+          this.setActiveScreen(this.documentInstructionBack);
+        }
+      },
+    );
 
-    this.backOfIdReview.addEventListener('document-capture-review.accepted', () => {
-      this._publishSelectedImages();
-    });
+    this.backOfIdReview.addEventListener(
+      'document-capture-review.accepted',
+      () => {
+        this._publishSelectedImages();
+      },
+    );
 
     const screens = [
       this.documentInstruction,
@@ -226,13 +248,17 @@ class DocumentCaptureScreens extends HTMLElement {
     ];
 
     screens.forEach((screen) => {
-      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvents());
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () =>
+        this.handleCloseEvents(),
+      );
     });
   }
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('document-capture-screens.publish', { detail: this._data }),
+      new CustomEvent('document-capture-screens.publish', {
+        detail: this._data,
+      }),
     );
   }
 
@@ -275,7 +301,10 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-screens')) {
+if (
+  'customElements' in window &&
+  !customElements.get('document-capture-screens')
+) {
   customElements.define('document-capture-screens', DocumentCaptureScreens);
 }
 

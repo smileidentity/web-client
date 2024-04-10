@@ -1,11 +1,11 @@
-import validate from "validate.js";
-import { version as sdkVersion } from "../../package.json";
-import "@smileid/web-components/signature-pad";
-import "@smileid/web-components/navigation";
+import validate from 'validate.js';
+import { version as sdkVersion } from '../../package.json';
+import '@smileid/web-components/signature-pad';
+import '@smileid/web-components/navigation';
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
-  const units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   const exponent = Math.min(
     Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
     units.length - 1,
@@ -20,40 +20,40 @@ function getHumanSize(numberOfBytes) {
 }
 
 (function eSignature() {
-  "use strict";
+  'use strict';
 
   function closeWindow(userTriggered) {
     const message = userTriggered
-      ? "SmileIdentity::Close"
-      : "SmileIdentity::Close::System";
-    referenceWindow.postMessage(message, "*");
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    referenceWindow.postMessage(message, '*');
   }
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: "https://devapi.smileidentity.com/v1",
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    development: 'https://devapi.smileidentity.com/v1',
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   function handleSuccess() {
-    referenceWindow.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 
   function handleBadDocuments(error) {
     referenceWindow.postMessage(
       {
-        message: "SmileIdentity::Error",
+        message: 'SmileIdentity::Error',
         data: {
           error,
         },
       },
-      "*",
+      '*',
     );
   }
 
@@ -69,10 +69,10 @@ function getHumanSize(numberOfBytes) {
     activeScreen = node;
   }
 
-  const NavigationTargets = document.querySelectorAll("smileid-navigation");
+  const NavigationTargets = document.querySelectorAll('smileid-navigation');
   NavigationTargets.forEach((navigationTarget) => {
     navigationTarget.addEventListener(
-      "navigation.back",
+      'navigation.back',
       () => {
         const screen = visitedScreens.pop();
         setActiveScreen(screen, false);
@@ -81,7 +81,7 @@ function getHumanSize(numberOfBytes) {
     );
 
     navigationTarget.addEventListener(
-      "navigation.close",
+      'navigation.close',
       () => {
         closeWindow(true);
       },
@@ -90,10 +90,10 @@ function getHumanSize(numberOfBytes) {
   });
 
   // NOTE: this exception is for inline back navigations
-  const BackButtons = document.querySelectorAll(".back-button");
+  const BackButtons = document.querySelectorAll('.back-button');
   BackButtons.forEach((button) => {
     button.addEventListener(
-      "click",
+      'click',
       (event) => {
         event.preventDefault();
         const screen = visitedScreens.pop();
@@ -123,15 +123,15 @@ function getHumanSize(numberOfBytes) {
        * 5. decode the URI Component to a JSON string
        * 6. parse the JSON string to a javascript object
        */
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split("")
+          .split('')
           .map(function (c) {
             return `%${c.charCodeAt(0).toString(16)}`;
           })
-          .join(""),
+          .join(''),
       );
 
       return JSON.parse(jsonPayload);
@@ -151,12 +151,12 @@ function getHumanSize(numberOfBytes) {
 
       const URL = `${
         endpoints[config.environment]
-      }/documents?ids=${config.document_ids.join(",")}`;
+      }/documents?ids=${config.document_ids.join(',')}`;
       const fetchConfig = {
-        mode: "cors",
+        mode: 'cors',
         headers: {
-          "SmileID-Partner-ID": partner_id,
-          "SmileID-Token": token,
+          'SmileID-Partner-ID': partner_id,
+          'SmileID-Token': token,
         },
       };
 
@@ -169,17 +169,17 @@ function getHumanSize(numberOfBytes) {
     } catch (e) {
       handleBadDocuments(e);
       closeWindow();
-      throw new Error("Failed to retrieve documents", { cause: e });
+      throw new Error('Failed to retrieve documents', { cause: e });
     }
   }
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity::Configuration")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
@@ -191,71 +191,71 @@ function getHumanSize(numberOfBytes) {
     false,
   );
 
-  const LoadingScreen = document.querySelector("#loading-screen");
+  const LoadingScreen = document.querySelector('#loading-screen');
   activeScreen = LoadingScreen;
-  const EntryScreen = document.querySelector("#entry-screen");
+  const EntryScreen = document.querySelector('#entry-screen');
   const DocumentReviewScreen = document.querySelector(
-    "#document-review-screen",
+    '#document-review-screen',
   );
-  const PersonalInfoScreen = document.querySelector("#personal-info-screen");
-  const PersonalInfoForm = PersonalInfoScreen.querySelector("form");
-  const SignatureScreen = document.querySelector("#signature-screen");
+  const PersonalInfoScreen = document.querySelector('#personal-info-screen');
+  const PersonalInfoForm = PersonalInfoScreen.querySelector('form');
+  const SignatureScreen = document.querySelector('#signature-screen');
   const ReviewSignatureScreen = document.querySelector(
-    "#review-signature-screen",
+    '#review-signature-screen',
   );
   const UploadProgressScreen = document.querySelector(
-    "#upload-progress-screen",
+    '#upload-progress-screen',
   );
-  const UploadFailedScreen = document.querySelector("#upload-failure-screen");
-  const CompleteScreen = document.querySelector("#complete-screen");
+  const UploadFailedScreen = document.querySelector('#upload-failure-screen');
+  const CompleteScreen = document.querySelector('#complete-screen');
 
-  EntryScreen.querySelector("#getStarted").addEventListener("click", () =>
+  EntryScreen.querySelector('#getStarted').addEventListener('click', () =>
     setActiveScreen(DocumentReviewScreen),
   );
 
-  DocumentReviewScreen.querySelector("#i_agree").addEventListener(
-    "change",
+  DocumentReviewScreen.querySelector('#i_agree').addEventListener(
+    'change',
     (event) => {
-      const button = DocumentReviewScreen.querySelector("#agreeToTerms");
+      const button = DocumentReviewScreen.querySelector('#agreeToTerms');
       if (event.target.checked) {
-        button.removeAttribute("disabled");
+        button.removeAttribute('disabled');
       } else {
-        button.setAttribute("disabled", true);
+        button.setAttribute('disabled', true);
       }
     },
   );
 
-  DocumentReviewScreen.querySelector("#agreeToTerms").addEventListener(
-    "click",
+  DocumentReviewScreen.querySelector('#agreeToTerms').addEventListener(
+    'click',
     agreeToTerms,
   );
 
-  SignatureScreen.querySelector("smileid-signature-pad").addEventListener(
-    "signature-pad.publish",
+  SignatureScreen.querySelector('smileid-signature-pad').addEventListener(
+    'signature-pad.publish',
     (event) => {
-      const name = ReviewSignatureScreen.querySelector("#name");
+      const name = ReviewSignatureScreen.querySelector('#name');
       name.textContent = personal_info.name;
-      const image = ReviewSignatureScreen.querySelector("#preview-signature");
+      const image = ReviewSignatureScreen.querySelector('#preview-signature');
       image.src = event.detail;
       signature = dataURLToFile(event.detail);
       setActiveScreen(ReviewSignatureScreen);
     },
   );
 
-  ReviewSignatureScreen.querySelector("#uploadSignature").addEventListener(
-    "click",
+  ReviewSignatureScreen.querySelector('#uploadSignature').addEventListener(
+    'click',
     () => submitSignature(),
   );
 
-  UploadFailedScreen.querySelector("#retry-upload").addEventListener(
-    "click",
+  UploadFailedScreen.querySelector('#retry-upload').addEventListener(
+    'click',
     () => submitSignature(),
   );
 
   function dataURLToFile(dataURL) {
     // Code taken from https://github.com/ebidel/filer.js
-    const parts = dataURL.split(";base64,");
-    const contentType = parts[0].split(":")[1];
+    const parts = dataURL.split(';base64,');
+    const contentType = parts[0].split(':')[1];
     const raw = window.atob(parts[1]);
     const rawLength = raw.length;
     const uInt8Array = new Uint8Array(rawLength);
@@ -265,9 +265,9 @@ function getHumanSize(numberOfBytes) {
     }
 
     const ext = {
-      "image/jpeg": "jpg",
-      "image/png": "png",
-      "image/svg+xml": "svg",
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/svg+xml': 'svg',
     }[contentType];
 
     return new File(
@@ -287,7 +287,7 @@ function getHumanSize(numberOfBytes) {
       name: {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       },
     };
@@ -297,7 +297,7 @@ function getHumanSize(numberOfBytes) {
     if (validation) {
       handleValidationErrors(validation);
       const submitButton = PersonalInfoForm.querySelector("[type='button']");
-      submitButton.removeAttribute("disabled");
+      submitButton.removeAttribute('disabled');
     }
 
     return validation;
@@ -308,15 +308,15 @@ function getHumanSize(numberOfBytes) {
 
     fields.forEach((field) => {
       const input = PersonalInfoForm.querySelector(`#${field}`);
-      input.setAttribute("aria-invalid", "true");
-      input.setAttribute("aria-describedby", `${field}-hint`);
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', `${field}-hint`);
 
-      const errorDiv = document.createElement("div");
-      errorDiv.setAttribute("id", `${field}-hint`);
-      errorDiv.setAttribute("class", "validation-message");
+      const errorDiv = document.createElement('div');
+      errorDiv.setAttribute('id', `${field}-hint`);
+      errorDiv.setAttribute('class', 'validation-message');
       errorDiv.textContent = errors[field][0];
 
-      input.insertAdjacentElement("afterend", errorDiv);
+      input.insertAdjacentElement('afterend', errorDiv);
     });
   }
 
@@ -344,8 +344,8 @@ function getHumanSize(numberOfBytes) {
     setActiveScreen(SignatureScreen);
   }
 
-  PersonalInfoForm.querySelector("#submitForm").addEventListener(
-    "click",
+  PersonalInfoForm.querySelector('#submitForm').addEventListener(
+    'click',
     (event) => {
       handlePersonalInfoSubmit(event);
     },
@@ -353,8 +353,8 @@ function getHumanSize(numberOfBytes) {
   );
 
   function loadDocuments(documents, containerElement) {
-    const placeholderElement = containerElement.querySelector(".document-list");
-    const list = document.createElement("div");
+    const placeholderElement = containerElement.querySelector('.document-list');
+    const list = document.createElement('div');
     list.innerHTML = `
       <ul class="document-list">
         ${documents
@@ -385,7 +385,7 @@ function getHumanSize(numberOfBytes) {
                 </li>
               `,
           )
-          .join("\n")}
+          .join('\n')}
       </ul>
     `;
     placeholderElement.replaceWith(list);
@@ -395,60 +395,60 @@ function getHumanSize(numberOfBytes) {
 
   function agreeToTerms() {
     resetForm();
-    const checkbox = DocumentReviewScreen.querySelector("#i_agree");
+    const checkbox = DocumentReviewScreen.querySelector('#i_agree');
 
     if (checkbox.checked) {
       setActiveScreen(PersonalInfoScreen);
     } else {
-      displayErrorMessage("You must tick the checkbox to proceed");
+      displayErrorMessage('You must tick the checkbox to proceed');
     }
   }
 
   function resetForm() {
-    const invalidElements = PersonalInfoForm.querySelectorAll("[aria-invalid]");
-    invalidElements.forEach((el) => el.removeAttribute("aria-invalid"));
+    const invalidElements = PersonalInfoForm.querySelectorAll('[aria-invalid]');
+    invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-    const validationMessages = document.querySelectorAll(".validation-message");
+    const validationMessages = document.querySelectorAll('.validation-message');
     validationMessages.forEach((el) => el.remove());
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
 
     p.textContent = message;
-    p.classList.add("validation-message");
-    p.style.fontSize = "1.5rem";
-    p.style.textAlign = "center";
+    p.classList.add('validation-message');
+    p.style.fontSize = '1.5rem';
+    p.style.textAlign = 'center';
 
-    const main = document.querySelector("main");
+    const main = document.querySelector('main');
     main.prepend(p);
   }
 
   async function submitSignature() {
     // ACTION: Build the request headers
     const headers = {
-      "SmileID-Partner-ID": config.partner_details.partner_id,
-      "SmileID-Token": config.token,
+      'SmileID-Partner-ID': config.partner_details.partner_id,
+      'SmileID-Token': config.token,
     };
 
     // ACTION: Build the request body
     const formData = new FormData();
     formData.append(
-      "partner_params",
+      'partner_params',
       JSON.stringify({
         ...partner_params,
         job_type: 12,
       }),
     );
-    formData.append("callback_url", config.callback_url);
-    formData.append("source_sdk", config.sdk || "hosted_web");
-    formData.append("source_sdk_version", config.sdk_version || sdkVersion);
-    formData.append("smile_client_id", config.partner_details.partner_id);
+    formData.append('callback_url', config.callback_url);
+    formData.append('source_sdk', config.sdk || 'hosted_web');
+    formData.append('source_sdk_version', config.sdk_version || sdkVersion);
+    formData.append('smile_client_id', config.partner_details.partner_id);
 
-    formData.append("ids", config.document_ids.join(","));
-    formData.append("name", personal_info.name);
-    formData.append("document_read_at", new Date().toISOString());
-    formData.append("image", signature);
+    formData.append('ids', config.document_ids.join(','));
+    formData.append('name', personal_info.name);
+    formData.append('document_read_at', new Date().toISOString());
+    formData.append('image', signature);
 
     const URL = `${
       endpoints[config.environment] || config.environment
@@ -457,7 +457,7 @@ function getHumanSize(numberOfBytes) {
     try {
       setActiveScreen(UploadProgressScreen);
       const response = await fetch(URL, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: formData,
       });
@@ -469,7 +469,7 @@ function getHumanSize(numberOfBytes) {
       return json;
     } catch (error) {
       setActiveScreen(UploadFailedScreen);
-      throw new Error("signature submission failed", { cause: error });
+      throw new Error('signature submission failed', { cause: error });
     }
   }
 

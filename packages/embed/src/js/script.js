@@ -43,11 +43,11 @@
 	environment before publishing to end users
 */
 window.SmileIdentity = (function () {
-  "use strict";
+  'use strict';
 
   function getSiteURL() {
     const currentScriptSrc = document.currentScript.src;
-    const qualifiedURL = currentScriptSrc.split("script")[0];
+    const qualifiedURL = currentScriptSrc.split('script')[0];
     return qualifiedURL;
   }
 
@@ -57,25 +57,25 @@ window.SmileIdentity = (function () {
 
   function getIFrameURL(product) {
     switch (product) {
-      case "biometric_kyc":
-      case "ekyc_smartselfie":
-        return "./../biometric-kyc.html";
-      case "enhanced_kyc":
-        return "./../ekyc.html";
-      case "authentication":
-      case "smartselfie":
-        return "./../smartselfie-auth.html";
-      case "doc_verification":
-        return "./../doc-verification.html";
-      case "enhanced_document_verification":
-        return "./../enhanced-document-verification.html";
-      case "e_signature":
-        return "./../e-signature.html";
-      case "basic_kyc":
-      case "identity_verification":
-        return "./../basic-kyc.html";
+      case 'biometric_kyc':
+      case 'ekyc_smartselfie':
+        return './../biometric-kyc.html';
+      case 'enhanced_kyc':
+        return './../ekyc.html';
+      case 'authentication':
+      case 'smartselfie':
+        return './../smartselfie-auth.html';
+      case 'doc_verification':
+        return './../doc-verification.html';
+      case 'enhanced_document_verification':
+        return './../enhanced-document-verification.html';
+      case 'e_signature':
+        return './../e-signature.html';
+      case 'basic_kyc':
+      case 'identity_verification':
+        return './../basic-kyc.html';
       case undefined:
-        return "./../product-selection.html";
+        return './../product-selection.html';
       default:
         throw new Error(
           `SmileIdentity: ${product} is not currently supported in this integration`,
@@ -84,21 +84,21 @@ window.SmileIdentity = (function () {
   }
 
   function createIframe(productName) {
-    const iframe = document.createElement("iframe");
+    const iframe = document.createElement('iframe');
 
     iframe.setAttribute(
-      "src",
+      'src',
       `${innerConfig.siteURL}${getIFrameURL(productName)}`,
     );
-    iframe.setAttribute("id", "smile-identity-hosted-web-integration");
-    iframe.setAttribute("name", "smile-identity-hosted-web-integration");
-    iframe.setAttribute("data-cy", "smile-identity-hosted-web-integration");
-    iframe.setAttribute("frameborder", "0");
+    iframe.setAttribute('id', 'smile-identity-hosted-web-integration');
+    iframe.setAttribute('name', 'smile-identity-hosted-web-integration');
+    iframe.setAttribute('data-cy', 'smile-identity-hosted-web-integration');
+    iframe.setAttribute('frameborder', '0');
     iframe.setAttribute(
-      "allow",
-      "camera; geolocation; encrypted-media; fullscreen",
+      'allow',
+      'camera; geolocation; encrypted-media; fullscreen',
     );
-    iframe.setAttribute("allowtransparency", "true");
+    iframe.setAttribute('allowtransparency', 'true');
 
     iframe.style.cssText = `
 			background-color: #F9F0E7;
@@ -116,7 +116,7 @@ window.SmileIdentity = (function () {
 
   function closeIFrame(config, userTriggered) {
     const iframe = document.querySelector(
-      "#smile-identity-hosted-web-integration",
+      '#smile-identity-hosted-web-integration',
     );
 
     iframe.remove();
@@ -145,40 +145,40 @@ window.SmileIdentity = (function () {
   }
 
   const requiredPartnerDetails = [
-    "name",
-    "logo_url",
-    "partner_id",
-    "policy_url",
-    "theme_color",
+    'name',
+    'logo_url',
+    'partner_id',
+    'policy_url',
+    'theme_color',
   ];
 
   function isConfigValid(config) {
     if (!config.token)
       throw new Error(
-        "SmileIdentity: Please provide your web token via the `token` attribute",
+        'SmileIdentity: Please provide your web token via the `token` attribute',
       );
     if (!config.callback_url)
       throw new Error(
-        "SmileIdentity: Please provide a callback URL via the `callback_url` attribute",
+        'SmileIdentity: Please provide a callback URL via the `callback_url` attribute',
       );
     if (!config.product && !config.id_types)
       throw new Error(
-        "SmileIdentity: Please select a product via the `product` attribute.",
+        'SmileIdentity: Please select a product via the `product` attribute.',
       );
 
     if (
-      (config.product === "biometric_kyc" ||
-        config.product === "ekyc_smartselfie") &&
+      (config.product === 'biometric_kyc' ||
+        config.product === 'ekyc_smartselfie') &&
       !config.partner_details
     ) {
       throw new Error(
-        "SmileIdentity: Please provide Partner Details via the `partner_details` attribute",
+        'SmileIdentity: Please provide Partner Details via the `partner_details` attribute',
       );
     }
 
     if (
-      (config.product === "biometric_kyc" ||
-        config.product === "ekyc_smartselfie") &&
+      (config.product === 'biometric_kyc' ||
+        config.product === 'ekyc_smartselfie') &&
       config.partner_details
     ) {
       requiredPartnerDetails.forEach((param) => {
@@ -195,23 +195,23 @@ window.SmileIdentity = (function () {
       !Array.isArray(config.document_capture_modes)
     ) {
       throw new Error(
-        "SmileIdentity: document_capture_modes must be an array containing one of `camera` or `upload`, or both",
+        'SmileIdentity: document_capture_modes must be an array containing one of `camera` or `upload`, or both',
       );
     }
 
-    if (config.product === "e_signature" && !config.document_ids) {
+    if (config.product === 'e_signature' && !config.document_ids) {
       throw new Error(
-        "SmileIdentity: `document_ids` field is required for `e_signature` product type",
+        'SmileIdentity: `document_ids` field is required for `e_signature` product type',
       );
     }
 
     if (
-      config.product === "e_signature" &&
+      config.product === 'e_signature' &&
       config.document_ids &&
       !Array.isArray(config.document_ids)
     ) {
       throw new Error(
-        "SmileIdentity: `document_ids` must be an array containing ids of documents uploaded for `e_signature`",
+        'SmileIdentity: `document_ids` must be an array containing ids of documents uploaded for `e_signature`',
       );
     }
 
@@ -222,9 +222,9 @@ window.SmileIdentity = (function () {
     const targetWindow = document.querySelector(
       "[name='smile-identity-hosted-web-integration']",
     ).contentWindow;
-    config.source = "SmileIdentity::Configuration";
+    config.source = 'SmileIdentity::Configuration';
 
-    targetWindow.postMessage(JSON.stringify(config), "*");
+    targetWindow.postMessage(JSON.stringify(config), '*');
   }
 
   function SmileIdentity(config) {
@@ -235,23 +235,23 @@ window.SmileIdentity = (function () {
         createIframe(config.product);
 
         window.addEventListener(
-          "message",
+          'message',
           (event) => {
             const tag = event.data.message || event.data;
 
             switch (tag) {
-              case "SmileIdentity::ChildPageReady":
+              case 'SmileIdentity::ChildPageReady':
                 return publishConfigToIFrame(config);
-              case "SmileIdentity::Close":
+              case 'SmileIdentity::Close':
                 return closeIFrame(config, true);
-              case "SmileIdentity::Close::System":
+              case 'SmileIdentity::Close::System':
                 return closeIFrame(config, false);
-              case "SmileIdentity::Success":
+              case 'SmileIdentity::Success':
                 return handleSuccess(config);
-              case "SmileIdentity::ConsentDenied":
-              case "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated":
+              case 'SmileIdentity::ConsentDenied':
+              case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
                 return handleConsentRejection(config, event.data);
-              case "SmileIdentity::Error":
+              case 'SmileIdentity::Error':
                 return handleError(config, event.data);
               default:
                 return undefined;

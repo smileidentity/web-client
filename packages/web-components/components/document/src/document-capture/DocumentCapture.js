@@ -235,10 +235,10 @@ function templateString() {
     <div class="circle-progress" id="loader">
     ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${
-  this.cameraError
-    ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
-    : '<p style="--flow-space: 4rem">Checking permissions</p>'
-}
+          this.cameraError
+            ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
+            : '<p style="--flow-space: 4rem">Checking permissions</p>'
+        }
     </div>
     <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
       <div class='id-video-container landscape'>
@@ -264,12 +264,12 @@ function templateString() {
     </div>
 
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -380,10 +380,13 @@ class DocumentCapture extends HTMLElement {
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
-      const sourceXOffset = ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
-      const sourceYOffset = ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
+      const sourceXOffset =
+        ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
+      const sourceYOffset =
+        ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
       const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
-      const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
+      const sourceHeight =
+        frameBox.height * (video.videoHeight / videoBox.height);
 
       canvas.height = (canvas.width * frameBox.height) / frameBox.width;
 
@@ -566,15 +569,15 @@ class DocumentCapture extends HTMLElement {
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'data-camera-ready':
-    case 'data-camera-error':
-    case 'hidden':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'title':
+      case 'data-camera-ready':
+      case 'data-camera-error':
+      case 'hidden':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 

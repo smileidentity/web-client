@@ -522,12 +522,12 @@ function templateString() {
       </button>
 
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -655,7 +655,8 @@ class SelfieCaptureScreen extends HTMLElement {
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');
     canvas.width = 240;
-    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height =
+      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -666,7 +667,8 @@ class SelfieCaptureScreen extends HTMLElement {
   _captureReferencePhoto() {
     const canvas = document.createElement('canvas');
     canvas.width = 480;
-    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height =
+      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);
@@ -847,15 +849,15 @@ class SelfieCaptureScreen extends HTMLElement {
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-camera-error':
-    case 'data-camera-ready':
-    case 'hidden':
-    case 'title':
-      this.shadowRoot.innerHTML = this.render();
-      this.init();
-      break;
-    default:
-      break;
+      case 'data-camera-error':
+      case 'data-camera-ready':
+      case 'hidden':
+      case 'title':
+        this.shadowRoot.innerHTML = this.render();
+        this.init();
+        break;
+      default:
+        break;
     }
   }
 

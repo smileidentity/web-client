@@ -20,5 +20,14 @@
     "packages/web-components/*/*",
     "packages/*"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@storybook/addon-essentials": "^7.6.12",
+    "@storybook/addon-links": "<8.0.0",
+    "@storybook/blocks": "^7.6.17",
+    "@storybook/web-components": "^7.6.4",
+    "@storybook/web-components-vite": "<8.0.0",
+    "prettier": "^3.2.5",
+    "storybook": "<8.0.0"
+  }
 }

@@ -6,24 +6,27 @@ module.exports = {
     es2021: true,
   },
   extends: 'airbnb-base',
-  ignorePatterns: [
-    'cypress/pages/instrumented/**',
-    'node_modules/',
-  ],
+  ignorePatterns: ['cypress/pages/instrumented/**', 'node_modules/'],
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  plugins: [
-    'cypress',
-  ],
+  plugins: ['cypress'],
   rules: {
-    indent: ['error', 2],
+    curly: 'off',
+    'function-paren-newline': 'off',
+    'implicit-arrow-linebreak': 'off',
+    indent: 'off',
     'max-classes-per-file': 'off',
     'max-len': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
     'no-plusplus': 'off',
     'no-underscore-dangle': 'off',
-    'no-unused-vars': ['error', { args: 'after-used', ignoreRestSiblings: false, vars: 'all' }],
+    'nonblock-statement-body-position': 'off',
+    'operator-linebreak': 'off',
+    'no-unused-vars': [
+      'error',
+      { args: 'after-used', ignoreRestSiblings: false, vars: 'all' },
+    ],
     'sort-keys': 'error',
   },
 };

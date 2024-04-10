@@ -275,6 +275,7 @@ function templateString() {
         display: flex;
         align-items: center;
         text-align: initial;
+        gap: 1rem;
       }
 
       .instructions svg {
@@ -336,7 +337,7 @@ function templateString() {
     </svg>
       <h1 class='text-2xl color-digital-blue font-bold'>Next, we'll take a quick selfie</h1>
     </header>
-    <div class="flow">
+    <div class="flow instructions-wrapper">
       <div class="instructions">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -501,7 +502,7 @@ function templateString() {
             </clipPath>
           </defs>
         </svg>
-        <div>
+        <div class="instruction">
           <p class="tip-header">Clear Image</p>
           <p>
             Hold your phone steady so the selfie is clear and sharp. Don't

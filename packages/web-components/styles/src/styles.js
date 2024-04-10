@@ -280,10 +280,9 @@ ${typography}
   .instructions-wrapper {
     display: inline-flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2rem;
+    gap: 1.5rem;
     margin-block-start: 2rem;
-    margin-block-end: 4rem;
+    margin-block-end: 2rem;
   }
   .instructions {
     display: flex;
@@ -298,6 +297,12 @@ ${typography}
 
   .instructions p {
     margin-block: 0;
+  }
+
+  .instruction {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .instruction-body {

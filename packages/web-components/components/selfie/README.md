@@ -9,7 +9,7 @@ The `SelfieCaptureScreens` is a custom web component designed to capture selfies
 To use the SelfieCaptureScreens component, you need to import it into your JavaScript file:
 
 ```js
-import "@smileid/web-components/selfie-capture-screens";
+import '@smileid/web-components/selfie-capture-screens';
 ```
 
 ### Using the Component
@@ -73,8 +73,8 @@ Usage:
 
 ```js
 document
-  .querySelector("selfie-capture-screens")
-  .addEventListener("selfie-capture-screens.publish", function (event) {
+  .querySelector('selfie-capture-screens')
+  .addEventListener('selfie-capture-screens.publish', function (event) {
     console.log(event.detail);
   });
 ```
@@ -101,7 +101,7 @@ The `SelfieCapture` is a custom web component designed to capture selfies and li
 To use the SelfieCapture component, you need to import it into your JavaScript file:
 
 ```js
-import "@smileid/web-components/selfie-capture";
+import '@smileid/web-components/selfie-capture';
 ```
 
 ### Using the Component
@@ -159,8 +159,8 @@ Usage:
 
 ```js
 document
-  .querySelector("selfie-capture")
-  .addEventListener("selfie-capture.publish", function (event) {
+  .querySelector('selfie-capture')
+  .addEventListener('selfie-capture.publish', function (event) {
     console.log(event.detail);
   });
 ```
@@ -184,16 +184,16 @@ When a user accepts an image, an event is triggered as shown below:
 
 ```js
 document
-  .querySelector("selfie-capture-review")
-  .addEventListener("selfie-capture-review.accepted", function (event) {});
+  .querySelector('selfie-capture-review')
+  .addEventListener('selfie-capture-review.accepted', function (event) {});
 ```
 
 When a user wants to recapture a selfie, an event is triggered as shown below:
 
 ```js
 document
-  .querySelector("selfie-capture-review")
-  .addEventListener("selfie-capture-review.rejected", function (event) {});
+  .querySelector('selfie-capture-review')
+  .addEventListener('selfie-capture-review.rejected', function (event) {});
 ```
 
 ### Compatibility

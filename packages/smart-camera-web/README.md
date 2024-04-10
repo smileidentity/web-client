@@ -40,7 +40,7 @@ npm install @smile_identity/smart-camera-web@<version>
 Then, in your VueJS, AngularJS, or React component:
 
 ```js
-import "@smile_identity/smart-camera-web";
+import '@smile_identity/smart-camera-web';
 ```
 
 #### Install via CDN
@@ -96,19 +96,19 @@ After installation and necessary imports:
 
    ```html
    <script>
-     const app = document.querySelector("smart-camera-web");
+     const app = document.querySelector('smart-camera-web');
 
      const postContent = async (data) => {
        const options = {
-         method: "POST",
+         method: 'POST',
          headers: {
-           "Content-Type": "application/json",
+           'Content-Type': 'application/json',
          },
          body: JSON.stringify(data),
        };
 
        try {
-         const response = await fetch("/", options);
+         const response = await fetch('/', options);
          const json = await response.json();
 
          return json;
@@ -117,7 +117,7 @@ After installation and necessary imports:
        }
      };
 
-     app.addEventListener("imagesComputed", async (e) => {
+     app.addEventListener('imagesComputed', async (e) => {
        try {
          const response = await postContent(e.detail);
 
@@ -132,30 +132,30 @@ After installation and necessary imports:
    The provided backend endpoint uses the NodeJS Server to Server library and ExpressJS:
 
    ```js
-   const express = require("express");
-   const { v4: UUID } = require("uuid");
+   const express = require('express');
+   const { v4: UUID } = require('uuid');
 
-   if (process.env.NODE_ENV === "development") {
-     const dotenv = require("dotenv");
+   if (process.env.NODE_ENV === 'development') {
+     const dotenv = require('dotenv');
 
      dotenv.config();
    }
 
-   const SIDCore = require("smile-identity-core");
+   const SIDCore = require('smile-identity-core');
    const SIDSignature = SIDCore.Signature;
    const SIDWebAPI = SIDCore.WebApi;
 
    const app = express();
 
-   app.use(express.json({ limit: "500kb" }));
-   app.use(express.static("public"));
+   app.use(express.json({ limit: '500kb' }));
+   app.use(express.static('public'));
 
-   app.post("/", async (req, res, next) => {
+   app.post('/', async (req, res, next) => {
      try {
        const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
        const connection = new SIDWebAPI(
          PARTNER_ID,
-         "/callback",
+         '/callback',
          API_KEY,
          SID_SERVER,
        );
@@ -194,7 +194,7 @@ After installation and necessary imports:
 
    // NOTE: This can be used to process responses. don't forget to add it as a callback option in the `connection` config on L22
    // https://docs.usesmileid.com/further-reading/faqs/how-do-i-setup-a-callback
-   app.post("/callback", (req, res, next) => {});
+   app.post('/callback', (req, res, next) => {});
 
    app.listen(process.env.PORT || 4000);
    ```

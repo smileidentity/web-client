@@ -17,9 +17,9 @@ Suppose you have an file input field
 
 ```javascript
 // get the element
-const uploadDocumentPhotoButton = document.getElementById("upload-photo");
+const uploadDocumentPhotoButton = document.getElementById('upload-photo');
 // add a change event listener
-uploadDocumentPhotoButton.addEventListener("change", async (event) => {
+uploadDocumentPhotoButton.addEventListener('change', async (event) => {
   try {
     const { files } = event.target;
 

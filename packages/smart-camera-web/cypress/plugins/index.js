@@ -19,7 +19,7 @@
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
-  require("@cypress/code-coverage/task")(on, config); // eslint-disable-line global-require, import/no-extraneous-dependencies
+  require('@cypress/code-coverage/task')(on, config); // eslint-disable-line global-require, import/no-extraneous-dependencies
   // include any other plugin code...
 
   // It's IMPORTANT to return the config object

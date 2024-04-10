@@ -13,7 +13,7 @@
         max-width: 100%;
         min-height: 100%;
       }
-      button[data-type="icon"] {
+      button[data-type='icon'] {
         align-items: center;
         background-color: transparent;
         border: 0;
@@ -56,16 +56,16 @@
 
     <script src="./js/components/smart-camera-web/src/SmartCameraWeb.js"></script>
     <script>
-      const app = document.querySelector("smart-camera-web");
-      app.addEventListener("smart-camera-web.publish", async (e) => {
+      const app = document.querySelector('smart-camera-web');
+      app.addEventListener('smart-camera-web.publish', async (e) => {
         console.log(e.detail);
       });
-      app.addEventListener("smart-camera-web.cancelled", async (e) => {
-        location.href = "/back_pressed";
+      app.addEventListener('smart-camera-web.cancelled', async (e) => {
+        location.href = '/back_pressed';
       });
 
-      app.addEventListener("smart-camera-web.close", async (e) => {
-        location.href = "/closed";
+      app.addEventListener('smart-camera-web.close', async (e) => {
+        location.href = '/closed';
       });
     </script>
   </body>

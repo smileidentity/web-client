@@ -1,23 +1,23 @@
-import JSZip from "jszip";
-import validate from "validate.js";
-import "@smile_identity/smart-camera-web";
-import "@smileid/web-components/end-user-consent";
-import { version as sdkVersion } from "../../package.json";
+import JSZip from 'jszip';
+import validate from 'validate.js';
+import '@smile_identity/smart-camera-web';
+import '@smileid/web-components/end-user-consent';
+import { version as sdkVersion } from '../../package.json';
 
 (function biometricKyc() {
-  "use strict";
+  'use strict';
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: "https://devapi.smileidentity.com/v1",
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    development: 'https://devapi.smileidentity.com/v1',
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   const pages = [];
   let activeScreen;
@@ -29,31 +29,31 @@ import { version as sdkVersion } from "../../package.json";
   let partner_params;
   let productConstraints;
 
-  const LoadingScreen = document.querySelector("#loading-screen");
-  const SelectIDType = document.querySelector("#select-id-type");
-  const SmartCameraWeb = document.querySelector("smart-camera-web");
-  const IDInfoForm = document.querySelector("#id-info");
+  const LoadingScreen = document.querySelector('#loading-screen');
+  const SelectIDType = document.querySelector('#select-id-type');
+  const SmartCameraWeb = document.querySelector('smart-camera-web');
+  const IDInfoForm = document.querySelector('#id-info');
   const UploadProgressScreen = document.querySelector(
-    "#upload-progress-screen",
+    '#upload-progress-screen',
   );
-  const UploadFailureScreen = document.querySelector("#upload-failure-screen");
-  const CompleteScreen = document.querySelector("#complete-screen");
+  const UploadFailureScreen = document.querySelector('#upload-failure-screen');
+  const CompleteScreen = document.querySelector('#complete-screen');
 
-  const CloseIframeButtons = document.querySelectorAll(".close-iframe");
-  const RetryUploadButton = document.querySelector("#retry-upload");
+  const CloseIframeButtons = document.querySelectorAll('.close-iframe');
+  const RetryUploadButton = document.querySelector('#retry-upload');
   let disableBackOnFirstScreen = false;
 
   let fileToUpload;
   let uploadURL;
 
-  function postData(url = "", data = {}) {
+  function postData(url = '', data = {}) {
     return fetch(url, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
@@ -89,16 +89,16 @@ import { version as sdkVersion } from "../../package.json";
         const previewBvnMfa = config.previewBVNMFA;
         if (previewBvnMfa) {
           generalConstraints.hosted_web.biometric_kyc.NG.id_types.BVN_MFA = {
-            id_number_regex: "^[0-9]{11}$",
-            label: "Bank Verification Number (with OTP)",
+            id_number_regex: '^[0-9]{11}$',
+            label: 'Bank Verification Number (with OTP)',
             required_fields: [
-              "country",
-              "id_type",
-              "session_id",
-              "user_id",
-              "job_id",
+              'country',
+              'id_type',
+              'session_id',
+              'user_id',
+              'job_id',
             ],
-            test_data: "00000000000",
+            test_data: '00000000000',
           };
         }
 
@@ -107,19 +107,19 @@ import { version as sdkVersion } from "../../package.json";
           generalConstraints: generalConstraints.hosted_web.biometric_kyc,
         };
       }
-      throw new Error("Failed to get supported ID types");
+      throw new Error('Failed to get supported ID types');
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity::Configuration")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
@@ -159,11 +159,11 @@ import { version as sdkVersion } from "../../package.json";
         customizeConsentScreen();
         setActiveScreen(EndUserConsent);
       } else {
-        SmartCameraWeb.setAttribute("hide-back-to-host", true);
+        SmartCameraWeb.setAttribute('hide-back-to-host', true);
         setActiveScreen(SmartCameraWeb);
       }
     } else {
-      SmartCameraWeb.setAttribute("hide-back-to-host", true);
+      SmartCameraWeb.setAttribute('hide-back-to-host', true);
       setActiveScreen(SmartCameraWeb);
     }
 
@@ -201,7 +201,7 @@ import { version as sdkVersion } from "../../package.json";
         };
 
         const idTypes = config.id_selection[selectedCountry];
-        if (idTypes.length === 1 || typeof idTypes === "string") {
+        if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           disableBackOnFirstScreen = true;
           // ACTION: set initial screen
@@ -215,8 +215,8 @@ import { version as sdkVersion } from "../../package.json";
     }
 
     if (!id_info || !id_info.id_type) {
-      const selectCountry = SelectIDType.querySelector("#country");
-      const selectIDType = SelectIDType.querySelector("#id_type");
+      const selectCountry = SelectIDType.querySelector('#country');
+      const selectIDType = SelectIDType.querySelector('#id_type');
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',
       );
@@ -240,16 +240,16 @@ import { version as sdkVersion } from "../../package.json";
           );
 
           // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
-          const initialOption = document.createElement("option");
-          initialOption.setAttribute("value", "");
-          initialOption.textContent = "--Please Select--";
+          selectIDType.innerHTML = '';
+          const initialOption = document.createElement('option');
+          initialOption.setAttribute('value', '');
+          initialOption.textContent = '--Please Select--';
           selectIDType.appendChild(initialOption);
 
           // ACTION: Load ID Types as <option>s
           selectedIDTypes.forEach((IDType) => {
-            const option = document.createElement("option");
-            option.setAttribute("value", IDType);
+            const option = document.createElement('option');
+            option.setAttribute('value', IDType);
             option.textContent =
               generalConstraints[countryCode].id_types[IDType].label;
             selectIDType.appendChild(option);
@@ -259,18 +259,18 @@ import { version as sdkVersion } from "../../package.json";
           selectIDType.disabled = false;
         } else {
           // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
+          selectIDType.innerHTML = '';
 
           // ACTION: Load the default <option>
-          const option = document.createElement("option");
+          const option = document.createElement('option');
           option.disabled = true;
-          option.setAttribute("value", "");
-          option.textContent = "--Select Country First--";
+          option.setAttribute('value', '');
+          option.textContent = '--Select Country First--';
           selectIDType.appendChild(option);
         }
       };
 
-      selectCountry.addEventListener("change", (e) => {
+      selectCountry.addEventListener('change', (e) => {
         loadIdTypes(e.target.value);
       });
 
@@ -278,12 +278,12 @@ import { version as sdkVersion } from "../../package.json";
       validCountries.forEach((country) => {
         const countryObject = generalConstraints[country];
         if (countryObject) {
-          const option = document.createElement("option");
-          option.setAttribute("value", country);
+          const option = document.createElement('option');
+          option.setAttribute('value', country);
           option.textContent = countryObject.name;
 
           if (id_info && id_info.country && country === id_info.country) {
-            option.setAttribute("selected", true);
+            option.setAttribute('selected', true);
             selectCountry.value = country;
             selectCountry.disabled = true;
             loadIdTypes(country);
@@ -293,7 +293,7 @@ import { version as sdkVersion } from "../../package.json";
         }
       });
 
-      hostedWebConfigForm.addEventListener("submit", (e) => {
+      hostedWebConfigForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCountry = selectCountry.value;
         const selectedIDType = selectIDType.value;
@@ -311,23 +311,23 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function initiateDemoMode() {
-    const demoTips = document.querySelectorAll(".demo-tip");
+    const demoTips = document.querySelectorAll('.demo-tip');
     Array.prototype.forEach.call(demoTips, (tip) => {
       tip.hidden = false;
     });
 
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "js/demo-ekyc-smartselfie.min.js";
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'js/demo-ekyc-smartselfie.min.js';
 
     document.body.appendChild(script);
   }
 
   SmartCameraWeb.addEventListener(
-    "imagesComputed",
+    'imagesComputed',
     (event) => {
       images = event.detail.images;
-      const idRequiresTOTPConsent = ["BVN_MFA"].includes(id_info.id_type);
+      const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
       if (idRequiresTOTPConsent) {
         handleFormSubmit();
       } else {
@@ -337,7 +337,7 @@ import { version as sdkVersion } from "../../package.json";
     false,
   );
   SmartCameraWeb.addEventListener(
-    "backExit",
+    'backExit',
     () => {
       SmartCameraWeb.reset();
       const page = pages.pop();
@@ -346,23 +346,23 @@ import { version as sdkVersion } from "../../package.json";
     false,
   );
   SmartCameraWeb.addEventListener(
-    "close",
+    'close',
     () => {
       closeWindow(true);
     },
     false,
   );
 
-  IDInfoForm.querySelector("#submitForm").addEventListener(
-    "click",
+  IDInfoForm.querySelector('#submitForm').addEventListener(
+    'click',
     (event) => {
       handleFormSubmit(event);
     },
     false,
   );
 
-  IDInfoForm.querySelector("#back-button").addEventListener(
-    "click",
+  IDInfoForm.querySelector('#back-button').addEventListener(
+    'click',
     (event) => {
       event.preventDefault();
       const page = pages.pop();
@@ -375,7 +375,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   RetryUploadButton.addEventListener(
-    "click",
+    'click',
     () => {
       retryUpload();
     },
@@ -384,7 +384,7 @@ import { version as sdkVersion } from "../../package.json";
 
   CloseIframeButtons.forEach((button) => {
     button.addEventListener(
-      "click",
+      'click',
       () => {
         closeWindow(true);
       },
@@ -395,48 +395,48 @@ import { version as sdkVersion } from "../../package.json";
   function customizeConsentScreen() {
     const partnerDetails = config.partner_details;
 
-    const main = document.querySelector("main");
-    EndUserConsent = document.querySelector("end-user-consent");
+    const main = document.querySelector('main');
+    EndUserConsent = document.querySelector('end-user-consent');
     if (EndUserConsent) {
       main.removeChild(EndUserConsent);
     }
-    EndUserConsent = document.createElement("end-user-consent");
+    EndUserConsent = document.createElement('end-user-consent');
     EndUserConsent.setAttribute(
-      "base-url",
+      'base-url',
       endpoints[config.environment] || config.environment,
     );
-    EndUserConsent.setAttribute("country", id_info.country);
+    EndUserConsent.setAttribute('country', id_info.country);
     EndUserConsent.setAttribute(
-      "id-regex",
+      'id-regex',
       productConstraints[id_info.country].id_types[id_info.id_type]
         .id_number_regex,
     );
-    EndUserConsent.setAttribute("id-type", id_info.id_type);
+    EndUserConsent.setAttribute('id-type', id_info.id_type);
     EndUserConsent.setAttribute(
-      "id-type-label",
+      'id-type-label',
       productConstraints[id_info.country].id_types[id_info.id_type].label,
     );
-    EndUserConsent.setAttribute("partner-id", partnerDetails.partner_id);
-    EndUserConsent.setAttribute("partner-name", partnerDetails.name);
-    EndUserConsent.setAttribute("partner-logo", partnerDetails.logo_url);
-    EndUserConsent.setAttribute("policy-url", partnerDetails.policy_url);
-    EndUserConsent.setAttribute("theme-color", partnerDetails.theme_color);
-    EndUserConsent.setAttribute("token", config.token);
+    EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
+    EndUserConsent.setAttribute('partner-name', partnerDetails.name);
+    EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
+    EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
+    EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+    EndUserConsent.setAttribute('token', config.token);
     if (disableBackOnFirstScreen) {
-      EndUserConsent.setAttribute("hide-back-to-host", true);
+      EndUserConsent.setAttribute('hide-back-to-host', true);
     }
 
     if (config.demo_mode) {
-      EndUserConsent.setAttribute("demo-mode", config.demo_mode);
+      EndUserConsent.setAttribute('demo-mode', config.demo_mode);
       localStorage.setItem(
-        "SmileIdentityConstraints",
+        'SmileIdentityConstraints',
         JSON.stringify(productConstraints, null, 2),
       );
       initiateDemoMode();
     }
 
     EndUserConsent.addEventListener(
-      "end-user-consent.cancelled",
+      'end-user-consent.cancelled',
       () => {
         setActiveScreen(SelectIDType);
       },
@@ -444,7 +444,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.cancelled",
+      'end-user-consent.totp.cancelled',
       () => {
         setActiveScreen(SelectIDType);
       },
@@ -452,7 +452,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.granted",
+      'end-user-consent.granted',
       (event) => {
         consent_information = event.detail;
 
@@ -465,7 +465,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.granted",
+      'end-user-consent.totp.granted',
       (event) => {
         consent_information = event.detail;
 
@@ -480,20 +480,20 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.denied",
+      'end-user-consent.denied',
       () => {
-        referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
+        referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
         closeWindow();
       },
       false,
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.denied.contact-methods-outdated",
+      'end-user-consent.totp.denied.contact-methods-outdated',
       (event) => {
         referenceWindow.postMessage(
-          "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
-          "*",
+          'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
+          '*',
         );
         closeWindow();
       },
@@ -510,16 +510,16 @@ import { version as sdkVersion } from "../../package.json";
 
   function setGuideTextForIDType() {
     const label = document.querySelector('[for="id_number"]');
-    const input = document.querySelector("#id_number");
+    const input = document.querySelector('#id_number');
 
     label.innerHTML =
       productConstraints[id_info.country].id_types[id_info.id_type].label;
     input.setAttribute(
-      "placeholder",
+      'placeholder',
       productConstraints[id_info.country].id_types[id_info.id_type].test_data,
     );
     input.setAttribute(
-      "pattern",
+      'pattern',
       productConstraints[id_info.country].id_types[id_info.id_type]
         .id_number_regex,
     );
@@ -531,29 +531,29 @@ import { version as sdkVersion } from "../../package.json";
         .required_fields;
 
     const showIdNumber = requiredFields.some((fieldName) =>
-      fieldName.includes("id_number"),
+      fieldName.includes('id_number'),
     );
 
     if (showIdNumber) {
-      const IdNumber = IDInfoForm.querySelector("div#id-number");
+      const IdNumber = IDInfoForm.querySelector('div#id-number');
       IdNumber.hidden = false;
     }
 
     const showNames = requiredFields.some((fieldName) =>
-      fieldName.includes("name"),
+      fieldName.includes('name'),
     );
 
     if (showNames) {
-      const Names = IDInfoForm.querySelector("fieldset#names");
+      const Names = IDInfoForm.querySelector('fieldset#names');
       Names.hidden = false;
     }
 
     const showDOB = requiredFields.some((fieldName) =>
-      fieldName.includes("dob"),
+      fieldName.includes('dob'),
     );
 
     if (showDOB) {
-      const DOB = IDInfoForm.querySelector("fieldset#dob");
+      const DOB = IDInfoForm.querySelector('fieldset#dob');
       DOB.hidden = false;
     }
   }
@@ -573,15 +573,15 @@ import { version as sdkVersion } from "../../package.json";
        * 5. decode the URI Component to a JSON string
        * 6. parse the JSON string to a javascript object
        */
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split("")
+          .split('')
           .map(function (c) {
             return `%${c.charCodeAt(0).toString(16)}`;
           })
-          .join(""),
+          .join(''),
       );
 
       return JSON.parse(jsonPayload);
@@ -600,10 +600,10 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function resetForm() {
-    const invalidElements = IDInfoForm.querySelectorAll("[aria-invalid]");
-    invalidElements.forEach((el) => el.removeAttribute("aria-invalid"));
+    const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
+    invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-    const validationMessages = document.querySelectorAll(".validation-message");
+    const validationMessages = document.querySelectorAll('.validation-message');
     validationMessages.forEach((el) => el.remove());
   }
 
@@ -615,14 +615,14 @@ import { version as sdkVersion } from "../../package.json";
         .required_fields;
 
     const showIdNumber = requiredFields.some((fieldName) =>
-      fieldName.includes("id_number"),
+      fieldName.includes('id_number'),
     );
 
     if (showIdNumber) {
       validationConstraints.id_number = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
         format: new RegExp(
           productConstraints[id_info.country].id_types[
@@ -633,45 +633,45 @@ import { version as sdkVersion } from "../../package.json";
     }
 
     const showNames = requiredFields.some((fieldName) =>
-      fieldName.includes("name"),
+      fieldName.includes('name'),
     );
 
     if (showNames) {
       validationConstraints.first_name = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.last_name = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
 
     const showDOB = requiredFields.some((fieldName) =>
-      fieldName.includes("dob"),
+      fieldName.includes('dob'),
     );
 
     if (showDOB) {
       validationConstraints.day = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.month = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.year = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
@@ -681,7 +681,7 @@ import { version as sdkVersion } from "../../package.json";
     if (validation) {
       handleValidationErrors(validation);
       const submitButton = IDInfoForm.querySelector('[type="button"]');
-      submitButton.removeAttribute("disabled");
+      submitButton.removeAttribute('disabled');
     }
 
     return validation;
@@ -692,15 +692,15 @@ import { version as sdkVersion } from "../../package.json";
 
     fields.forEach((field) => {
       const input = IDInfoForm.querySelector(`#${field}`);
-      input.setAttribute("aria-invalid", "true");
-      input.setAttribute("aria-describedby", `${field}-hint`);
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', `${field}-hint`);
 
-      const errorDiv = document.createElement("div");
-      errorDiv.setAttribute("id", `${field}-hint`);
-      errorDiv.setAttribute("class", "validation-message");
+      const errorDiv = document.createElement('div');
+      errorDiv.setAttribute('id', `${field}-hint`);
+      errorDiv.setAttribute('class', 'validation-message');
       errorDiv.textContent = errors[field][0];
 
-      input.insertAdjacentElement("afterend", errorDiv);
+      input.insertAdjacentElement('afterend', errorDiv);
     });
   }
 
@@ -709,7 +709,7 @@ import { version as sdkVersion } from "../../package.json";
       event.preventDefault();
       resetForm();
     }
-    const form = IDInfoForm.querySelector("form");
+    const form = IDInfoForm.querySelector('form');
 
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
@@ -738,7 +738,7 @@ import { version as sdkVersion } from "../../package.json";
       if (event && event.target) event.target.disabled = false;
     } catch (error) {
       if (event && event.target) event.target.disabled = false;
-      displayErrorMessage("Something went wrong");
+      displayErrorMessage('Something went wrong');
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -746,14 +746,14 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
 
     p.textContent = message;
-    p.classList.add("validation-message");
-    p.style.fontSize = "1.5rem";
-    p.style.textAlign = "center";
+    p.classList.add('validation-message');
+    p.style.fontSize = '1.5rem';
+    p.style.textAlign = 'center';
 
-    const main = document.querySelector("main");
+    const main = document.querySelector('main');
     main.prepend(p);
   }
 
@@ -761,10 +761,10 @@ import { version as sdkVersion } from "../../package.json";
     const zip = new JSZip();
 
     zip.file(
-      "info.json",
+      'info.json',
       JSON.stringify({
         package_information: {
-          language: "Hosted Web Integration",
+          language: 'Hosted Web Integration',
           apiVersion: {
             buildNumber: 0,
             majorVersion: 2,
@@ -777,17 +777,17 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     try {
-      const zipFile = await zip.generateAsync({ type: "blob" });
+      const zipFile = await zip.generateAsync({ type: 'blob' });
 
       return zipFile;
     } catch (error) {
-      throw new Error("createZip failed", { cause: error });
+      throw new Error('createZip failed', { cause: error });
     }
   }
 
   async function getUploadURL() {
     const payload = {
-      source_sdk: config.sdk || "hosted_web",
+      source_sdk: config.sdk || 'hosted_web',
       source_sdk_version: config.sdk_version || sdkVersion,
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
@@ -809,7 +809,7 @@ import { version as sdkVersion } from "../../package.json";
 
       return json.upload_url;
     } catch (error) {
-      throw new Error("getUploadURL failed", { cause: error });
+      throw new Error('getUploadURL failed', { cause: error });
     }
   }
 
@@ -818,15 +818,15 @@ import { version as sdkVersion } from "../../package.json";
     setActiveScreen(UploadProgressScreen);
 
     const request = new XMLHttpRequest();
-    request.open("PUT", destination);
+    request.open('PUT', destination);
 
-    request.upload.addEventListener("load", function () {
+    request.upload.addEventListener('load', function () {
       return request.response;
     });
 
-    request.upload.addEventListener("error", function (e) {
+    request.upload.addEventListener('error', function (e) {
       setActiveScreen(UploadFailureScreen);
-      throw new Error("uploadZip failed", { cause: e });
+      throw new Error('uploadZip failed', { cause: e });
     });
 
     request.onreadystatechange = function () {
@@ -839,7 +839,7 @@ import { version as sdkVersion } from "../../package.json";
           productConstraints[id_info.country].id_types[id_info.id_type].label;
 
         const thankYouMessage =
-          CompleteScreen.querySelector("#thank-you-message");
+          CompleteScreen.querySelector('#thank-you-message');
         thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
 
         setActiveScreen(CompleteScreen);
@@ -851,11 +851,11 @@ import { version as sdkVersion } from "../../package.json";
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error("uploadZip failed", { cause: request });
+        throw new Error('uploadZip failed', { cause: request });
       }
     };
 
-    request.setRequestHeader("Content-type", "application/zip");
+    request.setRequestHeader('Content-type', 'application/zip');
     request.send(file);
   }
 
@@ -867,12 +867,12 @@ import { version as sdkVersion } from "../../package.json";
 
   function closeWindow(userTriggered) {
     const message = userTriggered
-      ? "SmileIdentity::Close"
-      : "SmileIdentity::Close::System";
-    referenceWindow.postMessage(message, "*");
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    referenceWindow.postMessage(message, '*');
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 })();

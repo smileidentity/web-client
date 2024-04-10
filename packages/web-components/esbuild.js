@@ -1,11 +1,11 @@
-import esbuild from "esbuild";
-import fs from "fs";
-import path from "path";
-import { createRequire } from "node:module";
+import esbuild from 'esbuild';
+import fs from 'fs';
+import path from 'path';
+import { createRequire } from 'node:module';
 
 // Import the package.json file to get the version number by using the createRequire function
 const require = createRequire(import.meta.url);
-const { exports } = require("./package.json");
+const { exports } = require('./package.json');
 
 // Get the paths from the exports field
 const exportPaths = Object.values(exports).map((filePath) =>
@@ -53,7 +53,7 @@ const copySync = (srcDir, destDir, filterFn) => {
 const copyFiles = (srcDir, pattern, destDir) => {
   const files = fs
     .readdirSync(srcDir)
-    .filter((file) => file.match(new RegExp(pattern.replace("*", ".*"))));
+    .filter((file) => file.match(new RegExp(pattern.replace('*', '.*'))));
   files.forEach((file) => {
     const srcPath = path.join(srcDir, file);
     const destPath = path.join(destDir, file);
@@ -67,11 +67,11 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * and copies necessary files.
  */
 const prebuildDist = () => {
-  if (fs.existsSync("dist")) {
-    fs.rmSync("build", { recursive: true });
+  if (fs.existsSync('dist')) {
+    fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync("dist");
-  copySync("src", "dist", (file) => !file.endsWith(".js"));
+  ensureDirSync('dist');
+  copySync('src', 'dist', (file) => !file.endsWith('.js'));
 };
 
 /**
@@ -80,15 +80,15 @@ const prebuildDist = () => {
  * copies necessary files, and copies HTML pages from cypress.
  */
 const prebuild = () => {
-  if (fs.existsSync("build")) {
-    fs.rmSync("build", { recursive: true });
+  if (fs.existsSync('build')) {
+    fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync("build");
+  ensureDirSync('build');
   // copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
-  copyFiles("cypress/pages", "*.html", "build");
+  copyFiles('cypress/pages', '*.html', 'build');
 };
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   prebuild();
 } else {
   prebuildDist();
@@ -96,7 +96,7 @@ if (process.env.NODE_ENV === "development") {
 
 const devOptions = {
   bundle: true,
-  minify: process.env.MINIFY === "true",
+  minify: process.env.MINIFY === 'true',
 };
 
 const prodOptions = {
@@ -104,16 +104,16 @@ const prodOptions = {
   minify: true,
 };
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   esbuild.build({
     ...devOptions,
     entryPoints: exportPaths,
-    outdir: "build/js",
+    outdir: 'build/js',
   });
 } else {
   esbuild.build({
     ...prodOptions,
     entryPoints: exportPaths,
-    outdir: "dist/js",
+    outdir: 'dist/js',
   });
 }

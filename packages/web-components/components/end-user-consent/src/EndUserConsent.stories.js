@@ -1,7 +1,7 @@
-import "./EndUserConsent";
+import './EndUserConsent';
 
 const meta = {
-  component: "end-user-consent",
+  component: 'end-user-consent',
 };
 
 export default meta;

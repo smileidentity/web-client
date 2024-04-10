@@ -1,7 +1,7 @@
-import "./SmartCameraWeb";
+import './SmartCameraWeb';
 
 const meta = {
-  component: "smart-camera-web",
+  component: 'smart-camera-web',
 };
 
 export default meta;

@@ -1,5 +1,5 @@
-import styles from "../../../../styles/src/styles";
-import "../../../navigation/src";
+import styles from '../../../../styles/src/styles';
+import '../../../navigation/src';
 
 function templateString() {
   return `
@@ -309,7 +309,7 @@ function templateString() {
     </style>
     ${styles}
     <div id="selfie-capture-instruction-screen" class="flow center">
-    <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} ${this.hideBack ? "hide-back" : ""}></smileid-navigation>
+    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <header>
       <svg xmlns="http://www.w3.org/2000/svg" width="65" height="91" viewBox="0 0 65 91" fill="none">
       <g clip-path="url(#clip0_604_692)">
@@ -554,7 +554,7 @@ function templateString() {
     </div>
     ${
       this.hideAttribution
-        ? ""
+        ? ''
         : `
     <powered-by-smile-id></powered-by-smile-id>
     `
@@ -569,33 +569,33 @@ class SelfieCaptureInstructions extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
     this.pages = [];
-    const template = document.createElement("template");
+    const template = document.createElement('template');
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.allowButton = this.shadowRoot.querySelector("#allow");
-    this.navigation = this.shadowRoot.querySelector("smileid-navigation");
+    this.allowButton = this.shadowRoot.querySelector('#allow');
+    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    this.navigation.addEventListener("navigation.back", () => {
+    this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
     if (this.allowButton) {
-      this.allowButton.addEventListener("click", () => {
+      this.allowButton.addEventListener('click', () => {
         this.dispatchEvent(
-          new CustomEvent("selfie-capture-instructions.capture"),
+          new CustomEvent('selfie-capture-instructions.capture'),
         );
       });
     }
 
     this.navigation.addEventListener(
-      "navigation.close",
+      'navigation.close',
       () => {
         this.handleCloseEvents();
       },
@@ -604,38 +604,38 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute("hide-back");
+    return this.hasAttribute('hide-back');
   }
 
   get themeColor() {
-    return this.getAttribute("theme-color") || "#043C93";
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   handleBackEvents() {
     this.dispatchEvent(
-      new CustomEvent("selfie-capture-instructions.cancelled"),
+      new CustomEvent('selfie-capture-instructions.cancelled'),
     );
   }
 
   get showNavigation() {
-    return this.hasAttribute("show-navigation");
+    return this.hasAttribute('show-navigation');
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent("selfie-capture-instructions.close"));
+    this.dispatchEvent(new CustomEvent('selfie-capture-instructions.close'));
   }
 }
 
 if (
-  "customElements" in window &&
-  !window.customElements.get("selfie-capture-instructions")
+  'customElements' in window &&
+  !window.customElements.get('selfie-capture-instructions')
 ) {
   window.customElements.define(
-    "selfie-capture-instructions",
+    'selfie-capture-instructions',
     SelfieCaptureInstructions,
   );
 }

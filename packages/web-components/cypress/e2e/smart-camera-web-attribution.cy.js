@@ -1,21 +1,21 @@
-describe("SmartCameraWeb", () => {
-  it("shows attribution by default", () => {
-    cy.visit("/smart-camera-web");
-    cy.get("smart-camera-web")
+describe('SmartCameraWeb', () => {
+  it('shows attribution by default', () => {
+    cy.visit('/smart-camera-web');
+    cy.get('smart-camera-web')
       .shadow()
-      .find("selfie-capture-instructions")
+      .find('selfie-capture-instructions')
       .shadow()
-      .find("powered-by-smile-id")
-      .should("be.visible");
+      .find('powered-by-smile-id')
+      .should('be.visible');
   });
 
-  it.only("hides attribution when `hide-attribution` attribute is passed", () => {
-    cy.visit("/capture-back-of-id-hide-attribution");
-    cy.get("smart-camera-web")
+  it.only('hides attribution when `hide-attribution` attribute is passed', () => {
+    cy.visit('/capture-back-of-id-hide-attribution');
+    cy.get('smart-camera-web')
       .shadow()
-      .find("selfie-capture-instructions")
+      .find('selfie-capture-instructions')
       .shadow()
-      .get("powered-by-smile-id")
-      .should("not.exist");
+      .get('powered-by-smile-id')
+      .should('not.exist');
   });
 });

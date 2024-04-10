@@ -9,7 +9,7 @@ The `IdCapture` is a custom web component designed to capture documents using a 
 To use the IdCapture component, you need to import it into your JavaScript file:
 
 ```js
-import "@smileid/components/document-capture";
+import '@smileid/components/document-capture';
 ```
 
 ### Using the Component
@@ -70,8 +70,8 @@ Usage:
 
 ```js
 document
-  .querySelector("document-capture")
-  .addEventListener("document-capture.publish", function (event) {
+  .querySelector('document-capture')
+  .addEventListener('document-capture.publish', function (event) {
     console.log(event.detail);
   });
 ```

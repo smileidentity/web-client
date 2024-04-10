@@ -1,4 +1,4 @@
-import typography from "./typography";
+import typography from './typography';
 
 const styles = `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link

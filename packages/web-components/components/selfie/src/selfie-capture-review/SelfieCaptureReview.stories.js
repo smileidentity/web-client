@@ -1,7 +1,7 @@
-import "./SelfieCaptureReview";
+import './SelfieCaptureReview';
 
 const meta = {
-  component: "selfie-capture-review",
+  component: 'selfie-capture-review',
 };
 
 export default meta;

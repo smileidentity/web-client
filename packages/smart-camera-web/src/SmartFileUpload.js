@@ -1,11 +1,11 @@
 class SmartFileUpload {
   static memoryLimit = 10240000;
 
-  static supportedTypes = ["image/jpeg", "image/png"];
+  static supportedTypes = ['image/jpeg', 'image/png'];
 
   static getHumanSize(numberOfBytes) {
     // Approximate to the closest prefixed unit
-    const units = ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const exponent = Math.min(
       Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
       units.length - 1,
@@ -29,7 +29,7 @@ class SmartFileUpload {
       reader.onerror = () => {
         reject(
           new Error(
-            "An error occurred reading the file. Please check the file, and try again",
+            'An error occurred reading the file. Please check the file, and try again',
           ),
         );
       };
@@ -39,14 +39,14 @@ class SmartFileUpload {
 
   static async retrieve(files) {
     if (files.length > 1) {
-      throw new Error("Only one file upload is permitted at a time");
+      throw new Error('Only one file upload is permitted at a time');
     }
 
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
       throw new Error(
-        "Unsupported file format. Please ensure that you are providing a JPG or PNG image",
+        'Unsupported file format. Please ensure that you are providing a JPG or PNG image',
       );
     }
 

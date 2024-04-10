@@ -5,7 +5,7 @@
 To incorporate the DocumentInstruction component into your project, import it into your JavaScript file as follows:
 
 ```js
-import "@smileid/document-capture/document-capture-instructions";
+import '@smileid/document-capture/document-capture-instructions';
 ```
 
 ## Using the Component

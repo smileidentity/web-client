@@ -1,7 +1,7 @@
-import "./Navigation";
+import './Navigation';
 
 const meta = {
-  component: "smileid-navigation",
+  component: 'smileid-navigation',
 };
 
 export default meta;

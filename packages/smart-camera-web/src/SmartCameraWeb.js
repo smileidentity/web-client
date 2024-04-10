@@ -1,5 +1,5 @@
-import SmartFileUpload from "./SmartFileUpload";
-import { version } from "../package.json";
+import SmartFileUpload from './SmartFileUpload';
+import { version } from '../package.json';
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
@@ -498,10 +498,10 @@ function scwTemplateString() {
       ${
         this.showNavigation
           ? `
-        <div class="nav back-to-host-nav${this.hideBackToHost ? " justify-right" : ""}">
+        <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
           ${
             this.hideBackToHost
-              ? ""
+              ? ''
               : `
             <div class="back-wrapper back-to-host-wrapper">
               <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
@@ -523,7 +523,7 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <div class='section | flow'>
         <p>
@@ -536,7 +536,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -548,10 +548,10 @@ function scwTemplateString() {
       ${
         this.showNavigation
           ? `
-        <div class="nav back-to-host-nav${this.hideBackToHost ? " justify-right" : ""}">
+        <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
           ${
             this.hideBackToHost
-              ? ""
+              ? ''
               : `
             <div class="back-wrapper back-to-host-wrapper">
               <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
@@ -573,7 +573,7 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Take a Selfie</h1>
   
@@ -600,7 +600,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -622,7 +622,7 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Review Selfie</h1>
   
@@ -655,7 +655,7 @@ function scwTemplateString() {
       </div>
       ${
         this.hideAttribution
-          ? ""
+          ? ''
           : `
         <powered-by-smile-id></powered-by-smile-id>
       `
@@ -685,7 +685,7 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <header>
         <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
@@ -704,7 +704,7 @@ function scwTemplateString() {
           </defs>
         </svg>
         <h1>
-          Submit${this.captureBackOfID ? " the Front of" : ""} Your ID
+          Submit${this.captureBackOfID ? ' the Front of' : ''} Your ID
         </h1>
         <p>
           We'll use it to verify your identity.
@@ -754,28 +754,28 @@ function scwTemplateString() {
       </div>
       <div class='flow'>
         ${
-          this.supportBothCaptureModes || this.documentCaptureModes === "camera"
+          this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
             ? `
           <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
             Take Photo
           </button>
         `
-            : ""
+            : ''
         }
         ${
-          this.supportBothCaptureModes || this.documentCaptureModes === "upload"
+          this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
             ? `
-          <label id='upload-photo-label' data-variant='${this.supportBothCaptureModes ? "outline" : "solid"}' class='button'>
+          <label id='upload-photo-label' data-variant='${this.supportBothCaptureModes ? 'outline' : 'solid'}' class='button'>
             <input type='file' onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
             <span>Upload Photo</span>
           </label>
         `
-            : ""
+            : ''
         }
       </div>
       ${
         this.hideAttribution
-          ? ""
+          ? ''
           : `
         <powered-by-smile-id></powered-by-smile-id>
       `
@@ -805,16 +805,16 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Take ID Card Photo</h1>
-      <div class='section | flow ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
-        <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
-          <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? "hidden" : ""}>
+      <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+        <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+          <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame' />
           </svg>
   
-          <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? "hidden" : ""}>
+          <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame-portrait' />
           </svg>
   
@@ -830,7 +830,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -852,11 +852,11 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Review ID Card</h1>
       <div class='section | flow'>
-        <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
+        <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
           <div class='actions'>
             <button id='re-capture-id-image' class='button icon-btn' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
@@ -883,7 +883,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -914,7 +914,7 @@ function scwTemplateString() {
           </button>
         </div>
         `
-          : ""
+          : ''
       }
       <header>
         <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
@@ -990,31 +990,31 @@ function scwTemplateString() {
             Skip this step
           </button>
         `
-            : ""
+            : ''
         }
         ${
-          this.supportBothCaptureModes || this.documentCaptureModes === "camera"
+          this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
             ? `
           <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
             Take Photo
           </button>
         `
-            : ""
+            : ''
         }
         ${
-          this.supportBothCaptureModes || this.documentCaptureModes === "upload"
+          this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
             ? `
-          <label data-variant='${this.supportBothCaptureModes ? "outline" : "solid"}' class='button'>
+          <label data-variant='${this.supportBothCaptureModes ? 'outline' : 'solid'}' class='button'>
             <input type='file' id='upload-photo' name='document' accept='image/png, image/jpeg' />
             <span>Upload Photo</span>
           </label>
         `
-            : ""
+            : ''
         }
       </div>
       ${
         this.hideAttribution
-          ? ""
+          ? ''
           : `
         <powered-by-smile-id></powered-by-smile-id>
       `
@@ -1044,16 +1044,16 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Take Back of ID Card Photo</h1>
-      <div class='section | flow ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
-        <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
-          <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? "hidden" : ""}>
+      <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+        <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+          <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame' />
           </svg>
   
-          <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? "hidden" : ""}>
+          <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame-portrait' />
           </svg>
   
@@ -1069,7 +1069,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -1091,11 +1091,11 @@ function scwTemplateString() {
           </button>
         </div>
       `
-          : ""
+          : ''
       }
       <h1>Review Back of ID Card Photo</h1>
       <div class='section | flow'>
-        <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
+        <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
           <div class='actions'>
             <button id='re-capture-back-of-id-image' class='button icon-btn' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="40" width="40" viewBox='0 0 17 18'>
@@ -1122,7 +1122,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -1136,7 +1136,7 @@ function scwTemplateString() {
   
         ${
           this.hideAttribution
-            ? ""
+            ? ''
             : `
           <powered-by-smile-id></powered-by-smile-id>
         `
@@ -1154,7 +1154,7 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      "SmartCameraWeb: Minimum required no of frames is ",
+      'SmartCameraWeb: Minimum required no of frames is ',
       numberOfFramesRequired,
     );
   }
@@ -1205,7 +1205,7 @@ class SmartCameraWeb extends HTMLElement {
     super();
     this.scwTemplateString = scwTemplateString.bind(this);
     this.render = () => this.scwTemplateString();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
     this.activeScreen = null;
   }
 
@@ -1219,14 +1219,14 @@ class SmartCameraWeb extends HTMLElement {
     this.shadowRoot.innerHTML = this.render();
 
     if (
-      "mediaDevices" in navigator &&
-      "getUserMedia" in navigator.mediaDevices
+      'mediaDevices' in navigator &&
+      'getUserMedia' in navigator.mediaDevices
     ) {
       this.setUpEventListeners();
     } else {
-      const heading = document.createElement("h1");
-      heading.classList.add("error-message");
-      heading.textContent = "Your browser does not support this integration";
+      const heading = document.createElement('h1');
+      heading.classList.add('error-message');
+      heading.textContent = 'Your browser does not support this integration';
 
       this.shadowRoot.innerHTML = heading;
     }
@@ -1237,24 +1237,24 @@ class SmartCameraWeb extends HTMLElement {
       this.activeScreen.hidden = true;
     }
     this.activeScreen = null;
-    this.shadowRoot.innerHTML = "";
+    this.shadowRoot.innerHTML = '';
   }
 
   static get observedAttributes() {
     return [
-      "document-capture-modes",
-      "document-type",
-      "hide-back-to-host",
-      "show-navigation",
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case "document-capture-modes":
-      case "document-type":
-      case "hide-back-to-host":
-      case "show-navigation":
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-to-host':
+      case 'show-navigation':
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
         break;
@@ -1265,177 +1265,177 @@ class SmartCameraWeb extends HTMLElement {
 
   setUpEventListeners() {
     this.backOfIDCameraScreen = this.shadowRoot.querySelector(
-      "#back-of-id-camera-screen",
+      '#back-of-id-camera-screen',
     );
     this.backOfIdEntryScreen = this.shadowRoot.querySelector(
-      "#back-of-id-entry-screen",
+      '#back-of-id-entry-screen',
     );
     this.backOfIDReviewImage = this.shadowRoot.querySelector(
-      "#back-of-id-review-image",
+      '#back-of-id-review-image',
     );
     this.backOfIDReviewScreen = this.shadowRoot.querySelector(
-      "#back-of-id-review-screen",
+      '#back-of-id-review-screen',
     );
-    this.cameraScreen = this.shadowRoot.querySelector("#camera-screen");
+    this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
     this.captureBackOfIDImage = this.shadowRoot.querySelector(
-      "#capture-back-of-id-image",
+      '#capture-back-of-id-image',
     );
-    this.captureIDImage = this.shadowRoot.querySelector("#capture-id-image");
-    this.errorMessage = this.shadowRoot.querySelector("#error");
-    this.IDCameraScreen = this.shadowRoot.querySelector("#id-camera-screen");
-    this.idEntryScreen = this.shadowRoot.querySelector("#id-entry-screen");
-    this.IDReviewImage = this.shadowRoot.querySelector("#id-review-image");
-    this.IDReviewScreen = this.shadowRoot.querySelector("#id-review-screen");
-    this.imageOutline = this.shadowRoot.querySelector("#image-outline path");
+    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
+    this.errorMessage = this.shadowRoot.querySelector('#error');
+    this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
+    this.idEntryScreen = this.shadowRoot.querySelector('#id-entry-screen');
+    this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
+    this.IDReviewScreen = this.shadowRoot.querySelector('#id-review-screen');
+    this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
     this.reCaptureBackOfIDImage = this.shadowRoot.querySelector(
-      "#re-capture-back-of-id-image",
+      '#re-capture-back-of-id-image',
     );
     this.reCaptureIDImage = this.shadowRoot.querySelector(
-      "#re-capture-id-image",
+      '#re-capture-id-image',
     );
-    this.requestScreen = this.shadowRoot.querySelector("#request-screen");
+    this.requestScreen = this.shadowRoot.querySelector('#request-screen');
     this.reStartImageCapture = this.shadowRoot.querySelector(
-      "#restart-image-capture",
+      '#restart-image-capture',
     );
-    this.reviewImage = this.shadowRoot.querySelector("#review-image");
-    this.reviewScreen = this.shadowRoot.querySelector("#review-screen");
+    this.reviewImage = this.shadowRoot.querySelector('#review-image');
+    this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
     this.selectBackOfIDImage = this.shadowRoot.querySelector(
-      "#select-back-of-id-image",
+      '#select-back-of-id-image',
     );
-    this.selectIDImage = this.shadowRoot.querySelector("#select-id-image");
-    this.selectSelfie = this.shadowRoot.querySelector("#select-selfie");
+    this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
+    this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
     this.skipBackOfDocumentPhotoButton =
-      this.backOfIdEntryScreen.querySelector("#skip-this-step");
-    this.smileCTA = this.shadowRoot.querySelector("#smile-cta");
+      this.backOfIdEntryScreen.querySelector('#skip-this-step');
+    this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
     this.startImageCapture = this.shadowRoot.querySelector(
-      "#start-image-capture",
+      '#start-image-capture',
     );
     this.takeBackOfDocumentPhotoButton =
-      this.backOfIdEntryScreen.querySelector("#take-photo");
+      this.backOfIdEntryScreen.querySelector('#take-photo');
     this.takeDocumentPhotoButton =
-      this.idEntryScreen.querySelector("#take-photo");
-    this.thanksScreen = this.shadowRoot.querySelector("#thanks-screen");
+      this.idEntryScreen.querySelector('#take-photo');
+    this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
     this.uploadBackOfDocumentPhotoButton =
-      this.backOfIdEntryScreen.querySelector("#upload-photo");
+      this.backOfIdEntryScreen.querySelector('#upload-photo');
     this.uploadDocumentPhotoButton =
-      this.idEntryScreen.querySelector("#upload-photo");
+      this.idEntryScreen.querySelector('#upload-photo');
     this.videoContainer = this.shadowRoot.querySelector(
-      ".video-container > .video",
+      '.video-container > .video',
     );
 
     this.activeScreen = this.requestScreen;
 
     this.shadowRoot
-      .querySelector("#request-camera-access")
-      .addEventListener("click", () => this.init());
+      .querySelector('#request-camera-access')
+      .addEventListener('click', () => this.init());
 
     if (this.showNavigation) {
       // Add Back Button Listeners
-      const backButtons = this.shadowRoot.querySelectorAll(".back-button-exit");
+      const backButtons = this.shadowRoot.querySelectorAll('.back-button-exit');
       backButtons.forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener('click', () => {
           this._backAndExit();
         });
       });
 
       // Add Close Button Listeners
-      const closeButtons = this.shadowRoot.querySelectorAll(".close-iframe");
+      const closeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
       closeButtons.forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener('click', () => {
           this._exitSmartCamera();
         });
       });
     }
 
     if (this.takeDocumentPhotoButton)
-      this.takeDocumentPhotoButton.addEventListener("click", () =>
+      this.takeDocumentPhotoButton.addEventListener('click', () =>
         this._startIDCamera(),
       );
     if (this.skipBackOfDocumentPhotoButton)
-      this.skipBackOfDocumentPhotoButton.addEventListener("click", () =>
+      this.skipBackOfDocumentPhotoButton.addEventListener('click', () =>
         this._skipBackDocument(),
       );
     if (this.takeBackOfDocumentPhotoButton)
-      this.takeBackOfDocumentPhotoButton.addEventListener("click", () =>
+      this.takeBackOfDocumentPhotoButton.addEventListener('click', () =>
         this._startIDCamera(),
       );
     if (this.uploadDocumentPhotoButton)
-      this.uploadDocumentPhotoButton.addEventListener("change", (e) =>
+      this.uploadDocumentPhotoButton.addEventListener('change', (e) =>
         this._uploadDocument(e),
       );
     if (this.uploadBackOfDocumentPhotoButton)
-      this.uploadBackOfDocumentPhotoButton.addEventListener("change", (e) =>
+      this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) =>
         this._uploadDocument(e),
       );
 
     this.backToBackIdEntryButton = this.shadowRoot.querySelector(
-      "#back-button-back-id-entry",
+      '#back-button-back-id-entry',
     );
     this.backToIdEntryButton = this.shadowRoot.querySelector(
-      "#back-button-id-entry",
+      '#back-button-id-entry',
     );
     this.backToIdImageButton = this.shadowRoot.querySelector(
-      "#back-button-id-image",
+      '#back-button-id-image',
     );
-    this.backToSelfie = this.shadowRoot.querySelector("#back-button-selfie");
+    this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
 
     if (this.backToSelfie) {
-      this.backToSelfie.addEventListener("click", () => {
+      this.backToSelfie.addEventListener('click', () => {
         this._reStartImageCapture();
       });
     }
 
     if (this.backToIdEntryButton) {
-      this.backToIdEntryButton.addEventListener("click", () => {
+      this.backToIdEntryButton.addEventListener('click', () => {
         this.setActiveScreen(this.idEntryScreen);
       });
     }
 
     if (this.backToBackIdEntryButton) {
-      this.backToBackIdEntryButton.addEventListener("click", () => {
+      this.backToBackIdEntryButton.addEventListener('click', () => {
         this.setActiveScreen(this.backOfIdEntryScreen);
       });
     }
 
     if (this.backToIdImageButton) {
-      this.backToIdImageButton.addEventListener("click", () => {
+      this.backToIdImageButton.addEventListener('click', () => {
         this.setActiveScreen(this.IDReviewScreen);
       });
     }
 
-    this.startImageCapture.addEventListener("click", () => {
+    this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();
     });
 
-    this.selectSelfie.addEventListener("click", () => {
+    this.selectSelfie.addEventListener('click', () => {
       this._selectSelfie();
     });
 
-    this.selectIDImage.addEventListener("click", () => {
+    this.selectIDImage.addEventListener('click', () => {
       this._selectIDImage();
     });
 
-    this.selectBackOfIDImage.addEventListener("click", () => {
+    this.selectBackOfIDImage.addEventListener('click', () => {
       this._selectIDImage(true);
     });
 
-    this.captureIDImage.addEventListener("click", () => {
+    this.captureIDImage.addEventListener('click', () => {
       this._captureIDImage();
     });
 
-    this.captureBackOfIDImage.addEventListener("click", () => {
+    this.captureBackOfIDImage.addEventListener('click', () => {
       this._captureIDImage();
     });
 
-    this.reStartImageCapture.addEventListener("click", () => {
+    this.reStartImageCapture.addEventListener('click', () => {
       this._reStartImageCapture();
     });
 
-    this.reCaptureIDImage.addEventListener("click", () => {
+    this.reCaptureIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
     });
 
-    this.reCaptureBackOfIDImage.addEventListener("click", () => {
+    this.reCaptureBackOfIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
     });
   }
@@ -1469,20 +1469,20 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   resetErrorMessage() {
-    this.errorMessage.textContent = "";
+    this.errorMessage.textContent = '';
   }
 
   handleSuccess(stream) {
-    const videoExists = !!this.videoContainer.querySelector("video");
+    const videoExists = !!this.videoContainer.querySelector('video');
     const video = videoExists
-      ? this.videoContainer.querySelector("video")
-      : document.createElement("video");
+      ? this.videoContainer.querySelector('video')
+      : document.createElement('video');
 
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
 
-    if ("srcObject" in video) {
+    if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
@@ -1502,25 +1502,25 @@ class SmartCameraWeb extends HTMLElement {
   handleIDStream(stream) {
     const videoExists =
       this.activeScreen === this.IDCameraScreen
-        ? !!this.IDCameraScreen.querySelector("video")
-        : !!this.backOfIDCameraScreen.querySelector("video");
+        ? !!this.IDCameraScreen.querySelector('video')
+        : !!this.backOfIDCameraScreen.querySelector('video');
 
     let video = null;
     if (videoExists) {
       if (this.activeScreen === this.IDCameraScreen) {
-        video = this.IDCameraScreen.querySelector("video");
+        video = this.IDCameraScreen.querySelector('video');
       } else {
-        video = this.backOfIDCameraScreen.querySelector("video");
+        video = this.backOfIDCameraScreen.querySelector('video');
       }
     } else {
-      video = document.createElement("video");
+      video = document.createElement('video');
     }
 
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
 
-    if ("srcObject" in video) {
+    if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
@@ -1529,11 +1529,11 @@ class SmartCameraWeb extends HTMLElement {
 
     const videoContainer =
       this.activeScreen === this.IDCameraScreen
-        ? this.IDCameraScreen.querySelector(".id-video-container")
-        : this.backOfIDCameraScreen.querySelector(".id-video-container");
+        ? this.IDCameraScreen.querySelector('.id-video-container')
+        : this.backOfIDCameraScreen.querySelector('.id-video-container');
 
     video.onloadedmetadata = () => {
-      videoContainer.querySelector(".actions").hidden = false;
+      videoContainer.querySelector('.actions').hidden = false;
     };
 
     if (!videoExists) {
@@ -1546,8 +1546,8 @@ class SmartCameraWeb extends HTMLElement {
 
   handleError(e) {
     switch (e.name) {
-      case "NotAllowedError":
-      case "SecurityError":
+      case 'NotAllowedError':
+      case 'SecurityError':
         this.errorMessage.textContent = `
             Looks like camera access was not granted, or was blocked by a browser
             level setting / extension. Please follow the prompt from the URL bar,
@@ -1555,25 +1555,25 @@ class SmartCameraWeb extends HTMLElement {
             You may need to refresh to start all over again
           `;
         break;
-      case "AbortError":
+      case 'AbortError':
         this.errorMessage.textContent = `
             Oops! Something happened, and we lost access to your stream.
             Please refresh to start all over again
           `;
         break;
-      case "NotReadableError":
+      case 'NotReadableError':
         this.errorMessage.textContent = `
             There seems to be a problem with your device's camera, or its connection.
             Please check this, and when resolved, try again. Or try another device.
           `;
         break;
-      case "NotFoundError":
+      case 'NotFoundError':
         this.errorMessage.textContent = `
             We are unable to find a video stream.
             You may need to refresh to start all over again
           `;
         break;
-      case "TypeError":
+      case 'TypeError':
         this.errorMessage.textContent = `
             This site is insecure, and as such cannot have access to your camera.
             Try to navigate to a secure version of this page, or contact the owner.
@@ -1593,7 +1593,7 @@ class SmartCameraWeb extends HTMLElement {
     // NOTE: initialise image outline
     const imageOutlineLength = this.imageOutline.getTotalLength();
     // Clear any previous transition
-    this.imageOutline.style.transition = "none";
+    this.imageOutline.style.transition = 'none';
     // Set up the starting positions
     this.imageOutline.style.strokeDasharray = `${imageOutlineLength} ${imageOutlineLength}`;
     this.imageOutline.style.strokeDashoffset = imageOutlineLength;
@@ -1603,7 +1603,7 @@ class SmartCameraWeb extends HTMLElement {
     // Define our transition
     this.imageOutline.style.transition = `stroke-dashoffset ${this._videoStreamDurationInMS / 1000}s ease-in-out`;
     // Go!
-    this.imageOutline.style.strokeDashoffset = "0";
+    this.imageOutline.style.strokeDashoffset = '0';
 
     this.smileCTA.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
 
@@ -1626,7 +1626,7 @@ class SmartCameraWeb extends HTMLElement {
     }
 
     this._data.images.push({
-      image: image.split(",")[1],
+      image: image.split(',')[1],
       image_type_id: this.activeScreen === this.IDCameraScreen ? 3 : 7,
     });
 
@@ -1640,7 +1640,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _drawImage(canvas, video = this._video) {
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
 
     context.drawImage(
       video,
@@ -1658,30 +1658,30 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _capturePOLPhoto() {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = 240;
     canvas.height =
       (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     this._drawImage(canvas);
 
-    this._rawImages.push(canvas.toDataURL("image/jpeg"));
+    this._rawImages.push(canvas.toDataURL('image/jpeg'));
   }
 
   _captureReferencePhoto() {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = 480;
     canvas.height =
       (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     this._drawImage(canvas);
 
-    const image = canvas.toDataURL("image/jpeg");
+    const image = canvas.toDataURL('image/jpeg');
 
     this._referenceImage = image;
 
     this._data.images.push({
-      image: image.split(",")[1],
+      image: image.split(',')[1],
       image_type_id: 2,
     });
   }
@@ -1704,7 +1704,7 @@ class SmartCameraWeb extends HTMLElement {
         // separated by a comma.
         //
         // we are only interested in the base64 segment, so we extract it
-        image: fileData.split(",")[1],
+        image: fileData.split(',')[1],
         image_type_id: this.activeScreen === this.idEntryScreen ? 3 : 7,
       });
 
@@ -1713,7 +1713,7 @@ class SmartCameraWeb extends HTMLElement {
         this.activeScreen === this.idEntryScreen
           ? this.IDReviewScreen
           : this.backOfIDReviewScreen;
-      const previewImage = nextScreen.querySelector("img");
+      const previewImage = nextScreen.querySelector('img');
       previewImage.src = fileData;
 
       // change active screen
@@ -1724,13 +1724,13 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _drawIDImage(video = this._IDVideo) {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     if (this.isPortraitCaptureView) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       // Draw the video frame onto the canvas
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Get the dimensions of the video preview frame
@@ -1749,12 +1749,12 @@ class SmartCameraWeb extends HTMLElement {
       const cropTop = (canvas.height - cropHeight) / 2;
 
       // Create a new canvas element for the cropped image
-      const croppedCanvas = document.createElement("canvas");
+      const croppedCanvas = document.createElement('canvas');
       croppedCanvas.width = cropWidth;
       croppedCanvas.height = cropHeight;
 
       // Draw the cropped image onto the new canvas
-      const croppedCtx = croppedCanvas.getContext("2d");
+      const croppedCtx = croppedCanvas.getContext('2d');
       croppedCtx.drawImage(
         canvas,
         cropLeft,
@@ -1767,13 +1767,13 @@ class SmartCameraWeb extends HTMLElement {
         cropHeight,
       );
 
-      return croppedCanvas.toDataURL("image/jpeg");
+      return croppedCanvas.toDataURL('image/jpeg');
     }
 
     canvas.width = 2240;
     canvas.height = 1260;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
     const aspectRatio = video.videoWidth / video.videoHeight;
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
@@ -1805,17 +1805,17 @@ class SmartCameraWeb extends HTMLElement {
         canvas.width,
         canvas.height,
       );
-      return canvas.toDataURL("image/jpeg");
+      return canvas.toDataURL('image/jpeg');
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg");
+    return canvas.toDataURL('image/jpeg');
   }
 
   _stopVideoStream(stream) {
     clearTimeout(this._videoStreamTimeout);
     clearInterval(this._imageCaptureInterval);
     clearInterval(this._drawingInterval);
-    this.smileCTA.style.animation = "none";
+    this.smileCTA.style.animation = 'none';
 
     this._capturePOLPhoto(); // NOTE: capture the last photo
     this._captureReferencePhoto();
@@ -1829,7 +1829,7 @@ class SmartCameraWeb extends HTMLElement {
 
     this._data.images = this._data.images.concat(
       livenessFramesIndices.map((imageIndex) => ({
-        image: this._rawImages[imageIndex].split(",")[1],
+        image: this._rawImages[imageIndex].split(',')[1],
         image_type_id: 6,
       })),
     );
@@ -1846,7 +1846,7 @@ class SmartCameraWeb extends HTMLElement {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: "environment",
+          facingMode: 'environment',
           width: { min: 1280 },
           // NOTE: Special case for multi-camera Samsung devices (learnt from Acuant)
           // "We found out that some triple camera Samsung devices (S10, S20, Note 20, etc) capture images blurry at edges.
@@ -1885,18 +1885,18 @@ class SmartCameraWeb extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent("imagesComputed", { detail: this._data }),
+      new CustomEvent('imagesComputed', { detail: this._data }),
     );
 
     this.setActiveScreen(this.thanksScreen);
   }
 
   _exitSmartCamera() {
-    this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+    this.dispatchEvent(new CustomEvent('close', { detail: {} }));
   }
 
   _backAndExit() {
-    this.dispatchEvent(new CustomEvent("backExit", { detail: {} }));
+    this.dispatchEvent(new CustomEvent('backExit', { detail: {} }));
   }
 
   async _reStartImageCapture() {
@@ -1929,31 +1929,31 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get captureID() {
-    return this.hasAttribute("capture-id");
+    return this.hasAttribute('capture-id');
   }
 
   get captureBackOfID() {
-    return this.getAttribute("capture-id") === "back" || false;
+    return this.getAttribute('capture-id') === 'back' || false;
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution");
+    return this.hasAttribute('hide-attribution');
   }
 
   get showNavigation() {
-    return this.hasAttribute("show-navigation");
+    return this.hasAttribute('show-navigation');
   }
 
   get hideBackToHost() {
-    return this.hasAttribute("hide-back-to-host");
+    return this.hasAttribute('hide-back-to-host');
   }
 
   get documentType() {
-    return this.getAttribute("document-type");
+    return this.getAttribute('document-type');
   }
 
   get isPortraitCaptureView() {
-    return this.getAttribute("document-type") === "GREEN_BOOK";
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
 
   get documentCaptureModes() {
@@ -1963,16 +1963,16 @@ class SmartCameraWeb extends HTMLElement {
 
         defaults to `camera`;
       */
-    return this.getAttribute("document-capture-modes") || "camera";
+    return this.getAttribute('document-capture-modes') || 'camera';
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes("camera") && value.includes("upload");
+    return value.includes('camera') && value.includes('upload');
   }
 
   get doNotUpload() {
-    return this.getAttribute("document-capture-modes") === "camera";
+    return this.getAttribute('document-capture-modes') === 'camera';
   }
 }
 

@@ -9,7 +9,7 @@ The `DocumentCapture` is a bespoke web component designed for capturing document
 To utilize the DocumentCapture component within your project, import it into your JavaScript file as follows:
 
 ```js
-import "@smileid/components/document-capture";
+import '@smileid/components/document-capture';
 ```
 
 ### Using the Component
@@ -85,8 +85,8 @@ To handle this event:
 
 ```js
 document
-  .querySelector("document-capture")
-  .addEventListener("document-capture-screens.publish", function (event) {
+  .querySelector('document-capture')
+  .addEventListener('document-capture-screens.publish', function (event) {
     console.log(event.detail);
   });
 ```

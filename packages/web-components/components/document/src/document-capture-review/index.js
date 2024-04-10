@@ -1,3 +1,3 @@
-import IdReview from "./DocumentCaptureReview";
+import IdReview from './DocumentCaptureReview';
 
 export default IdReview;

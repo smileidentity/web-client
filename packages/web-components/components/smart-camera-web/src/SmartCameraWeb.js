@@ -1,17 +1,17 @@
-import styles from "../../../styles/src/styles";
-import SmartCamera from "../../../domain/camera/src/SmartCamera";
+import styles from '../../../styles/src/styles';
+import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
-import "../../document/src";
-import "../../selfie/src";
-import "../../camera-permission/CameraPermission";
+import '../../document/src';
+import '../../selfie/src';
+import '../../camera-permission/CameraPermission';
 
-import { version as COMPONENTS_VERSION } from "../../../package.json";
+import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 function scwTemplateString() {
   return `
   ${styles}
   <div>
-    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? "" : "hidden"}></camera-permission>
+    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
     <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost}
     ></selfie-capture-screens>
@@ -24,7 +24,7 @@ class SmartCameraWeb extends HTMLElement {
     super();
     this.scwTemplateString = scwTemplateString.bind(this);
     this.render = () => this.scwTemplateString();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
     this.activeScreen = null;
   }
 
@@ -39,8 +39,8 @@ class SmartCameraWeb extends HTMLElement {
     };
 
     if (
-      "mediaDevices" in navigator &&
-      "getUserMedia" in navigator.mediaDevices
+      'mediaDevices' in navigator &&
+      'getUserMedia' in navigator.mediaDevices
     ) {
       this.setUpEventListeners();
     } else {
@@ -52,27 +52,27 @@ class SmartCameraWeb extends HTMLElement {
   disconnectedCallback() {
     SmartCamera.stopMedia();
     if (this.activeScreen) {
-      this.activeScreen.removeAttribute("hidden");
+      this.activeScreen.removeAttribute('hidden');
     }
     this.activeScreen = null;
-    this.shadowRoot.innerHTML = "";
+    this.shadowRoot.innerHTML = '';
   }
 
   static get observedAttributes() {
     return [
-      "document-capture-modes",
-      "document-type",
-      "hide-back-to-host",
-      "show-navigation",
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case "document-capture-modes":
-      case "document-type":
-      case "hide-back-to-host":
-      case "show-navigation":
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-to-host':
+      case 'show-navigation':
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
         break;
@@ -82,12 +82,12 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.cameraPermission = this.shadowRoot.querySelector("camera-permission");
+    this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
     this.SelfieCaptureScreens = this.shadowRoot.querySelector(
-      "selfie-capture-screens",
+      'selfie-capture-screens',
     );
     this.documentCapture = this.shadowRoot.querySelector(
-      "document-capture-screens",
+      'document-capture-screens',
     );
 
     if (this.hideInstructions) {
@@ -95,14 +95,14 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       this.setActiveScreen(this.SelfieCaptureScreens);
     }
-    this.cameraPermission.addEventListener("camera-permission.granted", () => {
+    this.cameraPermission.addEventListener('camera-permission.granted', () => {
       this.setActiveScreen(this.SelfieCaptureScreens);
-      this.SelfieCaptureScreens.removeAttribute("data-camera-error");
-      this.SelfieCaptureScreens.setAttribute("data-camera-ready", true);
+      this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+      this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
 
     this.SelfieCaptureScreens.addEventListener(
-      "selfie-capture-screens.publish",
+      'selfie-capture-screens.publish',
       (event) => {
         this._data.images = event.detail.images;
         this.setActiveScreen(this.documentCapture);
@@ -110,14 +110,14 @@ class SmartCameraWeb extends HTMLElement {
     );
 
     this.SelfieCaptureScreens.addEventListener(
-      "selfie-capture-screens.cancelled",
+      'selfie-capture-screens.cancelled',
       () => {
         this.handleBackEvents();
       },
     );
 
     this.documentCapture.addEventListener(
-      "document-capture-screens.publish",
+      'document-capture-screens.publish',
       (event) => {
         this._data.images = [...this._data.images, ...event.detail.images];
         this._publishSelectedImages();
@@ -125,15 +125,15 @@ class SmartCameraWeb extends HTMLElement {
     );
 
     this.documentCapture.addEventListener(
-      "document-capture-screens.cancelled",
+      'document-capture-screens.cancelled',
       () => {
         this.SelfieCaptureScreens.setAttribute(
-          "initial-screen",
-          "selfie-capture",
+          'initial-screen',
+          'selfie-capture',
         );
         this.setActiveScreen(this.SelfieCaptureScreens);
-        this.SelfieCaptureScreens.removeAttribute("data-camera-error");
-        this.SelfieCaptureScreens.setAttribute("data-camera-ready", true);
+        this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+        this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
       },
     );
 
@@ -155,65 +155,65 @@ class SmartCameraWeb extends HTMLElement {
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent("smart-camera-web.publish", { detail: this._data }),
+      new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
   }
 
   get hideInstructions() {
-    return this.hasAttribute("hide-instructions") ? "hide-instructions" : "";
+    return this.hasAttribute('hide-instructions') ? 'hide-instructions' : '';
   }
 
   get hideBackOfId() {
-    return this.hasAttribute("hide-back-of-id");
+    return this.hasAttribute('hide-back-of-id');
   }
 
   get showNavigation() {
-    return this.hasAttribute("show-navigation") ? "show-navigation" : "";
+    return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
   get hideBackToHost() {
-    return this.hasAttribute("hide-back-to-host") ? "hide-back-to-host" : "";
+    return this.hasAttribute('hide-back-to-host') ? 'hide-back-to-host' : '';
   }
 
   get title() {
-    return this.hasAttribute("title")
-      ? `title=${this.getAttribute("title")}`
-      : "";
+    return this.hasAttribute('title')
+      ? `title=${this.getAttribute('title')}`
+      : '';
   }
 
   get documentCaptureModes() {
-    return this.hasAttribute("document-capture-modes")
-      ? `document-capture-modes='${this.getAttribute("document-capture-modes")}'`
-      : "";
+    return this.hasAttribute('document-capture-modes')
+      ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
+      : '';
   }
 
   get disableImageTests() {
-    return this.hasAttribute("disable-image-tests")
-      ? "disable-image-tests"
-      : "";
+    return this.hasAttribute('disable-image-tests')
+      ? 'disable-image-tests'
+      : '';
   }
 
   get hideAttribution() {
-    return this.hasAttribute("hide-attribution") ? "hide-attribution" : "";
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
   setActiveScreen(screen) {
-    this.activeScreen?.setAttribute("hidden", "");
-    screen.removeAttribute("hidden");
+    this.activeScreen?.setAttribute('hidden', '');
+    screen.removeAttribute('hidden');
     this.activeScreen = screen;
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent("smart-camera-web.cancelled"));
+    this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
   }
 
   handleCloseEvent() {
-    this.dispatchEvent(new CustomEvent("smart-camera-web.close"));
+    this.dispatchEvent(new CustomEvent('smart-camera-web.close'));
   }
 }
 
-if ("customElements" in window && !customElements.get("smart-camera-web")) {
-  customElements.define("smart-camera-web", SmartCameraWeb);
+if ('customElements' in window && !customElements.get('smart-camera-web')) {
+  customElements.define('smart-camera-web', SmartCameraWeb);
 }
 
 export default SmartCameraWeb;

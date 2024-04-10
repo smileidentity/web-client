@@ -23,33 +23,33 @@
 
     <script>
       function displayError(error) {
-        const errorDiv = document.createElement("div");
-        errorDiv.setAttribute("class", "validation-message");
+        const errorDiv = document.createElement('div');
+        errorDiv.setAttribute('class', 'validation-message');
         errorDiv.textContent = error;
         document.body.appendChild(errorDiv);
       }
 
       SmileIdentity({
         token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoid2ViLXRva2VuLXRlc3QtdXNlci0wMDEiLCJqb2JfaWQiOiJ3ZWItdG9rZW4tam9iLTEyMyIsImpvYl90eXBlIjo1fSwiY2FsbGJhY2tfdXJsIjoiaHR0cHM6Ly93ZWJob29rLnNpdGUvMWFhYTdhN2ItYWNjYi00MGFjLTg2NDMtZmQ4YTg3MDNlOWJlIiwiaWF0IjoxNjQ2OTQxNTQ5LCJleHAiOjE2NDg1ODg0ODN9.D83B4jSgQGJfSnQ5xALKea48okutLpbTcqojJTk4iGI",
-        product: "e_signature",
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoid2ViLXRva2VuLXRlc3QtdXNlci0wMDEiLCJqb2JfaWQiOiJ3ZWItdG9rZW4tam9iLTEyMyIsImpvYl90eXBlIjo1fSwiY2FsbGJhY2tfdXJsIjoiaHR0cHM6Ly93ZWJob29rLnNpdGUvMWFhYTdhN2ItYWNjYi00MGFjLTg2NDMtZmQ4YTg3MDNlOWJlIiwiaWF0IjoxNjQ2OTQxNTQ5LCJleHAiOjE2NDg1ODg0ODN9.D83B4jSgQGJfSnQ5xALKea48okutLpbTcqojJTk4iGI',
+        product: 'e_signature',
         document_ids: [
-          "07ef4595-aaed-4597-b6af-444986ae4565",
-          "6df1ceb5-72e5-4e38-9eef-66ee085aec17",
+          '07ef4595-aaed-4597-b6af-444986ae4565',
+          '6df1ceb5-72e5-4e38-9eef-66ee085aec17',
         ],
         callback_url:
-          "https://webhook.site/1aaa7a7b-accb-40ac-8643-fd8a8703e9be",
-        environment: "development",
+          'https://webhook.site/1aaa7a7b-accb-40ac-8643-fd8a8703e9be',
+        environment: 'development',
         partner_details: {
-          name: "Test Org",
-          logo_url: "https://portal.usesmileid.com/favicon.ico",
-          partner_id: "212",
-          policy_url: "https://usesmileid.com/privacy-policy",
-          theme_color: "#000",
+          name: 'Test Org',
+          logo_url: 'https://portal.usesmileid.com/favicon.ico',
+          partner_id: '212',
+          policy_url: 'https://usesmileid.com/privacy-policy',
+          theme_color: '#000',
         },
         onSuccess: () => {},
         onClose: () => {
-          displayError("User triggered this close action");
+          displayError('User triggered this close action');
         },
         onError: (data) => {
           console.log(data);

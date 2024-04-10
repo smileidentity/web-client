@@ -28,8 +28,8 @@ When a user confirms the captured image as acceptable, the `document-capture-rev
 
 ```js
 document
-  .querySelector("document-capture-review")
-  .addEventListener("document-capture-review.accepted", function (event) {
+  .querySelector('document-capture-review')
+  .addEventListener('document-capture-review.accepted', function (event) {
     // Handle the image acceptance action here
   });
 ```
@@ -40,8 +40,8 @@ If the user decides to recapture the image, the `document-capture-review.rejecte
 
 ```js
 document
-  .querySelector("document-capture-review")
-  .addEventListener("document-capture-review.rejected", function (event) {
+  .querySelector('document-capture-review')
+  .addEventListener('document-capture-review.rejected', function (event) {
     // Handle the recapture request here
   });
 ```
@@ -58,20 +58,20 @@ Below is a sample implementation showcasing how to use the `IdReview` component 
 ></document-capture-review>
 
 <script>
-  const idReviewElement = document.querySelector("document-capture-review");
+  const idReviewElement = document.querySelector('document-capture-review');
 
   idReviewElement.addEventListener(
-    "document-capture-review.accepted",
+    'document-capture-review.accepted',
     function (event) {
-      console.log("Image accepted by the user.");
+      console.log('Image accepted by the user.');
       // Additional logic for accepted image
     },
   );
 
   idReviewElement.addEventListener(
-    "document-capture-review.rejected",
+    'document-capture-review.rejected',
     function (event) {
-      console.log("User requested to recapture the image.");
+      console.log('User requested to recapture the image.');
       // Additional logic for image recapture
     },
   );

@@ -208,18 +208,12 @@ import { version as sdkVersion } from '../../package.json';
 
       if (config.id_selection) {
         const result = countryIdTypes.filter((idType) => {
-          const itemInList = config.id_selection[countryCode].find(
-            (validIdType) => {
-              if (
-                validIdType === '' ||
-                validIdType.toLowerCase() === 'others'
-              ) {
-                return !idType.code;
-              }
-              return validIdType === idType.code;
-            },
-          );
-          return itemInList === idType.code;
+          return config.id_selection[countryCode].find((validIdType) => {
+            if (validIdType === '' || validIdType.toLowerCase() === 'others') {
+              return !idType.code;
+            }
+            return validIdType === idType.code;
+          });
         });
         return result;
       }

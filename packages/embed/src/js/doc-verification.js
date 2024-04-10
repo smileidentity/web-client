@@ -145,6 +145,8 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function loadIdTypeSelector(idTypes) {
+    const isSingleIdType = idTypes.length === 1;
+
     const idTypeSelector = document.querySelector("#id-type-selector");
     let combobox = document.querySelector('smileid-combobox[id="id_type"]');
     if (!combobox) {
@@ -153,7 +155,11 @@ import { version as sdkVersion } from "../../package.json";
     }
 
     combobox.innerHTML = `
-      <smileid-combobox-trigger type="button" label="Select Document">
+      <smileid-combobox-trigger
+        ${isSingleIdType ? "disabled" : ""}
+        ${isSingleIdType ? `value="${idTypes[0].name}"` : ""}
+        label="Select Document"
+      >
       </smileid-combobox-trigger>
 
       <smileid-combobox-listbox empty-label="No country found">
@@ -200,14 +206,21 @@ import { version as sdkVersion } from "../../package.json";
       ).id_types;
 
       if (config.id_selection) {
-        return countryIdTypes.filter((idType) => {
-          return config.id_selection[countryCode].find((validIdType) => {
-            if (validIdType.toLowerCase() === "others") {
-              return !idType.code;
-            }
-            return validIdType === idType.code;
-          });
+        const result = countryIdTypes.filter((idType) => {
+          const itemInList = config.id_selection[countryCode].find(
+            (validIdType) => {
+              if (
+                validIdType === "" ||
+                validIdType.toLowerCase() === "others"
+              ) {
+                return !idType.code;
+              }
+              return validIdType === idType.code;
+            },
+          );
+          return itemInList === idType.code;
         });
+        return result;
       }
 
       return countryIdTypes;
@@ -304,7 +317,9 @@ import { version as sdkVersion } from "../../package.json";
 
         const idTypes = config.id_selection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === "string") {
+          selectedIdType = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
+
           const documentCaptureConfig = constraints
             .find((entry) => entry.country.code === selectedCountry)
             .id_types.find((entry) => entry.code === id_info.id_type);
@@ -342,7 +357,7 @@ import { version as sdkVersion } from "../../package.json";
       };
     });
 
-    if (!id_info || !id_info.id_type) {
+    if (!id_info || id_info.id_type === undefined) {
       const selectCountry = SelectIDType.querySelector("#country");
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',

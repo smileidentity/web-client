@@ -44,7 +44,9 @@ describe('back-button', () => {
       cy.getIFrameBody()
         .find('end-user-consent')
         .shadow()
-        .find('#back-button')
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
         .click();
 
       cy.getIFrameBody().find('#select-id-type').should('be.visible');
@@ -111,7 +113,9 @@ describe('back-button', () => {
       cy.getIFrameBody()
         .find('end-user-consent')
         .shadow()
-        .find('#back-button')
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
         .click();
 
       cy.getIFrameBody().find('#select-id-type').should('be.visible');
@@ -174,7 +178,9 @@ describe('back-button', () => {
       cy.getIFrameBody()
         .find('end-user-consent')
         .shadow()
-        .find('#back-button')
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
         .click();
 
       cy.getIFrameBody().find('#select-id-type').should('be.visible');

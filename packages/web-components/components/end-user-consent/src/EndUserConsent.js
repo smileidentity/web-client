@@ -1,5 +1,6 @@
 import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
+import '../../navigation/src';
 
 function templateString() {
   return `
@@ -327,7 +328,7 @@ function templateString() {
     ${styles}
     <div id='consent-screen'>
       <section class='flow center'>
-        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        <smileid-navigation ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
         <p class='demo-tip' ${this.demoMode ? '' : 'hidden'}>
           <svg aria-hidden='true' width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -631,9 +632,6 @@ class EndUserConsent extends HTMLElement {
       '#confirm-consent-rejection',
     );
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
-    this.backButton = this.shadowRoot.querySelector('#back-button');
-    const CloseIframeButtons =
-      this.shadowRoot.querySelectorAll('.close-iframe');
 
     this.allowButton.addEventListener('click', (e) =>
       this.handleConsentGrant(e),

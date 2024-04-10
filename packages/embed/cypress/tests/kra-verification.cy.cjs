@@ -71,7 +71,9 @@ describe('KE Drivers License verification basic kyc', () => {
     cy.getIFrameBody()
       .find('end-user-consent')
       .shadow()
-      .find('#back-button')
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy.getIFrameBody().find('#select-id-type').should('be.visible');
@@ -150,7 +152,9 @@ describe('KRA PIN verification enhanced kyc', () => {
     cy.getIFrameBody()
       .find('end-user-consent')
       .shadow()
-      .find('#back-button')
+      .find('smileid-navigation')
+      .shadow()
+      .find('.back-button')
       .click();
 
     cy.getIFrameBody().find('#select-id-type').should('be.visible');

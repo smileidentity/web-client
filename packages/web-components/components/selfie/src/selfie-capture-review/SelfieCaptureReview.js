@@ -1,5 +1,5 @@
-import styles from '../../../../styles/src/styles';
-import '../../../navigation/src';
+import styles from "../../../../styles/src/styles";
+import "../../../navigation/src";
 
 function templateString() {
   return `
@@ -206,24 +206,24 @@ function templateString() {
     </style>
     ${styles}
     <div id='selfie-capture-review-screen' class='flow center'>
-    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
+    <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} hide-back></smileid-navigation>
     <h1 class="header-title text-2xl color-digital-blue font-bold">
       Is your whole face visible and clear in this photo?
     </h1>
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+      <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
         ${
-  this.imageSrc
-    ? `<img
+          this.imageSrc
+            ? `<img
         alt='your ID card'
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
       />`
-    : ''
-}
+            : ""
+        }
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
@@ -234,12 +234,12 @@ function templateString() {
         </button>
       </div>
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ""
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -251,88 +251,88 @@ class SelfieCaptureReview extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = this.render();
-    this.shadowRoot.innerHTML = '';
+    this.shadowRoot.innerHTML = "";
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.setUpEventListeners();
   }
 
   static get observedAttributes() {
-    return ['hide-back-to-host', 'show-navigation', 'data-image'];
+    return ["hide-back-to-host", "show-navigation", "data-image"];
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute("hide-back-to-host");
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation');
+    return this.hasAttribute("show-navigation");
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute("theme-color") || "#043C93";
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution');
+    return this.hasAttribute("hide-attribution");
   }
 
   get imageSrc() {
-    return this.getAttribute('data-image');
+    return this.getAttribute("data-image");
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute("title") || "Submit Front of ID";
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-capture-review.cancelled'));
+    this.dispatchEvent(new CustomEvent("selfie-capture-review.cancelled"));
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-capture-review.close'));
+    this.dispatchEvent(new CustomEvent("selfie-capture-review.close"));
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-image':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case "data-image":
+      case "hide-back-to-host":
+      case "show-navigation":
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
   setUpEventListeners() {
-    this.selectImage = this.shadowRoot.querySelector('#select-id-image');
-    this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
-    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
+    this.selectImage = this.shadowRoot.querySelector("#select-id-image");
+    this.reCaptureImage = this.shadowRoot.querySelector("#re-capture-image");
+    this.navigation = this.shadowRoot.querySelector("smileid-navigation");
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation.addEventListener("navigation.back", () => {
       this.handleBackEvents();
     });
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation.addEventListener("navigation.close", () => {
       this.handleCloseEvents();
     });
 
-    this.selectImage.addEventListener('click', () => {
+    this.selectImage.addEventListener("click", () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-capture-review.accepted', {
+        new CustomEvent("selfie-capture-review.accepted", {
           detail: {},
         }),
       );
     });
-    this.reCaptureImage.addEventListener('click', () => {
+    this.reCaptureImage.addEventListener("click", () => {
       this.dispatchEvent(
-        new CustomEvent('selfie-capture-review.rejected', {
+        new CustomEvent("selfie-capture-review.rejected", {
           detail: {},
         }),
       );
@@ -340,8 +340,11 @@ class SelfieCaptureReview extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('selfie-capture-review')) {
-  window.customElements.define('selfie-capture-review', SelfieCaptureReview);
+if (
+  "customElements" in window &&
+  !customElements.get("selfie-capture-review")
+) {
+  window.customElements.define("selfie-capture-review", SelfieCaptureReview);
 }
 
 export default SelfieCaptureReview;

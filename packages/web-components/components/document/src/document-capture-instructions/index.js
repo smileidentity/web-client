@@ -1,3 +1,3 @@
-import DocumentInstruction from './DocumentCaptureInstructions';
+import DocumentInstruction from "./DocumentCaptureInstructions";
 
 export default DocumentInstruction;

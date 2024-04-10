@@ -1,19 +1,19 @@
-import './selfie-capture';
-import './selfie-capture-instructions';
-import './selfie-capture-review';
-import SmartCamera from '../../../domain/camera/src/SmartCamera';
-import styles from '../../../styles/src/styles';
-import { version as COMPONENTS_VERSION } from '../../../package.json';
+import "./selfie-capture";
+import "./selfie-capture-instructions";
+import "./selfie-capture-review";
+import SmartCamera from "../../../domain/camera/src/SmartCamera";
+import styles from "../../../styles/src/styles";
+import { version as COMPONENTS_VERSION } from "../../../package.json";
 
 async function getPermissions(captureScreen) {
   try {
     await SmartCamera.getMedia({ audio: false, video: true });
-    captureScreen.removeAttribute('data-camera-error');
-    captureScreen.setAttribute('data-camera-ready', true);
+    captureScreen.removeAttribute("data-camera-error");
+    captureScreen.setAttribute("data-camera-ready", true);
   } catch (error) {
-    captureScreen.removeAttribute('data-camera-ready');
+    captureScreen.removeAttribute("data-camera-ready");
     captureScreen.setAttribute(
-      'data-camera-error',
+      "data-camera-error",
       SmartCamera.handleCameraError(error),
     );
   }
@@ -42,15 +42,15 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     };
 
-    this.selfieInstruction = this.querySelector('selfie-capture-instructions');
-    this.selfieCapture = this.querySelector('selfie-capture');
-    this.selfieReview = this.querySelector('selfie-capture-review');
+    this.selfieInstruction = this.querySelector("selfie-capture-instructions");
+    this.selfieCapture = this.querySelector("selfie-capture");
+    this.selfieReview = this.querySelector("selfie-capture-review");
 
-    if (this.hideInstructions && !this.hasAttribute('hidden')) {
+    if (this.hideInstructions && !this.hasAttribute("hidden")) {
       getPermissions(this.selfieCapture);
     }
 
-    if (this.getAttribute('initial-screen') === 'selfie-capture') {
+    if (this.getAttribute("initial-screen") === "selfie-capture") {
       getPermissions(this.selfieCapture);
       this.setActiveScreen(this.selfieCapture);
     } else if (this.hideInstructions) {
@@ -65,38 +65,35 @@ class SelfieCaptureScreens extends HTMLElement {
   disconnectedCallback() {
     SmartCamera.stopMedia();
     if (this.activeScreen) {
-      this.activeScreen.removeAttribute('hidden');
+      this.activeScreen.removeAttribute("hidden");
     }
     this.activeScreen = null;
-    this.innerHTML = '';
+    this.innerHTML = "";
   }
 
   setUpEventListeners() {
     this.selfieInstruction.addEventListener(
-      'selfie-capture-instructions.capture',
+      "selfie-capture-instructions.capture",
       async () => {
         await getPermissions(this.selfieCapture);
         this.setActiveScreen(this.selfieCapture);
       },
     );
-    this.selfieInstruction.addEventListener('selfie-capture-instructions.cancelled', () => {
-      this.handleBackEvents();
-    });
-
-    this.selfieCapture.addEventListener(
-      'selfie-capture.publish',
-      (event) => {
-        this.selfieReview.setAttribute(
-          'data-image',
-          event.detail.referenceImage,
-        );
-        this._data.images = event.detail.images;
-        SmartCamera.stopMedia();
-        this.setActiveScreen(this.selfieReview);
+    this.selfieInstruction.addEventListener(
+      "selfie-capture-instructions.cancelled",
+      () => {
+        this.handleBackEvents();
       },
     );
 
-    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+    this.selfieCapture.addEventListener("selfie-capture.publish", (event) => {
+      this.selfieReview.setAttribute("data-image", event.detail.referenceImage);
+      this._data.images = event.detail.images;
+      SmartCamera.stopMedia();
+      this.setActiveScreen(this.selfieReview);
+    });
+
+    this.selfieCapture.addEventListener("selfie-capture.cancelled", () => {
       this.selfieCapture.reset();
       SmartCamera.stopMedia();
       if (this.hideInstructions) {
@@ -107,100 +104,113 @@ class SelfieCaptureScreens extends HTMLElement {
       this.setActiveScreen(this.selfieInstruction);
     });
 
-    this.selfieReview.addEventListener('selfie-capture-review.rejected', async () => {
-      this.selfieReview.removeAttribute('data-image');
-      this._data.images = [];
-      if (this.hideInstructions) {
-        this.setActiveScreen(this.selfieCapture);
-        await getPermissions(this.selfieCapture);
-      } else {
-        this.setActiveScreen(this.selfieInstruction);
-      }
-    });
+    this.selfieReview.addEventListener(
+      "selfie-capture-review.rejected",
+      async () => {
+        this.selfieReview.removeAttribute("data-image");
+        this._data.images = [];
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.selfieCapture);
+          await getPermissions(this.selfieCapture);
+        } else {
+          this.setActiveScreen(this.selfieInstruction);
+        }
+      },
+    );
 
     this.selfieReview.addEventListener(
-      'selfie-capture-review.accepted',
+      "selfie-capture-review.accepted",
       async () => {
         this._publishSelectedImages();
       },
     );
 
-    [this.selfieInstruction, this.selfieCapture, this.selfieReview].forEach((screen) => {
-      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => {
-        this.handleCloseEvent();
-      });
-    });
+    [this.selfieInstruction, this.selfieCapture, this.selfieReview].forEach(
+      (screen) => {
+        screen.addEventListener(
+          `${screen.nodeName.toLowerCase()}.close`,
+          () => {
+            this.handleCloseEvent();
+          },
+        );
+      },
+    );
   }
 
   _publishSelectedImages() {
     this.dispatchEvent(
-      new CustomEvent('selfie-capture-screens.publish', { detail: this._data }),
+      new CustomEvent("selfie-capture-screens.publish", { detail: this._data }),
     );
   }
 
   get hideInstructions() {
-    return this.hasAttribute('hide-instructions');
+    return this.hasAttribute("hide-instructions");
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+    return this.hasAttribute("hide-attribution") ? "hide-attribution" : "";
   }
 
   get hideBackOfId() {
-    return this.hasAttribute('hide-back-of-id');
+    return this.hasAttribute("hide-back-of-id");
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+    return this.hasAttribute("show-navigation") ? "show-navigation" : "";
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host') ? 'hide-back' : '';
+    return this.hasAttribute("hide-back-to-host") ? "hide-back" : "";
   }
 
   get disableImageTests() {
-    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
+    return this.hasAttribute("disable-image-tests")
+      ? "disable-image-tests"
+      : "";
   }
 
   setActiveScreen(screen) {
-    this.activeScreen?.setAttribute('hidden', '');
-    screen.removeAttribute('hidden');
+    this.activeScreen?.setAttribute("hidden", "");
+    screen.removeAttribute("hidden");
     this.activeScreen = screen;
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
+    this.dispatchEvent(new CustomEvent("selfie-capture-screens.cancelled"));
   }
 
   handleCloseEvent() {
-    this.dispatchEvent(new CustomEvent('selfie-capture-screens.close'));
+    this.dispatchEvent(new CustomEvent("selfie-capture-screens.close"));
   }
 
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
-      'initial-screen',
+      "title",
+      "hidden",
+      "show-navigation",
+      "hide-back-to-host",
+      "initial-screen",
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'hidden':
-    case 'initial-screen':
-      this.connectedCallback();
-      break;
-    default:
-      break;
+      case "title":
+      case "hidden":
+      case "initial-screen":
+        this.connectedCallback();
+        break;
+      default:
+        break;
     }
   }
 }
 
-if ('customElements' in window && !customElements.get('selfie-capture-screens')) {
-  customElements.define('selfie-capture-screens', SelfieCaptureScreens);
+if (
+  "customElements" in window &&
+  !customElements.get("selfie-capture-screens")
+) {
+  customElements.define("selfie-capture-screens", SelfieCaptureScreens);
 }
 
 export default SelfieCaptureScreens;

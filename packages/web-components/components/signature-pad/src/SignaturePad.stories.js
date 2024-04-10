@@ -1,7 +1,7 @@
-import './SignaturePad';
+import "./SignaturePad";
 
 const meta = {
-  component: 'smileid-signature-pad',
+  component: "smileid-signature-pad",
 };
 
 export default meta;

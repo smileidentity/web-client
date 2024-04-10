@@ -1,10 +1,10 @@
-import SmartCamera from '../../../../domain/camera/src/SmartCamera';
-import styles from '../../../../styles/src/styles';
+import SmartCamera from "../../../../domain/camera/src/SmartCamera";
+import styles from "../../../../styles/src/styles";
 import {
   PORTRAIT_ID_PREVIEW_HEIGHT,
   PORTRAIT_ID_PREVIEW_WIDTH,
-} from '../../../../domain/constants/src/Constants';
-import '../../../navigation/src';
+} from "../../../../domain/constants/src/Constants";
+import "../../../navigation/src";
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -230,24 +230,24 @@ function templateString() {
       }
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
-  <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+  <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} ${this.hideBack ? "hide-back" : ""}></smileid-navigation>
     <h2 class='h2 color-digital-blue'>${this.idType}</h2>
     <div class="circle-progress" id="loader">
-    ${this.cameraError ? '' : '<p class="spinner"></p>'}
+    ${this.cameraError ? "" : '<p class="spinner"></p>'}
         ${
-  this.cameraError
-    ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
-    : '<p style="--flow-space: 4rem">Checking permissions</p>'
-}
+          this.cameraError
+            ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
+            : '<p style="--flow-space: 4rem">Checking permissions</p>'
+        }
     </div>
-    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
+    <div class='video-section | flow ${this.isPortraitCaptureView ? "portrait" : "landscape"}' hidden>
       <div class='id-video-container landscape'>
         <video id='id-video' class='flow' playsinline autoplay muted></video>
-        <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
+        <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? "hidden" : ""}>
           <use href='#image-frame' />
         </svg>
 
-        <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
+        <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? "hidden" : ""}>
           <use href='#image-frame-portrait' />
         </svg>
       </div>
@@ -264,12 +264,12 @@ function templateString() {
     </div>
 
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ""
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -281,15 +281,15 @@ class DocumentCapture extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
     this.IdSides = {
-      back: 'Back',
-      front: 'Front',
+      back: "Back",
+      front: "Front",
     };
   }
 
   connectedCallback() {
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -311,7 +311,7 @@ class DocumentCapture extends HTMLElement {
     this._stopIDVideoStream();
 
     this.dispatchEvent(
-      new CustomEvent('document-capture.publish', {
+      new CustomEvent("document-capture.publish", {
         detail: {
           image,
         },
@@ -320,13 +320,13 @@ class DocumentCapture extends HTMLElement {
   }
 
   _drawIDImage(video = this._IDVideo) {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     if (this.isPortraitCaptureView) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       // Draw the video frame onto the canvas
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Get the dimensions of the video preview frame
@@ -345,12 +345,12 @@ class DocumentCapture extends HTMLElement {
       const cropTop = (canvas.height - cropHeight) / 2;
 
       // Create a new canvas element for the cropped image
-      const croppedCanvas = document.createElement('canvas');
+      const croppedCanvas = document.createElement("canvas");
       croppedCanvas.width = cropWidth;
       croppedCanvas.height = cropHeight;
 
       // Draw the cropped image onto the new canvas
-      const croppedCtx = croppedCanvas.getContext('2d');
+      const croppedCtx = croppedCanvas.getContext("2d");
       croppedCtx.drawImage(
         canvas,
         cropLeft,
@@ -363,13 +363,13 @@ class DocumentCapture extends HTMLElement {
         cropHeight,
       );
 
-      return croppedCanvas.toDataURL('image/jpeg');
+      return croppedCanvas.toDataURL("image/jpeg");
     }
 
     canvas.width = 2240;
     canvas.height = 1260;
 
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     const aspectRatio = video.videoWidth / video.videoHeight;
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
@@ -380,10 +380,13 @@ class DocumentCapture extends HTMLElement {
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
-      const sourceXOffset = ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
-      const sourceYOffset = ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
+      const sourceXOffset =
+        ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
+      const sourceYOffset =
+        ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
       const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
-      const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
+      const sourceHeight =
+        frameBox.height * (video.videoHeight / videoBox.height);
 
       canvas.height = (canvas.width * frameBox.height) / frameBox.width;
 
@@ -398,15 +401,15 @@ class DocumentCapture extends HTMLElement {
         canvas.width,
         canvas.height,
       );
-      return canvas.toDataURL('image/jpeg');
+      return canvas.toDataURL("image/jpeg");
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg');
+    return canvas.toDataURL("image/jpeg");
   }
 
   _drawImage(canvas, enableImageTests = true, video = SmartCamera.stream) {
     this.resetErrorMessage();
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
 
     context.drawImage(
       video,
@@ -429,7 +432,7 @@ class DocumentCapture extends HTMLElement {
         return context;
       }
       throw new Error(
-        'Unable to capture webcam images - Please try another device',
+        "Unable to capture webcam images - Please try another device",
       );
     } else {
       return context;
@@ -437,19 +440,19 @@ class DocumentCapture extends HTMLElement {
   }
 
   handleIDStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('video');
+    const videoExists = this.shadowRoot.querySelector("video");
     let video = null;
     if (videoExists) {
-      video = this.shadowRoot.querySelector('video');
+      video = this.shadowRoot.querySelector("video");
     } else {
-      video = document.createElement('video');
+      video = document.createElement("video");
     }
 
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
 
-    if ('srcObject' in video) {
+    if ("srcObject" in video) {
       video.srcObject = stream;
     } else {
       video.src = window.URL.createObjectURL(stream);
@@ -459,12 +462,12 @@ class DocumentCapture extends HTMLElement {
       video.play();
     };
 
-    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
+    const videoContainer = this.shadowRoot.querySelector(".id-video-container");
 
     video.onloadedmetadata = () => {
-      this.shadowRoot.querySelector('.actions').hidden = false;
-      this.shadowRoot.querySelector('#loader').hidden = true;
-      this.shadowRoot.querySelector('.video-section').hidden = false;
+      this.shadowRoot.querySelector(".actions").hidden = false;
+      this.shadowRoot.querySelector("#loader").hidden = true;
+      this.shadowRoot.querySelector(".video-section").hidden = false;
     };
 
     if (!videoExists) {
@@ -480,65 +483,65 @@ class DocumentCapture extends HTMLElement {
   }
 
   setUpEventListeners() {
-    this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
+    this.captureIDImage = this.shadowRoot.querySelector("#capture-id-image");
+    this.navigation = this.shadowRoot.querySelector("smileid-navigation");
 
     if (SmartCamera.stream) {
       this.handleIDStream(SmartCamera.stream);
     }
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation.addEventListener("navigation.back", () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation.addEventListener("navigation.close", () => {
       this.handleCloseEvents();
     });
 
-    this.captureIDImage.addEventListener('click', () => {
+    this.captureIDImage.addEventListener("click", () => {
       this._captureIDImage();
     });
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute("hide-back-to-host");
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation');
+    return this.hasAttribute("show-navigation");
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute("theme-color") || "#043C93";
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution');
+    return this.hasAttribute("hide-attribution");
   }
 
   get documentCaptureModes() {
-    return this.getAttribute('document-capture-modes') || 'camera';
+    return this.getAttribute("document-capture-modes") || "camera";
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes('camera') && value.includes('upload');
+    return value.includes("camera") && value.includes("upload");
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute("title") || "Submit Front of ID";
   }
 
   get hidden() {
-    return this.getAttribute('hidden');
+    return this.getAttribute("hidden");
   }
 
   get sideOfId() {
-    return (this.getAttribute('side-of-id') || 'front').toLowerCase();
+    return (this.getAttribute("side-of-id") || "front").toLowerCase();
   }
 
   get isFrontOfId() {
-    return this.sideOfId === 'front';
+    return this.sideOfId === "front";
   }
 
   get isBackOfId() {
@@ -546,49 +549,49 @@ class DocumentCapture extends HTMLElement {
   }
 
   get idType() {
-    return this.getAttribute('id-type') || 'Document';
+    return this.getAttribute("id-type") || "Document";
   }
 
   get cameraError() {
-    return this.getAttribute('data-camera-error');
+    return this.getAttribute("data-camera-error");
   }
 
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
-      'data-camera-ready',
-      'data-camera-error',
+      "title",
+      "hidden",
+      "show-navigation",
+      "hide-back-to-host",
+      "data-camera-ready",
+      "data-camera-error",
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'title':
-    case 'data-camera-ready':
-    case 'data-camera-error':
-    case 'hidden':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case "title":
+      case "data-camera-ready":
+      case "data-camera-error":
+      case "hidden":
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
+    this.dispatchEvent(new CustomEvent("document-capture.cancelled"));
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture.close'));
+    this.dispatchEvent(new CustomEvent("document-capture.close"));
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture')) {
-  window.customElements.define('document-capture', DocumentCapture);
+if ("customElements" in window && !customElements.get("document-capture")) {
+  window.customElements.define("document-capture", DocumentCapture);
 }
 
 export default DocumentCapture;

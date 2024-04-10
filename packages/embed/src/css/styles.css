@@ -298,17 +298,17 @@ button[data-type="icon"] {
 }
 
 .checkbox-input {
-	display: flex;
+  display: flex;
 }
 
 .checkbox-input input {
-	inline-size: 1.25rem;
-	block-size: 1.25rem;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
 }
 
 .checkbox-input label {
-	margin-inline-start: .5rem;
-	text-align: initial;
+  margin-inline-start: 0.5rem;
+  text-align: initial;
 }
 
 .nav {
@@ -566,86 +566,86 @@ smileid-combobox-option[hidden] {
 }
 
 .document-tips {
-	margin-block-start: 1.5rem;
-	display: flex;
-	align-items: center;
-	text-align: initial;
+  margin-block-start: 1.5rem;
+  display: flex;
+  align-items: center;
+  text-align: initial;
 }
 
 .document-tips svg {
-	flex-shrink: 0;
-	margin-inline-end: 1rem;
+  flex-shrink: 0;
+  margin-inline-end: 1rem;
 }
 
 .document-tips p {
-	margin-block: 0;
+  margin-block: 0;
 }
 
 .document-tips p:first-of-type {
-	font-size: 1.875rem;
-	font-weight: bold
+  font-size: 1.875rem;
+  font-weight: bold;
 }
 
-[type='file'] {
-	display: none;
+[type="file"] {
+  display: none;
 }
 
 .document-tips > * + * {
-	margin-inline-start: 1em;
+  margin-inline-start: 1em;
 }
 
 .document-list {
-	padding: 0px;
+  padding: 0px;
 }
 
 .document-list li {
-	list-style: none;
-	background-color: #F9F0E7;
-	border-radius: .5rem;
+  list-style: none;
+  background-color: #f9f0e7;
+  border-radius: 0.5rem;
 }
 
 .document-list li + li {
-	margin-block-start: 1rem;
+  margin-block-start: 1rem;
 }
 
 .document-list a {
-	color: initial;
-	padding: 1rem;
-	text-decoration: none;
-	margin: 0px;
-	cursor: pointer;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+  color: initial;
+  padding: 1rem;
+  text-decoration: none;
+  margin: 0px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .document-meta {
-	display: flex;
-	align-items: center;
-	text-align: initial;
+  display: flex;
+  align-items: center;
+  text-align: initial;
 }
 
 .document-meta p {
-	margin-block: 0;
+  margin-block: 0;
 }
 
 .document-meta p:first-of-type {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .document-meta svg {
-	margin-inline-end: 1rem;
+  margin-inline-end: 1rem;
 }
 
 .document-list li:has(a:hover),
 .document-list li:has(a:focus) {
-	background-color: #f7dec5;
+  background-color: #f7dec5;
 }
 
 smileid-signature-pad {
-	margin-inline: auto;
+  margin-inline: auto;
 }
 
-[id='preview-signature'] {
+[id="preview-signature"] {
   max-inline-size: 10rem;
 }

@@ -40,7 +40,7 @@ npm install @smile_identity/smart-camera-web@<version>
 Then, in your VueJS, AngularJS, or React component:
 
 ```js
-import '@smile_identity/smart-camera-web';
+import "@smile_identity/smart-camera-web";
 ```
 
 #### Install via CDN
@@ -61,143 +61,145 @@ After installation and necessary imports:
 
 1. Add the desired markup to your page/component:
 
-    - **For Selfie Capture / Liveness Images**:
+   - **For Selfie Capture / Liveness Images**:
 
-      ```html
-      <smart-camera-web></smart-camera-web>
-      ```
+     ```html
+     <smart-camera-web></smart-camera-web>
+     ```
 
-    - **For Selfie Capture / Liveness and ID Images**:
+   - **For Selfie Capture / Liveness and ID Images**:
 
-      ```html
-      <smart-camera-web capture-id></smart-camera-web>
-      ```
+     ```html
+     <smart-camera-web capture-id></smart-camera-web>
+     ```
 
-      Initially, you'll see this image:
-      ![Request Image](https://cdn.smileidentity.com/images/smart-camera-web/request.jpg)
+     Initially, you'll see this image:
+     ![Request Image](https://cdn.smileidentity.com/images/smart-camera-web/request.jpg)
 
-      After granting access, the capture screen appears:
-      ![Selfie Camera](https://cdn.smileidentity.com/images/smart-camera-web/selfie-camera.png)
+     After granting access, the capture screen appears:
+     ![Selfie Camera](https://cdn.smileidentity.com/images/smart-camera-web/selfie-camera.png)
 
-      Upon capturing a selfie, you'll reach the review screen:
-      ![Selfie Review](https://cdn.smileidentity.com/images/smart-camera-web/selfie-review.png)
+     Upon capturing a selfie, you'll reach the review screen:
+     ![Selfie Review](https://cdn.smileidentity.com/images/smart-camera-web/selfie-review.png)
 
-      If the `capture-id` attribute is used, additional screens include:
+     If the `capture-id` attribute is used, additional screens include:
 
-      ![ID Camera](https://cdn.smileidentity.com/images/smart-camera-web/id-camera.png)
+     ![ID Camera](https://cdn.smileidentity.com/images/smart-camera-web/id-camera.png)
 
-      ![ID Review](https://cdn.smileidentity.com/images/smart-camera-web/id-review.png)
+     ![ID Review](https://cdn.smileidentity.com/images/smart-camera-web/id-review.png)
 
 2. Handle the `imagesComputed` event:
 
-    When the user approves the captured image, an `imagesComputed` event is dispatched. The event returns a [CustomEvent](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent) payload in `e.detail`.
+   When the user approves the captured image, an `imagesComputed` event is dispatched. The event returns a [CustomEvent](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent) payload in `e.detail`.
 
-    Here's a script example to handle the event and send data to a backend endpoint:
+   Here's a script example to handle the event and send data to a backend endpoint:
 
-    ```html
-    <script>
-    const app = document.querySelector('smart-camera-web');
+   ```html
+   <script>
+     const app = document.querySelector("smart-camera-web");
 
-    const postContent = async (data) => {
-        const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-        };
+     const postContent = async (data) => {
+       const options = {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify(data),
+       };
 
-        try {
-        const response = await fetch('/', options);
-        const json = await response.json();
+       try {
+         const response = await fetch("/", options);
+         const json = await response.json();
 
-        return json;
-        } catch (e) {
-        throw e;
-        }
-    };
+         return json;
+       } catch (e) {
+         throw e;
+       }
+     };
 
-    app.addEventListener('imagesComputed', async (e) => {
+     app.addEventListener("imagesComputed", async (e) => {
+       try {
+         const response = await postContent(e.detail);
 
-        try {
-        const response = await postContent(e.detail);
+         console.log(response);
+       } catch (e) {
+         console.error(e);
+       }
+     });
+   </script>
+   ```
 
-        console.log(response);
-        } catch (e) {
-        console.error(e);
-        }
-    });
-    </script>
-    ```
+   The provided backend endpoint uses the NodeJS Server to Server library and ExpressJS:
 
-    The provided backend endpoint uses the NodeJS Server to Server library and ExpressJS:
+   ```js
+   const express = require("express");
+   const { v4: UUID } = require("uuid");
 
-    ```js
-    const express = require('express');
-    const { v4: UUID } = require('uuid');
+   if (process.env.NODE_ENV === "development") {
+     const dotenv = require("dotenv");
 
-    if (process.env.NODE_ENV === 'development') {
-    const dotenv = require('dotenv');
+     dotenv.config();
+   }
 
-    dotenv.config();
-    }
+   const SIDCore = require("smile-identity-core");
+   const SIDSignature = SIDCore.Signature;
+   const SIDWebAPI = SIDCore.WebApi;
 
-    const SIDCore = require('smile-identity-core');
-    const SIDSignature = SIDCore.Signature;
-    const SIDWebAPI = SIDCore.WebApi;
+   const app = express();
 
-    const app = express();
+   app.use(express.json({ limit: "500kb" }));
+   app.use(express.static("public"));
 
-    app.use(express.json({ limit: '500kb' }));
-    app.use(express.static('public'));
+   app.post("/", async (req, res, next) => {
+     try {
+       const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
+       const connection = new SIDWebAPI(
+         PARTNER_ID,
+         "/callback",
+         API_KEY,
+         SID_SERVER,
+       );
 
-    app.post('/', async (req, res, next) => {
-    try {
-        const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
-        const connection = new SIDWebAPI(
-        PARTNER_ID,
-        '/callback',
-        API_KEY,
-        SID_SERVER
-        );
+       const partner_params_from_server = {
+         user_id: `user-${UUID()}`,
+         job_id: `job-${UUID()}`,
+         job_type: 4, // job_type is the simplest job we have which enrolls a user using their selfie
+       };
 
-        const partner_params_from_server = {
-        user_id: `user-${UUID()}`,
-        job_id: `job-${UUID()}`,
-        job_type: 4 // job_type is the simplest job we have which enrolls a user using their selfie
-        };
+       const {
+         images,
+         partner_params: { libraryVersion },
+       } = req.body;
 
-        const { images, partner_params: { libraryVersion } } = req.body;
+       const options = {
+         return_job_status: true,
+       };
 
-        const options = {
-        return_job_status: true
-        };
-        
-        const partner_params = Object.assign({}, partner_params_from_server, { libraryVersion });
-        
-        
-        const result = await connection.submit_job(
-        partner_params,
-        images,
-        {},
-        options
-        );
+       const partner_params = Object.assign({}, partner_params_from_server, {
+         libraryVersion,
+       });
 
-        res.json(result);
-    } catch (e) {
-        console.error(e);
-    }
-    });
+       const result = await connection.submit_job(
+         partner_params,
+         images,
+         {},
+         options,
+       );
 
-    // NOTE: This can be used to process responses. don't forget to add it as a callback option in the `connection` config on L22
-    // https://docs.usesmileid.com/further-reading/faqs/how-do-i-setup-a-callback
-    app.post('/callback', (req, res, next) => {
-    });
+       res.json(result);
+     } catch (e) {
+       console.error(e);
+     }
+   });
 
-    app.listen(process.env.PORT || 4000);
-    ```
+   // NOTE: This can be used to process responses. don't forget to add it as a callback option in the `connection` config on L22
+   // https://docs.usesmileid.com/further-reading/faqs/how-do-i-setup-a-callback
+   app.post("/callback", (req, res, next) => {});
 
-    This approach can also be achieved using other Server to Server libraries.
+   app.listen(process.env.PORT || 4000);
+   ```
+
+   This approach can also be achieved using other Server to Server libraries.
 
 ## Compatibility
 

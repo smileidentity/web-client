@@ -24,7 +24,7 @@ jobs:
       - name: share preview urls as PR comment
         uses: unsplash/comment-on-pr@master
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           msg: >
             This branch has been deployed to s3 / cloudfront.

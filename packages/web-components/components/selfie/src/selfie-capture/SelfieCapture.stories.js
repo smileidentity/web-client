@@ -1,8 +1,8 @@
-import SmartCamera from '../../../../domain/camera/src/SmartCamera';
-import './SelfieCapture';
+import SmartCamera from "../../../../domain/camera/src/SmartCamera";
+import "./SelfieCapture";
 
 const meta = {
-  component: 'selfie-capture',
+  component: "selfie-capture",
 };
 
 export default meta;

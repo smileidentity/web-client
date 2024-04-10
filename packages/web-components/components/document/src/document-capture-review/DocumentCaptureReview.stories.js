@@ -1,7 +1,7 @@
-import './index';
+import "./index";
 
 const meta = {
-  component: 'document-capture-review',
+  component: "document-capture-review",
 };
 
 export default meta;

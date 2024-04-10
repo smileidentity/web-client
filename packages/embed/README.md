@@ -16,37 +16,37 @@ This repository provides a self-hosted integration for Smile ID on the Web. It e
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/smileidentity/hosted-web-integration.git
-    cd hosted-web-integration
-    ```
+   ```bash
+   git clone https://github.com/smileidentity/hosted-web-integration.git
+   cd hosted-web-integration
+   ```
 
 2. Switch to the appropriate Node version using `nvm`:
 
-    ```bash
-    nvm install
-    nvm use
-    ```
+   ```bash
+   nvm install
+   nvm use
+   ```
 
 3. Install project dependencies:
 
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 ## Running the Project
 
 1. Build the project:
 
-    ```bash
-    npm run build
-    ```
+   ```bash
+   npm run build
+   ```
 
 2. Start the local server:
 
-    ```bash
-    npm start
-    ```
+   ```bash
+   npm start
+   ```
 
 3. Access the application on `http://localhost:8000`.
 

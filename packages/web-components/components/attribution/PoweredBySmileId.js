@@ -1,7 +1,7 @@
 class PoweredBySmileId extends HTMLElement {
   constructor() {
     super();
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = `
         <p style='margin-inline: auto; max-inline-size: 10rem'>
           <svg viewBox="0 0 90 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,12 +26,17 @@ class PoweredBySmileId extends HTMLElement {
         </p>
       `;
 
-    this.attachShadow({ mode: 'open' }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: "open" }).appendChild(
+      template.content.cloneNode(true),
+    );
   }
 }
 
-if (window.customElements && !window.customElements.get('powered-by-smile-id')) {
-  window.customElements.define('powered-by-smile-id', PoweredBySmileId);
+if (
+  window.customElements &&
+  !window.customElements.get("powered-by-smile-id")
+) {
+  window.customElements.define("powered-by-smile-id", PoweredBySmileId);
 }
 
 export default PoweredBySmileId;

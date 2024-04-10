@@ -1,3 +1,3 @@
-import DocumentCaptureScreens from './DocumentCaptureScreens';
+import DocumentCaptureScreens from "./DocumentCaptureScreens";
 
 export default DocumentCaptureScreens;

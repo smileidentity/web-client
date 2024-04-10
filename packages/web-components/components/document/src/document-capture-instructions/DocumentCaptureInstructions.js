@@ -1,6 +1,6 @@
-import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
-import styles from '../../../../styles/src/styles';
-import '../../../navigation/src';
+import SmartFileUpload from "../../../../domain/file-upload/src/SmartFileUpload";
+import styles from "../../../../styles/src/styles";
+import "../../../navigation/src";
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -157,7 +157,7 @@ function templateString() {
   return `
     <div id="document-capture-instructions-screen" class="flow center">
         <section className="main">
-        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} ${this.hideBack ? "hide-back" : ""}></smileid-navigation>
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
             <h1 class='text-2xl color-digital-blue font-bold'>${this.title}</h1>
@@ -346,28 +346,28 @@ function templateString() {
     <section className="footer">
     <div class='flow'>
     ${
-  this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
-    ? `
+      this.supportBothCaptureModes || this.documentCaptureModes === "camera"
+        ? `
     <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
         Take Photo
     </button>
     `
-    : ''
-}
+        : ""
+    }
     ${
-  this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
-    ? `
+      this.supportBothCaptureModes || this.documentCaptureModes === "upload"
+        ? `
     <label id='upload-photo-label' data-variant='${
-  this.supportBothCaptureModes ? 'outline' : 'solid'
-}' class='button'>
+      this.supportBothCaptureModes ? "outline" : "solid"
+    }' class='button'>
         <input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
         <span>Upload Photo</span>
     </label>
     `
-    : ''
-}
+        : ""
+    }
 </div>
-${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
+${this.hideAttribution ? "" : "<powered-by-smile-id></powered-by-smile-id>"}
     </section>
   </div>
   ${styles}
@@ -380,40 +380,41 @@ class DocumentInstruction extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = this.render();
 
     this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
-    this.takeDocumentPhotoButton = this.shadowRoot.querySelector('#take-photo');
-    this.uploadDocumentPhotoButton = this.shadowRoot.querySelector('#upload-photo');
+    this.navigation = this.shadowRoot.querySelector("smileid-navigation");
+    this.takeDocumentPhotoButton = this.shadowRoot.querySelector("#take-photo");
+    this.uploadDocumentPhotoButton =
+      this.shadowRoot.querySelector("#upload-photo");
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation.addEventListener("navigation.back", () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation.addEventListener("navigation.close", () => {
       this.handleCloseEvents();
     });
 
     if (this.takeDocumentPhotoButton) {
-      this.takeDocumentPhotoButton.addEventListener('click', () => {
+      this.takeDocumentPhotoButton.addEventListener("click", () => {
         this.dispatchEvent(
-          new CustomEvent('document-capture-instructions.capture'),
+          new CustomEvent("document-capture-instructions.capture"),
         );
       });
     }
 
     if (this.uploadDocumentPhotoButton) {
       this.uploadDocumentPhotoButton.addEventListener(
-        'change',
+        "change",
         async (event) => {
-          this.shadowRoot.querySelector('#error').innerHTML = '';
+          this.shadowRoot.querySelector("#error").innerHTML = "";
           try {
             const { files } = event.target;
 
@@ -421,12 +422,12 @@ class DocumentInstruction extends HTMLElement {
             const fileData = await SmartFileUpload.retrieve(files);
 
             this.dispatchEvent(
-              new CustomEvent('document-capture-instructions.upload', {
+              new CustomEvent("document-capture-instructions.upload", {
                 detail: { image: fileData },
               }),
             );
           } catch (error) {
-            this.shadowRoot.querySelector('#error').innerHTML = error.message;
+            this.shadowRoot.querySelector("#error").innerHTML = error.message;
           }
         },
       );
@@ -434,40 +435,40 @@ class DocumentInstruction extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute("hide-back-to-host");
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation');
+    return this.hasAttribute("show-navigation");
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute("theme-color") || "#043C93";
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution');
+    return this.hasAttribute("hide-attribution");
   }
 
   get documentCaptureModes() {
-    return this.getAttribute('document-capture-modes') || 'camera';
+    return this.getAttribute("document-capture-modes") || "camera";
   }
 
   get supportBothCaptureModes() {
     const value = this.documentCaptureModes;
-    return value.includes('camera') && value.includes('upload');
+    return value.includes("camera") && value.includes("upload");
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute("title") || "Submit Front of ID";
   }
 
   get sideOfId() {
-    return (this.getAttribute('side-of-id') || 'front').toLowerCase();
+    return (this.getAttribute("side-of-id") || "front").toLowerCase();
   }
 
   get isFrontOfId() {
-    return this.sideOfId === 'front';
+    return this.sideOfId === "front";
   }
 
   get isBackOfId() {
@@ -475,16 +476,24 @@ class DocumentInstruction extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture-instructions.cancelled'));
+    this.dispatchEvent(
+      new CustomEvent("document-capture-instructions.cancelled"),
+    );
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture-instructions.close'));
+    this.dispatchEvent(new CustomEvent("document-capture-instructions.close"));
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-instructions')) {
-  window.customElements.define('document-capture-instructions', DocumentInstruction);
+if (
+  "customElements" in window &&
+  !customElements.get("document-capture-instructions")
+) {
+  window.customElements.define(
+    "document-capture-instructions",
+    DocumentInstruction,
+  );
 }
 
 export default DocumentInstruction;

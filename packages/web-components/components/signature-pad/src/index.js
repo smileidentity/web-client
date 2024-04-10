@@ -1,3 +1,3 @@
-import SignaturePad from './SignaturePad';
+import SignaturePad from "./SignaturePad";
 
 export default SignaturePad;

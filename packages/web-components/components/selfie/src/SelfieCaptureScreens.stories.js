@@ -1,7 +1,7 @@
-import './SelfieCaptureScreens';
+import "./SelfieCaptureScreens";
 
 const meta = {
-  component: 'selfie-capture-screens',
+  component: "selfie-capture-screens",
 };
 
 export default meta;

@@ -1,7 +1,7 @@
-import SmartCamera from '../../domain/camera/src/SmartCamera';
-import styles from '../../styles/src/styles';
-import '../attribution/PoweredBySmileId';
-import '../navigation/src';
+import SmartCamera from "../../domain/camera/src/SmartCamera";
+import styles from "../../styles/src/styles";
+import "../attribution/PoweredBySmileId";
+import "../navigation/src";
 
 function templateString() {
   return `
@@ -32,7 +32,7 @@ function templateString() {
         }
     </style>
     <div class='flow center'>
-        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} ${this.hideBack ? "hide-back" : ""}></smileid-navigation>
         <div class='flow center'>
           <p class='color-red | center' id='error'>
           </p>
@@ -75,7 +75,7 @@ function templateString() {
                 <button data-variant='solid full-width' class='button' type='button' id='request-camera-access'>
                   Request Camera Access
                 </button>
-                ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
+                ${this.hideAttribution ? "" : "<powered-by-smile-id></powered-by-smile-id>"}
             </div>
             </div>
         </div>
@@ -87,46 +87,50 @@ class CameraPermission extends HTMLElement {
   connectedCallback() {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = this.render();
     this.setUpEventListeners();
   }
 
   setUpEventListeners() {
-    const errorMessage = this.shadowRoot.querySelector('#error');
-    const permissionButton = this.shadowRoot.getElementById('request-camera-access');
-    errorMessage.textContent = '';
-    permissionButton.addEventListener('click', async () => {
-      permissionButton.setAttribute('disabled', true);
+    const errorMessage = this.shadowRoot.querySelector("#error");
+    const permissionButton = this.shadowRoot.getElementById(
+      "request-camera-access",
+    );
+    errorMessage.textContent = "";
+    permissionButton.addEventListener("click", async () => {
+      permissionButton.setAttribute("disabled", true);
       try {
         await SmartCamera.getMedia({
           audio: false,
           video: true,
         });
-        this.dispatchEvent(new CustomEvent('camera-permission.granted'));
+        this.dispatchEvent(new CustomEvent("camera-permission.granted"));
       } catch (error) {
-        this.dispatchEvent(new CustomEvent('camera-permission.denied', { detail: error }));
+        this.dispatchEvent(
+          new CustomEvent("camera-permission.denied", { detail: error }),
+        );
         errorMessage.textContent = SmartCamera.handleCameraError(error);
       }
-      permissionButton.removeAttribute('disabled');
+      permissionButton.removeAttribute("disabled");
     });
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation');
+    return this.hasAttribute("show-navigation");
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution');
+    return this.hasAttribute("hide-attribution");
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back');
+    return this.hasAttribute("hide-back");
   }
 }
 
-if (window.customElements && !window.customElements.get('camera-permission')) {
-  window.customElements.define('camera-permission', CameraPermission);
+if (window.customElements && !window.customElements.get("camera-permission")) {
+  window.customElements.define("camera-permission", CameraPermission);
 }
 
 export default CameraPermission;

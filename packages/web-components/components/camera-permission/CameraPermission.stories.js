@@ -1,7 +1,7 @@
-import './CameraPermission';
+import "./CameraPermission";
 
 const meta = {
-  component: 'camera-permission',
+  component: "camera-permission",
 };
 
 export default meta;

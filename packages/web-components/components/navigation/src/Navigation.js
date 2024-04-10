@@ -1,13 +1,13 @@
 class Navigation extends HTMLElement {
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: 'open' });
+    const shadow = this.attachShadow({ mode: "open" });
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
 :host {
   display: flex;
   max-inline-size: 100%;
-  justify-content: ${this.showBackButton ? 'space-between' : 'flex-end'};
+  justify-content: ${this.showBackButton ? "space-between" : "flex-end"};
 }
 
 button {
@@ -68,11 +68,11 @@ button[data-type="icon"] {
 }
     `;
 
-    const backButton = document.createElement('button');
-    backButton.setAttribute('class', 'back-button');
-    backButton.setAttribute('data-type', 'icon');
-    backButton.setAttribute('part', 'back-button');
-    backButton.setAttribute('type', 'button');
+    const backButton = document.createElement("button");
+    backButton.setAttribute("class", "back-button");
+    backButton.setAttribute("data-type", "icon");
+    backButton.setAttribute("part", "back-button");
+    backButton.setAttribute("type", "button");
     backButton.innerHTML = `
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -94,11 +94,11 @@ button[data-type="icon"] {
       <span part="back-button-text">Back</span>
     `;
 
-    const closeButton = document.createElement('button');
-    closeButton.setAttribute('class', 'close-button');
-    closeButton.setAttribute('data-type', 'icon');
-    closeButton.setAttribute('part', 'close-button');
-    closeButton.setAttribute('type', 'button');
+    const closeButton = document.createElement("button");
+    closeButton.setAttribute("class", "close-button");
+    closeButton.setAttribute("data-type", "icon");
+    closeButton.setAttribute("part", "close-button");
+    closeButton.setAttribute("type", "button");
     closeButton.innerHTML = `
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -128,33 +128,33 @@ button[data-type="icon"] {
 
     // Back Button Controls
     this.backButton = backButton;
-    this.backButton.addEventListener('click', () => this.handleBack());
+    this.backButton.addEventListener("click", () => this.handleBack());
 
     // Close Button Controls
     this.closeButton = closeButton;
-    this.closeButton.addEventListener('click', () => this.handleClose());
+    this.closeButton.addEventListener("click", () => this.handleClose());
   }
 
   disconnectedCallback() {
-    this.backButton.removeEventListener('click', () => this.handleBack());
-    this.closeButton.removeEventListener('click', () => this.handleClose());
+    this.backButton.removeEventListener("click", () => this.handleBack());
+    this.closeButton.removeEventListener("click", () => this.handleClose());
   }
 
   handleBack() {
-    this.dispatchEvent(new CustomEvent('navigation.back'));
+    this.dispatchEvent(new CustomEvent("navigation.back"));
   }
 
   handleClose() {
-    this.dispatchEvent(new CustomEvent('navigation.close'));
+    this.dispatchEvent(new CustomEvent("navigation.close"));
   }
 
   get showBackButton() {
-    return !this.hasAttribute('hide-back');
+    return !this.hasAttribute("hide-back");
   }
 }
 
-if ('customElements' in window) {
-  window.customElements.define('smileid-navigation', Navigation);
+if ("customElements" in window) {
+  window.customElements.define("smileid-navigation", Navigation);
 }
 
 export default Navigation;

@@ -1,5 +1,5 @@
-import styles from '../../../../styles/src/styles';
-import '../../../navigation/src';
+import styles from "../../../../styles/src/styles";
+import "../../../navigation/src";
 
 function templateString() {
   return `
@@ -209,22 +209,24 @@ function templateString() {
     }
   </style>
   <div id='document-capture-review-screen' class='flow center'>
-  <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
+  <smileid-navigation ${this.showNavigation ? "show-navigation" : ""} hide-back></smileid-navigation>
     <h1 class="header-title">
       Is the document clear and readable?
     </h1>
     <p class="description">Make sure all corners of the document 
     are visible and there is no glare</p>
     <div class='section | flow'>
-      <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+      <div class='id-video-container ${this.isPortraitCaptureView ? "portrait" : "landscape"}'>
         ${
-  this.imageSrc
-    ? `<img
+          this.imageSrc
+            ? `<img
     alt='your ID card'
     id='document-capture-review-image'
     src='${this.imageSrc}'
     width='396'
-    />` : ''}
+    />`
+            : ""
+        }
     <div class='overlay'></div>
       </div>
       <div class='flow action-buttons'>
@@ -237,12 +239,12 @@ function templateString() {
       </div>
 
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ""
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -254,90 +256,90 @@ class IdReview extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = this.render();
-    this.shadowRoot.innerHTML = '';
+    this.shadowRoot.innerHTML = "";
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.setUpEventListeners();
   }
 
   static get observedAttributes() {
-    return ['hide-back-to-host', 'show-navigation', 'data-image'];
+    return ["hide-back-to-host", "show-navigation", "data-image"];
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host');
+    return this.hasAttribute("hide-back-to-host");
   }
 
   get showNavigation() {
-    return this.hasAttribute('show-navigation');
+    return this.hasAttribute("show-navigation");
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute("theme-color") || "#043C93";
   }
 
   get hideAttribution() {
-    return this.hasAttribute('hide-attribution');
+    return this.hasAttribute("hide-attribution");
   }
 
   get imageSrc() {
-    return this.getAttribute('data-image');
+    return this.getAttribute("data-image");
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute("title") || "Submit Front of ID";
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture-review.cancelled'));
+    this.dispatchEvent(new CustomEvent("document-capture-review.cancelled"));
   }
 
   handleCloseEvents() {
-    this.dispatchEvent(new CustomEvent('document-capture-review.close'));
+    this.dispatchEvent(new CustomEvent("document-capture-review.close"));
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-image':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case "data-image":
+      case "hide-back-to-host":
+      case "show-navigation":
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
   setUpEventListeners() {
-    this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
+    this.selectIDImage = this.shadowRoot.querySelector("#select-id-image");
     this.reCaptureIDImage = this.shadowRoot.querySelector(
-      '#re-capture-id-image',
+      "#re-capture-id-image",
     );
-    this.navigation = this.shadowRoot.querySelector('smileid-navigation');
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation = this.shadowRoot.querySelector("smileid-navigation");
+    this.navigation.addEventListener("navigation.back", () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation.addEventListener("navigation.close", () => {
       this.handleCloseEvents();
     });
 
-    this.selectIDImage.addEventListener('click', () => {
+    this.selectIDImage.addEventListener("click", () => {
       this.dispatchEvent(
-        new CustomEvent('document-capture-review.accepted', {
+        new CustomEvent("document-capture-review.accepted", {
           detail: {},
         }),
       );
     });
-    this.reCaptureIDImage.addEventListener('click', () => {
+    this.reCaptureIDImage.addEventListener("click", () => {
       this.dispatchEvent(
-        new CustomEvent('document-capture-review.rejected', {
+        new CustomEvent("document-capture-review.rejected", {
           detail: {},
         }),
       );
@@ -345,8 +347,11 @@ class IdReview extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-review')) {
-  window.customElements.define('document-capture-review', IdReview);
+if (
+  "customElements" in window &&
+  !customElements.get("document-capture-review")
+) {
+  window.customElements.define("document-capture-review", IdReview);
 }
 
 export default IdReview;

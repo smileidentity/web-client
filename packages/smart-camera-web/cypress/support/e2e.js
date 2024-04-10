@@ -13,9 +13,9 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-import '@cypress/code-coverage/support'; // eslint-disable-line import/no-extraneous-dependencies
+import "@cypress/code-coverage/support"; // eslint-disable-line import/no-extraneous-dependencies
 // Import commands.js using ES2015 syntax:
-import './commands';
+import "./commands";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

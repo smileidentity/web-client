@@ -1,3 +1,3 @@
-import SelfieCapture from './SelfieCapture';
+import SelfieCapture from "./SelfieCapture";
 
 export default SelfieCapture;

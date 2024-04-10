@@ -168,7 +168,7 @@ function templateString() {
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h2 class='h2 color-digital-blue'>${this.idType}</h2>
+    <h2 class='h2 color-digital-blue'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
@@ -196,6 +196,7 @@ function templateString() {
   `;
 }
 
+const fixedAspectRatio = 1.53;
 class DocumentCapture extends HTMLElement {
   constructor() {
     super();
@@ -305,21 +306,8 @@ class DocumentCapture extends HTMLElement {
 
     const context = canvas.getContext('2d');
 
-    const widthRatio = video.videoWidth / video.clientWidth;
-    const heightRatio = video.videoHeight / video.clientHeight;
-
-    const sourceWidth = this.idCardRegion.width * widthRatio;
-    const sourceHeight = this.idCardRegion.height * heightRatio;
-    const sourceXOffset = this.idCardRegion.x * widthRatio;
-    const sourceYOffset = this.idCardRegion.y * heightRatio;
-
-    const pixelIncrease = 60;
-    const sourceXOffsetAdjusted = sourceXOffset - (pixelIncrease * widthRatio);
-    const sourceYOffsetAdjusted = sourceYOffset - (pixelIncrease * heightRatio);
-    const sourceWidthAdjusted = sourceWidth + (2 * pixelIncrease * widthRatio);
-    const sourceHeightAdjusted = sourceHeight + (2 * pixelIncrease * heightRatio);
-    canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
-    const aspectRatio = video.videoWidth / video.videoHeight;
+    const { aspectRatio } = this._calculateVideoOffset(video);
+    // canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
 
     if (aspectRatio < 1) {
       canvas.width = video.videoWidth;
@@ -329,20 +317,8 @@ class DocumentCapture extends HTMLElement {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // const {
-      //   originalHeight, originalWidth,
-      // } = this._calculateVideoOffset(video);
-
-      // Get the dimensions of the video preview frame
-      // const previewWidth = originalHeight;
-      // const previewHeight = originalWidth;
-
-      // Define the padding value
-      // const paddingPercent = 0.5 * 0; // 50% of the preview dimensions;
-      // const paddedWidth = previewWidth * (0 + paddingPercent * 3.5);
-      // const paddedHeight = previewHeight * (0 + paddingPercent);
       const paddedWidth = canvas.width;
-      const paddedHeight = canvas.width / 1.53;
+      const paddedHeight = canvas.width / fixedAspectRatio;
 
       // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
       const cropWidth = paddedWidth;
@@ -378,17 +354,9 @@ class DocumentCapture extends HTMLElement {
       };
     }
 
-    context.drawImage(
-      video,
-      /* sx= */ sourceXOffsetAdjusted,
-      /* sy= */ sourceYOffsetAdjusted,
-      /* sWidth= */ sourceWidthAdjusted,
-      /* sHeight= */ sourceHeightAdjusted,
-      /* dx= */ 0,
-      /* dy= */ 0,
-      /* dWidth= */ canvas.width,
-      /* dHeight= */ canvas.height,
-    );
+    const height = (canvas.width / (video.videoWidth / video.videoHeight));
+    canvas.height = height;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     return {
       image: canvas.toDataURL('image/jpeg'),
@@ -467,8 +435,8 @@ class DocumentCapture extends HTMLElement {
 
       if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
+        videoContainer.style.height = `${videoHeight}px`;
       }
-      videoContainer.style.height = `${videoHeight}px`;
       videoContainer.style.width = `${videoWidth}px`;
       videoContainer.style.maxHeight = `${videoHeight}px`;
       const idCardRegionWidth = videoWidth - offsetWidth;
@@ -522,14 +490,14 @@ class DocumentCapture extends HTMLElement {
   }
 
   _calculateVideoOffset(video) {
-    const videoWidth = video.clientWidth;
-    const videoHeight = video.clientWidth / 1.53;
-    const aspectRatio = video.videoWidth / video.videoHeight;
-    const originalWidth = video.videoWidth;
-    const originalHeight = video.videoWidth / 1.53;
-    const portrait = aspectRatio < 1;
-
     const offset = 30;
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    const portrait = aspectRatio < 1;
+    const videoWidth = video.clientWidth;
+    const videoHeight = (video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio));
+    const originalWidth = video.videoWidth;
+    const originalHeight = video.videoWidth / fixedAspectRatio;
+
     const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
     const offsetWidth = videoWidth * (offset / 100);
 
@@ -617,11 +585,11 @@ class DocumentCapture extends HTMLElement {
   }
 
   get documentType() {
-    return this.getAttribute('document-type') || 'Document';
+    return this.getAttribute('document-type') || '';
   }
 
   get documentName() {
-    return this.getAttribute('document-name') || this.documentType;
+    return this.getAttribute('document-name') || 'Document';
   }
 
   get isPortraitCaptureView() {

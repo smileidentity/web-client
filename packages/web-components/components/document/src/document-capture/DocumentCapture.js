@@ -458,14 +458,7 @@ class DocumentCapture extends HTMLElement {
       video.play();
     };
 
-    // video.onloadedmetadata = () => {
-    //   this.shadowRoot.querySelector('.id-video').hidden = false;
-    //   this.shadowRoot.querySelector('.actions').hidden = false;
-    //   this.shadowRoot.querySelector('#loader').hidden = true;
-    // };
-
     const onVideoStart = () => {
-      // const aspectRatio = videoWidth / videoHeight;
       const {
         aspectRatio,
         offsetHeight, offsetWidth, videoHeight, videoWidth,
@@ -481,8 +474,8 @@ class DocumentCapture extends HTMLElement {
       const idCardRegionWidth = videoWidth - offsetWidth;
       const idCardRegionHeight = videoHeight - offsetHeight;
 
-      const rightLeftBorderSize = 20; // (videoWidth - idCardRegionWidth) / 2;
-      const topBottomBorderSize = 20; // (videoHeight - idCardRegionHeight) / 2;
+      const rightLeftBorderSize = 20;
+      const topBottomBorderSize = 20;
       this.idCardRegion = {
         height: idCardRegionHeight,
         rightLeftBorderSize,

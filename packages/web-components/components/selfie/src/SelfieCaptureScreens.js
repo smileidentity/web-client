@@ -30,7 +30,6 @@ class SelfieCaptureScreens extends HTMLElement {
             ${styles}
             <div>
             <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-            <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
             <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
             <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>

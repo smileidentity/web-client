@@ -14,11 +14,17 @@ function isSamsungMultiCameraDevice() {
   return !Number.isNaN(modelNumber) && modelNumber >= smallerModelNumber;
 }
 
-function getLivenessFramesIndices(totalNoOfFrames, numberOfFramesRequired = DEFAULT_NO_OF_LIVENESS_FRAMES) {
+function getLivenessFramesIndices(
+  totalNoOfFrames,
+  numberOfFramesRequired = DEFAULT_NO_OF_LIVENESS_FRAMES,
+) {
   const selectedFrames = [];
 
   if (totalNoOfFrames < numberOfFramesRequired) {
-    throw new Error('SmartCameraWeb: Minimum required no of frames is ', numberOfFramesRequired);
+    throw new Error(
+      'SmartCameraWeb: Minimum required no of frames is ',
+      numberOfFramesRequired,
+    );
   }
 
   const frameDivisor = numberOfFramesRequired - 1;
@@ -58,25 +64,16 @@ class SmartFileUpload {
 
   static getHumanSize(numberOfBytes) {
     // Approximate to the closest prefixed unit
-    const units = [
-      'B',
-      'kB',
-      'MB',
-      'GB',
-      'TB',
-      'PB',
-      'EB',
-      'ZB',
-      'YB',
-    ];
+    const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const exponent = Math.min(
       Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
       units.length - 1,
     );
     const approx = numberOfBytes / 1024 ** exponent;
-    const output = exponent === 0
-      ? `${numberOfBytes} bytes`
-      : `${approx.toFixed(0)} ${units[exponent]}`;
+    const output =
+      exponent === 0
+        ? `${numberOfBytes} bytes`
+        : `${approx.toFixed(0)} ${units[exponent]}`;
 
     return output;
   }
@@ -89,7 +86,11 @@ class SmartFileUpload {
         resolve(e.target.result);
       };
       reader.onerror = () => {
-        reject(new Error('An error occurred reading the file. Please check the file, and try again'));
+        reject(
+          new Error(
+            'An error occurred reading the file. Please check the file, and try again',
+          ),
+        );
       };
       reader.readAsDataURL(file);
     });
@@ -103,11 +104,15 @@ class SmartFileUpload {
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
-      throw new Error('Unsupported file format. Please ensure that you are providing a JPG or PNG image');
+      throw new Error(
+        'Unsupported file format. Please ensure that you are providing a JPG or PNG image',
+      );
     }
 
     if (file.size > SmartFileUpload.memoryLimit) {
-      throw new Error(`${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`);
+      throw new Error(
+        `${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`,
+      );
     }
 
     const imageAsDataUrl = await SmartFileUpload.getData(file);
@@ -606,9 +611,14 @@ function scwTemplateString() {
   </div>
 
   <div id='request-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
-        ${this.hideBackToHost ? '' : `
+        ${
+          this.hideBackToHost
+            ? ''
+            : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button-exit" class="back-button back-button-exit icon-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -618,7 +628,8 @@ function scwTemplateString() {
             </button>
             <div class="back-button-text">Back</div>
           </div>
-        `}
+        `
+        }
         <button data-type='icon' type='button' id='request-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
             <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
@@ -627,7 +638,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <div class='section | flow'>
       <p>
         We need access to your camera so that we can take selfie and proof-of-life images.
@@ -637,16 +650,25 @@ function scwTemplateString() {
         Request Camera Access
       </button>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
   <div hidden id='camera-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav back-to-host-nav${this.hideBackToHost ? ' justify-right' : ''}">
-        ${this.hideBackToHost ? '' : `
+        ${
+          this.hideBackToHost
+            ? ''
+            : `
           <div class="back-wrapper back-to-host-wrapper">
             <button type='button' data-type='icon' id="back-button" class="back-button icon-btn back-button-exit">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -656,7 +678,8 @@ function scwTemplateString() {
             </button>
             <div class="back-button-text">Back</div>
           </div>
-        `}
+        `
+        }
         <button data-type='icon' type='button' id='camera-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
             <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
@@ -665,7 +688,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Take a Selfie</h1>
 
     <div class='section | flow'>
@@ -689,9 +714,13 @@ function scwTemplateString() {
         Take Selfie
       </button>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
@@ -710,15 +739,21 @@ function scwTemplateString() {
         Please try using a different device.
       </p>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
 
   <div hidden id='review-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='review-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -728,7 +763,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Review Selfie</h1>
 
     <div class='section | flow'>
@@ -758,13 +795,19 @@ function scwTemplateString() {
         Re-take selfie
       </button>
     </div>
-    ${this.hideAttribution ? '' : `
+    ${
+      this.hideAttribution
+        ? ''
+        : `
       <powered-by-smile-id></powered-by-smile-id>
-    `}
+    `
+    }
   </div>
 
   <div hidden id='id-entry-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-selfie" class="back-button icon-btn">
@@ -783,7 +826,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <header>
       <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
         <g clip-path="url(#clip-path)">
@@ -850,25 +895,39 @@ function scwTemplateString() {
       </div>
     </div>
     <div class='flow'>
-      ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
+      ${
+        this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
+          ? `
         <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
           Take Photo
         </button>
-      ` : ''}
-      ${this.supportBothCaptureModes || this.documentCaptureModes === 'upload' ? `
+      `
+          : ''
+      }
+      ${
+        this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
+          ? `
         <label id='upload-photo-label' data-variant='${this.supportBothCaptureModes ? 'outline' : 'solid'}' class='button'>
           <input type='file' onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
           <span>Upload Photo</span>
         </label>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
-    ${this.hideAttribution ? '' : `
+    ${
+      this.hideAttribution
+        ? ''
+        : `
       <powered-by-smile-id></powered-by-smile-id>
-    `}
+    `
+    }
   </div>
 
   <div hidden id='id-camera-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-id-entry" class="back-button icon-btn">
@@ -887,7 +946,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Take ID Card Photo</h1>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -909,14 +970,20 @@ function scwTemplateString() {
         </div>
       </div>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
   <div hidden id='id-review-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button'  id='id-review-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -926,7 +993,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Review ID Card</h1>
     <div class='section | flow'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -954,14 +1023,20 @@ function scwTemplateString() {
         />
       </div>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
   <div hidden id='back-of-id-entry-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-id-image" class="back-button icon-btn">
@@ -980,7 +1055,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-      ` : ''}
+      `
+        : ''
+    }
     <header>
       <svg xmlns="http://www.w3.org/2000/svg" width="51" height="78" fill="none">
         <g clip-path="url(#clip-path)">
@@ -1048,30 +1125,48 @@ function scwTemplateString() {
     </div>
     <br />
     <div class='flow'>
-      ${!this.documentType ? `
+      ${
+        !this.documentType
+          ? `
         <button data-variant='ghost full-width' class='button' type='button' id='skip-this-step'>
           Skip this step
         </button>
-      ` : ''}
-      ${this.supportBothCaptureModes || this.documentCaptureModes === 'camera' ? `
+      `
+          : ''
+      }
+      ${
+        this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
+          ? `
         <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
           Take Photo
         </button>
-      ` : ''}
-      ${this.supportBothCaptureModes || this.documentCaptureModes === 'upload' ? `
+      `
+          : ''
+      }
+      ${
+        this.supportBothCaptureModes || this.documentCaptureModes === 'upload'
+          ? `
         <label data-variant='${this.supportBothCaptureModes ? 'outline' : 'solid'}' class='button'>
           <input type='file' id='upload-photo' name='document' accept='image/png, image/jpeg' />
           <span>Upload Photo</span>
         </label>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
-    ${this.hideAttribution ? '' : `
+    ${
+      this.hideAttribution
+        ? ''
+        : `
       <powered-by-smile-id></powered-by-smile-id>
-    `}
+    `
+    }
   </div>
 
   <div hidden id='back-of-id-camera-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav">
         <div class="back-wrapper">
           <button type='button' data-type='icon' id="back-button-back-id-entry" class="back-button icon-btn">
@@ -1090,7 +1185,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Take Back of ID Card Photo</h1>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -1112,14 +1209,20 @@ function scwTemplateString() {
         </div>
       </div>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
   <div hidden id='back-of-id-review-screen' class='flow center'>
-    ${this.showNavigation ? `
+    ${
+      this.showNavigation
+        ? `
       <div class="nav justify-right">
         <button data-type='icon' type='button' id='back-review-screen-close' class='close-iframe icon-btn'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -1129,7 +1232,9 @@ function scwTemplateString() {
           <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
         </button>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
     <h1>Review Back of ID Card Photo</h1>
     <div class='section | flow'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -1157,9 +1262,13 @@ function scwTemplateString() {
         />
       </div>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
 
@@ -1167,9 +1276,13 @@ function scwTemplateString() {
     <div class='section | flow'>
       <h1>Thank you</h1>
 
-      ${this.hideAttribution ? '' : `
+      ${
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
-      `}
+      `
+      }
     </div>
   </div>
   `;
@@ -1203,7 +1316,9 @@ class PoweredBySmileId extends HTMLElement {
       </p>
     `;
 
-    this.attachShadow({ mode: 'open' }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: 'open' }).appendChild(
+      template.content.cloneNode(true),
+    );
   }
 }
 
@@ -1239,7 +1354,10 @@ class SmartCameraWeb extends HTMLElement {
   connectedCallback() {
     this.shadowRoot.innerHTML = this.render();
 
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+    if (
+      'mediaDevices' in navigator &&
+      'getUserMedia' in navigator.mediaDevices
+    ) {
       this.setUpEventListeners();
     } else {
       const heading = document.createElement('h1');
@@ -1259,20 +1377,25 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['document-capture-modes', 'document-type', 'hide-back-to-host', 'show-navigation'];
+    return [
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
+    ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'document-capture-modes':
-    case 'document-type':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
@@ -1282,39 +1405,70 @@ class SmartCameraWeb extends HTMLElement {
     this.requestScreen = this.shadowRoot.querySelector('#request-screen');
     this.activeScreen = this.requestScreen;
     this.cameraScreen = this.shadowRoot.querySelector('#camera-screen');
-    this.failedImageTestScreen = this.shadowRoot.querySelector('#failed-image-test-screen');
+    this.failedImageTestScreen = this.shadowRoot.querySelector(
+      '#failed-image-test-screen',
+    );
     this.reviewScreen = this.shadowRoot.querySelector('#review-screen');
     this.idEntryScreen = this.shadowRoot.querySelector('#id-entry-screen');
     this.IDCameraScreen = this.shadowRoot.querySelector('#id-camera-screen');
     this.IDReviewScreen = this.shadowRoot.querySelector('#id-review-screen');
-    this.backOfIdEntryScreen = this.shadowRoot.querySelector('#back-of-id-entry-screen');
-    this.backOfIDCameraScreen = this.shadowRoot.querySelector('#back-of-id-camera-screen');
-    this.backOfIDReviewScreen = this.shadowRoot.querySelector('#back-of-id-review-screen');
+    this.backOfIdEntryScreen = this.shadowRoot.querySelector(
+      '#back-of-id-entry-screen',
+    );
+    this.backOfIDCameraScreen = this.shadowRoot.querySelector(
+      '#back-of-id-camera-screen',
+    );
+    this.backOfIDReviewScreen = this.shadowRoot.querySelector(
+      '#back-of-id-review-screen',
+    );
     this.thanksScreen = this.shadowRoot.querySelector('#thanks-screen');
 
-    this.videoContainer = this.shadowRoot.querySelector('.video-container > .video');
+    this.videoContainer = this.shadowRoot.querySelector(
+      '.video-container > .video',
+    );
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
-    this.startImageCapture = this.shadowRoot.querySelector('#start-image-capture');
+    this.startImageCapture = this.shadowRoot.querySelector(
+      '#start-image-capture',
+    );
     this.captureIDImage = this.shadowRoot.querySelector('#capture-id-image');
-    this.captureBackOfIDImage = this.shadowRoot.querySelector('#capture-back-of-id-image');
+    this.captureBackOfIDImage = this.shadowRoot.querySelector(
+      '#capture-back-of-id-image',
+    );
     this.reviewImage = this.shadowRoot.querySelector('#review-image');
     this.IDReviewImage = this.shadowRoot.querySelector('#id-review-image');
-    this.backOfIDReviewImage = this.shadowRoot.querySelector('#back-of-id-review-image');
+    this.backOfIDReviewImage = this.shadowRoot.querySelector(
+      '#back-of-id-review-image',
+    );
 
-    this.reStartImageCapture = this.shadowRoot.querySelector('#restart-image-capture');
-    this.reCaptureIDImage = this.shadowRoot.querySelector('#re-capture-id-image');
-    this.reCaptureBackOfIDImage = this.shadowRoot.querySelector('#re-capture-back-of-id-image');
+    this.reStartImageCapture = this.shadowRoot.querySelector(
+      '#restart-image-capture',
+    );
+    this.reCaptureIDImage = this.shadowRoot.querySelector(
+      '#re-capture-id-image',
+    );
+    this.reCaptureBackOfIDImage = this.shadowRoot.querySelector(
+      '#re-capture-back-of-id-image',
+    );
     this.selectSelfie = this.shadowRoot.querySelector('#select-selfie');
     this.selectIDImage = this.shadowRoot.querySelector('#select-id-image');
-    this.selectBackOfIDImage = this.shadowRoot.querySelector('#select-back-of-id-image');
-    this.takeDocumentPhotoButton = this.idEntryScreen.querySelector('#take-photo');
-    this.uploadDocumentPhotoButton = this.idEntryScreen.querySelector('#upload-photo');
-    this.skipBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#skip-this-step');
-    this.takeBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#take-photo');
-    this.uploadBackOfDocumentPhotoButton = this.backOfIdEntryScreen.querySelector('#upload-photo');
+    this.selectBackOfIDImage = this.shadowRoot.querySelector(
+      '#select-back-of-id-image',
+    );
+    this.takeDocumentPhotoButton =
+      this.idEntryScreen.querySelector('#take-photo');
+    this.uploadDocumentPhotoButton =
+      this.idEntryScreen.querySelector('#upload-photo');
+    this.skipBackOfDocumentPhotoButton =
+      this.backOfIdEntryScreen.querySelector('#skip-this-step');
+    this.takeBackOfDocumentPhotoButton =
+      this.backOfIdEntryScreen.querySelector('#take-photo');
+    this.uploadBackOfDocumentPhotoButton =
+      this.backOfIdEntryScreen.querySelector('#upload-photo');
 
-    this.shadowRoot.querySelector('#request-camera-access').addEventListener('click', () => this.init());
+    this.shadowRoot
+      .querySelector('#request-camera-access')
+      .addEventListener('click', () => this.init());
 
     if (this.showNavigation) {
       // Add Back Button Listeners
@@ -1334,16 +1488,37 @@ class SmartCameraWeb extends HTMLElement {
       });
     }
 
-    if (this.takeDocumentPhotoButton) this.takeDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
-    if (this.skipBackOfDocumentPhotoButton) this.skipBackOfDocumentPhotoButton.addEventListener('click', () => this._skipBackDocument());
-    if (this.takeBackOfDocumentPhotoButton) this.takeBackOfDocumentPhotoButton.addEventListener('click', () => this._startIDCamera());
-    if (this.uploadDocumentPhotoButton) this.uploadDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
-    if (this.uploadBackOfDocumentPhotoButton) this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => this._uploadDocument(e));
+    if (this.takeDocumentPhotoButton)
+      this.takeDocumentPhotoButton.addEventListener('click', () =>
+        this._startIDCamera(),
+      );
+    if (this.skipBackOfDocumentPhotoButton)
+      this.skipBackOfDocumentPhotoButton.addEventListener('click', () =>
+        this._skipBackDocument(),
+      );
+    if (this.takeBackOfDocumentPhotoButton)
+      this.takeBackOfDocumentPhotoButton.addEventListener('click', () =>
+        this._startIDCamera(),
+      );
+    if (this.uploadDocumentPhotoButton)
+      this.uploadDocumentPhotoButton.addEventListener('change', (e) =>
+        this._uploadDocument(e),
+      );
+    if (this.uploadBackOfDocumentPhotoButton)
+      this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) =>
+        this._uploadDocument(e),
+      );
 
     this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
-    this.backToIdEntryButton = this.shadowRoot.querySelector('#back-button-id-entry');
-    this.backToBackIdEntryButton = this.shadowRoot.querySelector('#back-button-back-id-entry');
-    this.backToIdImageButton = this.shadowRoot.querySelector('#back-button-id-image');
+    this.backToIdEntryButton = this.shadowRoot.querySelector(
+      '#back-button-id-entry',
+    );
+    this.backToBackIdEntryButton = this.shadowRoot.querySelector(
+      '#back-button-back-id-entry',
+    );
+    this.backToIdImageButton = this.shadowRoot.querySelector(
+      '#back-button-id-image',
+    );
 
     if (this.backToSelfie) {
       this.backToSelfie.addEventListener('click', () => {
@@ -1419,7 +1594,8 @@ class SmartCameraWeb extends HTMLElement {
     };
     this._rawImages = [];
 
-    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+    navigator.mediaDevices
+      .getUserMedia({ audio: false, video: true })
       .then((stream) => {
         this.handleSuccess(stream);
       })
@@ -1439,7 +1615,9 @@ class SmartCameraWeb extends HTMLElement {
 
   handleSuccess(stream) {
     const videoExists = !!this.videoContainer.querySelector('video');
-    const video = videoExists ? this.videoContainer.querySelector('video') : document.createElement('video');
+    const video = videoExists
+      ? this.videoContainer.querySelector('video')
+      : document.createElement('video');
 
     video.autoplay = true;
     video.playsInline = true;
@@ -1463,9 +1641,10 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   handleIDStream(stream) {
-    const videoExists = this.activeScreen === this.IDCameraScreen
-      ? !!this.IDCameraScreen.querySelector('video')
-      : !!this.backOfIDCameraScreen.querySelector('video');
+    const videoExists =
+      this.activeScreen === this.IDCameraScreen
+        ? !!this.IDCameraScreen.querySelector('video')
+        : !!this.backOfIDCameraScreen.querySelector('video');
 
     let video = null;
     if (videoExists) {
@@ -1489,9 +1668,10 @@ class SmartCameraWeb extends HTMLElement {
     }
     video.play();
 
-    const videoContainer = this.activeScreen === this.IDCameraScreen
-      ? this.IDCameraScreen.querySelector('.id-video-container')
-      : this.backOfIDCameraScreen.querySelector('.id-video-container');
+    const videoContainer =
+      this.activeScreen === this.IDCameraScreen
+        ? this.IDCameraScreen.querySelector('.id-video-container')
+        : this.backOfIDCameraScreen.querySelector('.id-video-container');
 
     video.onloadedmetadata = () => {
       videoContainer.querySelector('.actions').hidden = false;
@@ -1507,41 +1687,41 @@ class SmartCameraWeb extends HTMLElement {
 
   handleError(e) {
     switch (e.name) {
-    case 'NotAllowedError':
-    case 'SecurityError':
-      this.errorMessage.textContent = `
+      case 'NotAllowedError':
+      case 'SecurityError':
+        this.errorMessage.textContent = `
           Looks like camera access was not granted, or was blocked by a browser
           level setting / extension. Please follow the prompt from the URL bar,
           or extensions, and enable access.
           You may need to refresh to start all over again
         `;
-      break;
-    case 'AbortError':
-      this.errorMessage.textContent = `
+        break;
+      case 'AbortError':
+        this.errorMessage.textContent = `
           Oops! Something happened, and we lost access to your stream.
           Please refresh to start all over again
         `;
-      break;
-    case 'NotReadableError':
-      this.errorMessage.textContent = `
+        break;
+      case 'NotReadableError':
+        this.errorMessage.textContent = `
           There seems to be a problem with your device's camera, or its connection.
           Please check this, and when resolved, try again. Or try another device.
         `;
-      break;
-    case 'NotFoundError':
-      this.errorMessage.textContent = `
+        break;
+      case 'NotFoundError':
+        this.errorMessage.textContent = `
           We are unable to find a video stream.
           You may need to refresh to start all over again
         `;
-      break;
-    case 'TypeError':
-      this.errorMessage.textContent = `
+        break;
+      case 'TypeError':
+        this.errorMessage.textContent = `
           This site is insecure, and as such cannot have access to your camera.
           Try to navigate to a secure version of this page, or contact the owner.
         `;
-      break;
-    default:
-      this.errorMessage.textContent = e.message;
+        break;
+      default:
+        this.errorMessage.textContent = e.message;
     }
   }
 
@@ -1624,7 +1804,9 @@ class SmartCameraWeb extends HTMLElement {
       if (hasEnoughColors) {
         return context;
       }
-      throw new Error('Unable to capture webcam images - Please try another device');
+      throw new Error(
+        'Unable to capture webcam images - Please try another device',
+      );
     } else {
       return context;
     }
@@ -1633,7 +1815,8 @@ class SmartCameraWeb extends HTMLElement {
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');
     canvas.width = 240;
-    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height =
+      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -1644,7 +1827,8 @@ class SmartCameraWeb extends HTMLElement {
   _captureReferencePhoto() {
     const canvas = document.createElement('canvas');
     canvas.width = 480;
-    canvas.height = (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    canvas.height =
+      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);
@@ -1682,7 +1866,10 @@ class SmartCameraWeb extends HTMLElement {
       });
 
       // add file to preview state
-      const nextScreen = this.activeScreen === this.idEntryScreen ? this.IDReviewScreen : this.backOfIDReviewScreen;
+      const nextScreen =
+        this.activeScreen === this.idEntryScreen
+          ? this.IDReviewScreen
+          : this.backOfIDReviewScreen;
       const previewImage = nextScreen.querySelector('img');
       previewImage.src = fileData;
 
@@ -1725,7 +1912,17 @@ class SmartCameraWeb extends HTMLElement {
 
       // Draw the cropped image onto the new canvas
       const croppedCtx = croppedCanvas.getContext('2d');
-      croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      croppedCtx.drawImage(
+        canvas,
+        cropLeft,
+        cropTop,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight,
+      );
 
       return croppedCanvas.toDataURL('image/jpeg');
     }
@@ -1738,18 +1935,33 @@ class SmartCameraWeb extends HTMLElement {
 
     // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
     if (aspectRatio < 1) {
-      const imageFrame = this.activeScreen.querySelector('[class*="image-frame"]:not([hidden]) [href*="image-frame"]');
+      const imageFrame = this.activeScreen.querySelector(
+        '[class*="image-frame"]:not([hidden]) [href*="image-frame"]',
+      );
       const videoBox = video.getBoundingClientRect();
       const frameBox = imageFrame.getBoundingClientRect();
 
-      const sourceXOffset = ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
-      const sourceYOffset = ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
+      const sourceXOffset =
+        ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
+      const sourceYOffset =
+        ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
       const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
-      const sourceHeight = frameBox.height * (video.videoHeight / videoBox.height);
+      const sourceHeight =
+        frameBox.height * (video.videoHeight / videoBox.height);
 
       canvas.height = (canvas.width * frameBox.height) / frameBox.width;
 
-      context.drawImage(video, sourceXOffset, sourceYOffset, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+      context.drawImage(
+        video,
+        sourceXOffset,
+        sourceYOffset,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
       return canvas.toDataURL('image/jpeg');
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -1773,10 +1985,12 @@ class SmartCameraWeb extends HTMLElement {
 
       const livenessFramesIndices = getLivenessFramesIndices(totalNoOfFrames);
 
-      this._data.images = this._data.images.concat(livenessFramesIndices.map((imageIndex) => ({
-        image: this._rawImages[imageIndex].split(',')[1],
-        image_type_id: 6,
-      })));
+      this._data.images = this._data.images.concat(
+        livenessFramesIndices.map((imageIndex) => ({
+          image: this._rawImages[imageIndex].split(',')[1],
+          image_type_id: 6,
+        })),
+      );
 
       this.setActiveScreen(this.reviewScreen);
     } catch (error) {
@@ -1839,15 +2053,11 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _exitSmartCamera() {
-    this.dispatchEvent(
-      new CustomEvent('close', { detail: {} }),
-    );
+    this.dispatchEvent(new CustomEvent('close', { detail: {} }));
   }
 
   _backAndExit() {
-    this.dispatchEvent(
-      new CustomEvent('backExit', { detail: {} }),
-    );
+    this.dispatchEvent(new CustomEvent('backExit', { detail: {} }));
   }
 
   async _reStartImageCapture() {
@@ -1869,8 +2079,10 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   async _reCaptureIDImage() {
-    const previousScreen = this.activeScreen === this.IDReviewScreen
-      ? this.idEntryScreen : this.backOfIdEntryScreen;
+    const previousScreen =
+      this.activeScreen === this.IDReviewScreen
+        ? this.idEntryScreen
+        : this.backOfIdEntryScreen;
     this.setActiveScreen(previousScreen);
 
     // NOTE: removes the last element in the list

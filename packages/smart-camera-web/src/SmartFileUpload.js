@@ -5,25 +5,16 @@ class SmartFileUpload {
 
   static getHumanSize(numberOfBytes) {
     // Approximate to the closest prefixed unit
-    const units = [
-      'B',
-      'kB',
-      'MB',
-      'GB',
-      'TB',
-      'PB',
-      'EB',
-      'ZB',
-      'YB',
-    ];
+    const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const exponent = Math.min(
       Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
       units.length - 1,
     );
     const approx = numberOfBytes / 1024 ** exponent;
-    const output = exponent === 0
-      ? `${numberOfBytes} bytes`
-      : `${approx.toFixed(0)} ${units[exponent]}`;
+    const output =
+      exponent === 0
+        ? `${numberOfBytes} bytes`
+        : `${approx.toFixed(0)} ${units[exponent]}`;
 
     return output;
   }
@@ -36,7 +27,11 @@ class SmartFileUpload {
         resolve(e.target.result);
       };
       reader.onerror = () => {
-        reject(new Error('An error occurred reading the file. Please check the file, and try again'));
+        reject(
+          new Error(
+            'An error occurred reading the file. Please check the file, and try again',
+          ),
+        );
       };
       reader.readAsDataURL(file);
     });
@@ -50,11 +45,15 @@ class SmartFileUpload {
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
-      throw new Error('Unsupported file format. Please ensure that you are providing a JPG or PNG image');
+      throw new Error(
+        'Unsupported file format. Please ensure that you are providing a JPG or PNG image',
+      );
     }
 
     if (file.size > SmartFileUpload.memoryLimit) {
-      throw new Error(`${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`);
+      throw new Error(
+        `${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`,
+      );
     }
 
     const imageAsDataUrl = await SmartFileUpload.getData(file);

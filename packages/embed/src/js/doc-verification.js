@@ -1,21 +1,21 @@
-import "@smile_identity/smart-camera-web";
-import "@smileid/web-components/combobox";
-import JSZip from "jszip";
-import { version as sdkVersion } from "../../package.json";
+import '@smile_identity/smart-camera-web';
+import '@smileid/web-components/combobox';
+import JSZip from 'jszip';
+import { version as sdkVersion } from '../../package.json';
 
 (function documentVerification() {
-  "use strict";
+  'use strict';
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   let config;
   let activeScreen;
@@ -23,17 +23,17 @@ import { version as sdkVersion } from "../../package.json";
   let images;
   let partner_params;
 
-  const LoadingScreen = document.querySelector("#loading-screen");
-  const SelectIDType = document.querySelector("#select-id-type");
-  const SmartCameraWeb = document.querySelector("smart-camera-web");
+  const LoadingScreen = document.querySelector('#loading-screen');
+  const SelectIDType = document.querySelector('#select-id-type');
+  const SmartCameraWeb = document.querySelector('smart-camera-web');
   const UploadProgressScreen = document.querySelector(
-    "#upload-progress-screen",
+    '#upload-progress-screen',
   );
-  const UploadFailureScreen = document.querySelector("#upload-failure-screen");
-  const CompleteScreen = document.querySelector("#complete-screen");
+  const UploadFailureScreen = document.querySelector('#upload-failure-screen');
+  const CompleteScreen = document.querySelector('#complete-screen');
 
-  const CloseIframeButtons = document.querySelectorAll(".close-iframe");
-  const RetryUploadButton = document.querySelector("#retry-upload");
+  const CloseIframeButtons = document.querySelectorAll('.close-iframe');
+  const RetryUploadButton = document.querySelector('#retry-upload');
 
   let fileToUpload;
   let uploadURL;
@@ -45,13 +45,13 @@ import { version as sdkVersion } from "../../package.json";
     };
 
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(payload),
     };
 
@@ -64,19 +64,19 @@ import { version as sdkVersion } from "../../package.json";
 
       return json.valid_documents;
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
   async function getLegacyProductConstraints() {
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "GET",
+      method: 'GET',
     };
 
     try {
@@ -88,17 +88,17 @@ import { version as sdkVersion } from "../../package.json";
 
       return json.hosted_web.doc_verification;
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity::Configuration")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
@@ -114,12 +114,12 @@ import { version as sdkVersion } from "../../package.json";
   function loadCountrySelector(countries, placeholderElement) {
     const isSingleCountry = countries.length === 1;
 
-    const autocomplete = document.createElement("smileid-combobox");
-    autocomplete.setAttribute("id", "country");
+    const autocomplete = document.createElement('smileid-combobox');
+    autocomplete.setAttribute('id', 'country');
     autocomplete.innerHTML = `
       <smileid-combobox-trigger
-        ${isSingleCountry ? "disabled" : ""}
-        ${isSingleCountry ? `value="${countries[0].name}"` : ""}
+        ${isSingleCountry ? 'disabled' : ''}
+        ${isSingleCountry ? `value="${countries[0].name}"` : ''}
         label="Search Country">
       </smileid-combobox-trigger>
 
@@ -129,13 +129,13 @@ import { version as sdkVersion } from "../../package.json";
             (country) =>
               `
             <smileid-combobox-option ${
-              isSingleCountry ? 'aria-selected="true" ' : ""
+              isSingleCountry ? 'aria-selected="true" ' : ''
             }value="${country.code}" label="${country.name}">
               ${country.name}
             </smileid-combobox-option>
           `,
           )
-          .join("\n")}
+          .join('\n')}
       </smileid-combobox-listbox>
     `;
 
@@ -145,11 +145,11 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function loadIdTypeSelector(idTypes) {
-    const idTypeSelector = document.querySelector("#id-type-selector");
+    const idTypeSelector = document.querySelector('#id-type-selector');
     let combobox = document.querySelector('smileid-combobox[id="id_type"]');
     if (!combobox) {
-      combobox = document.createElement("smileid-combobox");
-      combobox.setAttribute("id", "id_type");
+      combobox = document.createElement('smileid-combobox');
+      combobox.setAttribute('id', 'id_type');
     }
 
     combobox.innerHTML = `
@@ -167,24 +167,24 @@ import { version as sdkVersion } from "../../package.json";
               <div>
                 <p>${idType.name}</p>
                 ${
-                  idType.name === "Others" ||
+                  idType.name === 'Others' ||
                   (idType.example && idType.example.length > 1)
                     ? `<small>${
-                        idType.example.length > 1 ? "e.g. " : ""
-                      }${idType.example.join(", ")}</small>`
-                    : ""
+                        idType.example.length > 1 ? 'e.g. ' : ''
+                      }${idType.example.join(', ')}</small>`
+                    : ''
                 }
               </div>
             </smileid-combobox-option>
           `,
           )
-          .join("\n")}
+          .join('\n')}
       </smileid-combobox-listbox>
     `;
 
     if (idTypeSelector.hidden) {
       idTypeSelector.appendChild(combobox);
-      idTypeSelector.removeAttribute("hidden");
+      idTypeSelector.removeAttribute('hidden');
     }
 
     return combobox;
@@ -202,7 +202,7 @@ import { version as sdkVersion } from "../../package.json";
       if (config.id_selection) {
         return countryIdTypes.filter((idType) => {
           return config.id_selection[countryCode].find((validIdType) => {
-            if (validIdType.toLowerCase() === "others") {
+            if (validIdType.toLowerCase() === 'others') {
               return !idType.code;
             }
             return validIdType === idType.code;
@@ -216,7 +216,7 @@ import { version as sdkVersion } from "../../package.json";
     function initialiseIdTypeSelector(country, selectIdType) {
       const idTypes = loadIdTypes(country);
       const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
-      idTypeSelector.addEventListener("combobox.change", (e) => {
+      idTypeSelector.addEventListener('combobox.change', (e) => {
         selectedIdType = e.detail.value;
       });
     }
@@ -280,7 +280,7 @@ import { version as sdkVersion } from "../../package.json";
           console.error(
             `SmileIdentity - ${countryCode}-${idSelectionIdType} has been deprecated`,
           );
-          if (idSelectionIdType.toLowerCase() !== "others") {
+          if (idSelectionIdType.toLowerCase() !== 'others') {
             constraints[countryIndex].id_types.push({
               code: idSelectionIdType,
               has_back: false,
@@ -303,27 +303,27 @@ import { version as sdkVersion } from "../../package.json";
         };
 
         const idTypes = config.id_selection[selectedCountry];
-        if (idTypes.length === 1 || typeof idTypes === "string") {
+        if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           const documentCaptureConfig = constraints
             .find((entry) => entry.country.code === selectedCountry)
             .id_types.find((entry) => entry.code === id_info.id_type);
 
           // ACTION: set initial screen
-          SmartCameraWeb.setAttribute("document-type", id_info.id_type);
+          SmartCameraWeb.setAttribute('document-type', id_info.id_type);
           // ACTION: set document capture mode
           if (documentCaptureConfig.has_back) {
-            SmartCameraWeb.setAttribute("capture-id", "back");
+            SmartCameraWeb.setAttribute('capture-id', 'back');
           }
           if (config.document_capture_modes) {
             SmartCameraWeb.setAttribute(
-              "document-capture-modes",
-              config.document_capture_modes.join(","),
+              'document-capture-modes',
+              config.document_capture_modes.join(','),
             );
           }
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web
-          SmartCameraWeb.setAttribute("hide-back-to-host", true);
+          SmartCameraWeb.setAttribute('hide-back-to-host', true);
           setActiveScreen(SmartCameraWeb);
         }
       }
@@ -343,7 +343,7 @@ import { version as sdkVersion } from "../../package.json";
     });
 
     if (!id_info || !id_info.id_type) {
-      const selectCountry = SelectIDType.querySelector("#country");
+      const selectCountry = SelectIDType.querySelector('#country');
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',
       );
@@ -356,8 +356,8 @@ import { version as sdkVersion } from "../../package.json";
 
       // ACTION: Load Countries using combobox
       const countrySelector = loadCountrySelector(countries, selectCountry);
-      countrySelector.addEventListener("combobox.change", (e) => {
-        selectedCountry = e.detail ? e.detail.value : "";
+      countrySelector.addEventListener('combobox.change', (e) => {
+        selectedCountry = e.detail ? e.detail.value : '';
 
         // ACTION: Load id types using combobox
         initialiseIdTypeSelector(selectedCountry);
@@ -370,7 +370,7 @@ import { version as sdkVersion } from "../../package.json";
         initialiseIdTypeSelector(selectedCountry);
       }
 
-      hostedWebConfigForm.addEventListener("submit", (e) => {
+      hostedWebConfigForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
         // ACTION: set up `id_info`
@@ -379,19 +379,19 @@ import { version as sdkVersion } from "../../package.json";
           id_type: selectedIdType,
         };
 
-        SmartCameraWeb.setAttribute("document-type", selectedIdType);
+        SmartCameraWeb.setAttribute('document-type', selectedIdType);
         const documentCaptureConfig = constraints
           .find((entry) => entry.country.code === selectedCountry)
           .id_types.find((entry) => entry.code === selectedIdType);
 
         // ACTION: set document capture mode
         if (documentCaptureConfig.has_back) {
-          SmartCameraWeb.setAttribute("capture-id", "back");
+          SmartCameraWeb.setAttribute('capture-id', 'back');
         }
         if (config.document_capture_modes) {
           SmartCameraWeb.setAttribute(
-            "document-capture-modes",
-            config.document_capture_modes.join(","),
+            'document-capture-modes',
+            config.document_capture_modes.join(','),
           );
         }
         setActiveScreen(SmartCameraWeb);
@@ -400,7 +400,7 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   SmartCameraWeb.addEventListener(
-    "imagesComputed",
+    'imagesComputed',
     (event) => {
       images = event.detail.images;
       setActiveScreen(UploadProgressScreen);
@@ -410,7 +410,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   SmartCameraWeb.addEventListener(
-    "backExit",
+    'backExit',
     () => {
       setActiveScreen(SelectIDType);
     },
@@ -418,7 +418,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   SmartCameraWeb.addEventListener(
-    "close",
+    'close',
     () => {
       closeWindow();
     },
@@ -426,7 +426,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   RetryUploadButton.addEventListener(
-    "click",
+    'click',
     () => {
       retryUpload();
     },
@@ -435,7 +435,7 @@ import { version as sdkVersion } from "../../package.json";
 
   CloseIframeButtons.forEach((button) => {
     button.addEventListener(
-      "click",
+      'click',
       () => {
         closeWindow();
       },
@@ -458,15 +458,15 @@ import { version as sdkVersion } from "../../package.json";
        * 5. decode the URI Component to a JSON string
        * 6. parse the JSON string to a javascript object
        */
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split("")
+          .split('')
           .map(function (c) {
             return `%${c.charCodeAt(0).toString(16)}`;
           })
-          .join(""),
+          .join(''),
       );
 
       return JSON.parse(jsonPayload);
@@ -485,7 +485,7 @@ import { version as sdkVersion } from "../../package.json";
 
   async function handleFormSubmit(event) {
     event.preventDefault();
-    const errorMessage = document.querySelector(".validation-message");
+    const errorMessage = document.querySelector('.validation-message');
     if (errorMessage) errorMessage.remove();
 
     try {
@@ -499,7 +499,7 @@ import { version as sdkVersion } from "../../package.json";
       event.target.disabled = false;
     } catch (error) {
       event.target.disabled = false;
-      displayErrorMessage("Something went wrong");
+      displayErrorMessage('Something went wrong');
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -507,14 +507,14 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
 
     p.textContent = message;
-    p.classList.add("validation-message");
-    p.style.fontSize = "1.5rem";
-    p.style.textAlign = "center";
+    p.classList.add('validation-message');
+    p.style.fontSize = '1.5rem';
+    p.style.textAlign = 'center';
 
-    const main = document.querySelector("main");
+    const main = document.querySelector('main');
     main.prepend(p);
   }
 
@@ -522,10 +522,10 @@ import { version as sdkVersion } from "../../package.json";
     const zip = new JSZip();
 
     zip.file(
-      "info.json",
+      'info.json',
       JSON.stringify({
         package_information: {
-          language: "Hosted Web Integration",
+          language: 'Hosted Web Integration',
           apiVersion: {
             buildNumber: 0,
             majorVersion: 2,
@@ -538,17 +538,17 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     try {
-      const zipFile = await zip.generateAsync({ type: "blob" });
+      const zipFile = await zip.generateAsync({ type: 'blob' });
 
       return zipFile;
     } catch (error) {
-      throw new Error("createZip failed", { cause: error });
+      throw new Error('createZip failed', { cause: error });
     }
   }
 
   async function getUploadURL() {
     const payload = {
-      source_sdk: config.sdk || "hosted_web",
+      source_sdk: config.sdk || 'hosted_web',
       source_sdk_version: config.sdk_version || sdkVersion,
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
@@ -561,13 +561,13 @@ import { version as sdkVersion } from "../../package.json";
     };
 
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(payload),
     };
 
@@ -581,22 +581,22 @@ import { version as sdkVersion } from "../../package.json";
 
       return json.upload_url;
     } catch (error) {
-      throw new Error("getUploadURL failed", { cause: error });
+      throw new Error('getUploadURL failed', { cause: error });
     }
   }
 
   function uploadZip(file, destination) {
     // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
     const request = new XMLHttpRequest();
-    request.open("PUT", destination);
+    request.open('PUT', destination);
 
-    request.upload.addEventListener("load", function () {
+    request.upload.addEventListener('load', function () {
       return request.response;
     });
 
-    request.upload.addEventListener("error", function (e) {
+    request.upload.addEventListener('error', function (e) {
       setActiveScreen(UploadFailureScreen);
-      throw new Error("uploadZip failed", { cause: e });
+      throw new Error('uploadZip failed', { cause: e });
     });
 
     request.onreadystatechange = function () {
@@ -613,11 +613,11 @@ import { version as sdkVersion } from "../../package.json";
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error("uploadZip failed", { cause: request });
+        throw new Error('uploadZip failed', { cause: request });
       }
     };
 
-    request.setRequestHeader("Content-type", "application/zip");
+    request.setRequestHeader('Content-type', 'application/zip');
     request.send(file);
   }
 
@@ -628,10 +628,10 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function closeWindow() {
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 })();

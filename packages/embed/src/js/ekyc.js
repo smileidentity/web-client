@@ -1,22 +1,22 @@
-import validate from "validate.js";
-import "@smileid/web-components/combobox";
-import "@smileid/web-components/end-user-consent";
-import { version as sdkVersion } from "../../package.json";
+import validate from 'validate.js';
+import '@smileid/web-components/combobox';
+import '@smileid/web-components/end-user-consent';
+import { version as sdkVersion } from '../../package.json';
 
 (function eKYC() {
-  "use strict";
+  'use strict';
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: "https://devapi.smileidentity.com/v1",
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    development: 'https://devapi.smileidentity.com/v1',
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   const pages = [];
   let activeScreen;
@@ -28,22 +28,22 @@ import { version as sdkVersion } from "../../package.json";
   let ngBankCodes;
   let productConstraints;
 
-  const LoadingScreen = document.querySelector("#loading-screen");
-  const SelectIDType = document.querySelector("#select-id-type");
-  const IDInfoForm = document.querySelector("#id-info");
-  const CompleteScreen = document.querySelector("#complete-screen");
+  const LoadingScreen = document.querySelector('#loading-screen');
+  const SelectIDType = document.querySelector('#select-id-type');
+  const IDInfoForm = document.querySelector('#id-info');
+  const CompleteScreen = document.querySelector('#complete-screen');
   let disableBackOnFirstScreen = false;
 
-  const CloseIframeButtons = document.querySelectorAll(".close-iframe");
+  const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
-  function postData(url = "", data = {}) {
+  function postData(url = '', data = {}) {
     return fetch(url, {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
@@ -80,16 +80,16 @@ import { version as sdkVersion } from "../../package.json";
         const previewBvnMfa = config.previewBVNMFA;
         if (previewBvnMfa) {
           generalConstraints.hosted_web.enhanced_kyc.NG.id_types.BVN_MFA = {
-            id_number_regex: "^[0-9]{11}$",
-            label: "Bank Verification Number (with OTP)",
+            id_number_regex: '^[0-9]{11}$',
+            label: 'Bank Verification Number (with OTP)',
             required_fields: [
-              "country",
-              "id_type",
-              "session_id",
-              "user_id",
-              "job_id",
+              'country',
+              'id_type',
+              'session_id',
+              'user_id',
+              'job_id',
             ],
-            test_data: "00000000000",
+            test_data: '00000000000',
           };
         }
 
@@ -98,19 +98,19 @@ import { version as sdkVersion } from "../../package.json";
           generalConstraints: generalConstraints.hosted_web.enhanced_kyc,
         };
       }
-      throw new Error("Failed to get supported ID types");
+      throw new Error('Failed to get supported ID types');
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity::Configuration")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
         activeScreen = LoadingScreen;
@@ -162,8 +162,8 @@ import { version as sdkVersion } from "../../package.json";
   function hideIdFromBackExit() {
     // only disable if this is the first screen
     if (!disableBackOnFirstScreen) return;
-    IDInfoForm.querySelector(".nav").classList.add("justify-right");
-    IDInfoForm.querySelector(".back-wrapper").style.display = "none";
+    IDInfoForm.querySelector('.nav').classList.add('justify-right');
+    IDInfoForm.querySelector('.back-wrapper').style.display = 'none';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
@@ -198,7 +198,7 @@ import { version as sdkVersion } from "../../package.json";
         };
 
         const idTypes = config.id_selection[selectedCountry];
-        if (idTypes.length === 1 || typeof idTypes === "string") {
+        if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
           disableBackOnFirstScreen = true;
@@ -211,8 +211,8 @@ import { version as sdkVersion } from "../../package.json";
     }
 
     if (!id_info || !id_info.id_type) {
-      const selectCountry = SelectIDType.querySelector("#country");
-      const selectIDType = SelectIDType.querySelector("#id_type");
+      const selectCountry = SelectIDType.querySelector('#country');
+      const selectIDType = SelectIDType.querySelector('#id_type');
       const hostedWebConfigForm = document.querySelector(
         'form[name="hosted-web-config"]',
       );
@@ -236,16 +236,16 @@ import { version as sdkVersion } from "../../package.json";
           );
 
           // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
-          const initialOption = document.createElement("option");
-          initialOption.setAttribute("value", "");
-          initialOption.textContent = "--Please Select--";
+          selectIDType.innerHTML = '';
+          const initialOption = document.createElement('option');
+          initialOption.setAttribute('value', '');
+          initialOption.textContent = '--Please Select--';
           selectIDType.appendChild(initialOption);
 
           // ACTION: Load ID Types as <option>s
           selectedIDTypes.forEach((IDType) => {
-            const option = document.createElement("option");
-            option.setAttribute("value", IDType);
+            const option = document.createElement('option');
+            option.setAttribute('value', IDType);
             option.textContent =
               generalConstraints[countryCode].id_types[IDType].label;
             selectIDType.appendChild(option);
@@ -255,18 +255,18 @@ import { version as sdkVersion } from "../../package.json";
           selectIDType.disabled = false;
         } else {
           // ACTION: Reset ID Type <select>
-          selectIDType.innerHTML = "";
+          selectIDType.innerHTML = '';
 
           // ACTION: Load the default <option>
-          const option = document.createElement("option");
+          const option = document.createElement('option');
           option.disabled = true;
-          option.setAttribute("value", "");
-          option.textContent = "--Select Country First--";
+          option.setAttribute('value', '');
+          option.textContent = '--Select Country First--';
           selectIDType.appendChild(option);
         }
       };
 
-      selectCountry.addEventListener("change", (e) => {
+      selectCountry.addEventListener('change', (e) => {
         loadIdTypes(e.target.value);
       });
 
@@ -274,12 +274,12 @@ import { version as sdkVersion } from "../../package.json";
       validCountries.forEach((country) => {
         const countryObject = generalConstraints[country];
         if (countryObject) {
-          const option = document.createElement("option");
-          option.setAttribute("value", country);
+          const option = document.createElement('option');
+          option.setAttribute('value', country);
           option.textContent = countryObject.name;
 
           if (id_info && id_info.country && country === id_info.country) {
-            option.setAttribute("selected", true);
+            option.setAttribute('selected', true);
             selectCountry.value = country;
             selectCountry.disabled = true;
             loadIdTypes(country);
@@ -289,7 +289,7 @@ import { version as sdkVersion } from "../../package.json";
         }
       });
 
-      hostedWebConfigForm.addEventListener("submit", (e) => {
+      hostedWebConfigForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCountry = selectCountry.value;
         const selectedIDType = selectIDType.value;
@@ -307,28 +307,28 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function initiateDemoMode() {
-    const demoTips = document.querySelectorAll(".demo-tip");
+    const demoTips = document.querySelectorAll('.demo-tip');
     Array.prototype.forEach.call(demoTips, (tip) => {
       tip.hidden = false;
     });
 
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "js/demo-ekyc.min.js";
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'js/demo-ekyc.min.js';
 
     document.body.appendChild(script);
   }
 
-  IDInfoForm.querySelector("#submitForm").addEventListener(
-    "click",
+  IDInfoForm.querySelector('#submitForm').addEventListener(
+    'click',
     (event) => {
       handleFormSubmit(event);
     },
     false,
   );
 
-  IDInfoForm.querySelector("#back-button").addEventListener(
-    "click",
+  IDInfoForm.querySelector('#back-button').addEventListener(
+    'click',
     (event) => {
       event.preventDefault();
       const page = pages.pop();
@@ -339,7 +339,7 @@ import { version as sdkVersion } from "../../package.json";
 
   CloseIframeButtons.forEach((button) => {
     button.addEventListener(
-      "click",
+      'click',
       () => {
         closeWindow(true);
       },
@@ -350,48 +350,48 @@ import { version as sdkVersion } from "../../package.json";
   function customizeConsentScreen() {
     const partnerDetails = config.partner_details;
 
-    const main = document.querySelector("main");
-    EndUserConsent = document.querySelector("end-user-consent");
+    const main = document.querySelector('main');
+    EndUserConsent = document.querySelector('end-user-consent');
     if (EndUserConsent) {
       main.removeChild(EndUserConsent);
     }
-    EndUserConsent = document.createElement("end-user-consent");
+    EndUserConsent = document.createElement('end-user-consent');
     EndUserConsent.setAttribute(
-      "base-url",
+      'base-url',
       endpoints[config.environment] || config.environment,
     );
-    EndUserConsent.setAttribute("country", id_info.country);
+    EndUserConsent.setAttribute('country', id_info.country);
     EndUserConsent.setAttribute(
-      "id-regex",
+      'id-regex',
       productConstraints[id_info.country].id_types[id_info.id_type]
         .id_number_regex,
     );
-    EndUserConsent.setAttribute("id-type", id_info.id_type);
+    EndUserConsent.setAttribute('id-type', id_info.id_type);
     EndUserConsent.setAttribute(
-      "id-type-label",
+      'id-type-label',
       productConstraints[id_info.country].id_types[id_info.id_type].label,
     );
-    EndUserConsent.setAttribute("partner-id", partnerDetails.partner_id);
-    EndUserConsent.setAttribute("partner-name", partnerDetails.name);
-    EndUserConsent.setAttribute("partner-logo", partnerDetails.logo_url);
-    EndUserConsent.setAttribute("policy-url", partnerDetails.policy_url);
-    EndUserConsent.setAttribute("theme-color", partnerDetails.theme_color);
-    EndUserConsent.setAttribute("token", config.token);
+    EndUserConsent.setAttribute('partner-id', partnerDetails.partner_id);
+    EndUserConsent.setAttribute('partner-name', partnerDetails.name);
+    EndUserConsent.setAttribute('partner-logo', partnerDetails.logo_url);
+    EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
+    EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
+    EndUserConsent.setAttribute('token', config.token);
     if (disableBackOnFirstScreen) {
-      EndUserConsent.setAttribute("hide-back-to-host", true);
+      EndUserConsent.setAttribute('hide-back-to-host', true);
     }
 
     if (config.demo_mode) {
-      EndUserConsent.setAttribute("demo-mode", config.demo_mode);
+      EndUserConsent.setAttribute('demo-mode', config.demo_mode);
       localStorage.setItem(
-        "SmileIdentityConstraints",
+        'SmileIdentityConstraints',
         JSON.stringify(productConstraints, null, 2),
       );
       initiateDemoMode();
     }
 
     EndUserConsent.addEventListener(
-      "end-user-consent.cancelled",
+      'end-user-consent.cancelled',
       () => {
         setActiveScreen(SelectIDType);
       },
@@ -399,7 +399,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.cancelled",
+      'end-user-consent.totp.cancelled',
       () => {
         setActiveScreen(SelectIDType);
       },
@@ -407,7 +407,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.granted",
+      'end-user-consent.granted',
       (event) => {
         consent_information = event.detail;
 
@@ -420,7 +420,7 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.granted",
+      'end-user-consent.totp.granted',
       (event) => {
         consent_information = event.detail;
 
@@ -435,20 +435,20 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.denied",
+      'end-user-consent.denied',
       () => {
-        referenceWindow.postMessage("SmileIdentity::ConsentDenied", "*");
+        referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
         closeWindow();
       },
       false,
     );
 
     EndUserConsent.addEventListener(
-      "end-user-consent.totp.denied.contact-methods-outdated",
+      'end-user-consent.totp.denied.contact-methods-outdated',
       (event) => {
         referenceWindow.postMessage(
-          "SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated",
-          "*",
+          'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
+          '*',
         );
         closeWindow();
       },
@@ -465,24 +465,24 @@ import { version as sdkVersion } from "../../package.json";
 
   function setGuideTextForIDType() {
     const label = document.querySelector('[for="id_number"]');
-    const input = document.querySelector("#id_number");
+    const input = document.querySelector('#id_number');
 
     label.innerHTML =
       productConstraints[id_info.country].id_types[id_info.id_type].label;
     input.setAttribute(
-      "placeholder",
+      'placeholder',
       productConstraints[id_info.country].id_types[id_info.id_type].test_data,
     );
     input.setAttribute(
-      "pattern",
+      'pattern',
       productConstraints[id_info.country].id_types[id_info.id_type]
         .id_number_regex,
     );
   }
 
   function loadBankCodes(bankCodes, placeholderElement) {
-    const autocomplete = document.createElement("smileid-combobox");
-    autocomplete.setAttribute("id", "bank_code");
+    const autocomplete = document.createElement('smileid-combobox');
+    autocomplete.setAttribute('id', 'bank_code');
     autocomplete.innerHTML = `
       <smileid-combobox-trigger
         label="Search Bank">
@@ -501,12 +501,12 @@ import { version as sdkVersion } from "../../package.json";
                 </smileid-combobox-option>
               `,
           )
-          .join("\n")}
+          .join('\n')}
       </smileid-combobox-listbox>
     `;
     placeholderElement.replaceWith(autocomplete);
-    autocomplete.addEventListener("combobox.change", (e) => {
-      id_info.bank_code = e.detail ? e.detail.value : "";
+    autocomplete.addEventListener('combobox.change', (e) => {
+      id_info.bank_code = e.detail ? e.detail.value : '';
     });
 
     return autocomplete;
@@ -518,48 +518,48 @@ import { version as sdkVersion } from "../../package.json";
         .required_fields;
 
     const showIdNumber = requiredFields.some((fieldName) =>
-      fieldName.includes("id_number"),
+      fieldName.includes('id_number'),
     );
 
     if (showIdNumber) {
-      const IdNumber = IDInfoForm.querySelector("div#id-number");
+      const IdNumber = IDInfoForm.querySelector('div#id-number');
       IdNumber.hidden = false;
     }
 
     const showNames = requiredFields.some((fieldName) =>
-      fieldName.includes("name"),
+      fieldName.includes('name'),
     );
 
     if (showNames) {
-      const Names = IDInfoForm.querySelector("fieldset#names");
+      const Names = IDInfoForm.querySelector('fieldset#names');
       Names.hidden = false;
     }
 
     const showDOB = requiredFields.some((fieldName) =>
-      fieldName.includes("dob"),
+      fieldName.includes('dob'),
     );
 
     if (showDOB) {
-      const DOB = IDInfoForm.querySelector("fieldset#dob");
+      const DOB = IDInfoForm.querySelector('fieldset#dob');
       DOB.hidden = false;
     }
 
     const showCitizenship = requiredFields.some((fieldName) =>
-      fieldName.includes("citizenship"),
+      fieldName.includes('citizenship'),
     );
 
     if (showCitizenship) {
-      const Citizenship = IDInfoForm.querySelector("fieldset#citizenships");
+      const Citizenship = IDInfoForm.querySelector('fieldset#citizenships');
       Citizenship.hidden = false;
     }
 
     const showBankCode = requiredFields.some((fieldName) =>
-      fieldName.includes("bank_code"),
+      fieldName.includes('bank_code'),
     );
 
     if (showBankCode) {
-      const BankCode = IDInfoForm.querySelector("fieldset#bank-code");
-      loadBankCodes(ngBankCodes, BankCode.querySelector("#bank_code"));
+      const BankCode = IDInfoForm.querySelector('fieldset#bank-code');
+      loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
       BankCode.hidden = false;
     }
   }
@@ -579,15 +579,15 @@ import { version as sdkVersion } from "../../package.json";
        * 5. decode the URI Component to a JSON string
        * 6. parse the JSON string to a javascript object
        */
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
-          .split("")
+          .split('')
           .map(function (c) {
             return `%${c.charCodeAt(0).toString(16)}`;
           })
-          .join(""),
+          .join(''),
       );
 
       return JSON.parse(jsonPayload);
@@ -606,10 +606,10 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function resetForm() {
-    const invalidElements = IDInfoForm.querySelectorAll("[aria-invalid]");
-    invalidElements.forEach((el) => el.removeAttribute("aria-invalid"));
+    const invalidElements = IDInfoForm.querySelectorAll('[aria-invalid]');
+    invalidElements.forEach((el) => el.removeAttribute('aria-invalid'));
 
-    const validationMessages = document.querySelectorAll(".validation-message");
+    const validationMessages = document.querySelectorAll('.validation-message');
     validationMessages.forEach((el) => el.remove());
   }
 
@@ -621,14 +621,14 @@ import { version as sdkVersion } from "../../package.json";
         .required_fields;
 
     const showIdNumber = requiredFields.some((fieldName) =>
-      fieldName.includes("id_number"),
+      fieldName.includes('id_number'),
     );
 
     if (showIdNumber) {
       validationConstraints.id_number = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
         format: new RegExp(
           productConstraints[id_info.country].id_types[
@@ -639,70 +639,70 @@ import { version as sdkVersion } from "../../package.json";
     }
 
     const showNames = requiredFields.some((fieldName) =>
-      fieldName.includes("name"),
+      fieldName.includes('name'),
     );
 
     if (showNames) {
       validationConstraints.first_name = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.last_name = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
 
     const showDOB = requiredFields.some((fieldName) =>
-      fieldName.includes("dob"),
+      fieldName.includes('dob'),
     );
 
     if (showDOB) {
       validationConstraints.day = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.month = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
       validationConstraints.year = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
 
     const showCitizenship = requiredFields.some((fieldName) =>
-      fieldName.includes("citizenship"),
+      fieldName.includes('citizenship'),
     );
     if (showCitizenship) {
       validationConstraints.citizenship = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
 
     const showBankCode = requiredFields.some((fieldName) =>
-      fieldName.includes("bank_code"),
+      fieldName.includes('bank_code'),
     );
 
     if (showBankCode) {
       validationConstraints.bank_code = {
         presence: {
           allowEmpty: false,
-          message: "is required",
+          message: 'is required',
         },
       };
     }
@@ -712,7 +712,7 @@ import { version as sdkVersion } from "../../package.json";
     if (validation) {
       handleValidationErrors(validation);
       const submitButton = IDInfoForm.querySelector('[type="button"]');
-      submitButton.removeAttribute("disabled");
+      submitButton.removeAttribute('disabled');
     }
 
     return validation;
@@ -723,15 +723,15 @@ import { version as sdkVersion } from "../../package.json";
 
     fields.forEach((field) => {
       const input = IDInfoForm.querySelector(`#${field}`);
-      input.setAttribute("aria-invalid", "true");
-      input.setAttribute("aria-describedby", `${field}-hint`);
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', `${field}-hint`);
 
-      const errorDiv = document.createElement("div");
-      errorDiv.setAttribute("id", `${field}-hint`);
-      errorDiv.setAttribute("class", "validation-message");
+      const errorDiv = document.createElement('div');
+      errorDiv.setAttribute('id', `${field}-hint`);
+      errorDiv.setAttribute('class', 'validation-message');
       errorDiv.textContent = errors[field][0];
 
-      input.insertAdjacentElement("afterend", errorDiv);
+      input.insertAdjacentElement('afterend', errorDiv);
     });
   }
 
@@ -740,7 +740,7 @@ import { version as sdkVersion } from "../../package.json";
       event.preventDefault();
       resetForm();
     }
-    const form = IDInfoForm.querySelector("form");
+    const form = IDInfoForm.querySelector('form');
 
     const formData = new FormData(form);
     const payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
@@ -765,7 +765,7 @@ import { version as sdkVersion } from "../../package.json";
       complete();
     } catch (error) {
       if (event && event.target) event.target.disabled = false;
-      displayErrorMessage("Something went wrong");
+      displayErrorMessage('Something went wrong');
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -773,14 +773,14 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
 
     p.textContent = message;
-    p.classList.add("validation-message");
-    p.style.fontSize = "1.5rem";
-    p.style.textAlign = "center";
+    p.classList.add('validation-message');
+    p.style.fontSize = '1.5rem';
+    p.style.textAlign = 'center';
 
-    const main = document.querySelector("main");
+    const main = document.querySelector('main');
     main.prepend(p);
   }
 
@@ -798,7 +798,7 @@ import { version as sdkVersion } from "../../package.json";
       partner_id,
       callback_url,
       token,
-      source_sdk: config.sdk || "hosted_web",
+      source_sdk: config.sdk || 'hosted_web',
       source_sdk_version: config.sdk_version || sdkVersion,
       partner_params: {
         ...partner_params,
@@ -818,7 +818,7 @@ import { version as sdkVersion } from "../../package.json";
     const idTypeName =
       productConstraints[id_info.country].id_types[id_info.id_type].label;
 
-    const thankYouMessage = CompleteScreen.querySelector("#thank-you-message");
+    const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
     thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
 
     setActiveScreen(CompleteScreen);
@@ -828,12 +828,12 @@ import { version as sdkVersion } from "../../package.json";
 
   function closeWindow(userTriggered) {
     const message = userTriggered
-      ? "SmileIdentity::Close"
-      : "SmileIdentity::Close::System";
-    referenceWindow.postMessage(message, "*");
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    referenceWindow.postMessage(message, '*');
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 })();

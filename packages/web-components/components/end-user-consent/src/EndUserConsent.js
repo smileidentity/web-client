@@ -411,8 +411,8 @@ function templateString() {
         <p>
           You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
           <a class='theme' href='${
-  this.partnerPolicyURL
-}' rel='noreferer noopener' target='_blank'>here</a>
+            this.partnerPolicyURL
+          }' rel='noreferer noopener' target='_blank'>here</a>
         </p>
 
         <p style='--flow-space: .75rem'>
@@ -632,26 +632,35 @@ class EndUserConsent extends HTMLElement {
 
     this.allowButton = this.shadowRoot.querySelector('#allow');
     this.rejectButton = this.shadowRoot.querySelector('#cancel');
-    this.backToConsentButton = this.shadowRoot.querySelector('#back-to-consent');
+    this.backToConsentButton =
+      this.shadowRoot.querySelector('#back-to-consent');
     this.confirmConsentRejectionButton = this.shadowRoot.querySelector(
       '#confirm-consent-rejection',
     );
     this.backButton = this.shadowRoot.querySelector('#back-button');
-    const CloseIframeButtons = this.shadowRoot.querySelectorAll('.close-iframe');
+    const CloseIframeButtons =
+      this.shadowRoot.querySelectorAll('.close-iframe');
 
-    this.allowButton.addEventListener('click', (e) => this.handleConsentGrant(e));
-    this.rejectButton.addEventListener('click', (e) => this.handleConsentGrant(e));
+    this.allowButton.addEventListener('click', (e) =>
+      this.handleConsentGrant(e),
+    );
+    this.rejectButton.addEventListener('click', (e) =>
+      this.handleConsentGrant(e),
+    );
 
-    this.backToConsentButton.addEventListener('click', () => this.setActiveScreen(this.consentScreen));
-    this.confirmConsentRejectionButton.addEventListener('click', (e) => this.handleConsentRejection(e));
+    this.backToConsentButton.addEventListener('click', () =>
+      this.setActiveScreen(this.consentScreen),
+    );
+    this.confirmConsentRejectionButton.addEventListener('click', (e) =>
+      this.handleConsentRejection(e),
+    );
 
     this.totpConsentApp.addEventListener(
       'end-user-consent.totp.denied.contact-methods-outdated',
       (e) => this.handleTotpConsentEvents(e),
     );
-    this.totpConsentApp.addEventListener(
-      'end-user-consent.totp.granted',
-      (e) => this.handleTotpConsentEvents(e),
+    this.totpConsentApp.addEventListener('end-user-consent.totp.granted', (e) =>
+      this.handleTotpConsentEvents(e),
     );
     this.totpConsentApp.addEventListener(
       'end-user-consent.totp.cancelled',

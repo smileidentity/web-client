@@ -13,9 +13,10 @@ class SmartFileUpload {
       units.length - 1,
     );
     const approx = numberOfBytes / 1024 ** exponent;
-    const output = exponent === 0
-      ? `${numberOfBytes} bytes`
-      : `${approx.toFixed(0)} ${units[exponent]}`;
+    const output =
+      exponent === 0
+        ? `${numberOfBytes} bytes`
+        : `${approx.toFixed(0)} ${units[exponent]}`;
 
     return output;
   }
@@ -251,12 +252,14 @@ button:disabled {
     const componentMaxInlineSize = 30 * remInPx; // 30rem from the style declaration
     const aspectRatio = 2; // 2 from the canvas style aspect ratio declaration
 
-    canvas.width = containerWidth < componentMaxInlineSize
-      ? containerWidth
-      : componentMaxInlineSize;
-    canvas.height = (containerWidth < componentMaxInlineSize
-      ? containerWidth
-      : componentMaxInlineSize) / aspectRatio;
+    canvas.width =
+      containerWidth < componentMaxInlineSize
+        ? containerWidth
+        : componentMaxInlineSize;
+    canvas.height =
+      (containerWidth < componentMaxInlineSize
+        ? containerWidth
+        : componentMaxInlineSize) / aspectRatio;
 
     canvas.setAttribute('id', 'signature-canvas');
     canvas.setAttribute('part', 'canvas');
@@ -328,21 +331,35 @@ button:disabled {
 
     // Signature Pad Controls
     this.clearSignatureButton = signatureControls.querySelector('#clear');
-    this.clearSignatureButton.addEventListener('click', () => this.clearSignature());
+    this.clearSignatureButton.addEventListener('click', () =>
+      this.clearSignature(),
+    );
 
     // Upload Controls
-    this.uploadSignatureButton = uploadControl.querySelector('#upload-signature');
-    this.uploadSignatureButton.addEventListener('change', (event) => this.uploadSignature(event));
+    this.uploadSignatureButton =
+      uploadControl.querySelector('#upload-signature');
+    this.uploadSignatureButton.addEventListener('change', (event) =>
+      this.uploadSignature(event),
+    );
 
     // Publish Signature
-    this.publishSignatureButton = publishSignatureContainer.querySelector('#publish');
-    this.publishSignatureButton.addEventListener('click', () => this.publishSignature());
+    this.publishSignatureButton =
+      publishSignatureContainer.querySelector('#publish');
+    this.publishSignatureButton.addEventListener('click', () =>
+      this.publishSignature(),
+    );
   }
 
   disconnectedCallback() {
-    this.publishSignatureButton.removeEventListener('click', () => this.publishSignature());
-    this.clearSignatureButton.removeEventListener('click', () => this.clearSignature());
-    this.uploadSignatureButton.removeEventListener('change', (event) => this.uploadSignature(event));
+    this.publishSignatureButton.removeEventListener('click', () =>
+      this.publishSignature(),
+    );
+    this.clearSignatureButton.removeEventListener('click', () =>
+      this.clearSignature(),
+    );
+    this.uploadSignatureButton.removeEventListener('change', (event) =>
+      this.uploadSignature(event),
+    );
   }
 
   // Adjust canvas coordinate space taking into account pixel ratio,

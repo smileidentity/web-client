@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import esbuild from "esbuild";
+import fs from 'fs';
+import path from 'path';
+import esbuild from 'esbuild';
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -44,7 +44,7 @@ const copySync = (srcDir, destDir, filterFn) => {
 const copyFiles = (srcDir, pattern, destDir) => {
   const files = fs
     .readdirSync(srcDir)
-    .filter((file) => file.match(new RegExp(pattern.replace("*", ".*"))));
+    .filter((file) => file.match(new RegExp(pattern.replace('*', '.*'))));
   files.forEach((file) => {
     const srcPath = path.join(srcDir, file);
     const destPath = path.join(destDir, file);
@@ -58,11 +58,11 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * and copies necessary files.
  */
 const prebuildDist = () => {
-  if (fs.existsSync("dist")) {
-    fs.rmSync("build", { recursive: true });
+  if (fs.existsSync('dist')) {
+    fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync("dist");
-  copySync("src", "dist", (file) => !file.endsWith(".js"));
+  ensureDirSync('dist');
+  copySync('src', 'dist', (file) => !file.endsWith('.js'));
 };
 
 /**
@@ -71,19 +71,19 @@ const prebuildDist = () => {
  * copies necessary files, and copies HTML pages from cypress.
  */
 const prebuild = () => {
-  if (fs.existsSync("build")) {
-    fs.rmSync("build", { recursive: true });
+  if (fs.existsSync('build')) {
+    fs.rmSync('build', { recursive: true });
   }
-  ensureDirSync("build");
-  copySync("src", "build", (file) => !file.endsWith(".js"));
-  copyFiles("cypress/pages", "*.html", "build");
+  ensureDirSync('build');
+  copySync('src', 'build', (file) => !file.endsWith('.js'));
+  copyFiles('cypress/pages', '*.html', 'build');
 };
 
 const files = fs
-  .readdirSync("src/js/", { recursive: true })
-  .filter((file) => file.endsWith(".js"));
+  .readdirSync('src/js/', { recursive: true })
+  .filter((file) => file.endsWith('.js'));
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   prebuild();
 } else {
   prebuildDist();
@@ -91,7 +91,7 @@ if (process.env.NODE_ENV === "development") {
 
 const devOptions = {
   bundle: true,
-  minify: process.env.MINIFY === "true",
+  minify: process.env.MINIFY === 'true',
 };
 
 const prodOptions = {
@@ -100,10 +100,10 @@ const prodOptions = {
 };
 
 files.forEach((file) => {
-  const baseName = path.basename(file, ".js");
+  const baseName = path.basename(file, '.js');
   const dir = path.dirname(file);
 
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === 'development') {
     esbuild.build({
       ...devOptions,
       entryPoints: [`src/js/${file}`],

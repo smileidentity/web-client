@@ -38,10 +38,14 @@ class SmartCameraWeb extends HTMLElement {
       },
     };
 
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+    if (
+      'mediaDevices' in navigator &&
+      'getUserMedia' in navigator.mediaDevices
+    ) {
       this.setUpEventListeners();
     } else {
-      this.shadowRoot.innerHTML = '<h1 class="error-message">Your browser does not support this integration</h1>';
+      this.shadowRoot.innerHTML =
+        '<h1 class="error-message">Your browser does not support this integration</h1>';
     }
   }
 
@@ -55,27 +59,36 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['document-capture-modes', 'document-type', 'hide-back-to-host', 'show-navigation'];
+    return [
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
+    ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'document-capture-modes':
-    case 'document-type':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
   setUpEventListeners() {
     this.cameraPermission = this.shadowRoot.querySelector('camera-permission');
-    this.SelfieCaptureScreens = this.shadowRoot.querySelector('selfie-capture-screens');
-    this.documentCapture = this.shadowRoot.querySelector('document-capture-screens');
+    this.SelfieCaptureScreens = this.shadowRoot.querySelector(
+      'selfie-capture-screens',
+    );
+    this.documentCapture = this.shadowRoot.querySelector(
+      'document-capture-screens',
+    );
 
     if (this.hideInstructions) {
       this.setActiveScreen(this.cameraPermission);
@@ -88,29 +101,50 @@ class SmartCameraWeb extends HTMLElement {
       this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
     });
 
-    this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.publish', (event) => {
-      this._data.images = event.detail.images;
-      this.setActiveScreen(this.documentCapture);
-    });
+    this.SelfieCaptureScreens.addEventListener(
+      'selfie-capture-screens.publish',
+      (event) => {
+        this._data.images = event.detail.images;
+        this.setActiveScreen(this.documentCapture);
+      },
+    );
 
-    this.SelfieCaptureScreens.addEventListener('selfie-capture-screens.cancelled', () => {
-      this.handleBackEvents();
-    });
+    this.SelfieCaptureScreens.addEventListener(
+      'selfie-capture-screens.cancelled',
+      () => {
+        this.handleBackEvents();
+      },
+    );
 
-    this.documentCapture.addEventListener('document-capture-screens.publish', (event) => {
-      this._data.images = [...this._data.images, ...event.detail.images];
-      this._publishSelectedImages();
-    });
+    this.documentCapture.addEventListener(
+      'document-capture-screens.publish',
+      (event) => {
+        this._data.images = [...this._data.images, ...event.detail.images];
+        this._publishSelectedImages();
+      },
+    );
 
-    this.documentCapture.addEventListener('document-capture-screens.cancelled', () => {
-      this.SelfieCaptureScreens.setAttribute('initial-screen', 'selfie-capture');
-      this.setActiveScreen(this.SelfieCaptureScreens);
-      this.SelfieCaptureScreens.removeAttribute('data-camera-error');
-      this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
-    });
+    this.documentCapture.addEventListener(
+      'document-capture-screens.cancelled',
+      () => {
+        this.SelfieCaptureScreens.setAttribute(
+          'initial-screen',
+          'selfie-capture',
+        );
+        this.setActiveScreen(this.SelfieCaptureScreens);
+        this.SelfieCaptureScreens.removeAttribute('data-camera-error');
+        this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
+      },
+    );
 
-    [this.cameraPermission, this.SelfieCaptureScreens, this.documentCapture].forEach((screen) => {
-      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () => this.handleCloseEvent());
+    [
+      this.cameraPermission,
+      this.SelfieCaptureScreens,
+      this.documentCapture,
+    ].forEach((screen) => {
+      screen.addEventListener(`${screen.nodeName.toLowerCase()}.close`, () =>
+        this.handleCloseEvent(),
+      );
     });
   }
 
@@ -154,7 +188,9 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get disableImageTests() {
-    return this.hasAttribute('disable-image-tests') ? 'disable-image-tests' : '';
+    return this.hasAttribute('disable-image-tests')
+      ? 'disable-image-tests'
+      : '';
   }
 
   get hideAttribution() {

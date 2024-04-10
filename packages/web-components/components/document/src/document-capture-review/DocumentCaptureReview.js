@@ -218,13 +218,15 @@ function templateString() {
     <div class='section | flow'>
       <div class='id-video-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
         ${
-  this.imageSrc
-    ? `<img
+          this.imageSrc
+            ? `<img
     alt='your ID card'
     id='document-capture-review-image'
     src='${this.imageSrc}'
     width='396'
-    />` : ''}
+    />`
+            : ''
+        }
     <div class='overlay'></div>
       </div>
       <div class='flow action-buttons'>
@@ -237,12 +239,12 @@ function templateString() {
       </div>
 
       ${
-  this.hideAttribution
-    ? ''
-    : `
+        this.hideAttribution
+          ? ''
+          : `
         <powered-by-smile-id></powered-by-smile-id>
       `
-}
+      }
     </div>
   </div>
   `;
@@ -303,14 +305,14 @@ class IdReview extends HTMLElement {
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-image':
-    case 'hide-back-to-host':
-    case 'show-navigation':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'data-image':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 
@@ -345,7 +347,10 @@ class IdReview extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !customElements.get('document-capture-review')) {
+if (
+  'customElements' in window &&
+  !customElements.get('document-capture-review')
+) {
   window.customElements.define('document-capture-review', IdReview);
 }
 

@@ -1,29 +1,29 @@
-import "@smile_identity/smart-camera-web";
-import JSZip from "jszip";
-import { version as sdkVersion } from "../../package.json";
+import '@smile_identity/smart-camera-web';
+import JSZip from 'jszip';
+import { version as sdkVersion } from '../../package.json';
 
 (function SmartSelfie() {
-  "use strict";
+  'use strict';
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   const labels = {
     2: {
-      title: "SmartSelfie™ Authentication",
-      upload: "Authenticating User",
+      title: 'SmartSelfie™ Authentication',
+      upload: 'Authenticating User',
     },
     4: {
-      title: "SmartSelfie™ Registration",
-      upload: "Registering User",
+      title: 'SmartSelfie™ Registration',
+      upload: 'Registering User',
     },
   };
   let config;
@@ -32,26 +32,26 @@ import { version as sdkVersion } from "../../package.json";
   let images;
   let partner_params;
 
-  const SmartCameraWeb = document.querySelector("smart-camera-web");
+  const SmartCameraWeb = document.querySelector('smart-camera-web');
   const UploadProgressScreen = document.querySelector(
-    "#upload-progress-screen",
+    '#upload-progress-screen',
   );
-  const UploadFailureScreen = document.querySelector("#upload-failure-screen");
-  const CompleteScreen = document.querySelector("#complete-screen");
+  const UploadFailureScreen = document.querySelector('#upload-failure-screen');
+  const CompleteScreen = document.querySelector('#complete-screen');
 
-  const CloseIframeButton = document.querySelector("#close-iframe");
-  const RetryUploadButton = document.querySelector("#retry-upload");
+  const CloseIframeButton = document.querySelector('#close-iframe');
+  const RetryUploadButton = document.querySelector('#retry-upload');
 
   let fileToUpload;
   let uploadURL;
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity::Configuration")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
         partner_params = getPartnerParams();
@@ -63,10 +63,10 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   SmartCameraWeb.addEventListener(
-    "imagesComputed",
+    'imagesComputed',
     (event) => {
       images = event.detail.images;
-      const title = document.querySelector("#uploadTitle");
+      const title = document.querySelector('#uploadTitle');
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
@@ -75,7 +75,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   RetryUploadButton.addEventListener(
-    "click",
+    'click',
     () => {
       retryUpload();
     },
@@ -83,7 +83,7 @@ import { version as sdkVersion } from "../../package.json";
   );
 
   CloseIframeButton.addEventListener(
-    "click",
+    'click',
     () => {
       closeWindow(true);
     },
@@ -104,15 +104,15 @@ import { version as sdkVersion } from "../../package.json";
      * 5. decode the URI Component to a JSON string
      * 6. parse the JSON string to a javascript object
      */
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
-        .split("")
+        .split('')
         .map(function (c) {
           return `%${c.charCodeAt(0).toString(16)}`;
         })
-        .join(""),
+        .join(''),
     );
 
     return JSON.parse(jsonPayload);
@@ -131,7 +131,7 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   async function handleFormSubmit() {
-    const errorMessage = document.querySelector(".validation-message");
+    const errorMessage = document.querySelector('.validation-message');
     if (errorMessage) errorMessage.remove();
 
     try {
@@ -141,7 +141,7 @@ import { version as sdkVersion } from "../../package.json";
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage("Something went wrong");
+      displayErrorMessage('Something went wrong');
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -149,14 +149,14 @@ import { version as sdkVersion } from "../../package.json";
   }
 
   function displayErrorMessage(message) {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
 
     p.textContent = message;
-    p.style.color = "red";
-    p.style.fontSize = "1.5rem";
-    p.style.textAlign = "center";
+    p.style.color = 'red';
+    p.style.fontSize = '1.5rem';
+    p.style.textAlign = 'center';
 
-    const main = document.querySelector("main");
+    const main = document.querySelector('main');
     main.prepend(p);
   }
 
@@ -164,10 +164,10 @@ import { version as sdkVersion } from "../../package.json";
     const zip = new JSZip();
 
     zip.file(
-      "info.json",
+      'info.json',
       JSON.stringify({
         package_information: {
-          language: "Hosted Web Integration",
+          language: 'Hosted Web Integration',
           apiVersion: {
             buildNumber: 0,
             majorVersion: 2,
@@ -180,17 +180,17 @@ import { version as sdkVersion } from "../../package.json";
     );
 
     try {
-      const zipFile = await zip.generateAsync({ type: "blob" });
+      const zipFile = await zip.generateAsync({ type: 'blob' });
 
       return zipFile;
     } catch (error) {
-      throw new Error("createZip failed", { cause: error });
+      throw new Error('createZip failed', { cause: error });
     }
   }
 
   async function getUploadURL() {
     const payload = {
-      source_sdk: config.sdk || "hosted_web",
+      source_sdk: config.sdk || 'hosted_web',
       source_sdk_version: config.sdk_version || sdkVersion,
       file_name: `${config.product}.zip`,
       smile_client_id: config.partner_details.partner_id,
@@ -200,13 +200,13 @@ import { version as sdkVersion } from "../../package.json";
     };
 
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(payload),
     };
 
@@ -223,15 +223,15 @@ import { version as sdkVersion } from "../../package.json";
   function uploadZip(file, destination) {
     // CREDIT: Inspiration - https://usefulangle.com/post/321/javascript-fetch-upload-progress
     const request = new XMLHttpRequest();
-    request.open("PUT", destination);
+    request.open('PUT', destination);
 
-    request.upload.addEventListener("load", function () {
+    request.upload.addEventListener('load', function () {
       return request.response;
     });
 
-    request.upload.addEventListener("error", function (e) {
+    request.upload.addEventListener('error', function (e) {
       setActiveScreen(UploadFailureScreen);
-      throw new Error("uploadZip failed", { cause: e });
+      throw new Error('uploadZip failed', { cause: e });
     });
 
     request.onreadystatechange = function () {
@@ -248,11 +248,11 @@ import { version as sdkVersion } from "../../package.json";
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error("uploadZip failed", { cause: request });
+        throw new Error('uploadZip failed', { cause: request });
       }
     };
 
-    request.setRequestHeader("Content-type", "application/zip");
+    request.setRequestHeader('Content-type', 'application/zip');
     request.send(file);
   }
 
@@ -264,12 +264,12 @@ import { version as sdkVersion } from "../../package.json";
 
   function closeWindow(userTriggered) {
     const message = userTriggered
-      ? "SmileIdentity::Close"
-      : "SmileIdentity::Close::System";
-    referenceWindow.postMessage(message, "*");
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    referenceWindow.postMessage(message, '*');
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage("SmileIdentity::Success", "*");
+    referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 })();

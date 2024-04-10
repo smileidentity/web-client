@@ -8,7 +8,9 @@ const require = createRequire(import.meta.url);
 const { exports } = require('./package.json');
 
 // Get the paths from the exports field
-const exportPaths = Object.values(exports).map((filePath) => path.join(process.cwd(), filePath));
+const exportPaths = Object.values(exports).map((filePath) =>
+  path.join(process.cwd(), filePath),
+);
 
 /**
  * Ensures a directory exists. If not, creates it.

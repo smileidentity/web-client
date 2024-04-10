@@ -324,7 +324,7 @@ class DocumentCapture extends HTMLElement {
       const cropWidth = paddedWidth;
       const cropHeight = paddedHeight;
       const cropLeft = 0;
-      const cropTop = (canvas.height) / 2 - (paddedHeight / 2);
+      const cropTop = canvas.height / 2 - paddedHeight / 2;
 
       // Create a new canvas element for the cropped image
       const croppedCanvas = document.createElement('canvas');
@@ -333,11 +333,25 @@ class DocumentCapture extends HTMLElement {
 
       // Draw the cropped image onto the new canvas
       const croppedCtx = croppedCanvas.getContext('2d');
-      croppedCtx.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      croppedCtx.drawImage(
+        canvas,
+        cropLeft,
+        cropTop,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight,
+      );
       const image = croppedCanvas.toDataURL('image/jpeg');
 
-      const videoContainer = this.shadowRoot.querySelector('.id-video-container');
-      const oldCroppedImage = videoContainer.querySelector('image#preview-cropped-image');
+      const videoContainer = this.shadowRoot.querySelector(
+        '.id-video-container',
+      );
+      const oldCroppedImage = videoContainer.querySelector(
+        'image#preview-cropped-image',
+      );
       if (oldCroppedImage) {
         videoContainer.removeChild(oldCroppedImage);
       }
@@ -354,7 +368,7 @@ class DocumentCapture extends HTMLElement {
       };
     }
 
-    const height = (canvas.width / (video.videoWidth / video.videoHeight));
+    const height = canvas.width / (video.videoWidth / video.videoHeight);
     canvas.height = height;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -408,7 +422,10 @@ class DocumentCapture extends HTMLElement {
     }
     const videoContainer = this.shadowRoot.querySelector('.id-video');
     const MIN_WIDTH = 272;
-    const width = videoContainer.clientWidth < MIN_WIDTH ? MIN_WIDTH : videoContainer.clientWidth;
+    const width =
+      videoContainer.clientWidth < MIN_WIDTH
+        ? MIN_WIDTH
+        : videoContainer.clientWidth;
     video.style.width = `${width}px`;
     video.style.display = 'block';
     video.muted = true;
@@ -429,7 +446,10 @@ class DocumentCapture extends HTMLElement {
     const onVideoStart = () => {
       const {
         aspectRatio,
-        offsetHeight, offsetWidth, videoHeight, videoWidth,
+        offsetHeight,
+        offsetWidth,
+        videoHeight,
+        videoWidth,
       } = this._calculateVideoOffset(video);
       const portrait = aspectRatio < 1;
 
@@ -494,7 +514,8 @@ class DocumentCapture extends HTMLElement {
     const aspectRatio = video.videoWidth / video.videoHeight;
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
-    const videoHeight = (video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio));
+    const videoHeight =
+      video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio);
     const originalWidth = video.videoWidth;
     const originalHeight = video.videoWidth / fixedAspectRatio;
 
@@ -565,7 +586,10 @@ class DocumentCapture extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || `${this.IdSides[this.sideOfId]} of ${this.documentName}`;
+    return (
+      this.getAttribute('title') ||
+      `${this.IdSides[this.sideOfId]} of ${this.documentName}`
+    );
   }
 
   get hidden() {
@@ -615,17 +639,17 @@ class DocumentCapture extends HTMLElement {
 
   attributeChangedCallback(name) {
     switch (name) {
-    case 'data-camera-error':
-    case 'data-camera-ready':
-    case 'document-name':
-    case 'document-type':
-    case 'hidden':
-    case 'title':
-      this.shadowRoot.innerHTML = this.render();
-      this.setUpEventListeners();
-      break;
-    default:
-      break;
+      case 'data-camera-error':
+      case 'data-camera-ready':
+      case 'document-name':
+      case 'document-type':
+      case 'hidden':
+      case 'title':
+        this.shadowRoot.innerHTML = this.render();
+        this.setUpEventListeners();
+        break;
+      default:
+        break;
     }
   }
 

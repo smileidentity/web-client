@@ -25,229 +25,229 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 // -- Get iFrame body
-Cypress.Commands.add("getIFrameBody", () => {
-  cy.log("getIFrameBody");
+Cypress.Commands.add('getIFrameBody', () => {
+  cy.log('getIFrameBody');
 
   return cy
     .get('iframe[data-cy="smile-identity-hosted-web-integration"]', {
       log: false,
     })
-    .its("0.contentDocument.body", { log: false })
-    .should("not.be.empty")
+    .its('0.contentDocument.body', { log: false })
+    .should('not.be.empty')
     .then((body) => cy.wrap(body, { log: false }));
 });
 
-Cypress.Commands.add("loadIDOptions", () => {
-  cy.log("loadingIDOptions");
+Cypress.Commands.add('loadIDOptions', () => {
+  cy.log('loadingIDOptions');
 
-  cy.intercept("GET", "**/v1/services", { fixture: "services.json" });
+  cy.intercept('GET', '**/v1/services', { fixture: 'services.json' });
 
-  cy.intercept("POST", "**/v1/valid_documents", {
-    fixture: "valid_documents.json",
+  cy.intercept('POST', '**/v1/valid_documents', {
+    fixture: 'valid_documents.json',
   });
 
-  cy.intercept("POST", "**/v1/products_config", {
-    fixture: "products_config.json",
+  cy.intercept('POST', '**/v1/products_config', {
+    fixture: 'products_config.json',
   });
 
-  cy.intercept("POST", "**/v1/totp_consent", {
+  cy.intercept('POST', '**/v1/totp_consent', {
     statusCode: 200,
     body: {
-      message: "Select OTP Delivery Mode",
+      message: 'Select OTP Delivery Mode',
       modes: [
         {
-          sms: "08001****67",
+          sms: '08001****67',
         },
         {
-          email: "fa*****il@gmail.com",
+          email: 'fa*****il@gmail.com',
         },
       ],
-      session_id: "0000000000000",
+      session_id: '0000000000000',
       success: true,
     },
   });
 
-  cy.intercept("POST", "**/v1/totp_consent/mode", {
+  cy.intercept('POST', '**/v1/totp_consent/mode', {
     statusCode: 200,
     body: {
-      message: "OTP Delivery Mode Selected",
+      message: 'OTP Delivery Mode Selected',
       success: true,
     },
   });
 
-  cy.intercept("POST", "**/v1/totp_consent/otp", {
+  cy.intercept('POST', '**/v1/totp_consent/otp', {
     statusCode: 200,
     body: {
-      message: "OTP Confirmed",
+      message: 'OTP Confirmed',
       success: true,
     },
   });
 });
 
-Cypress.Commands.add("selectBVNIDType", () => {
+Cypress.Commands.add('selectBVNIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingBVNIDType");
+  cy.log('selectingBVNIDType');
 
-  cy.getIFrameBody().find("#country").select("NG");
+  cy.getIFrameBody().find('#country').select('NG');
 
-  cy.getIFrameBody().find("#id_type").select("BVN");
+  cy.getIFrameBody().find('#id_type').select('BVN');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectBVNMFAIDType", () => {
+Cypress.Commands.add('selectBVNMFAIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingBVNMFAIDType");
+  cy.log('selectingBVNMFAIDType');
 
-  cy.getIFrameBody().find("#country").select("NG");
+  cy.getIFrameBody().find('#country').select('NG');
 
-  cy.getIFrameBody().find("#id_type").select("BVN_MFA");
+  cy.getIFrameBody().find('#id_type').select('BVN_MFA');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectNINIDType", () => {
+Cypress.Commands.add('selectNINIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingNINIDType");
+  cy.log('selectingNINIDType');
 
-  cy.getIFrameBody().find("#country").select("NG");
+  cy.getIFrameBody().find('#country').select('NG');
 
-  cy.getIFrameBody().find("#id_type").select("NIN");
+  cy.getIFrameBody().find('#id_type').select('NIN');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectVOTERIDType", () => {
+Cypress.Commands.add('selectVOTERIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingVoterIdType");
+  cy.log('selectingVoterIdType');
 
-  cy.getIFrameBody().find("#country").select("NG");
+  cy.getIFrameBody().find('#country').select('NG');
 
-  cy.getIFrameBody().find("#id_type").select("VOTER_ID");
+  cy.getIFrameBody().find('#id_type').select('VOTER_ID');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectPASSPORTIDType", () => {
+Cypress.Commands.add('selectPASSPORTIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingPASSPORTIDType");
+  cy.log('selectingPASSPORTIDType');
 
-  cy.getIFrameBody().find("smileid-combobox-trigger input").type("Nigeria");
+  cy.getIFrameBody().find('smileid-combobox-trigger input').type('Nigeria');
 
   cy.getIFrameBody().find('smileid-combobox-option[value="NG"]').click();
 
-  cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+  cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
   cy.getIFrameBody().find('smileid-combobox-option[value="PASSPORT"]').click();
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectZAGREENBOOKIDType", () => {
+Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectingPASSPORTIDType");
+  cy.log('selectingPASSPORTIDType');
 
   cy.getIFrameBody()
-    .find("smileid-combobox-trigger input")
-    .type("South Africa");
+    .find('smileid-combobox-trigger input')
+    .type('South Africa');
 
   cy.getIFrameBody().find('smileid-combobox-option[value="ZA"]').click();
 
-  cy.getIFrameBody().find("smileid-combobox-trigger > button").click();
+  cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
   cy.getIFrameBody()
     .find('smileid-combobox-option[value="GREEN_BOOK"]')
     .click();
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectKRAType", () => {
+Cypress.Commands.add('selectKRAType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectKRAType");
+  cy.log('selectKRAType');
 
-  cy.getIFrameBody().find("#country").select("KE");
+  cy.getIFrameBody().find('#country').select('KE');
 
-  cy.getIFrameBody().find("#id_type").select("KRA_PIN");
+  cy.getIFrameBody().find('#id_type').select('KRA_PIN');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("selectKEDriversLicenseType", () => {
+Cypress.Commands.add('selectKEDriversLicenseType', () => {
   cy.loadIDOptions();
 
-  cy.log("selectDriversLicenseType");
+  cy.log('selectDriversLicenseType');
 
-  cy.getIFrameBody().find("#country").select("KE");
+  cy.getIFrameBody().find('#country').select('KE');
 
-  cy.getIFrameBody().find("#id_type").select("DRIVERS_LICENSE");
+  cy.getIFrameBody().find('#id_type').select('DRIVERS_LICENSE');
 
-  cy.getIFrameBody().find("#submitConfig").click();
+  cy.getIFrameBody().find('#submitConfig').click();
 });
 
-Cypress.Commands.add("getTotpConsentApp", () => {
+Cypress.Commands.add('getTotpConsentApp', () => {
   cy.getIFrameBody()
-    .find("end-user-consent")
+    .find('end-user-consent')
     .shadow()
-    .find("totp-consent")
+    .find('totp-consent')
     .shadow();
 });
 
-Cypress.Commands.add("navigateThroughTotpConsentApp", () => {
-  cy.getIFrameBody().find("end-user-consent").shadow().find("#allow").click();
+Cypress.Commands.add('navigateThroughTotpConsentApp', () => {
+  cy.getIFrameBody().find('end-user-consent').shadow().find('#allow').click();
 
-  cy.getTotpConsentApp().find("#id_number").type("00000000000");
+  cy.getTotpConsentApp().find('#id_number').type('00000000000');
 
-  cy.getTotpConsentApp().find("#query-otp-modes").click();
+  cy.getTotpConsentApp().find('#query-otp-modes').click();
 
   cy.getTotpConsentApp()
     .find('form[name="select-mode-form"]')
-    .should("be.visible");
+    .should('be.visible');
 
-  cy.getTotpConsentApp().find('[type="radio"]').check("email");
+  cy.getTotpConsentApp().find('[type="radio"]').check('email');
 
-  cy.getTotpConsentApp().find("#select-otp-mode").click();
+  cy.getTotpConsentApp().find('#select-otp-mode').click();
 
-  cy.getTotpConsentApp().find("#submit-otp").should("be.visible");
+  cy.getTotpConsentApp().find('#submit-otp').should('be.visible');
 
-  cy.getTotpConsentApp().find("#totp-token").type("000000");
+  cy.getTotpConsentApp().find('#totp-token').type('000000');
 
-  cy.getTotpConsentApp().find("#submit-otp").click();
+  cy.getTotpConsentApp().find('#submit-otp').click();
 });
 
-Cypress.Commands.add("navigateThroughCameraScreens", () => {
-  cy.log("SmartCameraWeb: disable image tests");
+Cypress.Commands.add('navigateThroughCameraScreens', () => {
+  cy.log('SmartCameraWeb: disable image tests');
 
   cy.getIFrameBody()
-    .find("smart-camera-web")
-    .invoke("attr", "disable-image-tests", "true");
+    .find('smart-camera-web')
+    .invoke('attr', 'disable-image-tests', 'true');
 
-  cy.log("navigatingThroughCameraScreens");
+  cy.log('navigatingThroughCameraScreens');
 
   cy.getIFrameBody()
-    .find("smart-camera-web")
+    .find('smart-camera-web')
     .shadow()
-    .find("#request-camera-access")
+    .find('#request-camera-access')
     .click();
 
   cy.getIFrameBody()
-    .find("smart-camera-web")
+    .find('smart-camera-web')
     .shadow()
-    .find("#start-image-capture")
+    .find('#start-image-capture')
     .click();
 
   cy.wait(4000);
 
   cy.getIFrameBody()
-    .find("smart-camera-web")
+    .find('smart-camera-web')
     .shadow()
-    .find("#select-selfie")
+    .find('#select-selfie')
     .click();
 });

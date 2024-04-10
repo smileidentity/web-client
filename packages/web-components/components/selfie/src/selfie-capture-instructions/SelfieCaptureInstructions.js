@@ -552,12 +552,12 @@ function templateString() {
        </section>
     </div>
     ${
-  this.hideAttribution
-    ? ''
-    : `
+      this.hideAttribution
+        ? ''
+        : `
     <powered-by-smile-id></powered-by-smile-id>
     `
-}
+    }
   </div>
   `;
 }
@@ -587,7 +587,9 @@ class SelfieCaptureInstructions extends HTMLElement {
 
     if (this.allowButton) {
       this.allowButton.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('selfie-capture-instructions.capture'));
+        this.dispatchEvent(
+          new CustomEvent('selfie-capture-instructions.capture'),
+        );
       });
     }
 
@@ -613,7 +615,9 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 
   handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('selfie-capture-instructions.cancelled'));
+    this.dispatchEvent(
+      new CustomEvent('selfie-capture-instructions.cancelled'),
+    );
   }
 
   get showNavigation() {
@@ -625,8 +629,14 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 }
 
-if ('customElements' in window && !window.customElements.get('selfie-capture-instructions')) {
-  window.customElements.define('selfie-capture-instructions', SelfieCaptureInstructions);
+if (
+  'customElements' in window &&
+  !window.customElements.get('selfie-capture-instructions')
+) {
+  window.customElements.define(
+    'selfie-capture-instructions',
+    SelfieCaptureInstructions,
+  );
 }
 
 export default SelfieCaptureInstructions;

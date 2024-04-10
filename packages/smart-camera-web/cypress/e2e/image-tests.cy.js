@@ -10,35 +10,23 @@ context('SmartCameraWeb - Image Tests', () => {
   });
 
   it('should show an error message when image is unusable', () => {
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#request-camera-access')
-      .click();
+    cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
-    cy
-      .get('smart-camera-web')
-      .shadow()
-      .find('#start-image-capture')
-      .click();
+    cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy
-      .wait(8000);
+    cy.wait(8000);
 
-    cy
-      .get('smart-camera-web')
+    cy.get('smart-camera-web')
       .shadow()
       .find('#camera-screen')
       .should('not.be.visible');
 
-    cy
-      .get('smart-camera-web')
+    cy.get('smart-camera-web')
       .shadow()
       .find('#review-screen')
       .should('not.be.visible');
 
-    cy
-      .get('smart-camera-web')
+    cy.get('smart-camera-web')
       .shadow()
       .find('#failed-image-test-screen')
       .should('be.visible');

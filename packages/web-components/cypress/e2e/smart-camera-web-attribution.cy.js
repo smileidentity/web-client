@@ -1,8 +1,7 @@
 describe('SmartCameraWeb', () => {
   it('shows attribution by default', () => {
     cy.visit('/smart-camera-web');
-    cy
-      .get('smart-camera-web')
+    cy.get('smart-camera-web')
       .shadow()
       .find('selfie-capture-instructions')
       .shadow()
@@ -12,8 +11,7 @@ describe('SmartCameraWeb', () => {
 
   it.only('hides attribution when `hide-attribution` attribute is passed', () => {
     cy.visit('/capture-back-of-id-hide-attribution');
-    cy
-      .get('smart-camera-web')
+    cy.get('smart-camera-web')
       .shadow()
       .find('selfie-capture-instructions')
       .shadow()

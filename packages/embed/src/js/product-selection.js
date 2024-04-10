@@ -1,28 +1,28 @@
 (function productSelection() {
-  "use strict";
+  'use strict';
 
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    sandbox: "https://testapi.smileidentity.com/v1",
-    live: "https://api.smileidentity.com/v1",
-    production: "https://api.smileidentity.com/v1",
+    sandbox: 'https://testapi.smileidentity.com/v1',
+    live: 'https://api.smileidentity.com/v1',
+    production: 'https://api.smileidentity.com/v1',
   };
 
   const referenceWindow = window.parent;
-  referenceWindow.postMessage("SmileIdentity::ChildPageReady", "*");
+  referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   let config;
   let verificationMethodMap;
   let activeScreen;
-  const LoadingScreen = document.querySelector("#loading-screen");
-  const SelectIdType = document.querySelector("#select-id-type");
+  const LoadingScreen = document.querySelector('#loading-screen');
+  const SelectIdType = document.querySelector('#select-id-type');
   const ConfigForm = document.querySelector('form[name="hosted-web-config"]');
-  const CloseIframeButtons = document.querySelectorAll(".close-iframe");
+  const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
   CloseIframeButtons.forEach((button) => {
     button.addEventListener(
-      "click",
+      'click',
       () => {
         closeWindow();
       },
@@ -43,13 +43,13 @@
     };
 
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(payload),
     };
 
@@ -62,19 +62,19 @@
 
       return json.valid_documents;
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
   async function getLegacyProductConstraints() {
     const fetchConfig = {
-      cache: "no-cache",
-      mode: "cors",
+      cache: 'no-cache',
+      mode: 'cors',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      method: "GET",
+      method: 'GET',
     };
 
     try {
@@ -86,7 +86,7 @@
 
       return json.hosted_web;
     } catch (e) {
-      throw new Error("Failed to get supported ID types", { cause: e });
+      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
@@ -161,10 +161,10 @@
   ) {
     if (countryCode) {
       // ACTION: Reset ID Type <select>
-      idTypeSelector.innerHTML = "";
-      const initialOption = document.createElement("option");
-      initialOption.setAttribute("value", "");
-      initialOption.textContent = "--Please Select--";
+      idTypeSelector.innerHTML = '';
+      const initialOption = document.createElement('option');
+      initialOption.setAttribute('value', '');
+      initialOption.textContent = '--Please Select--';
       idTypeSelector.appendChild(initialOption);
 
       // ACTION: Load ID Types as <option>s
@@ -173,13 +173,13 @@
       );
       const isSingleIdType = idTypes.length === 1;
       idTypes.forEach((idType) => {
-        const option = document.createElement("option");
-        option.setAttribute("value", idType);
+        const option = document.createElement('option');
+        option.setAttribute('value', idType);
         option.textContent =
           localVerificationMethodMap[countryCode].id_types[idType].name;
 
         if (isSingleIdType) {
-          option.setAttribute("selected", true);
+          option.setAttribute('selected', true);
         }
 
         idTypeSelector.appendChild(option);
@@ -189,13 +189,13 @@
       idTypeSelector.disabled = false;
     } else {
       // ACTION: Reset ID Type <select>
-      idTypeSelector.innerHTML = "";
+      idTypeSelector.innerHTML = '';
 
       // ACTION: Load the default <option>
-      const option = document.createElement("option");
+      const option = document.createElement('option');
       option.disabled = true;
-      option.setAttribute("value", "");
-      option.textContent = "--Select Country First--";
+      option.setAttribute('value', '');
+      option.textContent = '--Select Country First--';
       idTypeSelector.appendChild(option);
     }
   }
@@ -205,10 +205,10 @@
   }
 
   function initializeForm(form, localVerificationMethodMap) {
-    const countrySelector = form.querySelector("#country");
-    const idTypeSelector = form.querySelector("#id_type");
+    const countrySelector = form.querySelector('#country');
+    const idTypeSelector = form.querySelector('#id_type');
 
-    countrySelector.addEventListener("change", (e) => {
+    countrySelector.addEventListener('change', (e) => {
       loadIdTypes(localVerificationMethodMap, idTypeSelector, e.target.value);
     });
 
@@ -217,12 +217,12 @@
     countries.forEach((countryCode) => {
       const country = localVerificationMethodMap[countryCode];
 
-      const option = document.createElement("option");
-      option.setAttribute("value", countryCode);
+      const option = document.createElement('option');
+      option.setAttribute('value', countryCode);
       option.textContent = country.name;
 
       if (isSingleCountry) {
-        option.setAttribute("selected", true);
+        option.setAttribute('selected', true);
         loadIdTypes(localVerificationMethodMap, idTypeSelector, countryCode);
       }
 
@@ -234,48 +234,48 @@
   }
 
   function getSiteURL() {
-    const urlParts = location.href.split("/");
-    const url = urlParts.slice(0, -1).join("/");
+    const urlParts = location.href.split('/');
+    const url = urlParts.slice(0, -1).join('/');
     return `${url}/`;
   }
 
   function getIFrameURL(product) {
     switch (product) {
-      case "biometric_kyc":
-        return "biometric-kyc.html";
-      case "doc_verification":
-        return "doc-verification.html";
-      case "enhanced_document_verification":
-        return "enhanced-document-verification.html";
-      case "enhanced_kyc":
-        return "ekyc.html";
+      case 'biometric_kyc':
+        return 'biometric-kyc.html';
+      case 'doc_verification':
+        return 'doc-verification.html';
+      case 'enhanced_document_verification':
+        return 'enhanced-document-verification.html';
+      case 'enhanced_kyc':
+        return 'ekyc.html';
       default:
-        throw new Error("Unsupported product");
+        throw new Error('Unsupported product');
     }
   }
 
   function createIframe(productName) {
-    const iframe = document.createElement("iframe");
+    const iframe = document.createElement('iframe');
 
-    iframe.setAttribute("src", `${getSiteURL()}${getIFrameURL(productName)}`);
+    iframe.setAttribute('src', `${getSiteURL()}${getIFrameURL(productName)}`);
     iframe.setAttribute(
-      "id",
-      "smile-identity-hosted-web-integration-post-product-selection",
+      'id',
+      'smile-identity-hosted-web-integration-post-product-selection',
     );
     iframe.setAttribute(
-      "name",
-      "smile-identity-hosted-web-integration-post-product-selection",
+      'name',
+      'smile-identity-hosted-web-integration-post-product-selection',
     );
     iframe.setAttribute(
-      "data-cy",
-      "smile-identity-hosted-web-integration-post-product-selection",
+      'data-cy',
+      'smile-identity-hosted-web-integration-post-product-selection',
     );
-    iframe.setAttribute("frameborder", "0");
+    iframe.setAttribute('frameborder', '0');
     iframe.setAttribute(
-      "allow",
-      "camera; geolocation; encrypted-media; fullscreen",
+      'allow',
+      'camera; geolocation; encrypted-media; fullscreen',
     );
-    iframe.setAttribute("allowtransparency", "true");
+    iframe.setAttribute('allowtransparency', 'true');
 
     iframe.style.cssText = `
 			background-color: #F9F0E7;
@@ -292,16 +292,16 @@
   }
 
   function closeWindow() {
-    referenceWindow.postMessage("SmileIdentity::Close", "*");
+    referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 
   function publishMessage() {
     const targetWindow = document.querySelector(
       "[name='smile-identity-hosted-web-integration-post-product-selection']",
     ).contentWindow;
-    config.source = "SmileIdentity::Configuration";
+    config.source = 'SmileIdentity::Configuration';
 
-    targetWindow.postMessage(JSON.stringify(config), "*");
+    targetWindow.postMessage(JSON.stringify(config), '*');
   }
 
   function setProductPage(selectedCountry, selectedIdType) {
@@ -312,24 +312,24 @@
     createIframe(config.product);
   }
 
-  ConfigForm.addEventListener("submit", (e) => {
+  ConfigForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const selectedCountry = ConfigForm.querySelector("#country").value;
-    const selectedIdType = ConfigForm.querySelector("#id_type").value;
+    const selectedCountry = ConfigForm.querySelector('#country').value;
+    const selectedIdType = ConfigForm.querySelector('#id_type').value;
 
     setProductPage(selectedCountry, selectedIdType);
   });
 
   window.addEventListener(
-    "message",
+    'message',
     async (event) => {
       if (
         event.data &&
-        typeof event.data === "string" &&
-        event.data.includes("SmileIdentity")
+        typeof event.data === 'string' &&
+        event.data.includes('SmileIdentity')
       ) {
-        if (event.data.includes("SmileIdentity::Configuration")) {
+        if (event.data.includes('SmileIdentity::Configuration')) {
           config = JSON.parse(event.data);
           activeScreen = LoadingScreen;
 
@@ -345,11 +345,11 @@
             legacyConstraints,
           );
           initializeForm(SelectIdType, verificationMethodMap);
-        } else if (event.data.includes("SmileIdentity::ChildPageReady")) {
+        } else if (event.data.includes('SmileIdentity::ChildPageReady')) {
           publishMessage(config);
         }
       } else {
-        referenceWindow.postMessage(event.detail || event.data, "*");
+        referenceWindow.postMessage(event.detail || event.data, '*');
       }
     },
     false,

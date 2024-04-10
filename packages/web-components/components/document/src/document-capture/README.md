@@ -60,25 +60,27 @@ To receive the images after they have been captured, you can listen to the custo
 
 ```json
 {
- "detail": {
-  "image": "base64 image"
- }
+  "detail": {
+    "image": "base64 image"
+  }
 }
 ```
 
 Usage:
 
 ```js
-document.querySelector('document-capture').addEventListener('document-capture.publish', function(event) {
- console.log(event.detail);
-});
+document
+  .querySelector('document-capture')
+  .addEventListener('document-capture.publish', function (event) {
+    console.log(event.detail);
+  });
 ```
 
 ### Dependencies
 
 The `IdCapture` component depends on the following module:
 
-* SmartCamera
+- SmartCamera
 
 This module is imported when you use the `IdCapture` component in your projects.
 

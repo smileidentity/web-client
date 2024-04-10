@@ -11,9 +11,10 @@ class SmartFileUpload {
       units.length - 1,
     );
     const approx = numberOfBytes / 1024 ** exponent;
-    const output = exponent === 0
-      ? `${numberOfBytes} bytes`
-      : `${approx.toFixed(0)} ${units[exponent]}`;
+    const output =
+      exponent === 0
+        ? `${numberOfBytes} bytes`
+        : `${approx.toFixed(0)} ${units[exponent]}`;
 
     return output;
   }

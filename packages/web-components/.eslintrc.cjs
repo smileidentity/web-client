@@ -6,7 +6,13 @@ module.exports = {
     es2021: true,
   },
   extends: 'airbnb-base',
-  ignorePatterns: ['build/', 'instrumentation', 'dist/', 'libs/', 'node_modules/'],
+  ignorePatterns: [
+    'build/',
+    'instrumentation',
+    'dist/',
+    'libs/',
+    'node_modules/',
+  ],
   overrides: [
     {
       env: {
@@ -22,11 +28,11 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: [
-    'cypress',
-  ],
+  plugins: ['cypress'],
   rules: {
     'class-methods-use-this': 'off',
+    'function-paren-newline': 'off',
+    'implicit-arrow-linebreak': 'off',
     'import/no-extraneous-dependencies': [
       'error',
       {
@@ -38,9 +44,11 @@ module.exports = {
         optionalDependencies: false,
       },
     ],
-    indent: ['error', 2],
+    indent: 0,
     'max-classes-per-file': 'off',
     'max-len': 'off',
+    'object-curly-newline': 'off',
+    'operator-linebreak': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
     'no-param-reassign': 'off',
     'no-plusplus': 'off',

@@ -10,8 +10,8 @@ To get the media stream from the user's camera, call the `getMedia` method with 
 
 ```javascript
 const constraints = {
- video: true,
- audio: false,
+  video: true,
+  audio: false,
 };
 const stream = await SmartCamera.getMedia(constraints);
 ```
@@ -19,18 +19,18 @@ const stream = await SmartCamera.getMedia(constraints);
 `StartCamera` is a singleton so the `stream` can be accessed anytime via `SmartCamera.stream`.
 
 ```javascript
-   let video =  document.createElement('video');
+let video = document.createElement('video');
 
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
+video.autoplay = true;
+video.playsInline = true;
+video.muted = true;
 
-    if ('srcObject' in video) {
-      video.srcObject = stream;
-    } else {
-      video.src = window.URL.createObjectURL(stream);
-    }
-    video.play();
+if ('srcObject' in video) {
+  video.srcObject = stream;
+} else {
+  video.src = window.URL.createObjectURL(stream);
+}
+video.play();
 ```
 
 ### Stopping Media Stream

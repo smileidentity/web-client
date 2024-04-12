@@ -862,6 +862,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleBackEvents() {
+    SmartCamera.stopMedia();
     this.dispatchEvent(new CustomEvent('selfie-capture.cancelled'));
   }
 

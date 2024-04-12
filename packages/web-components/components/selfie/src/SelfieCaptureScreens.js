@@ -29,9 +29,9 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles}
             <div>
-            <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-            <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
-            <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+              <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -85,6 +85,14 @@ class SelfieCaptureScreens extends HTMLElement {
         this.handleBackEvents();
       },
     );
+
+    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      if (this.hideInstructions) {
+        this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
+      } else {
+        this.setActiveScreen(this.selfieInstruction);
+      }
+    });
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
       this.selfieReview.setAttribute('data-image', event.detail.referenceImage);

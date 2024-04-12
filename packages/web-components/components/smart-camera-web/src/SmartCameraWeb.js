@@ -15,7 +15,7 @@ function scwTemplateString() {
     <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost}
     ></selfie-capture-screens>
-    <document-capture-screens ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
+    <document-capture-screens document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -112,7 +112,19 @@ class SmartCameraWeb extends HTMLElement {
     this.SelfieCaptureScreens.addEventListener(
       'selfie-capture-screens.cancelled',
       () => {
-        this.handleBackEvents();
+        if (this.hideInstructions) {
+          this.setActiveScreen(this.cameraPermission);
+        } else {
+          this.handleBackEvents();
+        }
+      },
+    );
+    this.SelfieCaptureScreens.addEventListener(
+      'selfie-capture-screens.back',
+      () => {
+        if (!this.hideInstructions) {
+          this.setActiveScreen(this.cameraPermission);
+        }
       },
     );
 
@@ -146,6 +158,13 @@ class SmartCameraWeb extends HTMLElement {
         this.handleCloseEvent(),
       );
     });
+    this.documentCapture.addEventListener(
+      'document-capture-screens.back',
+      () => {
+        this.setActiveScreen(this.SelfieCaptureScreens);
+        this.reset();
+      },
+    );
   }
 
   reset() {
@@ -153,10 +172,22 @@ class SmartCameraWeb extends HTMLElement {
     this.connectedCallback();
   }
 
+  handleBackEvents() {
+    this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
+  }
+
   _publishSelectedImages() {
     this.dispatchEvent(
       new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
+  }
+
+  get documentType() {
+    return this.getAttribute('document-type');
+  }
+
+  get isPortraitCaptureView() {
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
 
   get hideInstructions() {
@@ -201,10 +232,6 @@ class SmartCameraWeb extends HTMLElement {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
-  }
-
-  handleBackEvents() {
-    this.dispatchEvent(new CustomEvent('smart-camera-web.cancelled'));
   }
 
   handleCloseEvent() {

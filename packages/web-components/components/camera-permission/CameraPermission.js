@@ -7,20 +7,20 @@ function templateString() {
   return `
     ${styles}
     <style>
-        .camera-permission-wrapper {
-            display: flex;
-            justify-content: space-between;
-            flex-direction: column;
+        .camera-permission-screen {
+          padding-block: 2rem;
+          display: flex;
+          flex-direction: column;
+          max-block-size: 100%;
+          max-inline-size: 40ch;
         }
         .camera-permission {
-            padding-block: 2rem;
-            gap: 2rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            max-block-size: 100%;
-            max-width: 307px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          align-items: center;
+          margin-top: auto;
+          margin-bottom: auto;
         }
         .camera-permission svg {
             flex-shrink: 0;
@@ -31,7 +31,7 @@ function templateString() {
             text-align: center;
         }
     </style>
-    <div class='flow center'>
+    <div class='camera-permission-screen flow center'>
         <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <div class='flow center'>
           <p class='color-red | center' id='error'>
@@ -77,7 +77,7 @@ function templateString() {
                 </button>
                 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
             </div>
-            </div>
+          </div>
         </div>
     </div>
     `;

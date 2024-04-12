@@ -21,32 +21,48 @@ function hasMoreThanNColors(data, n = 16) {
 function templateString() {
   return `
     ${styles}
-  <style>
-      .video-section {
-        border: 1px solid transparent;
-        /* border-radius: 0.5rem; */
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 35ch;
-        padding: 0;
-        height: 15rem;
-      }
-
-      .img {
-        transform: scaleX(1);
-      }
-      .selfie-capture-review-image {
+    <style>
+      .visually-hidden {
+        border: 0;
+        clip: rect(1px 1px 1px 1px);
+        clip: rect(1px, 1px, 1px, 1px);
+        height: auto;
+        margin: 0;
         overflow: hidden;
-        aspect-ratio: 1/1;
+        padding: 0;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
       }
 
-      #review-image {
-        scale: 1.75;
+      .mobile-camera-screen video {
+        display: block;
+        object-fit: cover;
+        object-position: center;
+        width: 100%;
       }
 
-      @media (max-aspect-ratio: 1/1) {
-        #review-image {
-          transform: scaleX(-1) translateY(-10%);
+      .id-video.mobile-camera-screen {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        max-height: 200px;
+        height: 180px;
+        width: 100%;
+        overflow: visible;
+        margin: 0 auto;
+      }
+      
+      @media (max-width: 600px) {
+        /*.document-capture-screen {
+          width: 100%;
+          height: 100vh;
+        }*/
+      
+        .section {
+          width: 100%;
+          height: 100vh;
+          justify-content: center;
         }
       }
 
@@ -68,146 +84,67 @@ function templateString() {
 
       .padding-bottom-2 {
         padding-bottom: 2rem;
+      }
+      @media (min-width: 600px) {
+       /* .id-video-container {
+          width: 80%;
+          margin: auto;
+          padding: 0px;
+        }*/
+      
+        video {
+          object-fit: contain;
+          -webkit-tap-highlight-color: transparent;
+          content: normal;
         }
-
-      .instructions {
-        margin-block-start: 2rem;
-        display: flex;
-        align-items: center;
-        text-align: initial;
+      
+        .id-video {
+          width: 100%;
+          min-height: 100px;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        .video-overlay {
+          position: absolute;
+          border-style: solid;
+          border-color: rgba(0, 0, 0, 0.48);
+          box-sizing: border-box;
+          inset: -1px;
+        }
+      
+        .id-video-container {
+          /* width: 50%; */
+          margin: auto;
+          padding: 0px;
+        }
       }
-
-      .instructions svg {
-        flex-shrink: 0;
-        margin-inline-end: 2rem;
-      }
-
-      .instructions p {
-        margin-block: 0;
-      }
-
-      h1 {
-        color: var(--web-digital-blue, #001096);
+      
+      .id-video {
+        width: 100%;
+        min-height: 100px;
         text-align: center;
-
-        /* h1 */
-        font-size: 1.5rem;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 36px; /* 150% */
-      }
-
-      .tip-header {
-        color: var(--web-digital-blue, #001096);
-
-        /* h2 */
-        font-size: 1rem;
-        font-style: normal;
-        font-weight: 700;
-      }
-
-      video {
-        width: 20rem;
-      }
-
-      .id-video-container.portrait {
-        width: 100%;
         position: relative;
-        height: calc(200px * 1.4);
+        background: white;
       }
-  
-      .id-video-container.portrait video {
-        width: calc(213px + 0.9rem);
-        height: 100%;
+      .video-overlay {
         position: absolute;
-        top: 239px;
-        left: 161px;
-        padding-bottom: calc((214px * 1.4) / 3);
-        padding-top: calc((191px * 1.4) / 3);
-        object-fit: cover;
-  
-        transform: translateX(-50%) translateY(-50%);
-        z-index: 1;
-        block-size: 100%;
-      }
-  
-      .video-container,
-      .id-video-container.landscape {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-      }
-  
-      .video-container #smile-cta,
-      .video-container video,
-      .id-video-container.landscape video {
-        left: 50%;
-        min-width: auto;
-        position: absolute;
-        top: calc(50% - 3px);
-        transform: translateX(-50%) translateY(50%);
-      }
-  
-      .video-container #smile-cta {
-        color: white;
-        font-size: 2rem;
-        font-weight: bold;
-        opacity: 0;
-        top: calc(50% - 3rem);
-      }
-  
-      .video-container video {
-        min-height: 100%;
-        transform: scaleX(-1) translateX(50%) translateY(-50%);
-      }
-  
-      .video-container .video {
-        background-color: black;
-        position: absolute;
-        left: 50%;
-        height: calc(100% - 6px);
-        clip-path: ellipse(101px 118px);
-      }
-  
-      .id-video-container.landscape {
-        /* min-height: calc((2 * 10rem) + 176px); */
-        width: calc((2 * 4rem) + 154px);
-      }
-  
-      .id-video-container.portrait .image-frame-portrait {
-        border-width: 0.9rem;
-        border-color: rgba(0, 0, 0, 0.7);
         border-style: solid;
-        height: auto;
-        position: absolute;
-        top: 80px;
-        left: 47px;
-        z-index: 2;
-        width: 200px;
-        height: calc(200px * 1.4);
+        border-color: rgba(0, 0, 0, 0.48);
+        box-sizing: border-box;
+        inset: 0px;
       }
-  
-      .id-video-container.landscape .image-frame {
-        border-width: 2rem 3.9rem;
-        border-color: #fff;
+      
+      .video-overlay .inner-border {
+        position: absolute;
+        border-width: 0.25rem;
+        border-color: #9394ab;
         border-style: solid;
-        height: auto;
-        width: calc((2 * 4rem) + 158px);
-        position: absolute;
-        top: -22px;
-        left: -52px;
-        z-index: 2;
+        border-radius: 0.25rem;
+        inset: -1px;
       }
-  
-      .id-video-container.landscape video {
-        width: 100%;
-        transform: translateX(-50%) translateY(2%);
-        z-index: 1;
-        width: 24rem;
-      }
-
+      
       .description {
-        width: 66%;
         align-self: center;
         padding-bottom: 1.75rem;
       }
@@ -220,7 +157,7 @@ function templateString() {
       .id-side {
         padding-bottom: 0.5rem;
       }
-
+      
       .circle-progress {
         display: flex;
         flex-direction: column;
@@ -231,50 +168,35 @@ function templateString() {
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h2 class='h2 color-digital-blue'>${this.idType}</h2>
+    <h2 class='text-base font-bold color-digital-blue'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
-    ${this.cameraError ? '' : '<p class="spinner"></p>'}
-        ${
-          this.cameraError
-            ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>`
-            : '<p style="--flow-space: 4rem">Checking permissions</p>'
-        }
+        ${this.cameraError ? '' : '<p class="spinner"></p>'}
+        ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
-    <div class='video-section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
-      <div class='id-video-container landscape'>
-        <video id='id-video' class='flow' playsinline autoplay muted></video>
-        <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
-          <use href='#image-frame' />
-        </svg>
-
-        <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
-          <use href='#image-frame-portrait' />
-        </svg>
+    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+      <div class='id-video-container'>
+        <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
+        </div>
+        <div class='video-footer'>
+          <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
+          <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
+          <div class='actions' hidden>
+            <button id='capture-id-image' class='button icon-btn | center' type='button'>
+              <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
+              </svg>
+              <span class='visually-hidden'>Capture</span>
+            </button>
+          </div>
+          ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
+        </div>
       </div>
-    </div>
-    <h2 class='h2 color-digital-blue reset-margin-block id-side'${this.IdSides[this.sideOfId]} of ${this.idType}</h2>
-    <h4 class='h4 color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
-    <div class='actions' hidden>
-      <button id='capture-id-image' class='button icon-btn | center' type='button'>
-        <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
-        </svg>
-        <span class='visually-hidden'>Capture</span>
-      </button>
-    </div>
-
-      ${
-        this.hideAttribution
-          ? ''
-          : `
-        <powered-by-smile-id></powered-by-smile-id>
-      `
-      }
     </div>
   </div>
   `;
 }
 
+const fixedAspectRatio = 1.53;
 class DocumentCapture extends HTMLElement {
   constructor() {
     super();
@@ -297,23 +219,31 @@ class DocumentCapture extends HTMLElement {
   }
 
   async getUserMedia() {
-    await SmartCamera.getMedia({
-      audio: false,
-      video: SmartCamera.environmentOptions,
-    });
+    if (SmartCamera.stream) {
+      return;
+    }
+    if (!this.hasAttribute('data-camera-error')) return;
+
+    try {
+      await SmartCamera.getMedia({
+        audio: false,
+        video: SmartCamera.environmentOptions,
+      });
+    } catch (error) {
+      console.error(error.constraint);
+    }
 
     this.handleIDStream(SmartCamera.stream);
   }
 
   _captureIDImage() {
-    const image = this._drawIDImage();
-
+    const imageDetails = this._drawIDImage();
     this._stopIDVideoStream();
 
     this.dispatchEvent(
       new CustomEvent('document-capture.publish', {
         detail: {
-          image,
+          ...imageDetails,
         },
       }),
     );
@@ -363,48 +293,91 @@ class DocumentCapture extends HTMLElement {
         cropHeight,
       );
 
-      return croppedCanvas.toDataURL('image/jpeg');
+      return {
+        image: croppedCanvas.toDataURL('image/jpeg'),
+        originalHeight: canvas.height,
+        originalWidth: canvas.width,
+        ...this.idCardRegion,
+      };
     }
 
     canvas.width = 2240;
     canvas.height = 1260;
 
     const context = canvas.getContext('2d');
-    const aspectRatio = video.videoWidth / video.videoHeight;
 
-    // NOTE: aspectRatio is greater than 1 in landscape mode, less in portrait
+    const { aspectRatio } = this._calculateVideoOffset(video);
+    // canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
+
     if (aspectRatio < 1) {
-      const imageFrame = this.activeScreen.querySelector(
-        '[class*="image-frame"]:not([hidden]) [href*="image-frame"]',
-      );
-      const videoBox = video.getBoundingClientRect();
-      const frameBox = imageFrame.getBoundingClientRect();
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-      const sourceXOffset =
-        ((frameBox.left - videoBox.left) / videoBox.width) * video.videoWidth;
-      const sourceYOffset =
-        ((frameBox.top - videoBox.top) / videoBox.height) * video.videoHeight;
-      const sourceWidth = frameBox.width * (video.videoWidth / videoBox.width);
-      const sourceHeight =
-        frameBox.height * (video.videoHeight / videoBox.height);
+      // Draw the video frame onto the canvas
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      canvas.height = (canvas.width * frameBox.height) / frameBox.width;
+      const paddedWidth = canvas.width;
+      const paddedHeight = canvas.width / fixedAspectRatio;
 
-      context.drawImage(
-        video,
-        sourceXOffset,
-        sourceYOffset,
-        sourceWidth,
-        sourceHeight,
+      // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
+      const cropWidth = paddedWidth;
+      const cropHeight = paddedHeight;
+      const cropLeft = 0;
+      const cropTop = canvas.height / 2 - paddedHeight / 2;
+
+      // Create a new canvas element for the cropped image
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = cropWidth;
+      croppedCanvas.height = cropHeight;
+
+      // Draw the cropped image onto the new canvas
+      const croppedCtx = croppedCanvas.getContext('2d');
+      croppedCtx.drawImage(
+        canvas,
+        cropLeft,
+        cropTop,
+        cropWidth,
+        cropHeight,
         0,
         0,
-        canvas.width,
-        canvas.height,
+        cropWidth,
+        cropHeight,
       );
-      return canvas.toDataURL('image/jpeg');
+      const image = croppedCanvas.toDataURL('image/jpeg');
+
+      const videoContainer = this.shadowRoot.querySelector(
+        '.id-video-container',
+      );
+      const oldCroppedImage = videoContainer.querySelector(
+        'image#preview-cropped-image',
+      );
+      if (oldCroppedImage) {
+        videoContainer.removeChild(oldCroppedImage);
+      }
+      const croppedImage = document.createElement('img');
+      croppedImage.id = 'preview-cropped-image';
+      croppedImage.src = image;
+      videoContainer.appendChild(croppedImage);
+
+      return {
+        image,
+        originalHeight: canvas.height,
+        originalWidth: canvas.width,
+        ...this.idCardRegion,
+      };
     }
+
+    const height = canvas.width / (video.videoWidth / video.videoHeight);
+    canvas.height = height;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg');
+
+    return {
+      image: canvas.toDataURL('image/jpeg'),
+      originalHeight: canvas.height,
+      originalWidth: canvas.width,
+      ...this.idCardRegion,
+    };
   }
 
   _drawImage(canvas, enableImageTests = true, video = SmartCamera.stream) {
@@ -447,11 +420,19 @@ class DocumentCapture extends HTMLElement {
     } else {
       video = document.createElement('video');
     }
+    const videoContainer = this.shadowRoot.querySelector('.id-video');
+    const MIN_WIDTH = 272;
+    const width =
+      videoContainer.clientWidth < MIN_WIDTH
+        ? MIN_WIDTH
+        : videoContainer.clientWidth;
+    video.style.width = `${width}px`;
+    video.style.display = 'block';
+    video.muted = true;
+    video.setAttribute('muted', 'true');
 
     video.autoplay = true;
     video.playsInline = true;
-    video.muted = true;
-
     if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
@@ -462,13 +443,63 @@ class DocumentCapture extends HTMLElement {
       video.play();
     };
 
-    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
+    const onVideoStart = () => {
+      const {
+        aspectRatio,
+        offsetHeight,
+        offsetWidth,
+        videoHeight,
+        videoWidth,
+      } = this._calculateVideoOffset(video);
+      const portrait = aspectRatio < 1;
 
-    video.onloadedmetadata = () => {
+      if (portrait) {
+        videoContainer.classList.add('mobile-camera-screen');
+        videoContainer.style.height = `${videoHeight}px`;
+      }
+      videoContainer.style.width = `${videoWidth}px`;
+      videoContainer.style.maxHeight = `${videoHeight}px`;
+      const idCardRegionWidth = videoWidth - offsetWidth;
+      const idCardRegionHeight = videoHeight - offsetHeight;
+
+      const rightLeftBorderSize = 20;
+      const topBottomBorderSize = 20;
+      this.idCardRegion = {
+        height: idCardRegionHeight,
+        rightLeftBorderSize,
+        topBottomBorderSize,
+        width: idCardRegionWidth,
+        x: offsetWidth / 2,
+        y: offsetHeight / 2,
+      };
+
+      const videoOverlay = document.createElement('div');
+      const shadeColor = 'white';
+      videoOverlay.classList.add('video-overlay');
+
+      videoOverlay.style.borderLeft = `${rightLeftBorderSize}px solid ${shadeColor}`;
+      videoOverlay.style.borderRight = `${rightLeftBorderSize}px solid ${shadeColor}`;
+      videoOverlay.style.borderTop = `${topBottomBorderSize}px solid ${shadeColor}`;
+      videoOverlay.style.borderBottom = `${topBottomBorderSize}px solid ${shadeColor}`;
+      videoOverlay.style.top = '0px';
+      videoOverlay.style.bottom = '0px';
+      videoOverlay.style.left = '0px';
+      videoOverlay.style.right = '0px';
+      videoOverlay.style.inset = '-1px';
+
+      const innerBorder = document.createElement('div');
+      innerBorder.classList.add('inner-border');
+      videoOverlay.appendChild(innerBorder);
+      videoContainer.appendChild(videoOverlay);
+      window.parent.videoOverlay = videoOverlay;
+      this.videoOverlay = videoOverlay;
+      this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
       this.shadowRoot.querySelector('#loader').hidden = true;
-      this.shadowRoot.querySelector('.video-section').hidden = false;
+      video.removeEventListener('playing', onVideoStart);
     };
+
+    video.addEventListener('playing', onVideoStart);
 
     if (!videoExists) {
       videoContainer.prepend(video);
@@ -476,6 +507,30 @@ class DocumentCapture extends HTMLElement {
 
     this._IDStream = stream;
     this._IDVideo = video;
+  }
+
+  _calculateVideoOffset(video) {
+    const offset = 30;
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    const portrait = aspectRatio < 1;
+    const videoWidth = video.clientWidth;
+    const videoHeight =
+      video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio);
+    const originalWidth = video.videoWidth;
+    const originalHeight = video.videoWidth / fixedAspectRatio;
+
+    const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
+    const offsetWidth = videoWidth * (offset / 100);
+
+    return {
+      aspectRatio,
+      offsetHeight,
+      offsetWidth,
+      originalHeight,
+      originalWidth,
+      videoHeight,
+      videoWidth,
+    };
   }
 
   _stopIDVideoStream(stream = this._IDStream) {
@@ -501,6 +556,8 @@ class DocumentCapture extends HTMLElement {
     this.captureIDImage.addEventListener('click', () => {
       this._captureIDImage();
     });
+
+    this.getUserMedia();
   }
 
   get hideBack() {
@@ -529,7 +586,10 @@ class DocumentCapture extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return (
+      this.getAttribute('title') ||
+      `${this.IdSides[this.sideOfId]} of ${this.documentName}`
+    );
   }
 
   get hidden() {
@@ -548,8 +608,16 @@ class DocumentCapture extends HTMLElement {
     return !this.isFrontOfId;
   }
 
-  get idType() {
-    return this.getAttribute('id-type') || 'Document';
+  get documentType() {
+    return this.getAttribute('document-type') || '';
+  }
+
+  get documentName() {
+    return this.getAttribute('document-name') || 'Document';
+  }
+
+  get isPortraitCaptureView() {
+    return this.getAttribute('document-type') === 'GREEN_BOOK';
   }
 
   get cameraError() {
@@ -558,21 +626,25 @@ class DocumentCapture extends HTMLElement {
 
   static get observedAttributes() {
     return [
-      'title',
-      'hidden',
-      'show-navigation',
-      'hide-back-to-host',
-      'data-camera-ready',
       'data-camera-error',
+      'data-camera-ready',
+      'document-name',
+      'document-type',
+      'hidden',
+      'hide-back-to-host',
+      'show-navigation',
+      'title',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
-      case 'title':
-      case 'data-camera-ready':
       case 'data-camera-error':
+      case 'data-camera-ready':
+      case 'document-name':
+      case 'document-type':
       case 'hidden':
+      case 'title':
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
         break;

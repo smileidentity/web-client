@@ -89,7 +89,6 @@ function templateString() {
       
         .id-video {
           width: 100%;
-          min-height: 100px;
           text-align: center;
           position: relative;
           overflow: hidden;
@@ -110,7 +109,6 @@ function templateString() {
       
       .id-video {
         width: 100%;
-        min-height: 100px;
         text-align: center;
         position: relative;
         background: white;
@@ -151,7 +149,7 @@ function templateString() {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100%;
+        height: 10rem;
       }
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
@@ -480,9 +478,9 @@ class DocumentCapture extends HTMLElement {
       videoContainer.appendChild(videoOverlay);
       window.parent.videoOverlay = videoOverlay;
       this.videoOverlay = videoOverlay;
+      this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
-      this.shadowRoot.querySelector('#loader').hidden = true;
       video.removeEventListener('playing', onVideoStart);
     };
 

@@ -7,7 +7,7 @@ const meta = {
     <document-capture
         show-navigation
         document-capture-modes="camera,upload"
-        title="Driver's License"
+        document-name="Driver's License"
         side-of-id="Front"
     >
     </document-capture>

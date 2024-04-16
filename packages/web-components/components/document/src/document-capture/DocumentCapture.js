@@ -54,11 +54,6 @@ function templateString() {
       }
       
       @media (max-width: 600px) {
-        /*.document-capture-screen {
-          width: 100%;
-          height: 100vh;
-        }*/
-      
         .section {
           width: 100%;
           height: 100vh;
@@ -86,12 +81,6 @@ function templateString() {
         padding-bottom: 2rem;
       }
       @media (min-width: 600px) {
-       /* .id-video-container {
-          width: 80%;
-          margin: auto;
-          padding: 0px;
-        }*/
-      
         video {
           object-fit: contain;
           -webkit-tap-highlight-color: transparent;
@@ -114,7 +103,6 @@ function templateString() {
         }
       
         .id-video-container {
-          /* width: 50%; */
           margin: auto;
           padding: 0px;
         }

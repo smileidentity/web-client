@@ -307,7 +307,6 @@ class DocumentCapture extends HTMLElement {
     const context = canvas.getContext('2d');
 
     const { aspectRatio } = this._calculateVideoOffset(video);
-    // canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
 
     if (aspectRatio < 1) {
       canvas.width = video.videoWidth;

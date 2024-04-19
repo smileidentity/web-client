@@ -412,6 +412,7 @@ class DocumentCapture extends HTMLElement {
         ? MIN_WIDTH
         : videoContainer.clientWidth;
     video.style.width = `${width}px`;
+    video.style.height = '0px';
     video.style.display = 'block';
     video.muted = true;
     video.setAttribute('muted', 'true');
@@ -441,10 +442,10 @@ class DocumentCapture extends HTMLElement {
       if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
         videoContainer.style.height = `${videoHeight}px`;
-        video.style.height = `${videoHeight}px`;
       }
       videoContainer.style.width = `${videoWidth}px`;
       videoContainer.style.maxHeight = `${videoHeight}px`;
+      video.style.height = `${videoHeight}px`;
       const idCardRegionWidth = videoWidth - offsetWidth;
       const idCardRegionHeight = videoHeight - offsetHeight;
 

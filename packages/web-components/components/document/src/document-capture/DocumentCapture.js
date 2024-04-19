@@ -47,7 +47,7 @@ function templateString() {
         align-items: stretch;
         justify-content: center;
         max-height: 200px;
-        height: 180px;
+        height: 10rem;
         width: 100%;
         overflow: visible;
         margin: 0 auto;
@@ -441,6 +441,7 @@ class DocumentCapture extends HTMLElement {
       if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
         videoContainer.style.height = `${videoHeight}px`;
+        video.style.height = `${videoHeight}px`;
       }
       videoContainer.style.width = `${videoWidth}px`;
       videoContainer.style.maxHeight = `${videoHeight}px`;
@@ -458,7 +459,11 @@ class DocumentCapture extends HTMLElement {
         y: offsetHeight / 2,
       };
 
-      const videoOverlay = document.createElement('div');
+      let videoOverlay = videoContainer.querySelector('.video-overlay');
+      if (videoOverlay) {
+        videoOverlay = document.removeChild(videoOverlay);
+      }
+      videoOverlay = document.createElement('div');
       const shadeColor = 'white';
       videoOverlay.classList.add('video-overlay');
 
@@ -476,7 +481,6 @@ class DocumentCapture extends HTMLElement {
       innerBorder.classList.add('inner-border');
       videoOverlay.appendChild(innerBorder);
       videoContainer.appendChild(videoOverlay);
-      window.parent.videoOverlay = videoOverlay;
       this.videoOverlay = videoOverlay;
       this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
@@ -500,7 +504,7 @@ class DocumentCapture extends HTMLElement {
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
     const videoHeight =
-      video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio);
+      video.clientWidth / (fixedAspectRatio);
     const originalWidth = video.videoWidth;
     const originalHeight = video.videoWidth / fixedAspectRatio;
 

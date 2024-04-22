@@ -504,8 +504,7 @@ class DocumentCapture extends HTMLElement {
     const aspectRatio = video.videoWidth / video.videoHeight;
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
-    const videoHeight =
-      video.clientWidth / (fixedAspectRatio);
+    const videoHeight = video.clientWidth / fixedAspectRatio;
     const originalWidth = video.videoWidth;
     const originalHeight = video.videoWidth / fixedAspectRatio;
 

@@ -152,7 +152,7 @@ function templateString() {
         height: 10rem;
       }
 
-     .sticky {
+     .portrait .sticky {
         position: -webkit-sticky; /* Safari */
         position: sticky;
         bottom: 0;
@@ -209,7 +209,7 @@ class DocumentCapture extends HTMLElement {
   connectedCallback() {
     const template = document.createElement('template');
     template.innerHTML = this.render();
-
+    this.shadowRoot.innerHTML = '';
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.setUpEventListeners();
   }
@@ -479,7 +479,7 @@ class DocumentCapture extends HTMLElement {
 
       let videoOverlay = videoContainer.querySelector('.video-overlay');
       if (videoOverlay) {
-        videoOverlay = document.removeChild(videoOverlay);
+        videoOverlay.remove();
       }
       videoOverlay = document.createElement('div');
       const shadeColor = 'white';
@@ -654,10 +654,7 @@ class DocumentCapture extends HTMLElement {
       case 'document-type':
       case 'hidden':
       case 'title':
-        if (this.shadowRoot.querySelector('template')) {
-          this.shadowRoot.querySelector('template').innerHTML = this.render();
-        }
-        this.setUpEventListeners();
+        this.connectedCallback();
         break;
       default:
         break;

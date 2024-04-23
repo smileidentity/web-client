@@ -151,6 +151,16 @@ function templateString() {
         justify-content: center;
         height: 10rem;
       }
+
+     .sticky {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        bottom: 0;
+      }
+      .video-footer {
+        background-color: rgba(255, 255, 255, 0.17);
+        padding-top: 10px;
+      }
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
@@ -163,15 +173,15 @@ function templateString() {
       <div class='id-video-container'>
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
         </div>
-        <div class='video-footer'>
+        <div class='video-footer sticky'>
           <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
           <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
-              <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true" focusable="false">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
               </svg>
-              <span class='visually-hidden'>Capture</span>
+              <span class='visually-hidden'>Capture Document</span>
             </button>
           </div>
           ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
@@ -250,7 +260,7 @@ class DocumentCapture extends HTMLElement {
       const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
 
       // Define the padding value
-      const paddingPercent = 0.5; // 50% of the preview dimensions;
+      const paddingPercent = 1.1; // 110% of the preview dimensions because we previously scaled the image, old value was 50%;
       const paddedWidth = previewWidth * (1 + paddingPercent);
       const paddedHeight = previewHeight * (1 + paddingPercent);
 
@@ -278,6 +288,23 @@ class DocumentCapture extends HTMLElement {
         cropWidth,
         cropHeight,
       );
+
+      const image = croppedCanvas.toDataURL('image/jpeg');
+      console.warn('this.idCardRegion', this.idCardRegion);
+
+      const videoContainer = this.shadowRoot.querySelector(
+        '.id-video-container',
+      );
+      const oldCroppedImage = videoContainer.querySelector(
+        'image#preview-cropped-image',
+      );
+      if (oldCroppedImage) {
+        videoContainer.removeChild(oldCroppedImage);
+      }
+      const croppedImage = document.createElement('img');
+      croppedImage.id = 'preview-cropped-image';
+      croppedImage.src = image;
+      videoContainer.appendChild(croppedImage);
 
       return {
         image: croppedCanvas.toDataURL('image/jpeg'),
@@ -330,20 +357,6 @@ class DocumentCapture extends HTMLElement {
         cropHeight,
       );
       const image = croppedCanvas.toDataURL('image/jpeg');
-
-      const videoContainer = this.shadowRoot.querySelector(
-        '.id-video-container',
-      );
-      const oldCroppedImage = videoContainer.querySelector(
-        'image#preview-cropped-image',
-      );
-      if (oldCroppedImage) {
-        videoContainer.removeChild(oldCroppedImage);
-      }
-      const croppedImage = document.createElement('img');
-      croppedImage.id = 'preview-cropped-image';
-      croppedImage.src = image;
-      videoContainer.appendChild(croppedImage);
 
       return {
         image,
@@ -416,6 +429,10 @@ class DocumentCapture extends HTMLElement {
     video.style.display = 'block';
     video.muted = true;
     video.setAttribute('muted', 'true');
+    if (this.isPortraitCaptureView) {
+      video.style.objectFit = 'cover';
+      video.style.scale = '1';
+    }
 
     video.autoplay = true;
     video.playsInline = true;
@@ -502,11 +519,12 @@ class DocumentCapture extends HTMLElement {
   _calculateVideoOffset(video) {
     const offset = 30;
     const aspectRatio = video.videoWidth / video.videoHeight;
+    const calculatedAspectRatio = this.isPortraitCaptureView ? (PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT) : fixedAspectRatio;
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
-    const videoHeight = video.clientWidth / fixedAspectRatio;
+    const videoHeight = video.clientWidth / calculatedAspectRatio;
     const originalWidth = video.videoWidth;
-    const originalHeight = video.videoWidth / fixedAspectRatio;
+    const originalHeight = video.videoWidth / calculatedAspectRatio;
 
     const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
     const offsetWidth = videoWidth * (offset / 100);
@@ -634,7 +652,9 @@ class DocumentCapture extends HTMLElement {
       case 'document-type':
       case 'hidden':
       case 'title':
-        this.shadowRoot.innerHTML = this.render();
+        if (this.shadowRoot.querySelector('template')) { 
+          this.shadowRoot.querySelector('template').innerHTML = this.render();
+        }
         this.setUpEventListeners();
         break;
       default:

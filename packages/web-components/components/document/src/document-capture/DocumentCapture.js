@@ -519,7 +519,9 @@ class DocumentCapture extends HTMLElement {
   _calculateVideoOffset(video) {
     const offset = 30;
     const aspectRatio = video.videoWidth / video.videoHeight;
-    const calculatedAspectRatio = this.isPortraitCaptureView ? (PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT) : fixedAspectRatio;
+    const calculatedAspectRatio = this.isPortraitCaptureView
+      ? PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT
+      : fixedAspectRatio;
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
     const videoHeight = video.clientWidth / calculatedAspectRatio;
@@ -652,7 +654,7 @@ class DocumentCapture extends HTMLElement {
       case 'document-type':
       case 'hidden':
       case 'title':
-        if (this.shadowRoot.querySelector('template')) { 
+        if (this.shadowRoot.querySelector('template')) {
           this.shadowRoot.querySelector('template').innerHTML = this.render();
         }
         this.setUpEventListeners();

@@ -1,6 +1,19 @@
 import fs from 'fs';
 import path from 'path';
 import esbuild from 'esbuild';
+const { sentryEsbuildPlugin } = require("@sentry/esbuild-plugin");
+
+require("esbuild").build({
+  sourcemap: true, // Source map generation must be turned on
+  plugins: [
+    // Put the Sentry esbuild plugin after all other plugins
+    sentryEsbuildPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "smile-identity",
+      project: "web-client",
+    }),
+  ],
+});
 
 /**
  * Ensures a directory exists. If not, creates it.

@@ -1,3 +1,20 @@
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: "https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224",
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 0.05, //  Capture 100% of the transactions
+  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: ['localhost', /^https:\/\/links\.usesmilid\.com/, /^https:\/\/links\.sandbox\.usesmilid\.com/],
+  // Session Replay
+  replaysSessionSampleRate: 0.01, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+});
+
 /**
  * A IdTypeVerificationMethod selection
  * @typedef {Object} IdTypeVerificationMethod
@@ -56,6 +73,7 @@ window.SmileIdentity = (function () {
   };
 
   function getIFrameURL(product) {
+    sentry.setTag('product', product);
     switch (product) {
       case 'biometric_kyc':
       case 'ekyc_smartselfie':
@@ -188,6 +206,7 @@ window.SmileIdentity = (function () {
           );
         }
       });
+      Sentry.setTag('partner_id', config.partner_details?.partner_id);
     }
 
     if (

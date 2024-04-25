@@ -249,7 +249,7 @@ window.SmileIdentity = (function () {
   function SmileIdentity(config) {
     try {
       const configIsValid = isConfigValid(config);
-
+      Sentry.setTag('environment', config.environment);
       if (configIsValid) {
         createIframe(config.product);
 

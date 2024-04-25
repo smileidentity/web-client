@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/browser";
 
 Sentry.init({
-  dsn: "https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224",
+  dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),

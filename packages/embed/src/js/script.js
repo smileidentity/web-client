@@ -73,7 +73,7 @@ window.SmileIdentity = (function () {
   };
 
   function getIFrameURL(product) {
-    sentry.setTag('product', product);
+    Sentry.setTag('product', product);
     switch (product) {
       case 'biometric_kyc':
       case 'ekyc_smartselfie':

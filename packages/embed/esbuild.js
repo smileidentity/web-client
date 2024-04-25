@@ -120,8 +120,8 @@ files.forEach((file) => {
         // Put the Sentry esbuild plugin after all other plugins
         sentry.sentryEsbuildPlugin({
           authToken: process.env.SENTRY_AUTH_TOKEN,
-          org: "smile-identity",
-          project: "web-client",
+          org: 'smile-identity',
+          project: 'web-client',
         }),
       ],
     });

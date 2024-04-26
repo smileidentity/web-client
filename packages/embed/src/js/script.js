@@ -123,7 +123,6 @@ window.SmileIdentity = (function () {
 			width: 100%;
 			z-index: 999999;
 		`;
-
     document.body.prepend(iframe);
   }
 

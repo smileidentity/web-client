@@ -37,7 +37,7 @@ class DocumentCaptureScreens extends HTMLElement {
       <document-capture-instructions id='document-capture-instructions-front' ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
       <document-capture id='document-capture-front' side-of-id='Front'
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
-      ${this.documentCaptureModes}
+      ${this.documentCaptureModes} ${this.documentType}
       ></document-capture>
       <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
       <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
@@ -283,6 +283,12 @@ class DocumentCaptureScreens extends HTMLElement {
   get documentCaptureModes() {
     return this.hasAttribute('document-capture-modes')
       ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
+      : '';
+  }
+
+  get documentType() {
+    return this.hasAttribute('document-type')
+      ? `document-type='${this.getAttribute('document-type')}'`
       : '';
   }
 

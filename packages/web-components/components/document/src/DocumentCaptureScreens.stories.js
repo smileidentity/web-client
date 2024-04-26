@@ -42,3 +42,10 @@ export const DocumentCaptureHideInstructionNBackOfId = {
         </document-capture-screens>
     `,
 };
+
+export const DocumentCapturePortraitMode = {
+  render: () => `
+        <document-capture-screens hide-back-of-id hide-instructions document-type="GREEN_BOOK">
+        </document-capture-screens>
+    `,
+};

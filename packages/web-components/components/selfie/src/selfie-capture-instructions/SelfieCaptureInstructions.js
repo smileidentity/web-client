@@ -300,11 +300,6 @@ function templateString() {
 
       .tip-header {
         color: var(--web-digital-blue, #001096);
-
-        /* h2 */
-        font-size: 1rem;
-        font-style: normal;
-        font-weight: 700;
       }
     </style>
     ${styles}
@@ -414,8 +409,8 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="tip-header">Good Light</p>
-          <p>
+          <p class="text-base font-bold tip-header">Good Light</p>
+          <p class="tip-body">
             Make sure you are in a well-lit environment where your face is
             clear and visible
           </p>
@@ -503,7 +498,7 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="tip-header">Clear Image</p>
+          <p class="text-base font-bold tip-header">Clear Image</p>
           <p>
             Hold your phone steady so the selfie is clear and sharp. Don't
             take blurry images.
@@ -536,7 +531,7 @@ function templateString() {
           />
         </svg>
         <div class="instruction">
-          <p class="tip-header">Remove Obstructions</p>
+          <p class="text-base font-bold tip-header">Remove Obstructions</p>
           <p>
             Remove anything that covers your face, such glasses, masks, hats
             and scarves

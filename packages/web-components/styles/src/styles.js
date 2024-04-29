@@ -114,7 +114,7 @@ ${typography}
   }
 
   .button {
-    --button-color: var(--color-default);
+    --button-color: var(--color-active);
     -webkit-appearance: none;
     appearance: none;
     border-radius: 2.5rem;
@@ -132,7 +132,7 @@ ${typography}
   .button:hover,
   .button:focus,
   .button:active {
-    --button-color: var(--color-active);
+    --button-color: var(--color-default);
   }
 
   .button:disabled {

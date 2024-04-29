@@ -47,18 +47,13 @@ function templateString() {
         align-items: stretch;
         justify-content: center;
         max-height: 200px;
-        height: 180px;
+        height: 10rem;
         width: 100%;
         overflow: visible;
         margin: 0 auto;
       }
       
       @media (max-width: 600px) {
-        /*.document-capture-screen {
-          width: 100%;
-          height: 100vh;
-        }*/
-      
         .section {
           width: 100%;
           height: 100vh;
@@ -86,12 +81,6 @@ function templateString() {
         padding-bottom: 2rem;
       }
       @media (min-width: 600px) {
-       /* .id-video-container {
-          width: 80%;
-          margin: auto;
-          padding: 0px;
-        }*/
-      
         video {
           object-fit: contain;
           -webkit-tap-highlight-color: transparent;
@@ -100,7 +89,6 @@ function templateString() {
       
         .id-video {
           width: 100%;
-          min-height: 100px;
           text-align: center;
           position: relative;
           overflow: hidden;
@@ -114,7 +102,6 @@ function templateString() {
         }
       
         .id-video-container {
-          /* width: 50%; */
           margin: auto;
           padding: 0px;
         }
@@ -122,7 +109,6 @@ function templateString() {
       
       .id-video {
         width: 100%;
-        min-height: 100px;
         text-align: center;
         position: relative;
         background: white;
@@ -163,7 +149,17 @@ function templateString() {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100%;
+        height: 10rem;
+      }
+
+     .portrait .sticky {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        bottom: 0;
+      }
+      .video-footer {
+        background-color: rgba(255, 255, 255, 0.17);
+        padding-top: 10px;
       }
   </style>
   <div id='document-capture-screen' class='flow center flex-column'>
@@ -177,15 +173,15 @@ function templateString() {
       <div class='id-video-container'>
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
         </div>
-        <div class='video-footer'>
+        <div class='video-footer sticky'>
           <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
           <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
-              <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true" focusable="false">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
               </svg>
-              <span class='visually-hidden'>Capture</span>
+              <span class='visually-hidden'>Capture Document</span>
             </button>
           </div>
           ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
@@ -213,7 +209,7 @@ class DocumentCapture extends HTMLElement {
   connectedCallback() {
     const template = document.createElement('template');
     template.innerHTML = this.render();
-
+    this.shadowRoot.innerHTML = '';
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.setUpEventListeners();
   }
@@ -264,7 +260,7 @@ class DocumentCapture extends HTMLElement {
       const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
 
       // Define the padding value
-      const paddingPercent = 0.5; // 50% of the preview dimensions;
+      const paddingPercent = 1.1; // 110% of the preview dimensions because we previously scaled the image, old value was 50%;
       const paddedWidth = previewWidth * (1 + paddingPercent);
       const paddedHeight = previewHeight * (1 + paddingPercent);
 
@@ -293,6 +289,23 @@ class DocumentCapture extends HTMLElement {
         cropHeight,
       );
 
+      const image = croppedCanvas.toDataURL('image/jpeg');
+      console.warn('this.idCardRegion', this.idCardRegion);
+
+      const videoContainer = this.shadowRoot.querySelector(
+        '.id-video-container',
+      );
+      const oldCroppedImage = videoContainer.querySelector(
+        'image#preview-cropped-image',
+      );
+      if (oldCroppedImage) {
+        videoContainer.removeChild(oldCroppedImage);
+      }
+      const croppedImage = document.createElement('img');
+      croppedImage.id = 'preview-cropped-image';
+      croppedImage.src = image;
+      videoContainer.appendChild(croppedImage);
+
       return {
         image: croppedCanvas.toDataURL('image/jpeg'),
         originalHeight: canvas.height,
@@ -307,7 +320,6 @@ class DocumentCapture extends HTMLElement {
     const context = canvas.getContext('2d');
 
     const { aspectRatio } = this._calculateVideoOffset(video);
-    // canvas.height = (canvas.width * this.idCardRegion.height) / this.idCardRegion.width;
 
     if (aspectRatio < 1) {
       canvas.width = video.videoWidth;
@@ -345,20 +357,6 @@ class DocumentCapture extends HTMLElement {
         cropHeight,
       );
       const image = croppedCanvas.toDataURL('image/jpeg');
-
-      const videoContainer = this.shadowRoot.querySelector(
-        '.id-video-container',
-      );
-      const oldCroppedImage = videoContainer.querySelector(
-        'image#preview-cropped-image',
-      );
-      if (oldCroppedImage) {
-        videoContainer.removeChild(oldCroppedImage);
-      }
-      const croppedImage = document.createElement('img');
-      croppedImage.id = 'preview-cropped-image';
-      croppedImage.src = image;
-      videoContainer.appendChild(croppedImage);
 
       return {
         image,
@@ -427,9 +425,14 @@ class DocumentCapture extends HTMLElement {
         ? MIN_WIDTH
         : videoContainer.clientWidth;
     video.style.width = `${width}px`;
+    video.style.height = '0px';
     video.style.display = 'block';
     video.muted = true;
     video.setAttribute('muted', 'true');
+    if (this.isPortraitCaptureView) {
+      video.style.objectFit = 'cover';
+      video.style.scale = '1';
+    }
 
     video.autoplay = true;
     video.playsInline = true;
@@ -459,6 +462,7 @@ class DocumentCapture extends HTMLElement {
       }
       videoContainer.style.width = `${videoWidth}px`;
       videoContainer.style.maxHeight = `${videoHeight}px`;
+      video.style.height = `${videoHeight}px`;
       const idCardRegionWidth = videoWidth - offsetWidth;
       const idCardRegionHeight = videoHeight - offsetHeight;
 
@@ -473,7 +477,11 @@ class DocumentCapture extends HTMLElement {
         y: offsetHeight / 2,
       };
 
-      const videoOverlay = document.createElement('div');
+      let videoOverlay = videoContainer.querySelector('.video-overlay');
+      if (videoOverlay) {
+        videoOverlay.remove();
+      }
+      videoOverlay = document.createElement('div');
       const shadeColor = 'white';
       videoOverlay.classList.add('video-overlay');
 
@@ -491,11 +499,10 @@ class DocumentCapture extends HTMLElement {
       innerBorder.classList.add('inner-border');
       videoOverlay.appendChild(innerBorder);
       videoContainer.appendChild(videoOverlay);
-      window.parent.videoOverlay = videoOverlay;
       this.videoOverlay = videoOverlay;
+      this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
-      this.shadowRoot.querySelector('#loader').hidden = true;
       video.removeEventListener('playing', onVideoStart);
     };
 
@@ -512,12 +519,14 @@ class DocumentCapture extends HTMLElement {
   _calculateVideoOffset(video) {
     const offset = 30;
     const aspectRatio = video.videoWidth / video.videoHeight;
+    const calculatedAspectRatio = this.isPortraitCaptureView
+      ? PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT
+      : fixedAspectRatio;
     const portrait = aspectRatio < 1;
     const videoWidth = video.clientWidth;
-    const videoHeight =
-      video.clientWidth / (portrait ? aspectRatio : fixedAspectRatio);
+    const videoHeight = video.clientWidth / calculatedAspectRatio;
     const originalWidth = video.videoWidth;
-    const originalHeight = video.videoWidth / fixedAspectRatio;
+    const originalHeight = video.videoWidth / calculatedAspectRatio;
 
     const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
     const offsetWidth = videoWidth * (offset / 100);
@@ -645,8 +654,7 @@ class DocumentCapture extends HTMLElement {
       case 'document-type':
       case 'hidden':
       case 'title':
-        this.shadowRoot.innerHTML = this.render();
-        this.setUpEventListeners();
+        this.connectedCallback();
         break;
       default:
         break;

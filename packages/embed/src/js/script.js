@@ -1,3 +1,15 @@
+import * as Sentry from '@sentry/browser';
+
+Sentry.init({
+  dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
+  tracesSampleRate: 0.05,
+  tracePropagationTargets: [
+    /^https:\/\/links\.usesmileid\.com/,
+    /^https:\/\/links\.sandbox\.usesmileid\.com/,
+    /^https:\/\/links\.dev\.usesmileid\.com/,
+  ],
+});
+
 /**
  * A IdTypeVerificationMethod selection
  * @typedef {Object} IdTypeVerificationMethod
@@ -56,6 +68,7 @@ window.SmileIdentity = (function () {
   };
 
   function getIFrameURL(product) {
+    Sentry.setTag('product', product);
     switch (product) {
       case 'biometric_kyc':
       case 'ekyc_smartselfie':
@@ -110,7 +123,6 @@ window.SmileIdentity = (function () {
 			width: 100%;
 			z-index: 999999;
 		`;
-
     document.body.prepend(iframe);
   }
 
@@ -188,6 +200,7 @@ window.SmileIdentity = (function () {
           );
         }
       });
+      Sentry.setTag('partner_id', config.partner_details?.partner_id);
     }
 
     if (
@@ -230,7 +243,7 @@ window.SmileIdentity = (function () {
   function SmileIdentity(config) {
     try {
       const configIsValid = isConfigValid(config);
-
+      Sentry.setTag('environment', config.environment);
       if (configIsValid) {
         createIframe(config.product);
 

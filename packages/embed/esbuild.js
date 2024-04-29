@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import esbuild from 'esbuild';
+import * as sentry from '@sentry/esbuild-plugin';
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -114,6 +115,15 @@ files.forEach((file) => {
       ...prodOptions,
       entryPoints: [`src/js/${file}`],
       outfile: `dist/js/${dir}/${baseName}.min.js`,
+      sourcemap: true, // Source map generation must be turned on
+      plugins: [
+        // Put the Sentry esbuild plugin after all other plugins
+        sentry.sentryEsbuildPlugin({
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          org: 'smile-identity',
+          project: 'web-client',
+        }),
+      ],
     });
   }
 });

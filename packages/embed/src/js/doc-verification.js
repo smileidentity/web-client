@@ -1,4 +1,3 @@
-import '@smile_identity/smart-camera-web';
 import '@smileid/web-components/combobox';
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
@@ -101,6 +100,15 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        let module;
+        if (config.use_new_component) {
+          module = import('@smileid/web-components/smart-camera-web');
+        } else {
+          module = import('@smile_identity/smart-camera-web');
+        }
+        module.then(() => {
+          // loaded
+        });
         activeScreen = LoadingScreen;
 
         const productConstraints = await getProductConstraints();
@@ -321,9 +329,13 @@ import { version as sdkVersion } from '../../package.json';
           // ACTION: set initial screen
           SmartCameraWeb.setAttribute('document-type', id_info.id_type);
           // ACTION: set document capture mode
+          if (!documentCaptureConfig.has_back) {
+            SmartCameraWeb.setAttribute('hide-back-of-id', true);
+          }
           if (documentCaptureConfig.has_back) {
             SmartCameraWeb.setAttribute('capture-id', 'back');
           }
+
           if (config.document_capture_modes) {
             SmartCameraWeb.setAttribute(
               'document-capture-modes',
@@ -397,6 +409,9 @@ import { version as sdkVersion } from '../../package.json';
         if (documentCaptureConfig.has_back) {
           SmartCameraWeb.setAttribute('capture-id', 'back');
         }
+        if (!documentCaptureConfig.has_back) {
+          SmartCameraWeb.setAttribute('hide-back-of-id', true);
+        }
         if (config.document_capture_modes) {
           SmartCameraWeb.setAttribute(
             'document-capture-modes',
@@ -419,6 +434,16 @@ import { version as sdkVersion } from '../../package.json';
   );
 
   SmartCameraWeb.addEventListener(
+    'smart-camera-web.publish',
+    (event) => {
+      images = event.detail.images;
+      setActiveScreen(UploadProgressScreen);
+      handleFormSubmit(event);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
     'backExit',
     () => {
       setActiveScreen(SelectIDType);
@@ -427,7 +452,23 @@ import { version as sdkVersion } from '../../package.json';
   );
 
   SmartCameraWeb.addEventListener(
+    'smart-camera-web.cancelled',
+    () => {
+      setActiveScreen(SelectIDType);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
     'close',
+    () => {
+      closeWindow();
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
+    'smart-camera-web.close',
     () => {
       closeWindow();
     },

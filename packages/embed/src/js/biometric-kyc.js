@@ -121,15 +121,11 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        let module;
         if (config.use_new_component) {
-          module = import('@smileid/web-components/smart-camera-web');
+          import('@smileid/web-components/smart-camera-web');
         } else {
-          module = import('@smile_identity/smart-camera-web');
+          import('@smile_identity/smart-camera-web');
         }
-        module.then(() => {
-          // loaded
-        });
         activeScreen = LoadingScreen;
 
         getPartnerParams();

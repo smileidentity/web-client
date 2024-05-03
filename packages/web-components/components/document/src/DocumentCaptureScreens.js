@@ -305,6 +305,30 @@ class DocumentCaptureScreens extends HTMLElement {
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
   }
+
+  static get observedAttributes() {
+    return [
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
+      'hide-back-of-id',
+    ];
+  }
+
+  attributeChangedCallback(name) {
+    switch (name) {
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-of-id':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.connectedCallback();
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 if (

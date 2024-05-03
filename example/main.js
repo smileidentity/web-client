@@ -1,6 +1,6 @@
-import './style.css'
-import setupForm from "./script";
-import '@smileid/web-components/smart-camera-web'
+import './style.css';
+import setupForm from './script';
+import '@smileid/web-components/smart-camera-web';
 
 document.querySelector('#app').innerHTML = `
   <div>
@@ -19,6 +19,6 @@ document.querySelector('#app').innerHTML = `
       </button>
     </form>
   </div>
-`
+`;
 
-setupForm()
+setupForm();

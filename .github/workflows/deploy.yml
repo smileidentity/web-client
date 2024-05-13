@@ -2,6 +2,9 @@ name: deploy
 on:
   push:
     tags: v*
+permissions:
+  id-token: write
+  contents: read
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -26,17 +29,14 @@ jobs:
           TAG: ${{ steps.package-version.outputs.current-version }}
         run: |
           echo "DEST_DIR_SMART_CAMERA_WEB=js/v$TAG" >> $GITHUB_OUTPUT
-      - name: deploy to s3 / cloudfront
-        uses: jakejarvis/s3-sync-action@v0.5.1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js'
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: ./packages/smart-camera-web
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          DEST_DIR: ${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: deploy to s3 / cloudfront
+        run: |
+          aws s3 sync --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js' . s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
     needs: [test]
     runs-on: ubuntu-latest
@@ -51,17 +51,15 @@ jobs:
         uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
-      - name: build site
-        run: npm run build && npm run build:dist
-      - name: deploy to s3 / cloudfront
-        uses: jakejarvis/s3-sync-action@v0.5.1
-        with:
-          args: --follow-symlinks --delete
+      - name: build application
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
-          SOURCE_DIR: './packages/embed/dist'
-          DEST_DIR: 'inline/v1'
+        run: npm run build && npm run build:dist
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: deploy to s3 / cloudfront
+        run: |
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/inline/v1

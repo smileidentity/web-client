@@ -5,12 +5,14 @@ on:
     types:
       - opened
       - synchronize
+permissions:
+  id-token: write
+  contents: read
 jobs:
   test:
     uses: ./.github/workflows/test.yml
   smart-camera-web:
-    needs:
-      - test
+    needs: [test]
     defaults:
       run:
         working-directory: ./packages/smart-camera-web
@@ -29,22 +31,16 @@ jobs:
         run: >-
           echo "DEST_DIR_SMART_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >>
           "$GITHUB_ENV"
-      - name: deploy preview to s3
-        uses: jakejarvis/s3-sync-action@v0.5.1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: >-
-            --follow-symlinks --delete --exclude '*' --include
-            'smart-camera-web.js'
-        env:
-          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}'
-          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
-          AWS_REGION: '${{ secrets.AWS_REGION }}'
-          SOURCE_DIR: ./packages/smart-camera-web
-          DEST_DIR: '${{ env.DEST_DIR_SMART_CAMERA_WEB }}'
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: deploy preview to s3
+        run: |
+          aws s3 sync --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js' . s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
-    needs:
-      - test
+    needs: [test]
     defaults:
       run:
         working-directory: ./packages/embed
@@ -57,19 +53,17 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: build application
-        run: 'npm run build && npm run build:dist'
+        env:
+          SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
+        run: npm run build && npm run build:dist
       - name: set destination directory
         id: set_dest_dir_hosted_web
         run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
-      - name: deploy preview to s3
-        uses: jakejarvis/s3-sync-action@v0.5.1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: '--follow-symlinks --delete'
-        env:
-          AWS_S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}'
-          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
-          AWS_REGION: '${{ secrets.AWS_REGION }}'
-          SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
-          SOURCE_DIR: ./packages/embed/dist
-          DEST_DIR: '${{ env.DEST_DIR_EMBED }}'
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: deploy preview to s3
+        run: |
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}

@@ -54,7 +54,9 @@ Displays navigation controls for the capture process. This attribute is boolean.
 Specifies the capture modes, accepting `camera`, `upload`, or both. Value required.
 
 ```html
-<document-capture-screens document-capture-modes="camera,upload"></document-capture-screens>
+<document-capture-screens
+  document-capture-modes="camera,upload"
+></document-capture-screens>
 ```
 
 ### Permissions

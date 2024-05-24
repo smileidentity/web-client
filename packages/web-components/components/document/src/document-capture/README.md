@@ -62,7 +62,7 @@ To receive the images after they have been captured, you can listen to the custo
 {
   "detail": {
     "image": "base64 image",
-    "previewImage": "base64 image",
+    "previewImage": "base64 image"
   }
 }
 ```

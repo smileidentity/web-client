@@ -9,14 +9,14 @@ Explore an [example full stack integration](https://glitch.com/edit/#!/smart-cam
 To integrate `SmartCameraWeb`, follow these steps:
 
 - [SmartCameraWeb](#smartcameraweb)
-	- [Getting Started](#getting-started)
-		- [Choose a Server to Server Library](#choose-a-server-to-server-library)
-		- [Installation](#installation)
-			- [Install Via NPM](#install-via-npm)
-		- [Usage](#usage)
-	- [Compatibility](#compatibility)
-	- [Support](#support)
-	- [Development](#development)
+  - [Getting Started](#getting-started)
+    - [Choose a Server to Server Library](#choose-a-server-to-server-library)
+    - [Installation](#installation)
+      - [Install Via NPM](#install-via-npm)
+    - [Usage](#usage)
+  - [Compatibility](#compatibility)
+  - [Support](#support)
+  - [Development](#development)
 
 ### Choose a Server to Server Library
 
@@ -75,11 +75,11 @@ After installation and necessary imports:
 
    ![Document Capture Instruction](https://cdn.smileidentity.com/images/smart-camera-web/document-capture-instruction.png)
 
-     If the `capture-id` attribute is used, additional screens include:
+   If the `capture-id` attribute is used, additional screens include:
 
-     ![ID Camera](https://cdn.smileidentity.com/images/smart-camera-web/document-capture.png)
+   ![ID Camera](https://cdn.smileidentity.com/images/smart-camera-web/document-capture.png)
 
-     ![ID Review](https://cdn.smileidentity.com/images/smart-camera-web/document-review-new.png)
+   ![ID Review](https://cdn.smileidentity.com/images/smart-camera-web/document-review-new.png)
 
 2. Handle the `smart-camera-web.publish` event:
 

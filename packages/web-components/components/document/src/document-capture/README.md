@@ -79,11 +79,11 @@ document
 
 ### Dependencies
 
-The `IdCapture` component depends on the following module:
+The `DocumentCapture` component depends on the following module:
 
-- SmartCamera
+- [SmartCamera](../../../../domain/camera/src/README.md)
 
-This module is imported when you use the `IdCapture` component in your projects.
+This module is imported when you use the `DocumentCapture` component in your projects.
 
 ### Compatibility
 

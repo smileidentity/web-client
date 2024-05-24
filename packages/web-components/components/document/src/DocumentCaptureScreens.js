@@ -107,7 +107,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
-        this.idReview.setAttribute('data-image', event.detail.image);
+        this.idReview.setAttribute('data-image', event.detail.previewImage);
         this._data.images.push({
           image: event.detail.image.split(',')[1],
           image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
@@ -117,7 +117,7 @@ class DocumentCaptureScreens extends HTMLElement {
     );
 
     this.idCapture.addEventListener('document-capture.publish', (event) => {
-      this.idReview.setAttribute('data-image', event.detail.image);
+      this.idReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
         image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,

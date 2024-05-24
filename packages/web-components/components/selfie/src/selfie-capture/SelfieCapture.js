@@ -635,6 +635,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
       const totalNoOfFrames = this._rawImages.length;
       this._data.referenceImage = this._referenceImage;
+      this._data.previewImage = this._referenceImage;
 
       const livenessFramesIndices = getLivenessFramesIndices(totalNoOfFrames);
 

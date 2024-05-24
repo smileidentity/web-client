@@ -61,7 +61,8 @@ To receive the images after they have been captured, you can listen to the custo
 ```json
 {
   "detail": {
-    "image": "base64 image"
+    "image": "base64 image",
+    "previewImage": "base64 image",
   }
 }
 ```

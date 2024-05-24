@@ -84,11 +84,35 @@ document
 The `SelfieCaptureScreens` component depends on the following modules:
 
 - [selfie-capture](#selfiecapture-web-component)
-- [selfie-capture-review](#selfie-capture-review-web-component)
-- Selfie-instructions
-- SmartCamera
+- [selfie-capture-review](#selfiecapturereview-web-component)
+- [Selfie-instructions](#selfiecaptureinstructions-web-component)
+- [SmartCamera](../../domain/camera/src/README.md)
 
 These modules are imported when you use the `SelfieCaptureScreens` component in your projects.
+
+### SelfieCaptureInstructions Web Component
+
+#### Overview
+
+The `SelfieCaptureInstructions` is a custom web component designed to show an instruction on how to capture a clear selfie image.
+
+#### Importing the SelfieCaptureInstructions Component
+
+To use the SelfieCaptureInstructions component, you need to import it into your JavaScript file:
+
+```js
+import '@smileid/web-components/selfie-capture-instructions';
+```
+
+#### show-navigation
+
+This attribute, when present, shows the navigation controls for the document capture process. It does not require a value.
+
+Usage:
+
+```html
+<selfie-capture-instructions show-navigation></selfie-capture-instructions>
+```
 
 ### SelfieCapture Web Component
 
@@ -104,7 +128,7 @@ To use the SelfieCapture component, you need to import it into your JavaScript f
 import '@smileid/web-components/selfie-capture';
 ```
 
-### Using the Component
+### Using the SelfieCapture Component
 
 You can use the SelfieCapture component in your HTML like any other HTML element:
 

@@ -74,6 +74,7 @@ export default function setupForm() {
         // 	[country]: ["PASSPORT"],
         //   },
         previewBVNMFA: true,
+        document_capture_modes: ['camera','upload'],
         partner_details: {
           partner_id,
           signature,

@@ -1,4 +1,3 @@
-import '@smile_identity/smart-camera-web';
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
 
@@ -58,6 +57,11 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        if (config.use_new_component) {
+          import('@smileid/web-components/smart-camera-web');
+        } else {
+          import('@smile_identity/smart-camera-web');
+        }
         activeScreen = LoadingScreen;
 
         productConstraints = await getProductConstraints();
@@ -251,6 +255,16 @@ import { version as sdkVersion } from '../../package.json';
   );
 
   SmartCameraWeb.addEventListener(
+    'smart-camera-web.publish',
+    (event) => {
+      images = event.detail.images;
+      setActiveScreen(UploadProgressScreen);
+      handleFormSubmit(event);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
     'backExit',
     () => {
       setActiveScreen(SelectIDType);
@@ -259,7 +273,23 @@ import { version as sdkVersion } from '../../package.json';
   );
 
   SmartCameraWeb.addEventListener(
+    'smart-camera-web.cancelled',
+    () => {
+      setActiveScreen(SelectIDType);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
     'close',
+    () => {
+      closeWindow();
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
+    'smart-camera-web.close',
     () => {
       closeWindow();
     },

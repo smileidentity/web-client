@@ -2,11 +2,12 @@
 
 ## Overview
 
-The `DocumentCapture` is a bespoke web component designed for capturing document images using a camera. It leverages the `SmartCamera` module for camera interaction and permission management.
+The `DocumentCaptureScreens` is a bespoke web component designed for capturing document images using a camera. It leverages the `SmartCamera` module for camera interaction and permission management.
+This component contains the flow for capturing both front and the back of id documents.
 
 ### Importing the Component
 
-To utilize the DocumentCapture component within your project, import it into your JavaScript file as follows:
+To utilize the `DocumentCaptureScreens` component within your project, import it into your JavaScript file as follows:
 
 ```js
 import '@smileid/components/document-capture';
@@ -17,7 +18,7 @@ import '@smileid/components/document-capture';
 The DocumentCapture component can be embedded in your HTML similarly to any standard HTML element:
 
 ```html
-<document-capture></document-capture>
+<document-capture-screens></document-capture-screens>
 ```
 
 ### Attributes
@@ -29,7 +30,7 @@ Customize the component's behavior with the following attributes:
 Omits the capture instructions. This attribute is boolean and does not require a value.
 
 ```html
-<document-capture hide-instructions></document-capture>
+<document-capture-screens hide-instructions></document-capture-screens>
 ```
 
 #### `hide-back-of-id`
@@ -37,7 +38,7 @@ Omits the capture instructions. This attribute is boolean and does not require a
 Excludes the option to capture the ID's back side. This attribute is boolean.
 
 ```html
-<document-capture hide-back-of-id></document-capture>
+<document-capture-screens hide-back-of-id></document-capture-screens>
 ```
 
 #### `show-navigation`
@@ -45,7 +46,7 @@ Excludes the option to capture the ID's back side. This attribute is boolean.
 Displays navigation controls for the capture process. This attribute is boolean.
 
 ```html
-<document-capture show-navigation></document-capture>
+<document-capture-screens show-navigation></document-capture-screens>
 ```
 
 #### `document-capture-modes`
@@ -53,7 +54,9 @@ Displays navigation controls for the capture process. This attribute is boolean.
 Specifies the capture modes, accepting `camera`, `upload`, or both. Value required.
 
 ```html
-<document-capture document-capture-modes="camera,upload"></document-capture>
+<document-capture-screens
+  document-capture-modes="camera,upload"
+></document-capture-screens>
 ```
 
 ### Permissions
@@ -85,7 +88,7 @@ To handle this event:
 
 ```js
 document
-  .querySelector('document-capture')
+  .querySelector('document-capture-screens')
   .addEventListener('document-capture-screens.publish', function (event) {
     console.log(event.detail);
   });

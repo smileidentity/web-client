@@ -1,10 +1,10 @@
-# IdReview Web Component
+# DocumentCaptureReview Web Component
 
-The `IdReview` component is designed to facilitate user interaction by allowing them to review and verify the accuracy of captured images. Users have the option to accept the captured image or initiate a recapture if necessary.
+The `DocumentCaptureReview` component is designed to facilitate user interaction by allowing them to review and verify the accuracy of captured images. Users have the option to accept the captured image or initiate a recapture if necessary.
 
 ## Usage
 
-To integrate the `IdReview` component into your web application, insert the custom HTML tag as follows, specifying attributes for the captured image data and optional features like navigation controls:
+To integrate the `DocumentCaptureReview` component into your web application, insert the custom HTML tag as follows, specifying attributes for the captured image data and optional features like navigation controls:
 
 ```html
 <document-capture-review

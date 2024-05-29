@@ -70,9 +70,6 @@ export default function setupForm() {
         environment,
         demo_mode: true,
         use_new_component: true,
-        // id_selection: {
-        // 	[country]: ["PASSPORT"],
-        //   },
         previewBVNMFA: true,
         document_capture_modes: ['camera', 'upload'],
         partner_details: {

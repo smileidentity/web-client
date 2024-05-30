@@ -290,26 +290,13 @@ class DocumentCapture extends HTMLElement {
       );
 
       const image = croppedCanvas.toDataURL('image/jpeg');
-      console.warn('this.idCardRegion', this.idCardRegion);
-
-      const videoContainer = this.shadowRoot.querySelector(
-        '.id-video-container',
-      );
-      const oldCroppedImage = videoContainer.querySelector(
-        'image#preview-cropped-image',
-      );
-      if (oldCroppedImage) {
-        videoContainer.removeChild(oldCroppedImage);
-      }
-      const croppedImage = document.createElement('img');
-      croppedImage.id = 'preview-cropped-image';
-      croppedImage.src = image;
-      videoContainer.appendChild(croppedImage);
+      const previewImage = image;
 
       return {
-        image: croppedCanvas.toDataURL('image/jpeg'),
+        image,
         originalHeight: canvas.height,
         originalWidth: canvas.width,
+        previewImage,
         ...this.idCardRegion,
       };
     }
@@ -362,6 +349,7 @@ class DocumentCapture extends HTMLElement {
         image,
         originalHeight: canvas.height,
         originalWidth: canvas.width,
+        previewImage: image,
         ...this.idCardRegion,
       };
     }

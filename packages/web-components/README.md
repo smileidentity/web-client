@@ -2,8 +2,9 @@
 
 These components can be used to capture id document or liveness images
 
-1. [`document-capture-screens`](./document/src/README.md)
-2. [`selfie-capture-screens`](./selfie/README.md)
+1. [`smart-camera-web`](./components/smart-camera-web/src/)
+2. [`document-capture-screens`](./components/document/src/README.md)
+3. [`selfie-capture-screens`](./components/selfie/README.md)
 
 ## Orchestration
 

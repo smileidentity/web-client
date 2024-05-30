@@ -107,7 +107,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
-        this.idReview.setAttribute('data-image', event.detail.image);
+        this.idReview.setAttribute('data-image', event.detail.previewImage);
         this._data.images.push({
           image: event.detail.image.split(',')[1],
           image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
@@ -117,7 +117,7 @@ class DocumentCaptureScreens extends HTMLElement {
     );
 
     this.idCapture.addEventListener('document-capture.publish', (event) => {
-      this.idReview.setAttribute('data-image', event.detail.image);
+      this.idReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
         image_type_id: IMAGE_TYPE.ID_CARD_IMAGE_BASE64,
@@ -304,6 +304,30 @@ class DocumentCaptureScreens extends HTMLElement {
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
+  }
+
+  static get observedAttributes() {
+    return [
+      'document-capture-modes',
+      'document-type',
+      'hide-back-to-host',
+      'show-navigation',
+      'hide-back-of-id',
+    ];
+  }
+
+  attributeChangedCallback(name) {
+    switch (name) {
+      case 'document-capture-modes':
+      case 'document-type':
+      case 'hide-back-of-id':
+      case 'hide-back-to-host':
+      case 'show-navigation':
+        this.connectedCallback();
+        break;
+      default:
+        break;
+    }
   }
 }
 

@@ -61,7 +61,8 @@ To receive the images after they have been captured, you can listen to the custo
 ```json
 {
   "detail": {
-    "image": "base64 image"
+    "image": "base64 image",
+    "previewImage": "base64 image"
   }
 }
 ```
@@ -78,11 +79,11 @@ document
 
 ### Dependencies
 
-The `IdCapture` component depends on the following module:
+The `DocumentCapture` component depends on the following module:
 
-- SmartCamera
+- [SmartCamera](../../../../domain/camera/src/README.md)
 
-This module is imported when you use the `IdCapture` component in your projects.
+This module is imported when you use the `DocumentCapture` component in your projects.
 
 ### Compatibility
 

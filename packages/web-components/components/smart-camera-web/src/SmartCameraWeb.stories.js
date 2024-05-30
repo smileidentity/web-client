@@ -33,3 +33,10 @@ export const SmartCameraWebWithOutBackToHost = {
         </smart-camera-web>
     `,
 };
+
+export const SmartCameraWebWithOutBackId = {
+  render: () => `
+        <smart-camera-web show-navigation hide-back-of-id>
+        </smart-camera-web>
+    `,
+};

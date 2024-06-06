@@ -13,7 +13,7 @@
   "dependencies": {
     "@smileid/web-components": "file:../packages/web-components",
     "cors": "^2.8.5",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "smile-identity-core": "^3.1.0",
     "uuid": "^9.0.0"
   },

@@ -87,7 +87,7 @@ Cypress.Commands.add('loadIDOptions', (baseApiUrl = '**/v1') => {
 });
 
 Cypress.Commands.add('selectBVNIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingBVNIDType');
 
@@ -99,7 +99,7 @@ Cypress.Commands.add('selectBVNIDType', () => {
 });
 
 Cypress.Commands.add('selectBVNMFAIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingBVNMFAIDType');
 
@@ -111,7 +111,7 @@ Cypress.Commands.add('selectBVNMFAIDType', () => {
 });
 
 Cypress.Commands.add('selectNINIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingNINIDType');
 
@@ -123,7 +123,7 @@ Cypress.Commands.add('selectNINIDType', () => {
 });
 
 Cypress.Commands.add('selectVOTERIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingVoterIdType');
 
@@ -135,7 +135,7 @@ Cypress.Commands.add('selectVOTERIDType', () => {
 });
 
 Cypress.Commands.add('selectPASSPORTIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingPASSPORTIDType');
 
@@ -151,7 +151,7 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 });
 
 Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingPASSPORTIDType');
 
@@ -171,7 +171,7 @@ Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
 });
 
 Cypress.Commands.add('selectKRAType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectKRAType');
 
@@ -183,7 +183,7 @@ Cypress.Commands.add('selectKRAType', () => {
 });
 
 Cypress.Commands.add('selectKEDriversLicenseType', () => {
-  cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectDriversLicenseType');
 

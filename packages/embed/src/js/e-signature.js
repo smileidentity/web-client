@@ -32,11 +32,13 @@ function getHumanSize(numberOfBytes) {
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: 'https://devapi.smileidentity.com/v1',
     sandbox: 'https://testapi.smileidentity.com/v1',
     live: 'https://api.smileidentity.com/v1',
     production: 'https://api.smileidentity.com/v1',
   };
+
+  const getEndpoint = (environment) =>
+    endpoints[environment] || `${environment}/v1`;
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
@@ -149,9 +151,9 @@ function getHumanSize(numberOfBytes) {
         partner_details: { partner_id },
       } = config;
 
-      const URL = `${
-        endpoints[config.environment]
-      }/documents?ids=${config.document_ids.join(',')}`;
+      const URL = `${getEndpoint(
+        config.environment,
+      )}/documents?ids=${config.document_ids.join(',')}`;
       const fetchConfig = {
         mode: 'cors',
         headers: {
@@ -450,9 +452,7 @@ function getHumanSize(numberOfBytes) {
     formData.append('document_read_at', new Date().toISOString());
     formData.append('image', signature);
 
-    const URL = `${
-      endpoints[config.environment] || config.environment
-    }/documents/sign`;
+    const URL = `${getEndpoint(config.environment)}/documents/sign`;
 
     try {
       setActiveScreen(UploadProgressScreen);

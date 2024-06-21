@@ -21,7 +21,7 @@ describe('enhanced document verification', () => {
       },
     ).as('successfulUpload');
 
-    cy.loadIDOptions('https://devapi.smileidentity.com/v1');
+    cy.loadIDOptions('https://example.smileidentity.com/v1');
 
     cy.visit('/enhanced_document_verification_dev');
 

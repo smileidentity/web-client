@@ -9,11 +9,13 @@ import { version as sdkVersion } from '../../package.json';
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: 'https://devapi.smileidentity.com/v1',
     sandbox: 'https://testapi.smileidentity.com/v1',
     live: 'https://api.smileidentity.com/v1',
     production: 'https://api.smileidentity.com/v1',
   };
+
+  const getEndpoint = (environment) =>
+    endpoints[environment] || `${environment}/v1`;
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
@@ -66,15 +68,15 @@ import { version as sdkVersion } from '../../package.json';
         partner_params,
       };
 
-      const productsConfigUrl = `${
-        endpoints[config.environment]
-      }/products_config`;
+      const productsConfigUrl = `${getEndpoint(
+        config.environment,
+      )}/products_config`;
       const productsConfigPromise = postData(
         productsConfigUrl,
         productsConfigPayload,
       );
       const servicesPromise = fetch(
-        `${endpoints[config.environment]}/services`,
+        `${getEndpoint(config.environment)}/services`,
       );
       const [productsConfigResponse, servicesResponse] = await Promise.all([
         productsConfigPromise,
@@ -433,10 +435,7 @@ import { version as sdkVersion } from '../../package.json';
       main.removeChild(EndUserConsent);
     }
     EndUserConsent = document.createElement('end-user-consent');
-    EndUserConsent.setAttribute(
-      'base-url',
-      endpoints[config.environment] || config.environment,
-    );
+    EndUserConsent.setAttribute('base-url', getEndpoint(config.environment));
     EndUserConsent.setAttribute('country', id_info.country);
     EndUserConsent.setAttribute(
       'id-regex',
@@ -831,7 +830,7 @@ import { version as sdkVersion } from '../../package.json';
       },
     };
 
-    const URL = `${endpoints[config.environment] || config.environment}/upload`;
+    const URL = `${getEndpoint(config.environment)}/upload`;
 
     try {
       const response = await postData(URL, payload);

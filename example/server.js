@@ -21,15 +21,22 @@ const vite = await createViteServer({
 });
 app.use(vite.middlewares);
 
+const SID_SERVER_MAPPING = {
+  0: 'sandbox',
+  1: 'production',
+};
+
 app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
+    const SID_SERVER_ENVIRONMENT = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
+
     console.log(PARTNER_ID, API_KEY, SID_SERVER);
     const connection = new SIDWebAPI(
       PARTNER_ID,
       'https://webhook.site/0ffa8d44-160a-46f2-b2d1-497a16fd6d787',
       API_KEY,
-      SID_SERVER,
+      SID_SERVER_ENVIRONMENT,
     );
 
     const request_params = {
@@ -43,7 +50,7 @@ app.post('/token', async (req, res, next) => {
     console.log('result', result);
     res.status(201).json({
       ...result,
-      environment: SID_SERVER === '0' ? 'sandbox' : 'production',
+      environment: SID_SERVER_ENVIRONMENT,
       product: req.body.product,
       partner_id: PARTNER_ID,
       callback_url: 'https://webhook.site/0ffa8d44-160a-46f2-b2d1-497a16fd6d78',

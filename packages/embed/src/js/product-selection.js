@@ -9,7 +9,8 @@
     production: 'https://api.smileidentity.com/v1',
   };
 
-  const getEndpoint = (environment) => endpoints[environment] || environment;
+  const getEndpoint = (environment) =>
+    endpoints[environment] || `${environment}/v1`;
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');

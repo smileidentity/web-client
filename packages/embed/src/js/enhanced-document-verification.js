@@ -12,6 +12,8 @@ import { version as sdkVersion } from '../../package.json';
     production: 'https://api.smileidentity.com/v1',
   };
 
+  const getEndpoint = (environment) => endpoints[environment] || environment;
+
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
@@ -39,7 +41,9 @@ import { version as sdkVersion } from '../../package.json';
 
   async function getProductConstraints() {
     try {
-      const response = await fetch(`${endpoints[config.environment]}/services`);
+      const response = await fetch(
+        `${getEndpoint(config.environment)}/services`,
+      );
       const json = await response.json();
 
       return json.hosted_web.enhanced_document_verification;
@@ -437,7 +441,7 @@ import { version as sdkVersion } from '../../package.json';
       body: JSON.stringify(payload),
     };
 
-    const URL = `${endpoints[config.environment] || config.environment}/upload`;
+    const URL = `${getEndpoint(config.environment) || config.environment}/upload`;
 
     try {
       const response = await fetch(URL, fetchConfig);

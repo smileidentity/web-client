@@ -9,6 +9,8 @@
     production: 'https://api.smileidentity.com/v1',
   };
 
+  const getEndpoint = (environment) => endpoints[environment] || environment;
+
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
@@ -55,7 +57,7 @@
 
     try {
       const response = await fetch(
-        `${endpoints[config.environment]}/valid_documents`,
+        `${getEndpoint(config.environment)}/valid_documents`,
         fetchConfig,
       );
       const json = await response.json();
@@ -79,7 +81,7 @@
 
     try {
       const response = await fetch(
-        `${endpoints[config.environment]}/services`,
+        `${getEndpoint(config.environment)}/services`,
         fetchConfig,
       );
       const json = await response.json();

@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@storybook/addon-essentials": "^7.6.12",
+    "@storybook/addon-essentials": "^8.1.10",
     "@storybook/addon-links": "<8.0.0",
     "@storybook/blocks": "^7.6.17",
     "@storybook/web-components": "^7.6.4",

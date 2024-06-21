@@ -357,11 +357,13 @@ class DocumentCapture extends HTMLElement {
     const height = canvas.width / (video.videoWidth / video.videoHeight);
     canvas.height = height;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const image = canvas.toDataURL('image/jpeg');
 
     return {
-      image: canvas.toDataURL('image/jpeg'),
+      image,
       originalHeight: canvas.height,
       originalWidth: canvas.width,
+      previewImage: image,
       ...this.idCardRegion,
     };
   }

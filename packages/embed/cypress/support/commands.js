@@ -37,20 +37,22 @@ Cypress.Commands.add('getIFrameBody', () => {
     .then((body) => cy.wrap(body, { log: false }));
 });
 
-Cypress.Commands.add('loadIDOptions', () => {
+Cypress.Commands.add('loadIDOptions', (baseApiUrl = '**/v1') => {
   cy.log('loadingIDOptions');
 
-  cy.intercept('GET', '**/v1/services', { fixture: 'services.json' });
+  cy.intercept('GET', `${baseApiUrl}/services`, {
+    fixture: 'services.json',
+  });
 
-  cy.intercept('POST', '**/v1/valid_documents', {
+  cy.intercept('POST', `${baseApiUrl}/valid_documents`, {
     fixture: 'valid_documents.json',
   });
 
-  cy.intercept('POST', '**/v1/products_config', {
+  cy.intercept('POST', `${baseApiUrl}/products_config`, {
     fixture: 'products_config.json',
   });
 
-  cy.intercept('POST', '**/v1/totp_consent', {
+  cy.intercept('POST', `${baseApiUrl}/totp_consent`, {
     statusCode: 200,
     body: {
       message: 'Select OTP Delivery Mode',
@@ -67,7 +69,7 @@ Cypress.Commands.add('loadIDOptions', () => {
     },
   });
 
-  cy.intercept('POST', '**/v1/totp_consent/mode', {
+  cy.intercept('POST', `${baseApiUrl}/totp_consent/mode`, {
     statusCode: 200,
     body: {
       message: 'OTP Delivery Mode Selected',
@@ -75,7 +77,7 @@ Cypress.Commands.add('loadIDOptions', () => {
     },
   });
 
-  cy.intercept('POST', '**/v1/totp_consent/otp', {
+  cy.intercept('POST', `${baseApiUrl}/totp_consent/otp`, {
     statusCode: 200,
     body: {
       message: 'OTP Confirmed',
@@ -85,7 +87,7 @@ Cypress.Commands.add('loadIDOptions', () => {
 });
 
 Cypress.Commands.add('selectBVNIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingBVNIDType');
 
@@ -97,7 +99,7 @@ Cypress.Commands.add('selectBVNIDType', () => {
 });
 
 Cypress.Commands.add('selectBVNMFAIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingBVNMFAIDType');
 
@@ -109,7 +111,7 @@ Cypress.Commands.add('selectBVNMFAIDType', () => {
 });
 
 Cypress.Commands.add('selectNINIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingNINIDType');
 
@@ -121,7 +123,7 @@ Cypress.Commands.add('selectNINIDType', () => {
 });
 
 Cypress.Commands.add('selectVOTERIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingVoterIdType');
 
@@ -133,7 +135,7 @@ Cypress.Commands.add('selectVOTERIDType', () => {
 });
 
 Cypress.Commands.add('selectPASSPORTIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingPASSPORTIDType');
 
@@ -149,7 +151,7 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 });
 
 Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectingPASSPORTIDType');
 
@@ -169,7 +171,7 @@ Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
 });
 
 Cypress.Commands.add('selectKRAType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectKRAType');
 
@@ -181,7 +183,7 @@ Cypress.Commands.add('selectKRAType', () => {
 });
 
 Cypress.Commands.add('selectKEDriversLicenseType', () => {
-  cy.loadIDOptions();
+  cy.loadIDOptions('https://example.smileidentity.com/v1');
 
   cy.log('selectDriversLicenseType');
 

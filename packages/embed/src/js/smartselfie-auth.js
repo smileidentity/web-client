@@ -13,6 +13,9 @@ import { version as sdkVersion } from '../../package.json';
     production: 'https://api.smileidentity.com/v1',
   };
 
+  const getEndpoint = (environment) =>
+    endpoints[environment] || `${environment}/v1`;
+
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
@@ -210,7 +213,7 @@ import { version as sdkVersion } from '../../package.json';
       body: JSON.stringify(payload),
     };
 
-    const URL = `${endpoints[config.environment]}/upload`;
+    const URL = `${getEndpoint(config.environment)}/upload`;
 
     const response = await fetch(URL, fetchConfig);
     const json = await response.json();

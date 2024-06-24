@@ -9,11 +9,12 @@ import { version as sdkVersion } from '../../package.json';
   // NOTE: In order to support prior integrations, we have `live` and
   // `production` pointing to the same URL
   const endpoints = {
-    development: 'https://devapi.smileidentity.com',
     sandbox: 'https://testapi.smileidentity.com',
     live: 'https://api.smileidentity.com',
     production: 'https://api.smileidentity.com',
   };
+
+  const getEndpoint = (environment) => endpoints[environment] || environment;
 
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
@@ -57,15 +58,15 @@ import { version as sdkVersion } from '../../package.json';
         partner_params,
       };
 
-      const productsConfigUrl = `${
-        endpoints[config.environment]
-      }/v1/products_config`;
+      const productsConfigUrl = `${getEndpoint(
+        config.environment,
+      )}/v1/products_config`;
       const productsConfigPromise = postData(
         productsConfigUrl,
         productsConfigPayload,
       );
       const servicesPromise = fetch(
-        `${endpoints[config.environment]}/v1/services`,
+        `${getEndpoint(config.environment)}/v1/services`,
       );
       const [productsConfigResponse, servicesResponse] = await Promise.all([
         productsConfigPromise,
@@ -360,7 +361,7 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent = document.createElement('end-user-consent');
     EndUserConsent.setAttribute(
       'base-url',
-      `${endpoints[config.environment] || config.environment}/v1`,
+      `${getEndpoint(config.environment)}/v1`,
     );
     EndUserConsent.setAttribute('country', id_info.country);
     EndUserConsent.setAttribute(
@@ -801,7 +802,7 @@ import { version as sdkVersion } from '../../package.json';
       source_sdk_version: config.sdk_version || sdkVersion,
     };
 
-    const URL = `${endpoints[config.environment]}/v2/verify_async`;
+    const URL = `${getEndpoint(config.environment)}/v2/verify_async`;
     const response = await postData(URL, payload);
     const json = await response.json();
 

@@ -21,15 +21,28 @@ const vite = await createViteServer({
 });
 app.use(vite.middlewares);
 
+const SID_SERVER_MAPPING = {
+  0: 'sandbox',
+  1: 'production',
+};
+
 app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
+    const environmentServer = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
+    let baseServer = environmentServer;
+    // the smile-identity-core client appears to append https:// to the baseServer
+    // this is a workaround to prevent the client from appending https:// twice
+    if (baseServer.startsWith('https://')) {
+      baseServer = `${baseServer.slice(8)}/v1`;
+    }
+
     console.log(PARTNER_ID, API_KEY, SID_SERVER);
     const connection = new SIDWebAPI(
       PARTNER_ID,
       'https://webhook.site/0ffa8d44-160a-46f2-b2d1-497a16fd6d787',
       API_KEY,
-      SID_SERVER,
+      baseServer,
     );
 
     const request_params = {
@@ -40,14 +53,16 @@ app.post('/token', async (req, res, next) => {
     };
 
     const result = await connection.get_web_token(request_params);
-    console.log('result', result);
-    res.status(201).json({
+
+    const response = {
       ...result,
-      environment: SID_SERVER === '0' ? 'sandbox' : 'production',
+      environment: environmentServer,
       product: req.body.product,
       partner_id: PARTNER_ID,
       callback_url: 'https://webhook.site/0ffa8d44-160a-46f2-b2d1-497a16fd6d78',
-    });
+    };
+
+    res.status(201).json(response);
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });

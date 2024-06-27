@@ -17,6 +17,8 @@ jobs:
         run: npm ci
       - name: lint
         run: npx prettier --check .
+      - name: version consistency
+        run: node ./scripts/versionConsistency.js
   web-components:
     runs-on: ubuntu-latest
     defaults:

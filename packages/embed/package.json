@@ -30,7 +30,7 @@
     "@sentry/browser": "^7.112.2",
     "@sentry/esbuild-plugin": "^2.17.0",
     "@smile_identity/smart-camera-web": "file:../smart-camera-web",
-    "@smileid/web-components": "^1.0.0",
+    "@smileid/web-components": "^10.0.0",
     "jszip": "^3.10.1",
     "validate.js": "^0.13.1"
   },

@@ -23,7 +23,7 @@ function getPackageJsonPaths(dir) {
     const stat = fs.statSync(filePath);
     if (stat && stat.isDirectory()) {
       results = results.concat(getPackageJsonPaths(filePath));
-    } else if (file === 'package.json') {
+    } else if (file === 'package.json' && !filePath.includes('node_modules')) {
       results.push(filePath);
     }
   });

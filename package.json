@@ -27,7 +27,8 @@
     "@storybook/blocks": "^7.6.17",
     "@storybook/web-components": "^7.6.4",
     "@storybook/web-components-vite": "<8.0.0",
-    "prettier": "^3.2.5",
+    "check-dependency-version-consistency": "^4.1.0",
+    "prettier": "^3.3.2",
     "storybook": "<8.0.0"
   }
 }

@@ -19,6 +19,8 @@ jobs:
         run: npx prettier --check .
       - name: version consistency
         run: node ./scripts/versionConsistency.js
+      - name: Check Dependency Versions
+        run: npm exec check-dependency-version-consistency || true
   web-components:
     runs-on: ubuntu-latest
     defaults:

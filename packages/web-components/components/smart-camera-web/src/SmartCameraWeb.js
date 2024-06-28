@@ -109,7 +109,11 @@ class SmartCameraWeb extends HTMLElement {
       'selfie-capture-screens.publish',
       (event) => {
         this._data.images = event.detail.images;
-        this.setActiveScreen(this.documentCapture);
+        if (!this.captureId) {
+          this._publishSelectedImages();
+        } else {
+          this.setActiveScreen(this.documentCapture);
+        }
       },
     );
 
@@ -184,6 +188,10 @@ class SmartCameraWeb extends HTMLElement {
     this.dispatchEvent(
       new CustomEvent('smart-camera-web.publish', { detail: this._data }),
     );
+  }
+
+  get captureID() {
+    return this.hasAttribute('capture-id');
   }
 
   get documentType() {

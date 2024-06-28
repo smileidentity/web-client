@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added workflow_dispatch to deploy
+
+### Changed
+
+- Updated Sentry to only capture web embed errors
+- Updated Sentry dependency to major version
+
+## [1.3.3] - 2024-06-28
+
+### Changed
+
+- Version bump: from 1.3.0 to 1.3.3. (Commit: 2488832)
+
 ## [1.3.0] - 2024-06-27
 
 ### Added

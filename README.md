@@ -53,6 +53,10 @@ This mono-repo contains test suites for both projects to ensure code quality and
    npm test
    ```
 
+### Versioning
+
+The versioning strategy is enforced by the `scripts/versionConsistency.js` script. It checks that all package.json files in the repo are on the same version. We use a CI action to publish a git tag when the version changes. In the future we will also publish to NPM.
+
 ### Storybook
 
 Storybook is a tool for building UI components and pages in isolation. It simplifies the development process and ensures consistency across the UI.

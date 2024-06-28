@@ -119,6 +119,7 @@ files.forEach((file) => {
       plugins: [
         // Put the Sentry esbuild plugin after all other plugins
         sentry.sentryEsbuildPlugin({
+          applicationKey: 'smileid-web-client',
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'smile-identity',
           project: 'web-client',

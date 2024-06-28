@@ -2,6 +2,12 @@ import * as Sentry from '@sentry/browser';
 
 Sentry.init({
   dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
+  integrations: [
+    Sentry.thirdPartyErrorFilterIntegration({
+      filterKeys: ['smileid-web-client'],
+      behaviour: 'drop-error-if-exclusively-contains-third-party-frames',
+    }),
+  ],
   tracesSampleRate: 0.05,
   tracePropagationTargets: [
     /^https:\/\/links\.usesmileid\.com/,

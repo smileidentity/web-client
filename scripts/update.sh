@@ -7,7 +7,6 @@
 
 # List of dependencies to ignore
 ignore_dependencies=(
-    "@sentry/browser"
     "@storybook/addon-essentials"
     "@storybook/addon-links"
     "@storybook/blocks"

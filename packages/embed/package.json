@@ -1,6 +1,6 @@
 {
   "name": "@smileid/embed",
-  "version": "1.3.0",
+  "version": "1.3.3",
   "description": "Self Hosted Integration for Smile Identity on the Web",
   "private": true,
   "main": "inline.js",
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
   "dependencies": {
-    "@sentry/browser": "^7.112.2",
+    "@sentry/browser": "^8.13.0",
     "@sentry/esbuild-plugin": "^2.20.1",
     "@smile_identity/smart-camera-web": "file:../smart-camera-web",
     "@smileid/web-components": "^1.0.0",

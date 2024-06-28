@@ -190,7 +190,7 @@ class SmartCameraWeb extends HTMLElement {
     );
   }
 
-  get captureID() {
+  get captureId() {
     return this.hasAttribute('capture-id');
   }
 

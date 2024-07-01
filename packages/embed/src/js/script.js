@@ -1,11 +1,28 @@
 import * as Sentry from '@sentry/browser';
 
 Sentry.init({
+  beforeSend(event) {
+    // Check if the error originates from the library's source files
+    if (event.exception && event.exception.values) {
+      const isLibraryError = event.exception.values.some((exception) => {
+        return exception.stacktrace.frames.some((frame) =>
+          frame.filename.includes('inline/src'),
+        );
+      });
+
+      // If the error is from the library, send it to Sentry
+      if (isLibraryError) {
+        return event;
+      }
+    }
+    // Otherwise, do not send the error
+    return null;
+  },
   dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
   integrations: [
     Sentry.thirdPartyErrorFilterIntegration({
       filterKeys: ['smileid-web-client'],
-      behaviour: 'drop-error-if-exclusively-contains-third-party-frames',
+      behaviour: 'drop-error-if-contains-third-party-frames',
     }),
   ],
   tracesSampleRate: 0.05,

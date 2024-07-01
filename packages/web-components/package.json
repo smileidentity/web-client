@@ -29,7 +29,7 @@
   "type": "module",
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
-    "signature_pad": "^4.1.7",
+    "signature_pad": "^5.0.2",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {

@@ -7,14 +7,8 @@
 
 # List of dependencies to ignore
 ignore_dependencies=(
-    "@storybook/addon-essentials"
-    "@storybook/addon-links"
-    "@storybook/blocks"
-    "@storybook/web-components-vite"
-    "@storybook/web-components"
     "eslint"
     "signature_pad"
-    "storybook"
 )
 
 # Convert the list to a comma-separated string

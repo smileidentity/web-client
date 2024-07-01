@@ -1534,7 +1534,6 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
 
     const videoContainer =
       this.activeScreen === this.IDCameraScreen
@@ -1542,6 +1541,7 @@ class SmartCameraWeb extends HTMLElement {
         : this.backOfIDCameraScreen.querySelector('.id-video-container');
 
     video.onloadedmetadata = () => {
+      video.play();
       videoContainer.querySelector('.actions').hidden = false;
     };
 

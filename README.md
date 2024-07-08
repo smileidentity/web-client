@@ -78,7 +78,7 @@ To start testing locally with the embed
    npm run dev
   ```
 
-> Upon making changes in the embed or it's dependencies, remember to rebuild the embed by running `npm run build` in the embed directory
+> Upon making changes in the embed or it's dependencies, remember to rebuild and restart the embed
 
 ### Versioning
 

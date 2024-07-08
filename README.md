@@ -59,9 +59,24 @@ The [Example App](example) can be used to test out changes made locally to the e
 To start testing locally with the embed
 
 - Copy the [Sample env](example/sample.env) to [example/.env](example/.env) in the example app and provide the relevant values
+
 - Build and start the embed server (it should be running on port 8000)
-- Start the example app backend `npm start`
-- Start the example app front end `npm run dev`
+
+  ```sh
+   cd packages/embed
+   npm install
+   npm build
+   npm start
+  ```
+
+- Start the example app
+
+  ```sh
+   cd example
+   npm install
+   npm start
+   npm run dev
+  ```
 
 > Upon making changes in the embed or it's dependencies, remember to rebuild the embed by running `npm run build` in the embed directory
 

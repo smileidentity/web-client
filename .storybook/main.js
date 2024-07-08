@@ -18,12 +18,10 @@ const config = {
     getAbsolutePath('@storybook/addon-links'),
     getAbsolutePath('@storybook/addon-essentials'),
   ],
+  docs: {},
   framework: {
     name: getAbsolutePath('@storybook/web-components-vite'),
     options: {},
-  },
-  docs: {
-    autodocs: 'tag',
   },
 };
 export default config;

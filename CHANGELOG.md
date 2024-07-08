@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated Storybook from 7.6.15 to 8.1.11
+- Fixed biometric verification requiring id images
 
 ## [1.3.4] - 2024-07-01
 

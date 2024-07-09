@@ -40,6 +40,27 @@
         SmileIdentity
       </p>
     </noscript>
+    <script>
+      // Configure sentryOnLoad before adding the Loader Script
+      window.sentryOnLoad = function () {
+        Sentry.init({
+          beforeSend(event) {
+            // Check if the error originates from the library's source files
+            /// https://sentry.zendesk.com/hc/en-us/articles/24076831568027--JS-Filter-events-based-on-their-entire-stack-trace
+            const traces = event.exception.values[0].stacktrace?.frames || [];
+            for (let i in traces) {
+              if (!event.exception.values[0].stacktrace.frames[i].filename.match(/inline\/src/g))
+              return null;
+          }
+          if (!event.request.url.match(/enhanced-document-verification/g)) {
+            return null;
+          }
+            return event;
+          },
+          tracesSampleRate: 0.01,
+        });
+      };
+    </script>
     <script
       src="https://js.sentry-cdn.com/82cc89f6d5a076c26d3a3cdc03a8d954.min.js"
       crossorigin="anonymous"

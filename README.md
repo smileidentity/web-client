@@ -53,6 +53,33 @@ This mono-repo contains test suites for both projects to ensure code quality and
    npm test
    ```
 
+### Example App
+
+The [Example App](example) can be used to test out changes made locally to the embed and it's dependencies.
+To start testing locally with the embed
+
+- Copy the [Sample env](example/sample.env) to [example/.env](example/.env) in the example app and provide the relevant values
+
+- Build and start the embed server (it should be running on port 8000)
+
+  ```sh
+   cd packages/embed
+   npm install
+   npm build
+   npm start
+  ```
+
+- Start the example app
+
+  ```sh
+   cd example
+   npm install
+   npm start
+   npm run dev
+  ```
+
+> Upon making changes in the embed or it's dependencies, remember to rebuild and restart the embed
+
 ### Versioning
 
 The versioning strategy is enforced by the `scripts/versionConsistency.js` script. It checks that all package.json files in the repo are on the same version. We use a CI action to publish a git tag when the version changes. In the future we will also publish to NPM.

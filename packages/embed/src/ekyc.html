@@ -49,12 +49,16 @@
             /// https://sentry.zendesk.com/hc/en-us/articles/24076831568027--JS-Filter-events-based-on-their-entire-stack-trace
             const traces = event.exception.values[0].stacktrace?.frames || [];
             for (let i in traces) {
-              if (!event.exception.values[0].stacktrace.frames[i].filename.match(/inline\/src/g))
+              if (
+                !event.exception.values[0].stacktrace.frames[i].filename.match(
+                  /inline\/src/g,
+                )
+              )
+                return null;
+            }
+            if (!event.request.url.match(/ekyc/g)) {
               return null;
-          }
-          if (!event.request.url.match(/ekyc/g)) {
-            return null;
-          }
+            }
             return event;
           },
           tracesSampleRate: 0.01,

@@ -347,8 +347,12 @@ import { version as sdkVersion } from '../../package.json';
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
-      setActiveScreen(UploadProgressScreen);
-      handleFormSubmit(event);
+      const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
+      if (idRequiresTOTPConsent) {
+        handleFormSubmit();
+      } else {
+        setActiveScreen(IDInfoForm);
+      }
     },
     false,
   );

@@ -15,7 +15,7 @@
   ],
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
-    "signature_pad": "^4.1.7"
+    "signature_pad": "^5.0.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

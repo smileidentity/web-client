@@ -25,7 +25,7 @@ Sentry.init({
       behaviour: 'drop-error-if-contains-third-party-frames',
     }),
   ],
-  tracesSampleRate: 0.05,
+  tracesSampleRate: 0.01,
   tracePropagationTargets: [
     /^https:\/\/links\.usesmileid\.com/,
     /^https:\/\/links\.sandbox\.usesmileid\.com/,

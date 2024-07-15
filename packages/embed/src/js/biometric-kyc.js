@@ -741,7 +741,7 @@ import { version as sdkVersion } from '../../package.json';
 
   async function handleFormSubmit(event) {
     if (event && event.target) event.target.disabled = true;
-    
+
     if (event) {
       event.preventDefault();
       resetForm();

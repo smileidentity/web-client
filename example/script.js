@@ -15,6 +15,10 @@ export default function setupForm() {
   const button = document.querySelector('#submitForm');
   const product = document.querySelector('#product');
 
+  const resetButton = () => {
+    button.textContent = 'Verify with Smile Identity';
+    button.disabled = false;
+  }
   const getWebToken = async () => {
     const payload = { product: product.value };
     const fetchConfig = {};
@@ -50,8 +54,8 @@ export default function setupForm() {
     e.preventDefault();
     button.textContent = 'Initializing session...';
     button.disabled = true;
+   try {
     const tokenResults = await getWebToken();
-    // debugger;
     const {
       token,
       product,
@@ -84,17 +88,18 @@ export default function setupForm() {
         onSuccess: () => {
           button.textContent = 'Verify with Smile Identity';
           button.disabled = false;
-          setActiveScreen(demoCompleteScreen);
+          // setActiveScreen(demoCompleteScreen);
         },
         onClose: () => {
-          button.textContent = 'Verify with Smile Identity';
-          button.disabled = false;
+          resetButton();
         },
         onError: () => {
-          button.textContent = 'Verify with Smile Identity';
-          button.disabled = false;
+          resetButton();
         },
       });
     }
+   } catch (error) {
+    resetButton();
+   }
   });
 }

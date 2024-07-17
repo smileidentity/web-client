@@ -52,7 +52,6 @@ function templateString() {
     img {
       height: 100%;
       min-height: 100px;
-      clip-path: polygon(5% 5%, 95% 5%, 95% 90%, 5% 90%);
     }
 
     .video-overlay .inner-border {

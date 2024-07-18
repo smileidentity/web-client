@@ -412,7 +412,9 @@ class DocumentCapture extends HTMLElement {
     let videoMeta = {};
 
     video.onloadedmetadata = () => {
-      videoMeta = this._calculateVideoOffset(video, { clientWidth: videoContainer.clientWidth });
+      videoMeta = this._calculateVideoOffset(video, {
+        clientWidth: videoContainer.clientWidth,
+      });
       video.play();
 
       this.shadowRoot.querySelector('#loader').hidden = true;
@@ -449,7 +451,19 @@ class DocumentCapture extends HTMLElement {
     const height = video.videoHeight * scaleFactor;
     const startX = video.videoWidth * scaleOffset;
     const startY = video.videoHeight * scaleOffset;
-    canvas.getContext('2d').drawImage(video, startX, startY, width, height, 0, 0, canvas.width, canvas.height);
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        width,
+        height,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
   }
 
   _drawPortraitToLandscapeImage(canvas, video = this._IDVideo) {
@@ -463,7 +477,19 @@ class DocumentCapture extends HTMLElement {
     const startX = (videoWidth - cropWidth) / 2;
     const startY = (videoHeight - cropHeight) / 2;
 
-    canvas.getContext('2d').drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
   }
 
   _calculateVideoOffset(video, { clientWidth }) {

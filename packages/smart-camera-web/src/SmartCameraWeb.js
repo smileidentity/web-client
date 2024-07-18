@@ -1238,6 +1238,12 @@ class SmartCameraWeb extends HTMLElement {
     }
     this.activeScreen = null;
     this.shadowRoot.innerHTML = '';
+    this._stopIDVideoStream(this._stream);
+    this._stopIDVideoStream(this._IDStream);
+    this._stream = null;
+    this._video = null;
+    this._IDStream = null;
+    this._IDVideo = null;
   }
 
   static get observedAttributes() {
@@ -1487,7 +1493,10 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
+
+    video.onloadedmetadata = () => {
+      video.play();
+    };
 
     if (!videoExists) this.videoContainer.prepend(video);
 
@@ -1525,7 +1534,6 @@ class SmartCameraWeb extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    video.play();
 
     const videoContainer =
       this.activeScreen === this.IDCameraScreen
@@ -1533,6 +1541,7 @@ class SmartCameraWeb extends HTMLElement {
         : this.backOfIDCameraScreen.querySelector('.id-video-container');
 
     video.onloadedmetadata = () => {
+      video.play();
       videoContainer.querySelector('.actions').hidden = false;
     };
 
@@ -1838,7 +1847,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _stopIDVideoStream(stream = this._IDStream) {
-    stream.getTracks().forEach((track) => track.stop());
+    stream?.getTracks()?.forEach((track) => track.stop());
   }
 
   async _startIDCamera() {

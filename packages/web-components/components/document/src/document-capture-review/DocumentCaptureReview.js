@@ -21,18 +21,6 @@ function templateString() {
         height: 100vh;
         justify-content: center;
       }
-
-      .video-overlay {
-        position: absolute;
-        border-width: 1rem;
-        border-color: white;
-        border-style: solid;
-        inset: 0px;
-      }
-
-      img {
-        clip-path: polygon(10% 10%, 90% 10%, 90% 85%, 10% 85%);
-      }
     }
     
     .id-image-container {
@@ -43,24 +31,14 @@ function templateString() {
     }
 
     .id-image {
-      max-width: fit-content;
-      height: auto;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        background: white;
     }
     img {
       height: 100%;
       min-height: 100px;
-    }
-
-    .video-overlay .inner-border {
-      position: absolute;
-      border-width: 1rem;
-      border-color: #9394ab;
-      border-style: solid;
-      border-radius: 1rem;
-      inset: -8px;
     }
 
     .action-buttons {
@@ -178,6 +156,12 @@ function templateString() {
     .padding-bottom-2 {
       padding-bottom: 2rem;
     }
+    img {
+        border-width: 0.25rem;
+        border-color: #9394ab;
+        border-style: solid;
+        border-radius: 0.25rem;
+      }
 
     .instructions-wrapper {
       display: inline-flex;

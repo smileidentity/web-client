@@ -46,8 +46,8 @@ function templateString() {
         display: flex;
         align-items: stretch;
         justify-content: center;
-        max-height: 200px;
-        height: 10rem;
+        max-height: 300px;
+        height: 15rem;
         width: 100%;
         overflow: visible;
         margin: 0 auto;
@@ -55,7 +55,7 @@ function templateString() {
       
       @media (max-width: 600px) {
         .section {
-          width: 100%;
+          width: 99%;
           height: 100vh;
           justify-content: center;
         }
@@ -88,25 +88,22 @@ function templateString() {
         }
       
         .id-video {
-          width: 100%;
+          width: 99%;
           text-align: center;
           position: relative;
           overflow: hidden;
         }
-        .video-overlay {
-          position: absolute;
-          border-style: solid;
-          border-color: rgba(0, 0, 0, 0.48);
-          box-sizing: border-box;
-          inset: -1px;
-        }
-      
+
         .id-video-container {
           margin: auto;
           padding: 0px;
         }
       }
-      
+      .id-video-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
       .id-video {
         width: 100%;
         text-align: center;
@@ -333,21 +330,27 @@ class DocumentCapture extends HTMLElement {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const image = canvas.toDataURL('image/jpeg');
     const previewCanvas = document.createElement('canvas');
-    previewCanvas.width = 2240;
-    previewCanvas.height = height;
-    const previewContext = previewCanvas.getContext('2d');
-    const previewWidth = video.videoWidth * scaleFactor;
-    const previewHeight = video.videoHeight * scaleFactor;
-    const startX = video.videoWidth * scaleOffset;
-    const startY = video.videoHeight * scaleOffset;
-    previewContext.drawImage(video, startX, startY, previewWidth, previewHeight, 0, 0, previewCanvas.width, previewCanvas.height);
+    const isPortrait = video.videoWidth < video.videoHeight;
+    if (isPortrait) {
+      this._drawPortraitToLandscapeImage(previewCanvas, video);
+    }else {
+      this._drawLandscapeImage(previewCanvas, video);
+    }
+    // previewCanvas.width = 2240;
+    // previewCanvas.height = height;
+    // const previewContext = previewCanvas.getContext('2d');
+    // const previewWidth = video.videoWidth * scaleFactor;
+    // const previewHeight = video.videoHeight * scaleFactor;
+    // const startX = video.videoWidth * scaleOffset;
+    // const startY = video.videoHeight * scaleOffset;
+    // previewContext.drawImage(video, startX, startY, previewWidth, previewHeight, 0, 0, previewCanvas.width, previewCanvas.height)
 
     const previewImage = previewCanvas.toDataURL('image/jpeg');
     return {
       image,
       originalHeight: canvas.height,
       originalWidth: canvas.width,
-      previewImage: image,
+      previewImage: previewImage,
       ...this.idCardRegion,
     };
   }
@@ -417,17 +420,19 @@ class DocumentCapture extends HTMLElement {
       this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
-      const portrait = videoMeta.aspectRatio < 1;
     };
 
-
     const onVideoStart = () => {
-      const width = video.videoWidth * scaleFactor;
-      const height = video.videoHeight * scaleFactor;
-      const startX = video.videoWidth * scaleOffset;
-      const startY = video.videoHeight * scaleOffset;
-      context.drawImage(video, startX, startY, width, height, 0, 0, canvas.width, canvas.height);
+      const portrait = videoMeta.aspectRatio < 1;
+
+      if (portrait) {
+        videoContainer.classList.add('mobile-camera-screen');
+        this._drawPortraitToLandscapeImage(canvas, video);
+      } else {
+        this._drawLandscapeImage(canvas, video);
+      }
       requestAnimationFrame(onVideoStart);
+
       video.removeEventListener('playing', onVideoStart);
     };
 
@@ -440,6 +445,31 @@ class DocumentCapture extends HTMLElement {
     this._IDStream = stream;
     this._IDVideo = video;
   }
+
+  _drawLandscapeImage(canvas, video = this._IDVideo) {
+    const width = video.videoWidth * scaleFactor;
+    const height = video.videoHeight * scaleFactor;
+    const startX = video.videoWidth * scaleOffset;
+    const startY = video.videoHeight * scaleOffset;
+    canvas.getContext('2d').drawImage(video, startX, startY, width, height, 0, 0, canvas.width, canvas.height);
+  }
+
+  _drawPortraitToLandscapeImage(canvas, video = this._IDVideo) {
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    const cropWidth = 600;
+    const cropHeight = 400;
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    const startX = (videoWidth - cropWidth) / 2;
+    const startY = (videoHeight - cropHeight) / 2;
+
+    canvas.getContext('2d').drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+  }
+
+
 
   _calculateVideoOffset(video, { clientWidth }) {
     clientWidth = clientWidth || video.clientWidth;

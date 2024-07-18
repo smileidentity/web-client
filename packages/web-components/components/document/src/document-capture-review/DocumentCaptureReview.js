@@ -39,6 +39,7 @@ function templateString() {
     img {
       height: 100%;
       min-height: 100px;
+      width: 98%;
     }
 
     .action-buttons {
@@ -230,7 +231,7 @@ function templateString() {
       <div class='id-image-container'>
         <div class='id-image'>
           <div class='video-overlay'></div>
-          ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' width='396' />` : ''}
+          ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' />` : ''}
           </div>
         <div class='flow action-buttons'>
           <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>

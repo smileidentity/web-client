@@ -333,7 +333,7 @@ class DocumentCapture extends HTMLElement {
     const isPortrait = video.videoWidth < video.videoHeight;
     if (isPortrait) {
       this._drawPortraitToLandscapeImage(previewCanvas, video);
-    }else {
+    } else {
       this._drawLandscapeImage(previewCanvas, video);
     }
     // previewCanvas.width = 2240;
@@ -350,7 +350,7 @@ class DocumentCapture extends HTMLElement {
       image,
       originalHeight: canvas.height,
       originalWidth: canvas.width,
-      previewImage: previewImage,
+      previewImage,
       ...this.idCardRegion,
     };
   }
@@ -398,7 +398,6 @@ class DocumentCapture extends HTMLElement {
     video.muted = true;
     video.setAttribute('muted', 'true');
 
-
     video.autoplay = true;
     video.playsInline = true;
     if ('srcObject' in video) {
@@ -410,7 +409,6 @@ class DocumentCapture extends HTMLElement {
     const topBottomBorderSize = 20;
     canvas.width = 430 - rightLeftBorderSize;
     canvas.height = 250 - topBottomBorderSize;
-    const context = canvas.getContext('2d');
     let videoMeta = {};
 
     video.onloadedmetadata = () => {
@@ -455,8 +453,7 @@ class DocumentCapture extends HTMLElement {
   }
 
   _drawPortraitToLandscapeImage(canvas, video = this._IDVideo) {
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
+    const { videoHeight, videoWidth } = video;
     const cropWidth = 600;
     const cropHeight = 400;
 
@@ -468,8 +465,6 @@ class DocumentCapture extends HTMLElement {
 
     canvas.getContext('2d').drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
   }
-
-
 
   _calculateVideoOffset(video, { clientWidth }) {
     clientWidth = clientWidth || video.clientWidth;

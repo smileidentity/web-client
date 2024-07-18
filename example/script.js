@@ -86,9 +86,7 @@ export default function setupForm() {
             theme_color: '#000',
           },
           onSuccess: () => {
-            button.textContent = 'Verify with Smile Identity';
-            button.disabled = false;
-            // setActiveScreen(demoCompleteScreen);
+            resetButton();
           },
           onClose: () => {
             resetButton();

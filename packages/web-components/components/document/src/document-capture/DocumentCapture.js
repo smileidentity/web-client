@@ -196,7 +196,7 @@ function templateString() {
 }
 
 const fixedAspectRatio = 1.53;
-const scaleFactor = 0.6;
+const documentCaptureScale = 0.6;
 const scaleOffset = 0.3;
 
 class DocumentCapture extends HTMLElement {
@@ -330,6 +330,8 @@ class DocumentCapture extends HTMLElement {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const image = canvas.toDataURL('image/jpeg');
     const previewCanvas = document.createElement('canvas');
+    previewCanvas.height = canvas.height;
+    previewCanvas.width = canvas.width;
     const isPortrait = video.videoWidth < video.videoHeight;
     if (isPortrait) {
       this._drawPortraitToLandscapeImage(previewCanvas, video);
@@ -389,6 +391,10 @@ class DocumentCapture extends HTMLElement {
 
   handleIDStream(stream) {
     const videoExists = this.shadowRoot.querySelector('canvas');
+    if (videoExists) {
+      // remove canvas
+      videoExists.remove();
+    }
     let video = null;
     let canvas = null;
     video = document.createElement('video');
@@ -423,6 +429,8 @@ class DocumentCapture extends HTMLElement {
     };
 
     const onVideoStart = () => {
+      if (video.paused || video.ended) return;
+
       const portrait = videoMeta.aspectRatio < 1;
 
       if (portrait) {
@@ -447,10 +455,13 @@ class DocumentCapture extends HTMLElement {
   }
 
   _drawLandscapeImage(canvas, video = this._IDVideo) {
-    const width = video.videoWidth * scaleFactor;
-    const height = video.videoHeight * scaleFactor;
+    const heightScaleFactor = this.height ? (this.height / video.videoHeight) : documentCaptureScale;
+    const widthScaleFactor = this.width ? (this.width / video.videoWidth) : documentCaptureScale;
+    const width = video.videoWidth * widthScaleFactor;
+    const height = video.videoHeight * heightScaleFactor;
     const startX = video.videoWidth * scaleOffset;
     const startY = video.videoHeight * scaleOffset;
+
     canvas
       .getContext('2d')
       .drawImage(
@@ -576,6 +587,14 @@ class DocumentCapture extends HTMLElement {
       this.getAttribute('title') ||
       `${this.IdSides[this.sideOfId]} of ${this.documentName}`
     );
+  }
+
+  get height() {
+    return this.getAttribute('height');
+  }
+
+  get width() {
+    return this.getAttribute('width');
   }
 
   get hidden() {

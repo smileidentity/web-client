@@ -229,7 +229,10 @@ class DocumentCapture extends HTMLElement {
     try {
       await SmartCamera.getMedia({
         audio: false,
-        video: { ...SmartCamera.environmentOptions, aspectRatio: { ideal: 16 / 9 } },
+        video: {
+          ...SmartCamera.environmentOptions,
+          aspectRatio: { ideal: 16 / 9 },
+        },
       });
     } catch (error) {
       console.error(error.constraint);
@@ -489,7 +492,7 @@ class DocumentCapture extends HTMLElement {
   _capturePortraitToLandscapeImage(canvas, video = this._IDVideo) {
     const { videoHeight, videoWidth } = video;
     const cropWidth = videoWidth;
-    const cropHeight = ((videoWidth * 9) / 16); // convert to landscape aspect ratio
+    const cropHeight = (videoWidth * 9) / 16; // convert to landscape aspect ratio
     const startX = 0;
     const startY = (videoHeight - cropHeight) / 2;
 

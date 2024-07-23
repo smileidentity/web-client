@@ -229,7 +229,7 @@ class DocumentCapture extends HTMLElement {
     try {
       await SmartCamera.getMedia({
         audio: false,
-        video: SmartCamera.environmentOptions,
+        video: { ...SmartCamera.environmentOptions, aspectRatio: { ideal: 16 / 9 } },
       });
     } catch (error) {
       console.error(error.constraint);
@@ -332,9 +332,11 @@ class DocumentCapture extends HTMLElement {
     previewCanvas.width = canvas.width;
     const isPortrait = video.videoWidth < video.videoHeight;
     if (isPortrait) {
-      this._drawPortraitToLandscapeImage(previewCanvas, video);
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const intermediateCanvas = document.createElement('canvas');
+      previewCanvas.height = canvas.width / 1.75;
+      this._capturePortraitToLandscapeImage(intermediateCanvas, video);
+      this._drawLandscapeImage(canvas, video, 1, 1);
+      this._drawLandscapeImageFromCanvas(previewCanvas, intermediateCanvas);
     } else {
       this._drawLandscapeImage(canvas, video, 1, 1);
       this._drawLandscapeImage(previewCanvas, video);
@@ -429,7 +431,9 @@ class DocumentCapture extends HTMLElement {
 
       if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
-        this._drawPortraitToLandscapeImage(canvas, video);
+        const intermediateCanvas = document.createElement('canvas');
+        this._capturePortraitToLandscapeImage(intermediateCanvas, video);
+        this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas);
       } else {
         this._drawLandscapeImage(canvas, video);
       }
@@ -471,6 +475,65 @@ class DocumentCapture extends HTMLElement {
       .getContext('2d')
       .drawImage(
         video,
+        startX,
+        startY,
+        width,
+        height,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
+
+  _capturePortraitToLandscapeImage(canvas, video = this._IDVideo) {
+    const { videoHeight, videoWidth } = video;
+    const cropWidth = videoWidth;
+    const cropHeight = ((videoWidth * 9) / 16); // convert to landscape aspect ratio
+    const startX = 0;
+    const startY = (videoHeight - cropHeight) / 2;
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
+
+  _drawLandscapeImageFromCanvas(
+    canvas,
+    sourceCanvas,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const heightScaleFactor = this.height
+      ? this.height / sourceCanvas.height
+      : scaleHeight;
+    const widthScaleFactor = this.width
+      ? this.width / sourceCanvas.width
+      : scaleWidth;
+    const scaleHeightOffset = (1 - scaleHeight) / 2;
+    const scaleWidthOffset = (1 - scaleWidth) / 2;
+    const width = sourceCanvas.width * widthScaleFactor;
+    const height = sourceCanvas.height * heightScaleFactor;
+    const startX = sourceCanvas.width * scaleWidthOffset;
+    const startY = sourceCanvas.height * scaleHeightOffset;
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        sourceCanvas,
         startX,
         startY,
         width,

@@ -197,7 +197,7 @@ function templateString() {
 
 const fixedAspectRatio = 1.53;
 const documentCaptureScale = 0.6;
-const scaleOffset = 0.3;
+// const scaleOffset = 0.3;
 
 class DocumentCapture extends HTMLElement {
   constructor() {
@@ -324,28 +324,22 @@ class DocumentCapture extends HTMLElement {
     canvas.width = 2240;
     canvas.height = 1260;
 
-    const context = canvas.getContext('2d');
     const height = canvas.width / (video.videoWidth / video.videoHeight);
     canvas.height = height;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const image = canvas.toDataURL('image/jpeg');
+
     const previewCanvas = document.createElement('canvas');
     previewCanvas.height = canvas.height;
     previewCanvas.width = canvas.width;
     const isPortrait = video.videoWidth < video.videoHeight;
     if (isPortrait) {
       this._drawPortraitToLandscapeImage(previewCanvas, video);
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
     } else {
+      this._drawLandscapeImage(canvas, video, 1, 1);
       this._drawLandscapeImage(previewCanvas, video);
     }
-    // previewCanvas.width = 2240;
-    // previewCanvas.height = height;
-    // const previewContext = previewCanvas.getContext('2d');
-    // const previewWidth = video.videoWidth * scaleFactor;
-    // const previewHeight = video.videoHeight * scaleFactor;
-    // const startX = video.videoWidth * scaleOffset;
-    // const startY = video.videoHeight * scaleOffset;
-    // previewContext.drawImage(video, startX, startY, previewWidth, previewHeight, 0, 0, previewCanvas.width, previewCanvas.height)
+    const image = canvas.toDataURL('image/jpeg');
 
     const previewImage = previewCanvas.toDataURL('image/jpeg');
     return {
@@ -454,13 +448,24 @@ class DocumentCapture extends HTMLElement {
     this._IDVideo = video;
   }
 
-  _drawLandscapeImage(canvas, video = this._IDVideo) {
-    const heightScaleFactor = this.height ? (this.height / video.videoHeight) : documentCaptureScale;
-    const widthScaleFactor = this.width ? (this.width / video.videoWidth) : documentCaptureScale;
+  _drawLandscapeImage(
+    canvas,
+    video = this._IDVideo,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const heightScaleFactor = this.height
+      ? this.height / video.videoHeight
+      : scaleHeight;
+    const widthScaleFactor = this.width
+      ? this.width / video.videoWidth
+      : scaleWidth;
+    const scaleHeightOffset = (1 - scaleHeight) / 2;
+    const scaleWidthOffset = (1 - scaleWidth) / 2;
     const width = video.videoWidth * widthScaleFactor;
     const height = video.videoHeight * heightScaleFactor;
-    const startX = video.videoWidth * scaleOffset;
-    const startY = video.videoHeight * scaleOffset;
+    const startX = video.videoWidth * scaleWidthOffset;
+    const startY = video.videoHeight * scaleHeightOffset;
 
     canvas
       .getContext('2d')

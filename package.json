@@ -27,6 +27,7 @@
     "@storybook/blocks": "^8.1.10",
     "@storybook/web-components": "^8.1.10",
     "@storybook/web-components-vite": "^8.1.10",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "check-dependency-version-consistency": "^4.1.0",
     "prettier": "^3.3.2",
     "storybook": "^8.1.10"

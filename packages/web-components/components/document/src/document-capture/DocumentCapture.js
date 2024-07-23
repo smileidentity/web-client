@@ -337,8 +337,10 @@ class DocumentCapture extends HTMLElement {
     if (isPortrait) {
       const intermediateCanvas = document.createElement('canvas');
       previewCanvas.height = canvas.width / 1.75;
+      canvas.width = 2240;
+      canvas.height = canvas.width / 1.77;
       this._capturePortraitToLandscapeImage(intermediateCanvas, video);
-      this._drawLandscapeImage(canvas, video, 1, 1);
+      this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas, 1, 1);
       this._drawLandscapeImageFromCanvas(previewCanvas, intermediateCanvas);
     } else {
       this._drawLandscapeImage(canvas, video, 1, 1);

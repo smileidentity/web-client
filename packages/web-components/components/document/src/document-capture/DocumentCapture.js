@@ -1,9 +1,5 @@
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
-import {
-  PORTRAIT_ID_PREVIEW_HEIGHT,
-  PORTRAIT_ID_PREVIEW_WIDTH,
-} from '../../../../domain/constants/src/Constants';
 import '../../../navigation/src';
 
 function hasMoreThanNColors(data, n = 16) {
@@ -195,9 +191,7 @@ function templateString() {
   `;
 }
 
-const fixedAspectRatio = 1.53;
 const documentCaptureScale = 0.6;
-// const scaleOffset = 0.3;
 
 class DocumentCapture extends HTMLElement {
   constructor() {
@@ -236,6 +230,7 @@ class DocumentCapture extends HTMLElement {
       });
     } catch (error) {
       console.error(error.constraint);
+      console.error(error.message);
     }
 
     this.handleIDStream(SmartCamera.stream);
@@ -256,73 +251,26 @@ class DocumentCapture extends HTMLElement {
 
   _drawIDImage(video = this._IDVideo) {
     const canvas = document.createElement('canvas');
-    // if (this.isPortraitCaptureView) {
-    //   canvas.width = video.videoWidth;
-    //   canvas.height = video.videoHeight;
+    if (this.isPortraitCaptureView) {
+      canvas.width = video.videoWidth;
+      canvas.height = (canvas.width * 16) / 9;
 
-    //   // Draw the video frame onto the canvas
-    //   const ctx = canvas.getContext('2d');
-    //   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const previewCanvas = document.createElement('canvas');
+      previewCanvas.width = canvas.width;
+      previewCanvas.height = canvas.height;
 
-    //   // Get the dimensions of the video preview frame
-    //   const previewWidth = PORTRAIT_ID_PREVIEW_WIDTH;
-    //   const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
-
-    //   // Define the padding value
-    //   const paddingPercent = 1.1; // 110% of the preview dimensions because we previously scaled the image, old value was 50%;
-    //   const paddedWidth = previewWidth * (1 + paddingPercent);
-    //   const paddedHeight = previewHeight * (1 + paddingPercent);
-
-    //   // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
-    //   const cropWidth = paddedWidth;
-    //   const cropHeight = paddedHeight;
-    //   const cropLeft = (canvas.width - cropWidth) / 2;
-    //   const cropTop = (canvas.height - cropHeight) / 2;
-
-    //   // Create a new canvas element for the cropped image
-    //   const croppedCanvas = document.createElement('canvas');
-    //   croppedCanvas.width = cropWidth;
-    //   croppedCanvas.height = cropHeight;
-
-    //   // Draw the cropped image onto the new canvas
-    //   const croppedCtx = croppedCanvas.getContext('2d');
-    //   croppedCtx.drawImage(
-    //     canvas,
-    //     cropLeft,
-    //     cropTop,
-    //     cropWidth,
-    //     cropHeight,
-    //     0,
-    //     0,
-    //     cropWidth,
-    //     cropHeight,
-    //   );
-    //   // Draw the cropped image onto the new canvas
-    //   const previewImageCtx = croppedCanvas.getContext('2d');
-    //   const previewCanvas = document.createElement('canvas');
-    //   previewImageCtx.drawImage(
-    //     previewCanvas,
-    //     cropLeft + 100,
-    //     cropTop + 100,
-    //     cropWidth,
-    //     cropHeight,
-    //     0,
-    //     0,
-    //     cropWidth,
-    //     cropHeight,
-    //   );
-
-    //   const image = croppedCanvas.toDataURL('image/jpeg');
-    //   const previewImage = previewCanvas.toDataURL('image/jpeg');
-
-    //   return {
-    //     image,
-    //     originalHeight: canvas.height,
-    //     originalWidth: canvas.width,
-    //     previewImage,
-    //     ...this.idCardRegion,
-    //   };
-    // }
+      this.updatePortraitId(canvas, video, 1, 1);
+      this.updatePortraitId(previewCanvas, video);
+      const image = canvas.toDataURL('image/jpeg');
+      const previewImage = previewCanvas.toDataURL('image/jpeg');
+      return {
+        image,
+        originalHeight: canvas.height,
+        originalWidth: canvas.width,
+        previewImage,
+        ...this.idCardRegion,
+      };
+    }
 
     canvas.width = 2240;
     canvas.height = 1260;
@@ -400,7 +348,7 @@ class DocumentCapture extends HTMLElement {
     let canvas = null;
     video = document.createElement('video');
     canvas = document.createElement('canvas');
-    const videoContainer = this.shadowRoot.querySelector('.id-video');
+    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
 
     video.muted = true;
     video.setAttribute('muted', 'true');
@@ -412,10 +360,12 @@ class DocumentCapture extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    const rightLeftBorderSize = 20;
-    const topBottomBorderSize = 20;
-    canvas.width = 430 - rightLeftBorderSize;
-    canvas.height = 250 - topBottomBorderSize;
+
+    canvas.width = videoContainer.clientWidth;
+    canvas.height = (videoContainer.clientWidth * 9) / 16;
+    if (this.isPortraitCaptureView) {
+      canvas.height = (videoContainer.clientWidth * 16) / 9;
+    }
     let videoMeta = {};
 
     video.onloadedmetadata = () => {
@@ -431,8 +381,14 @@ class DocumentCapture extends HTMLElement {
 
     const onVideoStart = () => {
       if (video.paused || video.ended) return;
+      video.removeEventListener('playing', onVideoStart);
 
       const portrait = videoMeta.aspectRatio < 1;
+      if (this.isPortraitCaptureView) {
+        this.updatePortraitId(canvas, video);
+        requestAnimationFrame(onVideoStart);
+        return;
+      }
 
       if (portrait) {
         videoContainer.classList.add('mobile-camera-screen');
@@ -443,8 +399,6 @@ class DocumentCapture extends HTMLElement {
         this._drawLandscapeImage(canvas, video);
       }
       requestAnimationFrame(onVideoStart);
-
-      video.removeEventListener('playing', onVideoStart);
     };
 
     video.addEventListener('playing', onVideoStart);
@@ -576,31 +530,81 @@ class DocumentCapture extends HTMLElement {
       );
   }
 
-  _calculateVideoOffset(video, { clientWidth }) {
-    clientWidth = clientWidth || video.clientWidth;
-    const offset = 30;
-    const aspectRatio = video.videoWidth / video.videoHeight;
-    const calculatedAspectRatio = this.isPortraitCaptureView
-      ? PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT
-      : fixedAspectRatio;
-    const portrait = aspectRatio < 1;
-    const videoWidth = clientWidth;
-    const videoHeight = clientWidth / calculatedAspectRatio;
-    const originalWidth = video.videoWidth;
-    const originalHeight = video.videoWidth / calculatedAspectRatio;
+  updatePortraitId(
+    destinationCanvas,
+    video = this._IDVideo,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const { videoWidth, videoHeight } = video;
 
-    const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
-    const offsetWidth = videoWidth * (offset / 100);
+    if (videoWidth && videoHeight) {
+      const intermediateCanvas = document.createElement('canvas');
+      const aspectRatio = 9 / 16;
+      let cropWidth;
+      let cropHeight;
+      let offsetX;
+      let offsetY;
 
-    return {
-      aspectRatio,
-      offsetHeight,
-      offsetWidth,
-      originalHeight,
-      originalWidth,
-      videoHeight,
-      videoWidth,
-    };
+      if (videoWidth / videoHeight > aspectRatio) {
+        // we scale the canvas to portrait aspect ratio
+        cropHeight = videoHeight;
+        cropWidth = cropHeight * aspectRatio;
+        offsetX = (videoWidth - cropWidth) / 2;
+        offsetY = 0;
+      } else {
+        // video already has portrait aspect ratio
+        cropWidth = videoWidth;
+        cropHeight = cropWidth;
+        offsetX = 0;
+        offsetY = 0;
+      }
+
+      intermediateCanvas.height = cropHeight;
+      intermediateCanvas.width = cropWidth;
+      // draw the video frame onto the intermediate canvas
+      intermediateCanvas
+        .getContext('2d')
+        .drawImage(
+          video,
+          offsetX,
+          offsetY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          intermediateCanvas.width,
+          intermediateCanvas.height,
+        );
+
+      // draw the intermediate canvas onto the destination canvas
+      // we scale image based on the scaleHeight and scaleWidth
+      const heightScaleFactor = this.height
+        ? this.height / cropWidth
+        : scaleHeight;
+      const widthScaleFactor = this.width
+        ? this.width / cropHeight
+        : scaleWidth;
+      const scaleHeightOffset = (1 - scaleHeight) / 2;
+      const scaleWidthOffset = (1 - scaleWidth) / 2;
+      const width = cropWidth * widthScaleFactor;
+      const height = cropHeight * heightScaleFactor;
+      const startX = cropWidth * scaleWidthOffset;
+      const startY = cropHeight * scaleHeightOffset;
+      destinationCanvas
+        .getContext('2d')
+        .drawImage(
+          intermediateCanvas,
+          startX,
+          startY,
+          width,
+          height,
+          0,
+          0,
+          destinationCanvas.width,
+          destinationCanvas.height,
+        );
+    }
   }
 
   _stopIDVideoStream(stream = this._IDStream) {

@@ -366,12 +366,8 @@ class DocumentCapture extends HTMLElement {
     if (this.isPortraitCaptureView) {
       canvas.height = (videoContainer.clientWidth * 16) / 9;
     }
-    let videoMeta = {};
 
     video.onloadedmetadata = () => {
-      videoMeta = this._calculateVideoOffset(video, {
-        clientWidth: videoContainer.clientWidth,
-      });
       video.play();
 
       this.shadowRoot.querySelector('#loader').hidden = true;
@@ -382,8 +378,8 @@ class DocumentCapture extends HTMLElement {
     const onVideoStart = () => {
       if (video.paused || video.ended) return;
       video.removeEventListener('playing', onVideoStart);
-
-      const portrait = videoMeta.aspectRatio < 1;
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      const portrait = aspectRatio < 1;
       if (this.isPortraitCaptureView) {
         this.updatePortraitId(canvas, video);
         requestAnimationFrame(onVideoStart);

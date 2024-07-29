@@ -175,7 +175,7 @@ import { version as sdkVersion } from '../../package.json';
           .map(
             (idType) =>
               `
-            <smileid-combobox-option value="${idType.code}" label="${
+            <smileid-combobox-option value="${idType.code}__${idType.name}" label="${
               idType.name
             }">
               <div>
@@ -207,6 +207,7 @@ import { version as sdkVersion } from '../../package.json';
   async function initializeSession(constraints) {
     let selectedCountry;
     let selectedIdType;
+    let selectedIdName;
 
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
@@ -232,7 +233,9 @@ import { version as sdkVersion } from '../../package.json';
       const idTypes = loadIdTypes(country);
       const idTypeSelector = loadIdTypeSelector(idTypes, selectIdType);
       idTypeSelector.addEventListener('combobox.change', (e) => {
-        selectedIdType = e.detail.value;
+        const details = (e.detail ? e.detail.value : '').split('__');
+        selectedIdType = details[0];
+        selectedIdName = details[1];
       });
     }
 
@@ -321,9 +324,15 @@ import { version as sdkVersion } from '../../package.json';
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
-          const documentCaptureConfig = constraints
-            .find((entry) => entry.country.code === selectedCountry)
-            .id_types.find((entry) => entry.code === id_info.id_type);
+          const countryConstraints = constraints.find(
+            (entry) => entry.country.code === selectedCountry,
+          );
+          const countryConstraint = Array.isArray(countryConstraints)
+            ? countryConstraints[0]
+            : countryConstraints;
+          const documentCaptureConfig = countryConstraint.id_types.find(
+            (entry) => entry.code === id_info.id_type,
+          );
 
           // ACTION: set initial screen
           SmartCameraWeb.setAttribute('document-type', id_info.id_type);
@@ -402,7 +411,10 @@ import { version as sdkVersion } from '../../package.json';
         SmartCameraWeb.setAttribute('document-type', selectedIdType);
         const documentCaptureConfig = constraints
           .find((entry) => entry.country.code === selectedCountry)
-          .id_types.find((entry) => entry.code === selectedIdType);
+          .id_types.find(
+            (entry) =>
+              entry.code === selectedIdType && entry.name === selectedIdName,
+          );
 
         // ACTION: set document capture mode
         if (documentCaptureConfig.has_back) {

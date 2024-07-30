@@ -80,10 +80,24 @@ for local development / audit, you can follow the steps:
 - ensure you have the aws cli installed and access configured on your computer.
 - [install sst cli](https://ion.sst.dev/docs/reference/cli)
 - set up the secrets for sst using the following convention
+
   ```bash
   sst secret set <secret_name> <secret_value>
   ```
+
+### Method 1
+
+```bash
+  npm install
+  sst dev --mode=basic
+  npm run dev
+```
+
+### Method 2
+
+With this method, there will be a menu at the left of the terminal that can be navigated with `j,k`
+
 - npm install
-- npm run dev
+- sst dev
 
 note: after you're done locally, run `sst remove` to remove the resources in aws

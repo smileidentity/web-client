@@ -154,7 +154,7 @@ window.SmileIdentity = (function () {
       '#smile-identity-hosted-web-integration',
     );
 
-    iframe.remove();
+    iframe?.remove();
 
     if (config.onClose && userTriggered) {
       config.onClose();

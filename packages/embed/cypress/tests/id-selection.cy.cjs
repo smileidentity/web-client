@@ -333,7 +333,7 @@ describe('Preselected Country', () => {
     cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
     cy.getIFrameBody()
-      .find('smileid-combobox-option[value="PASSPORT"]')
+      .find('smileid-combobox-option[value="PASSPORT__Passport"]')
       .click();
 
     cy.getIFrameBody().find('#submitConfig').click();

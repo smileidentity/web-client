@@ -145,7 +145,9 @@ Cypress.Commands.add('selectPASSPORTIDType', () => {
 
   cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
-  cy.getIFrameBody().find('smileid-combobox-option[value="PASSPORT"]').click();
+  cy.getIFrameBody()
+    .find('smileid-combobox-option[value="PASSPORT__Passport"]')
+    .click();
 
   cy.getIFrameBody().find('#submitConfig').click();
 });
@@ -164,7 +166,9 @@ Cypress.Commands.add('selectZAGREENBOOKIDType', () => {
   cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
   cy.getIFrameBody()
-    .find('smileid-combobox-option[value="GREEN_BOOK"]')
+    .find(
+      'smileid-combobox-option[value="GREEN_BOOK__National ID Document (Green Book)"]',
+    )
     .click();
 
   cy.getIFrameBody().find('#submitConfig').click();

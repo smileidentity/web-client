@@ -15,6 +15,10 @@ export default function setupForm() {
   const button = document.querySelector('#submitForm');
   const product = document.querySelector('#product');
 
+  const resetButton = () => {
+    button.textContent = 'Verify with Smile Identity';
+    button.disabled = false;
+  };
   const getWebToken = async () => {
     const payload = { product: product.value };
     const fetchConfig = {};
@@ -50,51 +54,50 @@ export default function setupForm() {
     e.preventDefault();
     button.textContent = 'Initializing session...';
     button.disabled = true;
-    const tokenResults = await getWebToken();
-    // debugger;
-    const {
-      token,
-      product,
-      callback_url,
-      environment,
-      partner_id,
-      signature,
-      timestamp,
-    } = tokenResults;
-
-    if (window.SmileIdentity) {
-      window.SmileIdentity({
+    try {
+      const tokenResults = await getWebToken();
+      const {
         token,
         product,
         callback_url,
         environment,
-        demo_mode: true,
-        use_new_component: true,
-        previewBVNMFA: true,
-        document_capture_modes: ['camera', 'upload'],
-        partner_details: {
-          partner_id,
-          signature,
-          timestamp,
-          name: 'Demo Account',
-          logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
-          policy_url: 'https://smileidentity.com/privacy-privacy',
-          theme_color: '#000',
-        },
-        onSuccess: () => {
-          button.textContent = 'Verify with Smile Identity';
-          button.disabled = false;
-          setActiveScreen(demoCompleteScreen);
-        },
-        onClose: () => {
-          button.textContent = 'Verify with Smile Identity';
-          button.disabled = false;
-        },
-        onError: () => {
-          button.textContent = 'Verify with Smile Identity';
-          button.disabled = false;
-        },
-      });
+        partner_id,
+        signature,
+        timestamp,
+      } = tokenResults;
+
+      if (window.SmileIdentity) {
+        window.SmileIdentity({
+          token,
+          product,
+          callback_url,
+          environment,
+          // demo_mode: true,
+          use_new_component: true,
+          // previewBVNMFA: true,
+          document_capture_modes: ['camera', 'upload'],
+          partner_details: {
+            partner_id,
+            signature,
+            timestamp,
+            name: 'Demo Account',
+            logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
+            policy_url: 'https://smileidentity.com/privacy-privacy',
+            theme_color: '#000',
+          },
+          onSuccess: () => {
+            resetButton();
+          },
+          onClose: () => {
+            resetButton();
+          },
+          onError: () => {
+            resetButton();
+          },
+        });
+      }
+    } catch (error) {
+      resetButton();
     }
   });
 }

@@ -740,10 +740,13 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   async function handleFormSubmit(event) {
+    if (event && event.target) event.target.disabled = true;
+
     if (event) {
       event.preventDefault();
       resetForm();
     }
+
     const form = IDInfoForm.querySelector('form');
 
     const formData = new FormData(form);
@@ -752,6 +755,7 @@ import { version as sdkVersion } from '../../package.json';
     const isInvalid = validateInputs(payload);
 
     if (isInvalid) {
+      if (event && event.target) event.target.disabled = false;
       return;
     }
 
@@ -763,20 +767,19 @@ import { version as sdkVersion } from '../../package.json';
     };
 
     try {
-      if (event && event.target) event.target.disabled = true;
       [uploadURL, fileToUpload] = await Promise.all([
         getUploadURL(),
         createZip(),
       ]);
 
       uploadZip(fileToUpload, uploadURL);
-      if (event && event.target) event.target.disabled = false;
     } catch (error) {
-      if (event && event.target) event.target.disabled = false;
       displayErrorMessage('Something went wrong');
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
+    } finally {
+      if (event && event.target) event.target.disabled = false;
     }
   }
 

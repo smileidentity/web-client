@@ -9,6 +9,7 @@ client. it contains two parts:
 these are managed by [sst](https://ion.sst.dev) and [remix](https://remix.run).
 
 ## integration with github actions
+
 the `deploy-preview` github workflow now has a `full-stack` job for creating the
 previews on a pull request.
 
@@ -64,13 +65,16 @@ form to the api endpoint, which when successful, returns a token, and some other
 configuration options.
 
 ## configuration
+
 to run this, we need a few secrets:
+
 - PartnerId
 - CallbackUrl
 - SmileIdApiKey
 - SmileIdEnvironment
 
 ## how do i run this locally?
+
 for local development / audit, you can follow the steps:
 
 - ensure you have the aws cli installed and access configured on your computer.

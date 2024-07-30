@@ -2,7 +2,6 @@ import { WebApi as SIDWebAPI } from 'smile-identity-core';
 import * as crypto from 'node:crypto';
 import { Resource } from 'sst';
 
-
 const SID_SERVER_MAPPING: { [key: string]: string } = {
   0: 'sandbox',
   1: 'production',
@@ -11,7 +10,9 @@ const SID_SERVER_MAPPING: { [key: string]: string } = {
 export const handler = async (event: { body: string }) => {
   const { callback_url, job_id, product, user_id } = JSON.parse(event.body);
   try {
-    const environmentServer = SID_SERVER_MAPPING[Resource.SmileIdEnvironment.value] || Resource.SmileIdEnvironment.value;
+    const environmentServer =
+      SID_SERVER_MAPPING[Resource.SmileIdEnvironment.value] ||
+      Resource.SmileIdEnvironment.value;
     let baseServer = Resource.SmileIdEnvironment.value;
     // the smile-identity-core client appears to append https:// to the baseServer
     // this is a workaround to prevent the client from appending https:// twice
@@ -23,7 +24,7 @@ export const handler = async (event: { body: string }) => {
       Resource.PartnerId.value,
       callback_url || Resource.CallbackUrl.value,
       Resource.SmileIdApiKey.value,
-      baseServer,
+      baseServer
     );
 
     const request_params = {

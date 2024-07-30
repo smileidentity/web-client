@@ -3,9 +3,9 @@
 export default $config({
   app(input) {
     return {
-      name: "previews",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      home: "aws",
+      name: 'previews',
+      removal: input?.stage === 'production' ? 'retain' : 'remove',
+      home: 'aws',
     };
   },
   async run() {

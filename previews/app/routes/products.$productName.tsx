@@ -70,7 +70,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function Product() {
-  const { product, apiUrl, appStage } = useLoaderData<{ product: Product, apiUrl: string, appStage: string } | null>(null);
+  const { product, apiUrl, appStage } = useLoaderData<{
+    product: Product;
+    apiUrl: string;
+    appStage: string;
+  } | null>(null);
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
@@ -140,7 +144,7 @@ export default function Product() {
                             <option key={optionIdx} value={option.name}>
                               {option.label}
                             </option>
-                          ),
+                          )
                         )}
                       </select>
                     </>

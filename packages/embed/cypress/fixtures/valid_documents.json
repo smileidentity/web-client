@@ -9778,6 +9778,12 @@
           "example": ["National IDs", "Consular IDs", "Diplomat IDs"]
         },
         {
+          "name": "Green Book",
+          "has_back": false,
+          "code": "IDENTITY_CARD",
+          "example": ["Green Book"]
+        },
+        {
           "name": "Occupation Card",
           "has_back": false,
           "code": "OCCUPATION_CARD",

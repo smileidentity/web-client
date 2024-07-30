@@ -126,7 +126,7 @@ describe('legacy support - preselected country / id_types', () => {
     cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
 
     cy.getIFrameBody()
-      .find('smileid-combobox-option[value=""]')
+      .find('smileid-combobox-option[value="__Others"]')
       .should('be.visible');
   });
 

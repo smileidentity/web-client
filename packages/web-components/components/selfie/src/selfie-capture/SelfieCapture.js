@@ -517,6 +517,10 @@ function templateString() {
         </svg>
         <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
 
+      <button data-variant='outline small' id='switch-camera' class='button | center' type='button'>
+        Switch Camera
+      </button>
+
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
         Take Selfie
       </button>
@@ -533,11 +537,12 @@ function templateString() {
   `;
 }
 
-async function getPermissions(captureScreen) {
+async function getPermissions(captureScreen, constraints = {}) {
   try {
     await SmartCamera.getMedia({
       audio: false,
       video: true,
+      ...constraints,
     });
     captureScreen?.removeAttribute('data-camera-error');
     captureScreen?.setAttribute('data-camera-ready', true);
@@ -557,6 +562,7 @@ class SelfieCaptureScreen extends HTMLElement {
     this.render = () => this.templateString();
 
     this.attachShadow({ mode: 'open' });
+    this.facingMode = 'user';
   }
 
   connectedCallback() {
@@ -592,6 +598,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _startImageCapture() {
     this.startImageCapture.disabled = true;
+    this.switchCamera.disabled = true;
 
     /**
      * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
@@ -620,6 +627,13 @@ class SelfieCaptureScreen extends HTMLElement {
     this._videoStreamTimeout = setTimeout(() => {
       this._stopVideoStream();
     }, this._videoStreamDurationInMS);
+  }
+
+  async _switchCamera() {
+    this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    SmartCamera.stopMedia();
+    await getPermissions(this, { facingMode: this.facingMode });
+    this.handleStream(SmartCamera.stream);
   }
 
   _stopVideoStream() {
@@ -773,11 +787,19 @@ class SelfieCaptureScreen extends HTMLElement {
     this.startImageCapture = this.shadowRoot.querySelector(
       '#start-image-capture',
     );
+
+    this.switchCamera = this.shadowRoot.querySelector(
+      '#switch-camera',
+    );
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
 
     this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();
+    });
+
+    this.switchCamera.addEventListener('click', () => {
+      this._switchCamera();
     });
 
     this.navigation.addEventListener('navigation.back', () => {

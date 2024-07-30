@@ -83,7 +83,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: install sst
         run: |
-          curl -fsSL https://ion.sst.dev/install | bash
+          curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
       - name: set sst stage
         run: |
           echo "SST_STAGE=preview-$GITHUB_HEAD_REF" >> "GITHUB_ENV"

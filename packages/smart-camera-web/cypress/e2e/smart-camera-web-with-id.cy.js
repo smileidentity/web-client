@@ -71,11 +71,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the review screen back to the camera screen on clicking "Re-take selfie"', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#restart-image-capture').click();
 
@@ -91,11 +92,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the review screen to the id camera screen on clicking "Yes, use this one"', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -141,11 +143,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should capture a photo when "capture-id-image" is clicked, and move to the "id-review-screen"', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -185,11 +188,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the id review screen back to the camera screen on clicking the "Re-Capture" icon', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -256,11 +260,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the review screen to the id camera screen on clicking the "Approve" icon', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 

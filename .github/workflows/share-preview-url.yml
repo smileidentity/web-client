@@ -11,6 +11,22 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: install sst
+        run: |
+          curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
+      - name: set branch name
+        id: set_branch_name
+        run: >-
+          echo "BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")" >> $GITHUB_OUTPUT
+      - name: retrieve sst app url
+        id: get_app_url
+        run: |
+          echo "PREVIEW_APP_URL=$(sst shell node get_app_url.js --stage=${{ steps.set_branch_name.outputs.BRANCH_NAME }})" >> "GITHUB_OUTPUT"
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web
         working-directory: ./packages/smart-camera-web
@@ -37,3 +53,7 @@ jobs:
             ✅ Preview URL for Embed: 
 
             https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
+
+            ✅ Preview URL for Web Client:
+
+            ${{ steps.get_app_url.outputs.app_url }}

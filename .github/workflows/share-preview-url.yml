@@ -56,4 +56,4 @@ jobs:
 
             ✅ Preview URL for Web Client:
 
-            ${{ steps.get_app_url.outputs.app_url }}
+            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}

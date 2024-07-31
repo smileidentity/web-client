@@ -85,7 +85,7 @@ jobs:
         run: |
           curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
       - name: set sst stage
-        run: |
+        run: >-
           echo "SST_STAGE=preview-$GITHUB_HEAD_REF" >> "GITHUB_ENV"
       - name: install dependencies
         run: npm install

@@ -1,4 +1,4 @@
-name: deploy-preview
+name: destroy-preview
 on:
   workflow_call:
   pull_request:

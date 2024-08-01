@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
   "dependencies": {
-    "@sentry/browser": "^8.13.0",
+    "@sentry/browser": "^8.22.0",
     "@sentry/esbuild-plugin": "^2.20.1",
     "@smile_identity/smart-camera-web": "file:../smart-camera-web",
     "@smileid/web-components": "^1.0.0",

@@ -50,11 +50,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the idEntryScreen to the selfieScreen on clicking the back button', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -82,11 +83,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the idCameraScreen to the idEntryScreen on clicking the "back" button', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -119,11 +121,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the backOfIdEntryScreen to the idReviewScreen when the back button is clicked', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -167,11 +170,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should switch from the backOfIdCameraScreen to the backOfIdEntryScreen on clicking the "back" button', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -241,11 +245,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in selfie review screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#review-screen-close').click();
 
@@ -253,11 +258,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id entry screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -272,11 +278,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id camera screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -296,11 +303,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id review screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -329,11 +337,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id back entry screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -369,11 +378,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id back camera screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -414,11 +424,12 @@ context('SmartCameraWeb', () => {
   });
 
   it('should navigate to "closed" when close button is pressed in id back review screen', () => {
+    cy.clock();
     cy.get('smart-camera-web').shadow().find('#request-camera-access').click();
 
     cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-    cy.wait(8000);
+    cy.tick(8000);
 
     cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 

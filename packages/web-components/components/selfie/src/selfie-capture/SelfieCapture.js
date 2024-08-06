@@ -378,6 +378,11 @@ function templateString() {
     transform: scaleX(-1) translateX(50%) translateY(-50%);
   }
 
+  .video-container video.agent-mode {
+    min-height: 100%;
+    transform: scaleX(1) translateX(-50%) translateY(-50%);
+  }
+
   .video-container .video {
     background-color: black;
     position: absolute;
@@ -537,12 +542,11 @@ function templateString() {
   `;
 }
 
-async function getPermissions(captureScreen, constraints = {}) {
+async function getPermissions(captureScreen, constraints = { facingMode: 'environment' }) {
   try {
     await SmartCamera.getMedia({
       audio: false,
-      video: true,
-      ...constraints,
+      video: constraints,
     });
     captureScreen?.removeAttribute('data-camera-error');
     captureScreen?.setAttribute('data-camera-ready', true);
@@ -631,6 +635,8 @@ class SelfieCaptureScreen extends HTMLElement {
 
   async _switchCamera() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    this.startImageCapture.disabled = true;
+    this.switchCamera.disabled = true;
     SmartCamera.stopMedia();
     await getPermissions(this, { facingMode: this.facingMode });
     this.handleStream(SmartCamera.stream);
@@ -749,6 +755,10 @@ class SelfieCaptureScreen extends HTMLElement {
       video = this.shadowRoot.querySelector('video');
     } else {
       video = document.createElement('video');
+    }
+
+    if (this.facingMode === 'environment') {
+      video.classList.add('agent-mode');
     }
 
     video.autoplay = true;

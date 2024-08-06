@@ -522,9 +522,7 @@ function templateString() {
         </svg>
         <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
 
-      <button data-variant='outline small' id='switch-camera' class='button | center' type='button'>
-        Switch Camera
-      </button>
+      ${this.allowAgentMode ? "<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>Switch Camera</button>" : ''}
 
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
         Take Selfie
@@ -542,7 +540,7 @@ function templateString() {
   `;
 }
 
-async function getPermissions(captureScreen, constraints = { facingMode: 'environment' }) {
+async function getPermissions(captureScreen, constraints = { facingMode: 'user' }) {
   try {
     await SmartCamera.getMedia({
       audio: false,
@@ -808,7 +806,7 @@ class SelfieCaptureScreen extends HTMLElement {
       this._startImageCapture();
     });
 
-    this.switchCamera.addEventListener('click', () => {
+    this.switchCamera?.addEventListener('click', () => {
       this._switchCamera();
     });
 
@@ -869,8 +867,13 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.hasAttribute('disable-image-tests');
   }
 
+  get allowAgentMode() {
+    return this.getAttribute('allow-agent-mode') === 'true';
+  }
+
   static get observedAttributes() {
     return [
+      'allow-agent-mode',
       'data-camera-error',
       'data-camera-ready',
       'hidden',
@@ -886,6 +889,7 @@ class SelfieCaptureScreen extends HTMLElement {
       case 'data-camera-ready':
       case 'hidden':
       case 'title':
+      case 'allow-agent-mode':
         this.shadowRoot.innerHTML = this.render();
         this.init();
         break;

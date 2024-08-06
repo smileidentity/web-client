@@ -13,7 +13,7 @@ function scwTemplateString() {
   <div>
     <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
     <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost}
+      ${this.hideBackToHost} ${this.allowAgentMode}
     ></selfie-capture-screens>
     <document-capture-screens document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} hidden></document-capture-screens>
@@ -216,6 +216,10 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideBackToHost() {
     return this.hasAttribute('hide-back-to-host') ? 'hide-back-to-host' : '';
+  }
+
+  get allowAgentMode() {
+    return this.hasAttribute('allow-agent-mode') ? 'allow-agent-mode' : '';
   }
 
   get title() {

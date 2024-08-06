@@ -21,3 +21,18 @@ export const SelfieCapture = {
         </selfie-capture>
     `,
 };
+
+export const SelfieCaptureAgentMode = {
+  loaders: [
+    async () => ({
+      permissionGranted: await SmartCamera.getMedia({
+        audio: false,
+        video: true,
+      }),
+    }),
+  ],
+  render: () => `
+        <selfie-capture allow-agent-mode='true'>
+        </selfie-capture>
+    `,
+};

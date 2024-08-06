@@ -40,3 +40,10 @@ export const SmartCameraWebWithOutBackId = {
         </smart-camera-web>
     `,
 };
+
+export const SmartCameraWebAgentMode = {
+  render: () => `
+        <smart-camera-web hide-instructions hide-back-of-id allow-agent-mode>
+        </smart-camera-web>
+    `,
+};

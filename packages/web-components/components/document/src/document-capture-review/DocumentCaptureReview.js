@@ -3,7 +3,6 @@ import '../../../navigation/src';
 
 function templateString() {
   return `
-  ${styles}
   <style>
     .retake-photo.button[data-variant~="ghost"] {
       color: #FF5805;
@@ -236,9 +235,10 @@ function templateString() {
       line-height: 1.5rem;
     }
   </style>
+  ${styles(this.themeColor)}
   <div id='document-capture-review-screen' class='flow center'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
-    <h1 class="header-title">
+    <h1 class="header-title title-color">
       Is the document clear and readable?
     </h1>
     <p class="description">Make sure all corners of the document 

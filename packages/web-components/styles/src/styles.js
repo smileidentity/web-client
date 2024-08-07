@@ -1,6 +1,6 @@
 import typography from './typography';
 
-const styles = `<link rel="preconnect" href="https://fonts.gstatic.com" />
+const styles = (themeColor) => `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link
   href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
@@ -114,7 +114,7 @@ ${typography}
   }
 
   .button {
-    --button-color: var(--color-active);
+    --button-color: ${themeColor || 'var(--active-color)'};
     -webkit-appearance: none;
     appearance: none;
     border-radius: 2.5rem;

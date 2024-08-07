@@ -2,7 +2,7 @@ import './index';
 
 const meta = {
   argTypes: {
-    themeColor: { control: 'color' },
+    'theme-color': { control: 'color' },
   },
   component: 'selfie-capture-instructions',
 };
@@ -11,12 +11,12 @@ export default meta;
 
 export const SelfieInstruction = {
   args: {
-    themeColor: '#d72c2c',
+    'theme-color': '#d72c2c',
   },
-  render: ({ themeColor }) => `
+  render: (args) => `
         <selfie-capture-instructions
             show-navigation
-            theme-color=${themeColor}
+            theme-color='${args['theme-color']}'
         >
         </selfie-capture-instructions>
     `,

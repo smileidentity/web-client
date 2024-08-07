@@ -142,7 +142,7 @@ function templateString() {
       .button:hover,
       .button:focus,
       .button:active {
-        --button-color: ${this.themeColor};;
+        --button-color: var(--color-default);
       }
 
       .button:disabled {

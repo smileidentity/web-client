@@ -3,7 +3,6 @@ import '../../../navigation/src';
 
 function templateString() {
   return `
-  ${styles}
     <style>
       .retake-photo.button[data-variant~="ghost"] {
         color: #FF5805;
@@ -204,10 +203,10 @@ function templateString() {
         line-height: 1.5rem;
       }
     </style>
-    ${styles}
+    ${styles(this.themeColor)}
     <div id='selfie-capture-review-screen' class='flow center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
-    <h1 class="header-title text-2xl color-digital-blue font-bold">
+    <h1 class="header-title text-2xl title-color font-bold">
       Is your whole face visible and clear in this photo?
     </h1>
     <div class='section | flow'>

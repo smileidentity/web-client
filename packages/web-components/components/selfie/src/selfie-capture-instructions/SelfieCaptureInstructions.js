@@ -81,14 +81,6 @@ function templateString() {
         color: #001096 !important;
       }
 
-      .title-color {
-        color: ${this.themeColor};
-      }
-      
-      .theme-color {
-        color: ${this.themeColor};
-      }
-
       .color-deep-blue {
         color: #001096;
       }

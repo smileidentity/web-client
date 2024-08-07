@@ -83,6 +83,14 @@ ${typography}
     color: #001096;
   }
 
+  .title-color {
+    color: ${themeColor || '#001096'};
+  }
+  
+  .theme-color {
+    color: ${themeColor || '#001096'};
+  }
+
   .center {
     text-align: center;
     margin-left: auto;

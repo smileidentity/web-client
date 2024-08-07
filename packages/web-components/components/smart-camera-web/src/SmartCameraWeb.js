@@ -241,7 +241,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   setActiveScreen(screen) {

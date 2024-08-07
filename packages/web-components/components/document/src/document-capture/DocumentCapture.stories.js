@@ -3,7 +3,7 @@ import './index';
 
 const meta = {
   args: {
-    'theme-color': '#d72c2c',
+    'theme-color': '#001096',
   },
   argTypes: {
     'theme-color': { control: 'color' },

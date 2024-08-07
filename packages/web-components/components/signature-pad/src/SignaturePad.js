@@ -470,7 +470,7 @@ button:disabled {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#001096';
   }
 }
 

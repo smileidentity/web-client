@@ -2,7 +2,7 @@ import './index';
 
 const meta = {
   args: {
-    'theme-color': '#d72c2c',
+    'theme-color': '#001096',
   },
   argTypes: {
     'theme-color': { control: 'color' },
@@ -28,9 +28,7 @@ export const DocumentCaptureHiddenInstructions = {
 
 export const DocumentCaptureHideBackOfId = {
   render: (args) => `
-        <document-capture-screen theme-color='${args['theme-color']}'s
-            hide-back-of-id
-        >
+        <document-capture-screens hide-back-of-id theme-color='${args['theme-color']}'>
         </document-capture-screens>
     `,
 };

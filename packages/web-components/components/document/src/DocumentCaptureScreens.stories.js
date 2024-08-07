@@ -1,28 +1,34 @@
 import './index';
 
 const meta = {
+  args: {
+    'theme-color': '#d72c2c',
+  },
+  argTypes: {
+    'theme-color': { control: 'color' },
+  },
   component: 'document-capture-screens',
 };
 
 export default meta;
 
 export const DocumentCapture = {
-  render: () => `
-        <document-capture-screens>
+  render: (args) => `
+        <document-capture-screens theme-color='${args['theme-color']}'>
         </document-capture-screens>
     `,
 };
 
 export const DocumentCaptureHiddenInstructions = {
-  render: () => `
-        <document-capture-screens hide-instructions>
+  render: (args) => `
+        <document-capture-screens hide-instructions theme-color='${args['theme-color']}'>
         </document-capture-screens>
     `,
 };
 
 export const DocumentCaptureHideBackOfId = {
-  render: () => `
-        <document-capture-screens
+  render: (args) => `
+        <document-capture-screen theme-color='${args['theme-color']}'s
             hide-back-of-id
         >
         </document-capture-screens>
@@ -30,15 +36,15 @@ export const DocumentCaptureHideBackOfId = {
 };
 
 export const DocumentCaptureAllowAttributes = {
-  render: () => `
-        <document-capture-screens document-capture-screens-modes='camera,upload'>
+  render: (args) => `
+        <document-capture-screens document-capture-screens-modes='camera,upload' theme-color='${args['theme-color']}'>
         </document-capture-screens>
     `,
 };
 
 export const DocumentCaptureHideInstructionNBackOfId = {
-  render: () => `
-        <document-capture-screens hide-back-of-id hide-instructions>
+  render: (args) => `
+        <document-capture-screens hide-back-of-id hide-instructions theme-color='${args['theme-color']}'>
         </document-capture-screens>
     `,
 };

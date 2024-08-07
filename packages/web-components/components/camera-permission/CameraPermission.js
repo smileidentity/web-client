@@ -5,7 +5,7 @@ import '../navigation/src';
 
 function templateString() {
   return `
-    ${styles}
+    ${styles(this.themeColor)}
     <style>
         .camera-permission-screen {
           padding-block: 2rem;
@@ -32,7 +32,7 @@ function templateString() {
         }
     </style>
     <div class='camera-permission-screen flow center'>
-        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <div class='flow center'>
           <p class='color-red | center' id='error'>
           </p>
@@ -126,6 +126,10 @@ class CameraPermission extends HTMLElement {
 
   get hideBack() {
     return this.hasAttribute('hide-back');
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#043C93';
   }
 }
 

@@ -177,7 +177,7 @@ button[data-variant="text"] {
 }
 
 button[data-variant="solid"] {
-  --button-color: var(--color-default);
+  --button-color: ${this.themeColor};
   border-radius: 2.5rem;
   border: 0;
   background-color: transparent;
@@ -467,6 +467,10 @@ button:disabled {
 
   get allowUpload() {
     return this.hasAttribute('allow-upload');
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#043C93';
   }
 }
 

@@ -9,14 +9,14 @@ import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 function scwTemplateString() {
   return `
-  ${styles}
+  ${styles(this.themeColor)}
   <div>
-    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
-    <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
+    <camera-permission theme-color='${this.themeColor}' ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <selfie-capture-screens theme-color='${this.themeColor}' ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost}
     ></selfie-capture-screens>
-    <document-capture-screens document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
-     ${this.hideBackOfId} hidden></document-capture-screens>
+    <document-capture-screens theme-color='${this.themeColor}' document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+     ${this.hideBackOfId} theme-color='${this.themeColor}' hidden></document-capture-screens>
   </div>
 `;
 }
@@ -238,6 +238,10 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideAttribution() {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#043C93';
   }
 
   setActiveScreen(screen) {

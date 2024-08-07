@@ -157,10 +157,10 @@ function templateString() {
   return `
     <div id="document-capture-instructions-screen" class="flow center">
         <section className="main">
-        <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
-            <h1 class='text-2xl color-digital-blue font-bold'>${this.title}</h1>
+            <h1 class='text-2xl title-color font-bold'>${this.title}</h1>
         <p class="description text-sm font-normal">
             We'll use it to verify your identity.
           </p>
@@ -182,55 +182,55 @@ function templateString() {
                     fill-rule="evenodd"
                     clip-rule="evenodd"
                     d="M31.8569 19C31.8569 21.5428 31.1029 24.0285 29.6902 26.1428C28.2774 28.2571 26.2695 29.9049 23.9203 30.878C21.571 31.8511 18.986 32.1057 16.492 31.6096C13.9981 31.1136 11.7072 29.8891 9.90919 28.091C8.11115 26.293 6.88668 24.0022 6.3906 21.5082C5.89452 19.0143 6.14913 16.4292 7.12222 14.08C8.09531 11.7307 9.74318 9.72279 11.8574 8.31008C13.9717 6.89737 16.4574 6.14334 19.0002 6.14334C22.41 6.14334 25.6802 7.49788 28.0913 9.90897C30.5024 12.3201 31.8569 15.5902 31.8569 19Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M19.6064 4.5419H18.394L18.9912 0L19.6064 4.5419Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M26.7541 6.77667L25.7046 6.17048L28.4913 2.54239L26.7541 6.77667Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M31.8298 12.2957L31.2236 11.2462L35.4489 9.49097L31.8298 12.2957Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M33.4674 19.6062V18.3938L38.0003 18.9909L33.4674 19.6062Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M31.2236 26.7538L31.8298 25.7043L35.4579 28.491L31.2236 26.7538Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M25.7046 31.8295L26.7541 31.2233L28.5094 35.4486L25.7046 31.8295Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M18.394 33.4671H19.6064L19.0093 38L18.394 33.4671Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M11.2464 31.2233L12.2959 31.8295L9.50928 35.4576L11.2464 31.2233Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M6.17068 25.7043L6.77687 26.7538L2.55164 28.509L6.17068 25.7043Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M4.54215 18.3938V19.6062L0.000244141 19.009L4.54215 18.3938Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M6.77689 11.2462L6.1707 12.2957L2.5426 9.50903L6.77689 11.2462Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                     <path
                     d="M12.296 6.17047L11.2464 6.77666L9.49121 2.55142L12.296 6.17047Z"
-                    fill="#001096"
+                    fill="${this.themeColor}"
                     />
                 </g>
                 <defs>
@@ -262,63 +262,63 @@ function templateString() {
             <g clip-path="url(#clip0_604_672)">
                 <path
                 d="M36.7211 12.6391H1.22537C1.06275 13.0909 0.910962 13.5427 0.77002 14.0055H37.1764C37.0463 13.5427 36.8946 13.0909 36.7211 12.6391Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.3716 14.7438H0.574875C0.466458 15.1625 0.379725 15.5813 0.303833 16.011H37.6426C37.5667 15.5813 37.48 15.1625 37.3716 14.7438Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.7727 16.8485H0.173703C0.119494 17.2342 0.0869685 17.6198 0.0544434 18.0055H37.892C37.8594 17.6198 37.8269 17.2342 37.7727 16.8485Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.9462 19.4711C37.9462 19.2948 37.9462 19.1295 37.9353 18.9532H0.0110865C0.000244802 19.1295 0.000244141 19.2948 0.000244141 19.4711C0.000244141 19.6474 0.000244802 19.8347 0.0110865 20.011H37.9353C37.9462 19.8347 37.9462 19.6474 37.9462 19.4711Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.8811 21.0579H0.0653076C0.086991 21.3774 0.119515 21.697 0.162882 22.0055H37.7836C37.8269 21.697 37.8595 21.3774 37.8811 21.0579Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.5992 23.1625H0.347168C0.401376 23.449 0.466426 23.7245 0.531477 24H37.4149C37.48 23.7245 37.545 23.449 37.5992 23.1625Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M37.0788 25.2672H0.867554C0.954287 25.5096 1.03018 25.7631 1.11691 26.0055H36.8295C36.9162 25.7631 37.0029 25.5096 37.0788 25.2672Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M36.2874 27.3719H1.65906L1.95178 28H35.9947L36.2874 27.3719Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M35.2032 29.4766H2.75403C2.84799 29.6529 2.95641 29.8292 3.07928 30.0055H34.878L35.2032 29.4766Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M33.7396 31.5813H4.20679L4.54288 32H33.4035L33.7396 31.5813Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M31.7989 33.6859H6.14746L6.49439 33.9945H31.452L31.7989 33.6859Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M29.0993 35.7906H8.84705L9.18314 36H28.7632L29.0993 35.7906Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M34.2384 8.01102C33.8914 7.53719 33.5228 7.07438 33.1325 6.63361C29.8258 2.60055 24.6977 0 18.9407 0C12.891 0 7.53525 2.86501 4.25021 7.26171H4.28274C4.08759 7.51515 3.89244 7.75757 3.70813 8.01102H34.2384Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M34.531 8.44077H3.41533C3.06839 8.94765 2.74314 9.47658 2.43958 10.0165H35.5068C35.2124 9.47215 34.8866 8.94597 34.531 8.44077Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
                 <path
                 d="M35.7887 10.5344H2.15776C1.9084 11.0193 1.68072 11.5151 1.47473 12.011H36.4717C36.2657 11.5151 36.0381 11.0193 35.7887 10.5344Z"
-                fill="#001096"
+                fill="${this.themeColor}"
                 />
             </g>
             <defs>
@@ -370,7 +370,7 @@ function templateString() {
 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </section>
   </div>
-  ${styles}
+  ${styles(this.themeColor)}
   `;
 }
 

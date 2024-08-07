@@ -318,7 +318,7 @@ ${typography}
   }
 
   .instruction-header {
-    color: var(--web-digital-blue, #001096);
+    color: ${themeColor};
   }
 
   .flex-column {

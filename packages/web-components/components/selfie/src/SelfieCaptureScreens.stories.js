@@ -1,21 +1,30 @@
 import './SelfieCaptureScreens';
 
 const meta = {
+  argTypes: {
+    'theme-color': { control: 'color' },
+  },
   component: 'selfie-capture-screens',
 };
 
 export default meta;
 
 export const SelfieCaptureFlow = {
-  render: () => `
-        <selfie-capture-screens>
+  args: {
+    'theme-color': '#d72c2c',
+  },
+  render: (args) => `
+        <selfie-capture-screens theme-color='${args['theme-color']}'>
         </selfie-capture-screens>
     `,
 };
 
 export const SelfieCaptureFlowHiddenInstructions = {
-  render: () => `
-        <selfie-capture-screens hide-instructions >
+  args: {
+    'theme-color': '#d72c2c',
+  },
+  render: (args) => `
+        <selfie-capture-screens hide-instructions theme-color='${args['theme-color']}'>
         </selfie-capture-screens>
     `,
 };

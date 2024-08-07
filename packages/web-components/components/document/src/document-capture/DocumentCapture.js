@@ -20,7 +20,6 @@ function hasMoreThanNColors(data, n = 16) {
 
 function templateString() {
   return `
-    ${styles}
     <style>
       .visually-hidden {
         border: 0;
@@ -162,9 +161,10 @@ function templateString() {
         padding-top: 10px;
       }
   </style>
+  ${styles(this.themeColor)}
   <div id='document-capture-screen' class='flow center flex-column'>
-  <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h2 class='text-base font-bold color-digital-blue'>${this.documentName}</h2>
+  <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <h2 class='text-base font-bold title-color'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
@@ -174,12 +174,12 @@ function templateString() {
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
         </div>
         <div class='video-footer sticky'>
-          <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
-          <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
+          <h2 class='text-base font-bold title-color reset-margin-block id-side'>${this.title}</h2>
+          <h4 class='text-base font-normal title-color description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true" focusable="false">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="${this.themeColor}"/>
               </svg>
               <span class='visually-hidden'>Capture Document</span>
             </button>

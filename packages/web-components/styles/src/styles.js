@@ -1,6 +1,8 @@
 import typography from './typography';
 
-const styles = (themeColor) => `<link rel="preconnect" href="https://fonts.gstatic.com" />
+const styles = (
+  themeColor,
+) => `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link
   href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
@@ -9,6 +11,7 @@ const styles = (themeColor) => `<link rel="preconnect" href="https://fonts.gstat
 <style>
 ${typography}
 :host {
+    --theme-color: ${themeColor || '#001096'};
     --color-active: #001096;
     --color-default: #2d2b2a;
     --color-disabled: #848282;

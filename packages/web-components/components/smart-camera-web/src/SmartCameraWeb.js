@@ -11,12 +11,12 @@ function scwTemplateString() {
   return `
   ${styles(this.themeColor)}
   <div>
-    <camera-permission theme-color='${this.themeColor}' ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
-    <selfie-capture-screens theme-color='${this.themeColor}' ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
+    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost}
     ></selfie-capture-screens>
-    <document-capture-screens theme-color='${this.themeColor}' document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
-     ${this.hideBackOfId} theme-color='${this.themeColor}' hidden></document-capture-screens>
+    <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+     ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -66,6 +66,7 @@ class SmartCameraWeb extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'hide-back-of-id',
+      'theme-color',
     ];
   }
 
@@ -240,8 +241,16 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
+  get hasThemeColor() {
+    return this.hasAttribute('theme-color') && ![null, undefined, 'null', 'undefined'].includes(this.getAttribute('theme-color'));
+  }
+
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return this.hasThemeColor ? this.getAttribute('theme-color') : '#001096';
+  }
+
+  get applyComponentThemeColor() {
+    return this.hasThemeColor ? `theme-color='${this.themeColor}'` : '';
   }
 
   setActiveScreen(screen) {

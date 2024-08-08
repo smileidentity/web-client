@@ -209,6 +209,11 @@ import { version as sdkVersion } from '../../package.json';
     let selectedIdType;
     let selectedIdName;
 
+    SmartCameraWeb.setAttribute(
+      'theme-color',
+      config.partner_details.theme_color,
+    );
+
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
         (item) => item.country.code === countryCode,

@@ -540,7 +540,10 @@ function templateString() {
   `;
 }
 
-async function getPermissions(captureScreen, constraints = { facingMode: 'user' }) {
+async function getPermissions(
+  captureScreen,
+  constraints = { facingMode: 'user' },
+) {
   try {
     await SmartCamera.getMedia({
       audio: false,
@@ -796,9 +799,7 @@ class SelfieCaptureScreen extends HTMLElement {
       '#start-image-capture',
     );
 
-    this.switchCamera = this.shadowRoot.querySelector(
-      '#switch-camera',
-    );
+    this.switchCamera = this.shadowRoot.querySelector('#switch-camera');
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
 

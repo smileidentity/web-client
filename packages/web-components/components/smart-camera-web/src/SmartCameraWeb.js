@@ -242,7 +242,12 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get hasThemeColor() {
-    return this.hasAttribute('theme-color') && ![null, undefined, 'null', 'undefined'].includes(this.getAttribute('theme-color'));
+    return (
+      this.hasAttribute('theme-color') &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        this.getAttribute('theme-color'),
+      )
+    );
   }
 
   get themeColor() {

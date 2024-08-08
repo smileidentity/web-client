@@ -177,7 +177,7 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
-        SmartCameraWeb.setAttribute(
+    SmartCameraWeb.setAttribute(
       'theme-color',
       config.partner_details.theme_color,
     );

@@ -1,4 +1,3 @@
-import '@smile_identity/smart-camera-web';
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
 
@@ -57,6 +56,12 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        if (config.use_new_component) {
+          import('@smileid/web-components/smart-camera-web');
+          CloseIframeButton.setAttribute('hidden', true);
+        } else {
+          import('@smile_identity/smart-camera-web');
+        }
         partner_params = getPartnerParams();
         id_info = {};
         setActiveScreen(SmartCameraWeb);
@@ -77,6 +82,16 @@ import { version as sdkVersion } from '../../package.json';
     false,
   );
 
+  SmartCameraWeb.addEventListener(
+    'smart-camera-web.publish',
+    (event) => {
+      images = event.detail.images;
+      setActiveScreen(UploadProgressScreen);
+      handleFormSubmit(event);
+    },
+    false,
+  );
+
   RetryUploadButton.addEventListener(
     'click',
     () => {
@@ -85,8 +100,24 @@ import { version as sdkVersion } from '../../package.json';
     false,
   );
 
-  CloseIframeButton.addEventListener(
+  CloseIframeButton?.addEventListener(
     'click',
+    () => {
+      closeWindow(true);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
+    'smart-camera-web.close',
+    () => {
+      closeWindow(true);
+    },
+    false,
+  );
+
+  SmartCameraWeb.addEventListener(
+    'smart-camera-web.cancelled',
     () => {
       closeWindow(true);
     },

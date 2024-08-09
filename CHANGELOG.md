@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- When `theme_color` is provided, it will now be used to style header texts and buttons
+
 ## [1.3.5] - 2024-07-12
 
 ### Changed

@@ -522,7 +522,7 @@ function templateString() {
         </svg>
         <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
 
-      ${this.allowAgentMode ? "<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>Switch Camera</button>" : ''}
+      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? 'Selfie Mode' : 'Agent Mode'}</button>` : ''}
 
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
         Take Selfie
@@ -562,6 +562,9 @@ class SelfieCaptureScreen extends HTMLElement {
 
     this.attachShadow({ mode: 'open' });
     this.facingMode = 'user';
+    if (this.allowAgentMode) {
+      this.facingMode = 'environment';
+    }
   }
 
   connectedCallback() {
@@ -597,7 +600,9 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _startImageCapture() {
     this.startImageCapture.disabled = true;
-    this.switchCamera.disabled = true;
+    if (this.switchCamera) {
+      this.switchCamera.disabled = true;
+    }
 
     /**
      * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
@@ -816,7 +821,7 @@ class SelfieCaptureScreen extends HTMLElement {
     if (SmartCamera.stream) {
       this.handleStream(SmartCamera.stream);
     } else if (this.hasAttribute('data-camera-ready')) {
-      getPermissions(this);
+      getPermissions(this, { facingMode: this.facingMode });
     }
 
     this.setupAgentMode();
@@ -909,6 +914,10 @@ class SelfieCaptureScreen extends HTMLElement {
 
   get allowAgentMode() {
     return this.getAttribute('allow-agent-mode') === 'true';
+  }
+
+  get inAgentMode() {
+    return this.facingMode === 'environment';
   }
 
   static get observedAttributes() {

@@ -528,13 +528,7 @@ function templateString() {
         Take Selfie
       </button>
 
-      ${
-        this.hideAttribution
-          ? ''
-          : `
-        <powered-by-smile-id></powered-by-smile-id>
-      `
-      }
+      ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </div>
   </div>
   `;
@@ -573,7 +567,7 @@ class SelfieCaptureScreen extends HTMLElement {
   connectedCallback() {
     const template = document.createElement('template');
     template.innerHTML = this.render();
-
+    this.shadowRoot.innerHTML = '';
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.videoContainer = this.shadowRoot.querySelector(
       '.video-container > .video',
@@ -824,6 +818,8 @@ class SelfieCaptureScreen extends HTMLElement {
     } else if (this.hasAttribute('data-camera-ready')) {
       getPermissions(this);
     }
+
+    this.setupAgentMode();
   }
 
   disconnectedCallback() {
@@ -847,9 +843,52 @@ class SelfieCaptureScreen extends HTMLElement {
     return this.hasAttribute('hide-attribution');
   }
 
-  get supportBothCaptureModes() {
-    const value = this.documentCaptureModes;
-    return value.includes('camera') && value.includes('upload');
+  async setupAgentMode() {
+    if (!this.allowAgentMode) {
+      return;
+    }
+
+    const supportAgentMode = await this.supportsAgentMode();
+
+    if (supportAgentMode && !this.hasAttribute('disable-for-tests')) {
+      this.switchCamera.hidden = false;
+    } else {
+      this.switchCamera.hidden = true;
+    }
+  }
+
+  async supportsAgentMode() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        (device) => device.kind === 'videoinput',
+      );
+
+      let hasBackCamera = false;
+
+      videoDevices.forEach((device) => {
+        // Check if the device label or device ID indicates a back camera
+        if (
+          device.label.toLowerCase().includes('back') ||
+          device.label.toLowerCase().includes('rear')
+        ) {
+          hasBackCamera = true;
+          return true;
+        }
+        return false;
+      });
+
+      if (hasBackCamera) {
+        console.warn('Device has a back camera.');
+      } else {
+        console.warn('No back camera found on this device.');
+      }
+
+      return hasBackCamera;
+    } catch (error) {
+      console.warn('Error accessing media devices: ', error);
+      return false;
+    }
   }
 
   get title() {

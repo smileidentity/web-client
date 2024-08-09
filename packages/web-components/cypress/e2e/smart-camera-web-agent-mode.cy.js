@@ -7,7 +7,7 @@ context('SmartCameraWeb', () => {
     cy.get('smart-camera-web')
       .shadow()
       .find('selfie-capture')
-      .invoke('attr', 'disable-for-tests', 'true');
+      .invoke('attr', 'show-agent-mode-for-tests', 'true');
 
     cy.clock();
     cy.get('smart-camera-web')
@@ -21,6 +21,19 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .should('contain.text', 'Selfie Mode');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .find('#switch-camera')
+      .click();
 
     cy.get('smart-camera-web')
       .shadow()

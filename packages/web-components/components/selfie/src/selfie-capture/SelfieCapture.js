@@ -855,7 +855,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     const supportAgentMode = await this.supportsAgentMode();
 
-    if (supportAgentMode && !this.hasAttribute('disable-for-tests')) {
+    if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
     } else {
       this.switchCamera.hidden = true;

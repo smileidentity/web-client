@@ -841,6 +841,7 @@ class SelfieCaptureScreen extends HTMLElement {
     return [
       'data-camera-error',
       'data-camera-ready',
+      'disable-image-tests',
       'hidden',
       'hide-back-to-host',
       'show-navigation',

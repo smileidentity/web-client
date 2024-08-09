@@ -257,3 +257,55 @@ Cypress.Commands.add('navigateThroughCameraScreens', () => {
     .find('#select-selfie')
     .click();
 });
+
+Cypress.Commands.add('navigateThroughNewCameraScreens', () => {
+  cy.log('SmartCameraWeb: disable image tests');
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .invoke('attr', 'disable-image-tests', 'true');
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture-instructions')
+    .shadow()
+    .find('#allow')
+    .click();
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture-instructions')
+    .should('not.be.visible');
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture')
+    .should('be.visible');
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture')
+    .shadow()
+    .should('contain.text', 'Take a Selfie');
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture')
+    .shadow()
+    .find('#start-image-capture')
+    .click();
+
+  cy.wait(8000);
+
+  cy.getIFrameBody()
+    .find('smart-camera-web')
+    .shadow()
+    .find('selfie-capture-review')
+    .shadow()
+    .find('#select-id-image')
+    .click();
+});

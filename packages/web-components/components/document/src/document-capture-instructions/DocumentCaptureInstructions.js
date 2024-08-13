@@ -423,7 +423,7 @@ class DocumentInstruction extends HTMLElement {
 
             this.dispatchEvent(
               new CustomEvent('document-capture-instructions.upload', {
-                detail: { image: fileData },
+                detail: { image: fileData, previewImage: fileData },
               }),
             );
           } catch (error) {

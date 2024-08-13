@@ -337,10 +337,10 @@ import { version as sdkVersion } from '../../package.json';
           // ACTION: set initial screen
           SmartCameraWeb.setAttribute('document-type', id_info.id_type);
           // ACTION: set document capture mode
-          if (!documentCaptureConfig.has_back) {
+          if (!documentCaptureConfig?.has_back) {
             SmartCameraWeb.setAttribute('hide-back-of-id', true);
           }
-          if (documentCaptureConfig.has_back) {
+          if (documentCaptureConfig?.has_back) {
             SmartCameraWeb.setAttribute('capture-id', 'back');
           }
 
@@ -417,10 +417,10 @@ import { version as sdkVersion } from '../../package.json';
           );
 
         // ACTION: set document capture mode
-        if (documentCaptureConfig.has_back) {
+        if (documentCaptureConfig?.has_back) {
           SmartCameraWeb.setAttribute('capture-id', 'back');
         }
-        if (!documentCaptureConfig.has_back) {
+        if (!documentCaptureConfig?.has_back) {
           SmartCameraWeb.setAttribute('hide-back-of-id', true);
         }
         if (config.document_capture_modes) {

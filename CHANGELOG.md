@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added new designs to smart selfie authentication
 
+## [1.3.6] - 2024-08-01
+
+### Changed
+
+- Added green book document to document verification
+
 ## [1.3.5] - 2024-07-12
 
 ### Changed

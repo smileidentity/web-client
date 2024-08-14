@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.7] - 2024-08-14
+
+### Changed
+
+- Improved document capture UI - margin and capture review improvement
+
 ## [1.3.6] - 2024-08-01
 
 ### Changed

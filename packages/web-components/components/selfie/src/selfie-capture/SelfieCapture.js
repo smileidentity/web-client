@@ -883,12 +883,6 @@ class SelfieCaptureScreen extends HTMLElement {
         return false;
       });
 
-      if (hasBackCamera) {
-        console.warn('Device has a back camera.');
-      } else {
-        console.warn('No back camera found on this device.');
-      }
-
       return hasBackCamera;
     } catch (error) {
       console.warn('Error accessing media devices: ', error);

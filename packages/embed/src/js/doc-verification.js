@@ -214,6 +214,13 @@ import { version as sdkVersion } from '../../package.json';
       config.partner_details.theme_color,
     );
 
+    const root = document.documentElement;
+
+    root.style.setProperty(
+      '--color-default',
+      config.partner_details.theme_color || '#001096',
+    );
+
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
         (item) => item.country.code === countryCode,

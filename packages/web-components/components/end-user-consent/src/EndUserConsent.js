@@ -124,7 +124,7 @@ function templateString() {
       button:hover,
       button:focus,
       button:active {
-        --button-color: var(--color-active);
+        --button-color: var(--theme-color);
       }
 
       button:disabled {
@@ -314,7 +314,7 @@ function templateString() {
         color: var(--color-danger);
       }
     </style>
-    ${styles}
+    ${styles(this.themeColor)}
     <div id='consent-screen'>
       <section class='flow center'>
         <div class="nav ${this.hideBack ? 'justify-right' : ''}">
@@ -444,6 +444,7 @@ function templateString() {
       partner-id='${this.partnerId}'
       partner-name='${this.partnerName}'
       token='${this.token}'
+      theme-color='${this.themeColor}'
     >
     </totp-consent>
 

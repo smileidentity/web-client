@@ -1,6 +1,8 @@
 import typography from './typography';
 
-const styles = `<link rel="preconnect" href="https://fonts.gstatic.com" />
+const styles = (
+  themeColor,
+) => `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link
   href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
@@ -9,6 +11,7 @@ const styles = `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <style>
 ${typography}
 :host {
+    --theme-color: ${themeColor || '#001096'};
     --color-active: #001096;
     --color-default: #2d2b2a;
     --color-disabled: #848282;
@@ -83,6 +86,14 @@ ${typography}
     color: #001096;
   }
 
+  .title-color {
+    color: ${themeColor || '#001096'};
+  }
+  
+  .theme-color {
+    color: ${themeColor || '#001096'};
+  }
+
   .center {
     text-align: center;
     margin-left: auto;
@@ -114,7 +125,7 @@ ${typography}
   }
 
   .button {
-    --button-color: var(--color-active);
+    --button-color: ${themeColor || 'var(--active-color)'};
     -webkit-appearance: none;
     appearance: none;
     border-radius: 2.5rem;
@@ -310,7 +321,7 @@ ${typography}
   }
 
   .instruction-header {
-    color: var(--web-digital-blue, #001096);
+    color: ${themeColor};
   }
 
   .flex-column {

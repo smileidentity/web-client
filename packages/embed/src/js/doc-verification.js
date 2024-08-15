@@ -209,10 +209,19 @@ import { version as sdkVersion } from '../../package.json';
     let selectedIdType;
     let selectedIdName;
 
-    SmartCameraWeb.setAttribute(
-      'theme-color',
-      config.partner_details.theme_color,
-    );
+    if (hasThemeColor()) {
+      SmartCameraWeb.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        '--color-default',
+        config.partner_details.theme_color,
+      );
+    }
 
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
@@ -441,6 +450,15 @@ import { version as sdkVersion } from '../../package.json';
         setActiveScreen(SmartCameraWeb);
       });
     }
+  }
+
+  function hasThemeColor() {
+    return (
+      config.partner_details.theme_color &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        config.partner_details.theme_color,
+      )
+    );
   }
 
   SmartCameraWeb.addEventListener(

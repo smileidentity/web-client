@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.8] - 2024-08-15
+
+### Changed
+
+- Updated the button in id types selection screen to use the theme color provided
+
 ## [1.3.7] - 2024-08-14
 
 ### Changed

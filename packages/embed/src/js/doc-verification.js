@@ -326,7 +326,11 @@ import { version as sdkVersion } from '../../package.json';
         };
 
         const idTypes = config.id_selection[selectedCountry];
-        if (idTypes.length === 1 || typeof idTypes === 'string') {
+
+        if (
+          (idTypes.length === 1 || typeof idTypes === 'string') &&
+          !(idTypes.includes('IDENTITY_CARD') && selectedCountry === 'ZA')
+        ) {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
           const countryConstraints = constraints.find(

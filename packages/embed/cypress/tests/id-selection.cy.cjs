@@ -302,6 +302,23 @@ describe('Preselected Country', () => {
       .should('contain', 'Bank Verification');
   });
 
+  it('should have the correct country and id_types if IDENTITY CARD is pre-selected', () => {
+    cy.visit('/document-verification-za');
+
+    cy.loadIDOptions();
+    cy.getIFrameBody().find('#country').should('contain', 'South Africa');
+
+    cy.getIFrameBody().find('smileid-combobox-trigger > button').click();
+
+    cy.getIFrameBody()
+      .find('smileid-combobox-option[value="IDENTITY_CARD__Identity Card"]')
+      .should('be.visible');
+
+    cy.getIFrameBody()
+      .find('smileid-combobox-option[value="IDENTITY_CARD__Green Book"]')
+      .should('be.visible');
+  });
+
   it('document_verification', () => {
     cy.visit('/document-verification-pre-select-country');
 

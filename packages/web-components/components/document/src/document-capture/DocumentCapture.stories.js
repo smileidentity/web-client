@@ -2,14 +2,21 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import './index';
 
 const meta = {
+  args: {
+    'theme-color': '#001096',
+  },
+  argTypes: {
+    'theme-color': { control: 'color' },
+  },
   component: 'document-capture',
-  render: ({ documentType }) => `
+  render: (args) => `
     <document-capture
         show-navigation
         document-capture-modes="camera,upload"
         document-name="Driver's License"
         side-of-id="Front"
-        document-type="${documentType}"
+        document-type="${args.documentType}"
+        theme-color='${args['theme-color']}'
     >
     </document-capture>
 `,

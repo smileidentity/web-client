@@ -27,11 +27,11 @@ class SelfieCaptureScreens extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-            ${styles}
+            ${styles(this.themeColor)}
             <div>
-              <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
-              <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+              <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -175,6 +175,10 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.hasAttribute('disable-image-tests')
       ? 'disable-image-tests'
       : '';
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   setActiveScreen(screen) {

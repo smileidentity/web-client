@@ -64,6 +64,10 @@ import { version as sdkVersion } from '../../package.json';
         }
         partner_params = getPartnerParams();
         id_info = {};
+        SmartCameraWeb.setAttribute(
+          'theme-color',
+          config.partner_details.theme_color,
+        );
         setActiveScreen(SmartCameraWeb);
       }
     },

@@ -177,6 +177,10 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
+    SmartCameraWeb.setAttribute(
+      'theme-color',
+      config.partner_details.theme_color,
+    );
     const supportedCountries = Object.keys(generalConstraints)
       .map((countryCode) => ({
         code: countryCode,

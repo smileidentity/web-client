@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added new designs to smart selfie authentication
 
+### Changed
+
+- When `theme_color` is provided, it will now be used to style header texts and buttons
+
 ## [1.3.6] - 2024-08-01
 
 ### Changed

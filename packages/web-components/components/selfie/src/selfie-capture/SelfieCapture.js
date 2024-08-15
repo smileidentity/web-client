@@ -63,11 +63,12 @@ function getLivenessFramesIndices(
 
 function templateString() {
   return `
-    ${styles}
+    ${styles(this.themeColor)}
   <style>
   :host {
-    --color-active: #2D2B2A;
-    --color-default: #001096;
+    --theme-color: ${this.themeColor || '#001096'};
+    --color-active: #001096;
+    --color-default: #2D2B2A;
     --color-disabled: #848282;
   }
 
@@ -140,6 +141,14 @@ function templateString() {
     color: #001096;
   }
 
+  .title-color {
+    color: ${this.themeColor};
+  }
+  
+  .theme-color {
+    color: ${this.themeColor};
+  }
+
   .center {
     text-align: center;
     margin-left: auto;
@@ -171,7 +180,7 @@ function templateString() {
   }
 
   .button {
-    --button-color: var(--color-default);
+    --button-color: ${this.themeColor};
     -webkit-appearance: none;
     appearance: none;
     border-radius: 2.5rem;
@@ -189,7 +198,7 @@ function templateString() {
   .button:hover,
   .button:focus,
   .button:active {
-    --button-color: var(--color-active);
+    --button-color: var(--color-default);
   }
 
   .button:disabled {
@@ -497,15 +506,15 @@ function templateString() {
   }
   </style>
   <div id='selfie-capture-screen' class='flow center'>
-    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h1 class='text-2xl color-digital-blue font-bold'>Take a Selfie</h1>
+    <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <h1 class='text-2xl title-color font-bold'>Take a Selfie</h1>
 
     <div class='section | flow'>
       <div class='video-container'>
         <div class='video'>
         </div>
         <svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="var(--color-default)" stroke-width="7.13965"/>
+          <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="${this.themeColor}" stroke-width="7.13965"/>
         </svg>
         <p id='smile-cta' class='color-gray'>SMILE</p>
       </div>
@@ -809,7 +818,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   get hideAttribution() {

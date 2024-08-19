@@ -11,9 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added new designs to smart selfie authentication
 
+## [1.3.8] - 2024-08-15
+
 ### Changed
 
+- Updated the button in id types selection screen to use the theme color provided
+
+## [1.3.7] - 2024-08-14
+
+### Changed
+
+- Improved document capture UI - margin and capture review improvement
 - When `theme_color` is provided, it will now be used to style header texts and buttons
+- Fix an issue where we couldn't display both Identity card and green book
 
 ## [1.3.6] - 2024-08-01
 

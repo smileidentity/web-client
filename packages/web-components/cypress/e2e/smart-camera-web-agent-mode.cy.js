@@ -26,7 +26,7 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .shadow()
-      .should('contain.text', 'Selfie Mode');
+      .should('contain.text', 'Agent Mode On');
 
     cy.get('smart-camera-web')
       .shadow()
@@ -39,7 +39,7 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .shadow()
-      .should('contain.text', 'Agent Mode');
+      .should('contain.text', 'Agent Mode Off');
 
     cy.get('smart-camera-web')
       .shadow()
@@ -52,7 +52,7 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .shadow()
-      .should('contain.text', 'Selfie Mode');
+      .should('contain.text', 'Agent Mode On');
 
     cy.get('smart-camera-web')
       .shadow()

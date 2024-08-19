@@ -531,7 +531,7 @@ function templateString() {
         </svg>
         <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
 
-      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? 'Selfie Mode' : 'Agent Mode'}</button>` : ''}
+      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? 'Agent Mode On' : 'Agent Mode Off'}</button>` : ''}
 
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
         Take Selfie
@@ -916,6 +916,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get allowAgentMode() {
+    console.log('allowAgentMode', this.hasAttribute('allow-agent-mode'));
     return this.getAttribute('allow-agent-mode') === 'true';
   }
 

@@ -13,7 +13,7 @@ function scwTemplateString() {
   <div>
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost} ${this.allowAgentMode}
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}
     ></selfie-capture-screens>
     <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
@@ -220,7 +220,15 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get allowAgentMode() {
-    return this.hasAttribute('allow-agent-mode') ? 'allow-agent-mode' : '';
+    return this.hasAttribute('allow-agent-mode')
+      ? `allow-agent-mode=${this.getAttribute('allow-agent-mode')}`
+      : '';
+  }
+
+  get allowAgentModeTests() {
+    return this.hasAttribute('show-agent-mode-for-tests')
+      ? 'show-agent-mode-for-tests'
+      : '';
   }
 
   get title() {

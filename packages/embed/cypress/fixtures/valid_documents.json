@@ -9715,12 +9715,13 @@
           "name": "Identity Card",
           "has_back": true,
           "code": "IDENTITY_CARD",
-          "example": [
-            "National IDs",
-            "Green Book",
-            "Consular IDs",
-            "Diplomat IDs"
-          ]
+          "example": ["National IDs", "Consular IDs", "Diplomat IDs"]
+        },
+        {
+          "name": "Green Book",
+          "has_back": false,
+          "code": "IDENTITY_CARD",
+          "example": ["Green Book"]
         },
         {
           "name": "Passport",

@@ -916,7 +916,6 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get allowAgentMode() {
-    console.log('allowAgentMode', this.hasAttribute('allow-agent-mode'));
     return this.getAttribute('allow-agent-mode') === 'true';
   }
 

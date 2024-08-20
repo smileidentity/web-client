@@ -84,7 +84,7 @@ export default function setupForm() {
             name: 'Demo Account',
             logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
             policy_url: 'https://smileidentity.com/privacy-privacy',
-            theme_color: '#000',
+            theme_color: '#96002d',
           },
           onSuccess: () => {
             resetButton();

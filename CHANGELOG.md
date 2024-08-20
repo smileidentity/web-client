@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added new designs to smart selfie authentication
+
 ## [1.3.8] - 2024-08-15
 
 ### Changed

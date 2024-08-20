@@ -72,10 +72,11 @@ export default function setupForm() {
           product,
           callback_url,
           environment,
-          // demo_mode: true,
           use_new_component: true,
+          //demo_mode: true,
           // previewBVNMFA: true,
           document_capture_modes: ['camera', 'upload'],
+          allow_agent_mode: true,
           partner_details: {
             partner_id,
             signature,

@@ -5,9 +5,9 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import { version as COMPONENTS_VERSION } from '../../../package.json';
 
-async function getPermissions(captureScreen) {
+async function getPermissions(captureScreen, facingMode = 'user') {
   try {
-    await SmartCamera.getMedia({ audio: false, video: true });
+    await SmartCamera.getMedia({ audio: false, video: { facingMode } });
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
   } catch (error) {
@@ -47,11 +47,11 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieReview = this.querySelector('selfie-capture-review');
 
     if (this.hideInstructions && !this.hasAttribute('hidden')) {
-      getPermissions(this.selfieCapture);
+      getPermissions(this.selfieCapture, this.getAgentMode());
     }
 
     if (this.getAttribute('initial-screen') === 'selfie-capture') {
-      getPermissions(this.selfieCapture);
+      getPermissions(this.selfieCapture, this.getAgentMode());
       this.setActiveScreen(this.selfieCapture);
     } else if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
@@ -60,6 +60,10 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     this.setUpEventListeners();
+  }
+
+  getAgentMode() {
+    return this.inAgentMode ? 'environment' : 'user';
   }
 
   disconnectedCallback() {
@@ -75,7 +79,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieInstruction.addEventListener(
       'selfie-capture-instructions.capture',
       async () => {
-        await getPermissions(this.selfieCapture);
+        await getPermissions(this.selfieCapture, this.getAgentMode());
         this.setActiveScreen(this.selfieCapture);
       },
     );
@@ -119,7 +123,7 @@ class SelfieCaptureScreens extends HTMLElement {
         this._data.images = [];
         if (this.hideInstructions) {
           this.setActiveScreen(this.selfieCapture);
-          await getPermissions(this.selfieCapture);
+          await getPermissions(this.selfieCapture, this.getAgentMode());
         } else {
           this.setActiveScreen(this.selfieInstruction);
         }
@@ -165,6 +169,10 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get showNavigation() {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+  }
+
+  get inAgentMode() {
+    return this.getAttribute('allow-agent-mode') === 'true';
   }
 
   get allowAgentMode() {

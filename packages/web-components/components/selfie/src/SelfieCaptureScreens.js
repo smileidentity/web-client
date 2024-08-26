@@ -9,7 +9,10 @@ async function getPermissions(captureScreen, facingMode = 'user') {
   try {
     const supportAgentMode = await SmartCamera.supportsAgentMode();
     const _facingMode = supportAgentMode ? facingMode : 'user';
-    await SmartCamera.getMedia({ audio: false, video: { facingMode: _facingMode } });
+    await SmartCamera.getMedia({
+      audio: false,
+      video: { facingMode: _facingMode },
+    });
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
     if (supportAgentMode) {

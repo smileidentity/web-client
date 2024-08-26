@@ -7,9 +7,14 @@ import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen, facingMode = 'user') {
   try {
-    await SmartCamera.getMedia({ audio: false, video: { facingMode } });
+    const supportAgentMode = await SmartCamera.supportsAgentMode();
+    const _facingMode = supportAgentMode ? facingMode : 'user';
+    await SmartCamera.getMedia({ audio: false, video: { facingMode: _facingMode } });
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
+    if (supportAgentMode) {
+      captureScreen.setAttribute('has-agent-support', true);
+    }
   } catch (error) {
     captureScreen.removeAttribute('data-camera-ready');
     captureScreen.setAttribute(
@@ -50,6 +55,7 @@ class SelfieCaptureScreens extends HTMLElement {
       getPermissions(this.selfieCapture, this.getAgentMode());
     }
 
+    // If the initial screen is selfie-capture, we need to get permissions
     if (this.getAttribute('initial-screen') === 'selfie-capture') {
       getPermissions(this.selfieCapture, this.getAgentMode());
       this.setActiveScreen(this.selfieCapture);

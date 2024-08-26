@@ -31,6 +31,34 @@ class SmartCamera {
     }
   }
 
+  static async supportsAgentMode() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        (device) => device.kind === 'videoinput',
+      );
+
+      let hasBackCamera = false;
+
+      videoDevices.forEach((device) => {
+        // Check if the device label or device ID indicates a back camera
+        if (
+          device.label.toLowerCase().includes('back') ||
+          device.label.toLowerCase().includes('rear')
+        ) {
+          hasBackCamera = true;
+          return true;
+        }
+        return false;
+      });
+
+      return hasBackCamera;
+    } catch (error) {
+      console.warn('Error accessing media devices: ', error);
+      return false;
+    }
+  }
+
   static isSamsungMultiCameraDevice() {
     const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);
     if (!matchedModelNumber) {

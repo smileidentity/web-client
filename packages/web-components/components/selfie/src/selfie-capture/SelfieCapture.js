@@ -862,7 +862,7 @@ class SelfieCaptureScreen extends HTMLElement {
       return;
     }
 
-    const supportAgentMode = await this.supportsAgentMode();
+    const supportAgentMode = this.hasAgentSupport ?? await SmartCamera.supportsAgentMode();
 
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
@@ -871,32 +871,8 @@ class SelfieCaptureScreen extends HTMLElement {
     }
   }
 
-  async supportsAgentMode() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(
-        (device) => device.kind === 'videoinput',
-      );
-
-      let hasBackCamera = false;
-
-      videoDevices.forEach((device) => {
-        // Check if the device label or device ID indicates a back camera
-        if (
-          device.label.toLowerCase().includes('back') ||
-          device.label.toLowerCase().includes('rear')
-        ) {
-          hasBackCamera = true;
-          return true;
-        }
-        return false;
-      });
-
-      return hasBackCamera;
-    } catch (error) {
-      console.warn('Error accessing media devices: ', error);
-      return false;
-    }
+  get hasAgentSupport() {
+    return this.hasAttribute('has-agent-support');
   }
 
   get title() {

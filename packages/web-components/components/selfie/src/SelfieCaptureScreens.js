@@ -30,7 +30,7 @@ class SelfieCaptureScreens extends HTMLElement {
             ${styles(this.themeColor)}
             <div>
               <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+              <selfie-capture theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
               <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
@@ -165,6 +165,18 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get showNavigation() {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+  }
+
+  get allowAgentMode() {
+    return this.hasAttribute('allow-agent-mode')
+      ? "allow-agent-mode='true'"
+      : '';
+  }
+
+  get allowAgentModeTests() {
+    return this.hasAttribute('show-agent-mode-for-tests')
+      ? 'show-agent-mode-for-tests'
+      : '';
   }
 
   get hideBack() {

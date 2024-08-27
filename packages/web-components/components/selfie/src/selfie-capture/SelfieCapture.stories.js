@@ -27,3 +27,10 @@ export const SelfieCapture = {
         </selfie-capture>
     `,
 };
+
+export const SelfieCaptureAgentMode = {
+  render: () => `
+        <selfie-capture allow-agent-mode='true' data-camera-ready show-agent-mode-for-tests>
+        </selfie-capture>
+    `,
+};

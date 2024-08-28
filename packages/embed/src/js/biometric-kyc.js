@@ -199,6 +199,10 @@ import { version as sdkVersion } from '../../package.json';
       );
     }
 
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+
     const supportedCountries = Object.keys(generalConstraints)
       .map((countryCode) => ({
         code: countryCode,

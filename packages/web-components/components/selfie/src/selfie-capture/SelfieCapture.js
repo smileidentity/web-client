@@ -644,6 +644,11 @@ class SelfieCaptureScreen extends HTMLElement {
 
   async _switchCamera() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    if (this.facingMode === 'user') {
+      this.videoContainer.querySelector('video').classList.remove('agent-mode');
+    } else {
+      this.videoContainer.querySelector('video').classList.add('agent-mode');
+    }
     this.startImageCapture.disabled = true;
     this.switchCamera.disabled = true;
     SmartCamera.stopMedia();
@@ -775,7 +780,7 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-
+    this.setupAgentMode();
     video.onloadedmetadata = () => {
       video.play();
     };
@@ -828,8 +833,6 @@ class SelfieCaptureScreen extends HTMLElement {
     } else if (this.hasAttribute('data-camera-ready')) {
       getPermissions(this, { facingMode: this.facingMode });
     }
-
-    this.setupAgentMode();
   }
 
   disconnectedCallback() {
@@ -863,7 +866,6 @@ class SelfieCaptureScreen extends HTMLElement {
 
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
-      this.shadowRoot.querySelector('video').classList.add('agent-mode');
     } else {
       this.switchCamera.hidden = true;
     }

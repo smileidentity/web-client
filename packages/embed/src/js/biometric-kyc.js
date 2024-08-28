@@ -150,7 +150,6 @@ import { version as sdkVersion } from '../../package.json';
 
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
 
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
@@ -190,6 +189,7 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
+    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

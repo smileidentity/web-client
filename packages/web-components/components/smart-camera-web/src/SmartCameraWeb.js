@@ -11,7 +11,7 @@ function scwTemplateString() {
   return `
   ${styles(this.themeColor)}
   <div>
-    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}
     ></selfie-capture-screens>
@@ -68,6 +68,7 @@ class SmartCameraWeb extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'theme-color',
+      'hide-attribution',
     ];
   }
 
@@ -76,6 +77,7 @@ class SmartCameraWeb extends HTMLElement {
       case 'disable-image-tests':
       case 'document-capture-modes':
       case 'document-type':
+      case 'hide-attribution':
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':

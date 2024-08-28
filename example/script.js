@@ -75,6 +75,7 @@ export default function setupForm() {
           use_new_component: true,
           //demo_mode: true,
           // previewBVNMFA: true,
+          hide_attribution: true,
           document_capture_modes: ['camera', 'upload'],
           allow_agent_mode: true,
           partner_details: {

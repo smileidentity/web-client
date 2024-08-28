@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.9] - 2024-08-28
+
 ### Added
 
 - Added new designs to smart selfie authentication
+
+### Changed
+
+- Fix theme color not affecting biometric and smart selfie authentication
 
 ## [1.3.8] - 2024-08-15
 

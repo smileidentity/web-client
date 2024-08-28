@@ -577,6 +577,7 @@ class SelfieCaptureInstructions extends HTMLElement {
 
     this.allowButton = this.shadowRoot.querySelector('#allow');
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
+    this.cancelButton = this.shadowRoot.querySelector('#cancel');
 
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
@@ -597,6 +598,10 @@ class SelfieCaptureInstructions extends HTMLElement {
       },
       false,
     );
+
+    this.cancelButton.addEventListener('click', () => {
+      this.handleBackEvents();
+    });
   }
 
   get hideBack() {

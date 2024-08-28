@@ -645,9 +645,9 @@ class SelfieCaptureScreen extends HTMLElement {
   async _switchCamera() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
     if (this.facingMode === 'user') {
-      this.videoContainer.querySelector('video').classList.remove('agent-mode');
+      this.shadowRoot.querySelector('video').classList.remove('agent-mode');
     } else {
-      this.videoContainer.querySelector('video').classList.add('agent-mode');
+      this.shadowRoot.querySelector('video').classList.add('agent-mode');
     }
     this.startImageCapture.disabled = true;
     this.switchCamera.disabled = true;

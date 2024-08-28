@@ -82,9 +82,6 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: install sst
-        run: |
-          curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
       - name: set sst stage
         id: get_branch_name
         run: |

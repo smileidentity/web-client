@@ -151,6 +151,10 @@ import { version as sdkVersion } from '../../package.json';
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
 
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+
     const selectedIdRequiresConsent = partnerConstraints.consentRequired[
       selectedCountry
     ]

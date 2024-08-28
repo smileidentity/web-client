@@ -69,6 +69,7 @@ class SmartCameraWeb extends HTMLElement {
       'show-navigation',
       'hide-back-of-id',
       'theme-color',
+      'hide-attribution',
     ];
   }
 
@@ -77,6 +78,7 @@ class SmartCameraWeb extends HTMLElement {
       case 'disable-image-tests':
       case 'document-capture-modes':
       case 'document-type':
+      case 'hide-attribution':
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':

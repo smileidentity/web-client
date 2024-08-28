@@ -184,6 +184,14 @@ function getHumanSize(numberOfBytes) {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+
+        LoadingScreen.querySelector('.credits').hidden =
+          config.hide_attribution;
+        const attributions = document.querySelectorAll('.credits');
+        Array.prototype.forEach.call(attributions, (attribution) => {
+          attribution.hidden = config.hide_attribution;
+        });
+
         activeScreen = LoadingScreen;
         getPartnerParams();
         const documents = (await getDocuments()).documents;

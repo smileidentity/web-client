@@ -51,7 +51,7 @@ button[data-type="icon"] {
 
 :host::part(back-button-text) {
   line-height: 1;
-  color: rgb(21, 31, 114) !important;
+  color: ${this.hasThemeColor ? this.themeColor : 'rgb(21, 31, 114)'} !important;
 }
 
 :host::part(close-button) {
@@ -87,7 +87,7 @@ button[data-type="icon"] {
           opacity=".4"
         />
         <path
-          fill="#001096"
+          fill="${this.themeColor}"
           d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"
         />
       </svg>
@@ -150,6 +150,14 @@ button[data-type="icon"] {
 
   get showBackButton() {
     return !this.hasAttribute('hide-back');
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#001096';
+  }
+
+  get hasThemeColor() {
+    return this.getAttribute('theme-color')?.trim();
   }
 }
 

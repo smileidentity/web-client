@@ -5,6 +5,7 @@ context('SmartCameraWeb - Skip Back of ID Document Capture', () => {
 
   context('when a document type does not exist', () => {
     it('should switch from the back of ID entry screen to the thanks screen on clicking the "Skip this step" button', () => {
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('#request-camera-access')
@@ -12,7 +13,7 @@ context('SmartCameraWeb - Skip Back of ID Document Capture', () => {
 
       cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-      cy.wait(8000);
+      cy.tick(8000);
 
       cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 
@@ -65,6 +66,7 @@ context('SmartCameraWeb - Skip Back of ID Document Capture', () => {
     });
 
     it('should not show the "skip this step" button', () => {
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('#request-camera-access')
@@ -72,7 +74,7 @@ context('SmartCameraWeb - Skip Back of ID Document Capture', () => {
 
       cy.get('smart-camera-web').shadow().find('#start-image-capture').click();
 
-      cy.wait(8000);
+      cy.tick(8000);
 
       cy.get('smart-camera-web').shadow().find('#select-selfie').click();
 

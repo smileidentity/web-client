@@ -9,14 +9,14 @@ import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 function scwTemplateString() {
   return `
-  ${styles}
+  ${styles(this.themeColor)}
   <div>
-    <camera-permission ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
-    <selfie-capture-screens ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost}
+    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
+    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}
     ></selfie-capture-screens>
-    <document-capture-screens document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
-     ${this.hideBackOfId} hidden></document-capture-screens>
+    <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+     ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -61,21 +61,27 @@ class SmartCameraWeb extends HTMLElement {
 
   static get observedAttributes() {
     return [
+      'disable-image-tests',
       'document-capture-modes',
       'document-type',
+      'hide-back-of-id',
       'hide-back-to-host',
       'show-navigation',
-      'hide-back-of-id',
+      'theme-color',
+      'hide-attribution',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
+      case 'disable-image-tests':
       case 'document-capture-modes':
       case 'document-type':
+      case 'hide-attribution':
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'theme-color':
         this.disconnectedCallback();
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
@@ -218,6 +224,18 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('hide-back-to-host') ? 'hide-back-to-host' : '';
   }
 
+  get allowAgentMode() {
+    return this.hasAttribute('allow-agent-mode')
+      ? `allow-agent-mode=${this.getAttribute('allow-agent-mode')}`
+      : '';
+  }
+
+  get allowAgentModeTests() {
+    return this.hasAttribute('show-agent-mode-for-tests')
+      ? 'show-agent-mode-for-tests'
+      : '';
+  }
+
   get title() {
     return this.hasAttribute('title')
       ? `title=${this.getAttribute('title')}`
@@ -238,6 +256,23 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideAttribution() {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+  }
+
+  get hasThemeColor() {
+    return (
+      this.hasAttribute('theme-color') &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        this.getAttribute('theme-color'),
+      )
+    );
+  }
+
+  get themeColor() {
+    return this.hasThemeColor ? this.getAttribute('theme-color') : '#001096';
+  }
+
+  get applyComponentThemeColor() {
+    return this.hasThemeColor ? `theme-color='${this.themeColor}'` : '';
   }
 
   setActiveScreen(screen) {

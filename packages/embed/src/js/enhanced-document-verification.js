@@ -67,6 +67,12 @@ import { version as sdkVersion } from '../../package.json';
         } else {
           import('@smile_identity/smart-camera-web');
         }
+        LoadingScreen.querySelector('.credits').hidden =
+          config.hide_attribution;
+        const attributions = document.querySelectorAll('.credits');
+        Array.prototype.forEach.call(attributions, (attribution) => {
+          attribution.hidden = config.hide_attribution;
+        });
         activeScreen = LoadingScreen;
 
         productConstraints = await getProductConstraints();
@@ -78,6 +84,22 @@ import { version as sdkVersion } from '../../package.json';
   );
 
   function initializeSession(constraints) {
+    if (hasThemeColor()) {
+      SmartCameraWeb.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        '--color-default',
+        config.partner_details.theme_color,
+      );
+    }
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
     const supportedCountries = Object.keys(constraints)
       .map((countryCode) => ({
         code: countryCode,
@@ -247,6 +269,15 @@ import { version as sdkVersion } from '../../package.json';
     script.src = 'js/demo-doc-verification.min.js';
 
     document.body.appendChild(script);
+  }
+
+  function hasThemeColor() {
+    return (
+      config.partner_details.theme_color &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        config.partner_details.theme_color,
+      )
+    );
   }
 
   SmartCameraWeb.addEventListener(

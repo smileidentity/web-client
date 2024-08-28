@@ -32,20 +32,22 @@ class DocumentCaptureScreens extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      ${styles}
+      ${styles(this.themeColor)}
       <div>
-      <document-capture-instructions id='document-capture-instructions-front' ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
+      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
       <document-capture id='document-capture-front' side-of-id='Front'
       ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
-      ${this.documentCaptureModes} ${this.documentType}
+      ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
       ></document-capture>
-      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID' ${this.documentCaptureModes} ${this.showNavigation} hidden></document-capture-instructions>
+      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID'
+       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' hidden
+       ></document-capture-instructions>
       <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
-      ${this.documentCaptureModes}
+      ${this.documentCaptureModes} theme-color='${this.themeColor}'
       hidden 
       ></document-capture>
-      <document-capture-review id='front-of-document-capture-review' hidden></document-capture-review>
-      <document-capture-review id='back-of-document-capture-review' hidden></document-capture-review>
+      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' hidden></document-capture-review>
+      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' hidden></document-capture-review>
       </div>
     `;
 
@@ -187,7 +189,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
-        this.idReview.setAttribute('data-image', event.detail.image);
+        this.backOfIdReview.setAttribute('data-image', event.detail.image);
         this._data.images.push({
           image: event.detail.image.split(',')[1],
           image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
@@ -196,7 +198,7 @@ class DocumentCaptureScreens extends HTMLElement {
       },
     );
     this.idCaptureBack.addEventListener('document-capture.publish', (event) => {
-      this.backOfIdReview.setAttribute('data-image', event.detail.image);
+      this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
         image_type_id: IMAGE_TYPE.ID_CARD_BACK_IMAGE_BASE64,
@@ -290,6 +292,10 @@ class DocumentCaptureScreens extends HTMLElement {
     return this.hasAttribute('document-type')
       ? `document-type='${this.getAttribute('document-type')}'`
       : '';
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   handleBackEvents() {

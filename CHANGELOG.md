@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.10] - 2024-08-28
+
+### Added
+
+- Added `hide_attribute` config to web embed
+
 ## [1.3.9] - 2024-08-28
 
 ### Added

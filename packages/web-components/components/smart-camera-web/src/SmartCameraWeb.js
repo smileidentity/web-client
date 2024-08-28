@@ -67,7 +67,6 @@ class SmartCameraWeb extends HTMLElement {
       'hide-back-of-id',
       'hide-back-to-host',
       'show-navigation',
-      'hide-back-of-id',
       'theme-color',
     ];
   }
@@ -80,6 +79,7 @@ class SmartCameraWeb extends HTMLElement {
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'theme-color':
         this.disconnectedCallback();
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();

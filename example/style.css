@@ -422,7 +422,7 @@ button[data-type='icon'] {
 
 .back-button-text {
   line-height: 1;
-  color: rgb(21, 31, 114);
+  color: var(--color-default, rgb(21, 31, 114));
 }
 
 .user-details {

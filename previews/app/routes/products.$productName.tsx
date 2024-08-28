@@ -1,12 +1,12 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Resource } from 'sst';
 import products from '~/data/products.json';
 
 declare global {
   interface Window {
-    SmileIdentity: Function;
+    SmileIdentity: function;
   }
 }
 
@@ -83,7 +83,7 @@ export default function Product() {
         ...config,
         document_ids: [config.document_id],
         document_capture_modes: (
-          (config.document_capture_modes as String) ?? ''
+          (config.document_capture_modes as string) ?? ''
         ).split(','),
         partner_details: {
           partner_id: config.partner_id,

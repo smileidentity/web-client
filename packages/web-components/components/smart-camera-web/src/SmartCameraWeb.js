@@ -11,7 +11,7 @@ function scwTemplateString() {
   return `
   ${styles(this.themeColor)}
   <div>
-    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'}></camera-permission>
+    <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}
     ></selfie-capture-screens>

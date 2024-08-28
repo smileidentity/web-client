@@ -64,10 +64,19 @@ import { version as sdkVersion } from '../../package.json';
         }
         partner_params = getPartnerParams();
         id_info = {};
+
         SmartCameraWeb.setAttribute(
           'theme-color',
           config.partner_details.theme_color,
         );
+
+        if (config.hide_attribution) {
+          const attributions = document.querySelectorAll('.credits');
+          Array.prototype.forEach.call(attributions, (attribution) => {
+            attribution.hidden = config.hide_attribution;
+          });
+          SmartCameraWeb.setAttribute('hide-attribution', true);
+        }
         setActiveScreen(SmartCameraWeb);
       }
     },

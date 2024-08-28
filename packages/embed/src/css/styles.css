@@ -327,6 +327,7 @@ button[data-type='icon'] {
 
 .back-button-text {
   line-height: 1;
+  font-size: 14px;
   color: rgb(21, 31, 114);
 }
 

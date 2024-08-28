@@ -1334,7 +1334,12 @@ function hasMoreThanNColors(data, n = 16) {
   return false;
 }
 
-window.customElements.define('powered-by-smile-id', PoweredBySmileId);
+if (
+  window.customElements &&
+  !window.customElements.get('powered-by-smile-id')
+) {
+  window.customElements.define('powered-by-smile-id', PoweredBySmileId);
+}
 
 class SmartCameraWeb extends HTMLElement {
   constructor() {

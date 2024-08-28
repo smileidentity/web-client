@@ -766,10 +766,6 @@ class SelfieCaptureScreen extends HTMLElement {
       video = document.createElement('video');
     }
 
-    if (this.facingMode === 'environment') {
-      video.classList.add('agent-mode');
-    }
-
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
@@ -867,6 +863,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
+      this.shadowRoot.querySelector('video').classList.add('agent-mode');
     } else {
       this.switchCamera.hidden = true;
     }

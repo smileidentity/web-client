@@ -115,6 +115,12 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        LoadingScreen.querySelector('.credits').hidden =
+          config.hide_attribution;
+        const attributions = document.querySelectorAll('.credits');
+        Array.prototype.forEach.call(attributions, (attribution) => {
+          attribution.hidden = config.hide_attribution;
+        });
         activeScreen = LoadingScreen;
         getPartnerParams();
         const { partnerConstraints, generalConstraints } =
@@ -169,6 +175,14 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
+    if (hasThemeColor()) {
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        '--color-default',
+        config.partner_details.theme_color,
+      );
+    }
     const supportedCountries = Object.keys(generalConstraints)
       .map((countryCode) => ({
         code: countryCode,
@@ -321,6 +335,15 @@ import { version as sdkVersion } from '../../package.json';
     document.body.appendChild(script);
   }
 
+  function hasThemeColor() {
+    return (
+      config.partner_details.theme_color &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        config.partner_details.theme_color,
+      )
+    );
+  }
+
   IDInfoForm.querySelector('#submitForm').addEventListener(
     'click',
     (event) => {
@@ -376,6 +399,9 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
     EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
     EndUserConsent.setAttribute('token', config.token);
+    if (config.hide_attribution) {
+      EndUserConsent.setAttribute('hide-attribution', true);
+    }
     if (disableBackOnFirstScreen) {
       EndUserConsent.setAttribute('hide-back-to-host', true);
     }

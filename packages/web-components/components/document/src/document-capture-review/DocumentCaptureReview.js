@@ -3,7 +3,6 @@ import '../../../navigation/src';
 
 function templateString() {
   return `
-  ${styles}
   <style>
     .retake-photo.button[data-variant~="ghost"] {
       color: #FF5805;
@@ -21,18 +20,6 @@ function templateString() {
         height: 100vh;
         justify-content: center;
       }
-
-      .video-overlay {
-        position: absolute;
-        border-width: 1rem;
-        border-color: white;
-        border-style: solid;
-        inset: 0px;
-      }
-
-      img {
-        clip-path: polygon(10% 10%, 90% 10%, 90% 85%, 10% 85%);
-      }
     }
     
     .id-image-container {
@@ -43,25 +30,15 @@ function templateString() {
     }
 
     .id-image {
-      max-width: fit-content;
-      height: auto;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        background: white;
     }
     img {
       height: 100%;
       min-height: 100px;
-      clip-path: polygon(5% 5%, 95% 5%, 95% 90%, 5% 90%);
-    }
-
-    .video-overlay .inner-border {
-      position: absolute;
-      border-width: 1rem;
-      border-color: #9394ab;
-      border-style: solid;
-      border-radius: 1rem;
-      inset: -8px;
+      width: 98%;
     }
 
     .action-buttons {
@@ -179,6 +156,12 @@ function templateString() {
     .padding-bottom-2 {
       padding-bottom: 2rem;
     }
+    img {
+        border-width: 0.25rem;
+        border-color: #9394ab;
+        border-style: solid;
+        border-radius: 0.25rem;
+      }
 
     .instructions-wrapper {
       display: inline-flex;
@@ -236,9 +219,10 @@ function templateString() {
       line-height: 1.5rem;
     }
   </style>
+  ${styles(this.themeColor)}
   <div id='document-capture-review-screen' class='flow center'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
-    <h1 class="header-title">
+    <h1 class="header-title title-color">
       Is the document clear and readable?
     </h1>
     <p class="description">Make sure all corners of the document 
@@ -247,7 +231,7 @@ function templateString() {
       <div class='id-image-container'>
         <div class='id-image'>
           <div class='video-overlay'></div>
-          ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' width='396' />` : ''}
+          ${this.imageSrc ? `<img alt='your ID card' id='document-capture-review-image' src='${this.imageSrc}' />` : ''}
           </div>
         <div class='flow action-buttons'>
           <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
@@ -301,7 +285,7 @@ class IdReview extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   get hideAttribution() {

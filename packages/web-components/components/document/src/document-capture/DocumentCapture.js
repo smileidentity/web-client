@@ -1,9 +1,5 @@
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
-import {
-  PORTRAIT_ID_PREVIEW_HEIGHT,
-  PORTRAIT_ID_PREVIEW_WIDTH,
-} from '../../../../domain/constants/src/Constants';
 import '../../../navigation/src';
 
 function hasMoreThanNColors(data, n = 16) {
@@ -20,7 +16,6 @@ function hasMoreThanNColors(data, n = 16) {
 
 function templateString() {
   return `
-    ${styles}
     <style>
       .visually-hidden {
         border: 0;
@@ -42,12 +37,12 @@ function templateString() {
         width: 100%;
       }
 
-      .id-video.mobile-camera-screen {
+     .id-video.mobile-camera-screen {
         display: flex;
         align-items: stretch;
         justify-content: center;
-        max-height: 200px;
-        height: 10rem;
+        max-height: 300px;
+        height: 15rem;
         width: 100%;
         overflow: visible;
         margin: 0 auto;
@@ -55,7 +50,7 @@ function templateString() {
       
       @media (max-width: 600px) {
         .section {
-          width: 100%;
+          width: 99%;
           height: 100vh;
           justify-content: center;
         }
@@ -88,25 +83,22 @@ function templateString() {
         }
       
         .id-video {
-          width: 100%;
+          width: 99%;
           text-align: center;
           position: relative;
           overflow: hidden;
         }
-        .video-overlay {
-          position: absolute;
-          border-style: solid;
-          border-color: rgba(0, 0, 0, 0.48);
-          box-sizing: border-box;
-          inset: -1px;
-        }
-      
+
         .id-video-container {
           margin: auto;
           padding: 0px;
         }
       }
-      
+      .id-video-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
       .id-video {
         width: 100%;
         text-align: center;
@@ -128,6 +120,12 @@ function templateString() {
         border-style: solid;
         border-radius: 0.25rem;
         inset: -1px;
+      }
+      canvas {
+        border-width: 0.25rem;
+        border-color: #9394ab;
+        border-style: solid;
+        border-radius: 0.25rem;
       }
       
       .description {
@@ -162,24 +160,25 @@ function templateString() {
         padding-top: 10px;
       }
   </style>
+  ${styles(this.themeColor)}
   <div id='document-capture-screen' class='flow center flex-column'>
-  <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h2 class='text-base font-bold color-digital-blue'>${this.documentName}</h2>
+  <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <h2 class='text-base font-bold title-color'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
     <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
       <div class='id-video-container'>
-        <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' >
+        <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
         </div>
         <div class='video-footer sticky'>
-          <h2 class='text-base font-bold color-digital-blue reset-margin-block id-side'>${this.title}</h2>
-          <h4 class='text-base font-normal color-digital-blue description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
+          <h2 class='text-base font-bold title-color reset-margin-block id-side'>${this.title}</h2>
+          <h4 class='text-base font-normal title-color description reset-margin-block'>Make sure all corners are visible and there is no glare.</h4>
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70" fill="none" aria-hidden="true" focusable="false">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="#001096"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z" fill="${this.themeColor}"/>
               </svg>
               <span class='visually-hidden'>Capture Document</span>
             </button>
@@ -192,7 +191,8 @@ function templateString() {
   `;
 }
 
-const fixedAspectRatio = 1.53;
+const documentCaptureScale = 0.6;
+
 class DocumentCapture extends HTMLElement {
   constructor() {
     super();
@@ -223,10 +223,14 @@ class DocumentCapture extends HTMLElement {
     try {
       await SmartCamera.getMedia({
         audio: false,
-        video: SmartCamera.environmentOptions,
+        video: {
+          ...SmartCamera.environmentOptions,
+          aspectRatio: { ideal: 16 / 9 },
+        },
       });
     } catch (error) {
       console.error(error.constraint);
+      console.error(error.message);
     }
 
     this.handleIDStream(SmartCamera.stream);
@@ -249,49 +253,16 @@ class DocumentCapture extends HTMLElement {
     const canvas = document.createElement('canvas');
     if (this.isPortraitCaptureView) {
       canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.height = (canvas.width * 16) / 9;
 
-      // Draw the video frame onto the canvas
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const previewCanvas = document.createElement('canvas');
+      previewCanvas.width = canvas.width;
+      previewCanvas.height = canvas.height;
 
-      // Get the dimensions of the video preview frame
-      const previewWidth = PORTRAIT_ID_PREVIEW_WIDTH;
-      const previewHeight = PORTRAIT_ID_PREVIEW_HEIGHT;
-
-      // Define the padding value
-      const paddingPercent = 1.1; // 110% of the preview dimensions because we previously scaled the image, old value was 50%;
-      const paddedWidth = previewWidth * (1 + paddingPercent);
-      const paddedHeight = previewHeight * (1 + paddingPercent);
-
-      // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
-      const cropWidth = paddedWidth;
-      const cropHeight = paddedHeight;
-      const cropLeft = (canvas.width - cropWidth) / 2;
-      const cropTop = (canvas.height - cropHeight) / 2;
-
-      // Create a new canvas element for the cropped image
-      const croppedCanvas = document.createElement('canvas');
-      croppedCanvas.width = cropWidth;
-      croppedCanvas.height = cropHeight;
-
-      // Draw the cropped image onto the new canvas
-      const croppedCtx = croppedCanvas.getContext('2d');
-      croppedCtx.drawImage(
-        canvas,
-        cropLeft,
-        cropTop,
-        cropWidth,
-        cropHeight,
-        0,
-        0,
-        cropWidth,
-        cropHeight,
-      );
-
-      const image = croppedCanvas.toDataURL('image/jpeg');
-      const previewImage = image;
-
+      this.updatePortraitId(canvas, video, 1, 1);
+      this.updatePortraitId(previewCanvas, video);
+      const image = canvas.toDataURL('image/jpeg');
+      const previewImage = previewCanvas.toDataURL('image/jpeg');
       return {
         image,
         originalHeight: canvas.height,
@@ -304,66 +275,33 @@ class DocumentCapture extends HTMLElement {
     canvas.width = 2240;
     canvas.height = 1260;
 
-    const context = canvas.getContext('2d');
-
-    const { aspectRatio } = this._calculateVideoOffset(video);
-
-    if (aspectRatio < 1) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      // Draw the video frame onto the canvas
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const paddedWidth = canvas.width;
-      const paddedHeight = canvas.width / fixedAspectRatio;
-
-      // Calculate the dimensions of the cropped image based on the padded preview frame dimensions
-      const cropWidth = paddedWidth;
-      const cropHeight = paddedHeight;
-      const cropLeft = 0;
-      const cropTop = canvas.height / 2 - paddedHeight / 2;
-
-      // Create a new canvas element for the cropped image
-      const croppedCanvas = document.createElement('canvas');
-      croppedCanvas.width = cropWidth;
-      croppedCanvas.height = cropHeight;
-
-      // Draw the cropped image onto the new canvas
-      const croppedCtx = croppedCanvas.getContext('2d');
-      croppedCtx.drawImage(
-        canvas,
-        cropLeft,
-        cropTop,
-        cropWidth,
-        cropHeight,
-        0,
-        0,
-        cropWidth,
-        cropHeight,
-      );
-      const image = croppedCanvas.toDataURL('image/jpeg');
-
-      return {
-        image,
-        originalHeight: canvas.height,
-        originalWidth: canvas.width,
-        previewImage: image,
-        ...this.idCardRegion,
-      };
-    }
-
     const height = canvas.width / (video.videoWidth / video.videoHeight);
     canvas.height = height;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.height = canvas.height;
+    previewCanvas.width = canvas.width;
+    const isPortrait = video.videoWidth < video.videoHeight;
+    if (isPortrait) {
+      const intermediateCanvas = document.createElement('canvas');
+      previewCanvas.height = canvas.width / 1.75;
+      canvas.width = 2240;
+      canvas.height = canvas.width / 1.77;
+      this._capturePortraitToLandscapeImage(intermediateCanvas, video);
+      this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas, 1, 1);
+      this._drawLandscapeImageFromCanvas(previewCanvas, intermediateCanvas);
+    } else {
+      this._drawLandscapeImage(canvas, video, 1, 1);
+      this._drawLandscapeImage(previewCanvas, video);
+    }
     const image = canvas.toDataURL('image/jpeg');
 
+    const previewImage = previewCanvas.toDataURL('image/jpeg');
     return {
       image,
       originalHeight: canvas.height,
       originalWidth: canvas.width,
-      previewImage: image,
+      previewImage,
       ...this.idCardRegion,
     };
   }
@@ -401,28 +339,19 @@ class DocumentCapture extends HTMLElement {
   }
 
   handleIDStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('video');
-    let video = null;
+    const videoExists = this.shadowRoot.querySelector('canvas');
     if (videoExists) {
-      video = this.shadowRoot.querySelector('video');
-    } else {
-      video = document.createElement('video');
+      // remove canvas
+      videoExists.remove();
     }
-    const videoContainer = this.shadowRoot.querySelector('.id-video');
-    const MIN_WIDTH = 272;
-    const width =
-      videoContainer.clientWidth < MIN_WIDTH
-        ? MIN_WIDTH
-        : videoContainer.clientWidth;
-    video.style.width = `${width}px`;
-    video.style.height = '0px';
-    video.style.display = 'block';
+    let video = null;
+    let canvas = null;
+    video = document.createElement('video');
+    canvas = document.createElement('canvas');
+    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
+
     video.muted = true;
     video.setAttribute('muted', 'true');
-    if (this.isPortraitCaptureView) {
-      video.style.objectFit = 'cover';
-      video.style.scale = '1';
-    }
 
     video.autoplay = true;
     video.playsInline = true;
@@ -432,104 +361,246 @@ class DocumentCapture extends HTMLElement {
       video.src = window.URL.createObjectURL(stream);
     }
 
+    canvas.width = videoContainer.clientWidth;
+    canvas.height = (videoContainer.clientWidth * 9) / 16;
+    if (this.isPortraitCaptureView) {
+      canvas.height = (videoContainer.clientWidth * 16) / 9;
+    }
+
     video.onloadedmetadata = () => {
       video.play();
-    };
 
-    const onVideoStart = () => {
-      const {
-        aspectRatio,
-        offsetHeight,
-        offsetWidth,
-        videoHeight,
-        videoWidth,
-      } = this._calculateVideoOffset(video);
-      const portrait = aspectRatio < 1;
-
-      if (portrait) {
-        videoContainer.classList.add('mobile-camera-screen');
-        videoContainer.style.height = `${videoHeight}px`;
-      }
-      videoContainer.style.width = `${videoWidth}px`;
-      videoContainer.style.maxHeight = `${videoHeight}px`;
-      video.style.height = `${videoHeight}px`;
-      const idCardRegionWidth = videoWidth - offsetWidth;
-      const idCardRegionHeight = videoHeight - offsetHeight;
-
-      const rightLeftBorderSize = 20;
-      const topBottomBorderSize = 20;
-      this.idCardRegion = {
-        height: idCardRegionHeight,
-        rightLeftBorderSize,
-        topBottomBorderSize,
-        width: idCardRegionWidth,
-        x: offsetWidth / 2,
-        y: offsetHeight / 2,
-      };
-
-      let videoOverlay = videoContainer.querySelector('.video-overlay');
-      if (videoOverlay) {
-        videoOverlay.remove();
-      }
-      videoOverlay = document.createElement('div');
-      const shadeColor = 'white';
-      videoOverlay.classList.add('video-overlay');
-
-      videoOverlay.style.borderLeft = `${rightLeftBorderSize}px solid ${shadeColor}`;
-      videoOverlay.style.borderRight = `${rightLeftBorderSize}px solid ${shadeColor}`;
-      videoOverlay.style.borderTop = `${topBottomBorderSize}px solid ${shadeColor}`;
-      videoOverlay.style.borderBottom = `${topBottomBorderSize}px solid ${shadeColor}`;
-      videoOverlay.style.top = '0px';
-      videoOverlay.style.bottom = '0px';
-      videoOverlay.style.left = '0px';
-      videoOverlay.style.right = '0px';
-      videoOverlay.style.inset = '-1px';
-
-      const innerBorder = document.createElement('div');
-      innerBorder.classList.add('inner-border');
-      videoOverlay.appendChild(innerBorder);
-      videoContainer.appendChild(videoOverlay);
-      this.videoOverlay = videoOverlay;
       this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
+    };
+
+    const onVideoStart = () => {
+      if (video.paused || video.ended) return;
       video.removeEventListener('playing', onVideoStart);
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      const portrait = aspectRatio < 1;
+      if (this.isPortraitCaptureView) {
+        this.updatePortraitId(canvas, video);
+        requestAnimationFrame(onVideoStart);
+        return;
+      }
+
+      if (portrait) {
+        videoContainer.classList.add('mobile-camera-screen');
+        const intermediateCanvas = document.createElement('canvas');
+        this._capturePortraitToLandscapeImage(intermediateCanvas, video);
+        this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas);
+      } else {
+        this._drawLandscapeImage(canvas, video);
+      }
+      requestAnimationFrame(onVideoStart);
     };
 
     video.addEventListener('playing', onVideoStart);
 
     if (!videoExists) {
-      videoContainer.prepend(video);
+      videoContainer.prepend(canvas);
     }
 
     this._IDStream = stream;
     this._IDVideo = video;
   }
 
-  _calculateVideoOffset(video) {
-    const offset = 30;
-    const aspectRatio = video.videoWidth / video.videoHeight;
-    const calculatedAspectRatio = this.isPortraitCaptureView
-      ? PORTRAIT_ID_PREVIEW_WIDTH / PORTRAIT_ID_PREVIEW_HEIGHT
-      : fixedAspectRatio;
-    const portrait = aspectRatio < 1;
-    const videoWidth = video.clientWidth;
-    const videoHeight = video.clientWidth / calculatedAspectRatio;
-    const originalWidth = video.videoWidth;
-    const originalHeight = video.videoWidth / calculatedAspectRatio;
+  _drawLandscapeImage(
+    canvas,
+    video = this._IDVideo,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const heightScaleFactor = this.height
+      ? this.height / video.videoHeight
+      : scaleHeight;
+    const widthScaleFactor = this.width
+      ? this.width / video.videoWidth
+      : scaleWidth;
+    const scaleHeightOffset = (1 - scaleHeight) / 2;
+    const scaleWidthOffset = (1 - scaleWidth) / 2;
+    const width = video.videoWidth * widthScaleFactor;
+    const height = video.videoHeight * heightScaleFactor;
+    const startX = video.videoWidth * scaleWidthOffset;
+    const startY = video.videoHeight * scaleHeightOffset;
 
-    const offsetHeight = videoHeight * ((portrait ? 5 : offset) / 100);
-    const offsetWidth = videoWidth * (offset / 100);
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        width,
+        height,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
 
-    return {
-      aspectRatio,
-      offsetHeight,
-      offsetWidth,
-      originalHeight,
-      originalWidth,
-      videoHeight,
-      videoWidth,
-    };
+  _capturePortraitToLandscapeImage(canvas, video = this._IDVideo) {
+    const { videoHeight, videoWidth } = video;
+    const cropWidth = videoWidth;
+    const cropHeight = (videoWidth * 9) / 16; // convert to landscape aspect ratio
+    const startX = 0;
+    const startY = (videoHeight - cropHeight) / 2;
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
+
+  _drawLandscapeImageFromCanvas(
+    canvas,
+    sourceCanvas,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const heightScaleFactor = this.height
+      ? this.height / sourceCanvas.height
+      : scaleHeight;
+    const widthScaleFactor = this.width
+      ? this.width / sourceCanvas.width
+      : scaleWidth;
+    const scaleHeightOffset = (1 - scaleHeight) / 2;
+    const scaleWidthOffset = (1 - scaleWidth) / 2;
+    const width = sourceCanvas.width * widthScaleFactor;
+    const height = sourceCanvas.height * heightScaleFactor;
+    const startX = sourceCanvas.width * scaleWidthOffset;
+    const startY = sourceCanvas.height * scaleHeightOffset;
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        sourceCanvas,
+        startX,
+        startY,
+        width,
+        height,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
+
+  _drawPortraitToLandscapeImage(canvas, video = this._IDVideo) {
+    const { videoHeight, videoWidth } = video;
+    const cropWidth = 600;
+    const cropHeight = 400;
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    const startX = (videoWidth - cropWidth) / 2;
+    const startY = (videoHeight - cropHeight) / 2;
+
+    canvas
+      .getContext('2d')
+      .drawImage(
+        video,
+        startX,
+        startY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+  }
+
+  updatePortraitId(
+    destinationCanvas,
+    video = this._IDVideo,
+    scaleHeight = documentCaptureScale,
+    scaleWidth = documentCaptureScale,
+  ) {
+    const { videoWidth, videoHeight } = video;
+
+    if (videoWidth && videoHeight) {
+      const intermediateCanvas = document.createElement('canvas');
+      const aspectRatio = 9 / 16;
+      let cropWidth;
+      let cropHeight;
+      let offsetX;
+      let offsetY;
+
+      if (videoWidth / videoHeight > aspectRatio) {
+        // we scale the canvas to portrait aspect ratio
+        cropHeight = videoHeight;
+        cropWidth = cropHeight * aspectRatio;
+        offsetX = (videoWidth - cropWidth) / 2;
+        offsetY = 0;
+      } else {
+        // video already has portrait aspect ratio
+        cropWidth = videoWidth;
+        cropHeight = cropWidth;
+        offsetX = 0;
+        offsetY = 0;
+      }
+
+      intermediateCanvas.height = cropHeight;
+      intermediateCanvas.width = cropWidth;
+      // draw the video frame onto the intermediate canvas
+      intermediateCanvas
+        .getContext('2d')
+        .drawImage(
+          video,
+          offsetX,
+          offsetY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          intermediateCanvas.width,
+          intermediateCanvas.height,
+        );
+
+      // draw the intermediate canvas onto the destination canvas
+      // we scale image based on the scaleHeight and scaleWidth
+      const heightScaleFactor = this.height
+        ? this.height / cropWidth
+        : scaleHeight;
+      const widthScaleFactor = this.width
+        ? this.width / cropHeight
+        : scaleWidth;
+      const scaleHeightOffset = (1 - scaleHeight) / 2;
+      const scaleWidthOffset = (1 - scaleWidth) / 2;
+      const width = cropWidth * widthScaleFactor;
+      const height = cropHeight * heightScaleFactor;
+      const startX = cropWidth * scaleWidthOffset;
+      const startY = cropHeight * scaleHeightOffset;
+      destinationCanvas
+        .getContext('2d')
+        .drawImage(
+          intermediateCanvas,
+          startX,
+          startY,
+          width,
+          height,
+          0,
+          0,
+          destinationCanvas.width,
+          destinationCanvas.height,
+        );
+    }
   }
 
   _stopIDVideoStream(stream = this._IDStream) {
@@ -568,7 +639,7 @@ class DocumentCapture extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#043C93';
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   get hideAttribution() {
@@ -589,6 +660,14 @@ class DocumentCapture extends HTMLElement {
       this.getAttribute('title') ||
       `${this.IdSides[this.sideOfId]} of ${this.documentName}`
     );
+  }
+
+  get height() {
+    return this.getAttribute('height');
+  }
+
+  get width() {
+    return this.getAttribute('width');
   }
 
   get hidden() {

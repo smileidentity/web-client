@@ -108,6 +108,14 @@ import { version as sdkVersion } from '../../package.json';
         } else {
           import('@smile_identity/smart-camera-web');
         }
+
+        LoadingScreen.querySelector('.credits').hidden =
+          config.hide_attribution;
+        const attributions = document.querySelectorAll('.credits');
+        Array.prototype.forEach.call(attributions, (attribution) => {
+          attribution.hidden = config.hide_attribution;
+        });
+
         activeScreen = LoadingScreen;
 
         const productConstraints = await getProductConstraints();
@@ -208,6 +216,24 @@ import { version as sdkVersion } from '../../package.json';
     let selectedCountry;
     let selectedIdType;
     let selectedIdName;
+
+    if (hasThemeColor()) {
+      SmartCameraWeb.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        '--color-default',
+        config.partner_details.theme_color,
+      );
+    }
+
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
 
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
@@ -321,7 +347,11 @@ import { version as sdkVersion } from '../../package.json';
         };
 
         const idTypes = config.id_selection[selectedCountry];
-        if (idTypes.length === 1 || typeof idTypes === 'string') {
+
+        if (
+          (idTypes.length === 1 || typeof idTypes === 'string') &&
+          !(idTypes.includes('IDENTITY_CARD') && selectedCountry === 'ZA')
+        ) {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
           const countryConstraints = constraints.find(
@@ -432,6 +462,15 @@ import { version as sdkVersion } from '../../package.json';
         setActiveScreen(SmartCameraWeb);
       });
     }
+  }
+
+  function hasThemeColor() {
+    return (
+      config.partner_details.theme_color &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        config.partner_details.theme_color,
+      )
+    );
   }
 
   SmartCameraWeb.addEventListener(

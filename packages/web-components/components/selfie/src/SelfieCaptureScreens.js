@@ -27,11 +27,11 @@ class SelfieCaptureScreens extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-            ${styles}
+            ${styles(this.themeColor)}
             <div>
-              <selfie-capture-instructions ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture ${this.showNavigation} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
-              <selfie-capture-review ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-capture>
+              <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -167,6 +167,18 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get allowAgentMode() {
+    return this.hasAttribute('allow-agent-mode')
+      ? "allow-agent-mode='true'"
+      : '';
+  }
+
+  get allowAgentModeTests() {
+    return this.hasAttribute('show-agent-mode-for-tests')
+      ? 'show-agent-mode-for-tests'
+      : '';
+  }
+
   get hideBack() {
     return this.hasAttribute('hide-back-to-host') ? 'hide-back' : '';
   }
@@ -175,6 +187,10 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.hasAttribute('disable-image-tests')
       ? 'disable-image-tests'
       : '';
+  }
+
+  get themeColor() {
+    return this.getAttribute('theme-color') || '#001096';
   }
 
   setActiveScreen(screen) {

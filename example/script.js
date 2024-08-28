@@ -72,10 +72,12 @@ export default function setupForm() {
           product,
           callback_url,
           environment,
-          // demo_mode: true,
           use_new_component: true,
+          //demo_mode: true,
           // previewBVNMFA: true,
+          hide_attribution: true,
           document_capture_modes: ['camera', 'upload'],
+          allow_agent_mode: true,
           partner_details: {
             partner_id,
             signature,
@@ -83,7 +85,7 @@ export default function setupForm() {
             name: 'Demo Account',
             logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
             policy_url: 'https://smileidentity.com/privacy-privacy',
-            theme_color: '#000',
+            theme_color: '#96002d',
           },
           onSuccess: () => {
             resetButton();

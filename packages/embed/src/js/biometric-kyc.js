@@ -128,6 +128,14 @@ import { version as sdkVersion } from '../../package.json';
         } else {
           import('@smile_identity/smart-camera-web');
         }
+
+        LoadingScreen.querySelector('.credits').hidden =
+          config.hide_attribution;
+        const attributions = document.querySelectorAll('.credits');
+        Array.prototype.forEach.call(attributions, (attribution) => {
+          attribution.hidden = config.hide_attribution;
+        });
+
         activeScreen = LoadingScreen;
 
         getPartnerParams();
@@ -142,6 +150,10 @@ import { version as sdkVersion } from '../../package.json';
 
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
+
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
 
     const selectedIdRequiresConsent = partnerConstraints.consentRequired[
       selectedCountry
@@ -177,6 +189,24 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
+    if (hasThemeColor()) {
+      SmartCameraWeb.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+
+      const root = document.documentElement;
+
+      root.style.setProperty(
+        '--color-default',
+        config.partner_details.theme_color,
+      );
+    }
+
+    if (config.hide_attribution) {
+      SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+
     const supportedCountries = Object.keys(generalConstraints)
       .map((countryCode) => ({
         code: countryCode,
@@ -329,6 +359,15 @@ import { version as sdkVersion } from '../../package.json';
     document.body.appendChild(script);
   }
 
+  function hasThemeColor() {
+    return (
+      config.partner_details.theme_color &&
+      ![null, undefined, 'null', 'undefined'].includes(
+        config.partner_details.theme_color,
+      )
+    );
+  }
+
   SmartCameraWeb.addEventListener(
     'imagesComputed',
     (event) => {
@@ -457,6 +496,9 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent.setAttribute('policy-url', partnerDetails.policy_url);
     EndUserConsent.setAttribute('theme-color', partnerDetails.theme_color);
     EndUserConsent.setAttribute('token', config.token);
+    if (config.hide_attribution) {
+      EndUserConsent.setAttribute('hide-attribution', true);
+    }
     if (disableBackOnFirstScreen) {
       EndUserConsent.setAttribute('hide-back-to-host', true);
     }

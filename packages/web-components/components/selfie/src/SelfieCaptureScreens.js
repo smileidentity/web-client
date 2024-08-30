@@ -9,6 +9,7 @@ async function getPermissions(captureScreen, facingMode = 'user') {
   try {
     const supportAgentMode = await SmartCamera.supportsAgentMode();
     const _facingMode = supportAgentMode ? facingMode : 'user';
+    console.log('debug: getPermissions -> _facingMode', _facingMode, 'supportAgentMode', supportAgentMode, 'facingMode', facingMode);
     await SmartCamera.getMedia({
       audio: false,
       video: { facingMode: _facingMode },

@@ -644,6 +644,11 @@ class SelfieCaptureScreen extends HTMLElement {
 
   async _switchCamera() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+    if (this.facingMode === 'user') {
+      this.shadowRoot.querySelector('video').classList.remove('agent-mode');
+    } else {
+      this.shadowRoot.querySelector('video').classList.add('agent-mode');
+    }
     this.startImageCapture.disabled = true;
     this.switchCamera.disabled = true;
     SmartCamera.stopMedia();
@@ -766,10 +771,6 @@ class SelfieCaptureScreen extends HTMLElement {
       video = document.createElement('video');
     }
 
-    if (this.facingMode === 'environment') {
-      video.classList.add('agent-mode');
-    }
-
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
@@ -862,41 +863,22 @@ class SelfieCaptureScreen extends HTMLElement {
       return;
     }
 
-    const supportAgentMode = await this.supportsAgentMode();
+    const supportAgentMode = await SmartCamera.supportsAgentMode();
 
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
+      if (this.facingMode === 'user') {
+        this.shadowRoot.querySelector('video')?.classList?.remove('agent-mode');
+      } else {
+        this.shadowRoot.querySelector('video')?.classList?.add('agent-mode');
+      }
     } else {
       this.switchCamera.hidden = true;
     }
   }
 
-  async supportsAgentMode() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(
-        (device) => device.kind === 'videoinput',
-      );
-
-      let hasBackCamera = false;
-
-      videoDevices.forEach((device) => {
-        // Check if the device label or device ID indicates a back camera
-        if (
-          device.label.toLowerCase().includes('back') ||
-          device.label.toLowerCase().includes('rear')
-        ) {
-          hasBackCamera = true;
-          return true;
-        }
-        return false;
-      });
-
-      return hasBackCamera;
-    } catch (error) {
-      console.warn('Error accessing media devices: ', error);
-      return false;
-    }
+  get hasAgentSupport() {
+    return this.hasAttribute('has-agent-support');
   }
 
   get title() {

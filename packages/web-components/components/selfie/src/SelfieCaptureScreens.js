@@ -7,18 +7,12 @@ import { version as COMPONENTS_VERSION } from '../../../package.json';
 
 async function getPermissions(captureScreen, facingMode = 'user') {
   try {
-    const supportAgentMode = await SmartCamera.supportsAgentMode();
-    const _facingMode = supportAgentMode ? facingMode : 'user';
-    console.log('debug: getPermissions -> _facingMode', _facingMode, 'supportAgentMode', supportAgentMode, 'facingMode', facingMode);
     await SmartCamera.getMedia({
       audio: false,
-      video: { facingMode: _facingMode },
+      video: { facingMode },
     });
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
-    if (supportAgentMode) {
-      captureScreen.setAttribute('has-agent-support', true);
-    }
   } catch (error) {
     captureScreen.removeAttribute('data-camera-ready');
     captureScreen.setAttribute(

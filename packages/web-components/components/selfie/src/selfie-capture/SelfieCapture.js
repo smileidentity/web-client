@@ -780,7 +780,7 @@ class SelfieCaptureScreen extends HTMLElement {
     } else {
       video.src = window.URL.createObjectURL(stream);
     }
-    this.setupAgentMode();
+
     video.onloadedmetadata = () => {
       video.play();
     };
@@ -833,6 +833,8 @@ class SelfieCaptureScreen extends HTMLElement {
     } else if (this.hasAttribute('data-camera-ready')) {
       getPermissions(this, { facingMode: this.facingMode });
     }
+
+    this.setupAgentMode();
   }
 
   disconnectedCallback() {
@@ -864,7 +866,6 @@ class SelfieCaptureScreen extends HTMLElement {
     const supportAgentMode = await SmartCamera.supportsAgentMode();
 
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
-      await getPermissions(this, { facingMode: this.facingMode });
       this.switchCamera.hidden = false;
     } else {
       this.switchCamera.hidden = true;

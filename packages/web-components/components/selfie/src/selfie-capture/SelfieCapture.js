@@ -868,9 +868,9 @@ class SelfieCaptureScreen extends HTMLElement {
     if (supportAgentMode || this.hasAttribute('show-agent-mode-for-tests')) {
       this.switchCamera.hidden = false;
       if (this.facingMode === 'user') {
-        this.shadowRoot.querySelector('video').classList.remove('agent-mode');
+        this.shadowRoot.querySelector('video')?.classList?.remove('agent-mode');
       } else {
-        this.shadowRoot.querySelector('video').classList.add('agent-mode');
+        this.shadowRoot.querySelector('video')?.classList?.add('agent-mode');
       }
     } else {
       this.switchCamera.hidden = true;

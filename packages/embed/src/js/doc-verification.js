@@ -217,6 +217,7 @@ import { version as sdkVersion } from '../../package.json';
     let selectedIdType;
     let selectedIdName;
 
+    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

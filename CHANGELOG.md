@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2024-09-03
+
+### Changed
+
+- Fix: Hide the document video when checking permission
+- Update dev dependencies
+
 ## [1.4.0] - 2024-08-30
 
 ### Added

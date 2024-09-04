@@ -1,6 +1,6 @@
 {
   "name": "@smileid/web",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A collection of SmileID browser clients and components",
   "main": "index.js",
   "private": true,

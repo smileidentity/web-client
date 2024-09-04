@@ -373,6 +373,9 @@ class DocumentCapture extends HTMLElement {
       this.shadowRoot.querySelector('#loader').hidden = true;
       this.shadowRoot.querySelector('.id-video').hidden = false;
       this.shadowRoot.querySelector('.actions').hidden = false;
+      if (!videoExists) {
+        videoContainer.prepend(canvas);
+      }
     };
 
     const onVideoStart = () => {
@@ -398,10 +401,6 @@ class DocumentCapture extends HTMLElement {
     };
 
     video.addEventListener('playing', onVideoStart);
-
-    if (!videoExists) {
-      videoContainer.prepend(canvas);
-    }
 
     this._IDStream = stream;
     this._IDVideo = video;

@@ -9,10 +9,12 @@ context('SmartCameraWeb', () => {
       .invoke('attr', 'allow-agent-mode', 'true')
       .should('have.attr', 'allow-agent-mode', 'true');
 
-    cy.get('smart-camera-web')
-      .invoke('attr', 'show-agent-mode-for-tests', 'true');
-    cy.get('smart-camera-web')
-      .invoke('attr', 'disable-image-tests', '');
+    cy.get('smart-camera-web').invoke(
+      'attr',
+      'show-agent-mode-for-tests',
+      'true',
+    );
+    cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
     cy.clock();
     cy.get('smart-camera-web')
@@ -91,8 +93,7 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .invoke('attr', 'show-agent-mode-for-tests', 'false');
-    cy.get('smart-camera-web')
-      .invoke('attr', 'disable-image-tests', '');
+    cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
     cy.clock();
     cy.get('smart-camera-web')

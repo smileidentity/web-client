@@ -65,10 +65,12 @@ import { version as sdkVersion } from '../../package.json';
         partner_params = getPartnerParams();
         id_info = {};
 
-        SmartCameraWeb.setAttribute(
-          'allow-agent-mode',
-          config.allow_agent_mode,
-        );
+        if (config.allow_agent_mode) {
+          SmartCameraWeb.setAttribute(
+            'allow-agent-mode',
+            config.allow_agent_mode,
+          );
+        }
         SmartCameraWeb.setAttribute(
           'theme-color',
           config.partner_details.theme_color,

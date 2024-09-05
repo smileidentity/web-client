@@ -189,7 +189,9 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    if (config.allow_agent_mode) {
+      SmartCameraWeb.setAttribute('allow-agent-mode', true);
+    }
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

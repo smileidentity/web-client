@@ -180,9 +180,7 @@ class SelfieCaptureScreens extends HTMLElement {
   }
 
   get allowAgentMode() {
-    return this.hasAttribute('allow-agent-mode')
-      ? "allow-agent-mode='true'"
-      : '';
+    return this.inAgentMode ? "allow-agent-mode='true'" : '';
   }
 
   get allowAgentModeTests() {

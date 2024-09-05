@@ -61,19 +61,21 @@ class SmartCameraWeb extends HTMLElement {
 
   static get observedAttributes() {
     return [
+      'allow-agent-mode',
       'disable-image-tests',
       'document-capture-modes',
       'document-type',
+      'hide-attribution',
       'hide-back-of-id',
       'hide-back-to-host',
       'show-navigation',
       'theme-color',
-      'hide-attribution',
     ];
   }
 
   attributeChangedCallback(name) {
     switch (name) {
+      case 'allow-agent-mode':
       case 'disable-image-tests':
       case 'document-capture-modes':
       case 'document-type':

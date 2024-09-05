@@ -6,13 +6,13 @@ context('SmartCameraWeb', () => {
   it('should switch from the selfie mode to agent mode"', () => {
     cy.log('Enable agent mode for tests');
     cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .invoke('attr', 'allow-agent-mode', 'true');
+      .invoke('attr', 'allow-agent-mode', 'true')
+      .should('have.attr', 'allow-agent-mode', 'true');
+
     cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
       .invoke('attr', 'show-agent-mode-for-tests', 'true');
+    cy.get('smart-camera-web')
+      .invoke('attr', 'disable-image-tests', '');
 
     cy.clock();
     cy.get('smart-camera-web')
@@ -91,6 +91,8 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('selfie-capture')
       .invoke('attr', 'show-agent-mode-for-tests', 'false');
+    cy.get('smart-camera-web')
+      .invoke('attr', 'disable-image-tests', '');
 
     cy.clock();
     cy.get('smart-camera-web')

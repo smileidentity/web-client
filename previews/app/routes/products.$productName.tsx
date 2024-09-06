@@ -6,7 +6,7 @@ import products from '~/data/products.json';
 
 declare global {
   interface Window {
-    SmileIdentity: function;
+    SmileIdentity: Function;
   }
 }
 

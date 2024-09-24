@@ -534,7 +534,7 @@ import { version as sdkVersion } from '../../package.json';
     false,
   );
 
-  CloseIframeButtons.forEach((button) => {
+  CloseIframeButtons?.forEach((button) => {
     button.addEventListener(
       'click',
       () => {

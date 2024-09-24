@@ -733,6 +733,7 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function handleSuccess() {
+    console.log('close success');
     referenceWindow.postMessage('SmileIdentity::Success', '*');
   }
 })();

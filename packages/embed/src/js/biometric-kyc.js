@@ -426,7 +426,7 @@ import { version as sdkVersion } from '../../package.json';
   SmartCameraWeb.addEventListener(
     'smart-camera-web.close',
     () => {
-      closeWindow();
+      closeWindow(true);
     },
     false,
   );

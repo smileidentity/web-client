@@ -625,7 +625,10 @@ class TotpConsent extends HTMLElement {
 
   closeWindow() {
     const referenceWindow = window.parent;
-    (referenceWindow.parent || referenceWindow).postMessage('SmileIdentity::Close', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Close',
+      '*',
+    );
   }
 
   handleBackClick() {

@@ -78,6 +78,9 @@ export default function setupForm() {
           hide_attribution: true,
           document_capture_modes: ['camera', 'upload'],
           allow_agent_mode: true,
+          // consent_required: {
+          //   NG: ['BVN'],
+          // },
           partner_details: {
             partner_id,
             signature,

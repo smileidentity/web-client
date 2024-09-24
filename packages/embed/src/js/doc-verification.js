@@ -513,7 +513,7 @@ import { version as sdkVersion } from '../../package.json';
   SmartCameraWeb.addEventListener(
     'close',
     () => {
-      closeWindow();
+      closeWindow(true);
     },
     false,
   );
@@ -521,7 +521,7 @@ import { version as sdkVersion } from '../../package.json';
   SmartCameraWeb.addEventListener(
     'smart-camera-web.close',
     () => {
-      closeWindow();
+      closeWindow(true);
     },
     false,
   );
@@ -538,7 +538,7 @@ import { version as sdkVersion } from '../../package.json';
     button.addEventListener(
       'click',
       () => {
-        closeWindow();
+        closeWindow(true);
       },
       false,
     );
@@ -728,14 +728,17 @@ import { version as sdkVersion } from '../../package.json';
     return fileUploaded;
   }
 
-  function closeWindow() {
-    console.log('close window');
-    
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+  function closeWindow(userTriggered) {
+    const message = userTriggered
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    (referenceWindow.parent || referenceWindow).postMessage(message, '*');
   }
 
   function handleSuccess() {
-    console.log('close success');
-    referenceWindow.postMessage('SmileIdentity::Success', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Success',
+      '*',
+    );
   }
 })();

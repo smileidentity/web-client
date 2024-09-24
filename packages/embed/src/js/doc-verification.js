@@ -729,6 +729,8 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function closeWindow() {
+    console.log('close window');
+    
     referenceWindow.postMessage('SmileIdentity::Close', '*');
   }
 

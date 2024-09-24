@@ -74,13 +74,13 @@ export default function setupForm() {
           environment,
           use_new_component: true,
           //demo_mode: true,
-          // previewBVNMFA: true,
+          previewBVNMFA: true,
           hide_attribution: true,
           document_capture_modes: ['camera', 'upload'],
           allow_agent_mode: true,
-          // consent_required: {
-          //   NG: ['BVN'],
-          // },
+          consent_required: {
+            NG: ['BVN'],
+          },
           partner_details: {
             partner_id,
             signature,

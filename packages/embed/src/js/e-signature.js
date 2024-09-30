@@ -26,7 +26,7 @@ function getHumanSize(numberOfBytes) {
     const message = userTriggered
       ? 'SmileIdentity::Close'
       : 'SmileIdentity::Close::System';
-    referenceWindow.postMessage(message, '*');
+    (referenceWindow.parent || referenceWindow).postMessage(message, '*');
   }
 
   // NOTE: In order to support prior integrations, we have `live` and
@@ -44,11 +44,14 @@ function getHumanSize(numberOfBytes) {
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   function handleSuccess() {
-    referenceWindow.postMessage('SmileIdentity::Success', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Success',
+      '*',
+    );
   }
 
   function handleBadDocuments(error) {
-    referenceWindow.postMessage(
+    (referenceWindow.parent || referenceWindow).postMessage(
       {
         message: 'SmileIdentity::Error',
         data: {

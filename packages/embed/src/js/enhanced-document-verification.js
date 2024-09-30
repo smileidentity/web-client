@@ -531,10 +531,16 @@ import { version as sdkVersion } from '../../package.json';
   }
 
   function closeWindow() {
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Close',
+      '*',
+    );
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage('SmileIdentity::Success', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Success',
+      '*',
+    );
   }
 })();

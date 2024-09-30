@@ -295,7 +295,10 @@
   }
 
   function closeWindow() {
-    referenceWindow.postMessage('SmileIdentity::Close', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Close',
+      '*',
+    );
   }
 
   function publishMessage() {

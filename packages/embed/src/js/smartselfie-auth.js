@@ -317,10 +317,13 @@ import { version as sdkVersion } from '../../package.json';
     const message = userTriggered
       ? 'SmileIdentity::Close'
       : 'SmileIdentity::Close::System';
-    referenceWindow.postMessage(message, '*');
+    (referenceWindow.parent || referenceWindow).postMessage(message, '*');
   }
 
   function handleSuccess() {
-    referenceWindow.postMessage('SmileIdentity::Success', '*');
+    (referenceWindow.parent || referenceWindow).postMessage(
+      'SmileIdentity::Success',
+      '*',
+    );
   }
 })();

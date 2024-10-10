@@ -462,7 +462,10 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent.addEventListener(
       'end-user-consent.denied',
       () => {
-        referenceWindow.postMessage('SmileIdentity::ConsentDenied', '*');
+        (referenceWindow.parent || referenceWindow).postMessage(
+          'SmileIdentity::ConsentDenied',
+          '*',
+        );
         closeWindow();
       },
       false,

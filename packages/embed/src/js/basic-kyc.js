@@ -466,10 +466,9 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent.addEventListener(
       'end-user-consent.denied',
       () => {
-        (referenceWindow.parent || referenceWindow).postMessage(
-          'SmileIdentity::ConsentDenied',
-          '*',
-        );
+        [referenceWindow.parent, referenceWindow].forEach((win) => {
+          win.postMessage('SmileIdentity::ConsentDenied', '*');
+        });
         closeWindow();
       },
       false,
@@ -478,10 +477,12 @@ import { version as sdkVersion } from '../../package.json';
     EndUserConsent.addEventListener(
       'end-user-consent.totp.denied.contact-methods-outdated',
       (event) => {
-        (referenceWindow.parent || referenceWindow).postMessage(
-          'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
-          '*',
-        );
+        [referenceWindow.parent, referenceWindow].forEach((win) => {
+          win.postMessage(
+            'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
+            '*',
+          );
+        });
         closeWindow();
       },
       false,

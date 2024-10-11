@@ -113,8 +113,8 @@
 
     if (!validIdType) {
       const legacyValidIdType =
-        legacyProductConstraints.doc_verification[country].id_types[id_type] ||
-        legacyProductConstraints.enhanced_kyc[country].id_types[id_type];
+        legacyProductConstraints.doc_verification[country]?.id_types[id_type] ||
+        legacyProductConstraints.enhanced_kyc[country]?.id_types[id_type];
       if (legacyValidIdType) {
         validIdType = {
           name: legacyValidIdType.label,

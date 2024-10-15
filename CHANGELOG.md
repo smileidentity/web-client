@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.4] - 2024-10-15
+
+### Changed
+
+- Fixed an issue where some grandparents of the hosted web client do not receive error callbacks
+- Update dependencies
+
 ## [1.4.3] - 2024-09-30
 
 ### Changed

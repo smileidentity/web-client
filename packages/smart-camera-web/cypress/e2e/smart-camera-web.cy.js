@@ -112,7 +112,7 @@ context('SmartCameraWeb', () => {
       .should('be.visible');
   });
 
-  it('should switch to request screen when "Rest"', () => {
+  it('should switch to request screen when "Reset"', () => {
     cy.get('smart-camera-web').then((element) => {
       element[0].reset();
     });
@@ -128,6 +128,8 @@ context('SmartCameraWeb', () => {
       .shadow()
       .find('#camera-screen')
       .should('be.visible');
+
+    cy.wait(200);
 
     cy.get('smart-camera-web').then((element) => {
       element[0].reset();

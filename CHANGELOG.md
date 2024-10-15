@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.3] - 2024-09-30
+
+### Changed
+
+- Fixed an issue where grandparents of the hosted web client do not receive callbacks
+
 ## [1.4.2] - 2024-09-05
+
+### Changed
 
 - Fix: Agent mode displaying when config is not enabled
 

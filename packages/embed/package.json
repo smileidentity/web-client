@@ -1,6 +1,6 @@
 {
   "name": "@smileid/embed",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Self Hosted Integration for Smile Identity on the Web",
   "private": true,
   "main": "inline.js",
@@ -47,6 +47,6 @@
     "eslint-plugin-prettier": "^5.2.1",
     "nyc": "17.0.0",
     "prettier": "^3.3.3",
-    "serve": "^14.2.3"
+    "serve": "^6.5.8"
   }
 }

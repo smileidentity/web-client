@@ -1,0 +1,224 @@
+[
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      }
+    ],
+    "label": "Basic KYC",
+    "name": "basic_kyc",
+    "url": "basic-kyc"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      }
+    ],
+    "label": "Enhanced KYC",
+    "name": "enhanced_kyc",
+    "url": "enhanced-kyc"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "optional": true,
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "optional": true,
+        "type": "text"
+      }
+    ],
+    "label": "Biometric KYC",
+    "name": "biometric_kyc",
+    "url": "biometric-kyc"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      }
+    ],
+    "label": "Biometric Registration (Legacy)",
+    "name": "smartselfie",
+    "url": "biometric-registration"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text",
+        "required": true
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      }
+    ],
+    "label": "SmartSelfie Authentication",
+    "name": "authentication",
+    "url": "smartselfie-authentication"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      },
+      {
+        "label": "Document Capture Modes",
+        "name": "document_capture_modes",
+        "type": "select",
+        "options": [
+          {
+            "name": "camera",
+            "label": "Camera"
+          },
+          {
+            "name": "upload",
+            "label": "Upload"
+          },
+          {
+            "name": "camera,upload",
+            "label": "Camera + Upload"
+          }
+        ]
+      }
+    ],
+    "label": "Document Verification",
+    "name": "doc_verification",
+    "url": "document-verification"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      },
+      {
+        "label": "Document Capture Modes",
+        "name": "document_capture_modes",
+        "type": "select",
+        "options": [
+          {
+            "name": "camera",
+            "label": "Camera"
+          },
+          {
+            "name": "upload",
+            "label": "Upload"
+          },
+          {
+            "name": "camera,upload",
+            "label": "Camera + Upload"
+          }
+        ]
+      }
+    ],
+    "label": "Enhanced Document Verification",
+    "name": "enhanded_document_verification",
+    "url": "enhanced-document-verification"
+  },
+  {
+    "input_fields": [
+      {
+        "label": "Webhook URL",
+        "name": "callback_url",
+        "type": "url"
+      },
+      {
+        "label": "User ID",
+        "name": "user_id",
+        "type": "text"
+      },
+      {
+        "label": "Job ID",
+        "name": "job_id",
+        "type": "text"
+      },
+      {
+        "label": "Document ID",
+        "name": "document_id",
+        "type": "text"
+      }
+    ],
+    "label": "Electronic Signature",
+    "name": "e_signature",
+    "url": "electronic-signature"
+  }
+]

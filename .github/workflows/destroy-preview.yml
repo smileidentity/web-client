@@ -1,0 +1,43 @@
+name: destroy-preview
+on:
+  workflow_call:
+  pull_request:
+    types:
+      - closed
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  full-stack:
+    defaults:
+      run:
+        working-directory: ./previews
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: install sst
+        run: |
+          curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
+      - name: set sst stage
+        id: get_branch_name
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+      - name: install dependencies
+        run: npm install
+      - name: configure sst secrets
+        run: |
+          sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
+          sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
+          sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
+          sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }}
+      - name: remove sst app
+        run: |
+          sst remove --stage=${{ steps.get_branch_name.outputs.SS_STAGE }}

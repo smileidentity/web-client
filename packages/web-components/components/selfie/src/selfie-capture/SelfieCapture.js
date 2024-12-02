@@ -763,41 +763,42 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('video');
-    let video = null;
-    if (videoExists) {
-      video = this.shadowRoot.querySelector('video');
-    } else {
-      video = document.createElement('video');
-    }
+    try {
+      const videoExists = this.shadowRoot.querySelector('video');
+      let video = null;
+      if (videoExists) {
+        video = this.shadowRoot.querySelector('video');
+      } else {
+        video = document.createElement('video');
+      }
 
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.muted = true;
 
-    if ('srcObject' in video) {
-      video.srcObject = stream;
-    } else {
-      video.src = window.URL.createObjectURL(stream);
-    }
+      if ('srcObject' in video) {
+        video.srcObject = stream;
+      } else {
+        video.src = window.URL.createObjectURL(stream);
+      }
 
-    video.onloadedmetadata = () => {
-      video.play();
-    };
-    this._video = video;
-    const videoContainer = this.shadowRoot.querySelector(
-      '.video-container > .video',
-    );
-    this._data.permissionGranted = true;
+      video.onloadedmetadata = () => {
+        video.play();
+      };
 
-    video.onloadedmetadata = () => {
-      // this.shadowRoot.querySelector('.actions').hidden = false;
-      // this.shadowRoot.querySelector('#loader').hidden = true;
-      // this.shadowRoot.querySelector('.video-section').hidden = false;
-    };
+      this._video = video;
+      const videoContainer = this.shadowRoot.querySelector(
+        '.video-container > .video',
+      );
+      this._data.permissionGranted = true;
 
-    if (!videoExists) {
-      videoContainer.prepend(video);
+      if (!videoExists) {
+        videoContainer.prepend(video);
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error(error);
+      }
     }
   }
 

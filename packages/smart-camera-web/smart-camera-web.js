@@ -1602,7 +1602,11 @@ class SmartCameraWeb extends HTMLElement {
     navigator.mediaDevices
       .getUserMedia({ audio: false, video: true })
       .then((stream) => {
-        this.handleSuccess(stream);
+        try {
+          this.handleSuccess(stream);
+        } catch (error) {
+          this.handleError(error);
+        }
       })
       .catch((e) => {
         this.handleError(e);

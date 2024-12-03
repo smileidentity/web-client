@@ -411,6 +411,9 @@ class DocumentCapture extends HTMLElement {
       if (error.name !== 'AbortError') {
         console.error(error);
       }
+      if (stream) {
+        this._stopIDVideoStream(stream);
+      }
     }
   }
 

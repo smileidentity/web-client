@@ -408,7 +408,10 @@ class DocumentCapture extends HTMLElement {
       this._IDStream = stream;
       this._IDVideo = video;
     } catch (error) {
-      this.setAttribute('data-camera-error', SmartCamera.handleCameraError(error));
+      this.setAttribute(
+        'data-camera-error',
+        SmartCamera.handleCameraError(error),
+      );
       if (error.name !== 'AbortError') {
         console.error(error);
       }

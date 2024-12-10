@@ -34,20 +34,23 @@ class DocumentCaptureScreens extends HTMLElement {
     this.innerHTML = `
       ${styles(this.themeColor)}
       <div>
-      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title} ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}></document-capture-instructions>
+      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title}
+      ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}
+      ${this.hideAttribution}
+      ></document-capture-instructions>
       <document-capture id='document-capture-front' side-of-id='Front'
-      ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} 
+      ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
       ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
       ></document-capture>
       <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID'
-       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' hidden
+       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></document-capture-instructions>
       <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
-      ${this.documentCaptureModes} theme-color='${this.themeColor}'
+      ${this.documentCaptureModes} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden 
       ></document-capture>
-      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' hidden></document-capture-review>
-      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' hidden></document-capture-review>
+      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
+      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
       </div>
     `;
 
@@ -292,6 +295,10 @@ class DocumentCaptureScreens extends HTMLElement {
     return this.hasAttribute('document-type')
       ? `document-type='${this.getAttribute('document-type')}'`
       : '';
+  }
+
+  get hideAttribution() {
+    return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
   get themeColor() {

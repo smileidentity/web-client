@@ -408,12 +408,11 @@ class DocumentCapture extends HTMLElement {
       this._IDStream = stream;
       this._IDVideo = video;
     } catch (error) {
+      this.setAttribute('data-camera-error', SmartCamera.handleCameraError(error));
       if (error.name !== 'AbortError') {
         console.error(error);
       }
-      if (stream) {
-        this._stopIDVideoStream(stream);
-      }
+      SmartCamera.stopMedia();
     }
   }
 
@@ -742,10 +741,12 @@ class DocumentCapture extends HTMLElement {
 
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
+    SmartCamera.stopMedia();
   }
 
   handleCloseEvents() {
     this.dispatchEvent(new CustomEvent('document-capture.close'));
+    SmartCamera.stopMedia();
   }
 }
 

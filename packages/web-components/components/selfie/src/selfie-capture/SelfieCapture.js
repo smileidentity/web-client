@@ -514,7 +514,11 @@ function templateString() {
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h1 class='text-2xl title-color font-bold'>Take a Selfie</h1>
 
-    <div class='section | flow'>
+    <div className="error">
+      ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
+      ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
+    </div>
+    <div class='section | flow' ${this.cameraError ? 'hidden' : ''}>
       <div class='video-container'>
         <div class='video'>
         </div>
@@ -796,9 +800,11 @@ class SelfieCaptureScreen extends HTMLElement {
         videoContainer.prepend(video);
       }
     } catch (error) {
+      this.setAttribute('data-camera-error', SmartCamera.handleCameraError(error));
       if (error.name !== 'AbortError') {
         console.error(error);
       }
+      SmartCamera.stopMedia();
     }
   }
 
@@ -935,12 +941,18 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleBackEvents() {
-    SmartCamera.stopMedia();
+    this.stopMedia();
     this.dispatchEvent(new CustomEvent('selfie-capture.cancelled'));
   }
 
   closeWindow() {
+    this.stopMedia();
     this.dispatchEvent(new CustomEvent('selfie-capture.close'));
+  }
+
+  stopMedia() {
+    this.removeAttribute('data-camera-ready');
+    SmartCamera.stopMedia();
   }
 }
 

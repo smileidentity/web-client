@@ -55,8 +55,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
     // If the initial screen is selfie-capture, we need to get permissions
     if (this.getAttribute('initial-screen') === 'selfie-capture') {
-      getPermissions(this.selfieCapture, this.getAgentMode());
-      this.setActiveScreen(this.selfieCapture);
+      getPermissions(this.selfieCapture, this.getAgentMode()).then(() => this.setActiveScreen(this.selfieCapture));
     } else if (this.hideInstructions) {
       this.setActiveScreen(this.selfieCapture);
     } else {
@@ -83,8 +82,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieInstruction.addEventListener(
       'selfie-capture-instructions.capture',
       async () => {
-        await getPermissions(this.selfieCapture, this.getAgentMode());
-        this.setActiveScreen(this.selfieCapture);
+        await getPermissions(this.selfieCapture, this.getAgentMode()).then(() => this.setActiveScreen(this.selfieCapture));
       },
     );
     this.selfieInstruction.addEventListener(

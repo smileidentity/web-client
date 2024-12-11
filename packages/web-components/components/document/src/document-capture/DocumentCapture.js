@@ -168,7 +168,7 @@ function templateString() {
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
-    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' ${this.cameraError ? 'hidden' : ''}>
       <div class='id-video-container'>
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
         </div>

@@ -168,7 +168,7 @@ function templateString() {
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
         ${this.cameraError ? `<p style="--flow-space: 4rem" class='color-red | center'>${this.cameraError}</p>` : '<p style="--flow-space: 4rem">Checking permissions</p>'}
     </div>
-    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
+    <div class='section | flow ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' ${this.cameraError ? 'hidden' : ''}>
       <div class='id-video-container'>
         <div class='id-video ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}' hidden>
         </div>
@@ -339,71 +339,84 @@ class DocumentCapture extends HTMLElement {
   }
 
   handleIDStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('canvas');
-    if (videoExists) {
-      // remove canvas
-      videoExists.remove();
-    }
-    let video = null;
-    let canvas = null;
-    video = document.createElement('video');
-    canvas = document.createElement('canvas');
-    const videoContainer = this.shadowRoot.querySelector('.id-video-container');
-
-    video.muted = true;
-    video.setAttribute('muted', 'true');
-
-    video.autoplay = true;
-    video.playsInline = true;
-    if ('srcObject' in video) {
-      video.srcObject = stream;
-    } else {
-      video.src = window.URL.createObjectURL(stream);
-    }
-
-    canvas.width = videoContainer.clientWidth;
-    canvas.height = (videoContainer.clientWidth * 9) / 16;
-    if (this.isPortraitCaptureView) {
-      canvas.height = (videoContainer.clientWidth * 16) / 9;
-    }
-
-    video.onloadedmetadata = () => {
-      video.play();
-
-      this.shadowRoot.querySelector('#loader').hidden = true;
-      this.shadowRoot.querySelector('.id-video').hidden = false;
-      this.shadowRoot.querySelector('.actions').hidden = false;
-      if (!videoExists) {
-        videoContainer.prepend(canvas);
+    try {
+      const videoExists = this.shadowRoot.querySelector('canvas');
+      if (videoExists) {
+        // remove canvas
+        videoExists.remove();
       }
-    };
+      let video = null;
+      let canvas = null;
+      video = document.createElement('video');
+      canvas = document.createElement('canvas');
+      const videoContainer = this.shadowRoot.querySelector(
+        '.id-video-container',
+      );
 
-    const onVideoStart = () => {
-      if (video.paused || video.ended) return;
-      video.removeEventListener('playing', onVideoStart);
-      const aspectRatio = video.videoWidth / video.videoHeight;
-      const portrait = aspectRatio < 1;
-      if (this.isPortraitCaptureView) {
-        this.updatePortraitId(canvas, video);
-        requestAnimationFrame(onVideoStart);
-        return;
-      }
+      video.muted = true;
+      video.setAttribute('muted', 'true');
 
-      if (portrait) {
-        videoContainer.classList.add('mobile-camera-screen');
-        const intermediateCanvas = document.createElement('canvas');
-        this._capturePortraitToLandscapeImage(intermediateCanvas, video);
-        this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas);
+      video.autoplay = true;
+      video.playsInline = true;
+      if ('srcObject' in video) {
+        video.srcObject = stream;
       } else {
-        this._drawLandscapeImage(canvas, video);
+        video.src = window.URL.createObjectURL(stream);
       }
-      requestAnimationFrame(onVideoStart);
-    };
 
-    video.addEventListener('playing', onVideoStart);
+      canvas.width = videoContainer.clientWidth;
+      canvas.height = (videoContainer.clientWidth * 9) / 16;
+      if (this.isPortraitCaptureView) {
+        canvas.height = (videoContainer.clientWidth * 16) / 9;
+      }
 
-    this._IDStream = stream;
-    this._IDVideo = video;
+      video.onloadedmetadata = () => {
+        video.play();
+
+        this.shadowRoot.querySelector('#loader').hidden = true;
+        this.shadowRoot.querySelector('.id-video').hidden = false;
+        this.shadowRoot.querySelector('.actions').hidden = false;
+        if (!videoExists) {
+          videoContainer.prepend(canvas);
+        }
+      };
+
+      const onVideoStart = () => {
+        if (video.paused || video.ended) return;
+        video.removeEventListener('playing', onVideoStart);
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        const portrait = aspectRatio < 1;
+        if (this.isPortraitCaptureView) {
+          this.updatePortraitId(canvas, video);
+          requestAnimationFrame(onVideoStart);
+          return;
+        }
+
+        if (portrait) {
+          videoContainer.classList.add('mobile-camera-screen');
+          const intermediateCanvas = document.createElement('canvas');
+          this._capturePortraitToLandscapeImage(intermediateCanvas, video);
+          this._drawLandscapeImageFromCanvas(canvas, intermediateCanvas);
+        } else {
+          this._drawLandscapeImage(canvas, video);
+        }
+        requestAnimationFrame(onVideoStart);
+      };
+
+      video.addEventListener('playing', onVideoStart);
+
+      this._IDStream = stream;
+      this._IDVideo = video;
+    } catch (error) {
+      this.setAttribute(
+        'data-camera-error',
+        SmartCamera.handleCameraError(error),
+      );
+      if (error.name !== 'AbortError') {
+        console.error(error);
+      }
+      SmartCamera.stopMedia();
+    }
   }
 
   _drawLandscapeImage(
@@ -731,10 +744,12 @@ class DocumentCapture extends HTMLElement {
 
   handleBackEvents() {
     this.dispatchEvent(new CustomEvent('document-capture.cancelled'));
+    SmartCamera.stopMedia();
   }
 
   handleCloseEvents() {
     this.dispatchEvent(new CustomEvent('document-capture.close'));
+    SmartCamera.stopMedia();
   }
 }
 

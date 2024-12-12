@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Handle errors gracefully
+- Fixed document capture not hidden when `hide_attribution` is specified
+- Improve web-components build process
+
 ## [1.4.4] - 2024-10-15
 
 ### Changed

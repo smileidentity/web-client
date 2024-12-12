@@ -1,7 +1,6 @@
 {
   "name": "@smileid/web-components",
-  "version": "1.4.4",
-  "private": "true",
+  "version": "1.4.5-beta",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",

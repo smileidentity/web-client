@@ -514,7 +514,11 @@ function templateString() {
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h1 class='text-2xl title-color font-bold'>Take a Selfie</h1>
 
-    <div class='section | flow'>
+    <div className="error">
+      ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
+      ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
+    </div>
+    <div class='section | flow' ${this.cameraError ? 'hidden' : ''}>
       <div class='video-container'>
         <div class='video'>
         </div>
@@ -763,41 +767,47 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleStream(stream) {
-    const videoExists = this.shadowRoot.querySelector('video');
-    let video = null;
-    if (videoExists) {
-      video = this.shadowRoot.querySelector('video');
-    } else {
-      video = document.createElement('video');
-    }
+    try {
+      const videoExists = this.shadowRoot.querySelector('video');
+      let video = null;
+      if (videoExists) {
+        video = this.shadowRoot.querySelector('video');
+      } else {
+        video = document.createElement('video');
+      }
 
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.muted = true;
 
-    if ('srcObject' in video) {
-      video.srcObject = stream;
-    } else {
-      video.src = window.URL.createObjectURL(stream);
-    }
+      if ('srcObject' in video) {
+        video.srcObject = stream;
+      } else {
+        video.src = window.URL.createObjectURL(stream);
+      }
 
-    video.onloadedmetadata = () => {
-      video.play();
-    };
-    this._video = video;
-    const videoContainer = this.shadowRoot.querySelector(
-      '.video-container > .video',
-    );
-    this._data.permissionGranted = true;
+      video.onloadedmetadata = () => {
+        video.play();
+      };
 
-    video.onloadedmetadata = () => {
-      // this.shadowRoot.querySelector('.actions').hidden = false;
-      // this.shadowRoot.querySelector('#loader').hidden = true;
-      // this.shadowRoot.querySelector('.video-section').hidden = false;
-    };
+      this._video = video;
+      const videoContainer = this.shadowRoot.querySelector(
+        '.video-container > .video',
+      );
+      this._data.permissionGranted = true;
 
-    if (!videoExists) {
-      videoContainer.prepend(video);
+      if (!videoExists) {
+        videoContainer.prepend(video);
+      }
+    } catch (error) {
+      this.setAttribute(
+        'data-camera-error',
+        SmartCamera.handleCameraError(error),
+      );
+      if (error.name !== 'AbortError') {
+        console.error(error);
+      }
+      SmartCamera.stopMedia();
     }
   }
 
@@ -934,12 +944,18 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   handleBackEvents() {
-    SmartCamera.stopMedia();
+    this.stopMedia();
     this.dispatchEvent(new CustomEvent('selfie-capture.cancelled'));
   }
 
   closeWindow() {
+    this.stopMedia();
     this.dispatchEvent(new CustomEvent('selfie-capture.close'));
+  }
+
+  stopMedia() {
+    this.removeAttribute('data-camera-ready');
+    SmartCamera.stopMedia();
   }
 }
 

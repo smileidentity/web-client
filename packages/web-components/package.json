@@ -3,23 +3,51 @@
   "version": "1.4.4",
   "private": "true",
   "exports": {
-    ".": "./index.js",
-    "./combobox": "./components/combobox/src/index.js",
-    "./document-capture": "./components/document/src/index.js",
-    "./end-user-consent": "./components/end-user-consent/src/index.js",
-    "./navigation": "./components/navigation/src/index.js",
-    "./selfie-capture": "./components/selfie/src/index.js",
-    "./signature-pad": "./components/signature-pad/src/index.js",
-    "./totp-consent": "./components/totp-consent/src/index.js",
-    "./smart-camera-web": "./components/smart-camera-web/src/SmartCameraWeb.js"
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./combobox": {
+      "import": "./components/combobox/dist/index.esm.js",
+      "require": "./components/combobox/dist/index.cjs.js"
+    },
+    "./document-capture": {
+      "import": "./components/document/dist/index.esm.js",
+      "require": "./components/document/dist/index.cjs.js"
+    },
+    "./end-user-consent": {
+      "import": "./components/end-user-consent/dist/index.esm.js",
+      "require": "./components/end-user-consent/dist/index.cjs.js"
+    },
+    "./navigation": {
+      "import": "./components/navigation/dist/index.esm.js",
+      "require": "./components/navigation/dist/index.cjs.js"
+    },
+    "./selfie-capture": {
+      "import": "./components/selfie/dist/index.esm.js",
+      "require": "./components/selfie/dist/index.cjs.js"
+    },
+    "./signature-pad": {
+      "import": "./components/signature-pad/dist/index.esm.js",
+      "require": "./components/signature-pad/dist/index.cjs.js"
+    },
+    "./totp-consent": {
+      "import": "./components/totp-consent/dist/index.esm.js",
+      "require": "./components/totp-consent/dist/index.cjs.js"
+    },
+    "./smart-camera-web": {
+      "import": "./components/smart-camera-web/dist/SmartCameraWeb.esm.js",
+      "require": "./components/smart-camera-web/dist/SmartCameraWeb.cjs.js"
+    }
   },
   "scripts": {
-    "build": "NODE_ENV=development node esbuild.js",
+    "build": "NODE_ENV=production node esbuild.js",
+    "build:dev": "NODE_ENV=development node esbuild.js",
     "clean": "rm -rf build dist",
     "lint:fix": "eslint . --ext .js --fix",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",
     "lint": "eslint . --ext .js",
-    "start": "npm run build && npx serve -p 8000 build",
+    "start": "npm run build:dev && npx serve -p 8000 build",
     "test": "npx cypress run"
   },
   "description": "A collection of Web Components used by SmileID",

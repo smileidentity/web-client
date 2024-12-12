@@ -3,14 +3,21 @@ import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'node:module';
 
-// Import the package.json file to get the version number by using the createRequire function
 const require = createRequire(import.meta.url);
-const { exports } = require('./package.json');
+const { version } = require('./package.json');
 
-// Get the paths from the exports field
-const exportPaths = Object.values(exports).map((filePath) =>
-  path.join(process.cwd(), filePath),
-);
+const entryPoints = [
+  './index.js',
+  './components/combobox/src/index.js',
+  './components/document/src/index.js',
+  './components/end-user-consent/src/index.js',
+  './components/navigation/src/index.js',
+  './components/selfie/src/index.js',
+  './components/signature-pad/src/index.js',
+  './components/totp-consent/src/index.js',
+  './components/smart-camera-web/src/SmartCameraWeb.js',
+];
+const buildDir = 'build';
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -66,12 +73,12 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * Clears the 'dist' directory, ensures it exists,
  * and copies necessary files.
  */
-const prebuildDist = () => {
-  if (fs.existsSync('dist')) {
-    fs.rmSync('build', { recursive: true });
+const prebuild = () => {
+  if (fs.existsSync(buildDir)) {
+    fs.rmSync(buildDir, { recursive: true });
   }
-  ensureDirSync('dist');
-  copySync('src', 'dist', (file) => !file.endsWith('.js'));
+  ensureDirSync(buildDir);
+  copyFiles('.', 'package.json', buildDir);
 };
 
 /**
@@ -79,41 +86,41 @@ const prebuildDist = () => {
  * Clears the 'build' directory, ensures it exists,
  * copies necessary files, and copies HTML pages from cypress.
  */
-const prebuild = () => {
-  if (fs.existsSync('build')) {
-    fs.rmSync('build', { recursive: true });
-  }
-  ensureDirSync('build');
-  // copySync('dist', 'cypress/pages/instrumentation', (file) => !file.endsWith('.js'));
-  copyFiles('cypress/pages', '*.html', 'build');
+const prebuildPages = () => {
+  ensureDirSync(buildDir);
+  copyFiles('cypress/pages', '*.html', buildDir);
 };
+
+prebuild();
 
 if (process.env.NODE_ENV === 'development') {
-  prebuild();
-} else {
-  prebuildDist();
+  prebuildPages();
 }
 
-const devOptions = {
+const buildOptions = {
   bundle: true,
-  minify: process.env.MINIFY === 'true',
+  define: {
+    SMILE_COMPONENTS_VERSION: JSON.stringify(version),
+  },
+  entryPoints,
+  minify: process.env.NODE_ENV !== 'development',
 };
 
-const prodOptions = {
-  bundle: true,
-  minify: true,
-};
+const buildESM = () => esbuild.build({
+  ...buildOptions,
+  format: 'esm',
+  outdir: `${buildDir}/esm`,
+});
 
-if (process.env.NODE_ENV === 'development') {
-  esbuild.build({
-    ...devOptions,
-    entryPoints: exportPaths,
-    outdir: 'build/js',
+const buildCJS = () => esbuild.build({
+  ...buildOptions,
+  format: 'cjs',
+  outdir: `${buildDir}/cjs`,
+});
+
+Promise.all([buildESM(), buildCJS()])
+  .then(() => console.info('Build completed!'))
+  .catch((error) => {
+    console.error('Build failed:', error);
+    process.exit(1);
   });
-} else {
-  esbuild.build({
-    ...prodOptions,
-    entryPoints: exportPaths,
-    outdir: 'dist/js',
-  });
-}

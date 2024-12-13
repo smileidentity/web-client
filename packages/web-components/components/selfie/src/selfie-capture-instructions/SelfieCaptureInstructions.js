@@ -305,7 +305,7 @@ function templateString() {
     </style>
     ${styles(this.themeColor)}
     <div id="selfie-capture-instruction-screen" class="flow center">
-    <smileid-navigation theme-color=${this.themeColor} ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+    <smileid-navigation theme-color=${this.themeColor} ${this.hideBack ? 'hide-back' : ''} ${this.showNavigation ? '' : 'hidden'}></smileid-navigation>
     <header>
       <svg xmlns="http://www.w3.org/2000/svg" width="65" height="91" viewBox="0 0 65 91" fill="none">
       <g clip-path="url(#clip0_604_692)">
@@ -543,7 +543,7 @@ function templateString() {
         <button id='allow' data-variant='solid full-width' class='button theme-background'>
             Allow
         </button>
-        <button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem'>
+        <button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem' ${this.hideBack ? 'hidden' : ''}>
             Cancel
         </button>
        </section>
@@ -628,6 +628,12 @@ class SelfieCaptureInstructions extends HTMLElement {
 
   handleCloseEvents() {
     this.dispatchEvent(new CustomEvent('selfie-capture-instructions.close'));
+  }
+
+  static get observedAttributes() {
+    return [
+      'show-navigation',
+    ];
   }
 }
 

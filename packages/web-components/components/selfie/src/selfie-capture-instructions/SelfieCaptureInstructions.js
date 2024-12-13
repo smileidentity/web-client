@@ -631,9 +631,7 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return [
-      'show-navigation',
-    ];
+    return ['show-navigation'];
   }
 }
 

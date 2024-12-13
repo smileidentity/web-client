@@ -2,6 +2,7 @@
   "name": "@smileid/web-components",
   "version": "1.4.4",
   "private": "true",
+  "main": "index.js",
   "exports": {
     ".": "./index.js",
     "./combobox": "./components/combobox/src/index.js",

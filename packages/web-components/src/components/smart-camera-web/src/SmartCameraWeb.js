@@ -4,8 +4,9 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import '../../document/src';
 import '../../selfie/src';
 import '../../camera-permission/CameraPermission';
+import packageJson from '../../../../package.json';
 
-import { version as COMPONENTS_VERSION } from '../../../../package.json';
+const COMPONENTS_VERSION = packageJson.version;
 
 function scwTemplateString() {
   return `

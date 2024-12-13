@@ -3,7 +3,9 @@ import './selfie-capture-instructions';
 import './selfie-capture-review';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
-import { version as COMPONENTS_VERSION } from '../../../../package.json';
+import packageJson from '../../../../package.json';
+
+const COMPONENTS_VERSION = packageJson.version;
 
 async function getPermissions(captureScreen, facingMode = 'user') {
   try {

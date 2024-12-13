@@ -543,7 +543,7 @@ function templateString() {
         <button id='allow' data-variant='solid full-width' class='button theme-background'>
             Allow
         </button>
-        <button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem' ${(this.hideBack || !this.showNavigation) ? 'hidden' : ''}>
+        <button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem' ${this.hideBack || !this.showNavigation ? 'hidden' : ''}>
             Cancel
         </button>
        </section>

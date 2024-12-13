@@ -5,7 +5,7 @@ import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import './document-capture';
 import './document-capture-review';
 import './document-capture-instructions';
-import { version as COMPONENTS_VERSION } from '../../../package.json';
+import { version as COMPONENTS_VERSION } from '../../../../package.json';
 
 async function getPermissions(captureScreen) {
   try {

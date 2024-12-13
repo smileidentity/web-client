@@ -7,17 +7,16 @@ const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
 
 const entryPoints = [
-  './index.js',
-  './components/combobox/src/index.js',
-  './components/document/src/index.js',
-  './components/end-user-consent/src/index.js',
-  './components/navigation/src/index.js',
-  './components/selfie/src/index.js',
-  './components/signature-pad/src/index.js',
-  './components/totp-consent/src/index.js',
-  './components/smart-camera-web/src/SmartCameraWeb.js',
+  './src/index.js',
+  './src/components/combobox/src/index.js',
+  './src/components/document/src/index.js',
+  './src/components/end-user-consent/src/index.js',
+  './src/components/selfie/src/index.js',
+  './src/components/signature-pad/src/index.js',
+  './src/components/totp-consent/src/index.js',
+  './src/components/smart-camera-web/src/SmartCameraWeb.js',
 ];
-const buildDir = 'build';
+const buildDir = 'dist';
 
 /**
  * Ensures a directory exists. If not, creates it.
@@ -78,8 +77,12 @@ const prebuild = () => {
     fs.rmSync(buildDir, { recursive: true });
   }
   ensureDirSync(buildDir);
+  ensureDirSync(`${buildDir}/cjs`);
   copyFiles('.', '*.json', buildDir);
   copyFiles('.', '*.md', buildDir);
+  copyFiles('.', '*.md', `${buildDir}/cjs`);
+  copySync('./src', `${buildDir}/cjs`, (file) => file.endsWith('.md'));
+  copySync('./src', `${buildDir}`, (file) => file.endsWith('.md'));
 };
 
 /**
@@ -110,7 +113,7 @@ const buildOptions = {
 const buildESM = () => esbuild.build({
   ...buildOptions,
   format: 'esm',
-  outdir: `${buildDir}/esm`,
+  outdir: `${buildDir}`,
 });
 
 const buildCJS = () => esbuild.build({

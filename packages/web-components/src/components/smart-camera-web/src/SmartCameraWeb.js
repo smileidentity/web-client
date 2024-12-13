@@ -5,7 +5,7 @@ import '../../document/src';
 import '../../selfie/src';
 import '../../camera-permission/CameraPermission';
 
-import { version as COMPONENTS_VERSION } from '../../../package.json';
+import { version as COMPONENTS_VERSION } from '../../../../package.json';
 
 function scwTemplateString() {
   return `

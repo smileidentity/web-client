@@ -78,7 +78,8 @@ const prebuild = () => {
     fs.rmSync(buildDir, { recursive: true });
   }
   ensureDirSync(buildDir);
-  copyFiles('.', 'package.json', buildDir);
+  copyFiles('.', '*.json', buildDir);
+  copyFiles('.', '*.md', buildDir);
 };
 
 /**

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Handle errors gracefully
+- Fixed document capture not hidden when `hide_attribution` is specified
+- Cancel button on the selfie capture instructions screen will now be hidden when back button is hidden
 
 ## [1.4.4] - 2024-10-15
 

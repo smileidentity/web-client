@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.5] - 2024-12-16
+
+### Changed
+
 - Handle errors gracefully
 - Fixed document capture not hidden when `hide_attribution` is specified
 - Cancel button on the selfie capture instructions screen will now be hidden when back button is hidden

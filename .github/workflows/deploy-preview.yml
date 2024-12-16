@@ -68,7 +68,6 @@ jobs:
         run: |
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
   full-stack:
-    needs: [embed]
     if: always()
     defaults:
       run:

@@ -102,8 +102,15 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
-      - name: remove sst app
-        if: github.event.pull_request.merged == true
-        run: |
-          npm run sst remove --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
+          SST_OUTPUT =$(npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }})
+          SITE_URL=$(echo "$SST_OUTPUT" | grep 'PreviewApp:' | awk '{print $2}')
+          echo "PREVIEW_APP_URL=$SITE_URL" >> $GITHUB_OUTPUT
+      - name: share fullstack preview urls as PR comment
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        with:
+          msg: >
+            ✅ Preview URL for Web Client:
+
+            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}

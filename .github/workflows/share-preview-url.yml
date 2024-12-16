@@ -17,9 +17,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: install sst
+        continue-on-error: true
         run: |
-          curl -fsSL https://ion.sst.dev/install | VERSION=0.1.51 bash
+          curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
       - name: retrieve sst app url
+        continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |

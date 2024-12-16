@@ -1,5 +1,11 @@
 name: deploy-preview
 on:
+  workflow_dispatch:
+    inputs:
+      ref_name:
+        description: 'Branch name'
+        required: true
+        default: 'main'
   workflow_call:
   pull_request:
     types:
@@ -102,3 +108,5 @@ jobs:
         id: deploy_sst_app
         run: |
           npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+  share-preview-url:
+    uses: ./.github/workflows/share-preview-url.yml

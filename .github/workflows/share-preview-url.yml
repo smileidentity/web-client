@@ -1,16 +1,12 @@
 name: share-preview-url
 on:
   workflow_dispatch:
-  pull_request:
-    types:
-      - opened
-      - ready_for_review
-  workflow_run:
-    workflows: ['deploy-preview']
-    types:
-      - completed
-    branches-ignore:
-      - 'main'
+    inputs:
+      ref_name:
+        description: 'Branch name'
+        required: true
+        default: 'main'
+  workflow_call:
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest

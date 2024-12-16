@@ -35,7 +35,7 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
-          APP_URL=$(npm run sst shell node get_app_url.js -- --stage $GITHUB_HEAD_REF)
+          APP_URL=$(npm run sst shell node get_app_url.js -- --stage $GITHUB_HEAD_REF --print-logs)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

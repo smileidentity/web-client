@@ -34,4 +34,4 @@ jobs:
         run: npm install
       - name: remove sst app
         run: |
-          npm sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}

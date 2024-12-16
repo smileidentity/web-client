@@ -1,9 +1,9 @@
 name: share-preview-url
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["deploy-preview"]
     types:
-      - opened
-      - ready_for_review
+      - completed
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest

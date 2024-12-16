@@ -114,4 +114,4 @@ jobs:
           msg: >
             ✅ Preview URL for Web Client:
 
-            ${{ steps.deploy_sst_app.outputs.PREVIEW_APP_URL }}
+              ${{ steps.deploy_sst_app.outputs.PREVIEW_APP_URL }}

@@ -7,10 +7,10 @@ on:
         required: true
         default: 'main'
   workflow_call:
-permissions: write-all
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: checkout code
         uses: actions/checkout@v4

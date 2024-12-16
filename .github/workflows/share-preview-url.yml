@@ -9,7 +9,8 @@ on:
     workflows: ['deploy-preview']
     types:
       - completed
-    branches-ignore: ['main']
+    branches-ignore:
+      - 'main'
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
@@ -30,12 +31,24 @@ jobs:
         continue-on-error: true
         run: |
           curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
+      - name: set branch name
+        run: |
+          if [ -n "${{ github.event.inputs.ref_name }}" ]; then
+            BRANCH_NAME="${{ github.event.inputs.ref_name }}"
+          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
+          elif [ -n "${GITHUB_HEAD_REF}" ]; then
+            BRANCH_NAME="${GITHUB_HEAD_REF}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
       - name: retrieve sst app url
         continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |
-          APP_URL=$(npm run sst shell node get_app_url.js -- --stage $GITHUB_HEAD_REF --print-logs)
+          APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage $BRANCH_NAME --print-logs)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

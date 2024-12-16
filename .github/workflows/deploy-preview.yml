@@ -1,11 +1,5 @@
 name: deploy-preview
 on:
-  workflow_dispatch:
-    inputs:
-      ref_name:
-        description: 'Branch name'
-        required: true
-        default: 'main'
   workflow_call:
   pull_request:
     types:
@@ -111,3 +105,5 @@ jobs:
   share-preview-url:
     needs: [full-stack]
     uses: ./.github/workflows/share-preview-url.yml
+    with:
+      ref_name: ${{ github.ref_name }}

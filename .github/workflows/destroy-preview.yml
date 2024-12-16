@@ -34,10 +34,10 @@ jobs:
         run: npm install
       - name: configure sst secrets
         run: |
-          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
-          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
-          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }} &&
-          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} --stage=${{ steps.get_branch_name.outputs.SS_STAGE }}
+          npx sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npx sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npx sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npx sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: remove sst app
         run: |
-          npm run sst remove --stage=${{ steps.get_branch_name.outputs.SS_STAGE }}
+          npx sst remove --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}

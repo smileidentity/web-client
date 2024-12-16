@@ -25,9 +25,8 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
-          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
-          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+          APP_URL=$(npm run sst shell node get_app_url.js)
+          echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web
         working-directory: ./packages/smart-camera-web

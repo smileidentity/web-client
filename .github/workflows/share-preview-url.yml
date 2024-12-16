@@ -1,7 +1,7 @@
 name: share-preview-url
 on:
   workflow_run:
-    workflows: ["deploy-preview"]
+    workflows: ['deploy-preview']
     types:
       - completed
 jobs:

@@ -109,4 +109,5 @@ jobs:
         run: |
           npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
   share-preview-url:
+    needs: [full-stack]
     uses: ./.github/workflows/share-preview-url.yml

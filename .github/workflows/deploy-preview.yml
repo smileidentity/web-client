@@ -5,9 +5,7 @@ on:
     types:
       - opened
       - synchronize
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -105,5 +103,3 @@ jobs:
   share-preview-url:
     needs: [full-stack]
     uses: ./.github/workflows/share-preview-url.yml
-    with:
-      ref_name: ${{ github.ref_name }}

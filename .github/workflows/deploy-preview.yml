@@ -102,7 +102,7 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          SST_OUTPUT =$(npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }})
+          SST_OUTPUT=$(npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }})
           SITE_URL=$(echo "$SST_OUTPUT" | grep 'PreviewApp:' | awk '{print $2}')
           echo "PREVIEW_APP_URL=$SITE_URL" >> $GITHUB_OUTPUT
       - name: share fullstack preview urls as PR comment

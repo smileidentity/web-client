@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -25,7 +29,7 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
-          APP_URL=$(npx sst shell node get_app_url.js)
+          APP_URL=$(npm run sst shell node get_app_url.js -- --stage $GITHUB_HEAD_REF)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

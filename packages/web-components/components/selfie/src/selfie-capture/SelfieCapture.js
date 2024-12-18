@@ -1,8 +1,10 @@
 import { IMAGE_TYPE } from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
-import { version as COMPONENTS_VERSION } from '../../../../package.json';
+import packageJson from '../../../../package.json';
 import '../../../navigation/src';
+
+const COMPONENTS_VERSION = packageJson.version;
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 

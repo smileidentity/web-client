@@ -194,7 +194,10 @@ class SelfieCaptureScreens extends HTMLElement {
   }
 
   get hideBack() {
-    return this.hasAttribute('hide-back-to-host') || this.hasAttribute('hide-back') ? 'hide-back' : '';
+    return this.hasAttribute('hide-back-to-host') ||
+      this.hasAttribute('hide-back')
+      ? 'hide-back'
+      : '';
   }
 
   get disableImageTests() {

@@ -65,43 +65,44 @@ export default function setupForm() {
         signature,
         timestamp,
       } = tokenResults;
-
-      if (window.SmileIdentity) {
-        window.SmileIdentity({
-          token,
-          product,
-          callback_url,
-          environment,
-          use_new_component: true,
-          //demo_mode: true,
-          previewBVNMFA: true,
-          hide_attribution: true,
-          document_capture_modes: ['camera', 'upload'],
-          allow_agent_mode: true,
-          consent_required: {
-            NG: ['BVN'],
-          },
-          partner_details: {
-            partner_id,
-            signature,
-            timestamp,
-            name: 'Demo Account',
-            logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
-            policy_url: 'https://smileidentity.com/privacy-privacy',
-            theme_color: '#96002d',
-          },
-          onSuccess: () => {
-            resetButton();
-          },
-          onClose: () => {
-            resetButton();
-          },
-          onError: () => {
-            resetButton();
-          },
-        });
-      }
+      window.SmileIdentity({
+        token,
+        product,
+        callback_url,
+        environment,
+        use_new_component: true,
+        //demo_mode: true,
+        previewBVNMFA: true,
+        hide_attribution: true,
+        document_capture_modes: ['camera', 'upload'],
+        allow_agent_mode: true,
+        // id_selection: {
+        //   NG: ['PASSPORT']
+        // },
+        // consent_required: {
+        //   NG: ['BVN'],
+        // },
+        partner_details: {
+          partner_id,
+          signature,
+          timestamp,
+          name: 'Demo Account',
+          logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
+          policy_url: 'https://smileidentity.com/privacy-privacy',
+          theme_color: '#96002d',
+        },
+        onSuccess: () => {
+          resetButton();
+        },
+        onClose: () => {
+          resetButton();
+        },
+        onError: () => {
+          resetButton();
+        },
+      });
     } catch (error) {
+      console.error(error);
       resetButton();
     }
   });

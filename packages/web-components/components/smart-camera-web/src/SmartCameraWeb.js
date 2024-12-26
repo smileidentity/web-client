@@ -224,7 +224,10 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get hideBackToHost() {
-    return this.hasAttribute('hide-back-to-host') ? 'hide-back-to-host' : '';
+    return this.hasAttribute('hide-back-to-host') ||
+      this.hasAttribute('hide-back')
+      ? 'hide-back'
+      : '';
   }
 
   get allowAgentMode() {

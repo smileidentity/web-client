@@ -5,9 +5,7 @@ on:
     types:
       - opened
       - synchronize
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -68,7 +66,6 @@ jobs:
         run: |
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
   full-stack:
-    needs: [embed]
     if: always()
     defaults:
       run:
@@ -94,16 +91,15 @@ jobs:
         run: npm run build
       - name: configure sst secrets
         run: |
-          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: deploy sst app
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
-      - name: remove sst app
-        if: github.event.pull_request.merged == true
-        run: |
-          npm run sst remove --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
+          npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+  share-preview-url:
+    needs: [full-stack]
+    uses: ./.github/workflows/share-preview-url.yml

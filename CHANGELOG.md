@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.4.6] - 2024-12-19
+## [1.4.7] - 2024-12-23
+
+### Added
+
+- Added support for both `hide-back-to-host` and `hide-back` to web components (selfie capture instructions and smart camera web)
 
 ## Changed
+
+- Change embed to use the latest web components via file dependency
+- Added support for both `hide-back-to-host` and `hide-back` to web components (selfie capture instructions and smart camera web)
+
+## [1.4.6] - 2024-12-19
+
+### Changed
 
 - Fixed selfie import
 

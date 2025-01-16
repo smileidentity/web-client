@@ -142,7 +142,7 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME"
           SST_STAGE=${{ needs.full-stack.outputs.SST_STAGE }}
           echo "SST_STAGE=$SST_STAGE"
-          APP_URL=$(npm run sst -- shell -- node get_app_url.js --stage update-sst $BRANCH_NAME --print-logs)
+          APP_URL=$(npm run sst -- shell -- node get_app_url.js --stage update-sst $SST_STAGE --print-logs)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

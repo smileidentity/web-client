@@ -71,6 +71,8 @@ jobs:
       run:
         working-directory: ./previews
     runs-on: ubuntu-latest
+    outputs:
+      SST_STAGE: ${{ steps.get_branch_name.outputs.SST_STAGE }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -103,3 +105,5 @@ jobs:
   share-preview-url:
     needs: [full-stack]
     uses: ./.github/workflows/share-preview-url.yml
+    with:
+      ref_name: ${{ needs.full-stack.outputs.SST_STAGE }}

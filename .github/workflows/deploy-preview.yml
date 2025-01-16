@@ -103,7 +103,70 @@ jobs:
         run: |
           npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
   share-preview-url:
-    needs: [full-stack]
-    uses: ./.github/workflows/share-preview-url.yml
-    with:
-      ref_name: ${{ needs.full-stack.outputs.SST_STAGE }}
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: install sst
+        continue-on-error: true
+        run: |
+          curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
+      - name: set branch name
+        run: |
+          if [ -n "${{ github.event.inputs.ref_name }}" ]; then
+            BRANCH_NAME="${{ github.event.inputs.ref_name }}"
+          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
+          elif [ -n "${GITHUB_HEAD_REF}" ]; then
+            BRANCH_NAME="${GITHUB_HEAD_REF}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+      - name: retrieve sst app url
+        continue-on-error: true
+        id: get_app_url
+        working-directory: ./previews
+        run: |
+          APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage $BRANCH_NAME --print-logs)
+          echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
+      - name: get dest dir for web smart-camera-web
+        id: get_dest_dir_smart_camera_web
+        working-directory: ./packages/smart-camera-web
+        run: >-
+          echo "DEST_DIR_SMART_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >>
+          "$GITHUB_ENV"
+      - name: get dest dir for web embed
+        id: get_dest_dir_embed
+        working-directory: ./packages/embed
+        run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+      - name: share preview urls as PR comment
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        with:
+          msg: >
+            This branch has been deployed to s3 / cloudfront.
+
+
+            ✅ Preview URL for Smart Camera Web:
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/smart-camera-web.js
+
+            ✅ Preview URL for Embed: 
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
+
+            ✅ Preview URL for Web Client:
+
+            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}

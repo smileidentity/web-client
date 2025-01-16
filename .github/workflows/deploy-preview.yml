@@ -105,6 +105,7 @@ jobs:
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all
+    needs: [full-stack]
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -138,6 +139,9 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
+          echo "BRANCH_NAME=$BRANCH_NAME"
+          SST_STAGE=${{ needs.full-stack.outputs.SST_STAGE }}
+          echo "SST_STAGE=$SST_STAGE"
           APP_URL=$(npm run sst -- shell -- node get_app_url.js --stage update-sst $BRANCH_NAME --print-logs)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web

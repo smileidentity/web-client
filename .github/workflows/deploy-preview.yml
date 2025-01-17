@@ -130,8 +130,8 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
-          SST_OUTPUT=${{ needs.full-stack.outputs.SST_URL }}
-          echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
+          PREVIEW_APP_URL=${{ needs.full-stack.outputs.SST_URL }}
+          echo "PREVIEW_APP_URL=$PREVIEW_APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web
         working-directory: ./packages/smart-camera-web

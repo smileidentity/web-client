@@ -72,7 +72,7 @@ jobs:
         working-directory: ./previews
     runs-on: ubuntu-latest
     outputs:
-      SST_STAGE: ${{ steps.get_branch_name.outputs.SST_STAGE }}
+      SST_URL: ${{ steps.deploy_sst_app.outputs.SST_URL }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
         run: |
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install
       - name: build application
@@ -101,7 +101,10 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }})
+          echo "$SST_OUTPUT"
+          SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
+          echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all
@@ -122,27 +125,12 @@ jobs:
         continue-on-error: true
         run: |
           curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
-      - name: set branch name
-        run: |
-          if [ -n "${{ github.event.inputs.ref_name }}" ]; then
-            BRANCH_NAME="${{ github.event.inputs.ref_name }}"
-          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
-            BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
-          elif [ -n "${GITHUB_HEAD_REF}" ]; then
-            BRANCH_NAME="${GITHUB_HEAD_REF}"
-          else
-            BRANCH_NAME="${{ github.ref_name }}"
-          fi
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
       - name: retrieve sst app url
         continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |
-          echo "BRANCH_NAME=$BRANCH_NAME"
-          SST_STAGE=${{ needs.full-stack.outputs.SST_STAGE }}
-          echo "SST_STAGE=$SST_STAGE"
-          APP_URL=$(npm run sst shell -- node get_app_url.js --stage $SST_STAGE --print-logs)
+          SST_OUTPUT=${{ needs.full-stack.outputs.SST_URL }}
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

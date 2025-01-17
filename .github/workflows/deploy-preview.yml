@@ -5,9 +5,7 @@ on:
     types:
       - opened
       - synchronize
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -68,12 +66,13 @@ jobs:
         run: |
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
   full-stack:
-    needs: [embed]
     if: always()
     defaults:
       run:
         working-directory: ./previews
     runs-on: ubuntu-latest
+    outputs:
+      SST_URL: ${{ steps.deploy_sst_app.outputs.SST_URL }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -87,23 +86,80 @@ jobs:
         run: |
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install
       - name: build application
         run: npm run build
       - name: configure sst secrets
         run: |
-          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: deploy sst app
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          npm run sst deploy --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
-      - name: remove sst app
-        if: github.event.pull_request.merged == true
+          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }})
+          echo "$SST_OUTPUT"
+          SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
+          echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
+  share-preview-url:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    needs: [full-stack]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: install sst
+        continue-on-error: true
         run: |
-          npm run sst remove --stage=${{ steps.get_branch_name.outputs.SST_STAGE }}
+          curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
+      - name: retrieve sst app url
+        continue-on-error: true
+        id: get_app_url
+        working-directory: ./previews
+        run: |
+          PREVIEW_APP_URL=${{ needs.full-stack.outputs.SST_URL }}
+          echo "PREVIEW_APP_URL=$PREVIEW_APP_URL" >> $GITHUB_OUTPUT
+      - name: get dest dir for web smart-camera-web
+        id: get_dest_dir_smart_camera_web
+        working-directory: ./packages/smart-camera-web
+        run: >-
+          echo "DEST_DIR_SMART_CAMERA_WEB=js/preview-$GITHUB_HEAD_REF" >>
+          "$GITHUB_ENV"
+      - name: get dest dir for web embed
+        id: get_dest_dir_embed
+        working-directory: ./packages/embed
+        run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
+      - name: share preview urls as PR comment
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        with:
+          duplicate_msg_pattern: '[A-Z]'
+          msg: >
+            This branch has been deployed to s3 / cloudfront.
+
+
+            ✅ Preview URL for Smart Camera Web:
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/smart-camera-web.js
+
+            ✅ Preview URL for Embed: 
+
+            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
+
+            ✅ Preview URL for Web Client:
+
+            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}

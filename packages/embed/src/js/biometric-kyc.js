@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
 import { version as sdkVersion } from '../../package.json';
+import { getMetadata } from './metadata';
 
 (function biometricKyc() {
   'use strict';
@@ -123,6 +124,7 @@ import { version as sdkVersion } from '../../package.json';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        console.log('new components: ', config.use_new_component);
         if (config.use_new_component) {
           import('@smileid/web-components/smart-camera-web');
         } else {
@@ -881,6 +883,7 @@ import { version as sdkVersion } from '../../package.json';
         ...partner_params,
         job_type: 1,
       },
+      ...getMetadata(),
     };
 
     const URL = `${getEndpoint(config.environment)}/upload`;

@@ -1,5 +1,6 @@
 import '@smileid/web-components/combobox';
 import JSZip from 'jszip';
+import './metadata';
 import { version as sdkVersion } from '../../package.json';
 
 (function documentVerification() {

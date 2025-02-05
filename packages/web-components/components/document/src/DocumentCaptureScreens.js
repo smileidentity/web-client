@@ -11,10 +11,20 @@ const COMPONENTS_VERSION = packageJson.version;
 
 async function getPermissions(captureScreen) {
   try {
-    await SmartCamera.getMedia({
+    const stream = await SmartCamera.getMedia({
       audio: false,
       video: SmartCamera.environmentOptions,
     });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevice = devices.find(
+      (device) =>
+        device.kind === 'videoinput' &&
+        stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
+    );
+    console.log("dispatch: metadata:camera-name", { detail: {cameraName: videoDevice?.label} });
+    window.dispatchEvent(
+      new CustomEvent('metadata:camera-name', { detail: {cameraName: videoDevice?.label} }),
+    );
     captureScreen.removeAttribute('data-camera-error');
     captureScreen.setAttribute('data-camera-ready', true);
   } catch (error) {
@@ -30,6 +40,10 @@ class DocumentCaptureScreens extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
+    console.log("dispatch: metadata:initialize");
+    window.dispatchEvent(
+      new CustomEvent('metadata:initialize'),
+    );
   }
 
   connectedCallback() {
@@ -107,6 +121,18 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.capture',
       async () => {
+        console.log("dispatch: metadata:document-front-capture-start");
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-front-capture-start'),
+        );
+        console.log("dispatch: metadata:document-front-origin",{
+          detail: { imageOrigin: 'camera' },
+        });
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-front-origin', {
+            detail: { imageOrigin: 'camera' },
+          }),
+        );
         this.setActiveScreen(this.idCapture);
         await getPermissions(this.idCapture);
       },
@@ -114,6 +140,14 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
+        console.log("dispatch: metadata:document-front-origin",{
+          detail: { imageOrigin: 'uploaded' },
+        });
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-front-origin', {
+            detail: { imageOrigin: 'uploaded' },
+          }),
+        );
         this.idReview.setAttribute('data-image', event.detail.previewImage);
         this._data.images.push({
           image: event.detail.image.split(',')[1],
@@ -124,6 +158,10 @@ class DocumentCaptureScreens extends HTMLElement {
     );
 
     this.idCapture.addEventListener('document-capture.publish', (event) => {
+      console.log("dispatch: metadata:document-front-capture-end");
+      window.dispatchEvent(
+        new CustomEvent('metadata:document-front-capture-end'),
+      );
       this.idReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -144,6 +182,8 @@ class DocumentCaptureScreens extends HTMLElement {
     this.idReview.addEventListener(
       'document-capture-review.rejected',
       async () => {
+        console.log("dispatch: metadata:document-front-capture-retry");
+        window.dispatchEvent(new CustomEvent('metadata:document-front-capture-retry'));
         this.idReview.removeAttribute('data-image');
         this._data.images.pop();
         if (this.hideInstructions) {
@@ -172,6 +212,18 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.capture',
       async () => {
+        console.log("dispatch: metadata:document-back-capture-start");
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-back-capture-start'),
+        );
+        console.log("dispatch: metadata:document-back-origin",{
+          detail: { imageOrigin: 'camera' },
+        });
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-back-origin', {
+            detail: { imageOrigin: 'camera' },
+          }),
+        );
         this.setActiveScreen(this.idCaptureBack);
         await getPermissions(this.idCaptureBack);
       },
@@ -194,6 +246,14 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
+        console.log("dispatch: metadata:document-back-origin",{
+          detail: { imageOrigin: 'uploaded' },
+        });
+        window.dispatchEvent(
+          new CustomEvent('metadata:document-back-origin', {
+            detail: { imageOrigin: 'uploaded' },
+          }),
+        );
         this.backOfIdReview.setAttribute('data-image', event.detail.image);
         this._data.images.push({
           image: event.detail.image.split(',')[1],
@@ -203,6 +263,10 @@ class DocumentCaptureScreens extends HTMLElement {
       },
     );
     this.idCaptureBack.addEventListener('document-capture.publish', (event) => {
+      console.log("dispatch: metadata:document-back-capture-end");
+      window.dispatchEvent(
+        new CustomEvent('metadata:document-back-capture-end'),
+      );
       this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -227,6 +291,8 @@ class DocumentCaptureScreens extends HTMLElement {
     this.backOfIdReview.addEventListener(
       'document-capture-review.rejected',
       async () => {
+        console.log("dispatch: metadata:document-back-capture-retry");
+        window.dispatchEvent(new CustomEvent('metadata:document-back-capture-retry'));
         this.backOfIdReview.removeAttribute('data-image');
         this._data.images.pop();
         if (this.hideInstructions) {

@@ -1497,8 +1497,8 @@ class SmartCameraWeb extends HTMLElement {
 
     if (this.takeDocumentPhotoButton)
       this.takeDocumentPhotoButton.addEventListener('click', () => {
-        this._startIDCamera(),
-          console.log('dispatch: metadata:document-front-capture-start');
+        this._startIDCamera();
+        console.log('dispatch: metadata:document-front-capture-start');
         window.dispatchEvent(
           new CustomEvent('metadata:document-front-capture-start'),
         );

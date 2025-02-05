@@ -28,8 +28,7 @@ export const parseUserAgent = (uaString) => {
   }
 
   // Operating System
-  const osRegex =
-    /(windows|macintosh|mac os x|linux|android|ios|iphone|ipad)/i;
+  const osRegex = /(windows|macintosh|mac os x|linux|android|ios|iphone|ipad)/i;
   const osMatch = uaString.match(osRegex);
 
   if (osMatch) {
@@ -57,7 +56,7 @@ export const parseUserAgent = (uaString) => {
   }
 
   return parser;
-}
+};
 
 // Example usage
 const parsedData = parseUserAgent(navigator.userAgent);

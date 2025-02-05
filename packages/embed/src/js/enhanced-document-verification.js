@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
-import './metadata';
 import { version as sdkVersion } from '../../package.json';
+import { getMetadata } from './metadata';
 
 (function enhancedDocumentVerification() {
   'use strict';
@@ -462,6 +462,7 @@ import { version as sdkVersion } from '../../package.json';
         ...partner_params,
         job_type: 11,
       },
+      ...getMetadata(),
     };
 
     const fetchConfig = {

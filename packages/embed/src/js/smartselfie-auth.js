@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
-import './metadata';
 import { version as sdkVersion } from '../../package.json';
+import { getMetadata } from './metadata';
 
 (function SmartSelfie() {
   'use strict';
@@ -249,6 +249,7 @@ import { version as sdkVersion } from '../../package.json';
       callback_url: config.callback_url,
       token: config.token,
       partner_params,
+      ...getMetadata(),
     };
 
     const fetchConfig = {

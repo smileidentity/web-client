@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
 import { version as sdkVersion } from '../../package.json';
-import './metadata';
+import { getMetadata } from './metadata';
 
 (function biometricKyc() {
   'use strict';
@@ -883,6 +883,7 @@ import './metadata';
         ...partner_params,
         job_type: 1,
       },
+      ...getMetadata()
     };
 
     const URL = `${getEndpoint(config.environment)}/upload`;

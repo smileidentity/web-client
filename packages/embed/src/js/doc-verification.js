@@ -1,7 +1,7 @@
 import '@smileid/web-components/combobox';
 import JSZip from 'jszip';
-import './metadata';
 import { version as sdkVersion } from '../../package.json';
+import { getMetadata } from './metadata';
 
 (function documentVerification() {
   'use strict';
@@ -660,6 +660,7 @@ import { version as sdkVersion } from '../../package.json';
         ...partner_params,
         job_type: 6,
       },
+      ...getMetadata(),
     };
 
     const fetchConfig = {

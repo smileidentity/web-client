@@ -48,7 +48,10 @@ export const initializeMetadata = async () => {
   metadata.active_liveness_version = '0.0.1';
 };
 
-export const getMetadata = () => metadata;
+export const getMetadata = () =>
+  Object.fromEntries(
+    Object.entries(metadata).filter(([_key, value]) => value !== null),
+  );
 
 /**
  * Set a specific key in the metadata object to a specific value.

@@ -564,11 +564,11 @@ async function getPermissions(
         device.kind === 'videoinput' &&
         stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
     );
-    console.log('dispatch: metadata:camera-name', {
+    console.log('dispatch: metadata.camera-name', {
       detail: { cameraName: videoDevice?.label },
     });
     window.dispatchEvent(
-      new CustomEvent('metadata:camera-name', {
+      new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
     );

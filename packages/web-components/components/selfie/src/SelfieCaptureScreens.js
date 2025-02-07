@@ -19,11 +19,11 @@ async function getPermissions(captureScreen, facingMode = 'user') {
         device.kind === 'videoinput' &&
         stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
     );
-    console.log('dispatch: metadata:camera-name', {
+    console.log('dispatch: metadata.camera-name', {
       detail: { cameraName: videoDevice?.label },
     });
     window.dispatchEvent(
-      new CustomEvent('metadata:camera-name', {
+      new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
     );
@@ -42,8 +42,8 @@ class SelfieCaptureScreens extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
-    console.log('dispatch: metadata:initialize');
-    window.dispatchEvent(new CustomEvent('metadata:initialize'));
+    console.log('dispatch: metadata.initialize');
+    window.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   connectedCallback() {
@@ -105,8 +105,8 @@ class SelfieCaptureScreens extends HTMLElement {
         await getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
           this.setActiveScreen(this.selfieCapture),
         );
-        console.log('dispatch: metadata:selfie-capture-start');
-        window.dispatchEvent(new CustomEvent('metadata:selfie-capture-start'));
+        console.log('dispatch: metadata.selfie-capture-start');
+        window.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
       },
     );
     this.selfieInstruction.addEventListener(
@@ -125,8 +125,8 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
-      console.log('dispatch: metadata:selfie-capture-end');
-      window.dispatchEvent(new CustomEvent('metadata:selfie-capture-end'));
+      console.log('dispatch: metadata.selfie-capture-end');
+      window.dispatchEvent(new CustomEvent('metadata.selfie-capture-end'));
       this.selfieReview.setAttribute('data-image', event.detail.referenceImage);
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();
@@ -147,8 +147,8 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieReview.addEventListener(
       'selfie-capture-review.rejected',
       async () => {
-        console.log('dispatch: metadata:selfie-capture-retry');
-        window.dispatchEvent(new CustomEvent('metadata:selfie-capture-retry'));
+        console.log('dispatch: metadata.selfie-capture-retry');
+        window.dispatchEvent(new CustomEvent('metadata.selfie-capture-retry'));
         this.selfieReview.removeAttribute('data-image');
         this._data.images = [];
         if (this.hideInstructions) {

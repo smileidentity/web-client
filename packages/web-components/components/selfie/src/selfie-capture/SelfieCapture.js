@@ -554,10 +554,24 @@ async function getPermissions(
   constraints = { facingMode: 'user' },
 ) {
   try {
-    await SmartCamera.getMedia({
+    const stream = await SmartCamera.getMedia({
       audio: false,
       video: constraints,
     });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevice = devices.find(
+      (device) =>
+        device.kind === 'videoinput' &&
+        stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
+    );
+    console.log('dispatch: metadata:camera-name', {
+      detail: { cameraName: videoDevice?.label },
+    });
+    window.dispatchEvent(
+      new CustomEvent('metadata:camera-name', {
+        detail: { cameraName: videoDevice?.label },
+      }),
+    );
     captureScreen?.removeAttribute('data-camera-error');
     captureScreen?.setAttribute('data-camera-ready', true);
   } catch (error) {

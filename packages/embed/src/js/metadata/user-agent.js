@@ -33,17 +33,7 @@ export const parseUserAgent = (uaString) => {
 
   if (osMatch) {
     parser.os = osMatch[1].toLowerCase();
-
-    // OS version
-    const osVersionRegex = new RegExp(
-      `${parser.os}[\\s/](\\d+(\\.\\d+)*)`,
-      'i',
-    );
-    const osVersionMatch = uaString.match(osVersionRegex);
-
-    if (osVersionMatch) {
-      parser.osVersion = osVersionMatch[1];
-    }
+    parser.osVersion = getOSVersionNumber(uaString);
   }
 
   // Device
@@ -56,6 +46,25 @@ export const parseUserAgent = (uaString) => {
   }
 
   return parser;
+};
+
+const getOSVersionNumber = (userAgent) => {
+  const versionRegex = /[\d._]+/;
+  const osRegex = /\(([^)]+)\)/;
+  const match = userAgent.match(osRegex);
+  if (!match) {
+    return null;
+  }
+
+  const details = match[1].split(';');
+  for (let detail of details) {
+    const versionMatch = detail.match(versionRegex);
+    if (versionMatch) {
+      return versionMatch[0].replaceAll('_', '.');
+    }
+  }
+
+  return null;
 };
 
 // Example usage

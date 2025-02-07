@@ -249,7 +249,7 @@ import { getMetadata } from './metadata';
       callback_url: config.callback_url,
       token: config.token,
       partner_params,
-      ...getMetadata(),
+      metadata: getMetadata(),
     };
 
     const fetchConfig = {

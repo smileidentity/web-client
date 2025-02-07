@@ -883,7 +883,7 @@ import { getMetadata } from './metadata';
         ...partner_params,
         job_type: 1,
       },
-      ...getMetadata(),
+      metadata: getMetadata(),
     };
 
     const URL = `${getEndpoint(config.environment)}/upload`;

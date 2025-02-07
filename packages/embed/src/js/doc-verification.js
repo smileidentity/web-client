@@ -660,7 +660,7 @@ import { getMetadata } from './metadata';
         ...partner_params,
         job_type: 6,
       },
-      ...getMetadata(),
+      metadata: getMetadata(),
     };
 
     const fetchConfig = {

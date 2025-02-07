@@ -49,9 +49,7 @@ export const initializeMetadata = async () => {
 };
 
 export const getMetadata = () =>
-  Object.fromEntries(
-    Object.entries(metadata).filter(([_key, value]) => value !== null),
-  );
+  Object.entries(metadata).map(([name, value]) => ({ name, value }));
 
 /**
  * Set a specific key in the metadata object to a specific value.

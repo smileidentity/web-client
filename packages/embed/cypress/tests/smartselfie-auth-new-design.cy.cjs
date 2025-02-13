@@ -1,3 +1,5 @@
+const { expect } = require('chai');
+
 describe('smartselfie authentication', () => {
   beforeEach(() => {
     cy.visit('/smartselfie-new-design');

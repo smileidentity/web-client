@@ -9,6 +9,8 @@ import packageJson from '../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
 
+const smartCameraWeb = document.querySelector('smart-camera-web');
+
 async function getPermissions(captureScreen) {
   try {
     const stream = await SmartCamera.getMedia({
@@ -24,7 +26,7 @@ async function getPermissions(captureScreen) {
     console.log('dispatch: metadata.camera-name', {
       detail: { cameraName: videoDevice?.label },
     });
-    window.dispatchEvent(
+    smartCameraWeb.dispatchEvent(
       new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
@@ -44,8 +46,9 @@ class DocumentCaptureScreens extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
+    this.smartCameraWeb = this.closest('smart-camera-web');
     console.log('dispatch: metadata.initialize');
-    window.dispatchEvent(new CustomEvent('metadata.initialize'));
+    smartCameraWeb.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   connectedCallback() {
@@ -124,13 +127,13 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-instructions.capture',
       async () => {
         console.log('dispatch: metadata.document-front-capture-start');
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-start'),
         );
         console.log('dispatch: metadata.document-front-origin', {
           detail: { imageOrigin: 'camera' },
         });
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'camera' },
           }),
@@ -145,7 +148,7 @@ class DocumentCaptureScreens extends HTMLElement {
         console.log('dispatch: metadata.document-front-origin', {
           detail: { imageOrigin: 'uploaded' },
         });
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'uploaded' },
           }),
@@ -161,7 +164,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.idCapture.addEventListener('document-capture.publish', (event) => {
       console.log('dispatch: metadata.document-front-capture-end');
-      window.dispatchEvent(
+      smartCameraWeb.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
       this.idReview.setAttribute('data-image', event.detail.previewImage);
@@ -185,7 +188,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-review.rejected',
       async () => {
         console.log('dispatch: metadata.document-front-capture-retry');
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-retry'),
         );
         this.idReview.removeAttribute('data-image');
@@ -217,13 +220,13 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-instructions.capture',
       async () => {
         console.log('dispatch: metadata.document-back-capture-start');
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-start'),
         );
         console.log('dispatch: metadata.document-back-origin', {
           detail: { imageOrigin: 'camera' },
         });
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'camera' },
           }),
@@ -253,7 +256,7 @@ class DocumentCaptureScreens extends HTMLElement {
         console.log('dispatch: metadata.document-back-origin', {
           detail: { imageOrigin: 'uploaded' },
         });
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'uploaded' },
           }),
@@ -268,7 +271,7 @@ class DocumentCaptureScreens extends HTMLElement {
     );
     this.idCaptureBack.addEventListener('document-capture.publish', (event) => {
       console.log('dispatch: metadata.document-back-capture-end');
-      window.dispatchEvent(
+      smartCameraWeb.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-end'),
       );
       this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
@@ -296,7 +299,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-review.rejected',
       async () => {
         console.log('dispatch: metadata.document-back-capture-retry');
-        window.dispatchEvent(
+        smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-retry'),
         );
         this.backOfIdReview.removeAttribute('data-image');

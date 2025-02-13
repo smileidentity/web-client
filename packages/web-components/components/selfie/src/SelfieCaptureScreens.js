@@ -7,6 +7,8 @@ import packageJson from '../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
 
+const smartCameraWeb = document.querySelector('smart-camera-web');
+
 async function getPermissions(captureScreen, facingMode = 'user') {
   try {
     const stream = await SmartCamera.getMedia({
@@ -22,7 +24,7 @@ async function getPermissions(captureScreen, facingMode = 'user') {
     console.log('dispatch: metadata.camera-name', {
       detail: { cameraName: videoDevice?.label },
     });
-    window.dispatchEvent(
+    smartCameraWeb.dispatchEvent(
       new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
@@ -43,7 +45,7 @@ class SelfieCaptureScreens extends HTMLElement {
     super();
     this.activeScreen = null;
     console.log('dispatch: metadata.initialize');
-    window.dispatchEvent(new CustomEvent('metadata.initialize'));
+    smartCameraWeb.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   connectedCallback() {
@@ -106,7 +108,9 @@ class SelfieCaptureScreens extends HTMLElement {
           this.setActiveScreen(this.selfieCapture),
         );
         console.log('dispatch: metadata.selfie-capture-start');
-        window.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
+        smartCameraWeb.dispatchEvent(
+          new CustomEvent('metadata.selfie-capture-start'),
+        );
       },
     );
     this.selfieInstruction.addEventListener(
@@ -126,7 +130,9 @@ class SelfieCaptureScreens extends HTMLElement {
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
       console.log('dispatch: metadata.selfie-capture-end');
-      window.dispatchEvent(new CustomEvent('metadata.selfie-capture-end'));
+      smartCameraWeb.dispatchEvent(
+        new CustomEvent('metadata.selfie-capture-end'),
+      );
       this.selfieReview.setAttribute('data-image', event.detail.referenceImage);
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();
@@ -148,7 +154,9 @@ class SelfieCaptureScreens extends HTMLElement {
       'selfie-capture-review.rejected',
       async () => {
         console.log('dispatch: metadata.selfie-capture-retry');
-        window.dispatchEvent(new CustomEvent('metadata.selfie-capture-retry'));
+        smartCameraWeb.dispatchEvent(
+          new CustomEvent('metadata.selfie-capture-retry'),
+        );
         this.selfieReview.removeAttribute('data-image');
         this._data.images = [];
         if (this.hideInstructions) {

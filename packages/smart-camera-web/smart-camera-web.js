@@ -1349,7 +1349,7 @@ class SmartCameraWeb extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.activeScreen = null;
     console.log('dispatch: metadata.initialize');
-    window.dispatchEvent(new CustomEvent('metadata.initialize'));
+    this.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   setActiveScreen(element) {
@@ -1499,13 +1499,13 @@ class SmartCameraWeb extends HTMLElement {
       this.takeDocumentPhotoButton.addEventListener('click', () => {
         this._startIDCamera();
         console.log('dispatch: metadata.document-front-capture-start');
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-start'),
         );
         console.log('dispatch: metadata.document-front-origin', {
           detail: { imageOrigin: 'camera' },
         });
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'camera' },
           }),
@@ -1519,13 +1519,13 @@ class SmartCameraWeb extends HTMLElement {
       this.takeBackOfDocumentPhotoButton.addEventListener('click', () => {
         this._startIDCamera();
         console.log('dispatch: metadata.document-back-capture-start');
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-start'),
         );
         console.log('dispatch: metadata.document-back-origin', {
           detail: { imageOrigin: 'camera' },
         });
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'camera' },
           }),
@@ -1537,7 +1537,7 @@ class SmartCameraWeb extends HTMLElement {
         console.log('dispatch: metadata.document-front-origin', {
           detail: { imageOrigin: 'uploaded' },
         });
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'uploaded' },
           }),
@@ -1549,7 +1549,7 @@ class SmartCameraWeb extends HTMLElement {
         console.log('dispatch: metadata.document-back-origin', {
           detail: { imageOrigin: 'uploaded' },
         });
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'uploaded' },
           }),
@@ -1602,7 +1602,7 @@ class SmartCameraWeb extends HTMLElement {
     this.selectIDImage.addEventListener('click', () => {
       this._selectIDImage();
       console.log('dispatch: metadata.document-front-capture-end');
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
     });
@@ -1610,21 +1610,19 @@ class SmartCameraWeb extends HTMLElement {
     this.selectBackOfIDImage.addEventListener('click', () => {
       this._selectIDImage(true);
       console.log('dispatch: metadata.document-back-capture-end');
-      window.dispatchEvent(
-        new CustomEvent('metadata.document-back-capture-end'),
-      );
+      this.dispatchEvent(new CustomEvent('metadata.document-back-capture-end'));
     });
 
     this.captureIDImage.addEventListener('click', () => {
       this._captureIDImage();
       console.log('dispatch: metadata.document-front-capture-start');
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-start'),
       );
       console.log('dispatch: metadata.document-front-origin', {
         detail: { imageOrigin: 'camera' },
       });
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-front-origin', {
           detail: { imageOrigin: 'camera' },
         }),
@@ -1634,13 +1632,13 @@ class SmartCameraWeb extends HTMLElement {
     this.captureBackOfIDImage.addEventListener('click', () => {
       this._captureIDImage();
       console.log('dispatch: metadata.document-back-capture-start');
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-start'),
       );
       console.log('dispatch: metadata.document-back-origin', {
         detail: { imageOrigin: 'camera' },
       });
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-back-origin', {
           detail: { imageOrigin: 'camera' },
         }),
@@ -1654,7 +1652,7 @@ class SmartCameraWeb extends HTMLElement {
     this.reCaptureIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
       console.log('dispatch: metadata.document-front-capture-retry');
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-retry'),
       );
     });
@@ -1662,7 +1660,7 @@ class SmartCameraWeb extends HTMLElement {
     this.reCaptureBackOfIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
       console.log('dispatch: metadata.document-back-capture-retry');
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-retry'),
       );
     });
@@ -1694,7 +1692,7 @@ class SmartCameraWeb extends HTMLElement {
         console.log('dispatch: metadata.camera-name', {
           detail: { cameraName: videoDevice?.label },
         });
-        window.dispatchEvent(
+        this.dispatchEvent(
           new CustomEvent('metadata.camera-name', {
             detail: { cameraName: videoDevice?.label },
           }),
@@ -1835,7 +1833,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _startImageCapture() {
     console.log('dispatch: metadata.selfie-capture-start');
-    window.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
     this.startImageCapture.disabled = true;
 
     /**
@@ -2134,7 +2132,7 @@ class SmartCameraWeb extends HTMLElement {
       console.log('dispatch: metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       });
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.camera-name', {
           detail: { cameraName: videoDevice?.label },
         }),
@@ -2154,7 +2152,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _selectSelfie() {
     console.log('dispatch: metadata.selfie-capture-end');
-    window.dispatchEvent(new CustomEvent('metadata.selfie-capture-end'));
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-end'));
     if (!this.captureID) {
       this._publishSelectedImages();
     } else {
@@ -2188,7 +2186,7 @@ class SmartCameraWeb extends HTMLElement {
 
   async _reStartImageCapture() {
     console.log('dispatch: metadata.selfie-capture-retry');
-    window.dispatchEvent(new CustomEvent('metadata.selfie-capture-retry'));
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-retry'));
     this.startImageCapture.disabled = false;
 
     this._rawImages = [];
@@ -2208,7 +2206,7 @@ class SmartCameraWeb extends HTMLElement {
       console.log('dispatch: metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       });
-      window.dispatchEvent(
+      this.dispatchEvent(
         new CustomEvent('metadata.camera-name', {
           detail: { cameraName: videoDevice?.label },
         }),

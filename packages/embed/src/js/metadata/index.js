@@ -171,13 +171,15 @@ export const endTrackSelfieCapture = () => {
   console.log(metadata);
 };
 
-window.addEventListener('metadata.initialize', initializeMetadata);
+const eventTarget = document.querySelector('smart-camera-web');
+
+eventTarget.addEventListener('metadata.initialize', initializeMetadata);
 // Document Front
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-front-capture-start',
   beginTrackDocumentFrontCapture,
 );
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.camera-name',
   ({ detail: { cameraName } }) => {
     activeCameraName = cameraName;
@@ -193,41 +195,44 @@ window.addEventListener(
   },
 );
 
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-front-origin',
   ({ detail: { imageOrigin } }) => {
     metadata.document_front_image_origin = imageOrigin;
   },
 );
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-front-capture-end',
   endTrackDocumentFrontCapture,
 );
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-front-capture-retry',
   retryDocumentFrontCapture,
 );
 
 // Document Back
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-back-capture-start',
   beginTrackDocumentBackCapture,
 );
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-back-capture-end',
   endTrackDocumentBackCapture,
 );
 
-window.addEventListener(
+eventTarget.addEventListener(
   'metadata.document-back-capture-retry',
   retryDocumentBackCapture,
 );
-window.addEventListener('metadata.document-back-origin', (event) => {
+eventTarget.addEventListener('metadata.document-back-origin', (event) => {
   metadata.document_back_image_origin = event.detail.imageOrigin;
 });
 
 // Selfie
-window.addEventListener('metadata.selfie-capture-start', () => {
+eventTarget.addEventListener('metadata.selfie-capture-start', () => {
   beginTrackSelfieCapture();
 });
-window.addEventListener('metadata.selfie-capture-end', endTrackSelfieCapture);
+eventTarget.addEventListener(
+  'metadata.selfie-capture-end',
+  endTrackSelfieCapture,
+);

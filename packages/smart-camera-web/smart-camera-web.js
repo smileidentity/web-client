@@ -1503,11 +1503,11 @@ class SmartCameraWeb extends HTMLElement {
           new CustomEvent('metadata.document-front-capture-start'),
         );
         console.log('dispatch: metadata.document-front-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         });
         this.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
-            detail: { imageOrigin: 'camera' },
+            detail: { imageOrigin: 'camera_manual_capture' },
           }),
         );
       });
@@ -1523,11 +1523,11 @@ class SmartCameraWeb extends HTMLElement {
           new CustomEvent('metadata.document-back-capture-start'),
         );
         console.log('dispatch: metadata.document-back-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         });
         this.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
-            detail: { imageOrigin: 'camera' },
+            detail: { imageOrigin: 'camera_manual_capture' },
           }),
         );
       });
@@ -1535,11 +1535,11 @@ class SmartCameraWeb extends HTMLElement {
       this.uploadDocumentPhotoButton.addEventListener('change', (e) => {
         this._uploadDocument(e);
         console.log('dispatch: metadata.document-front-origin', {
-          detail: { imageOrigin: 'uploaded' },
+          detail: { imageOrigin: 'gallery' },
         });
         this.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
-            detail: { imageOrigin: 'uploaded' },
+            detail: { imageOrigin: 'gallery' },
           }),
         );
       });
@@ -1547,11 +1547,11 @@ class SmartCameraWeb extends HTMLElement {
       this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => {
         this._uploadDocument(e);
         console.log('dispatch: metadata.document-back-origin', {
-          detail: { imageOrigin: 'uploaded' },
+          detail: { imageOrigin: 'gallery' },
         });
         this.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
-            detail: { imageOrigin: 'uploaded' },
+            detail: { imageOrigin: 'gallery' },
           }),
         );
       });
@@ -1620,11 +1620,11 @@ class SmartCameraWeb extends HTMLElement {
         new CustomEvent('metadata.document-front-capture-start'),
       );
       console.log('dispatch: metadata.document-front-origin', {
-        detail: { imageOrigin: 'camera' },
+        detail: { imageOrigin: 'camera_manual_capture' },
       });
       this.dispatchEvent(
         new CustomEvent('metadata.document-front-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         }),
       );
     });
@@ -1636,11 +1636,11 @@ class SmartCameraWeb extends HTMLElement {
         new CustomEvent('metadata.document-back-capture-start'),
       );
       console.log('dispatch: metadata.document-back-origin', {
-        detail: { imageOrigin: 'camera' },
+        detail: { imageOrigin: 'camera_manual_capture' },
       });
       this.dispatchEvent(
         new CustomEvent('metadata.document-back-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         }),
       );
     });

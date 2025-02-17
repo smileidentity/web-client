@@ -131,11 +131,11 @@ class DocumentCaptureScreens extends HTMLElement {
           new CustomEvent('metadata.document-front-capture-start'),
         );
         console.log('dispatch: metadata.document-front-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         });
         smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
-            detail: { imageOrigin: 'camera' },
+            detail: { imageOrigin: 'camera_manual_capture' },
           }),
         );
         this.setActiveScreen(this.idCapture);
@@ -146,11 +146,11 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-instructions.upload',
       async (event) => {
         console.log('dispatch: metadata.document-front-origin', {
-          detail: { imageOrigin: 'uploaded' },
+          detail: { imageOrigin: 'gallery' },
         });
         smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
-            detail: { imageOrigin: 'uploaded' },
+            detail: { imageOrigin: 'gallery' },
           }),
         );
         this.idReview.setAttribute('data-image', event.detail.previewImage);
@@ -224,11 +224,11 @@ class DocumentCaptureScreens extends HTMLElement {
           new CustomEvent('metadata.document-back-capture-start'),
         );
         console.log('dispatch: metadata.document-back-origin', {
-          detail: { imageOrigin: 'camera' },
+          detail: { imageOrigin: 'camera_manual_capture' },
         });
         smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
-            detail: { imageOrigin: 'camera' },
+            detail: { imageOrigin: 'camera_manual_capture' },
           }),
         );
         this.setActiveScreen(this.idCaptureBack);
@@ -254,11 +254,11 @@ class DocumentCaptureScreens extends HTMLElement {
       'document-capture-instructions.upload',
       async (event) => {
         console.log('dispatch: metadata.document-back-origin', {
-          detail: { imageOrigin: 'uploaded' },
+          detail: { imageOrigin: 'gallery' },
         });
         smartCameraWeb.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
-            detail: { imageOrigin: 'uploaded' },
+            detail: { imageOrigin: 'gallery' },
           }),
         );
         this.backOfIdReview.setAttribute('data-image', event.detail.image);

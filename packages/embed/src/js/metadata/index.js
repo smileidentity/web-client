@@ -8,14 +8,14 @@ const defaultMetadata = {
   browser_version: null, // string
   document_back_capture_duration_ms: null, // number
   document_back_capture_retries: null, // number
-  document_back_image_origin: null, // uploaded | camera
+  document_back_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
   document_back_capture_camera_name: null, // string
   document_front_capture_duration_ms: null, // number
   document_front_capture_retries: null, // number
-  document_front_image_origin: null, // uploaded | camera
+  document_front_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
   document_front_capture_camera_name: null, // string
   selfie_capture_duration_ms: null, // number
-  selfie_image_origin: null, // uploaded | camera
+  selfie_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
   camera_name: null, // string - for selfies
   active_liveness_type: null, // headpose | smile
   active_liveness_version: null, // string
@@ -74,6 +74,7 @@ export const beginTrackDocumentFrontCapture = () => {
   if (metadata.document_front_capture_retries === null) {
     metadata.document_front_capture_retries = 0;
   }
+  metadata.document_front_image_origin = 'camera_manual_capture';
   capturing = 'document_front';
 
   if (activeCameraName) {
@@ -114,7 +115,7 @@ export const beginTrackDocumentBackCapture = () => {
   if (metadata.document_back_capture_retries === null) {
     metadata.document_back_capture_retries = 0;
   }
-  metadata.document_back_image_origin = 'camera';
+  metadata.document_back_image_origin = 'camera_manual_capture';
   capturing = 'document_back';
   if (activeCameraName) {
     metadata.document_back_capture_camera_name = activeCameraName;
@@ -149,7 +150,7 @@ export const endTrackDocumentBackCapture = () => {
  * selfie_image_origin to 'camera'.
  */
 export const beginTrackSelfieCapture = () => {
-  metadata.selfie_image_origin = 'camera';
+  metadata.selfie_image_origin = 'camera_manual_capture';
   capturing = 'selfie';
   if (activeCameraName) {
     metadata.camera_name = activeCameraName;

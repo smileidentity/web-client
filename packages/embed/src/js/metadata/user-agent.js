@@ -66,7 +66,3 @@ const getOSVersionNumber = (userAgent) => {
 
   return null;
 };
-
-// Example usage
-const parsedData = parseUserAgent(navigator.userAgent);
-console.log(parsedData);

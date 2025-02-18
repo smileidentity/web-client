@@ -1,5 +1,3 @@
-const { expect } = require('chai');
-
 describe('document verification', () => {
   beforeEach(() => {
     cy.intercept(

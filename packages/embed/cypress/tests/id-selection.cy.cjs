@@ -1,5 +1,3 @@
-const { expect } = require('chai');
-
 describe('No ID Selection', () => {
   beforeEach(() => {
     cy.loadIDOptions();

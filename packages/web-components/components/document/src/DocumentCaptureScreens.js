@@ -23,7 +23,7 @@ async function getPermissions(captureScreen) {
         device.kind === 'videoinput' &&
         stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
     );
-    smartCameraWeb.dispatchEvent(
+    smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
@@ -44,7 +44,7 @@ class DocumentCaptureScreens extends HTMLElement {
     super();
     this.activeScreen = null;
     this.smartCameraWeb = this.closest('smart-camera-web');
-    smartCameraWeb.dispatchEvent(new CustomEvent('metadata.initialize'));
+    smartCameraWeb?.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   connectedCallback() {
@@ -122,10 +122,10 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.capture',
       async () => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-start'),
         );
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'camera_manual_capture' },
           }),
@@ -137,7 +137,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: 'gallery' },
           }),
@@ -152,7 +152,7 @@ class DocumentCaptureScreens extends HTMLElement {
     );
 
     this.idCapture.addEventListener('document-capture.publish', (event) => {
-      smartCameraWeb.dispatchEvent(
+      smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
       this.idReview.setAttribute('data-image', event.detail.previewImage);
@@ -175,7 +175,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.idReview.addEventListener(
       'document-capture-review.rejected',
       async () => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-retry'),
         );
         this.idReview.removeAttribute('data-image');
@@ -206,10 +206,10 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.capture',
       async () => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-start'),
         );
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'camera_manual_capture' },
           }),
@@ -236,7 +236,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.upload',
       async (event) => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: 'gallery' },
           }),
@@ -250,7 +250,7 @@ class DocumentCaptureScreens extends HTMLElement {
       },
     );
     this.idCaptureBack.addEventListener('document-capture.publish', (event) => {
-      smartCameraWeb.dispatchEvent(
+      smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-end'),
       );
       this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
@@ -277,7 +277,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.backOfIdReview.addEventListener(
       'document-capture-review.rejected',
       async () => {
-        smartCameraWeb.dispatchEvent(
+        smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-retry'),
         );
         this.backOfIdReview.removeAttribute('data-image');

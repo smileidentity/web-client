@@ -147,7 +147,7 @@ jobs:
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         with:
-          duplicate_msg_pattern: '[A-Z]'
+          duplicate_msg_pattern: '.*Preview URL for.*'
           msg: >
             This branch has been deployed to s3 / cloudfront.
 

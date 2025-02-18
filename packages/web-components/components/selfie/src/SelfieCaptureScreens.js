@@ -41,6 +41,7 @@ class SelfieCaptureScreens extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
+    console.log('dispatch: metadata.initialize');
     smartCameraWeb?.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
@@ -103,6 +104,7 @@ class SelfieCaptureScreens extends HTMLElement {
         await getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
           this.setActiveScreen(this.selfieCapture),
         );
+        console.log('dispatch: metadata.selfie-capture-start');
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.selfie-capture-start'),
         );
@@ -124,6 +126,7 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
+      console.log('dispatch: metadata.selfie-capture-end');
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
@@ -147,6 +150,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieReview.addEventListener(
       'selfie-capture-review.rejected',
       async () => {
+        console.log('dispatch: metadata.selfie-capture-retry');
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.selfie-capture-retry'),
         );

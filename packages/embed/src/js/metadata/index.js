@@ -101,6 +101,8 @@ export const endTrackDocumentFrontCapture = () => {
     Date.now() - captureStartTimestamp;
   captureStartTimestamp = null;
   capturing = null;
+
+  console.log(metadata);
 };
 
 /**
@@ -139,6 +141,7 @@ export const endTrackDocumentBackCapture = () => {
     Date.now() - captureStartTimestamp;
   captureStartTimestamp = null;
   capturing = null;
+  console.log(metadata);
 };
 
 /**
@@ -168,6 +171,7 @@ export const endTrackSelfieCapture = () => {
   metadata.selfie_capture_duration_ms = Date.now() - captureStartTimestamp;
   captureStartTimestamp = null;
   capturing = null;
+  console.log(metadata);
 };
 
 const eventTarget = document.querySelector('smart-camera-web');
@@ -182,6 +186,7 @@ eventTarget.addEventListener(
   'metadata.camera-name',
   ({ detail: { cameraName } }) => {
     activeCameraName = cameraName;
+    console.log({ capturing });
 
     if (capturing === 'selfie') {
       metadata.camera_name = cameraName;

@@ -124,6 +124,7 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        console.log('new components: ', config.use_new_component);
         if (config.use_new_component) {
           import('@smileid/web-components/smart-camera-web');
         } else {
@@ -572,7 +573,7 @@ import { getMetadata } from './metadata';
 
     EndUserConsent.addEventListener(
       'end-user-consent.totp.denied.contact-methods-outdated',
-      () => {
+      (event) => {
         (referenceWindow.parent || referenceWindow).postMessage(
           'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
           '*',

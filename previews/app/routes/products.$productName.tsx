@@ -124,7 +124,7 @@ export default function Product() {
           <form onSubmit={handleSubmit}>
             <fieldset disabled={isGettingToken}>
               <legend>
-                <h1>{product.label}</h1>
+                <h1>{product.label}</h1> {appStage ? appStage : ''}
               </legend>
 
               <input type="hidden" name="product" value={product.name} />
@@ -169,7 +169,7 @@ export default function Product() {
 
           <script
             src={`https://cdn.smileidentity.com/inline/${
-              appStage.includes('preview/') ? appStage : 'v1'
+              appStage.includes('preview') ? appStage : 'v1'
             }/js/script.min.js`}
           ></script>
         </>

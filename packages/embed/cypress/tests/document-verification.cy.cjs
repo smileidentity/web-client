@@ -98,7 +98,9 @@ describe('document verification', () => {
         expect(metadata.user_agent).to.be.a('string');
         expect(metadata.document_front_capture_camera_name).to.be.a('string');
         expect(metadata.camera_name).to.be.a('string');
-        expect(metadata.selfie_capture_duration_ms).to.be.greaterThan(0);
+        expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(
+          0,
+        );
       });
 
     cy.wait('@successfulUpload');

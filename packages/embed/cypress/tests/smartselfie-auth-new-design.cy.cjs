@@ -47,7 +47,9 @@ describe('smartselfie authentication', () => {
           expect(metadata.fingerprint).to.be.a('string');
           expect(metadata.user_agent).to.be.a('string');
           expect(metadata.camera_name).to.be.a('string');
-          expect(metadata.selfie_capture_duration_ms).to.be.greaterThan(0);
+          expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(
+            0,
+          );
         });
 
       cy.wait('@successfulUpload');

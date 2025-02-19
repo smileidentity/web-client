@@ -124,7 +124,8 @@ export default function Product() {
           <form onSubmit={handleSubmit}>
             <fieldset disabled={isGettingToken}>
               <legend>
-                <h1>{product.label}</h1> <span>{appStage ? `Previewing ${appStage}` : ''}</span>
+                <h1>{product.label}</h1>{' '}
+                <span>{appStage ? `Previewing ${appStage}` : ''}</span>
               </legend>
 
               <input type="hidden" name="product" value={product.name} />

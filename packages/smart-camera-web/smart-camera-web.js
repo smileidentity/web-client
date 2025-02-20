@@ -1348,6 +1348,7 @@ class SmartCameraWeb extends HTMLElement {
     this.render = () => this.scwTemplateString();
     this.attachShadow({ mode: 'open' });
     this.activeScreen = null;
+    this.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
   setActiveScreen(element) {
@@ -1494,25 +1495,51 @@ class SmartCameraWeb extends HTMLElement {
     }
 
     if (this.takeDocumentPhotoButton)
-      this.takeDocumentPhotoButton.addEventListener('click', () =>
-        this._startIDCamera(),
-      );
+      this.takeDocumentPhotoButton.addEventListener('click', () => {
+        this._startIDCamera();
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-front-capture-start'),
+        );
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-front-origin', {
+            detail: { imageOrigin: 'camera_manual_capture' },
+          }),
+        );
+      });
     if (this.skipBackOfDocumentPhotoButton)
       this.skipBackOfDocumentPhotoButton.addEventListener('click', () =>
         this._skipBackDocument(),
       );
     if (this.takeBackOfDocumentPhotoButton)
-      this.takeBackOfDocumentPhotoButton.addEventListener('click', () =>
-        this._startIDCamera(),
-      );
+      this.takeBackOfDocumentPhotoButton.addEventListener('click', () => {
+        this._startIDCamera();
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-back-capture-start'),
+        );
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-back-origin', {
+            detail: { imageOrigin: 'camera_manual_capture' },
+          }),
+        );
+      });
     if (this.uploadDocumentPhotoButton)
-      this.uploadDocumentPhotoButton.addEventListener('change', (e) =>
-        this._uploadDocument(e),
-      );
+      this.uploadDocumentPhotoButton.addEventListener('change', (e) => {
+        this._uploadDocument(e);
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-front-origin', {
+            detail: { imageOrigin: 'gallery' },
+          }),
+        );
+      });
     if (this.uploadBackOfDocumentPhotoButton)
-      this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) =>
-        this._uploadDocument(e),
-      );
+      this.uploadBackOfDocumentPhotoButton.addEventListener('change', (e) => {
+        this._uploadDocument(e);
+        this.dispatchEvent(
+          new CustomEvent('metadata.document-back-origin', {
+            detail: { imageOrigin: 'gallery' },
+          }),
+        );
+      });
 
     this.backToSelfie = this.shadowRoot.querySelector('#back-button-selfie');
     this.backToIdEntryButton = this.shadowRoot.querySelector(
@@ -1559,18 +1586,38 @@ class SmartCameraWeb extends HTMLElement {
 
     this.selectIDImage.addEventListener('click', () => {
       this._selectIDImage();
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-front-capture-end'),
+      );
     });
 
     this.selectBackOfIDImage.addEventListener('click', () => {
       this._selectIDImage(true);
+      this.dispatchEvent(new CustomEvent('metadata.document-back-capture-end'));
     });
 
     this.captureIDImage.addEventListener('click', () => {
       this._captureIDImage();
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-front-capture-start'),
+      );
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-front-origin', {
+          detail: { imageOrigin: 'camera_manual_capture' },
+        }),
+      );
     });
 
     this.captureBackOfIDImage.addEventListener('click', () => {
       this._captureIDImage();
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-back-capture-start'),
+      );
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-back-origin', {
+          detail: { imageOrigin: 'camera_manual_capture' },
+        }),
+      );
     });
 
     this.reStartImageCapture.addEventListener('click', () => {
@@ -1579,10 +1626,16 @@ class SmartCameraWeb extends HTMLElement {
 
     this.reCaptureIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-front-capture-retry'),
+      );
     });
 
     this.reCaptureBackOfIDImage.addEventListener('click', () => {
       this._reCaptureIDImage();
+      this.dispatchEvent(
+        new CustomEvent('metadata.document-back-capture-retry'),
+      );
     });
   }
 
@@ -1601,7 +1654,19 @@ class SmartCameraWeb extends HTMLElement {
 
     navigator.mediaDevices
       .getUserMedia({ audio: false, video: true })
-      .then((stream) => {
+      .then(async (stream) => {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevice = devices.find(
+          (device) =>
+            device.kind === 'videoinput' &&
+            stream.getVideoTracks()[0].getSettings().deviceId ===
+              device.deviceId,
+        );
+        this.dispatchEvent(
+          new CustomEvent('metadata.camera-name', {
+            detail: { cameraName: videoDevice?.label },
+          }),
+        );
         try {
           this.handleSuccess(stream);
         } catch (error) {
@@ -1737,6 +1802,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _startImageCapture() {
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
     this.startImageCapture.disabled = true;
 
     /**
@@ -2026,6 +2092,17 @@ class SmartCameraWeb extends HTMLElement {
           zoom: isSamsungMultiCameraDevice() ? 2.0 : 1.0,
         },
       });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevice = devices.find(
+        (device) =>
+          device.kind === 'videoinput' &&
+          stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
+      );
+      this.dispatchEvent(
+        new CustomEvent('metadata.camera-name', {
+          detail: { cameraName: videoDevice?.label },
+        }),
+      );
 
       if (this.activeScreen === this.idEntryScreen) {
         this.setActiveScreen(this.IDCameraScreen);
@@ -2040,6 +2117,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _selectSelfie() {
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-end'));
     if (!this.captureID) {
       this._publishSelectedImages();
     } else {
@@ -2072,6 +2150,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   async _reStartImageCapture() {
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-retry'));
     this.startImageCapture.disabled = false;
 
     this._rawImages = [];
@@ -2082,6 +2161,17 @@ class SmartCameraWeb extends HTMLElement {
         audio: false,
         video: true,
       });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevice = devices.find(
+        (device) =>
+          device.kind === 'videoinput' &&
+          stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
+      );
+      this.dispatchEvent(
+        new CustomEvent('metadata.camera-name', {
+          detail: { cameraName: videoDevice?.label },
+        }),
+      );
 
       this.handleSuccess(stream);
     } catch (e) {

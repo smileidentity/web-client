@@ -170,7 +170,7 @@ export default function Product() {
 
           <script
             src={`https://cdn.smileidentity.com/inline/${
-              appStage.includes('preview') ? appStage : 'v1'
+              appStage === 'main' ? 'v1' : appStage
             }/js/script.min.js`}
           ></script>
         </>

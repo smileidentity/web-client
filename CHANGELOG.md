@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - Fix abort error when access biometric kyc page
+- Collect additional metadata
 
 ## [1.4.7] - 2024-12-23
 

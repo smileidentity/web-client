@@ -1,5 +1,6 @@
+import { UAParser } from 'ua-parser-js';
+
 import { getFingerprint } from './fingerprint';
-import { parseUserAgent } from './user-agent';
 
 const defaultMetadata = {
   device_model: null, // string
@@ -38,11 +39,14 @@ let captureStartTimestamp = null;
 export const initializeMetadata = async () => {
   metadata = { ...defaultMetadata };
   metadata.user_agent = navigator.userAgent;
-  const parsedUserAgent = parseUserAgent(navigator.userAgent);
-  metadata.device_model = parsedUserAgent.device || null;
-  metadata.device_os = parsedUserAgent.os;
-  metadata.browser_name = parsedUserAgent.browser;
-  metadata.browser_version = parsedUserAgent.browserVersion;
+  const parsedUserAgent = UAParser(navigator.userAgent);
+  metadata.device_model =
+    `${parsedUserAgent.device.vendor || ''} ${parsedUserAgent.device.model || ''}`.trim() ||
+    null;
+  metadata.device_os =
+    `${parsedUserAgent.os.name} ${parsedUserAgent.os.version}`.trim() || null;
+  metadata.browser_name = parsedUserAgent.browser.name;
+  metadata.browser_version = parsedUserAgent.browser.version;
   metadata.fingerprint = await getFingerprint();
   metadata.active_liveness_type = 'smile';
   metadata.active_liveness_version = '0.0.1';

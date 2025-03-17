@@ -15,7 +15,7 @@ const defaultMetadata = {
   document_front_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
   document_front_capture_camera_name: null, // string
   selfie_capture_duration_ms: null, // number
-  selfie_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
+  selfie_image_origin: null, // font_camera | back_camera
   camera_name: null, // string - for selfies
   active_liveness_type: null, // headpose | smile
   active_liveness_version: null, // string
@@ -143,11 +143,9 @@ export const endTrackDocumentBackCapture = () => {
 
 /**
  * Start tracking the selfie capture process. This function should be called
- * once the user starts the selfie capture process. It sets the
- * selfie_image_origin to 'camera'.
+ * once the user starts the selfie capture process.
  */
 export const beginTrackSelfieCapture = () => {
-  metadata.selfie_image_origin = 'camera_manual_capture';
   capturing = 'selfie';
   if (activeCameraName) {
     metadata.camera_name = activeCameraName;
@@ -227,6 +225,9 @@ eventTarget.addEventListener('metadata.document-back-origin', (event) => {
 });
 
 // Selfie
+eventTarget.addEventListener('metadata.selfie-origin', (event) => {
+  metadata.selfie_image_origin = event.detail.imageOrigin;
+});
 eventTarget.addEventListener('metadata.selfie-capture-start', () => {
   beginTrackSelfieCapture();
 });

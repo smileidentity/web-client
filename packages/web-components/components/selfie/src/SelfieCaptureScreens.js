@@ -106,6 +106,16 @@ class SelfieCaptureScreens extends HTMLElement {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.selfie-capture-start'),
         );
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.selfie-origin', {
+            detail: {
+              imageOrigin: {
+                environment: 'back_camera',
+                user: 'front_camera',
+              }[this.getAgentMode()],
+            },
+          }),
+        );
       },
     );
     this.selfieInstruction.addEventListener(

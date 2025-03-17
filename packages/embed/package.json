@@ -33,6 +33,7 @@
     "@smile_identity/smart-camera-web": "file:../smart-camera-web",
     "@smileid/web-components": "file:../web-components",
     "jszip": "^3.10.1",
+    "ua-parser-js": "^2.0.2",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {

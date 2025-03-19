@@ -39,7 +39,7 @@ let captureStartTimestamp = null;
 export const initializeMetadata = async () => {
   metadata = { ...defaultMetadata };
   metadata.user_agent = navigator.userAgent;
-  const parsedUserAgent = UAParser(navigator.userAgent);
+  const parsedUserAgent = await UAParser(navigator.userAgent).withClientHints();
   metadata.device_model =
     `${parsedUserAgent.device.vendor || ''} ${parsedUserAgent.device.model || ''}`.trim() ||
     null;

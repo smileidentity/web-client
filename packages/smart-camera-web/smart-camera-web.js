@@ -1640,6 +1640,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   init() {
+    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
     this._videoStreamDurationInMS = 7800;
     this._imageCaptureIntervalInMS = 200;
 
@@ -1661,6 +1662,13 @@ class SmartCameraWeb extends HTMLElement {
             device.kind === 'videoinput' &&
             stream.getVideoTracks()[0].getSettings().deviceId ===
               device.deviceId,
+        );
+        this.dispatchEvent(
+          new CustomEvent('metadata.selfie-origin', {
+            detail: {
+              imageOrigin: 'front_camera',
+            },
+          }),
         );
         this.dispatchEvent(
           new CustomEvent('metadata.camera-name', {
@@ -1802,7 +1810,6 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _startImageCapture() {
-    this.dispatchEvent(new CustomEvent('metadata.selfie-capture-start'));
     this.startImageCapture.disabled = true;
 
     /**

@@ -16,7 +16,7 @@ const defaultMetadata = {
   document_front_image_origin: null, // gallery | camera_manual_capture | camera_auto_capture
   document_front_capture_camera_name: null, // string
   selfie_capture_duration_ms: null, // number
-  selfie_image_origin: null, // font_camera | back_camera
+  selfie_image_origin: null, // front_camera | back_camera
   camera_name: null, // string - for selfies
   active_liveness_type: null, // headpose | smile
   active_liveness_version: null, // string

@@ -80,7 +80,7 @@ describe('No ID Selection', () => {
           metadata[name] = value;
         });
         expect(metadata.browser_version).to.match(/^\d+(\.\d+)+$/);
-        expect(metadata.selfie_image_origin).to.equal('camera_manual_capture');
+        expect(metadata.selfie_image_origin).to.equal('front_camera');
         expect(metadata.active_liveness_type).to.equal('smile');
         expect(metadata.active_liveness_version).to.equal('0.0.1');
         expect(metadata.fingerprint).to.be.a('string');

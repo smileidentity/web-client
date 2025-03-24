@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-03-24
+
 - Fix abort error when access biometric kyc page
+- Collect additional metadata for biometric kyc, SmartSelfie auth, docv, and enhanced docv
 
 ## [1.4.7] - 2024-12-23
 

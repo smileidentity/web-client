@@ -7,6 +7,8 @@ updates:
       interval: monthly
       day: wednesday
       time: '11:00'
+    pull-request-branch-name:
+      separator: '-'
   - package-ecosystem: github-actions
     open-pull-requests-limit: 0
     directory: /

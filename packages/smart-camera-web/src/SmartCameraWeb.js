@@ -1680,11 +1680,17 @@ class SmartCameraWeb extends HTMLElement {
     if (isPortrait) {
       // Portrait orientation (taller than wide)
       canvas.width = 240;
-      canvas.height = Math.max(320, (canvas.width * this._video.videoHeight) / this._video.videoWidth);
+      canvas.height = Math.max(
+        320,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
     } else {
       // Landscape orientation (wider than tall)
       canvas.height = 240;
-      canvas.width = Math.max(320, (canvas.height * this._video.videoWidth) / this._video.videoHeight);
+      canvas.width = Math.max(
+        320,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
     }
 
     this._drawImage(canvas);
@@ -1701,11 +1707,17 @@ class SmartCameraWeb extends HTMLElement {
     if (isPortrait) {
       // Portrait orientation (taller than wide)
       canvas.width = 480;
-      canvas.height = Math.max(640, (canvas.width * this._video.videoHeight) / this._video.videoWidth);
+      canvas.height = Math.max(
+        640,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
     } else {
       // Landscape orientation (wider than tall)
       canvas.height = 480;
-      canvas.width = Math.max(640, (canvas.height * this._video.videoWidth) / this._video.videoHeight);
+      canvas.width = Math.max(
+        640,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
     }
 
     this._drawImage(canvas);

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Bump selfie capture resolution to 480 x 640
+- Bump proof of liveness capture resolution to 240 x 320
+
 ## [1.5.0] - 2025-03-24
 
 - Fix abort error when access biometric kyc page

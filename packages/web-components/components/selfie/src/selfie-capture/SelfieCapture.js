@@ -706,9 +706,25 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');
-    canvas.width = 240;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    // Determine orientation of the video
+    const isPortrait = this._video.videoHeight > this._video.videoWidth;
+
+    // Set dimensions based on orientation, ensuring minimums
+    if (isPortrait) {
+      // Portrait orientation (taller than wide)
+      canvas.width = 240;
+      canvas.height = Math.max(
+        320,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
+    } else {
+      // Landscape orientation (wider than tall)
+      canvas.height = 240;
+      canvas.width = Math.max(
+        320,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
+    }
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -718,9 +734,25 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _captureReferencePhoto() {
     const canvas = document.createElement('canvas');
-    canvas.width = 480;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    // Determine orientation of the video
+    const isPortrait = this._video.videoHeight > this._video.videoWidth;
+
+    // Set dimensions based on orientation, ensuring minimums
+    if (isPortrait) {
+      // Portrait orientation (taller than wide)
+      canvas.width = 480;
+      canvas.height = Math.max(
+        640,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
+    } else {
+      // Landscape orientation (wider than tall)
+      canvas.height = 480;
+      canvas.width = Math.max(
+        640,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
+    }
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);

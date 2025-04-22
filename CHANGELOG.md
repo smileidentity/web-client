@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.1]
+## [1.5.1] - 2025-04-22
 
 - Bump selfie capture minimum resolution to 480 x 640
 - Bump proof of liveness capture minimum resolution to 240 x 320

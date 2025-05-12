@@ -1,6 +1,6 @@
 {
   "name": "@smileid/web",
-  "version": "1.4.4",
+  "version": "1.5.1",
   "description": "A collection of SmileID browser clients and components",
   "main": "index.js",
   "private": true,
@@ -26,13 +26,13 @@
     "@storybook/addon-links": "^8.2.7",
     "@storybook/blocks": "^8.2.7",
     "@storybook/web-components": "^8.2.7",
-    "@storybook/web-components-vite": "^8.2.7",
-    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "@storybook/web-components-vite": "^8.6.8",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
     "check-dependency-version-consistency": "^4.1.0",
     "prettier": "^3.3.3",
-    "storybook": "^8.2.7"
+    "storybook": "^8.6.8"
   },
   "dependencies": {
-    "sst": "3.0.74"
+    "sst": "3.4.5"
   }
 }

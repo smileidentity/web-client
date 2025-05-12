@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2025-04-22
+
+- Bump selfie capture minimum resolution to 480 x 640
+- Bump proof of liveness capture minimum resolution to 240 x 320
+
+## [1.5.0] - 2025-03-24
+
+- Fix abort error when access biometric kyc page
+- Collect additional metadata for biometric kyc, SmartSelfie auth, docv, and enhanced docv
+
+## [1.4.7] - 2024-12-23
+
+### Added
+
+- Added support for both `hide-back-to-host` and `hide-back` to web components (selfie capture instructions and smart camera web)
+
+## Changed
+
+- Change embed to use the latest web components via file dependency
+- Added support for both `hide-back-to-host` and `hide-back` to web components (selfie capture instructions and smart camera web)
+
+## [1.4.6] - 2024-12-19
+
+### Changed
+
+- Fixed selfie import
+
+## [1.4.5] - 2024-12-16
+
 ### Changed
 
 - Handle errors gracefully

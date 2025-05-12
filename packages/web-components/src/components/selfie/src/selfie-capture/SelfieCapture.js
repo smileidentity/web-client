@@ -1,8 +1,10 @@
 import { IMAGE_TYPE } from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
-import { version as COMPONENTS_VERSION } from '../../../../../package.json';
+import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
+
+const COMPONENTS_VERSION = packageJson.version;
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 
@@ -552,10 +554,21 @@ async function getPermissions(
   constraints = { facingMode: 'user' },
 ) {
   try {
-    await SmartCamera.getMedia({
+    const stream = await SmartCamera.getMedia({
       audio: false,
       video: constraints,
     });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevice = devices.find(
+      (device) =>
+        device.kind === 'videoinput' &&
+        stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
+    );
+    window.dispatchEvent(
+      new CustomEvent('metadata.camera-name', {
+        detail: { cameraName: videoDevice?.label },
+      }),
+    );
     captureScreen?.removeAttribute('data-camera-error');
     captureScreen?.setAttribute('data-camera-ready', true);
   } catch (error) {
@@ -693,9 +706,25 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _capturePOLPhoto() {
     const canvas = document.createElement('canvas');
-    canvas.width = 240;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    // Determine orientation of the video
+    const isPortrait = this._video.videoHeight > this._video.videoWidth;
+
+    // Set dimensions based on orientation, ensuring minimums
+    if (isPortrait) {
+      // Portrait orientation (taller than wide)
+      canvas.width = 240;
+      canvas.height = Math.max(
+        320,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
+    } else {
+      // Landscape orientation (wider than tall)
+      canvas.height = 240;
+      canvas.width = Math.max(
+        320,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
+    }
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -705,9 +734,25 @@ class SelfieCaptureScreen extends HTMLElement {
 
   _captureReferencePhoto() {
     const canvas = document.createElement('canvas');
-    canvas.width = 480;
-    canvas.height =
-      (canvas.width * this._video.videoHeight) / this._video.videoWidth;
+    // Determine orientation of the video
+    const isPortrait = this._video.videoHeight > this._video.videoWidth;
+
+    // Set dimensions based on orientation, ensuring minimums
+    if (isPortrait) {
+      // Portrait orientation (taller than wide)
+      canvas.width = 480;
+      canvas.height = Math.max(
+        640,
+        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      );
+    } else {
+      // Landscape orientation (wider than tall)
+      canvas.height = 480;
+      canvas.width = Math.max(
+        640,
+        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      );
+    }
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);

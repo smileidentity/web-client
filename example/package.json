@@ -1,7 +1,7 @@
 {
   "name": "example",
   "private": true,
-  "version": "1.4.4",
+  "version": "1.5.1",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -13,12 +13,12 @@
   "dependencies": {
     "@smileid/web-components": "file:../packages/web-components",
     "cors": "^2.8.5",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "smile-identity-core": "^3.1.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^1.1.0",
-    "vite": "^5.4.6"
+    "vite": "^5.4.17"
   }
 }

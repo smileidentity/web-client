@@ -518,7 +518,6 @@ function templateString() {
 
     <div className="error">
       ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
-      ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </div>
     <div class='section | flow' ${this.cameraError ? 'hidden' : ''}>
       <div class='video-container'>

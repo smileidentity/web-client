@@ -17,12 +17,33 @@ const entryPoints = [
   './src/components/smart-camera-web/src/SmartCameraWeb.js',
 ];
 const buildDir = 'dist';
+const compatDir = 'build'; // For compatibility with older browsers
+const isProduction = process.env.NODE_ENV !== 'development';
+
+const debugLog = (message, ...options) => {
+  if (process.env.DEBUG) {
+    // eslint-disable-next-line no-console
+    console.debug(message, ...options);
+  }
+};
+
+/**
+ * Cleans a directory by removing it if it exists.
+ * @param {string} dirPath - The path to the directory.
+ */
+const cleanDir = (dirPath) => {
+  if (fs.existsSync(dirPath)) {
+    debugLog(`Cleaning directory: ${dirPath}`);
+    fs.rmSync(dirPath, { recursive: true });
+  }
+};
 
 /**
  * Ensures a directory exists. If not, creates it.
  * @param {string} dirPath - The path to the directory.
  */
 const ensureDirSync = (dirPath) => {
+  debugLog(`Ensuring directory exists: ${dirPath}`);
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
@@ -35,6 +56,7 @@ const ensureDirSync = (dirPath) => {
  * @param {Function} filterFn - A function to filter which files to copy.
  */
 const copySync = (srcDir, destDir, filterFn) => {
+  debugLog(`Copying files from ${srcDir} to ${destDir}`);
   const entries = fs.readdirSync(srcDir, { withFileTypes: true });
 
   entries.forEach((entry) => {
@@ -73,15 +95,13 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * and copies necessary files.
  */
 const prebuild = () => {
-  if (fs.existsSync(buildDir)) {
-    fs.rmSync(buildDir, { recursive: true });
-  }
+  cleanDir(buildDir);
   ensureDirSync(buildDir);
-  ensureDirSync(`${buildDir}/cjs`);
+  ensureDirSync(`${buildDir}/${compatDir}`);
   copyFiles('.', '*.json', buildDir);
   copyFiles('.', '*.md', buildDir);
-  copyFiles('.', '*.md', `${buildDir}/cjs`);
-  copySync('./src', `${buildDir}/cjs`, (file) => file.endsWith('.md'));
+  copyFiles('.', '*.md', `${buildDir}/${compatDir}`);
+  copySync('./src', `${buildDir}/${compatDir}`, (file) => file.endsWith('.md'));
   copySync('./src', `${buildDir}`, (file) => file.endsWith('.md'));
 };
 
@@ -107,7 +127,10 @@ const buildOptions = {
     SMILE_COMPONENTS_VERSION: JSON.stringify(version),
   },
   entryPoints,
-  minify: process.env.NODE_ENV !== 'development',
+  format: 'esm',
+  minify: isProduction,
+  platform: 'browser',
+  sourcemap: isProduction,
 };
 
 const buildESM = () => esbuild.build({
@@ -116,13 +139,13 @@ const buildESM = () => esbuild.build({
   outdir: `${buildDir}`,
 });
 
-const buildCJS = () => esbuild.build({
+const buildIife = () => esbuild.build({
   ...buildOptions,
-  format: 'cjs',
-  outdir: `${buildDir}/cjs`,
+  format: 'iife',
+  outdir: `${buildDir}/${compatDir}`,
 });
 
-Promise.all([buildESM(), buildCJS()])
+Promise.all([buildESM(), buildIife()])
   .then(() => console.info('Build completed!'))
   .catch((error) => {
     console.error('Build failed:', error);

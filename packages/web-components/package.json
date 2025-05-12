@@ -50,7 +50,7 @@
     "lint:fix": "eslint . --ext .js --fix",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",
     "lint": "eslint . --ext .js",
-    "start": "npm run build:dev && npx serve -p 8000 dist",
+    "start": "npm run build && npx serve -p 8000 dist",
     "test": "npx cypress run"
   },
   "description": "A collection of Web Components used by SmileID",

@@ -133,17 +133,19 @@ const buildOptions = {
   sourcemap: isProduction,
 };
 
-const buildESM = () => esbuild.build({
-  ...buildOptions,
-  format: 'esm',
-  outdir: `${buildDir}`,
-});
+const buildESM = () =>
+  esbuild.build({
+    ...buildOptions,
+    format: 'esm',
+    outdir: `${buildDir}`,
+  });
 
-const buildIife = () => esbuild.build({
-  ...buildOptions,
-  format: 'iife',
-  outdir: `${buildDir}/${compatDir}`,
-});
+const buildIife = () =>
+  esbuild.build({
+    ...buildOptions,
+    format: 'iife',
+    outdir: `${buildDir}/${compatDir}`,
+  });
 
 Promise.all([buildESM(), buildIife()])
   .then(() => console.info('Build completed!'))

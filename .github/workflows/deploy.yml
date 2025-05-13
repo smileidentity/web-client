@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 5
     defaults:
       run:
-        working-directory: ./packages/smart-camera-web
+        working-directory: ./packages/web-components
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
         with:
-          path: packages/smart-camera-web
+          path: packages/web-components
       - name: set destination directory
         id: set_destination
         env:
@@ -38,7 +38,11 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy to s3 / cloudfront
         run: |
-          aws s3 sync --follow-symlinks --delete --exclude '*' --include 'smart-camera-web.js' . s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
+          aws s3 sync --follow-symlinks --delete \
+          --exclude '*' \
+          --include 'smart-camera-web.js' \
+          --include '*/smart-camera-web.js' \
+          .dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
     needs: [test]
     runs-on: ubuntu-latest

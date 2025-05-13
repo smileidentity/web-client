@@ -34,7 +34,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: deploy preview to s3 (smart-camera-web)
+      - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
             --exclude "*" \

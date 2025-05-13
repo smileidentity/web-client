@@ -126,11 +126,14 @@ class SelfieCaptureScreens extends HTMLElement {
     );
 
     this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      this.selfieCapture.reset();
+      SmartCamera.stopMedia();
       if (this.hideInstructions) {
-        this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
-      } else {
-        this.setActiveScreen(this.selfieInstruction);
+        this.handleBackEvents();
+        return;
       }
+
+      this.setActiveScreen(this.selfieInstruction);
     });
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
@@ -141,17 +144,6 @@ class SelfieCaptureScreens extends HTMLElement {
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
-    });
-
-    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
-      this.selfieCapture.reset();
-      SmartCamera.stopMedia();
-      if (this.hideInstructions) {
-        this.handleBackEvents();
-        return;
-      }
-
-      this.setActiveScreen(this.selfieInstruction);
     });
 
     this.selfieReview.addEventListener(

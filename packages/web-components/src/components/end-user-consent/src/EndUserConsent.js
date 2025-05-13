@@ -782,7 +782,7 @@ class EndUserConsent extends HTMLElement {
   }
 }
 
-if ('customElements' in window) {
+if ('customElements' in window && !window.customElements.get('end-user-consent')) {
   window.customElements.define('end-user-consent', EndUserConsent);
 }
 

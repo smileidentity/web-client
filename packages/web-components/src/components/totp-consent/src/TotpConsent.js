@@ -939,7 +939,7 @@ class TotpConsent extends HTMLElement {
   }
 }
 
-if ('customElements' in window) {
+if ('customElements' in window && !window.customElements.get('totp-consent')) {
   window.customElements.define('totp-consent', TotpConsent);
 }
 

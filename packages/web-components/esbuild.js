@@ -95,6 +95,8 @@ const copyFiles = (srcDir, pattern, destDir) => {
  * and copies necessary files.
  */
 const prebuild = () => {
+  console.info('Building web components...', version, process.env.NODE_ENV);
+
   cleanDir(buildDir);
   ensureDirSync(buildDir);
   ensureDirSync(`${buildDir}/${compatDir}`);
@@ -120,9 +122,6 @@ prebuild();
 if (process.env.NODE_ENV === 'development') {
   prebuildPages();
 }
-
-console.log('Building web components...', version, process.env.NODE_ENV);
-
 
 const buildOptions = {
   bundle: true,

@@ -576,7 +576,10 @@ const Trigger = ComboboxTrigger;
 const List = ComboboxListbox;
 const Option = ComboboxOption;
 
-if ('customElements' in window && !window.customElements.get('smileid-combobox')) {
+if (
+  'customElements' in window &&
+  !window.customElements.get('smileid-combobox')
+) {
   window.customElements.define('smileid-combobox', Root);
   window.customElements.define('smileid-combobox-trigger', Trigger);
   window.customElements.define('smileid-combobox-listbox', List);

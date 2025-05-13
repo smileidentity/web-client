@@ -474,7 +474,10 @@ button:disabled {
   }
 }
 
-if ('customElements' in window && !window.customElements.get('smileid-signature-pad')) {
+if (
+  'customElements' in window &&
+  !window.customElements.get('smileid-signature-pad')
+) {
   window.customElements.define('smileid-signature-pad', SignaturePad);
 }
 

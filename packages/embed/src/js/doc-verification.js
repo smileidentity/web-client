@@ -1,4 +1,6 @@
 import '@smileid/web-components/combobox';
+import '@smileid/web-components/smart-camera-web';
+
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
@@ -104,11 +106,6 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

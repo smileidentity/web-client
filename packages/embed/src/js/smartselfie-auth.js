@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 
@@ -57,12 +58,8 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-          CloseIframeButton.setAttribute('hidden', true);
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
+
+        CloseIframeButton.setAttribute('hidden', true);
         partner_params = getPartnerParams();
         id_info = {};
 

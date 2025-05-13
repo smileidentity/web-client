@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
+import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 
@@ -124,11 +125,6 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

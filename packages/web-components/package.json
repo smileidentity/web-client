@@ -2,46 +2,26 @@
   "name": "@smileid/web-components",
   "version": "1.5.1",
   "private": "true",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/index.js",
+  "main": "index.js",
   "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./build/index.js"
-    },
-    "./combobox": {
-      "import": "./components/combobox/src/index.js",
-      "require": "./dist/build/components/combobox/src/index.js"
-    },
-    "./document-capture": {
-      "import": "./dist/components/document/src/index.js",
-      "require": "./dist/build/components/document/src/index.js"
-    },
-    "./end-user-consent": {
-      "import": "./dist/components/end-user-consent/src/index.js",
-      "require": "./dist/build/components/end-user-consent/src/index.js"
-    },
-    "./navigation": {
-      "import": "./dist/components/navigation/src/index.js",
-      "require": "./dist/build/components/navigation/src/index.js"
-    },
-    "./selfie-capture": {
-      "import": "./dist/components/selfie/src/index.js",
-      "require": "./dist/build/components/selfie/src/index.js"
-    },
-    "./signature-pad": {
-      "import": "./dist/components/signature-pad/src/index.js",
-      "require": "./dist/build/components/signature-pad/src/index.js"
-    },
-    "./totp-consent": {
-      "import": "./dist/components/totp-consent/src/index.js",
-      "require": "./dist/build/components/totp-consent/src/index.js"
-    },
-    "./smart-camera-web": {
-      "import": "./dist/components/smart-camera-web/src/SmartCameraWeb.js",
-      "require": "./dist/build/components/smart-camera-web/src/SmartCameraWeb.js"
-    }
+    ".": "./index.js",
+    "./combobox": "./src/components/combobox/src/index.js",
+    "./document-capture": "./src/components/document/src/index.js",
+    "./end-user-consent": "./src/components/end-user-consent/src/index.js",
+    "./navigation": "./src/components/navigation/src/index.js",
+    "./selfie-capture": "./src/components/selfie/src/index.js",
+    "./signature-pad": "./src/components/signature-pad/src/index.js",
+    "./totp-consent": "./src/components/totp-consent/src/index.js",
+    "./smart-camera-web": "./src/components/smart-camera-web/src/SmartCameraWeb.js"
   },
+  "files": [
+    "./src/components/",
+    "./src/domain/",
+    "./src/styles/",
+    "./README.md",
+    "index.js",
+    "package.json"
+  ],
   "scripts": {
     "build": "cross-env NODE_ENV=production node esbuild.js",
     "build:dev": "cross-env NODE_ENV=development node esbuild.js",

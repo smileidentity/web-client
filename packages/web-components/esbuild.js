@@ -121,13 +121,15 @@ if (process.env.NODE_ENV === 'development') {
   prebuildPages();
 }
 
+console.log('Building web components...', version, process.env.NODE_ENV);
+
+
 const buildOptions = {
   bundle: true,
   define: {
     SMILE_COMPONENTS_VERSION: JSON.stringify(version),
   },
   entryPoints,
-  format: 'esm',
   minify: isProduction,
   platform: 'browser',
   sourcemap: isProduction,

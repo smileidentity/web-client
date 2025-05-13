@@ -173,7 +173,7 @@ const renameAndGzip = () => {
   }
 
   // Process IIFE build output
-  const iifeOldPath = path.join(buildDir, compatDir, entryPoints[0]);
+  const iifeOldPath = path.join(buildDir, compatDir, 'index.js');
   const iifeNewPath = path.join(buildDir, compatDir, 'smart-camera-web.js');
 
   if (fs.existsSync(iifeOldPath)) {

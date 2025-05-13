@@ -2,10 +2,14 @@ import esbuild from 'esbuild';
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'node:module';
+import { gzipSync } from 'zlib'; // added for gzip compression
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
 
+// the first entry point is the main point but the rest are added for when
+// a particular component is imported. The first entry point is renamed to smart-camera-web.js
+// and gzipped for the final build.
 const entryPoints = [
   './src/index.js',
   './src/components/combobox/src/index.js',
@@ -130,10 +134,12 @@ const buildOptions = {
   },
   entryPoints,
   minify: isProduction,
+  outbase: '.',
   platform: 'browser',
   sourcemap: isProduction,
 };
 
+// TODO:  Barnabas: add code splitting for the components
 const buildESM = () =>
   esbuild.build({
     ...buildOptions,
@@ -145,11 +151,45 @@ const buildIife = () =>
   esbuild.build({
     ...buildOptions,
     format: 'iife',
+    outbase: './src',
     outdir: `${buildDir}/${compatDir}`,
   });
 
+/**
+ * After build completion, renames the bundle generated from
+ * src/index.js to smart-camera-web.js and compresses it with gzip.
+ */
+const renameAndGzip = () => {
+  // Process ESM build output
+  const esmOldPath = path.join(buildDir, entryPoints[0]);
+  const esmNewPath = path.join(buildDir, 'smart-camera-web.js');
+
+  if (fs.existsSync(esmOldPath)) {
+    fs.renameSync(esmOldPath, esmNewPath);
+    const fileContent = fs.readFileSync(esmNewPath);
+    const zippedContent = gzipSync(fileContent);
+    fs.writeFileSync(`${esmNewPath}.gz`, zippedContent);
+    console.info('Renamed and gzipped esm file:', esmNewPath);
+  }
+
+  // Process IIFE build output
+  const iifeOldPath = path.join(buildDir, compatDir, entryPoints[0]);
+  const iifeNewPath = path.join(buildDir, compatDir, 'smart-camera-web.js');
+
+  if (fs.existsSync(iifeOldPath)) {
+    fs.renameSync(iifeOldPath, iifeNewPath);
+    const fileContent = fs.readFileSync(iifeNewPath);
+    const zippedContent = gzipSync(fileContent);
+    fs.writeFileSync(`${iifeNewPath}.gz`, zippedContent);
+    console.info('Renamed and gzipped iife file:', iifeNewPath);
+  }
+};
+
 Promise.all([buildESM(), buildIife()])
-  .then(() => console.info('Build completed!'))
+  .then(() => {
+    renameAndGzip();
+    console.info('Build completed!');
+  })
   .catch((error) => {
     console.error('Build failed:', error);
     process.exit(1);

@@ -21,7 +21,7 @@ const entryPoints = [
   './src/components/smart-camera-web/src/SmartCameraWeb.js',
 ];
 const buildDir = 'dist';
-const compatDir = 'build'; // For compatibility with older browsers
+const compatDir = 'esm'; // For compatibility with modern browsers
 const isProduction = process.env.NODE_ENV !== 'development';
 
 const debugLog = (message, ...options) => {
@@ -144,15 +144,15 @@ const buildESM = () =>
   esbuild.build({
     ...buildOptions,
     format: 'esm',
-    outdir: `${buildDir}`,
+    outbase: './src',
+    outdir: `${buildDir}/${compatDir}`,
   });
 
 const buildIife = () =>
   esbuild.build({
     ...buildOptions,
     format: 'iife',
-    outbase: './src',
-    outdir: `${buildDir}/${compatDir}`,
+    outdir: `${buildDir}`,
   });
 
 /**
@@ -160,21 +160,9 @@ const buildIife = () =>
  * src/index.js to smart-camera-web.js and compresses it with gzip.
  */
 const renameAndGzip = () => {
-  // Process ESM build output
-  const esmOldPath = path.join(buildDir, entryPoints[0]);
-  const esmNewPath = path.join(buildDir, 'smart-camera-web.js');
-
-  if (fs.existsSync(esmOldPath)) {
-    fs.renameSync(esmOldPath, esmNewPath);
-    const fileContent = fs.readFileSync(esmNewPath);
-    const zippedContent = gzipSync(fileContent);
-    fs.writeFileSync(`${esmNewPath}.gz`, zippedContent);
-    console.info('Renamed and gzipped esm file:', esmNewPath);
-  }
-
   // Process IIFE build output
-  const iifeOldPath = path.join(buildDir, compatDir, 'index.js');
-  const iifeNewPath = path.join(buildDir, compatDir, 'smart-camera-web.js');
+  const iifeOldPath = path.join(buildDir, entryPoints[0]);
+  const iifeNewPath = path.join(buildDir, 'smart-camera-web.js');
 
   if (fs.existsSync(iifeOldPath)) {
     fs.renameSync(iifeOldPath, iifeNewPath);
@@ -182,6 +170,18 @@ const renameAndGzip = () => {
     const zippedContent = gzipSync(fileContent);
     fs.writeFileSync(`${iifeNewPath}.gz`, zippedContent);
     console.info('Renamed and gzipped iife file:', iifeNewPath);
+  }
+
+  // Process ESM build output
+  const esmOldPath = path.join(buildDir, compatDir, 'index.js');
+  const esmNewPath = path.join(buildDir, compatDir, 'smart-camera-web.js');
+
+  if (fs.existsSync(esmOldPath)) {
+    fs.renameSync(esmOldPath, esmNewPath);
+    const fileContent = fs.readFileSync(esmNewPath);
+    const zippedContent = gzipSync(fileContent);
+    fs.writeFileSync(`${esmNewPath}.gz`, zippedContent);
+    console.info('Renamed and gzipped esm file:', esmNewPath);
   }
 };
 

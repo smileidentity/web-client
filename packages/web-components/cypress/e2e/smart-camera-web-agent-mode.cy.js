@@ -1,144 +1,151 @@
-context('SmartCameraWeb', () => {
-  beforeEach(() => {
-    cy.visit('/smart-camera-web-agent-mode');
-  });
+const variants = [
+  { name: 'iife', suffix: '' },
+  { name: 'esm', suffix: '?format=esm' },
+];
 
-  it('should switch from the selfie mode to agent mode"', () => {
-    cy.log('Enable agent mode for tests');
-    cy.get('smart-camera-web')
-      .invoke('attr', 'allow-agent-mode', 'true')
-      .should('have.attr', 'allow-agent-mode', 'true');
+variants.forEach(({ name, suffix }) => {
+  context(`SmartCameraWeb AgentMode [${name}]`, () => {
+    beforeEach(() => {
+      cy.visit(`/smart-camera-web-agent-mode${suffix}`);
+    });
 
-    cy.get('smart-camera-web').invoke(
-      'attr',
-      'show-agent-mode-for-tests',
-      'true',
-    );
-    cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
+    it('should switch from the selfie mode to agent mode', () => {
+      cy.log('Enable agent mode for tests');
+      cy.get('smart-camera-web')
+        .invoke('attr', 'allow-agent-mode', 'true')
+        .should('have.attr', 'allow-agent-mode', 'true');
 
-    cy.clock();
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture-instructions')
-      .shadow()
-      .find('#allow')
-      .click();
+      cy.get('smart-camera-web').invoke(
+        'attr',
+        'show-agent-mode-for-tests',
+        'true',
+      );
+      cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .should('be.visible');
+      cy.clock();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('#allow')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('contain.text', 'Agent Mode On');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .should('be.visible');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .find('#switch-camera')
-      .click();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('contain.text', 'Agent Mode On');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('contain.text', 'Agent Mode Off');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#switch-camera')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .find('#switch-camera')
-      .click();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('contain.text', 'Agent Mode Off');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('contain.text', 'Agent Mode On');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#switch-camera')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('contain.text', 'Take a Selfie');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('contain.text', 'Agent Mode On');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .find('#start-image-capture')
-      .click();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('contain.text', 'Take a Selfie');
 
-    cy.tick(8000);
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('not.be.visible');
+      cy.tick(8000);
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture-review')
-      .should('be.visible');
-  });
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('not.be.visible');
 
-  it('should not show the agent mode switch button"', () => {
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .invoke('attr', 'show-agent-mode-for-tests', 'false');
-    cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-review')
+        .should('be.visible');
+    });
 
-    cy.clock();
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture-instructions')
-      .shadow()
-      .find('#allow')
-      .click();
+    it('should not show the agent mode switch button', () => {
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .invoke('attr', 'show-agent-mode-for-tests', 'false');
+      cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .should('be.visible');
+      cy.clock();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('#allow')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .find('#switch-camera')
-      .should('not.exist');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .should('be.visible');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('contain.text', 'Take a Selfie');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#switch-camera')
+        .should('not.exist');
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .find('#start-image-capture')
-      .click();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('contain.text', 'Take a Selfie');
 
-    cy.tick(8000);
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture')
-      .shadow()
-      .should('not.be.visible');
+      cy.tick(8000);
 
-    cy.get('smart-camera-web')
-      .shadow()
-      .find('selfie-capture-review')
-      .should('be.visible');
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .should('not.be.visible');
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-review')
+        .should('be.visible');
+    });
   });
 });

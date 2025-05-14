@@ -30,7 +30,7 @@
     <script type="module" src="./smart-camera-web.js"></script>
     <script>
       const app = document.querySelector('smart-camera-web');
-      app.addEventListener('imagesComputed', async (e) => {
+      app.addEventListener('smart-camera-web.publish', async (e) => {
         console.log(e.detail);
       });
     </script>

@@ -369,9 +369,6 @@ import { getMetadata } from './metadata';
           if (!documentCaptureConfig.has_back) {
             SmartCameraWeb.setAttribute('hide-back-of-id', true);
           }
-          if (documentCaptureConfig.has_back) {
-            SmartCameraWeb.setAttribute('capture-id', 'back');
-          }
 
           if (config.document_capture_modes) {
             SmartCameraWeb.setAttribute(
@@ -473,16 +470,6 @@ import { getMetadata } from './metadata';
   }
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
-    (event) => {
-      images = event.detail.images;
-      setActiveScreen(UploadProgressScreen);
-      handleFormSubmit(event);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
@@ -493,25 +480,9 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'backExit',
-    () => {
-      setActiveScreen(SelectIDType);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.cancelled',
     () => {
       setActiveScreen(SelectIDType);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'close',
-    () => {
-      closeWindow(true);
     },
     false,
   );

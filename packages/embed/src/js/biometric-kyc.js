@@ -367,20 +367,6 @@ import { getMetadata } from './metadata';
   }
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
-    (event) => {
-      images = event.detail.images;
-      const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
-      if (idRequiresTOTPConsent) {
-        handleFormSubmit();
-      } else {
-        setActiveScreen(IDInfoForm);
-      }
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
@@ -400,14 +386,6 @@ import { getMetadata } from './metadata';
       SmartCameraWeb.reset();
       const page = pages.pop();
       setActiveScreen(page);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'close',
-    () => {
-      closeWindow(true);
     },
     false,
   );

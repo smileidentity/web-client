@@ -86,23 +86,13 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
+    'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
       const title = document.querySelector('#uploadTitle');
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'smart-camera-web.publish',
-    (event) => {
-      images = event.detail.images;
-      setActiveScreen(UploadProgressScreen);
-      handleFormSubmit(event);
     },
     false,
   );

@@ -99,6 +99,8 @@ import { getMetadata } from './metadata';
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
+    // this is to mimic the behavior of the old hosted web integration
+    SmartCameraWeb.setAttribute('hide-back-of-id', true);
     const supportedCountries = Object.keys(constraints)
       .map((countryCode) => ({
         code: countryCode,
@@ -145,6 +147,8 @@ import { getMetadata } from './metadata';
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web
           SmartCameraWeb.setAttribute('hide-back-to-host', true);
+          // this is to mimic the behavior of the old hosted web integration
+          SmartCameraWeb.setAttribute('hide-back-of-id', true);
           setActiveScreen(SmartCameraWeb);
         }
       }

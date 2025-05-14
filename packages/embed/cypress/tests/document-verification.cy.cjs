@@ -177,7 +177,6 @@ describe('legacy support - preselected country / id_types', () => {
       .invoke('attr', 'document-type')
       .should('eq', 'GREEN_BOOK');
 
-    
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()

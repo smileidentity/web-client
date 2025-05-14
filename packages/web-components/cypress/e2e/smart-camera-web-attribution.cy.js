@@ -1,7 +1,7 @@
 describe('SmartCameraWeb', () => {
   it('shows attribution by default', () => {
     cy.clock();
-    cy.visit('/smart-camera-web');
+    cy.visit('/smart-camera-web-complete-flow');
     cy.get('smart-camera-web')
       .shadow()
       .find('selfie-capture-instructions')

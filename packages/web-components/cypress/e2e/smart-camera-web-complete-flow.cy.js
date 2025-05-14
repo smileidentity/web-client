@@ -218,4 +218,157 @@ context('SmartCameraWeb', () => {
       .find('#select-id-image')
       .click();
   });
+
+  it.only('should go from the camera screen through to front document review with camera capture', () => {
+    cy.clock();
+
+    cy.get('smart-camera-web').invoke('attr', 'hide-back-of-id', '');
+
+    cy.get('smart-camera-web')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instructions')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instructions')
+      .shadow()
+      .find('#allow')
+      .click();
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-instructions')
+      .should('not.be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .should('contain.text', 'Take a Selfie');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .find('#start-image-capture')
+      .click();
+
+    cy.tick(8000);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture')
+      .shadow()
+      .should('not.be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-review')
+      .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-review')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-review')
+      .shadow()
+      .find('#select-id-image')
+      .click();
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-review')
+      .shadow()
+      .should('not.be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions')
+      .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .shadow()
+      .find('#take-photo')
+      .click();
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .should('not.be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('#capture-id-image')
+      .click();
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('not.be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
+      .should('be.visible');
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
+      .invoke('attr', 'theme-color')
+      .should('equal', themeColor);
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
+      .shadow()
+      .find('#select-id-image')
+      .click();
+
+    cy.get('smart-camera-web')
+      .shadow()
+      .find('document-capture-instructions#document-capture-instructions-back')
+      .should('not.be.visible');
+  });
 });

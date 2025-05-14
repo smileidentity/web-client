@@ -395,19 +395,11 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'backExit',
+    'smart-camera-web.cancelled',
     () => {
       SmartCameraWeb.reset();
       const page = pages.pop();
       setActiveScreen(page);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'smart-camera-web.cancelled',
-    () => {
-      setActiveScreen(SelectIDType);
     },
     false,
   );

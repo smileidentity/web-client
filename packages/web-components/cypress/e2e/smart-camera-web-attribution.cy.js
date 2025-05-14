@@ -123,7 +123,7 @@ describe('SmartCameraWeb', () => {
       .should('be.visible');
   });
 
-  it.only('hides attribution when `hide-attribution` attribute is passed', () => {
+  it('hides attribution when `hide-attribution` attribute is passed', () => {
     cy.clock();
     cy.visit('/capture-back-of-id-hide-attribution');
     cy.get('smart-camera-web')

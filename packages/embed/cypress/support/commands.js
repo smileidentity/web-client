@@ -235,36 +235,6 @@ Cypress.Commands.add('navigateThroughCameraScreens', () => {
     .find('smart-camera-web')
     .invoke('attr', 'disable-image-tests', 'true');
 
-  cy.log('navigatingThroughCameraScreens');
-
-  cy.getIFrameBody()
-    .find('smart-camera-web')
-    .shadow()
-    .find('#request-camera-access')
-    .click();
-
-  cy.getIFrameBody()
-    .find('smart-camera-web')
-    .shadow()
-    .find('#start-image-capture')
-    .click();
-
-  cy.wait(4000);
-
-  cy.getIFrameBody()
-    .find('smart-camera-web')
-    .shadow()
-    .find('#select-selfie')
-    .click();
-});
-
-Cypress.Commands.add('navigateThroughNewCameraScreens', () => {
-  cy.log('SmartCameraWeb: disable image tests');
-
-  cy.getIFrameBody()
-    .find('smart-camera-web')
-    .invoke('attr', 'disable-image-tests', 'true');
-
   cy.getIFrameBody()
     .find('smart-camera-web')
     .shadow()

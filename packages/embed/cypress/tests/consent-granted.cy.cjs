@@ -21,6 +21,6 @@ it('should grant consent, and navigate to image capture screen', () => {
   cy.getIFrameBody()
     .find('smart-camera-web')
     .shadow()
-    .find('#request-screen')
+    .find('selfie-capture-instructions')
     .should('be.visible');
 });

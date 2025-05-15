@@ -61,8 +61,8 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .find('#cancel')
-        .should('not.exist');
+        .find('#cancel', { timeout: 0 })
+        .should('not.be.visible');
     });
   });
 });

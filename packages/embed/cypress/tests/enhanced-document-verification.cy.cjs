@@ -39,37 +39,53 @@ describe('enhanced document verification', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions')
       .should('be.visible');
 
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-camera-screen')
-      .should('be.visible');
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('#capture-id-image')
-      .click();
-
-    cy.wait(2000);
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('#id-camera-screen')
+      .find('document-capture-instructions#document-capture-instructions-front')
       .should('not.be.visible');
 
     cy.getIFrameBody()
       .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('#capture-id-image')
+      .click();
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('not.be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
+      .should('be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
       .shadow()
       .find('#select-id-image')
       .click();
@@ -77,7 +93,7 @@ describe('enhanced document verification', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-review-screen')
+      .find('document-capture-review#front-of-document-capture-review')
       .should('not.be.visible');
 
     cy.wait('@getUploadURL')

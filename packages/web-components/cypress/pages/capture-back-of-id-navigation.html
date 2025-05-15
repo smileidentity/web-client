@@ -51,20 +51,32 @@
   </head>
 
   <body>
-    <smart-camera-web capture-id="back" disable-image-tests show-navigation>
-    </smart-camera-web>
+    <smart-camera-web
+      capture-id="back"
+      disable-image-tests
+      show-navigation
+    ></smart-camera-web>
 
-    <script src="./smart-camera-web.js"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const script = document.createElement('script');
+      if (params.get('format') === 'esm') {
+        script.type = 'module';
+        script.src = './esm/smart-camera-web.js';
+      } else {
+        script.src = './smart-camera-web.js';
+      }
+      document.head.appendChild(script);
+    </script>
     <script>
       const app = document.querySelector('smart-camera-web');
-      app.addEventListener('smart-camera-web.publish', async (e) => {
+      app.addEventListener('smart-camera-web.publish', (e) => {
         console.log(e.detail);
       });
-      app.addEventListener('smart-camera-web.cancelled', async (e) => {
+      app.addEventListener('smart-camera-web.cancelled', () => {
         location.href = '/back_pressed';
       });
-
-      app.addEventListener('smart-camera-web.close', async (e) => {
+      app.addEventListener('smart-camera-web.close', () => {
         location.href = '/closed';
       });
     </script>

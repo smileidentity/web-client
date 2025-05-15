@@ -30,12 +30,22 @@
       hide-attribution
       disable-image-tests
       document-capture-modes="camera,upload"
-    >
-    </smart-camera-web>
-    <script src="./smart-camera-web.js"></script>
+    ></smart-camera-web>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const script = document.createElement('script');
+      if (params.get('format') === 'esm') {
+        script.type = 'module';
+        script.src = './esm/smart-camera-web.js';
+      } else {
+        script.src = './smart-camera-web.js';
+      }
+      document.head.appendChild(script);
+    </script>
     <script>
       const app = document.querySelector('smart-camera-web');
-      app.addEventListener('smart-camera-web.publish', async (e) => {
+      app.addEventListener('smart-camera-web.publish', (e) => {
         console.log(e.detail);
       });
     </script>

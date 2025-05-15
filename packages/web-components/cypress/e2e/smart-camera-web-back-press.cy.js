@@ -272,7 +272,6 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('should navigate to "closed" when close button is pressed in selfie review screen', () => {
-      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -284,6 +283,7 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture')
         .shadow()
         .should('contain.text', 'Take a Selfie');
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')

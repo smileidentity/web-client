@@ -6,7 +6,6 @@ const variants = [
 variants.forEach(({ name, suffix }) => {
   describe(`SmartCameraWeb Attribution [${name}]`, () => {
     it('shows attribution by default', () => {
-      cy.clock();
       cy.visit(`/smart-camera-web-complete-flow${suffix}`);
       cy.get('smart-camera-web')
         .shadow()
@@ -29,6 +28,7 @@ variants.forEach(({ name, suffix }) => {
         .find('powered-by-smile-id')
         .should('be.visible');
 
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')
@@ -138,7 +138,6 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('hides attribution when `hide-attribution` attribute is passed', () => {
-      cy.clock();
       cy.visit(`/capture-back-of-id-hide-attribution${suffix}`);
       cy.get('smart-camera-web')
         .shadow()
@@ -161,6 +160,7 @@ variants.forEach(({ name, suffix }) => {
         .get('powered-by-smile-id')
         .should('not.exist');
 
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')

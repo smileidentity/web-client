@@ -159,7 +159,6 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('should switch from the review screen back to the selfie instruction screen on clicking "Re-take selfie"', () => {
-      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -181,6 +180,7 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture')
         .shadow()
         .should('contain.text', 'Take a Selfie');
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')
@@ -221,7 +221,6 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('should switch from the camera screen to selfie review screen on clicking "Yes, use this"', () => {
-      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -243,6 +242,7 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture')
         .shadow()
         .should('contain.text', 'Take a Selfie');
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')

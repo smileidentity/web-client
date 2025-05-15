@@ -11,8 +11,6 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('should go from the camera screen through to document review with camera capture', () => {
-      cy.clock();
-
       cy.get('smart-camera-web')
         .invoke('attr', 'theme-color')
         .should('equal', themeColor);
@@ -52,6 +50,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .should('contain.text', 'Take a Selfie');
 
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')

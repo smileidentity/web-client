@@ -22,7 +22,6 @@ variants.forEach(({ name, suffix }) => {
       );
       cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
-      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -73,6 +72,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .should('contain.text', 'Take a Selfie');
 
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')
@@ -101,7 +101,6 @@ variants.forEach(({ name, suffix }) => {
         .invoke('attr', 'show-agent-mode-for-tests', 'false');
       cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
 
-      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -127,6 +126,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .should('contain.text', 'Take a Selfie');
 
+      cy.clock();
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')

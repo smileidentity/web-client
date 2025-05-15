@@ -1,7 +1,7 @@
 import { IMAGE_TYPE } from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
-import packageJson from '../../../../package.json';
+import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
 
 const COMPONENTS_VERSION = packageJson.version;
@@ -518,7 +518,6 @@ function templateString() {
 
     <div className="error">
       ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
-      ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
     </div>
     <div class='section | flow' ${this.cameraError ? 'hidden' : ''}>
       <div class='video-container'>

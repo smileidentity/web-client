@@ -96,13 +96,29 @@ describe('back-button', () => {
       cy.getIFrameBody()
         .find('smart-camera-web')
         .shadow()
-        .find('#request-camera-access')
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('#allow')
         .click();
+
       cy.getIFrameBody()
         .find('smart-camera-web')
         .shadow()
-        .find('.back-button-exit')
-        .last()
+        .find('selfie-capture')
+        .shadow()
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
+        .click();
+
+      cy.getIFrameBody()
+        .find('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
         .click();
 
       cy.getTotpConsentApp().find('.try-another-method').click();

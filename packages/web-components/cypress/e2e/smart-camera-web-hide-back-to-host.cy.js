@@ -55,13 +55,13 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('smileid-navigation')
         .shadow()
-        .get('.back-button')
+        .find('.back-button')
         .should('not.exist');
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .get('#cancel')
+        .find('#cancel')
         .should('not.exist');
     });
   });

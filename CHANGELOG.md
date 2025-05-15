@@ -7,12 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve web-components build process
+- Use new designs for smart camera web cdn
+
 ## [1.5.1] - 2025-04-22
+
+### Changed
 
 - Bump selfie capture minimum resolution to 480 x 640
 - Bump proof of liveness capture minimum resolution to 240 x 320
 
 ## [1.5.0] - 2025-03-24
+
+### Changed
 
 - Fix abort error when access biometric kyc page
 - Collect additional metadata for biometric kyc, SmartSelfie auth, docv, and enhanced docv

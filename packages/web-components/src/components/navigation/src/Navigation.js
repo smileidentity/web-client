@@ -161,7 +161,10 @@ button[data-type="icon"] {
   }
 }
 
-if ('customElements' in window) {
+if (
+  'customElements' in window &&
+  !window.customElements.get('smileid-navigation')
+) {
   window.customElements.define('smileid-navigation', Navigation);
 }
 

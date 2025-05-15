@@ -3,7 +3,7 @@ import './selfie-capture-instructions';
 import './selfie-capture-review';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
-import packageJson from '../../../package.json';
+import packageJson from '../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -126,11 +126,14 @@ class SelfieCaptureScreens extends HTMLElement {
     );
 
     this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
+      this.selfieCapture.reset();
+      SmartCamera.stopMedia();
       if (this.hideInstructions) {
-        this.dispatchEvent(new CustomEvent('selfie-capture-screens.cancelled'));
-      } else {
-        this.setActiveScreen(this.selfieInstruction);
+        this.handleBackEvents();
+        return;
       }
+
+      this.setActiveScreen(this.selfieInstruction);
     });
 
     this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
@@ -141,17 +144,6 @@ class SelfieCaptureScreens extends HTMLElement {
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
-    });
-
-    this.selfieCapture.addEventListener('selfie-capture.cancelled', () => {
-      this.selfieCapture.reset();
-      SmartCamera.stopMedia();
-      if (this.hideInstructions) {
-        this.handleBackEvents();
-        return;
-      }
-
-      this.setActiveScreen(this.selfieInstruction);
     });
 
     this.selfieReview.addEventListener(

@@ -5,22 +5,32 @@
   "main": "index.js",
   "exports": {
     ".": "./index.js",
-    "./combobox": "./components/combobox/src/index.js",
-    "./document-capture": "./components/document/src/index.js",
-    "./end-user-consent": "./components/end-user-consent/src/index.js",
-    "./navigation": "./components/navigation/src/index.js",
-    "./selfie-capture": "./components/selfie/src/index.js",
-    "./signature-pad": "./components/signature-pad/src/index.js",
-    "./totp-consent": "./components/totp-consent/src/index.js",
-    "./smart-camera-web": "./components/smart-camera-web/src/SmartCameraWeb.js"
+    "./combobox": "./src/components/combobox/src/index.js",
+    "./document-capture": "./src/components/document/src/index.js",
+    "./end-user-consent": "./src/components/end-user-consent/src/index.js",
+    "./navigation": "./src/components/navigation/src/index.js",
+    "./selfie-capture": "./src/components/selfie/src/index.js",
+    "./signature-pad": "./src/components/signature-pad/src/index.js",
+    "./totp-consent": "./src/components/totp-consent/src/index.js",
+    "./smart-camera-web": "./src/components/smart-camera-web/src/SmartCameraWeb.js"
   },
+  "files": [
+    "./src/components/",
+    "./src/domain/",
+    "./src/styles/",
+    "./README.md",
+    "index.js",
+    "package.json"
+  ],
   "scripts": {
-    "build": "cross-env NODE_ENV=development node esbuild.js",
+    "build": "cross-env NODE_ENV=production node esbuild.js",
+    "build:dev": "cross-env NODE_ENV=development node esbuild.js",
     "clean": "rm -rf build dist",
+    "prepublishOnly": "npm run build",
     "lint:fix": "eslint . --ext .js --fix",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",
     "lint": "eslint . --ext .js",
-    "start": "npm run build && npx serve -p 8000 build",
+    "start": "npm run build:dev && npx serve -p 8000 dist",
     "test": "npx cypress run"
   },
   "description": "A collection of Web Components used by SmileID",

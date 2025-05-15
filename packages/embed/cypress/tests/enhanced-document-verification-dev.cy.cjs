@@ -39,37 +39,53 @@ describe('enhanced document verification', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen')
+      .find('document-capture-instructions')
       .should('be.visible');
 
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-entry-screen #take-photo')
+      .find('document-capture-instructions#document-capture-instructions-front')
+      .shadow()
+      .find('#take-photo')
       .click();
 
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-camera-screen')
-      .should('be.visible');
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('#capture-id-image')
-      .click();
-
-    cy.wait(2000);
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('#id-camera-screen')
+      .find('document-capture-instructions#document-capture-instructions-front')
       .should('not.be.visible');
 
     cy.getIFrameBody()
       .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('#capture-id-image')
+      .click();
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .should('not.be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
+      .should('be.visible');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture-review#front-of-document-capture-review')
       .shadow()
       .find('#select-id-image')
       .click();
@@ -77,10 +93,27 @@ describe('enhanced document verification', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
       .shadow()
-      .find('#id-review-screen')
+      .find('document-capture-review#front-of-document-capture-review')
       .should('not.be.visible');
 
-    cy.wait('@getUploadURL');
+    cy.wait('@getUploadURL')
+      .its('request.body')
+      .should((body) => {
+        const metadata = {};
+        body.metadata.forEach(({ name, value }) => {
+          metadata[name] = value;
+        });
+        expect(metadata.browser_version).to.match(/^\d+(\.\d+)+$/);
+        expect(metadata.selfie_image_origin).to.equal('front_camera');
+        expect(metadata.active_liveness_type).to.equal('smile');
+        expect(metadata.active_liveness_version).to.equal('0.0.1');
+        expect(metadata.fingerprint).to.be.a('string');
+        expect(metadata.user_agent).to.be.a('string');
+        expect(metadata.camera_name).to.be.a('string');
+        expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(
+          0,
+        );
+      });
 
     cy.wait('@successfulUpload');
 

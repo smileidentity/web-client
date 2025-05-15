@@ -44,7 +44,7 @@
     </script>
     <script>
       const app = document.querySelector('smart-camera-web');
-      app.addEventListener('smart-camera-web.published', async (e) => {
+      app.addEventListener('smart-camera-web.published', (e) => {
         console.log(e.detail);
       });
     </script>

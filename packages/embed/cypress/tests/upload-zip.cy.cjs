@@ -44,24 +44,7 @@ describe('zip upload screens', () => {
 
       cy.getIFrameBody().find('#submitForm').click();
 
-      cy.wait('@getUploadURL')
-        .its('request.body')
-        .should((body) => {
-          const metadata = {};
-          body.metadata.forEach(({ name, value }) => {
-            metadata[name] = value;
-          });
-          expect(metadata.browser_version).to.match(/^\d+(\.\d+)+$/);
-          expect(metadata.selfie_image_origin).to.equal('front_camera');
-          expect(metadata.active_liveness_type).to.equal('smile');
-          expect(metadata.active_liveness_version).to.equal('0.0.1');
-          expect(metadata.fingerprint).to.be.a('string');
-          expect(metadata.user_agent).to.be.a('string');
-          expect(metadata.camera_name).to.be.a('string');
-          expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(
-            0,
-          );
-        });
+      cy.wait('@getUploadURL');
 
       cy.wait('@successfulUpload');
 

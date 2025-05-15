@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: npm run build
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1

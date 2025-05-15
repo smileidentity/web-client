@@ -18,6 +18,12 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: build application
+        run: npm run build
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -68,4 +68,24 @@ app.post('/token', async (req, res, next) => {
   }
 });
 
+app.post('/webhook', async (req, res, next) => {
+  try {
+    console.log('webhook called');
+    console.log(req.body);
+    res.status(200).json({ status: 'ok' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+app.get('/webhook', async (req, res, next) => {
+  try {
+    console.log('webhook called');
+    console.log(req.body);
+    res.status(200).json({ status: 'ok' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
 app.listen(8080);

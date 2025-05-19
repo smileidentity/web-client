@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-05-20
+
+### Changed
+
+- Fixed version number for embed (hosted web)
+
 ## [2.0.0] - 2025-05-19
 
 ### Changed

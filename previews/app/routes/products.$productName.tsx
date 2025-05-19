@@ -74,7 +74,7 @@ export default function Product() {
     product: Product;
     apiUrl: string;
     appStage: string;
-  }>();
+  } | null>(null);
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
@@ -170,7 +170,7 @@ export default function Product() {
 
           <script
             src={`https://cdn.smileidentity.com/inline/${
-              appStage.includes('preview') ? appStage : 'v1'
+              appStage === 'main' ? 'v2' : `preview-${appStage}`
             }/js/script.min.js`}
           ></script>
         </>

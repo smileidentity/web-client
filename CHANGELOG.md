@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-05-19
+
 ### Changed
 
 - Improve web-components build process
 - Use new designs for smart camera web cdn
 - Deprecate version smart-camera-web v1
+- Some bug fixes and improvements
 
 ## [1.5.1] - 2025-04-22
 

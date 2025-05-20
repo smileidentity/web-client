@@ -2,7 +2,7 @@ name: deploy
 on:
   push:
     tags:
-      - v*
+      - 'v*'
   workflow_dispatch:
 permissions:
   id-token: write
@@ -36,19 +36,28 @@ jobs:
         env:
           TAG: ${{ steps.package-version.outputs.current-version }}
         run: |
+          MAJOR_VERSION=$(echo "$TAG" | cut -d '.' -f 1)
           echo "DEST_DIR_SMART_CAMERA_WEB=js/v$TAG" >> $GITHUB_OUTPUT
+          echo "MAJOR_VERSION_SMART_CAMERA_WEB=js/v$MAJOR_VERSION" >> $GITHUB_OUTPUT
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: deploy to s3 / cloudfront
+      - name: deploy to s3 / cloudfront version pinning
         run: |
           aws s3 sync --follow-symlinks --delete \
           --exclude '*' \
           --include 'smart-camera-web.js' \
           --include '*/smart-camera-web.js' \
           ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
+      - name: deploy to s3 / cloudfront major version
+        run: |
+          aws s3 sync --follow-symlinks --delete \
+          --exclude '*' \
+          --include 'smart-camera-web.js' \
+          --include '*/smart-camera-web.js' \
+          ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}
   embed:
     needs: [test]
     runs-on: ubuntu-latest
@@ -63,6 +72,11 @@ jobs:
         uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: packages/embed
       - name: build application
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
@@ -74,4 +88,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy to s3 / cloudfront
         run: |
-          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/inline/v1
+          TAG=${{ steps.package-version.outputs.current-version }}
+          MAJOR_VERSION=$(echo "$TAG" | cut -d '.' -f 1)
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/inline/v$MAJOR_VERSION

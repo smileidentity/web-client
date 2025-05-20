@@ -76,6 +76,11 @@ jobs:
         uses: actions/setup-node@v4
       - name: install dependencies
         run: npm ci
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: packages/embed
       - name: build application
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
@@ -87,5 +92,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy to s3 / cloudfront
         run: |
+          TAG=${{ steps.package-version.outputs.current-version }}
           MAJOR_VERSION=$(echo "$TAG" | cut -d '.' -f 1)
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/inline/v$MAJOR_VERSION

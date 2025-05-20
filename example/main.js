@@ -13,7 +13,7 @@ document.querySelector('#app').innerHTML = `
         <option value="basic_kyc">Basic KYC</option>
         <option value="enhanced_kyc">Enhanced KYC</option>
         <option selected value="doc_verification">Document Verification</option>
-        <option selected value="enhanced_document_verification">Enhanced Document Verification</option>
+        <option value="enhanced_document_verification">Enhanced Document Verification</option>
       </select>
       <button data-type="primary" id="submitForm">
         Verify with Smile Identity

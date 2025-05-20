@@ -44,7 +44,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: deploy to s3 / cloudfront versioned
+      - name: deploy to s3 / cloudfront version pinning
         run: |
           aws s3 sync --follow-symlinks --delete \
           --exclude '*' \

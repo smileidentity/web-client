@@ -704,27 +704,38 @@ class SelfieCaptureScreen extends HTMLElement {
     }
   }
 
-  _capturePOLPhoto() {
+  _createScaledCanvas(video, baseWidth, baseHeight) {
     const canvas = document.createElement('canvas');
-    // Determine orientation of the video
-    const isPortrait = this._video.videoHeight > this._video.videoWidth;
+    const isPortrait = video.videoHeight > video.videoWidth;
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
-    // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
-      // Portrait orientation (taller than wide)
-      canvas.width = 240 * RESOLUTION_SCALE_FACTOR;
-      canvas.height = Math.max(
-        320 * RESOLUTION_SCALE_FACTOR,
-        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      const scaledWidth = Math.min(baseWidth, videoWidth);
+      const calculatedHeight = (scaledWidth * videoHeight) / videoWidth;
+
+      canvas.width = scaledWidth;
+      canvas.height = Math.min(
+        Math.max(baseHeight, calculatedHeight),
+        videoHeight,
       );
     } else {
-      // Landscape orientation (wider than tall)
-      canvas.height = 240 * RESOLUTION_SCALE_FACTOR;
-      canvas.width = Math.max(
-        320 * RESOLUTION_SCALE_FACTOR,
-        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
-      );
+      const scaledHeight = Math.min(baseHeight, videoHeight);
+      const calculatedWidth = (scaledHeight * videoWidth) / videoHeight;
+
+      canvas.height = scaledHeight;
+      canvas.width = Math.min(Math.max(baseWidth, calculatedWidth), videoWidth);
     }
+
+    return canvas;
+  }
+
+  _capturePOLPhoto() {
+    const canvas = this._createScaledCanvas(
+      video,
+      240 * RESOLUTION_SCALE_FACTOR,
+      320 * RESOLUTION_SCALE_FACTOR,
+    );
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -733,37 +744,11 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   _captureReferencePhoto() {
-    const canvas = document.createElement('canvas');
-    // Determine orientation of the video
-    const isPortrait = this._video.videoHeight > this._video.videoWidth;
-
-    if (isPortrait) {
-      const baseWidth = 480;
-      const scaledWidth = baseWidth * RESOLUTION_SCALE_FACTOR;
-      const desiredWidth = Math.min(scaledWidth, this._video.videoWidth);
-      const calculatedHeight =
-        (desiredWidth * this._video.videoHeight) / this._video.videoWidth;
-      const minHeight = 640 * RESOLUTION_SCALE_FACTOR;
-
-      canvas.width = desiredWidth;
-      canvas.height = Math.min(
-        Math.max(minHeight, calculatedHeight),
-        this._video.videoHeight,
-      );
-    } else {
-      const baseHeight = 480;
-      const scaledHeight = baseHeight * RESOLUTION_SCALE_FACTOR;
-      const desiredHeight = Math.min(scaledHeight, this._video.videoHeight);
-      const calculatedWidth =
-        (desiredHeight * this._video.videoWidth) / this._video.videoHeight;
-      const minWidth = 640 * RESOLUTION_SCALE_FACTOR;
-
-      canvas.height = desiredHeight;
-      canvas.width = Math.min(
-        Math.max(minWidth, calculatedWidth),
-        this._video.videoWidth,
-      );
-    }
+    const canvas = this._createScaledCanvas(
+      video,
+      480 * RESOLUTION_SCALE_FACTOR,
+      640 * RESOLUTION_SCALE_FACTOR,
+    );
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);

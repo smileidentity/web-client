@@ -7,7 +7,7 @@ import '../../../navigation/src';
 const COMPONENTS_VERSION = packageJson.version;
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
-const RESOLUTION_SCALE_FACTOR = 3;
+const RESOLUTION_SCALE_FACTOR = 1.5;
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();

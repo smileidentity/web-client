@@ -2,7 +2,7 @@ const VERSION = '1.0.2';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
-const RESOLUTION_SCALE_FACTOR = 3;
+const RESOLUTION_SCALE_FACTOR = 1.5;
 
 function isSamsungMultiCameraDevice() {
   const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);

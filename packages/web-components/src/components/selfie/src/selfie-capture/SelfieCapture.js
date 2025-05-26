@@ -64,6 +64,31 @@ function getLivenessFramesIndices(
   return selectedFrames;
 }
 
+function createScaledCanvas(video, baseWidth, baseHeight) {
+  const canvas = document.createElement('canvas');
+  const isPortrait = video.videoHeight > video.videoWidth;
+  const { videoWidth, videoHeight } = video;
+
+  if (isPortrait) {
+    const scaledWidth = Math.min(baseWidth, videoWidth);
+    const calculatedHeight = (scaledWidth * videoHeight) / videoWidth;
+
+    canvas.width = scaledWidth;
+    canvas.height = Math.min(
+      Math.max(baseHeight, calculatedHeight),
+      videoHeight,
+    );
+  } else {
+    const scaledHeight = Math.min(baseHeight, videoHeight);
+    const calculatedWidth = (scaledHeight * videoWidth) / videoHeight;
+
+    canvas.height = scaledHeight;
+    canvas.width = Math.min(Math.max(baseWidth, calculatedWidth), videoWidth);
+  }
+
+  return canvas;
+}
+
 function templateString() {
   return `
     ${styles(this.themeColor)}
@@ -704,33 +729,8 @@ class SelfieCaptureScreen extends HTMLElement {
     }
   }
 
-  _createScaledCanvas(video, baseWidth, baseHeight) {
-    const canvas = document.createElement('canvas');
-    const isPortrait = video.videoHeight > video.videoWidth;
-    const { videoWidth, videoHeight } = video;
-
-    if (isPortrait) {
-      const scaledWidth = Math.min(baseWidth, videoWidth);
-      const calculatedHeight = (scaledWidth * videoHeight) / videoWidth;
-
-      canvas.width = scaledWidth;
-      canvas.height = Math.min(
-        Math.max(baseHeight, calculatedHeight),
-        videoHeight,
-      );
-    } else {
-      const scaledHeight = Math.min(baseHeight, videoHeight);
-      const calculatedWidth = (scaledHeight * videoWidth) / videoHeight;
-
-      canvas.height = scaledHeight;
-      canvas.width = Math.min(Math.max(baseWidth, calculatedWidth), videoWidth);
-    }
-
-    return canvas;
-  }
-
   _capturePOLPhoto() {
-    const canvas = this._createScaledCanvas(
+    const canvas = createScaledCanvas(
       this._video,
       240 * RESOLUTION_SCALE_FACTOR,
       320 * RESOLUTION_SCALE_FACTOR,
@@ -743,7 +743,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   _captureReferencePhoto() {
-    const canvas = this._createScaledCanvas(
+    const canvas = createScaledCanvas(
       this._video,
       480 * RESOLUTION_SCALE_FACTOR,
       640 * RESOLUTION_SCALE_FACTOR,

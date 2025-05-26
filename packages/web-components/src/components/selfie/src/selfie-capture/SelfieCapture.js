@@ -7,6 +7,7 @@ import '../../../navigation/src';
 const COMPONENTS_VERSION = packageJson.version;
 
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
+const RESOLUTION_SCALE_FACTOR = 3;
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -711,16 +712,16 @@ class SelfieCaptureScreen extends HTMLElement {
     // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
       // Portrait orientation (taller than wide)
-      canvas.width = 240;
+      canvas.width = 240 * RESOLUTION_SCALE_FACTOR;
       canvas.height = Math.max(
-        320,
+        320 * RESOLUTION_SCALE_FACTOR,
         (canvas.width * this._video.videoHeight) / this._video.videoWidth,
       );
     } else {
       // Landscape orientation (wider than tall)
-      canvas.height = 240;
+      canvas.height = 240 * RESOLUTION_SCALE_FACTOR;
       canvas.width = Math.max(
-        320,
+        320 * RESOLUTION_SCALE_FACTOR,
         (canvas.height * this._video.videoWidth) / this._video.videoHeight,
       );
     }
@@ -739,16 +740,16 @@ class SelfieCaptureScreen extends HTMLElement {
     // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
       // Portrait orientation (taller than wide)
-      canvas.width = 480;
+      canvas.width = 480 * RESOLUTION_SCALE_FACTOR;
       canvas.height = Math.max(
-        640,
+        640 * RESOLUTION_SCALE_FACTOR,
         (canvas.width * this._video.videoHeight) / this._video.videoWidth,
       );
     } else {
       // Landscape orientation (wider than tall)
-      canvas.height = 480;
+      canvas.height = 480 * RESOLUTION_SCALE_FACTOR;
       canvas.width = Math.max(
-        640,
+        640 * RESOLUTION_SCALE_FACTOR,
         (canvas.height * this._video.videoWidth) / this._video.videoHeight,
       );
     }

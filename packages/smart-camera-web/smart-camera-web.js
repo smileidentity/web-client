@@ -2,6 +2,7 @@ const VERSION = '1.0.2';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
+const RESOLUTION_SCALE_FACTOR = 3;
 
 function isSamsungMultiCameraDevice() {
   const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);
@@ -1905,16 +1906,16 @@ class SmartCameraWeb extends HTMLElement {
     // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
       // Portrait orientation (taller than wide)
-      canvas.width = 240;
+      canvas.width = 240 * RESOLUTION_SCALE_FACTOR;
       canvas.height = Math.max(
-        320,
+        320 * RESOLUTION_SCALE_FACTOR,
         (canvas.width * this._video.videoHeight) / this._video.videoWidth,
       );
     } else {
       // Landscape orientation (wider than tall)
-      canvas.height = 240;
+      canvas.height = 240 * RESOLUTION_SCALE_FACTOR;
       canvas.width = Math.max(
-        320,
+        320 * RESOLUTION_SCALE_FACTOR,
         (canvas.height * this._video.videoWidth) / this._video.videoHeight,
       );
     }
@@ -1933,16 +1934,16 @@ class SmartCameraWeb extends HTMLElement {
     // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
       // Portrait orientation (taller than wide)
-      canvas.width = 480;
+      canvas.width = 480 * RESOLUTION_SCALE_FACTOR;
       canvas.height = Math.max(
-        640,
+        640 * RESOLUTION_SCALE_FACTOR,
         (canvas.width * this._video.videoHeight) / this._video.videoWidth,
       );
     } else {
       // Landscape orientation (wider than tall)
-      canvas.height = 480;
+      canvas.height = 480 * RESOLUTION_SCALE_FACTOR;
       canvas.width = Math.max(
-        640,
+        640 * RESOLUTION_SCALE_FACTOR,
         (canvas.height * this._video.videoWidth) / this._video.videoHeight,
       );
     }

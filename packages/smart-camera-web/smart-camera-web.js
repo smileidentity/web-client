@@ -1926,7 +1926,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _capturePOLPhoto() {
     const canvas = this._createScaledCanvas(
-      video,
+      this._video,
       240 * RESOLUTION_SCALE_FACTOR,
       320 * RESOLUTION_SCALE_FACTOR,
     );
@@ -1939,7 +1939,7 @@ class SmartCameraWeb extends HTMLElement {
 
   _captureReferencePhoto() {
     const canvas = this._createScaledCanvas(
-      video,
+      this._video,
       480 * RESOLUTION_SCALE_FACTOR,
       640 * RESOLUTION_SCALE_FACTOR,
     );

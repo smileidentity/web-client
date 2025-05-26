@@ -745,8 +745,8 @@ class SelfieCaptureScreen extends HTMLElement {
   _captureReferencePhoto() {
     const canvas = createScaledCanvas(
       this._video,
-      480 * RESOLUTION_SCALE_FACTOR,
-      640 * RESOLUTION_SCALE_FACTOR,
+      480,
+      640,
     );
 
     // NOTE: we want to test the image quality of the reference photo

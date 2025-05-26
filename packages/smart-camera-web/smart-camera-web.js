@@ -1901,8 +1901,7 @@ class SmartCameraWeb extends HTMLElement {
   _createScaledCanvas(video, baseWidth, baseHeight) {
     const canvas = document.createElement('canvas');
     const isPortrait = video.videoHeight > video.videoWidth;
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
+    const { videoWidth, videoHeight } = video;
 
     if (isPortrait) {
       const scaledWidth = Math.min(baseWidth, videoWidth);

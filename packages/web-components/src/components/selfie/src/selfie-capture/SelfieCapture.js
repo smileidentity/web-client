@@ -737,20 +737,31 @@ class SelfieCaptureScreen extends HTMLElement {
     // Determine orientation of the video
     const isPortrait = this._video.videoHeight > this._video.videoWidth;
 
-    // Set dimensions based on orientation, ensuring minimums
     if (isPortrait) {
-      // Portrait orientation (taller than wide)
-      canvas.width = 480 * RESOLUTION_SCALE_FACTOR;
-      canvas.height = Math.max(
-        640 * RESOLUTION_SCALE_FACTOR,
-        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
+      const baseWidth = 480;
+      const scaledWidth = baseWidth * RESOLUTION_SCALE_FACTOR;
+      const desiredWidth = Math.min(scaledWidth, this._video.videoWidth);
+      const calculatedHeight =
+        (desiredWidth * this._video.videoHeight) / this._video.videoWidth;
+      const minHeight = 640 * RESOLUTION_SCALE_FACTOR;
+
+      canvas.width = desiredWidth;
+      canvas.height = Math.min(
+        Math.max(minHeight, calculatedHeight),
+        this._video.videoHeight,
       );
     } else {
-      // Landscape orientation (wider than tall)
-      canvas.height = 480 * RESOLUTION_SCALE_FACTOR;
-      canvas.width = Math.max(
-        640 * RESOLUTION_SCALE_FACTOR,
-        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
+      const baseHeight = 480;
+      const scaledHeight = baseHeight * RESOLUTION_SCALE_FACTOR;
+      const desiredHeight = Math.min(scaledHeight, this._video.videoHeight);
+      const calculatedWidth =
+        (desiredHeight * this._video.videoWidth) / this._video.videoHeight;
+      const minWidth = 640 * RESOLUTION_SCALE_FACTOR;
+
+      canvas.height = desiredHeight;
+      canvas.width = Math.min(
+        Math.max(minWidth, calculatedWidth),
+        this._video.videoWidth,
       );
     }
 

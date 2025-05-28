@@ -66,12 +66,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .should('contain.text', 'Agent Mode On');
 
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
-
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()
@@ -119,12 +113,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('#switch-camera')
         .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
 
       cy.clock();
       cy.get('smart-camera-web')

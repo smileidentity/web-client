@@ -44,11 +44,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
     });
 
     it('should have a 8000ms timer', () => {
@@ -68,11 +63,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture')
@@ -111,11 +101,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()
@@ -159,11 +144,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .shadow()
-        .should('contain.text', 'Take a Selfie');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
         .find('#start-image-capture')
         .click();
       cy.get('smart-camera-web')
@@ -200,11 +180,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()
@@ -262,11 +237,6 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()

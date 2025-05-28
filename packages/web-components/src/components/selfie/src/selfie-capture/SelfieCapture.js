@@ -366,7 +366,6 @@ function templateString() {
     width: 100%;
   }
 
-  .video-container #smile-cta,
   .video-container video,
   .id-video-container.landscape video {
     left: 50%;
@@ -376,12 +375,22 @@ function templateString() {
     transform: translateX(-50%) translateY(50%);
   }
 
-  .video-container #smile-cta {
-    color: white;
-    font-size: 2rem;
-    font-weight: bold;
+  .video-container #smile-cta-box {
+    color: #fff;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 3rem 0;
     opacity: 0;
-    top: calc(50% - 3rem);
+  }
+
+  .video-container #smile-cta {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 0;
   }
 
   .video-container video {
@@ -526,7 +535,14 @@ function templateString() {
         <svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="${this.themeColor}" stroke-width="7.13965"/>
         </svg>
-        <p id='smile-cta' class='color-gray'>SMILE</p>
+        <div id="smile-cta-box">
+          <div>
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="96"  height="96"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1.5"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-mood-happy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>
+          </div>
+          <div>
+            <p id='smile-cta'>BIG SMILE</p>
+          </div>
+        </div>
       </div>
 
       <small class='tips'>
@@ -647,7 +663,7 @@ class SelfieCaptureScreen extends HTMLElement {
     // Go!
     this.imageOutline.style.strokeDashoffset = '0';
 
-    this.smileCTA.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
+    this.smileCTABox.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
 
     this._imageCaptureInterval = setInterval(() => {
       this._capturePOLPhoto();
@@ -677,7 +693,7 @@ class SelfieCaptureScreen extends HTMLElement {
       clearTimeout(this._videoStreamTimeout);
       clearInterval(this._imageCaptureInterval);
       clearInterval(this._drawingInterval);
-      this.smileCTA.style.animation = 'none';
+      this.smileCTABox.style.animation = 'none';
 
       this._capturePOLPhoto(); // NOTE: capture the last photo
       this._captureReferencePhoto();
@@ -864,7 +880,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     this.switchCamera = this.shadowRoot.querySelector('#switch-camera');
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
-    this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
+    this.smileCTABox = this.shadowRoot.querySelector('#smile-cta-box');
 
     this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();

@@ -377,7 +377,6 @@ function templateString() {
 
   .video-container #smile-cta-box {
     color: #fff;
-    height: 100%;
     width: 100%;
     position: absolute;
     top: 0;

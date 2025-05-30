@@ -2,6 +2,7 @@ const VERSION = '1.0.2';
 const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
+const RESOLUTION_SCALE_FACTOR = 1.5;
 
 function isSamsungMultiCameraDevice() {
   const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);
@@ -55,6 +56,31 @@ function getLivenessFramesIndices(
   }
 
   return selectedFrames;
+}
+
+function createScaledCanvas(video, baseWidth, baseHeight) {
+  const canvas = document.createElement('canvas');
+  const isPortrait = video.videoHeight > video.videoWidth;
+  const { videoWidth, videoHeight } = video;
+
+  if (isPortrait) {
+    const scaledWidth = Math.min(baseWidth, videoWidth);
+    const calculatedHeight = (scaledWidth * videoHeight) / videoWidth;
+
+    canvas.width = scaledWidth;
+    canvas.height = Math.min(
+      Math.max(baseHeight, calculatedHeight),
+      videoHeight,
+    );
+  } else {
+    const scaledHeight = Math.min(baseHeight, videoHeight);
+    const calculatedWidth = (scaledHeight * videoWidth) / videoHeight;
+
+    canvas.height = scaledHeight;
+    canvas.width = Math.min(Math.max(baseWidth, calculatedWidth), videoWidth);
+  }
+
+  return canvas;
 }
 
 class SmartFileUpload {
@@ -1897,27 +1923,11 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _capturePOLPhoto() {
-    const canvas = document.createElement('canvas');
-
-    // Determine orientation of the video
-    const isPortrait = this._video.videoHeight > this._video.videoWidth;
-
-    // Set dimensions based on orientation, ensuring minimums
-    if (isPortrait) {
-      // Portrait orientation (taller than wide)
-      canvas.width = 240;
-      canvas.height = Math.max(
-        320,
-        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
-      );
-    } else {
-      // Landscape orientation (wider than tall)
-      canvas.height = 240;
-      canvas.width = Math.max(
-        320,
-        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
-      );
-    }
+    const canvas = createScaledCanvas(
+      this._video,
+      240 * RESOLUTION_SCALE_FACTOR,
+      320 * RESOLUTION_SCALE_FACTOR,
+    );
 
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
@@ -1926,26 +1936,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   _captureReferencePhoto() {
-    const canvas = document.createElement('canvas');
-    // Determine orientation of the video
-    const isPortrait = this._video.videoHeight > this._video.videoWidth;
-
-    // Set dimensions based on orientation, ensuring minimums
-    if (isPortrait) {
-      // Portrait orientation (taller than wide)
-      canvas.width = 480;
-      canvas.height = Math.max(
-        640,
-        (canvas.width * this._video.videoHeight) / this._video.videoWidth,
-      );
-    } else {
-      // Landscape orientation (wider than tall)
-      canvas.height = 480;
-      canvas.width = Math.max(
-        640,
-        (canvas.height * this._video.videoWidth) / this._video.videoHeight,
-      );
-    }
+    const canvas = createScaledCanvas(this._video, 480, 640);
 
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);

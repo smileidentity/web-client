@@ -171,8 +171,8 @@ export default function Product() {
           </form>
 
           <script
-            src={`https://cdn.smileidentity.com/inline/${
-              appStage === 'main' ? 'v2' : embedUrl
+            src={`https://cdn.smileidentity.com/${
+              appStage === 'main' ? 'inline/v2' : embedUrl
             }/js/script.min.js`}
           ></script>
         </>

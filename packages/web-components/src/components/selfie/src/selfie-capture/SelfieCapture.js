@@ -308,7 +308,6 @@ function templateString() {
   .powered-by {
     align-items: center;
     border-radius: .25rem;
-    color: #4E6577;
     display: flex;
     justify-content: center;
     letter-spacing: .075em;
@@ -324,6 +323,8 @@ function templateString() {
     margin-left: auto;
     margin-right: auto;
     max-width: 17rem;
+    font-size: 0.875rem;
+    font-weight: 600;
   }
 
   .tips > * + *,
@@ -348,20 +349,6 @@ function templateString() {
     height: auto;
     justify-self: center;
     width: .75em;
-  }
-
-  @keyframes fadeInOut {
-    12.5% {
-      opacity: 0;
-    }
-
-    50% {
-      opacity: 1;
-    }
-
-    87.5% {
-      opacity: 0;
-    }
   }
 
   .id-video-container.portrait {
@@ -392,7 +379,6 @@ function templateString() {
     width: 100%;
   }
 
-  .video-container #smile-cta,
   .video-container video,
   .id-video-container.landscape video {
     left: 50%;
@@ -402,12 +388,22 @@ function templateString() {
     transform: translateX(-50%) translateY(50%);
   }
 
-  .video-container #smile-cta {
-    color: white;
-    font-size: 2rem;
-    font-weight: bold;
+  .video-container #smile-cta-box {
+    color: #fff;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2rem 0;
     opacity: 0;
-    top: calc(50% - 3rem);
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .video-container #smile-cta {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .video-container video {
@@ -540,7 +536,8 @@ function templateString() {
   </style>
   <div id='selfie-capture-screen' class='flow center'>
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
-    <h1 class='text-2xl title-color font-bold'>Take a Selfie</h1>
+
+    <div class='tips'>Fit your head inside the oval frame</div>
 
     <div className="error">
       ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
@@ -552,15 +549,30 @@ function templateString() {
         <svg id="image-outline" width="215" height="245" viewBox="0 0 215 245" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M210.981 122.838C210.981 188.699 164.248 241.268 107.55 241.268C50.853 241.268 4.12018 188.699 4.12018 122.838C4.12018 56.9763 50.853 4.40771 107.55 4.40771C164.248 4.40771 210.981 56.9763 210.981 122.838Z" stroke="${this.themeColor}" stroke-width="7.13965"/>
         </svg>
-        <p id='smile-cta' class='color-gray'>SMILE</p>
+        <div id="smile-cta-box">
+          <div>
+            <svg width="120" height="120" xmlns="http://www.w3.org/2000/svg" viewBox="70 70 360 360" fill="currentColor">
+              <path d="M354.02,247.69c4.12-12.26,6.39-24.53,6.39-35.75,0-54.63-50.19-99.08-111.88-99.08s-111.95,44.45-111.95,99.08c0,11.22,2.28,23.49,6.39,35.75-6.6,4.66-10.94,12.33-10.94,21.04,0,13.45,10.36,24.4,23.46,25.51.52,26.93,12.56,53.51,35.04,71.64v.73c.07.03.14.05.21.08,3.66,1.63,6.74,4.28,9.92,6.66.08.06.17.12.25.17,0-.08-.01-.16-.01-.25,15.23,9.12,32.95,13.89,51.85,12.96h0c15.54-.72,30.01-5.37,42.59-12.99,2.91-2.85,7.01-4.93,10.42-6.71.25-.16.51-.28.77-.43v-.76c20.36-16.83,33.62-42.32,34.85-71.11,13.15-1.05,23.57-12.03,23.57-25.53,0-8.7-4.35-16.38-10.94-21.04ZM155.53,283.54c-7.18-1.09-12.71-7.31-12.71-14.85s5.53-13.75,12.71-14.85v29.7ZM330.53,289.9c0,45.26-33.98,83.65-78.48,85.72-47.29,2.31-86.52-35.65-86.52-83.18v-40.7c15.63-4.03,38.45-15.61,65.91-46.31.08.59.13,1.21.11,1.87-.13,4.43-3.09,9.32-8.58,14.14-1.79,1.57-2.32,4.13-1.31,6.28,1.01,2.14,3.29,3.35,5.68,3,2.19-.35,48.6-8.13,71.88-38.36,3.84,13.25,12.48,33.59,31.31,48.79v48.75ZM339.42,234.31c-27.83-21.03-32.1-56.22-32.15-56.57-.26-2.37-2.08-4.28-4.43-4.67-2.33-.39-4.68.83-5.69,2.99-11.08,23.62-39.34,35.42-56.72,40.63,1.35-2.97,2.08-6,2.16-9.06.26-9.11-5.24-14.81-5.88-15.43-1.06-1.05-2.53-1.59-3.99-1.53-1.48.07-2.87.75-3.83,1.88-32.09,37.93-57.18,47.4-69.28,49.67-.68.13-1.29.39-1.84.74-.11,0-.18-.03-.29-.03-1.65,0-3.26.19-4.82.49-3.58-10.9-5.56-21.72-5.56-31.57,0-48.78,45.46-88.46,101.33-88.46s101.26,39.68,101.26,88.46c0,9.84-1.98,20.67-5.56,31.57-.85-.16-1.73-.19-2.61-.27v-4.6c0-1.67-.78-3.25-2.12-4.26ZM341.53,283.54v-29.7c7.18,1.09,12.72,7.3,12.72,14.85s-5.53,13.76-12.72,14.85Z"/>
+              <path d="M259.05,305.3c2.08-2.08,2.08-5.46,0-7.55-2.09-2.08-5.47-2.07-7.54,0-1.75,1.75-4.79,1.75-6.54,0-2.08-2.08-5.45-2.09-7.54,0-2.08,2.08-2.08,5.46,0,7.55,5.98,5.98,15.65,5.98,21.63,0h0Z"/>
+              <path id="mouth"
+                  d="m 213.88314,319.4551 c -1.58,0.97 -0.35309,9.33393 1.50671,9.30586 6.05679,-0.0914 16.11631,0.17227 34.57066,0.13346 18.45435,-0.0388 28.15778,-0.0418 31.09964,-0.79956 1.80122,-0.46394 2.75061,-7.48365 1.16061,-8.45365 -1.6,-1.74874 -2.96432,-0.94348 -6.77747,-1.56441 -12.83012,0.04 -36.52534,0.50197 -41.29469,0.43262 -2.51525,-0.0713 -18.41588,-0.61 -20.01588,0.35 z m 57.29363,1.36599 c -9.24417,-2.23757 -8.08363,-2.42362 -20.78363,-2.42362 -12.7,0 -17.77931,2.69528 -26.84042,5.36549 12.57883,3.28731 33.57775,-4.29887 49.70067,2.24964 z">
+                <animate
+                  id="mouthAnim"
+                  attributeName="d"
+                  begin="indefinite"
+                  dur="1s"
+                  fill="freeze"
+                  to="m 211.72,312.36 c -1.58,0.97 -2.56,2.86 -2.56,4.72 0,21.54 17.40021,38.7239 38.94021,38.7239 21.54,0 39.18979,-17.1739 39.18979,-39.0439 0,-1.86 -0.97,-3.59 -2.56,-4.56 -1.6,-0.97 -3.57,-1.03 -5.22,-0.18 -21.07,10.85 -41.53,10.85 -62.58,0 -1.65,-0.85 -3.62,-0.61 -5.22,0.35 z m 63.61,13.22 c -3.62,11.52 -14.4,19.9 -27.1,19.9 -12.7,0 -23.49,-8.38 -27.1,-19.9 18.03,6.94 36.2,6.94 54.2,0 z" />
+              </path>
+              <circle fill="none" stroke="currentColor" stroke-width="10px" cx="287.3" cy="263.68" r="14"/>
+              <circle fill="none" stroke="currentColor" stroke-width="10px" cx="209.16" cy="263.68" r="14"/>
+            </svg>
+          </div>
+          <div>
+            <p id='smile-cta'>SMILE</p>
+          </div>
+        </div>
       </div>
-
-      <small class='tips'>
-        <svg width='44' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40">
-          <path fill="#F8F8FA" fill-rule="evenodd" d="M17.44 0h4.2c4.92 0 7.56.68 9.95 1.96a13.32 13.32 0 015.54 5.54c1.27 2.39 1.95 5.02 1.95 9.94v4.2c0 4.92-.68 7.56-1.95 9.95a13.32 13.32 0 01-5.54 5.54c-2.4 1.27-5.03 1.95-9.95 1.95h-4.2c-4.92 0-7.55-.68-9.94-1.95a13.32 13.32 0 01-5.54-5.54C.68 29.19 0 26.56 0 21.64v-4.2C0 12.52.68 9.9 1.96 7.5A13.32 13.32 0 017.5 1.96C9.89.68 12.52 0 17.44 0z" clip-rule="evenodd"/>
-          <path fill="#AEB6CB" d="M19.95 10.58a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.54 2.3a.71.71 0 000 1.43.71.71 0 000-1.43zm11.08 0a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.63 1.27a4.98 4.98 0 00-2.05 9.48v1.2a2.14 2.14 0 004.28 0v-1.2a4.99 4.99 0 00-2.23-9.48zm-7.75 4.27a.71.71 0 000 1.43.71.71 0 000-1.43zm15.68 0a.71.71 0 000 1.43.71.71 0 000-1.43z"/>
-        </svg>
-        <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
 
       ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? 'Agent Mode On' : 'Agent Mode Off'}</button>` : ''}
 
@@ -673,7 +685,24 @@ class SelfieCaptureScreen extends HTMLElement {
     // Go!
     this.imageOutline.style.strokeDashoffset = '0';
 
-    this.smileCTA.style.animation = `fadeInOut ease ${this._videoStreamDurationInMS / 1000}s`;
+    setTimeout(() => {
+      this.smileCTABox.style.opacity = 1;
+      this.mouthAnim.beginElement();
+    }, 1500);
+
+    setTimeout(() => {
+      this.smileCTABox.style.opacity = 0;
+    }, 3500);
+
+    setTimeout(() => {
+      this.smileCTABox.style.opacity = 1;
+      this.smileCTA.textContent = 'BIGGER SMILE';
+      this.mouth.setAttribute(
+        'd',
+        'm 213.88314,319.4551 c -1.58,0.97 -0.35309,9.33393 1.50671,9.30586 6.05679,-0.0914 16.11631,0.17227 34.57066,0.13346 18.45435,-0.0388 28.15778,-0.0418 31.09964,-0.79956 1.80122,-0.46394 2.75061,-7.48365 1.16061,-8.45365 -1.6,-1.74874 -2.96432,-0.94348 -6.77747,-1.56441 -12.83012,0.04 -36.52534,0.50197 -41.29469,0.43262 -2.51525,-0.0713 -18.41588,-0.61 -20.01588,0.35 z m 57.29363,1.36599 c -9.24417,-2.23757 -8.08363,-2.42362 -20.78363,-2.42362 -12.7,0 -17.77931,2.69528 -26.84042,5.36549 12.57883,3.28731 33.57775,-4.29887 49.70067,2.24964 z',
+      );
+      this.mouthAnim.beginElement();
+    }, 4000);
 
     this._imageCaptureInterval = setInterval(() => {
       this._capturePOLPhoto();
@@ -703,7 +732,6 @@ class SelfieCaptureScreen extends HTMLElement {
       clearTimeout(this._videoStreamTimeout);
       clearInterval(this._imageCaptureInterval);
       clearInterval(this._drawingInterval);
-      this.smileCTA.style.animation = 'none';
 
       this._capturePOLPhoto(); // NOTE: capture the last photo
       this._captureReferencePhoto();
@@ -856,7 +884,10 @@ class SelfieCaptureScreen extends HTMLElement {
 
     this.switchCamera = this.shadowRoot.querySelector('#switch-camera');
     this.imageOutline = this.shadowRoot.querySelector('#image-outline path');
+    this.smileCTABox = this.shadowRoot.querySelector('#smile-cta-box');
     this.smileCTA = this.shadowRoot.querySelector('#smile-cta');
+    this.mouth = this.shadowRoot.querySelector('#mouth');
+    this.mouthAnim = this.shadowRoot.querySelector('#mouthAnim');
 
     this.startImageCapture.addEventListener('click', () => {
       this._startImageCapture();

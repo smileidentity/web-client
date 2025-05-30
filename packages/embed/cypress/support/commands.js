@@ -254,12 +254,6 @@ Cypress.Commands.add('navigateThroughCameraScreens', () => {
     .shadow()
     .find('selfie-capture')
     .should('be.visible');
-  cy.getIFrameBody()
-    .find('smart-camera-web')
-    .shadow()
-    .find('selfie-capture')
-    .shadow()
-    .should('contain.text', 'Take a Selfie');
 
   cy.getIFrameBody()
     .find('smart-camera-web')

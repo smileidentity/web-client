@@ -44,12 +44,6 @@ variants.forEach(({ name, suffix }) => {
         .invoke('attr', 'theme-color')
         .should('equal', themeColor);
 
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .should('contain.text', 'Take a Selfie');
-
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()

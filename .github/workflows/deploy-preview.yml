@@ -88,6 +88,7 @@ jobs:
       - name: set sst stage
         id: get_branch_name
         run: |
+          echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._]/-/g')
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
@@ -100,7 +101,8 @@ jobs:
           npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
           npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
           npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set EmbedUrl ${{ env.DEST_DIR_EMBED }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: deploy sst app
         if: github.event.pull_request.merged != true
         id: deploy_sst_app

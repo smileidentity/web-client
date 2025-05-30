@@ -64,17 +64,19 @@ export async function loader({ params }: LoaderFunctionArgs) {
       product,
       apiUrl: Resource.GetToken.url,
       appStage: Resource.App.stage,
+      embedUrl: Resource.EmbedUrl.value || `preview-${Resource.App.stage}`,
     };
   }
-  return null;
+  return {};
 }
 
 export default function Product() {
-  const { product, apiUrl, appStage } = useLoaderData<{
-    product: Product;
-    apiUrl: string;
-    appStage: string;
-  } | null>(null);
+  const { product, apiUrl, appStage, embedUrl } = useLoaderData<{
+    product?: Product;
+    apiUrl?: string;
+    appStage?: string;
+    embedUrl?: string;
+  }>();
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
@@ -169,8 +171,8 @@ export default function Product() {
           </form>
 
           <script
-            src={`https://cdn.smileidentity.com/inline/${
-              appStage === 'main' ? 'v2' : `preview-${appStage}`
+            src={`https://cdn.smileidentity.com/${
+              appStage === 'main' ? 'inline/v2' : embedUrl
             }/js/script.min.js`}
           ></script>
         </>

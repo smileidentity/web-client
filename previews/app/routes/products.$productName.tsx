@@ -172,7 +172,7 @@ export default function Product() {
             src={`https://cdn.smileidentity.com/inline/${
               appStage === 'main'
                 ? 'v2'
-                : `${process.env.EmbedUrl || 'preview-' + appStage}`
+                : `${Resource.EmbedUrl.value || 'preview-' + appStage}`
             }/js/script.min.js`}
           ></script>
         </>

@@ -37,6 +37,71 @@ async function getPermissions(captureScreen, facingMode = 'user') {
   }
 }
 
+const cropImageFromDataUri = (
+  dataUri,
+  cropPercentX = 0,
+  cropPercentY = 0,
+  quality = 0.9,
+) =>
+  new Promise((resolve, reject) => {
+    if (!dataUri || typeof dataUri !== 'string') {
+      reject(new Error('Invalid data URI provided'));
+      return;
+    }
+
+    if (
+      cropPercentX < 0 ||
+      cropPercentX >= 100 ||
+      cropPercentY < 0 ||
+      cropPercentY >= 100
+    ) {
+      reject(new Error('Crop percentages must be between 0 and 99'));
+      return;
+    }
+
+    const img = new Image();
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const originalWidth = img.width;
+        const originalHeight = img.height;
+        const cropAmountX = (originalWidth * cropPercentX) / 100;
+        const cropAmountY = (originalHeight * cropPercentY) / 100;
+
+        const newWidth = originalWidth - cropAmountX * 2;
+        const newHeight = originalHeight - cropAmountY * 2;
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        ctx.drawImage(
+          img,
+          cropAmountX,
+          cropAmountY,
+          newWidth,
+          newHeight,
+          0,
+          0,
+          newWidth,
+          newHeight,
+        );
+
+        const croppedDataUri = canvas.toDataURL('image/jpeg', quality);
+        resolve(croppedDataUri);
+      } catch (error) {
+        reject(new Error(`Failed to process image: ${error.message}`));
+      }
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to load image from data URI'));
+    };
+
+    img.src = dataUri;
+  });
+
 class SelfieCaptureScreens extends HTMLElement {
   constructor() {
     super();
@@ -136,15 +201,21 @@ class SelfieCaptureScreens extends HTMLElement {
       this.setActiveScreen(this.selfieInstruction);
     });
 
-    this.selfieCapture.addEventListener('selfie-capture.publish', (event) => {
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.selfie-capture-end'),
-      );
-      this.selfieReview.setAttribute('data-image', event.detail.referenceImage);
-      this._data.images = event.detail.images;
-      SmartCamera.stopMedia();
-      this.setActiveScreen(this.selfieReview);
-    });
+    this.selfieCapture.addEventListener(
+      'selfie-capture.publish',
+      async (event) => {
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.selfie-capture-end'),
+        );
+        this.selfieReview.setAttribute(
+          'data-image',
+          await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
+        );
+        this._data.images = event.detail.images;
+        SmartCamera.stopMedia();
+        this.setActiveScreen(this.selfieReview);
+      },
+    );
 
     this.selfieReview.addEventListener(
       'selfie-capture-review.rejected',

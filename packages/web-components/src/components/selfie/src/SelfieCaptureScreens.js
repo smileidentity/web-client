@@ -51,9 +51,9 @@ const cropImageFromDataUri = (
 
     if (
       cropPercentX < 0 ||
-      cropPercentX >= 100 ||
+      cropPercentX >= 99 ||
       cropPercentY < 0 ||
-      cropPercentY >= 100
+      cropPercentY >= 99
     ) {
       reject(new Error('Crop percentages must be between 0 and 99'));
       return;

@@ -60,13 +60,12 @@ To start testing locally with the embed
 
 - Copy the [Sample env](example/sample.env) to [example/.env](example/.env) in the example app and provide the relevant values
 
-- Build and start the embed server (it should be running on port 8000)
+- Build embed
 
   ```sh
    cd packages/embed
    npm install
    npm build
-   npm start
   ```
 
 - Start the example app
@@ -74,9 +73,14 @@ To start testing locally with the embed
   ```sh
    cd example
    npm install
-   npm start
    npm run dev
   ```
+
+#### This will start three(3) servers
+
+- Frontend for example app on port 5173
+- Backend for the example app on port 8080
+- The embed server on port 8000
 
 > Upon making changes in the embed or it's dependencies, remember to rebuild and restart the embed
 

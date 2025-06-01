@@ -5,13 +5,15 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm start\" \"npm run start:embed\" \"vite\"",
     "start": "node server.js",
+    "start:embed": "cd ../packages/embed && npm run build && npm start",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@smileid/web-components": "file:../packages/web-components",
+    "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "smile-identity-core": "^3.1.0",

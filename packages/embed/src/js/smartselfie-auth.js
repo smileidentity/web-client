@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 
@@ -57,12 +58,8 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-          CloseIframeButton.setAttribute('hidden', true);
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
+
+        CloseIframeButton.setAttribute('hidden', true);
         partner_params = getPartnerParams();
         id_info = {};
 
@@ -89,23 +86,13 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
+    'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
       const title = document.querySelector('#uploadTitle');
       title.innerHTML = labels[`${partner_params.job_type}`].upload;
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'smart-camera-web.publish',
-    (event) => {
-      images = event.detail.images;
-      setActiveScreen(UploadProgressScreen);
-      handleFormSubmit(event);
     },
     false,
   );

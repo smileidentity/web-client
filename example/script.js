@@ -33,7 +33,7 @@ export default function setupForm() {
 
     fetchConfig.method = 'POST';
     try {
-      const response = await fetch('http://localhost:8080/token', fetchConfig);
+      const response = await fetch('/api/token', fetchConfig);
 
       if (response.status === 201 || response.statusCode === 201) {
         const json = await response.json();

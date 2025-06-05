@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./.sst/platform/config.d.ts" />
+
 export default $config({
   app(input) {
     return {
@@ -11,6 +14,7 @@ export default $config({
     const CALLBACK_URL = new sst.Secret('CallbackUrl');
     const SMILEID_API_KEY = new sst.Secret('SmileIdApiKey');
     const SMILE_ID_ENVIRONMENT = new sst.Secret('SmileIdEnvironment');
+    const EmbedUrl = new sst.Secret('EmbedUrl');
 
     const api = new sst.aws.Function('GetToken', {
       handler: 'api/lambda.handler',
@@ -19,7 +23,7 @@ export default $config({
     });
 
     const site = new sst.aws.Remix('PreviewApp', {
-      link: [api],
+      link: [api, EmbedUrl],
     });
 
     return {

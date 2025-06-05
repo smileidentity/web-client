@@ -7,12 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2025-05-28
+
+### Changed
+
+- Improve selfie capture UI, with clearer instructions to smile
+
+## [2.0.1] - 2025-05-20
+
+### Added
+
+- Add major‐version alias for frequent updates
+
+### Changed
+
+- Fix embed(hosted web) deployment path
+
+## [2.0.0] - 2025-05-19
+
+### Changed
+
+- Improve web-components build process
+- Use new designs for smart camera web cdn
+- Deprecate version smart-camera-web v1
+- Some bug fixes and improvements
+
 ## [1.5.1] - 2025-04-22
+
+### Changed
 
 - Bump selfie capture minimum resolution to 480 x 640
 - Bump proof of liveness capture minimum resolution to 240 x 320
 
 ## [1.5.0] - 2025-03-24
+
+### Changed
 
 - Fix abort error when access biometric kyc page
 - Collect additional metadata for biometric kyc, SmartSelfie auth, docv, and enhanced docv

@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 
@@ -63,11 +64,7 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
+
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
         const attributions = document.querySelectorAll('.credits');
@@ -102,6 +99,8 @@ import { getMetadata } from './metadata';
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
+    // this is to mimic the behavior of the old hosted web integration
+    SmartCameraWeb.setAttribute('hide-back-of-id', true);
     const supportedCountries = Object.keys(constraints)
       .map((countryCode) => ({
         code: countryCode,
@@ -148,6 +147,8 @@ import { getMetadata } from './metadata';
           // Hide the back button that takes the user back to the id selection screen
           // from startcamera web
           SmartCameraWeb.setAttribute('hide-back-to-host', true);
+          // this is to mimic the behavior of the old hosted web integration
+          SmartCameraWeb.setAttribute('hide-back-of-id', true);
           setActiveScreen(SmartCameraWeb);
         }
       }
@@ -283,16 +284,6 @@ import { getMetadata } from './metadata';
   }
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
-    (event) => {
-      images = event.detail.images;
-      setActiveScreen(UploadProgressScreen);
-      handleFormSubmit(event);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
@@ -303,25 +294,9 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'backExit',
-    () => {
-      setActiveScreen(SelectIDType);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.cancelled',
     () => {
       setActiveScreen(SelectIDType);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'close',
-    () => {
-      closeWindow();
     },
     false,
   );

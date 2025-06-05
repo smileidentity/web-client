@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
+import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 
@@ -124,11 +125,6 @@ import { getMetadata } from './metadata';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        if (config.use_new_component) {
-          import('@smileid/web-components/smart-camera-web');
-        } else {
-          import('@smile_identity/smart-camera-web');
-        }
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -371,20 +367,6 @@ import { getMetadata } from './metadata';
   }
 
   SmartCameraWeb.addEventListener(
-    'imagesComputed',
-    (event) => {
-      images = event.detail.images;
-      const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
-      if (idRequiresTOTPConsent) {
-        handleFormSubmit();
-      } else {
-        setActiveScreen(IDInfoForm);
-      }
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
@@ -399,27 +381,11 @@ import { getMetadata } from './metadata';
   );
 
   SmartCameraWeb.addEventListener(
-    'backExit',
+    'smart-camera-web.cancelled',
     () => {
       SmartCameraWeb.reset();
       const page = pages.pop();
       setActiveScreen(page);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'smart-camera-web.cancelled',
-    () => {
-      setActiveScreen(SelectIDType);
-    },
-    false,
-  );
-
-  SmartCameraWeb.addEventListener(
-    'close',
-    () => {
-      closeWindow(true);
     },
     false,
   );

@@ -60,14 +60,6 @@ To start testing locally with the embed
 
 - Copy the [Sample env](example/sample.env) to [example/.env](example/.env) in the example app and provide the relevant values
 
-- Build embed
-
-  ```sh
-   cd packages/embed
-   npm install
-   npm build
-  ```
-
 - Start the example app
 
   ```sh

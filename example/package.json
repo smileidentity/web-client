@@ -5,8 +5,10 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run start:embed\" \"npm start\" \"vite\"",
     "start": "node server.js",
+    "preinstall": "cd ../packages/web-components && npm install && npm install && cd ../embed && npm install",
+    "start:embed": "cd ../packages/embed && npm run build && npm start",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "concurrently": "^9.1.2",
     "vite": "^5.4.19"
   }
 }

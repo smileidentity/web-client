@@ -126,13 +126,6 @@ function templateString() {
         z-index: 1;
         block-size: 100%;
       }
-    
-      .selfie-container,
-      .selfie-review-container.landscape {
-        height: auto;
-        clip-path: inset(15% 20% 20% 20% round 10px);
-        overflow: hidden;
-      }
 
       .selfie-container img {
         background-color: black;

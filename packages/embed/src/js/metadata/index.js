@@ -1,11 +1,16 @@
 import { UAParser } from 'ua-parser-js';
+import dayjs from 'dayjs';
 
 import { getFingerprint } from './fingerprint';
+import proxyCheck from './proxycheck';
 
 let capturing = null;
 let activeCameraName = null;
 let metadata = [];
 let captureStartTimestamp = null;
+let orientationListenerAdded = false;
+let lastIp = null;
+let ipPollInterval = null;
 
 /**
  * Keys that should only have a single entry in metadata
@@ -60,9 +65,85 @@ const getLastMetadataValue = (name) => {
   return undefined;
 };
 
+const getOrientationString = () => {
+  if (window.screen?.orientation?.type) {
+    return window.screen.orientation.type.startsWith('landscape')
+      ? 'landscape'
+      : 'portrait';
+  }
+  if (window.innerWidth && window.innerHeight) {
+    return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+  }
+  return null;
+};
+
+const handleDeviceOrientationChange = () => {
+  addMetadataEntry('device_orientation', getOrientationString());
+};
+
+const getLocalIP = () => {
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
+
+  pc.createDataChannel('');
+
+  return new Promise((resolve) => {
+    pc.onicecandidate = (evt) => {
+      if (!evt.candidate) return;
+
+      const match = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/.exec(
+        evt.candidate.candidate,
+      );
+      if (match) {
+        const ip = match[1];
+        resolve(ip);
+        pc.onicecandidate = null;
+        pc.close();
+      }
+    };
+
+    pc.createOffer()
+      .then((offer) => pc.setLocalDescription(offer))
+      .catch(() => {
+        resolve(null);
+        pc.close();
+      });
+
+    setTimeout(() => {
+      resolve(null);
+      pc.close();
+    }, 1500);
+  });
+};
+
+const pollIpAddress = () => {
+  getLocalIP().then((ip) => {
+    if (ip && ip !== lastIp) {
+      lastIp = ip;
+      addMetadataEntry('ip', ip);
+    }
+  });
+};
+
 export const initializeMetadata = async () => {
   metadata = [];
+  const hostApplication = `${window.location.protocol}//${window.location.hostname}`;
+  addMetadataEntry('host_application', hostApplication);
+
+  // Add proximity_sensor: true if present, false if not, null if undetectable
+  let proximitySensor = null;
+  if ('ondeviceproximity' in window || 'onuserproximity' in window) {
+    proximitySensor = true;
+  } else if ('ProximitySensor' in window) {
+    proximitySensor = true;
+  } else {
+    proximitySensor = false;
+  }
+  addMetadataEntry('proximity_sensor', proximitySensor);
+
   addMetadataEntry('user_agent', navigator.userAgent);
+  addMetadataEntry('network_connection', navigator.connection?.effectiveType);
   const parsedUserAgent = await UAParser(navigator.userAgent).withClientHints();
   addMetadataEntry(
     'device_model',
@@ -78,6 +159,63 @@ export const initializeMetadata = async () => {
   addMetadataEntry('fingerprint', await getFingerprint());
   addMetadataEntry('active_liveness_type', 'smile');
   addMetadataEntry('active_liveness_version', '0.0.1');
+  addMetadataEntry('security_policy_version', '0.3.0');
+  addMetadataEntry(
+    'timezone',
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
+  addMetadataEntry('locale', navigator.language);
+  const localTimeOfEnrolment = dayjs().format('YYYY-MM-DDTHH:mm:ss.SSS');
+  addMetadataEntry('local_time_of_enrolment', localTimeOfEnrolment);
+  addMetadataEntry(
+    'screen_resolution',
+    `${window.screen.width}x${window.screen.height}`,
+  );
+  addMetadataEntry('memory_info', navigator.deviceMemory);
+  addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
+
+  let numberOfCameras = null;
+  if (navigator.mediaDevices?.enumerateDevices) {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      numberOfCameras = devices.filter(
+        (device) => device.kind === 'videoinput',
+      ).length;
+    } catch (e) {
+      numberOfCameras = null;
+    }
+  }
+  addMetadataEntry('number_of_cameras', numberOfCameras);
+
+  // Device orientation
+  const orientation = getOrientationString();
+  addMetadataEntry('device_orientation', orientation);
+  if (
+    window.screen?.orientation &&
+    typeof window.screen.orientation.addEventListener === 'function' &&
+    !orientationListenerAdded
+  ) {
+    try {
+      window.screen.orientation.addEventListener(
+        'change',
+        handleDeviceOrientationChange,
+      );
+      orientationListenerAdded = true;
+    } catch (e) {
+      // Some browsers may throw if not allowed
+    }
+  }
+
+  // Add IP address
+  getLocalIP().then(async (ip) => {
+    lastIp = ip;
+    addMetadataEntry('ip', ip);
+    await proxyCheck(ip);
+  });
+  if (ipPollInterval) {
+    clearInterval(ipPollInterval);
+  }
+  ipPollInterval = setInterval(pollIpAddress, 60 * 1000);
 };
 
 export const getMetadata = () => metadata.map((entry) => ({ ...entry }));

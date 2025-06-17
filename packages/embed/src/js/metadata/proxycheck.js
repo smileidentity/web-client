@@ -10,7 +10,7 @@ const proxyCheck = async (ip) => {
       asn: 1,
       vpn: 3,
     });
-    console.log({ singleIPResult });
+    console.log({ proxyCheck: singleIPResult });
 
     return singleIPResult;
   } catch (error) {

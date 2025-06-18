@@ -210,7 +210,10 @@ export const initializeMetadata = async () => {
   getLocalIP().then(async (ip) => {
     lastIp = ip;
     addMetadataEntry('ip', ip);
-    await proxyCheck(ip);
+    const networkInfo = await proxyCheck(ip);
+    addMetadataEntry('proxy', networkInfo?.proxy);
+    addMetadataEntry('vpn', networkInfo?.vpn);
+    addMetadataEntry('carrier_info', networkInfo?.provider);
   });
   if (ipPollInterval) {
     clearInterval(ipPollInterval);

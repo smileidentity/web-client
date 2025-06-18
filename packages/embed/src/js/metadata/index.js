@@ -211,9 +211,15 @@ export const initializeMetadata = async () => {
     lastIp = ip;
     addMetadataEntry('ip', ip);
     const networkInfo = await proxyCheck(ip);
-    addMetadataEntry('proxy', networkInfo?.proxy);
-    addMetadataEntry('vpn', networkInfo?.vpn);
-    addMetadataEntry('carrier_info', networkInfo?.provider);
+    addMetadataEntry(
+      'proxy',
+      networkInfo?.proxy ? networkInfo.proxy === 'yes' : null,
+    );
+    addMetadataEntry(
+      'vpn',
+      networkInfo?.vpn ? networkInfo.vpn === 'yes' : null,
+    );
+    addMetadataEntry('carrier_info', networkInfo?.provider || null);
   });
   if (ipPollInterval) {
     clearInterval(ipPollInterval);

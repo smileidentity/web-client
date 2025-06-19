@@ -16,21 +16,33 @@ let ipPollInterval = null;
  * Keys that should only have a single entry in metadata
  */
 const SINGLE_ENTRY_KEYS = [
-  'user_agent',
-  'device_model',
-  'device_os',
-  'browser_name',
-  'browser_version',
-  'fingerprint',
   'active_liveness_type',
   'active_liveness_version',
-  'camera_name',
-  'document_front_capture_camera_name',
-  'document_back_capture_camera_name',
-  'selfie_image_origin',
-  'document_front_image_origin',
-  'document_back_image_origin',
-];
+  'browser_name',
+  'browser_version',
+  'device_model',
+  'device_os',
+  'document_back_capture_duration_ms',
+  'document_back_capture_retries',
+  'document_front_capture_duration_ms',
+  'document_front_capture_retries',
+  'fingerprint',
+  'host_application',
+  'local_time_of_enrolment',
+  'locale',
+  'memory_info',
+  'number_of_cameras',
+  'proximity_sensor',
+  'screen_resolution',
+  'sdk',
+  'sdk_version',
+  'security_policy_version',
+  'selfie_capture_duration_ms',
+  'selfie_retries',
+  'system_architecture',
+  'timezone',
+  'user_agent',
+};
 
 /**
  * Adds a metadata entry to the metadata array. If the key is in SINGLE_ENTRY_KEYS, upsert it.
@@ -117,15 +129,6 @@ const getLocalIP = () => {
   });
 };
 
-const pollIpAddress = () => {
-  getLocalIP().then((ip) => {
-    if (ip && ip !== lastIp) {
-      lastIp = ip;
-      addMetadataEntry('ip', ip);
-    }
-  });
-};
-
 export const initializeMetadata = async () => {
   metadata = [];
   const hostApplication = `${window.location.protocol}//${window.location.hostname}`;
@@ -143,7 +146,6 @@ export const initializeMetadata = async () => {
   addMetadataEntry('proximity_sensor', proximitySensor);
 
   addMetadataEntry('user_agent', navigator.userAgent);
-  addMetadataEntry('network_connection', navigator.connection?.effectiveType);
   const parsedUserAgent = await UAParser(navigator.userAgent).withClientHints();
   addMetadataEntry(
     'device_model',
@@ -206,8 +208,13 @@ export const initializeMetadata = async () => {
     }
   }
 
-  // Add IP address
-  getLocalIP().then(async (ip) => {
+  const getNetworkInfo = async () => {
+    addMetadataEntry('network_connection', navigator.connection?.effectiveType);
+    const ip = await getLocalIP();
+    if (!ip || ip === lastIp) {
+      return;
+    }
+
     lastIp = ip;
     addMetadataEntry('ip', ip);
     const networkInfo = await proxyCheck(ip);
@@ -220,11 +227,14 @@ export const initializeMetadata = async () => {
       networkInfo?.vpn ? networkInfo.vpn === 'yes' : null,
     );
     addMetadataEntry('carrier_info', networkInfo?.provider || null);
-  });
+  };
+
+  await getNetworkInfo();
+  // If metadata was initialized previously, clear the interval
   if (ipPollInterval) {
     clearInterval(ipPollInterval);
   }
-  ipPollInterval = setInterval(pollIpAddress, 60 * 1000);
+  ipPollInterval = setInterval(getNetworkInfo, 60 * 1000);
 };
 
 export const getMetadata = () => metadata.map((entry) => ({ ...entry }));

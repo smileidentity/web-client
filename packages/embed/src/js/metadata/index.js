@@ -9,7 +9,6 @@ let activeCameraName = null;
 let metadata = [];
 let captureStartTimestamp = null;
 let orientationListenerAdded = false;
-let lastIp = null;
 let ipPollInterval = null;
 
 /**
@@ -42,7 +41,7 @@ const SINGLE_ENTRY_KEYS = [
   'system_architecture',
   'timezone',
   'user_agent',
-};
+];
 
 /**
  * Adds a metadata entry to the metadata array. If the key is in SINGLE_ENTRY_KEYS, upsert it.
@@ -211,11 +210,11 @@ export const initializeMetadata = async () => {
   const getNetworkInfo = async () => {
     addMetadataEntry('network_connection', navigator.connection?.effectiveType);
     const ip = await getLocalIP();
+    const lastIp = getLastMetadataValue('ip');
     if (!ip || ip === lastIp) {
       return;
     }
 
-    lastIp = ip;
     addMetadataEntry('ip', ip);
     const networkInfo = await proxyCheck(ip);
     addMetadataEntry(

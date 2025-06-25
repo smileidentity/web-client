@@ -133,16 +133,14 @@ export const initializeMetadata = async () => {
   const hostApplication = `${window.location.protocol}//${window.location.hostname}`;
   addMetadataEntry('host_application', hostApplication);
 
-  // Add proximity_sensor: true if present, false if not, null if undetectable
-  let proximitySensor = null;
-  if ('ondeviceproximity' in window || 'onuserproximity' in window) {
-    proximitySensor = true;
-  } else if ('ProximitySensor' in window) {
-    proximitySensor = true;
-  } else {
-    proximitySensor = false;
+  // Add proximity_sensor: true if present, nothing if not present
+  if (
+    'ondeviceproximity' in window ||
+    'onuserproximity' in window ||
+    'ProximitySensor' in window
+  ) {
+    addMetadataEntry('proximity_sensor', true);
   }
-  addMetadataEntry('proximity_sensor', proximitySensor);
 
   addMetadataEntry('user_agent', navigator.userAgent);
   const parsedUserAgent = await UAParser(navigator.userAgent).withClientHints();
@@ -172,21 +170,12 @@ export const initializeMetadata = async () => {
     'screen_resolution',
     `${window.screen.width}x${window.screen.height}`,
   );
-  addMetadataEntry('memory_info', navigator.deviceMemory);
+  // Memory in bytes
+  addMetadataEntry(
+    'memory_info',
+    navigator.deviceMemory ? navigator.deviceMemory * 1024 ** 3 : null,
+  );
   addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
-
-  let numberOfCameras = null;
-  if (navigator.mediaDevices?.enumerateDevices) {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      numberOfCameras = devices.filter(
-        (device) => device.kind === 'videoinput',
-      ).length;
-    } catch (e) {
-      numberOfCameras = null;
-    }
-  }
-  addMetadataEntry('number_of_cameras', numberOfCameras);
 
   // Device orientation
   const orientation = getOrientationString();
@@ -234,6 +223,21 @@ export const initializeMetadata = async () => {
     clearInterval(ipPollInterval);
   }
   ipPollInterval = setInterval(getNetworkInfo, 60 * 1000);
+};
+
+const getNumberOfCameras = async () => {
+  let numberOfCameras = null;
+  if (navigator.mediaDevices?.enumerateDevices) {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      numberOfCameras = devices.filter(
+        (device) => device.kind === 'videoinput',
+      ).length;
+    } catch (e) {
+      numberOfCameras = null;
+    }
+  }
+  addMetadataEntry('number_of_cameras', numberOfCameras);
 };
 
 export const getMetadata = () => metadata.map((entry) => ({ ...entry }));
@@ -327,6 +331,7 @@ eventTarget.addEventListener(
 eventTarget.addEventListener(
   'metadata.camera-name',
   ({ detail: { cameraName } }) => {
+    getNumberOfCameras();
     activeCameraName = cameraName;
     if (capturing === 'selfie') {
       addMetadataEntry('camera_name', cameraName);

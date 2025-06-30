@@ -23,12 +23,7 @@ export default $config({
 
     const api = new sst.aws.ApiGatewayV2('GetTokenApi');
 
-    api.addRoutes({
-      'POST /': {
-        function: lambda,
-      },
-    });
-
+    api.route('POST /', lambda);
 
     const site = new sst.aws.Remix('PreviewApp', {
       link: [api, EmbedUrl],

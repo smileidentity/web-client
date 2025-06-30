@@ -16,11 +16,19 @@ export default $config({
     const SMILE_ID_ENVIRONMENT = new sst.Secret('SmileIdEnvironment');
     const EmbedUrl = new sst.Secret('EmbedUrl');
 
-    const api = new sst.aws.Function('GetToken', {
+    const lambda = new sst.aws.Function('GetToken', {
       handler: 'api/lambda.handler',
-      url: true,
       link: [PARTNER_ID, CALLBACK_URL, SMILEID_API_KEY, SMILE_ID_ENVIRONMENT],
     });
+
+    const api = new sst.aws.ApiGatewayV2('GetTokenApi');
+
+    api.addRoutes({
+      'POST /': {
+        function: lambda,
+      },
+    });
+
 
     const site = new sst.aws.Remix('PreviewApp', {
       link: [api, EmbedUrl],

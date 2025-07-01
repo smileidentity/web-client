@@ -8,7 +8,7 @@
     "dev": "concurrently \"npm run start:embed\" \"npm start\" \"vite\"",
     "start": "node server.js",
     "preinstall": "cd ../packages/web-components && npm install && npm install && cd ../embed && npm install",
-    "start:embed": "cd ../packages/embed && npm run build && npm start",
+    "start:embed": "cd ../packages/embed && npm start",
     "build": "vite build",
     "preview": "vite preview"
   },

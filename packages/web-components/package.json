@@ -12,32 +12,25 @@
       "require": "./dist/main.js"
     },
     "./combobox": {
-      "types": "./dist/types/components/combobox/src/index.d.ts",
-      "import": "./dist/components-combobox-src-index.js"
+      "import": "./dist/components-combobox.js"
     },
     "./document-capture": {
-      "types": "./dist/types/components/document/src/index.d.ts",
-      "import": "./dist/components-document-src-index.js"
+      "import": "./dist/components-document.js"
     },
     "./end-user-consent": {
-      "types": "./dist/types/components/end-user-consent/src/index.d.ts",
-      "import": "./dist/components-end-user-consent-src-index.js"
+      "import": "./dist/components-end-user-consent.js"
     },
     "./navigation": {
-      "types": "./dist/types/components/navigation/src/index.d.ts",
-      "import": "./dist/components-navigation-src-index.js"
+      "import": "./dist/components-navigation.js"
     },
     "./selfie-capture": {
-      "types": "./dist/types/components/selfie/src/index.d.ts",
-      "import": "./dist/components-selfie-src-index.js"
+      "import": "./dist/components-selfie.js"
     },
     "./signature-pad": {
-      "types": "./dist/types/components/signature-pad/src/index.d.ts",
-      "import": "./dist/components-signature-pad-src-index.js"
+      "import": "./dist/components-signature-pad.js"
     },
     "./totp-consent": {
-      "types": "./dist/types/components/totp-consent/src/index.d.ts",
-      "import": "./dist/components-totp-consent-src-index.js"
+      "import": "./dist/components-totp-consent.js"
     },
     "./smart-camera-web": {
       "types": "./dist/types/components/smart-camera-web/src/SmartCameraWeb.d.ts",

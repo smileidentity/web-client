@@ -21,6 +21,7 @@ const entryPoints = [
   './lib/components/combobox/src/index.js',
   './lib/components/document/src/index.js',
   './lib/components/end-user-consent/src/index.js',
+  './lib/components/navigation/src/index.js',
   './lib/components/selfie/src/index.js',
   './lib/components/signature-pad/src/index.js',
   './lib/components/totp-consent/src/index.js',

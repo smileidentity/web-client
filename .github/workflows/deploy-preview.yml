@@ -43,6 +43,7 @@ jobs:
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
     # needs: [test]
+    needs: [smart-camera-web]
     defaults:
       run:
         working-directory: ./packages/embed

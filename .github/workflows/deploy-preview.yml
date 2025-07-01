@@ -11,6 +11,9 @@ jobs:
     uses: ./.github/workflows/test.yml
   smart-camera-web:
     needs: [test]
+    defaults:
+      run:
+        working-directory: ./packages/web-components
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -20,7 +23,6 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: build application
-        working-directory: ./packages/web-components
         run: npm run build
       - name: set destination directory
         id: set_dest_dir_smart_camera_web
@@ -38,9 +40,12 @@ jobs:
             --exclude "*" \
             --include "smart-camera-web.js" \
             --include "*/smart-camera-web.js" \
-            ./packages/web-components/dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
+            ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
-    needs: [test, smart-camera-web]
+    needs: [test]
+    defaults:
+      run:
+        working-directory: ./packages/embed
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -50,7 +55,6 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: build application
-        working-directory: ./packages/embed
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
         run: npm run build && npm run build:dist
@@ -64,7 +68,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy preview to s3
         run: |
-          aws s3 sync --follow-symlinks --delete packages/embed/dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
   full-stack:
     if: always()
     defaults:

@@ -52,6 +52,9 @@ jobs:
         uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v4
+      - name: install root dependencies
+        run: npm ci
+        working-directory: ./
       - name: install dependencies
         run: npm ci
       - name: build application

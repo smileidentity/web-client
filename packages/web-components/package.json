@@ -2,36 +2,67 @@
   "name": "@smileid/web-components",
   "version": "2.0.2",
   "private": "true",
-  "main": "index.js",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/types/main.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./combobox": "./src/components/combobox/src/index.js",
-    "./document-capture": "./src/components/document/src/index.js",
-    "./end-user-consent": "./src/components/end-user-consent/src/index.js",
-    "./navigation": "./src/components/navigation/src/index.js",
-    "./selfie-capture": "./src/components/selfie/src/index.js",
-    "./signature-pad": "./src/components/signature-pad/src/index.js",
-    "./totp-consent": "./src/components/totp-consent/src/index.js",
-    "./smart-camera-web": "./src/components/smart-camera-web/src/SmartCameraWeb.js"
+    ".": {
+      "types": "./dist/types/main.d.ts",
+      "import": "./dist/main.js",
+      "require": "./dist/main.js"
+    },
+    "./combobox": {
+      "types": "./dist/types/components/combobox/src/index.d.ts",
+      "import": "./dist/components-combobox-src-index.js"
+    },
+    "./document-capture": {
+      "types": "./dist/types/components/document/src/index.d.ts",
+      "import": "./dist/components-document-src-index.js"
+    },
+    "./end-user-consent": {
+      "types": "./dist/types/components/end-user-consent/src/index.d.ts",
+      "import": "./dist/components-end-user-consent-src-index.js"
+    },
+    "./navigation": {
+      "types": "./dist/types/components/navigation/src/index.d.ts",
+      "import": "./dist/components-navigation-src-index.js"
+    },
+    "./selfie-capture": {
+      "types": "./dist/types/components/selfie/src/index.d.ts",
+      "import": "./dist/components-selfie-src-index.js"
+    },
+    "./signature-pad": {
+      "types": "./dist/types/components/signature-pad/src/index.d.ts",
+      "import": "./dist/components-signature-pad-src-index.js"
+    },
+    "./totp-consent": {
+      "types": "./dist/types/components/totp-consent/src/index.d.ts",
+      "import": "./dist/components-totp-consent-src-index.js"
+    },
+    "./smart-camera-web": {
+      "types": "./dist/types/components/smart-camera-web/src/SmartCameraWeb.d.ts",
+      "import": "./dist/components-smart-camera-web-src-SmartCameraWeb.js"
+    }
   },
   "files": [
-    "./src/components/",
-    "./src/domain/",
-    "./src/styles/",
+    "./lib/components/",
+    "./lib/domain/",
+    "./lib/styles/",
+    "./dist/",
     "./README.md",
-    "index.js",
     "package.json"
   ],
   "scripts": {
-    "build": "cross-env NODE_ENV=production node esbuild.js",
-    "build:dev": "cross-env NODE_ENV=development node esbuild.js",
-    "clean": "rm -rf build dist",
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
     "prepublishOnly": "npm run build",
-    "lint:fix": "eslint . --ext .js --fix",
+    "lint:fix": "eslint . --ext .js,.ts,.tsx --fix",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",
-    "lint": "eslint . --ext .js",
-    "start": "npm run build:dev && npx serve -p 8000 dist",
-    "test": "npx cypress run"
+    "lint": "eslint . --ext .js,.ts,.tsx",
+    "start": "vite build --watch",
+    "test": "npx cypress run",
+    "type-check": "tsc --noEmit"
   },
   "description": "A collection of Web Components used by SmileID",
   "keywords": [
@@ -40,20 +71,33 @@
   "type": "module",
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
   "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
+    "@preact/signals": "^2.1.1",
+    "preact-custom-element": "^4.3.0",
     "signature_pad": "^5.0.2",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
+    "@preact/preset-vite": "^2.8.2",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
     "cross-env": "^7.0.3",
     "cypress": "^13.15.0",
-    "esbuild": "^0.24.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-cypress": "^3.3.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-prettier": "^5.2.1",
-    "prettier": "^3.3.3"
+    "glob": "^10.3.10",
+    "preact": "^10.19.6",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6",
+    "vite-plugin-dts": "^3.7.3",
+    "vite-plugin-tsconfig-paths": "^1.4.1"
   }
 }

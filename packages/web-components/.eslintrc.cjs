@@ -23,6 +23,33 @@ module.exports = {
         sourceType: 'script',
       },
     },
+    {
+      files: ['**/*.{ts,tsx}'],
+      parser: '@typescript-eslint/parser',
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            args: 'after-used',
+            ignoreRestSiblings: false,
+            vars: 'all',
+          },
+        ],
+        '@typescript-eslint/no-explicit-any': 'warn',
+        'import/extensions': [
+          'error',
+          'ignorePackages',
+          {
+            js: 'never',
+            jsx: 'never',
+            ts: 'never',
+            tsx: 'never',
+          },
+        ],
+      },
+    },
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -32,6 +59,7 @@ module.exports = {
   rules: {
     'class-methods-use-this': 'off',
     'function-paren-newline': 'off',
+    'linebreak-style': 'off',
     'implicit-arrow-linebreak': 'off',
     'import/no-extraneous-dependencies': [
       'error',
@@ -68,5 +96,17 @@ module.exports = {
       },
     ],
     'sort-keys': 'error',
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+      '../eslint-plugin-import-resolver.js': { someConfig: 1 },
+    },
   },
 };

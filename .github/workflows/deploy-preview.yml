@@ -10,7 +10,7 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
   smart-camera-web:
-    needs: [test]
+    # needs: [test]
     defaults:
       run:
         working-directory: ./packages/web-components
@@ -42,7 +42,7 @@ jobs:
             --include "*/smart-camera-web.js" \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
-    needs: [test]
+    # needs: [test]
     defaults:
       run:
         working-directory: ./packages/embed

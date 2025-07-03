@@ -801,7 +801,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
         currentFaceSize.value = 0;
         currentMouthOpen.value = 0;
         faceInBounds.value = false;
-        faceProximity.value = 'good'; // Reset to default
+        faceProximity.value = 'good';
       }
 
       // Update overlay text based on current state - show alerts even when not capturing
@@ -1169,7 +1169,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
         .alert-title {
           font-size: 14px;
           font-weight: bold;
-          margin-bottom: 0.25rem;
+          text-align: center;
         }
         
         .controls {

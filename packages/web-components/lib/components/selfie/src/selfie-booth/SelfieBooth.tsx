@@ -1170,6 +1170,10 @@ const SelfieBooth: FunctionComponent<Props> = ({
         
         .controls {
           margin: 1.5rem 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          justify-content: center;
         }
 
         button {

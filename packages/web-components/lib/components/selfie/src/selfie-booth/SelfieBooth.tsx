@@ -694,7 +694,6 @@ const SelfieBooth: FunctionComponent<Props> = ({
         performance.now(),
       );
 
-      // Update face landmarks for mesh rendering
       faceLandmarks.value = results.faceLandmarks || [];
 
       if (results.faceLandmarks && canvasRef.current && videoRef.current && isCapturing.value) {

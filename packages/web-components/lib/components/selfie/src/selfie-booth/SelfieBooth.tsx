@@ -42,7 +42,7 @@ const MOUTH_INNER = [
 const MESSAGES = {
   'multiple-faces': "Ensure only one face is visible",
   'no-face': "Position your face in the oval",
-  'out-of-bounds': "Position your face in the oval 2",
+  'out-of-bounds': "Position your face in the oval",
   'too-close': "Move farther away",
   'too-far': "Move closer",
   'neutral-expression': "Neutral expression",

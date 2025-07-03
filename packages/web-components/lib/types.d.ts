@@ -8,11 +8,17 @@ declare module 'validate.js' {
 declare module 'signature_pad' {
   export default class SignaturePad {
     constructor(canvas: HTMLCanvasElement, options?: any);
+
     clear(): void;
+
     toDataURL(type?: string): string;
+
     fromDataURL(dataURL: string): void;
+
     isEmpty(): boolean;
+
     on(event: string, callback: Function): void;
+
     off(event: string, callback: Function): void;
   }
 }
@@ -42,6 +48,8 @@ declare namespace JSX {
     'totp-consent': any;
     'signature-pad': any;
     'smart-camera-web': any;
+    'powered-by-smile-id': any;
+    'selfie-booth': any;
   }
 }
 

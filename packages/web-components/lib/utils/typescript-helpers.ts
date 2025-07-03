@@ -51,6 +51,7 @@ export abstract class TypeSafeWebComponent extends HTMLElement {
   protected _connected: boolean = false;
 
   abstract connectedCallback(): void;
+
   abstract disconnectedCallback?(): void;
 
   protected emitEvent<T>(type: string, detail: T): void {
@@ -104,7 +105,7 @@ export function registerComponent(tagName: string, componentClass: CustomElement
 // Migration helper for existing components
 export function createMigrationWrapper<T extends HTMLElement>(
   originalComponent: T,
-  enhancements: Partial<T>
+  enhancements: Partial<T>,
 ): T {
   return Object.assign(originalComponent, enhancements);
 }

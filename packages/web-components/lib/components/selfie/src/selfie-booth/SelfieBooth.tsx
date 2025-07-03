@@ -19,6 +19,7 @@ interface Props {
   'show-agent-mode-for-tests'?: string | boolean;
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
+  mediapipeInstance?: FaceLandmarker;
 }
 
 // Face mesh landmark indices for key features
@@ -39,38 +40,14 @@ const MOUTH_INNER = [
 ];
 
 const MESSAGES = {
-  'multiple-faces': {
-    title: 'Multiple faces detected',
-    description: 'Please ensure only one face is visible in the frame.',
-  },
-  'no-face': {
-    title: 'No face detected',
-    description: 'Please position your face within the frame.',
-  },
-  'out-of-bounds': {
-    title: 'Face out of bounds',
-    description: 'Please center your face within the oval.',
-  },
-  'too-close': {
-    title: 'Too close to camera',
-    description: 'Please move further away from the camera.',
-  },
-  'too-far': {
-    title: 'Too far from camera',
-    description: 'Please move closer to the camera.',
-  },
-  'neutral-expression': {
-    title: 'Neutral expression required',
-    description: 'Please keep a neutral facial expression.',
-  },
-  'smile-required': {
-    title: 'Smile',
-    description: 'Please smile to continue capturing.',
-  },
-  'open-mouth-smile': {
-    title: 'Bigger smile',
-    description: 'Give us your biggest smile to continue capturing.',
-  },
+  'multiple-faces': "Ensure only one face is visible",
+  'no-face': "Position your face in the oval",
+  'out-of-bounds': "Position your face in the oval 2",
+  'too-close': "Move farther away",
+  'too-far': "Move closer",
+  'neutral-expression': "Neutral expression",
+  'smile-required': "Smile!",
+  'open-mouth-smile': 'Bigger smile!'
 };
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
@@ -84,6 +61,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
   'allow-agent-mode': allowAgentModeProp = false,
   'show-agent-mode-for-tests': showAgentModeForTestsProp = false,
   'hide-attribution': hideAttributionProp = false,
+  mediapipeInstance,
 }) => {
   // Convert string attributes to boolean
   const showNavigation =
@@ -105,7 +83,6 @@ const SelfieBooth: FunctionComponent<Props> = ({
   const isPaused = useSignal(false);
   const countdown = useSignal(0);
   const alertTitle = useSignal('');
-  const alertDescription = useSignal('');
   const capturedImages = useSignal<string[]>([]);
   const referencePhoto = useSignal<string | null>(null);
   const lastSmileTime = useSignal(0);
@@ -124,6 +101,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
     Math.floor(totalCaptures.value * 0.4),
   );
   const neutralZone = useComputed(() => Math.floor(totalCaptures.value * 0.2));
+  const hasFinishedCapture = useSignal(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -140,10 +118,17 @@ const SelfieBooth: FunctionComponent<Props> = ({
   const smileCooldown = 300;
   const smileThreshold = 0.2;
   const mouthOpenThreshold = 0.05;
-  const minFaceSize = 0.4;
-  const maxFaceSize = 0.7;
+  const minFaceSize = 0.3;
+  const maxFaceSize = 0.5;
 
   const initializeFaceLandmarker = async () => {
+    // If a Mediapipe instance was passed as a prop, use it
+    if (mediapipeInstance) {
+      faceLandmarkerRef.current = mediapipeInstance;
+      return;
+    }
+
+    // Otherwise, load Mediapipe ourselves (for backward compatibility)
     const vision = await FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm',
     );
@@ -194,12 +179,10 @@ const SelfieBooth: FunctionComponent<Props> = ({
         // Function to set up canvas when video is ready
         const setupCanvas = () => {
           if (videoRef.current && canvasRef.current) {
-            videoAspectRatio.value =
-              videoRef.current.videoWidth / videoRef.current.videoHeight;
-
             // Get the video's intrinsic dimensions
-            const videoWidth = videoRef.current.videoWidth;
-            const videoHeight = videoRef.current.videoHeight;
+            const { videoWidth, videoHeight } = videoRef.current;
+
+            videoAspectRatio.value = videoWidth / videoHeight;
 
             canvasRef.current.width = videoWidth;
             canvasRef.current.height = videoHeight;
@@ -253,8 +236,8 @@ const SelfieBooth: FunctionComponent<Props> = ({
     // Scale line width based on canvas resolution, not display size
     const scaleFactor = Math.sqrt(canvasWidth * canvasHeight) / 500;
 
-    landmarks.forEach((faceLandmarks) => {
-      if (!faceLandmarks || faceLandmarks.length === 0) return;
+    landmarks.forEach((landmark) => {
+      if (!landmark || landmark.length === 0) return;
 
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.lineWidth = Math.max(1, 2 * scaleFactor);
@@ -269,13 +252,13 @@ const SelfieBooth: FunctionComponent<Props> = ({
         if (points.length < 2) return;
 
         ctx.beginPath();
-        const firstPoint = faceLandmarks[points[0]];
+        const firstPoint = landmark[points[0]];
         if (!firstPoint) return;
 
         ctx.moveTo(firstPoint.x * canvasWidth, firstPoint.y * canvasHeight);
 
         for (let i = 1; i < points.length; i++) {
-          const point = faceLandmarks[points[i]];
+          const point = landmark[points[i]];
           if (point) {
             ctx.lineTo(point.x * canvasWidth, point.y * canvasHeight);
           }
@@ -357,10 +340,10 @@ const SelfieBooth: FunctionComponent<Props> = ({
     const face = landmarks[0];
 
     // Get face bounding box
-    let minX = 1,
-      maxX = 0,
-      minY = 1,
-      maxY = 0;
+    let minX = 1;
+    let maxX = 0;
+    let minY = 1;
+    let maxY = 0;
     face.forEach((landmark: any) => {
       minX = Math.min(minX, landmark.x);
       maxX = Math.max(maxX, landmark.x);
@@ -368,20 +351,20 @@ const SelfieBooth: FunctionComponent<Props> = ({
       maxY = Math.max(maxY, landmark.y);
     });
 
-    // Define oval bounds (same as the visual guide)
     const ovalCenterX = 0.5;
-    const ovalCenterY = 0.5;
+    const ovalCenterY = 0.7; // Shift center down to encourage lower positioning
 
     const isLandscape = videoAspectRatio.value > 1;
-    let ovalWidth, ovalHeight;
+    let ovalWidth;
+    let ovalHeight;
     if (isLandscape) {
-      // For landscape, oval height is 75% of video height
-      ovalHeight = 0.375; // 75% / 2
-      ovalWidth = ovalHeight / videoAspectRatio.value;
+      // For landscape, oval height is 60% of video height
+      ovalHeight = 0.375;
+      ovalWidth = ovalHeight / 2;
     } else {
-      // For portrait, oval width is 75% of video width
-      ovalWidth = 0.375; // 75% / 2
-      ovalHeight = ovalWidth * videoAspectRatio.value;
+      // For portrait, oval width is 60% of video width
+      ovalWidth = 0.375;
+      ovalHeight = ovalWidth * 2;
     }
 
     // Check if face center is within oval (more lenient approach)
@@ -395,10 +378,10 @@ const SelfieBooth: FunctionComponent<Props> = ({
     };
     const centerInBounds = checkPointInOval(faceCenterX, faceCenterY);
 
-    // Allow 30% of face to be outside the oval
-    const tolerance = 0.3;
-    const adjustedOvalWidth = ovalWidth * (1 + tolerance);
-    const adjustedOvalHeight = ovalHeight * (1 + tolerance);
+    const toleranceX = 0.8;
+    const toleranceY = 0.2;
+    const adjustedOvalWidth = ovalWidth * (1 + toleranceX);
+    const adjustedOvalHeight = ovalHeight * (1 + toleranceY);
 
     const checkPointInExpandedOval = (x: number, y: number) => {
       const dx = (x - ovalCenterX) / adjustedOvalWidth;
@@ -419,11 +402,9 @@ const SelfieBooth: FunctionComponent<Props> = ({
   // Utility function to update alert messages using MESSAGES keys
   const updateAlert = (messageKey: keyof typeof MESSAGES | null) => {
     if (messageKey && MESSAGES[messageKey]) {
-      alertTitle.value = MESSAGES[messageKey].title;
-      alertDescription.value = MESSAGES[messageKey].description;
+      alertTitle.value = MESSAGES[messageKey];
     } else {
       alertTitle.value = '';
-      alertDescription.value = '';
     }
   };
 
@@ -489,197 +470,6 @@ const SelfieBooth: FunctionComponent<Props> = ({
     return canvas;
   };
 
-  const detectSmile = async () => {
-    // Direct access to current signal values - no stale closures!
-    if (!faceLandmarkerRef.current || !videoRef.current || !isCapturing.value) {
-      stopDetectionLoop();
-      return;
-    }
-
-    try {
-      // Create cropped frame for detection
-      const croppedCanvas = createCroppedVideoFrame();
-      const detectionSource = croppedCanvas || videoRef.current;
-
-      const results = faceLandmarkerRef.current.detectForVideo(
-        detectionSource,
-        performance.now(),
-      );
-
-      // Update face landmarks for mesh rendering
-      faceLandmarks.value = results.faceLandmarks || [];
-
-      // Draw face mesh overlay on full video
-      if (results.faceLandmarks && canvasRef.current && videoRef.current) {
-        // If we used cropped detection, we need to adjust landmark coordinates back to full video space
-        if (croppedCanvas) {
-          const sourceWidth = videoRef.current.videoWidth;
-          const sourceHeight = videoRef.current.videoHeight;
-          const squareSize = Math.min(sourceWidth, sourceHeight);
-          const offsetX = (sourceWidth - squareSize) / (2 * sourceWidth);
-          const offsetY = (sourceHeight - squareSize) / (2 * sourceHeight);
-          const scaleFactor = squareSize / sourceWidth; // Scale factor for width
-          const scaleFactorY = squareSize / sourceHeight; // Scale factor for height
-
-          // Adjust landmarks to full video coordinates
-          const adjustedLandmarks = results.faceLandmarks.map((face) =>
-            face.map((landmark: any) => ({
-              x: landmark.x * scaleFactor + offsetX,
-              y: landmark.y * scaleFactorY + offsetY,
-              z: landmark.z,
-            })),
-          );
-
-          // Draw with adjusted coordinates
-          const originalLandmarks = faceLandmarks.value;
-          faceLandmarks.value = adjustedLandmarks;
-          drawFaceMesh(adjustedLandmarks);
-          faceLandmarks.value = originalLandmarks;
-        } else {
-          drawFaceMesh(results.faceLandmarks);
-        }
-      }
-
-      // Check number of faces
-      const numFaces = results.faceLandmarks ? results.faceLandmarks.length : 0;
-      multipleFaces.value = numFaces > 1;
-
-      // Check if face is detected
-      const hasFace =
-        results.faceBlendshapes &&
-        results.faceBlendshapes.length > 0 &&
-        numFaces === 1;
-      faceDetected.value = hasFace;
-
-      if (hasFace && results.faceLandmarks) {
-        // Calculate face size and position
-        const faceSize = calculateFaceSize(results.faceLandmarks);
-        currentFaceSize.value = faceSize;
-
-        // Check face proximity
-        if (faceSize > maxFaceSize) {
-          faceProximity.value = 'too-close';
-        } else if (faceSize < minFaceSize) {
-          faceProximity.value = 'too-far';
-        } else {
-          faceProximity.value = 'good';
-        }
-
-        // Check face position
-        faceInBounds.value = isFaceInBounds(results.faceLandmarks);
-
-        // Get smile and mouth open data
-        const blendshapes = results.faceBlendshapes[0].categories;
-        const smileLeft =
-          blendshapes.find((b) => b.categoryName === 'mouthSmileLeft')?.score ||
-          0;
-        const smileRight =
-          blendshapes.find((b) => b.categoryName === 'mouthSmileRight')
-            ?.score || 0;
-        const mouthOpen = calculateMouthOpening(results.faceLandmarks);
-        const smileScore = (smileLeft + smileRight) / 2;
-
-        // Update current smile score and mouth open for UI feedback
-        currentSmileScore.value = smileScore;
-        currentMouthOpen.value = mouthOpen;
-
-        if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
-          lastSmileTime.value = Date.now();
-        }
-
-        // Auto-resume if paused and all conditions are met
-        if (isPaused.value) {
-          if (
-            faceProximity.value === 'good' &&
-            faceInBounds.value &&
-            !multipleFaces.value
-          ) {
-            // For smile zones, also check if recently smiled with open mouth
-            const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
-            const timeSinceSmile = Date.now() - lastSmileTime.value;
-
-            if (!isInSmileZone || timeSinceSmile <= smileCooldown) {
-              resumeCapture();
-            }
-          }
-        }
-      } else {
-        // No face detected or multiple faces - reset values
-        currentSmileScore.value = 0;
-        currentFaceSize.value = 0;
-        currentMouthOpen.value = 0;
-        faceInBounds.value = false;
-        faceProximity.value = 'good'; // Reset to default
-      }
-
-      // Update overlay text based on current state using utility function
-      if (isCapturing.value) {
-        if (multipleFaces.value) {
-          updateAlert('multiple-faces');
-        } else if (!faceDetected.value) {
-          updateAlert('no-face');
-        } else if (!faceInBounds.value) {
-          updateAlert('out-of-bounds');
-        } else if (faceProximity.value === 'too-close') {
-          updateAlert('too-close');
-        } else if (faceProximity.value === 'too-far') {
-          updateAlert('too-far');
-        } else {
-          // All conditions are good - handle different capture phases
-          const isInNeutralZone = capturesTaken.value < neutralZone.value;
-          const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
-
-          if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
-            updateAlert('neutral-expression');
-          } else if (isInNeutralZone) {
-            alertTitle.value = 'Keep a neutral expression';
-            alertDescription.value = '';
-          } else if (capturesTaken.value === neutralZone.value) {
-            alertTitle.value = 'Get ready to smile!';
-            alertDescription.value = '';
-          } else if (isInSmileZone) {
-            const timeSinceSmile = Date.now() - lastSmileTime.value;
-            if (timeSinceSmile > smileCooldown) {
-              // Check if they're smiling but mouth is not open enough
-              if (
-                currentSmileScore.value >= smileThreshold &&
-                currentMouthOpen.value < mouthOpenThreshold
-              ) {
-                updateAlert('open-mouth-smile');
-              } else {
-                updateAlert('smile-required');
-              }
-            } else {
-              alertTitle.value = 'Keep smiling!';
-              alertDescription.value = '';
-            }
-          } else {
-            updateAlert(null); // Clear alerts
-          }
-        }
-      }
-    } catch (error) {
-      faceDetected.value = false;
-      faceInBounds.value = false;
-      multipleFaces.value = false;
-      faceProximity.value = 'good';
-      currentMouthOpen.value = 0;
-      // Update overlay text on detection error during capture
-      if (isCapturing.value && !isPaused.value) {
-        updateAlert('no-face');
-      }
-    }
-
-    animationFrameRef.current = requestAnimationFrame(detectSmile);
-  };
-
-  const startDetectionLoop = () => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    animationFrameRef.current = requestAnimationFrame(detectSmile);
-  };
-
   const stopDetectionLoop = () => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -687,20 +477,130 @@ const SelfieBooth: FunctionComponent<Props> = ({
     }
   };
 
-  const startCapture = async () => {
-    capturedImages.value = [];
-    isCapturing.value = true;
-    isPaused.value = false;
-    totalCaptures.value = Math.ceil(duration / interval);
-    capturesTaken.value = 0;
-    countdown.value = totalCaptures.value;
+  const pauseCapture = () => {
+    if (captureTimerRef.current) {
+      clearInterval(captureTimerRef.current);
+      captureTimerRef.current = null;
+    }
+    isPaused.value = true;
 
-    if (!faceLandmarkerRef.current) {
-      await initializeFaceLandmarker();
+    // Don't override specific error messages with generic smile message
+    if (
+      !alertTitle.value.includes(MESSAGES['multiple-faces']) &&
+      !alertTitle.value.includes('move') &&
+      !alertTitle.value.includes('center')
+    ) {
+      updateAlert('smile-required');
+    }
+  };
+
+  const captureImage = () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Check if this is the last capture (reference photo)
+    if (capturesTaken.value === totalCaptures.value - 1) {
+      // capture at higher resolution
+      canvas.width = 640;
+      canvas.height = 480;
+      
+      // Shift the source crop slightly upward to capture full head
+      const sourceWidth = videoRef.current.videoWidth;
+      const sourceHeight = videoRef.current.videoHeight;
+      const verticalOffset = sourceHeight * 0.05; // Shift up by 5% of video height
+      
+      ctx.drawImage(
+        videoRef.current,
+        0,
+        -verticalOffset, // Shift source up
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        640,
+        480,
+      );
+      referencePhoto.value = canvas.toDataURL('image/jpeg');
+    } else {
+      // lower resolution
+      canvas.width = 320;
+      canvas.height = 240;
+      
+      // Shift the source crop slightly upward to capture full head
+      const sourceWidth = videoRef.current.videoWidth;
+      const sourceHeight = videoRef.current.videoHeight;
+      const verticalOffset = sourceHeight * 0.05; // Shift up by 5% of video height
+      
+      ctx.drawImage(
+        videoRef.current,
+        0,
+        -verticalOffset, // Shift source up
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        320,
+        240,
+      );
+      const imageData = canvas.toDataURL('image/jpeg');
+      capturedImages.value = [...capturedImages.value, imageData];
     }
 
-    startDetectionLoop();
-    startCaptureInterval();
+    capturesTaken.value++;
+    countdown.value = totalCaptures.value - capturesTaken.value;
+  };
+
+  const stopCapture = () => {
+    stopDetectionLoop();
+    if (captureTimerRef.current) {
+      clearInterval(captureTimerRef.current);
+      captureTimerRef.current = null;
+    }
+
+    // Clean signal resets
+    isCapturing.value = false;
+    isPaused.value = false;
+    alertTitle.value = '';
+    faceLandmarks.value = [];
+
+    if (capturesTaken.value >= totalCaptures.value && referencePhoto.value) {
+      const livenessImages = capturedImages.value.map((img) => ({
+        image: img.split(',')[1], // Remove the base64 prefix
+        image_type_id: ImageType.LIVENESS_IMAGE_BASE64,
+      }));
+
+      const referenceImage = {
+        image: referencePhoto.value.split(',')[1], // Remove the base64 prefix
+        image_type_id: ImageType.SELFIE_IMAGE_BASE64,
+      };
+
+      const eventDetail = {
+        images: [...livenessImages, referenceImage],
+        referenceImage: referencePhoto.value,
+        previewImage: referencePhoto.value,
+        meta: { libraryVersion: COMPONENTS_VERSION },
+      };
+
+      window.dispatchEvent(
+        new CustomEvent('selfie-capture.publish', {
+          detail: eventDetail,
+        }),
+      );
+
+      smartCameraWeb?.dispatchEvent(
+        new CustomEvent('metadata.selfie-capture-end'),
+      );
+
+      hasFinishedCapture.value = true;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
   };
 
   const startCaptureInterval = () => {
@@ -759,23 +659,6 @@ const SelfieBooth: FunctionComponent<Props> = ({
     }, interval);
   };
 
-  const pauseCapture = () => {
-    if (captureTimerRef.current) {
-      clearInterval(captureTimerRef.current);
-      captureTimerRef.current = null;
-    }
-    isPaused.value = true;
-
-    // Don't override specific error messages with generic smile message
-    if (
-      !alertTitle.value.includes(MESSAGES['multiple-faces'].title) &&
-      !alertTitle.value.includes('move') &&
-      !alertTitle.value.includes('center')
-    ) {
-      updateAlert('smile-required');
-    }
-  };
-
   const resumeCapture = () => {
     if (
       faceDetected.value &&
@@ -788,101 +671,212 @@ const SelfieBooth: FunctionComponent<Props> = ({
       startCaptureInterval();
     }
   };
-
-  const captureImage = () => {
-    if (!videoRef.current) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Check if this is the last capture (reference photo)
-    if (capturesTaken.value === totalCaptures.value - 1) {
-      // capture at higher resolution
-      canvas.width = 640;
-      canvas.height = 480;
-      ctx.drawImage(
-        videoRef.current,
-        0,
-        0,
-        videoRef.current.videoWidth,
-        videoRef.current.videoHeight,
-        0,
-        0,
-        640,
-        480,
-      );
-      referencePhoto.value = canvas.toDataURL('image/jpeg');
-    } else {
-      // lower resolution
-      canvas.width = 320;
-      canvas.height = 240;
-      ctx.drawImage(
-        videoRef.current,
-        0,
-        0,
-        videoRef.current.videoWidth,
-        videoRef.current.videoHeight,
-        0,
-        0,
-        320,
-        240,
-      );
-      const imageData = canvas.toDataURL('image/jpeg');
-      capturedImages.value = [...capturedImages.value, imageData];
+  const detectSmile = async () => {
+    // Keep face detection running even when not capturing
+    if (!faceLandmarkerRef.current || !videoRef.current) {
+      stopDetectionLoop();
+      return;
     }
 
-    capturesTaken.value++;
-    countdown.value = totalCaptures.value - capturesTaken.value;
+    try {
+      // Create cropped frame for detection
+      const croppedCanvas = createCroppedVideoFrame();
+      const detectionSource = croppedCanvas || videoRef.current;
+
+      const results = faceLandmarkerRef.current.detectForVideo(
+        detectionSource,
+        performance.now(),
+      );
+
+      // Update face landmarks for mesh rendering
+      faceLandmarks.value = results.faceLandmarks || [];
+
+      // Draw face mesh overlay on full video (only when capturing)
+      if (results.faceLandmarks && canvasRef.current && videoRef.current && isCapturing.value) {
+        // If we used cropped detection, we need to adjust landmark coordinates back to full video space
+        if (croppedCanvas) {
+          const sourceWidth = videoRef.current.videoWidth;
+          const sourceHeight = videoRef.current.videoHeight;
+          const squareSize = Math.min(sourceWidth, sourceHeight);
+          const offsetX = (sourceWidth - squareSize) / (2 * sourceWidth);
+          const offsetY = (sourceHeight - squareSize) / (2 * sourceHeight);
+          const scaleFactor = squareSize / sourceWidth; // Scale factor for width
+          const scaleFactorY = squareSize / sourceHeight; // Scale factor for height
+
+          // Adjust landmarks to full video coordinates
+          const adjustedLandmarks = results.faceLandmarks.map((face) =>
+            face.map((landmark: any) => ({
+              x: landmark.x * scaleFactor + offsetX,
+              y: landmark.y * scaleFactorY + offsetY,
+              z: landmark.z,
+            })),
+          );
+
+          // Draw with adjusted coordinates
+          const originalLandmarks = faceLandmarks.value;
+          faceLandmarks.value = adjustedLandmarks;
+          drawFaceMesh(adjustedLandmarks);
+          faceLandmarks.value = originalLandmarks;
+        } else {
+          drawFaceMesh(results.faceLandmarks);
+        }
+      } else if (canvasRef.current && !isCapturing.value) {
+        // Clear canvas when not capturing
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        }
+      }
+
+      // Check number of faces
+      const numFaces = results.faceLandmarks ? results.faceLandmarks.length : 0;
+      multipleFaces.value = numFaces > 1;
+
+      // Check if face is detected
+      const hasFace =
+        results.faceBlendshapes &&
+        results.faceBlendshapes.length > 0 &&
+        numFaces === 1;
+      faceDetected.value = hasFace;
+
+      if (hasFace && results.faceLandmarks) {
+        // Calculate face size and position
+        const faceSize = calculateFaceSize(results.faceLandmarks);
+        currentFaceSize.value = faceSize;
+
+        // Check face proximity
+        if (faceSize > maxFaceSize) {
+          faceProximity.value = 'too-close';
+        } else if (faceSize < minFaceSize) {
+          faceProximity.value = 'too-far';
+        } else {
+          faceProximity.value = 'good';
+        }
+
+        // Check face position
+        faceInBounds.value = isFaceInBounds(results.faceLandmarks);
+
+        // Get smile and mouth open data
+        const blendshapes = results.faceBlendshapes[0].categories;
+        const smileLeft =
+          blendshapes.find((b) => b.categoryName === 'mouthSmileLeft')?.score ||
+          0;
+        const smileRight =
+          blendshapes.find((b) => b.categoryName === 'mouthSmileRight')
+            ?.score || 0;
+        const mouthOpen = calculateMouthOpening(results.faceLandmarks);
+        const smileScore = (smileLeft + smileRight) / 2;
+
+        // Update current smile score and mouth open for UI feedback
+        currentSmileScore.value = smileScore;
+        currentMouthOpen.value = mouthOpen;
+
+        if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
+          lastSmileTime.value = Date.now();
+        }
+
+        // Auto-resume if paused and all conditions are met (only when capturing)
+        if (isPaused.value && isCapturing.value) {
+          if (
+            faceProximity.value === 'good' &&
+            faceInBounds.value &&
+            !multipleFaces.value
+          ) {
+            // For smile zones, also check if recently smiled with open mouth
+            const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
+            const timeSinceSmile = Date.now() - lastSmileTime.value;
+
+            if (!isInSmileZone || timeSinceSmile <= smileCooldown) {
+              resumeCapture();
+            }
+          }
+        }
+      } else {
+        // No face detected or multiple faces - reset values
+        currentSmileScore.value = 0;
+        currentFaceSize.value = 0;
+        currentMouthOpen.value = 0;
+        faceInBounds.value = false;
+        faceProximity.value = 'good'; // Reset to default
+      }
+
+      // Update overlay text based on current state - show alerts even when not capturing
+      if (multipleFaces.value) {
+        updateAlert('multiple-faces');
+      } else if (!faceDetected.value) {
+        updateAlert('no-face');
+      } else if (faceProximity.value === 'too-close') {
+        updateAlert('too-close');
+      } else if (faceProximity.value === 'too-far') {
+        updateAlert('too-far');
+      } else if (!faceInBounds.value) {
+        updateAlert('out-of-bounds');
+      } else if (isCapturing.value) {
+        // Only show capture-specific messages when actually capturing
+        const isInNeutralZone = capturesTaken.value < neutralZone.value;
+        const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
+
+        if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
+          updateAlert('neutral-expression');
+        } else if (isInNeutralZone) {
+          alertTitle.value = 'Keep a neutral expression';
+        } else if (capturesTaken.value === neutralZone.value) {
+          alertTitle.value = 'Get ready to smile!';
+        } else if (isInSmileZone) {
+          const timeSinceSmile = Date.now() - lastSmileTime.value;
+          if (timeSinceSmile > smileCooldown) {
+            // Check if they're smiling but mouth is not open enough
+            if (
+              currentSmileScore.value >= smileThreshold &&
+              currentMouthOpen.value < mouthOpenThreshold
+            ) {
+              updateAlert('open-mouth-smile');
+            } else {
+              updateAlert('smile-required');
+            }
+          } else {
+            alertTitle.value = 'Keep smiling!';
+          }
+        } else {
+          updateAlert(null); // Clear alerts
+        }
+      } else {
+        // When not capturing but all conditions are good, show ready message
+        alertTitle.value = 'Ready to capture';
+      }
+    } catch (error) {
+      faceDetected.value = false;
+      faceInBounds.value = false;
+      multipleFaces.value = false;
+      faceProximity.value = 'good';
+      currentMouthOpen.value = 0;
+      // Update overlay text on detection error - only during capture
+      if (isCapturing.value && !isPaused.value) {
+        updateAlert('no-face');
+      }
+    }
+
+    animationFrameRef.current = requestAnimationFrame(detectSmile);
   };
 
-  const stopCapture = () => {
-    stopDetectionLoop();
-    if (captureTimerRef.current) {
-      clearInterval(captureTimerRef.current);
-      captureTimerRef.current = null;
+  const startDetectionLoop = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
+    animationFrameRef.current = requestAnimationFrame(detectSmile);
+  };
 
-    // Clean signal resets
-    isCapturing.value = false;
+  const startCapture = async () => {
+    capturedImages.value = [];
+    isCapturing.value = true;
     isPaused.value = false;
-    alertTitle.value = '';
-    faceLandmarks.value = [];
+    totalCaptures.value = Math.ceil(duration / interval);
+    capturesTaken.value = 0;
+    countdown.value = totalCaptures.value;
 
-    if (capturesTaken.value >= totalCaptures.value && referencePhoto.value) {
-      const livenessImages = capturedImages.value.map((img) => ({
-        image: img.split(',')[1], // Remove the base64 prefix
-        image_type_id: ImageType.LIVENESS_IMAGE_BASE64,
-      }));
-
-      const referenceImage = {
-        image: referencePhoto.value.split(',')[1], // Remove the base64 prefix
-        image_type_id: ImageType.SELFIE_IMAGE_BASE64,
-      };
-
-      const eventDetail = {
-        images: [...livenessImages, referenceImage],
-        referenceImage: referencePhoto.value,
-        previewImage: referencePhoto.value,
-        meta: { libraryVersion: COMPONENTS_VERSION },
-      };
-
-      window.dispatchEvent(
-        new CustomEvent('selfie-capture.publish', {
-          detail: eventDetail,
-        }),
-      );
-
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.selfie-capture-end'),
-      );
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+    startCaptureInterval();
   };
+
   const handleCancel = () => {
     stopCapture();
     window.dispatchEvent(
@@ -953,15 +947,14 @@ const SelfieBooth: FunctionComponent<Props> = ({
       await startCamera();
       await checkAgentSupport();
 
-      // Start detection loop after camera is ready to ensure fresh video stream
+      // Initialize face detection immediately on mount
+      if (!faceLandmarkerRef.current) {
+        await initializeFaceLandmarker();
+      }
+      
+      // Start detection loop immediately after camera is ready
       setTimeout(() => {
-        if (!faceLandmarkerRef.current) {
-          initializeFaceLandmarker().then(() => {
-            startDetectionLoop();
-          });
-        } else {
-          startDetectionLoop();
-        }
+        startDetectionLoop();
       }, 500);
     };
 
@@ -995,18 +988,17 @@ const SelfieBooth: FunctionComponent<Props> = ({
 
       return () => {
         navigation.removeEventListener('navigation.back', handleNavigationBack);
-        navigation.removeEventListener(
-          'navigation.close',
-          handleNavigationClose,
-        );
+        navigation.removeEventListener('navigation.close', handleNavigationClose);
       };
     }
+    return undefined;
   }, [showNavigation]);
 
   return (
     <div className="selfie-booth">
       {/* SmileID Navigation Component */}
       {showNavigation && (
+        // @ts-ignore
         <smileid-navigation ref={navigationRef} theme-color={themeColor} />
       )}
       <div
@@ -1037,18 +1029,16 @@ const SelfieBooth: FunctionComponent<Props> = ({
                 transform: `translate(-50%, -50%) ${facingMode === 'user' ? 'scaleX(-1)' : ''}`,
               }}
             />
-            {isCapturing.value && (
-              <canvas
-                ref={canvasRef}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: `translate(-50%, -50%) ${facingMode === 'user' ? 'scaleX(-1)' : ''}`,
-                  pointerEvents: 'none',
-                }}
-              />
-            )}
+            <canvas
+              ref={canvasRef}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: `translate(-50%, -50%) ${facingMode === 'user' ? 'scaleX(-1)' : ''}`,
+                pointerEvents: 'none',
+              }}
+            />
           </div>
         </div>
 
@@ -1067,28 +1057,27 @@ const SelfieBooth: FunctionComponent<Props> = ({
       {alertTitle.value && (
         <div className="alert-message">
           <div className="alert-title">{alertTitle.value}</div>
-          {alertDescription.value && (
-            <div className="alert-description">{alertDescription.value}</div>
-          )}
         </div>
       )}
-      {!isCapturing.value && (
-        <div className="controls">
-          <button onClick={startCapture} disabled={isCapturing.value}>
-            Start Capture
-          </button>
+      <div className="controls">
+        <button
+          class="btn-primary"
+          onClick={startCapture}
+          disabled={isCapturing.value || hasFinishedCapture.value}
+        >
+          Start Capture
+        </button>
 
-          {allowAgentMode && (agentSupported || showAgentModeForTests) && (
-            <button
-              onClick={switchCamera}
-              className="agent-mode-btn"
-              disabled={isCapturing.value}
-            >
-              {facingMode === 'user' ? 'Agent Mode Off' : 'Agent Mode On'}
-            </button>
-          )}
-        </div>
-      )}
+        {allowAgentMode && (agentSupported || showAgentModeForTests) && (
+          <button
+            onClick={switchCamera}
+            className="agent-mode-btn"
+            disabled={isCapturing.value || hasFinishedCapture.value}
+          >
+            {facingMode === 'user' ? 'Agent Mode Off' : 'Agent Mode On'}
+          </button>
+        )}
+      </div>
       {/* {capturedImages.value.length > 0 && (
         <div className="preview-section">
           <h3>Preview</h3>
@@ -1108,10 +1097,34 @@ const SelfieBooth: FunctionComponent<Props> = ({
           </div>
         </div>
       )} */}
+      {/* @ts-ignore */}
       {!hideAttribution && <powered-by-smile-id></powered-by-smile-id>}
       <style>{`
         * {
           box-sizing: border-box;
+        }
+
+        button.btn-primary {
+          background-color: ${themeColor || '#001096'};
+          border-radius: 2.5rem;
+          color: white;
+          border: none;
+          height: 3.125rem;
+          display: inline-block;
+          padding: 0.75rem 1.5rem;
+          text-align: center;
+          font-size: 1.125rem;
+          font-weight: 600;
+          font-family: "DM Sans", sans-serif;
+          cursor: pointer;
+        }
+        
+        button.btn-primary:hover {
+          background-color: #2d2b2a;
+        }
+        
+        button.btn-primary:disabled {
+          background-color: #666;
         }
 
         .selfie-booth {
@@ -1139,7 +1152,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
         }
 
         .alert-message {
-          margin-top: 1rem;
+          margin-top: 1.5rem;
           color: #000;
           padding: 0.5rem 1.5rem;
           background: #e5e5e5;
@@ -1154,16 +1167,14 @@ const SelfieBooth: FunctionComponent<Props> = ({
           font-weight: bold;
           margin-bottom: 0.25rem;
         }
-
-        .alert-description {
-          font-size: 14px;
-        }        .controls {
-          margin: 1rem 0;
+        
+        .controls {
+          margin: 1.5rem 0;
         }
 
         button {
           padding: 10px 20px;
-          background: #4285f4;
+          background: ${themeColor || '#001096'};
           color: white;
           border: none;
           border-radius: 4px;
@@ -1219,9 +1230,11 @@ const SelfieBooth: FunctionComponent<Props> = ({
         }
 
         .reference-photo {
-          border: 2px solid #4285f4;
-        }        .reference-photo span {
-          background: #4285f4;
+          border: 2px solid #001096;
+        }
+
+        .reference-photo span {
+          background: #001096;
         }
       `}</style>
     </div>
@@ -1242,7 +1255,7 @@ if (!customElements.get('selfie-booth')) {
       'hide-attribution',
       'disable-image-tests',
     ],
-    { shadow: false },
+    { shadow: true },
   );
 }
 

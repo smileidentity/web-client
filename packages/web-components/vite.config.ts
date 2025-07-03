@@ -1,14 +1,16 @@
 import { defineConfig, type Plugin, loadEnv } from 'vite';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 import { globSync } from 'glob';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+
 import preact from '@preact/preset-vite';
 import dts from 'vite-plugin-dts';
 import { gzipSync } from 'zlib';
 import fs from 'fs';
 
+// eslint-disable-next-line no-underscore-dangle
 const __filename = fileURLToPath(import.meta.url);
+// eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(__filename);
 
 // Read package.json for version
@@ -42,62 +44,60 @@ entryPoints.forEach((entry) => {
 });
 
 // Plugin to copy essential files and handle post-build tasks
-const buildPlugin = (): Plugin => {
-  return {
-    name: 'build-tasks',
-    writeBundle() {
-      const buildDir = 'dist';
+const buildPlugin = (): Plugin => ({
+  name: 'build-tasks',
+  writeBundle() {
+    const buildDir = 'dist';
 
-      // Ensure directories exist
-      if (!fs.existsSync(buildDir)) {
-        fs.mkdirSync(buildDir, { recursive: true });
+    // Ensure directories exist
+    if (!fs.existsSync(buildDir)) {
+      fs.mkdirSync(buildDir, { recursive: true });
+    }
+
+    // Copy essential files
+    const filesToCopy = ['package.json', 'README.md'];
+    filesToCopy.forEach((file) => {
+      if (fs.existsSync(file)) {
+        fs.copyFileSync(file, resolve(buildDir, file));
       }
+    });
 
-      // Copy essential files
-      const filesToCopy = ['package.json', 'README.md'];
-      filesToCopy.forEach((file) => {
-        if (fs.existsSync(file)) {
-          fs.copyFileSync(file, resolve(buildDir, file));
-        }
-      });
-
-      // Copy README files from lib directory
-      if (fs.existsSync('./lib')) {
-        try {
-          const readmeFiles = globSync('**/*.md', { cwd: './lib' });
-          readmeFiles.forEach((file) => {
-            const srcPath = resolve('./lib', file);
-            const destPath = resolve(buildDir, file);
-            const destDirPath = dirname(destPath);
-            if (!fs.existsSync(destDirPath)) {
-              fs.mkdirSync(destDirPath, { recursive: true });
-            }
-            fs.copyFileSync(srcPath, destPath);
-          });
-        } catch (e) {
-          console.warn('Could not copy README files:', (e as Error).message);
-        }
+    // Copy README files from lib directory
+    if (fs.existsSync('./lib')) {
+      try {
+        const readmeFiles = globSync('**/*.md', { cwd: './lib' });
+        readmeFiles.forEach((file) => {
+          const srcPath = resolve('./lib', file);
+          const destPath = resolve(buildDir, file);
+          const destDirPath = dirname(destPath);
+          if (!fs.existsSync(destDirPath)) {
+            fs.mkdirSync(destDirPath, { recursive: true });
+          }
+          fs.copyFileSync(srcPath, destPath);
+        });
+      } catch (e) {
+        console.warn('Could not copy README files:', (e as Error).message);
       }
+    }
 
-      // Rename main.js to smart-camera-web.js and gzip it
-      const mainPath = resolve(buildDir, 'main.js');
-      const smartCameraPath = resolve(buildDir, 'smart-camera-web.js');
+    // Rename main.js to smart-camera-web.js and gzip it
+    const mainPath = resolve(buildDir, 'main.js');
+    const smartCameraPath = resolve(buildDir, 'smart-camera-web.js');
 
-      if (fs.existsSync(mainPath)) {
-        fs.renameSync(mainPath, smartCameraPath);
-        const fileContent = fs.readFileSync(smartCameraPath);
-        const zippedContent = gzipSync(fileContent);
-        fs.writeFileSync(`${smartCameraPath}.gz`, zippedContent);
-        console.info('✓ Created and gzipped smart-camera-web.js');
-      }
-    },
-  };
-};
+    if (fs.existsSync(mainPath)) {
+      fs.renameSync(mainPath, smartCameraPath);
+      const fileContent = fs.readFileSync(smartCameraPath);
+      const zippedContent = gzipSync(fileContent);
+      fs.writeFileSync(`${smartCameraPath}.gz`, zippedContent);
+      console.info('✓ Created and gzipped smart-camera-web.js');
+    }
+  },
+});
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
-  const port = parseInt(env.VITE_PORT || env.PORT || '3005');
+  const port = parseInt(env.PORT || '3005', 10);
 
   return {
     plugins: [
@@ -135,7 +135,6 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       emptyOutDir: true,
     },
-
     server: {
       port,
       open: true,
@@ -154,7 +153,7 @@ export default defineConfig(({ mode }) => {
     esbuild: {
       jsxFactory: 'h',
       jsxFragment: 'Fragment',
-      jsxInject: `import { h, Fragment } from 'preact'`,
+      jsxInject: "import { h, Fragment } from 'preact'",
     },
   };
 });

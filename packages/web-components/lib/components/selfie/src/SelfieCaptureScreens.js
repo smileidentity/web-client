@@ -1,6 +1,6 @@
-import './selfie-booth/index';
 import './selfie-capture-instructions';
 import './selfie-capture-review';
+import './selfie-capture-wrapper/index.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import packageJson from '../../../../package.json';
@@ -106,6 +106,7 @@ class SelfieCaptureScreens extends HTMLElement {
   constructor() {
     super();
     this.activeScreen = null;
+    this._remountKey = 0; // Counter for forcing wrapper remounts
     smartCameraWeb?.dispatchEvent(new CustomEvent('metadata.initialize'));
   }
 
@@ -114,7 +115,7 @@ class SelfieCaptureScreens extends HTMLElement {
             ${styles(this.themeColor)}
             <div>
               <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-booth theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} hidden></selfie-booth>
+              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
               <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
@@ -126,7 +127,7 @@ class SelfieCaptureScreens extends HTMLElement {
       },
     };
     this.selfieInstruction = this.querySelector('selfie-capture-instructions');
-    this.selfieCapture = this.querySelector('selfie-booth');
+    this.selfieCapture = this.querySelector('selfie-capture-wrapper');
     this.selfieReview = this.querySelector('selfie-capture-review');
 
     if (this.hideInstructions && !this.hasAttribute('hidden')) {
@@ -187,8 +188,9 @@ class SelfieCaptureScreens extends HTMLElement {
       () => {
         this.handleBackEvents();
       },
-    ); // Setup selfie-booth event listeners
-    this.setupSelfieBoothEventListeners();
+    );
+    // Setup selfie-wrapper event listeners
+    this.setupSelfieWrapperEventListeners();
 
     this.selfieReview.addEventListener(
       'selfie-capture-review.rejected',
@@ -199,10 +201,10 @@ class SelfieCaptureScreens extends HTMLElement {
         this.selfieReview.removeAttribute('data-image');
         this._data.images = [];
 
-        this.scheduleRemount();
+        // Force remount by incrementing key
+        this.forceWrapperRemount();
 
         if (this.hideInstructions) {
-          this.remountSelfieBooth();
           this.setActiveScreen(this.selfieCapture);
           await getPermissions(this.selfieCapture, this.getAgentMode());
         } else {
@@ -228,14 +230,19 @@ class SelfieCaptureScreens extends HTMLElement {
         );
       },
     );
-  } // Force remount of selfie-booth component for clean state
-  remountSelfieBooth() {
-    const container = this.querySelector('div');
-    const oldSelfieBooth = this.selfieCapture;
+  }
 
-    // Create new selfie-booth element with same attributes
-    const newSelfieBooth = document.createElement('selfie-booth');
-    newSelfieBooth.setAttribute('theme-color', this.themeColor);
+  // Force remount of selfie-capture-wrapper component for clean state
+  forceWrapperRemount() {
+    this._remountKey++;
+    const container = this.querySelector('div');
+    const oldSelfieCapture = this.selfieCapture;
+
+    // Create new selfie-capture-wrapper element with same attributes
+    const newSelfieCapture = document.createElement('selfie-capture-wrapper');
+    newSelfieCapture.setAttribute('theme-color', this.themeColor);
+    newSelfieCapture.setAttribute('key', this._remountKey.toString());
+    newSelfieCapture.setAttribute('start-countdown', 'false');
 
     // Copy all the correct attributes based on the getter logic
     const showNav = this.hasAttribute('show-navigation');
@@ -244,68 +251,46 @@ class SelfieCaptureScreens extends HTMLElement {
     const hideAttr = this.hasAttribute('hide-attribution');
     const disableTests = this.hasAttribute('disable-image-tests');
 
-    if (showNav) newSelfieBooth.setAttribute('show-navigation', '');
-    if (allowAgent) newSelfieBooth.setAttribute('allow-agent-mode', 'true');
+    if (showNav) newSelfieCapture.setAttribute('show-navigation', '');
+    if (allowAgent) newSelfieCapture.setAttribute('allow-agent-mode', 'true');
     if (allowAgentTests)
-      newSelfieBooth.setAttribute('show-agent-mode-for-tests', '');
-    if (hideAttr) newSelfieBooth.setAttribute('hide-attribution', '');
-    if (disableTests) newSelfieBooth.setAttribute('disable-image-tests', '');
-    newSelfieBooth.setAttribute('hidden', '');
+      newSelfieCapture.setAttribute('show-agent-mode-for-tests', '');
+    if (hideAttr) newSelfieCapture.setAttribute('hide-attribution', '');
+    if (disableTests) newSelfieCapture.setAttribute('disable-image-tests', '');
+    newSelfieCapture.setAttribute('hidden', '');
 
     // Replace old element with new one
-    container.replaceChild(newSelfieBooth, oldSelfieBooth);
+    container.replaceChild(newSelfieCapture, oldSelfieCapture);
 
     // Update reference
-    this.selfieCapture = newSelfieBooth;
+    this.selfieCapture = newSelfieCapture;
 
     // Re-add event listeners for the new element
-    this.setupSelfieBoothEventListeners();
-
-    // Clear the remount flag
-    this._needsRemount = false;
-
-    console.log('Selfie booth remounted successfully');
-  }
-  // Schedule remount for next time selfie-booth is accessed
-  scheduleRemount() {
-    console.log('Scheduling selfie-booth remount');
-    this._needsRemount = true;
+    this.setupSelfieWrapperEventListeners();
   }
 
-  // Override setActiveScreen to remount selfie-booth if needed
+  // Override setActiveScreen to enable countdown when selfie-capture is active
   setActiveScreen(screen) {
-    console.log(
-      'Setting active screen:',
-      screen.tagName,
-      'Needs remount:',
-      this._needsRemount,
-    );
-
-    // Check if we're activating selfie-booth and it needs remounting
-    if (screen === this.selfieCapture && this._needsRemount) {
-      console.log('Remounting selfie-booth before activation');
-      this.remountSelfieBooth();
-      // Update screen reference after remount
-      screen = this.selfieCapture;
-    }
-
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
 
-    // If activating selfie-booth, ensure it has camera permissions
+    // If activating selfie-capture-wrapper, enable the countdown and ensure permissions
     if (screen === this.selfieCapture) {
-      console.log('Getting camera permissions for selfie-booth');
+      screen.setAttribute('start-countdown', 'true');
       getPermissions(this.selfieCapture, this.getAgentMode());
+    } else if (this.selfieCapture) {
+      // Disable countdown when not on capture screen
+      this.selfieCapture.setAttribute('start-countdown', 'false');
     }
   }
-  setupSelfieBoothEventListeners() {
+
+  setupSelfieWrapperEventListeners() {
     window.addEventListener('selfie-capture.cancelled', () => {
-      console.log('Selfie capture cancelled - scheduling remount');
       SmartCamera.stopMedia();
 
-      // Force remount of selfie-booth for clean state on next visit
-      this.scheduleRemount();
+      // Force remount of selfie-capture-wrapper for clean state on next visit
+      this.forceWrapperRemount();
 
       if (this.hideInstructions) {
         this.handleBackEvents();
@@ -315,19 +300,17 @@ class SelfieCaptureScreens extends HTMLElement {
       this.setActiveScreen(this.selfieInstruction);
     });
 
-    // Add specific close event handler for selfie-booth
+    // Add specific close event handler for selfie-capture-wrapper
     window.addEventListener('selfie-capture.close', () => {
-      console.log('Selfie capture closed - scheduling remount');
       SmartCamera.stopMedia();
 
-      // Force remount of selfie-booth for clean state on next visit
-      this.scheduleRemount();
+      // Force remount of selfie-capture-wrapper for clean state on next visit
+      this.forceWrapperRemount();
 
       this.handleCloseEvent();
     });
 
     window.addEventListener('selfie-capture.publish', async (event) => {
-      console.log('Selfie capture published');
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
@@ -343,7 +326,6 @@ class SelfieCaptureScreens extends HTMLElement {
     // Also listen for the publish event on the parent SelfieCaptureScreens element
     // in case selfie-booth dispatches it there
     this.addEventListener('selfie-capture.publish', async (event) => {
-      console.log('Selfie capture published (on parent)');
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
@@ -366,6 +348,7 @@ class SelfieCaptureScreens extends HTMLElement {
   get hideInstructions() {
     return this.hasAttribute('hide-instructions');
   }
+
   get hideAttribution() {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution=""' : '';
   }
@@ -373,6 +356,7 @@ class SelfieCaptureScreens extends HTMLElement {
   get hideBackOfId() {
     return this.hasAttribute('hide-back-of-id');
   }
+
   get showNavigation() {
     return this.hasAttribute('show-navigation') ? 'show-navigation=""' : '';
   }
@@ -380,25 +364,30 @@ class SelfieCaptureScreens extends HTMLElement {
   get inAgentMode() {
     return this.getAttribute('allow-agent-mode') === 'true';
   }
+
   get allowAgentMode() {
     return this.inAgentMode ? 'allow-agent-mode="true"' : '';
   }
+
   get allowAgentModeTests() {
     return this.hasAttribute('show-agent-mode-for-tests')
       ? 'show-agent-mode-for-tests=""'
       : '';
   }
+
   get hideBack() {
     return this.hasAttribute('hide-back-to-host') ||
       this.hasAttribute('hide-back')
       ? 'hide-back=""'
       : '';
   }
+
   get disableImageTests() {
     return this.hasAttribute('disable-image-tests')
       ? 'disable-image-tests=""'
       : '';
   }
+
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
   }

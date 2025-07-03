@@ -697,7 +697,6 @@ const SelfieBooth: FunctionComponent<Props> = ({
       // Update face landmarks for mesh rendering
       faceLandmarks.value = results.faceLandmarks || [];
 
-      // Draw face mesh overlay on full video (only when capturing)
       if (results.faceLandmarks && canvasRef.current && videoRef.current && isCapturing.value) {
         // If we used cropped detection, we need to adjust landmark coordinates back to full video space
         if (croppedCanvas) {

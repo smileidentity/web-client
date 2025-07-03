@@ -102,6 +102,12 @@ const SelfieBooth: FunctionComponent<Props> = ({
   );
   const neutralZone = useComputed(() => Math.floor(totalCaptures.value * 0.2));
   const hasFinishedCapture = useSignal(false);
+  const isReadyToCapture = useComputed(() => 
+    faceDetected.value && 
+    faceInBounds.value && 
+    faceProximity.value === 'good' && 
+    !multipleFaces.value
+  );
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1063,7 +1069,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
         <button
           class="btn-primary"
           onClick={startCapture}
-          disabled={isCapturing.value || hasFinishedCapture.value}
+          disabled={isCapturing.value || hasFinishedCapture.value || !isReadyToCapture.value}
         >
           Start Capture
         </button>

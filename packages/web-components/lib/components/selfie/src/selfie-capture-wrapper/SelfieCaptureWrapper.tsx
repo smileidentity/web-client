@@ -218,7 +218,7 @@ if (!customElements.get('selfie-capture-wrapper')) {
       'key',
       'start-countdown',
     ],
-    { shadow: false },
+    { shadow: true },
   );
 }
 

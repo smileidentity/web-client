@@ -1,1 +1,1 @@
-export { default as SelfieCaptureWrapper } from './SelfieCaptureWrapper.tsx';
+export { default as SelfieCaptureWrapper } from './SelfieCaptureWrapper';

@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
         open: false,
         gzipSize: true,
         brotliSize: true,
-      })
+      }),
     );
   }
 
@@ -61,11 +61,23 @@ export default defineConfig(({ mode }) => {
           main: resolve(__dirname, 'lib/main.ts'),
           combobox: resolve(__dirname, 'lib/components/combobox/src/index.js'),
           document: resolve(__dirname, 'lib/components/document/src/index.js'),
-          'end-user-consent': resolve(__dirname, 'lib/components/end-user-consent/src/index.js'),
+          'end-user-consent': resolve(
+            __dirname,
+            'lib/components/end-user-consent/src/index.js',
+          ),
           selfie: resolve(__dirname, 'lib/components/selfie/src/index.js'),
-          'signature-pad': resolve(__dirname, 'lib/components/signature-pad/src/index.js'),
-          'totp-consent': resolve(__dirname, 'lib/components/totp-consent/src/index.js'),
-          'smart-camera-web': resolve(__dirname, 'lib/components/smart-camera-web/src/SmartCameraWeb.js'),
+          'signature-pad': resolve(
+            __dirname,
+            'lib/components/signature-pad/src/index.js',
+          ),
+          'totp-consent': resolve(
+            __dirname,
+            'lib/components/totp-consent/src/index.js',
+          ),
+          'smart-camera-web': resolve(
+            __dirname,
+            'lib/components/smart-camera-web/src/SmartCameraWeb.js',
+          ),
         },
         formats: ['es'],
       },

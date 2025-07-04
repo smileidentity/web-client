@@ -8,6 +8,7 @@ import { useFaceCapture, useCamera } from './hooks';
 import { CameraPreview } from './components/CameraPreview';
 import { AlertDisplay } from './components/AlertDisplay';
 import { CaptureControls } from './components/CaptureControls';
+
 import '../../../navigation/src';
 import '../../../attribution/PoweredBySmileId';
 

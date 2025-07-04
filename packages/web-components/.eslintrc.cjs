@@ -5,7 +5,7 @@ module.exports = {
     'cypress/globals': true,
     es2021: true,
   },
-  extends: 'airbnb-base',
+  extends: ['airbnb-base', 'prettier'],
   ignorePatterns: [
     'build/',
     'instrumentation',
@@ -23,6 +23,58 @@ module.exports = {
         sourceType: 'script',
       },
     },
+    {
+      extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
+      files: ['src/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        project: './tsconfig.app.json',
+      },
+      plugins: ['@typescript-eslint'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            args: 'after-used',
+            ignoreRestSiblings: false,
+            vars: 'all',
+          },
+        ],
+
+        'class-methods-use-this': 'off',
+        'import/extensions': [
+          'error',
+          'ignorePackages',
+          {
+            js: 'never',
+            jsx: 'never',
+            ts: 'never',
+            tsx: 'never',
+          },
+        ],
+        'import/prefer-default-export': 'off',
+        'max-classes-per-file': 'off',
+        'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
+        'no-param-reassign': 'off',
+        'no-plusplus': 'off',
+        'no-underscore-dangle': 'off',
+      },
+    },
+    {
+      extends: ['airbnb-base', 'prettier'],
+      files: ['*.config.{js,ts}', 'esbuild.js'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+      plugins: ['@typescript-eslint'],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+        'no-console': 'off',
+      },
+    },
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -31,24 +83,22 @@ module.exports = {
   plugins: ['cypress'],
   rules: {
     'class-methods-use-this': 'off',
-    'function-paren-newline': 'off',
-    'implicit-arrow-linebreak': 'off',
     'import/no-extraneous-dependencies': [
       'error',
       {
         devDependencies: [
           'esbuild.js',
           'cypress.config.js',
-          '**/*{.,_,-}{test,spec}.js', // tests where the extension or filename suffix denotes that it is a test
+          '**/*{.,_,-}{test,spec}.js',
+          '**/*{.,_,-}{test,spec}.ts',
+          '**/*{.,_,-}{test,spec}.tsx',
+          'cypress/**/*.js',
+          'cypress/**/*.ts',
         ],
         optionalDependencies: false,
       },
     ],
-    indent: 0,
     'max-classes-per-file': 'off',
-    'max-len': 'off',
-    'object-curly-newline': 'off',
-    'operator-linebreak': 'off',
     'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
     'no-param-reassign': 'off',
     'no-plusplus': 'off',
@@ -68,5 +118,16 @@ module.exports = {
       },
     ],
     'sort-keys': 'error',
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.app.json',
+      },
+    },
   },
 };

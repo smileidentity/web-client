@@ -45,7 +45,7 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
         </button>
       )}
     </div>
-    
+
     <style>{`
       .controls {
         margin: 1.5rem 0;

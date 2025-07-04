@@ -18,7 +18,9 @@ const MOUTH_INNER = [
 /**
  * Create a cropped square canvas from video for face detection
  */
-export const createCroppedVideoFrame = (videoElement: HTMLVideoElement): HTMLCanvasElement | null => {
+export const createCroppedVideoFrame = (
+  videoElement: HTMLVideoElement,
+): HTMLCanvasElement | null => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
@@ -55,7 +57,7 @@ export const drawFaceMesh = (
   canvas: HTMLCanvasElement,
   landmarks: any[],
   capturesTaken: number,
-  smileCheckpoint: number
+  smileCheckpoint: number,
 ): void => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -75,10 +77,7 @@ export const drawFaceMesh = (
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const drawConnectedPoints = (
-      points: number[],
-      closed: boolean = false,
-    ) => {
+    const drawConnectedPoints = (points: number[], closed: boolean = false) => {
       if (points.length < 2) return;
 
       ctx.beginPath();

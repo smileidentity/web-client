@@ -28,7 +28,7 @@ export const useCamera = () => {
           device.kind === 'videoinput' &&
           stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
       );
-      
+
       const smartCameraWeb = document.querySelector('smart-camera-web');
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.camera-name', {

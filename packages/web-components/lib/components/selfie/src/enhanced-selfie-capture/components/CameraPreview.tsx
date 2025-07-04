@@ -17,7 +17,8 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
   facingMode,
   multipleFaces,
   progress,
-  interval, themeColor
+  interval,
+  themeColor,
 }) => (
   <>
     <div className="camera-preview-container">

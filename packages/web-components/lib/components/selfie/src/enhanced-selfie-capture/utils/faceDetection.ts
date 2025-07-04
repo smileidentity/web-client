@@ -38,7 +38,10 @@ export const calculateFaceSize = (landmarks: any): number => {
 /**
  * Check if a face is positioned within the oval bounds
  */
-export const isFaceInBounds = (landmarks: any, videoAspectRatio: number): boolean => {
+export const isFaceInBounds = (
+  landmarks: any,
+  videoAspectRatio: number,
+): boolean => {
   if (!landmarks || landmarks.length === 0) return false;
 
   const face = landmarks[0];

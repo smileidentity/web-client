@@ -1,8 +1,16 @@
 import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
-import { calculateFaceSize, isFaceInBounds, calculateMouthOpening } from '../utils/faceDetection';
-import { createCroppedVideoFrame, drawFaceMesh, clearCanvas } from '../utils/canvas';
+import {
+  calculateFaceSize,
+  isFaceInBounds,
+  calculateMouthOpening,
+} from '../utils/faceDetection';
+import {
+  createCroppedVideoFrame,
+  drawFaceMesh,
+  clearCanvas,
+} from '../utils/canvas';
 import { captureImageFromVideo } from '../utils/imageCapture';
 import { ImageType } from '../constants';
 import { MESSAGES, type MessageKey } from '../utils/alertMessages';
@@ -61,14 +69,17 @@ export const useFaceCapture = ({
   const capturesTaken = useSignal(0);
   const hasFinishedCapture = useSignal(false);
 
-  const smileCheckpoint = useComputed(() => Math.floor(totalCaptures.value * 0.4));
+  const smileCheckpoint = useComputed(() =>
+    Math.floor(totalCaptures.value * 0.4),
+  );
   const neutralZone = useComputed(() => Math.floor(totalCaptures.value * 0.2));
-  
-  const isReadyToCapture = useComputed(() => 
-    faceDetected.value && 
-    faceInBounds.value && 
-    faceProximity.value === 'good' && 
-    !multipleFaces.value
+
+  const isReadyToCapture = useComputed(
+    () =>
+      faceDetected.value &&
+      faceInBounds.value &&
+      faceProximity.value === 'good' &&
+      !multipleFaces.value,
   );
 
   const initializeFaceLandmarker = async () => {
@@ -128,7 +139,10 @@ export const useFaceCapture = ({
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {
-        if (currentSmileScore.value >= smileThreshold && currentMouthOpen.value < mouthOpenThreshold) {
+        if (
+          currentSmileScore.value >= smileThreshold &&
+          currentMouthOpen.value < mouthOpenThreshold
+        ) {
           updateAlert('open-mouth-smile');
         } else {
           updateAlert('smile-required');
@@ -203,9 +217,19 @@ export const useFaceCapture = ({
             })),
           );
 
-          drawFaceMesh(canvasRef.current, adjustedLandmarks, capturesTaken.value, smileCheckpoint.value);
+          drawFaceMesh(
+            canvasRef.current,
+            adjustedLandmarks,
+            capturesTaken.value,
+            smileCheckpoint.value,
+          );
         } else {
-          drawFaceMesh(canvasRef.current, results.faceLandmarks, capturesTaken.value, smileCheckpoint.value);
+          drawFaceMesh(
+            canvasRef.current,
+            results.faceLandmarks,
+            capturesTaken.value,
+            smileCheckpoint.value,
+          );
         }
       } else if (canvasRef.current) {
         clearCanvas(canvasRef.current);
@@ -216,7 +240,10 @@ export const useFaceCapture = ({
       multipleFaces.value = numFaces > 1;
 
       // Check if face is detected
-      const hasFace = results.faceBlendshapes && results.faceBlendshapes.length > 0 && numFaces === 1;
+      const hasFace =
+        results.faceBlendshapes &&
+        results.faceBlendshapes.length > 0 &&
+        numFaces === 1;
       faceDetected.value = hasFace;
 
       if (hasFace && results.faceLandmarks) {
@@ -234,12 +261,19 @@ export const useFaceCapture = ({
         }
 
         // Check face position
-        faceInBounds.value = isFaceInBounds(results.faceLandmarks, videoAspectRatio.value);
+        faceInBounds.value = isFaceInBounds(
+          results.faceLandmarks,
+          videoAspectRatio.value,
+        );
 
         // Get smile and mouth open data
         const blendshapes = results.faceBlendshapes[0].categories;
-        const smileLeft = blendshapes.find((b) => b.categoryName === 'mouthSmileLeft')?.score || 0;
-        const smileRight = blendshapes.find((b) => b.categoryName === 'mouthSmileRight')?.score || 0;
+        const smileLeft =
+          blendshapes.find((b) => b.categoryName === 'mouthSmileLeft')?.score ||
+          0;
+        const smileRight =
+          blendshapes.find((b) => b.categoryName === 'mouthSmileRight')
+            ?.score || 0;
         const mouthOpen = calculateMouthOpening(results.faceLandmarks);
         const smileScore = (smileLeft + smileRight) / 2;
 
@@ -248,12 +282,17 @@ export const useFaceCapture = ({
 
         if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
           lastSmileTime.value = Date.now();
-          
+
           if (isPaused.value && isCapturing.value && resumeCaptureRef.current) {
             // defer execution
             setTimeout(() => {
               const stillSmiling = Date.now() - lastSmileTime.value <= 100;
-              if (stillSmiling && isPaused.value && isCapturing.value && resumeCaptureRef.current) {
+              if (
+                stillSmiling &&
+                isPaused.value &&
+                isCapturing.value &&
+                resumeCaptureRef.current
+              ) {
                 resumeCaptureRef.current();
               }
             }, 0);
@@ -276,7 +315,7 @@ export const useFaceCapture = ({
       multipleFaces.value = false;
       faceProximity.value = 'good';
       currentMouthOpen.value = 0;
-      
+
       if (isCapturing.value) {
         updateAlert('no-face');
       }
@@ -297,7 +336,7 @@ export const useFaceCapture = ({
 
     const isReference = capturesTaken.value === totalCaptures.value - 1;
     const imageData = captureImageFromVideo(videoRef.current, isReference);
-    
+
     if (!imageData) return;
 
     if (isReference) {
@@ -351,7 +390,7 @@ export const useFaceCapture = ({
       hasFinishedCapture.value = true;
     }
   };
-  
+
   const pauseCapture = () => {
     if (captureTimerRef.current) {
       clearInterval(captureTimerRef.current);
@@ -360,7 +399,10 @@ export const useFaceCapture = ({
     isPaused.value = true;
 
     if (
-      !multipleFaces.value && faceDetected.value && faceInBounds.value && faceProximity.value === 'good'
+      !multipleFaces.value &&
+      faceDetected.value &&
+      faceInBounds.value &&
+      faceProximity.value === 'good'
     ) {
       updateAlert('smile-required');
     }
@@ -429,13 +471,13 @@ export const useFaceCapture = ({
           return;
         }
       }
-      
+
       isPaused.value = false;
       updateAlert(null);
       startCaptureInterval();
     }
   };
-  
+
   resumeCaptureRef.current = resumeCapture;
 
   const startCapture = async () => {
@@ -502,7 +544,7 @@ export const useFaceCapture = ({
     lastSmileTime,
     alertTitle,
     isReadyToCapture,
-    
+
     isCapturing,
     isPaused,
     countdown,
@@ -513,7 +555,7 @@ export const useFaceCapture = ({
     hasFinishedCapture,
     smileCheckpoint,
     neutralZone,
-    
+
     initializeFaceLandmarker,
     setupCanvas,
     startDetectionLoop,

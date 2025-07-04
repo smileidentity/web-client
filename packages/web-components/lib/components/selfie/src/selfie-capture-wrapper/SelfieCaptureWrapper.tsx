@@ -89,9 +89,12 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     if (!mediapipeReady && loadingProgress >= 100) {
       const setupEventForwarding = () => {
         const selfieCapture = document.querySelector('selfie-capture');
-        if (selfieCapture && !selfieCapture.hasAttribute('data-backup-events-setup')) {
+        if (
+          selfieCapture &&
+          !selfieCapture.hasAttribute('data-backup-events-setup')
+        ) {
           selfieCapture.setAttribute('data-backup-events-setup', 'true');
-          
+
           const forwardEvent = (event: Event) => {
             const customEvent = event as CustomEvent;
             window.dispatchEvent(
@@ -102,14 +105,29 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
             );
           };
 
-          selfieCapture.addEventListener('selfie-capture.publish', forwardEvent);
-          selfieCapture.addEventListener('selfie-capture.cancelled', forwardEvent);
+          selfieCapture.addEventListener(
+            'selfie-capture.publish',
+            forwardEvent,
+          );
+          selfieCapture.addEventListener(
+            'selfie-capture.cancelled',
+            forwardEvent,
+          );
           selfieCapture.addEventListener('selfie-capture.close', forwardEvent);
 
           return () => {
-            selfieCapture.removeEventListener('selfie-capture.publish', forwardEvent);
-            selfieCapture.removeEventListener('selfie-capture.cancelled', forwardEvent);
-            selfieCapture.removeEventListener('selfie-capture.close', forwardEvent);
+            selfieCapture.removeEventListener(
+              'selfie-capture.publish',
+              forwardEvent,
+            );
+            selfieCapture.removeEventListener(
+              'selfie-capture.cancelled',
+              forwardEvent,
+            );
+            selfieCapture.removeEventListener(
+              'selfie-capture.close',
+              forwardEvent,
+            );
           };
         }
         return undefined;
@@ -130,7 +148,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     mediapipeInstance &&
     !usingSelfieCapture
   ) {
-    return <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />;
+    return (
+      <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+    );
   }
 
   // use EnhancedSelfieCapture if mediapipe loads
@@ -140,7 +160,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     mediapipeInstance &&
     !usingSelfieCapture
   ) {
-    return <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />;
+    return (
+      <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+    );
   }
 
   if (loadingProgress >= 100) {
@@ -150,13 +172,13 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
     const propsWithoutHidden = { ...props };
     delete (propsWithoutHidden as any).hidden;
-    
+
     const selfieCapture = h('selfie-capture', {
       ...propsWithoutHidden,
       ref: (el: HTMLElement) => {
         if (el && !el.hasAttribute('data-events-setup')) {
           el.setAttribute('data-events-setup', 'true');
-          
+
           const forwardEvent = (event: Event) => {
             const customEvent = event as CustomEvent;
 
@@ -180,9 +202,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
           el.addEventListener('selfie-capture.cancelled', forwardEvent);
           el.addEventListener('selfie-capture.close', forwardEvent);
         }
-      }
+      },
     });
-    
+
     return selfieCapture;
   }
 

@@ -1,6 +1,6 @@
 export const captureImageFromVideo = (
   videoElement: HTMLVideoElement,
-  isReference: boolean = false
+  isReference: boolean = false,
 ): string | null => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -18,11 +18,11 @@ export const captureImageFromVideo = (
   const zoomOutFactor = 1.3;
   const sourceWidth = videoElement.videoWidth * zoomOutFactor;
   const sourceHeight = videoElement.videoHeight * zoomOutFactor;
-  
+
   // center the zoomed out area
   const offsetX = (sourceWidth - videoElement.videoWidth) / 2;
   const offsetY = (sourceHeight - videoElement.videoHeight) / 2;
-  
+
   // vertical offset to shift up and capture full head
   const verticalOffset = videoElement.videoHeight * 0.05;
 

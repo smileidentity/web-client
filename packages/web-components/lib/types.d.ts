@@ -52,11 +52,15 @@ declare namespace JSX {
 }
 
 interface HTMLElementConstructor {
-  new(): HTMLElement;
+  new (): HTMLElement;
 }
 
 interface CustomElementRegistry {
-  define(name: string, constructor: HTMLElementConstructor, options?: ElementDefinitionOptions): void;
+  define(
+    name: string,
+    constructor: HTMLElementConstructor,
+    options?: ElementDefinitionOptions,
+  ): void;
   get(name: string): HTMLElementConstructor | undefined;
   whenDefined(name: string): Promise<HTMLElementConstructor>;
 }

@@ -128,7 +128,9 @@ const App = () => {
             <option value="smart-camera-web">Smart Camera Web</option>
             <option value="document-capture">Document Capture</option>
             <option value="selfie-capture">Selfie Capture</option>
-            <option value="enhanced-selfie-capture">Enhanced Selfie Capture (Standalone)</option>
+            <option value="enhanced-selfie-capture">
+              Enhanced Selfie Capture (Standalone)
+            </option>
           </select>
         </div>
 

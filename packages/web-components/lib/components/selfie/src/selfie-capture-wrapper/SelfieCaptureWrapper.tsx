@@ -88,56 +88,42 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     };
   }, [startCountdown, timeout, mediapipeReady]);
 
-  // Set up event forwarding for selfie-capture component
   useEffect(() => {
     if (!mediapipeReady && loadingProgress >= 100) {
-      // Find the selfie-capture element once it's rendered
-      const selfieCapture = document.querySelector('selfie-capture');
-      if (selfieCapture) {
-        const forwardEvent = (event: Event) => {
-          const customEvent = event as CustomEvent;
+      // Additional event forwarding via querySelector as backup
+      const setupEventForwarding = () => {
+        const selfieCapture = document.querySelector('selfie-capture');
+        if (selfieCapture && !selfieCapture.hasAttribute('data-backup-events-setup')) {
+          selfieCapture.setAttribute('data-backup-events-setup', 'true');
+          
+          const forwardEvent = (event: Event) => {
+            const customEvent = event as CustomEvent;
+            // Forward the event to window for SelfieCaptureScreens to catch
+            window.dispatchEvent(
+              new CustomEvent(customEvent.type, {
+                detail: customEvent.detail,
+                bubbles: true,
+              }),
+            );
+          };
 
-          // Track when a session completes (either success, cancel, or close)
-          if (
-            customEvent.type === 'selfie-capture.publish' ||
-            customEvent.type === 'selfie-capture.cancelled' ||
-            customEvent.type === 'selfie-capture.close'
-          ) {
-            setInitialSessionCompleted(true);
-          }
+          selfieCapture.addEventListener('selfie-capture.publish', forwardEvent);
+          selfieCapture.addEventListener('selfie-capture.cancelled', forwardEvent);
+          selfieCapture.addEventListener('selfie-capture.close', forwardEvent);
 
-          // Forward the event to window for SelfieCaptureScreens to catch
-          window.dispatchEvent(
-            new CustomEvent(customEvent.type, {
-              detail: customEvent.detail,
-              bubbles: true,
-            }),
-          );
-        };
+          return () => {
+            selfieCapture.removeEventListener('selfie-capture.publish', forwardEvent);
+            selfieCapture.removeEventListener('selfie-capture.cancelled', forwardEvent);
+            selfieCapture.removeEventListener('selfie-capture.close', forwardEvent);
+          };
+        }
+        return undefined;
+      };
 
-        // Add event listeners for the events that selfie-capture dispatches
-        selfieCapture.addEventListener('selfie-capture.publish', forwardEvent);
-        selfieCapture.addEventListener(
-          'selfie-capture.cancelled',
-          forwardEvent,
-        );
-        selfieCapture.addEventListener('selfie-capture.close', forwardEvent);
-
-        return () => {
-          selfieCapture.removeEventListener(
-            'selfie-capture.publish',
-            forwardEvent,
-          );
-          selfieCapture.removeEventListener(
-            'selfie-capture.cancelled',
-            forwardEvent,
-          );
-          selfieCapture.removeEventListener(
-            'selfie-capture.close',
-            forwardEvent,
-          );
-        };
-      }
+      const timeoutId = setTimeout(setupEventForwarding, 200);
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
     return undefined;
   }, [mediapipeReady, loadingProgress]);
@@ -162,17 +148,53 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return <SelfieBooth {...props} mediapipeInstance={mediapipeInstance} />;
   }
 
-  // Use selfie-capture if Mediapipe didn't load in time or failed
+  // use selfie-capture as a fallback
   if (loadingProgress >= 100) {
     // Mark that we're using selfie-capture to prevent switching later
     if (!usingSelfieCapture) {
       setUsingSelfieCapture(true);
     }
 
-    // Remove the 'hidden' attribute when rendering selfie-capture to make it visible
     const propsWithoutHidden = { ...props };
     delete (propsWithoutHidden as any).hidden;
-    return h('selfie-capture', propsWithoutHidden);
+    
+    const selfieCapture = h('selfie-capture', {
+      ...propsWithoutHidden,
+      ref: (el: HTMLElement) => {
+        if (el && !el.hasAttribute('data-events-setup')) {
+          // Mark that we've set up events to avoid duplicates
+          el.setAttribute('data-events-setup', 'true');
+          
+          const forwardEvent = (event: Event) => {
+            const customEvent = event as CustomEvent;
+
+            // Track when a session completes (either success, cancel, or close)
+            if (
+              customEvent.type === 'selfie-capture.publish' ||
+              customEvent.type === 'selfie-capture.cancelled' ||
+              customEvent.type === 'selfie-capture.close'
+            ) {
+              setInitialSessionCompleted(true);
+            }
+
+            // Forward the event to window for SelfieCaptureScreens to catch
+            window.dispatchEvent(
+              new CustomEvent(customEvent.type, {
+                detail: customEvent.detail,
+                bubbles: true,
+              }),
+            );
+          };
+
+          // Add event listeners directly to the element
+          el.addEventListener('selfie-capture.publish', forwardEvent);
+          el.addEventListener('selfie-capture.cancelled', forwardEvent);
+          el.addEventListener('selfie-capture.close', forwardEvent);
+        }
+      }
+    });
+    
+    return selfieCapture;
   }
 
   return (

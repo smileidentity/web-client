@@ -65,6 +65,10 @@ export default defineConfig(({ mode }) => {
             __dirname,
             'lib/components/end-user-consent/src/index.js',
           ),
+          navigation: resolve(
+            __dirname,
+            'lib/components/navigation/src/index.js',
+          ),
           selfie: resolve(__dirname, 'lib/components/selfie/src/index.js'),
           'signature-pad': resolve(
             __dirname,

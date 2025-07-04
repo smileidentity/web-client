@@ -23,6 +23,10 @@
       "types": "./dist/types/end-user-consent.d.ts",
       "import": "./dist/end-user-consent.js"
     },
+    "./navigation": {
+      "types": "./dist/types/navigation.d.ts",
+      "import": "./dist/navigation.js"
+    },
     "./selfie-capture": {
       "types": "./dist/types/selfie.d.ts",
       "import": "./dist/selfie.js"

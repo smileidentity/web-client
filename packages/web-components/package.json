@@ -12,29 +12,32 @@
       "require": "./dist/main.js"
     },
     "./combobox": {
-      "import": "./dist/components-combobox.js"
+      "types": "./dist/types/combobox.d.ts",
+      "import": "./dist/combobox.js"
     },
     "./document-capture": {
-      "import": "./dist/components-document.js"
+      "types": "./dist/types/document.d.ts",
+      "import": "./dist/document.js"
     },
     "./end-user-consent": {
-      "import": "./dist/components-end-user-consent.js"
-    },
-    "./navigation": {
-      "import": "./dist/components-navigation.js"
+      "types": "./dist/types/end-user-consent.d.ts",
+      "import": "./dist/end-user-consent.js"
     },
     "./selfie-capture": {
-      "import": "./dist/components-selfie.js"
+      "types": "./dist/types/selfie.d.ts",
+      "import": "./dist/selfie.js"
     },
     "./signature-pad": {
-      "import": "./dist/components-signature-pad.js"
+      "types": "./dist/types/signature-pad.d.ts",
+      "import": "./dist/signature-pad.js"
     },
     "./totp-consent": {
-      "import": "./dist/components-totp-consent.js"
+      "types": "./dist/types/totp-consent.d.ts",
+      "import": "./dist/totp-consent.js"
     },
     "./smart-camera-web": {
-      "types": "./dist/types/components/smart-camera-web/src/SmartCameraWeb.d.ts",
-      "import": "./dist/components-smart-camera-web-src-SmartCameraWeb.js"
+      "types": "./dist/types/smart-camera-web.d.ts",
+      "import": "./dist/smart-camera-web.js"
     }
   },
   "files": [
@@ -47,6 +50,7 @@
   ],
   "scripts": {
     "build": "vite build",
+    "build:stats": "cross-env GENERATE_STATS=true vite build --mode=production && echo Bundle analysis generated at dist/bundle-analysis.html",
     "dev": "vite",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
@@ -92,6 +96,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "glob": "^10.3.10",
     "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.8.3",
     "vite": "^7.0.1",
     "vite-plugin-dts": "^4.5.4",

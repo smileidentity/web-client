@@ -150,10 +150,10 @@ export default defineConfig(({ mode }) => {
       },
     },
 
-    esbuild: {
-      jsxFactory: 'h',
-      jsxFragment: 'Fragment',
-      jsxInject: "import { h, Fragment } from 'preact'",
-    },
+    // esbuild: {
+    //   jsxFactory: 'h',
+    //   // jsxFragment: 'Fragment',
+    //   // jsxInject: "import { h, Fragment } from 'preact'",
+    // },
   };
 });

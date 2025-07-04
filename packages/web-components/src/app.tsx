@@ -37,8 +37,8 @@ const App = () => {
       case 'selfie-capture':
         componentElement = createElement('selfie-capture-screens', props);
         break;
-      case 'selfie-booth':
-        componentElement = createElement('selfie-booth', props);
+      case 'enhanced-selfie-capture':
+        componentElement = createElement('enhanced-selfie-capture', props);
         break;
       case 'smart-camera-web':
       default:
@@ -103,8 +103,8 @@ const App = () => {
         return createElement('document-capture-screens', props);
       case 'selfie-capture':
         return createElement('selfie-capture-screens', props);
-      case 'selfie-booth':
-        return createElement('selfie-booth', props);
+      case 'enhanced-selfie-capture':
+        return createElement('enhanced-selfie-capture', props);
       case 'smart-camera-web':
       default:
         return createElement('smart-camera-web', props);
@@ -128,7 +128,7 @@ const App = () => {
             <option value="smart-camera-web">Smart Camera Web</option>
             <option value="document-capture">Document Capture</option>
             <option value="selfie-capture">Selfie Capture</option>
-            <option value="selfie-booth">Selfie Booth (Standalone)</option>
+            <option value="enhanced-selfie-capture">Enhanced Selfie Capture (Standalone)</option>
           </select>
         </div>
 

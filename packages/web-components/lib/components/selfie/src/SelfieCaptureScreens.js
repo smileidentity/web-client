@@ -324,7 +324,7 @@ class SelfieCaptureScreens extends HTMLElement {
     });
 
     // Also listen for the publish event on the parent SelfieCaptureScreens element
-    // in case selfie-booth dispatches it there
+    // in case enhanced-selfie-capture dispatches it there
     this.addEventListener('selfie-capture.publish', async (event) => {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),

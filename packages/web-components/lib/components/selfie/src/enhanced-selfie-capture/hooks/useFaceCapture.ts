@@ -87,7 +87,7 @@ export const useFaceCapture = ({
       },
       outputFaceBlendshapes: true,
       runningMode: 'VIDEO',
-      numFaces: 5,
+      numFaces: 2,
     });
   };
 
@@ -125,8 +125,6 @@ export const useFaceCapture = ({
       updateAlert('neutral-expression');
     } else if (isInNeutralZone) {
       alertTitle.value = 'Keep a neutral expression';
-    } else if (capturesTaken.value === neutralZone.value) {
-      alertTitle.value = 'Get ready to smile!';
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {

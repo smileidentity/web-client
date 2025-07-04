@@ -4,7 +4,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
-import SelfieBooth from '../selfie-booth/SelfieBooth';
+import EnhancedSelfieCapture from '../enhanced-selfie-capture/EnhancedSelfieCapture';
 import '../selfie-capture/SelfieCapture';
 
 declare const h: any;
@@ -20,7 +20,7 @@ interface Props {
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
   key?: string;
-  'start-countdown'?: string | boolean; // Prop to control when countdown starts
+  'start-countdown'?: string | boolean;
 }
 
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
@@ -38,7 +38,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
-  // Load Mediapipe in background immediately
   useEffect(() => {
     if (mediapipeReady || mediapipeLoading) return;
 
@@ -59,7 +58,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
             },
             outputFaceBlendshapes: true,
             runningMode: 'VIDEO',
-            numFaces: 5,
+            numFaces: 2,
           },
         );
 
@@ -67,7 +66,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         setMediapipeReady(true);
       } catch (error) {
         console.error('Failed to load Mediapipe:', error);
-        // Don't set any permanent fallback flag - let retakes check again
       }
       setMediapipeLoading(false);
     };
@@ -75,7 +73,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     loadMediapipe();
   }, [mediapipeReady, mediapipeLoading]);
 
-  // Start countdown only when startCountdown is true (when capture screen is active)
   useEffect(() => {
     if (!startCountdown || mediapipeReady) return undefined;
 
@@ -90,7 +87,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (!mediapipeReady && loadingProgress >= 100) {
-      // Additional event forwarding via querySelector as backup
       const setupEventForwarding = () => {
         const selfieCapture = document.querySelector('selfie-capture');
         if (selfieCapture && !selfieCapture.hasAttribute('data-backup-events-setup')) {
@@ -98,7 +94,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
           
           const forwardEvent = (event: Event) => {
             const customEvent = event as CustomEvent;
-            // Forward the event to window for SelfieCaptureScreens to catch
             window.dispatchEvent(
               new CustomEvent(customEvent.type, {
                 detail: customEvent.detail,
@@ -128,29 +123,27 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return undefined;
   }, [mediapipeReady, loadingProgress]);
 
-  // On retakes (after initial session completed), prefer SelfieBooth if Mediapipe is ready
+  // on retakes, prefer EnhancedSelfieCapture if Mediapipe is ready
   if (
     initialSessionCompleted &&
     mediapipeReady &&
     mediapipeInstance &&
     !usingSelfieCapture
   ) {
-    return <SelfieBooth {...props} mediapipeInstance={mediapipeInstance} />;
+    return <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />;
   }
 
-  // For initial session, use SelfieBooth if Mediapipe loaded within timeout
+  // use EnhancedSelfieCapture if mediapipe loads
   if (
     !initialSessionCompleted &&
     mediapipeReady &&
     mediapipeInstance &&
     !usingSelfieCapture
   ) {
-    return <SelfieBooth {...props} mediapipeInstance={mediapipeInstance} />;
+    return <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />;
   }
 
-  // use selfie-capture as a fallback
   if (loadingProgress >= 100) {
-    // Mark that we're using selfie-capture to prevent switching later
     if (!usingSelfieCapture) {
       setUsingSelfieCapture(true);
     }
@@ -162,13 +155,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
       ...propsWithoutHidden,
       ref: (el: HTMLElement) => {
         if (el && !el.hasAttribute('data-events-setup')) {
-          // Mark that we've set up events to avoid duplicates
           el.setAttribute('data-events-setup', 'true');
           
           const forwardEvent = (event: Event) => {
             const customEvent = event as CustomEvent;
 
-            // Track when a session completes (either success, cancel, or close)
             if (
               customEvent.type === 'selfie-capture.publish' ||
               customEvent.type === 'selfie-capture.cancelled' ||
@@ -177,7 +168,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
               setInitialSessionCompleted(true);
             }
 
-            // Forward the event to window for SelfieCaptureScreens to catch
             window.dispatchEvent(
               new CustomEvent(customEvent.type, {
                 detail: customEvent.detail,
@@ -186,7 +176,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
             );
           };
 
-          // Add event listeners directly to the element
           el.addEventListener('selfie-capture.publish', forwardEvent);
           el.addEventListener('selfie-capture.cancelled', forwardEvent);
           el.addEventListener('selfie-capture.close', forwardEvent);
@@ -222,7 +211,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   );
 };
 
-// Register as a custom element
 if (!customElements.get('selfie-capture-wrapper')) {
   register(
     SelfieCaptureWrapper,

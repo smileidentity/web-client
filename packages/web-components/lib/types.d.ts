@@ -1,5 +1,3 @@
-// Type definitions for existing JavaScript modules
-
 declare module 'validate.js' {
   const validate: any;
   export default validate;
@@ -36,6 +34,7 @@ declare namespace JSX {
     'document-capture': any;
     'document-capture-instructions': any;
     'document-capture-review': any;
+    'enhanced-selfie-capture': any;
     'selfie-capture': any;
     'selfie-capture-instructions': any;
     'selfie-capture-review': any;
@@ -49,11 +48,9 @@ declare namespace JSX {
     'signature-pad': any;
     'smart-camera-web': any;
     'powered-by-smile-id': any;
-    'selfie-booth': any;
   }
 }
 
-// Web Components interfaces
 interface HTMLElementConstructor {
   new(): HTMLElement;
 }

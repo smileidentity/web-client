@@ -23,7 +23,7 @@ interface Props {
   mediapipeInstance?: FaceLandmarker;
 }
 
-const SelfieBooth: FunctionComponent<Props> = ({
+const EnhancedSelfieCapture: FunctionComponent<Props> = ({
   interval = 350,
   duration = 2800,
   'theme-color': themeColor = '#001096',
@@ -110,7 +110,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
   }, [showNavigation]);
 
   return (
-    <div className="selfie-booth">
+    <div className="enhanced-selfie-capture">
       {showNavigation && (
         // @ts-ignore
         <smileid-navigation ref={navigationRef} theme-color={themeColor} />
@@ -192,7 +192,7 @@ const SelfieBooth: FunctionComponent<Props> = ({
           cursor: not-allowed;
         }
 
-        .selfie-booth {
+        .enhanced-selfie-capture {
           font-family: sans-serif;
           max-width: 356px;
           margin: 0 auto;
@@ -203,10 +203,10 @@ const SelfieBooth: FunctionComponent<Props> = ({
   );
 };
 
-if (!customElements.get('selfie-booth')) {
+if (!customElements.get('enhanced-selfie-capture')) {
   register(
-    SelfieBooth,
-    'selfie-booth',
+    EnhancedSelfieCapture,
+    'enhanced-selfie-capture',
     [
       'interval',
       'duration',
@@ -221,4 +221,4 @@ if (!customElements.get('selfie-booth')) {
   );
 }
 
-export default SelfieBooth;
+export default EnhancedSelfieCapture;

@@ -6,13 +6,13 @@ interface AlertDisplayProps {
 
 export const AlertDisplay: FunctionComponent<AlertDisplayProps> = ({
   alertTitle,
-}) => (
+}) =>
   alertTitle ? (
     <>
       <div className="alert-message">
         <div className="alert-title">{alertTitle}</div>
       </div>
-      
+
       <style>{`
         .alert-message {
           margin-top: 1.5rem;
@@ -32,5 +32,4 @@ export const AlertDisplay: FunctionComponent<AlertDisplayProps> = ({
         }
       `}</style>
     </>
-  ) : null
-);
+  ) : null;

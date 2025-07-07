@@ -120,7 +120,7 @@ jobs:
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all
-    needs: [full-stack]
+    needs: [full-stack, embed]
     steps:
       - name: checkout code
         uses: actions/checkout@v4

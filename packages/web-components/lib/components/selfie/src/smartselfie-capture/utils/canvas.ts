@@ -67,7 +67,8 @@ export const drawFaceMesh = (
     ctx.lineJoin = 'round';
 
     drawingUtils.drawLandmarks(landmark, {
-      color: 'rgba(9, 132, 227,0.7)',lineWidth: 0.5,
+      color: 'rgba(9, 132, 227,0.7)',
+      lineWidth: 0.5,
       radius: 0.5,
     });
     drawingUtils.drawConnectors(
@@ -78,7 +79,7 @@ export const drawFaceMesh = (
         lineWidth,
       },
     );
-    
+
     const isInSmileZone = capturesTaken > 0 && capturesTaken >= smileCheckpoint;
     if (isInSmileZone) {
       drawingUtils.drawConnectors(

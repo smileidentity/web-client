@@ -40,7 +40,14 @@ jobs:
             --exclude "*" \
             --include "smart-camera-web.js" \
             --include "*/smart-camera-web.js" \
+            --cache-control "max-age=300, s-maxage=300" \
+            --metadata-directive REPLACE \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
+      - name: invalidate cloudfront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/*"
   embed:
     # needs: [test]
     defaults:
@@ -73,7 +80,15 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy preview to s3
         run: |
-          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
+          aws s3 sync --follow-symlinks --delete \
+            --cache-control "max-age=300, s-maxage=300" \
+            --metadata-directive REPLACE \
+            dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
+      - name: invalidate cloudfront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/${{ env.DEST_DIR_EMBED }}/*"
   full-stack:
     if: always()
     defaults:

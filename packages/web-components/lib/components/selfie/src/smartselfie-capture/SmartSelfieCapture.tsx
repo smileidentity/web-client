@@ -133,18 +133,21 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
       <AlertDisplay alertTitle={faceCapture.alertTitle.value} />
 
-      {!faceCapture.isCapturing.value && !faceCapture.hasFinishedCapture.value &&  <CaptureControls
-        isCapturing={faceCapture.isCapturing.value}
-        hasFinishedCapture={faceCapture.hasFinishedCapture.value}
-        isReadyToCapture={faceCapture.isReadyToCapture.value}
-        allowAgentMode={allowAgentMode}
-        agentSupported={camera.agentSupported}
-        showAgentModeForTests={showAgentModeForTests}
-        facingMode={camera.facingMode}
-        themeColor={themeColor}
-        onStartCapture={faceCapture.startCapture}
-        onSwitchCamera={camera.switchCamera}
-      />}
+      {!faceCapture.isCapturing.value &&
+        !faceCapture.hasFinishedCapture.value && (
+          <CaptureControls
+            isCapturing={faceCapture.isCapturing.value}
+            hasFinishedCapture={faceCapture.hasFinishedCapture.value}
+            isReadyToCapture={faceCapture.isReadyToCapture.value}
+            allowAgentMode={allowAgentMode}
+            agentSupported={camera.agentSupported}
+            showAgentModeForTests={showAgentModeForTests}
+            facingMode={camera.facingMode}
+            themeColor={themeColor}
+            onStartCapture={faceCapture.startCapture}
+            onSwitchCamera={camera.switchCamera}
+          />
+        )}
 
       {/* @ts-ignore */}
       {!hideAttribution && <powered-by-smile-id />}

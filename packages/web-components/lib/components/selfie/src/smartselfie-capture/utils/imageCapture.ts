@@ -23,18 +23,18 @@ export const captureImageFromVideo = (
       );
     }
   } else if (isPortrait) {
-      canvas.width = 240;
-      canvas.height = Math.max(
-        320,
-        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
-      );
-    } else {
-      canvas.width = 320;
-      canvas.height = Math.max(
-        240,
-        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
-      );
-    }
+    canvas.width = 240;
+    canvas.height = Math.max(
+      320,
+      (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+    );
+  } else {
+    canvas.width = 320;
+    canvas.height = Math.max(
+      240,
+      (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+    );
+  }
 
   // capture more of the user's head and avoid clipping
   const zoomOutFactor = 1.3;

@@ -43,7 +43,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   const hideAttribution = getBoolProp(hideAttributionProp);
 
   const smileCooldown = 300;
-  const smileThreshold = 0.2;
+  const smileThreshold = 0.25;
   const mouthOpenThreshold = 0.05;
   const minFaceSize = 0.35;
   const maxFaceSize = 0.5;

@@ -46,14 +46,14 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
       try {
         const vision = await import('@mediapipe/tasks-vision');
         const filesetResolver = await vision.FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm',
+          'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
         );
 
         const faceLandmarker = await vision.FaceLandmarker.createFromOptions(
           filesetResolver,
           {
             baseOptions: {
-              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task`,
+              modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
               delegate: 'GPU',
             },
             outputFaceBlendshapes: true,

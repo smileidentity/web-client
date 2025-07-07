@@ -88,12 +88,12 @@ export const useFaceCapture = ({
       return;
     }
     const vision = await FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm',
+      'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
     );
 
     faceLandmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task`,
+        modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
         delegate: 'GPU',
       },
       outputFaceBlendshapes: true,

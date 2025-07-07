@@ -498,7 +498,7 @@ export const useFaceCapture = ({
       }),
     );
 
-    // TODO: remove - backwards compatibility
+    // TODO: remove - for backwards compatibility
     window.dispatchEvent(
       new CustomEvent('selfie-capture-screens.cancelled', {
         detail: { meta: { libraryVersion: COMPONENTS_VERSION } },

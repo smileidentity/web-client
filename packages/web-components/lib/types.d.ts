@@ -34,7 +34,7 @@ declare namespace JSX {
     'document-capture': any;
     'document-capture-instructions': any;
     'document-capture-review': any;
-    'enhanced-selfie-capture': any;
+    'smartselfie-capture': any;
     'selfie-capture': any;
     'selfie-capture-instructions': any;
     'selfie-capture-review': any;

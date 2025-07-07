@@ -24,7 +24,7 @@ interface Props {
   mediapipeInstance?: FaceLandmarker;
 }
 
-const EnhancedSelfieCapture: FunctionComponent<Props> = ({
+const SmartSelfieCapture: FunctionComponent<Props> = ({
   interval = 350,
   duration = 2800,
   'theme-color': themeColor = '#001096',
@@ -111,7 +111,7 @@ const EnhancedSelfieCapture: FunctionComponent<Props> = ({
   }, [showNavigation]);
 
   return (
-    <div className="enhanced-selfie-capture">
+    <div className="smartselfie-capture">
       {showNavigation && (
         // @ts-ignore
         <smileid-navigation ref={navigationRef} theme-color={themeColor} />
@@ -193,7 +193,7 @@ const EnhancedSelfieCapture: FunctionComponent<Props> = ({
           cursor: not-allowed;
         }
 
-        .enhanced-selfie-capture {
+        .smartselfie-capture {
           font-family: sans-serif;
           max-width: 356px;
           margin: 0 auto;
@@ -204,10 +204,10 @@ const EnhancedSelfieCapture: FunctionComponent<Props> = ({
   );
 };
 
-if (!customElements.get('enhanced-selfie-capture')) {
+if (!customElements.get('smartselfie-capture')) {
   register(
-    EnhancedSelfieCapture,
-    'enhanced-selfie-capture',
+    SmartSelfieCapture,
+    'smartselfie-capture',
     [
       'interval',
       'duration',
@@ -222,4 +222,4 @@ if (!customElements.get('enhanced-selfie-capture')) {
   );
 }
 
-export default EnhancedSelfieCapture;
+export default SmartSelfieCapture;

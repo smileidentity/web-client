@@ -4,7 +4,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
-import EnhancedSelfieCapture from '../enhanced-selfie-capture/EnhancedSelfieCapture';
+import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 import '../selfie-capture/SelfieCapture';
 
 declare const h: any;
@@ -141,7 +141,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return undefined;
   }, [mediapipeReady, loadingProgress]);
 
-  // on retakes, prefer EnhancedSelfieCapture if Mediapipe is ready
+  // on retakes, prefer SmartSelfieCapture if Mediapipe is ready
   if (
     initialSessionCompleted &&
     mediapipeReady &&
@@ -149,11 +149,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     !usingSelfieCapture
   ) {
     return (
-      <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+      <SmartSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
     );
   }
 
-  // use EnhancedSelfieCapture if mediapipe loads
+  // use SmartSelfieCapture if mediapipe loads
   if (
     !initialSessionCompleted &&
     mediapipeReady &&
@@ -161,7 +161,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     !usingSelfieCapture
   ) {
     return (
-      <EnhancedSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+      <SmartSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
     );
   }
 

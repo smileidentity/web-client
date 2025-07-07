@@ -4,7 +4,8 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
-import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
+import { getBoolProp } from '@/utils/props';
+import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture.tsx';
 import '../selfie-capture/SelfieCapture';
 
 declare const h: any;
@@ -21,15 +22,17 @@ interface Props {
   'disable-image-tests'?: string | boolean;
   key?: string;
   'start-countdown'?: string | boolean;
+  hidden?: string | boolean;
 }
 
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   timeout = 10000,
   'start-countdown': startCountdownProp = false,
+  hidden: hiddenProp = false,
   ...props
 }) => {
-  const startCountdown =
-    startCountdownProp === true || startCountdownProp === 'true';
+  const hidden = getBoolProp(hiddenProp);
+  const startCountdown = getBoolProp(startCountdownProp);
   const [mediapipeReady, setMediapipeReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [mediapipeInstance, setMediapipeInstance] =
@@ -40,7 +43,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (mediapipeReady || mediapipeLoading) return;
-
     const loadMediapipe = async () => {
       setMediapipeLoading(true);
       try {
@@ -74,7 +76,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   }, [mediapipeReady, mediapipeLoading]);
 
   useEffect(() => {
-    if (!startCountdown || mediapipeReady) return undefined;
+    if (hidden || !startCountdown || mediapipeReady) return undefined;
 
     const timer = setInterval(() => {
       setLoadingProgress((prev: number) => Math.min(prev + 1, 100));
@@ -83,63 +85,63 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return () => {
       clearInterval(timer);
     };
-  }, [startCountdown, timeout, mediapipeReady]);
+  }, [hidden, startCountdown, timeout, mediapipeReady]);
 
   useEffect(() => {
-    if (!mediapipeReady && loadingProgress >= 100) {
-      const setupEventForwarding = () => {
-        const selfieCapture = document.querySelector('selfie-capture');
-        if (
-          selfieCapture &&
-          !selfieCapture.hasAttribute('data-backup-events-setup')
-        ) {
-          selfieCapture.setAttribute('data-backup-events-setup', 'true');
+    if (hidden || mediapipeReady || loadingProgress < 100) return undefined;
 
-          const forwardEvent = (event: Event) => {
-            const customEvent = event as CustomEvent;
-            window.dispatchEvent(
-              new CustomEvent(customEvent.type, {
-                detail: customEvent.detail,
-                bubbles: true,
-              }),
-            );
-          };
+    const setupEventForwarding = () => {
+      const selfieCapture = document.querySelector('selfie-capture');
+      if (
+        selfieCapture &&
+        !selfieCapture.hasAttribute('data-backup-events-setup')
+      ) {
+        selfieCapture.setAttribute('data-backup-events-setup', 'true');
 
-          selfieCapture.addEventListener(
+        const forwardEvent = (event: Event) => {
+          const customEvent = event as CustomEvent;
+          window.dispatchEvent(
+            new CustomEvent(customEvent.type, {
+              detail: customEvent.detail,
+              bubbles: true,
+            }),
+          );
+        };
+
+        selfieCapture.addEventListener('selfie-capture.publish', forwardEvent);
+        selfieCapture.addEventListener(
+          'selfie-capture.cancelled',
+          forwardEvent,
+        );
+        selfieCapture.addEventListener('selfie-capture.close', forwardEvent);
+
+        return () => {
+          selfieCapture.removeEventListener(
             'selfie-capture.publish',
             forwardEvent,
           );
-          selfieCapture.addEventListener(
+          selfieCapture.removeEventListener(
             'selfie-capture.cancelled',
             forwardEvent,
           );
-          selfieCapture.addEventListener('selfie-capture.close', forwardEvent);
+          selfieCapture.removeEventListener(
+            'selfie-capture.close',
+            forwardEvent,
+          );
+        };
+      }
+      return undefined;
+    };
 
-          return () => {
-            selfieCapture.removeEventListener(
-              'selfie-capture.publish',
-              forwardEvent,
-            );
-            selfieCapture.removeEventListener(
-              'selfie-capture.cancelled',
-              forwardEvent,
-            );
-            selfieCapture.removeEventListener(
-              'selfie-capture.close',
-              forwardEvent,
-            );
-          };
-        }
-        return undefined;
-      };
+    const timeoutId = setTimeout(setupEventForwarding, 200);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [hidden, mediapipeReady, loadingProgress]);
 
-      const timeoutId = setTimeout(setupEventForwarding, 200);
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-    return undefined;
-  }, [mediapipeReady, loadingProgress]);
+  if (hidden) {
+    return null;
+  }
 
   // on retakes, prefer SmartSelfieCapture if Mediapipe is ready
   if (
@@ -249,6 +251,7 @@ if (!customElements.get('selfie-capture-wrapper')) {
       'disable-image-tests',
       'key',
       'start-countdown',
+      'hidden',
     ],
     { shadow: true },
   );

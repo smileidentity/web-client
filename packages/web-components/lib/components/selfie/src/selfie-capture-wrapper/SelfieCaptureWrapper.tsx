@@ -125,25 +125,13 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   }
 
   // on retakes, prefer SmartSelfieCapture if Mediapipe is ready
-  if (
-    initialSessionCompleted &&
-    mediapipeReady &&
-    !usingSelfieCapture
-  ) {
-    return (
-      <SmartSelfieCapture {...props} />
-    );
+  if (initialSessionCompleted && mediapipeReady && !usingSelfieCapture) {
+    return <SmartSelfieCapture {...props} />;
   }
 
   // use SmartSelfieCapture if mediapipe loads
-  if (
-    !initialSessionCompleted &&
-    mediapipeReady &&
-    !usingSelfieCapture
-  ) {
-    return (
-      <SmartSelfieCapture {...props} />
-    );
+  if (!initialSessionCompleted && mediapipeReady && !usingSelfieCapture) {
+    return <SmartSelfieCapture {...props} />;
   }
 
   if (loadingProgress >= 100) {

@@ -6,13 +6,35 @@ export const captureImageFromVideo = (
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
+  const isPortrait = videoElement.videoHeight > videoElement.videoWidth;
+
   if (isReference) {
-    canvas.width = 640;
-    canvas.height = 480;
-  } else {
-    canvas.width = 320;
-    canvas.height = 240;
-  }
+    if (isPortrait) {
+      canvas.width = 480;
+      canvas.height = Math.max(
+        640,
+        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+      );
+    } else {
+      canvas.width = 640;
+      canvas.height = Math.max(
+        480,
+        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+      );
+    }
+  } else if (isPortrait) {
+      canvas.width = 240;
+      canvas.height = Math.max(
+        320,
+        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+      );
+    } else {
+      canvas.width = 320;
+      canvas.height = Math.max(
+        240,
+        (canvas.width * videoElement.videoHeight) / videoElement.videoWidth,
+      );
+    }
 
   // capture more of the user's head and avoid clipping
   const zoomOutFactor = 1.3;

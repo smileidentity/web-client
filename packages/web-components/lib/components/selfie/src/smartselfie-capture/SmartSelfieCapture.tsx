@@ -133,7 +133,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
       <AlertDisplay alertTitle={faceCapture.alertTitle.value} />
 
-      <CaptureControls
+      {!faceCapture.isCapturing.value && !faceCapture.hasFinishedCapture.value &&  <CaptureControls
         isCapturing={faceCapture.isCapturing.value}
         hasFinishedCapture={faceCapture.hasFinishedCapture.value}
         isReadyToCapture={faceCapture.isReadyToCapture.value}
@@ -144,7 +144,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         themeColor={themeColor}
         onStartCapture={faceCapture.startCapture}
         onSwitchCamera={camera.switchCamera}
-      />
+      />}
 
       {/* @ts-ignore */}
       {!hideAttribution && <powered-by-smile-id />}

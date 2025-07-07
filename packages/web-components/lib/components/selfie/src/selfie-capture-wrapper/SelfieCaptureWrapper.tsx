@@ -5,7 +5,7 @@ import type { FunctionComponent } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
 import { getBoolProp } from '@/utils/props';
-import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture.tsx';
+import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 import '../selfie-capture/SelfieCapture';
 
 declare const h: any;

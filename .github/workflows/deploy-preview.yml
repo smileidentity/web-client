@@ -43,8 +43,7 @@ jobs:
             --cache-control "max-age=300, s-maxage=300" \
             --metadata-directive REPLACE \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
-      # Remove CloudFront invalidation from here since distribution doesn't exist yet
-      
+
   embed:
     # needs: [test]
     defaults:
@@ -81,7 +80,6 @@ jobs:
             --cache-control "max-age=300, s-maxage=300" \
             --metadata-directive REPLACE \
             dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
-      # Remove CloudFront invalidation from here since distribution doesn't exist yet
 
   full-stack:
     if: always()
@@ -126,7 +124,7 @@ jobs:
           echo "$SST_OUTPUT"
           SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
-          
+
           # Extract CloudFront distribution ID from SST output
           CLOUDFRONT_ID=$(echo "$SST_OUTPUT" | grep -o 'CloudFrontDistribution.*' | sed 's/CloudFrontDistribution: //')
           echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_ID" >> $GITHUB_OUTPUT

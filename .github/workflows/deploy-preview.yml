@@ -34,6 +34,9 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
+      - name: clean s3 destination for fresh deployment
+        run: |
+          aws s3 rm s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }} --recursive || true
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
@@ -46,6 +49,7 @@ jobs:
 
   embed:
     # needs: [test]
+    needs: [smart-camera-web]
     defaults:
       run:
         working-directory: ./packages/embed
@@ -74,6 +78,9 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
+      - name: clean s3 destination for fresh deployment
+        run: |
+          aws s3 rm s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }} --recursive || true
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
@@ -107,6 +114,12 @@ jobs:
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install
+      - name: cleanup and redeploy sst app
+        run: |
+          echo "Removing existing SST deployment..."
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} || true
+          sleep 30
+          echo "Deployment removed, proceeding with fresh deployment..."
       - name: build application
         run: npm run build
       - name: configure sst secrets

@@ -43,11 +43,8 @@ jobs:
             --cache-control "max-age=300, s-maxage=300" \
             --metadata-directive REPLACE \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
-      - name: invalidate cloudfront
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/*"
+      # Remove CloudFront invalidation from here since distribution doesn't exist yet
+      
   embed:
     # needs: [test]
     defaults:
@@ -84,11 +81,8 @@ jobs:
             --cache-control "max-age=300, s-maxage=300" \
             --metadata-directive REPLACE \
             dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
-      - name: invalidate cloudfront
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/${{ env.DEST_DIR_EMBED }}/*"
+      # Remove CloudFront invalidation from here since distribution doesn't exist yet
+
   full-stack:
     if: always()
     defaults:
@@ -97,6 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       SST_URL: ${{ steps.deploy_sst_app.outputs.SST_URL }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -131,6 +126,17 @@ jobs:
           echo "$SST_OUTPUT"
           SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
+          
+          # Extract CloudFront distribution ID from SST output
+          CLOUDFRONT_ID=$(echo "$SST_OUTPUT" | grep -o 'CloudFrontDistribution.*' | sed 's/CloudFrontDistribution: //')
+          echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_ID" >> $GITHUB_OUTPUT
+      - name: invalidate cloudfront after sst deployment
+        if: steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/js/preview-$GITHUB_HEAD_REF/*" "/inline/preview-$GITHUB_HEAD_REF/*"
+
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all

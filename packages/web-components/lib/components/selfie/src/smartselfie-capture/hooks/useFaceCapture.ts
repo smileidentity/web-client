@@ -1,6 +1,6 @@
 import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
-import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+import { FaceLandmarker } from '@mediapipe/tasks-vision';
 import {
   calculateFaceSize,
   isFaceInBounds,
@@ -14,6 +14,7 @@ import {
 import { captureImageFromVideo } from '../utils/imageCapture';
 import { ImageType } from '../constants';
 import { MESSAGES, type MessageKey } from '../utils/alertMessages';
+import { getMediapipeInstance } from '../utils/mediapipeManager';
 import packageJson from '../../../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
@@ -21,7 +22,6 @@ const COMPONENTS_VERSION = packageJson.version;
 interface UseFaceCaptureProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  mediapipeInstance?: FaceLandmarker;
   interval: number;
   duration: number;
   smileThreshold: number;
@@ -34,7 +34,6 @@ interface UseFaceCaptureProps {
 export const useFaceCapture = ({
   videoRef,
   canvasRef,
-  mediapipeInstance,
   interval,
   duration,
   smileThreshold,
@@ -83,23 +82,11 @@ export const useFaceCapture = ({
   );
 
   const initializeFaceLandmarker = async () => {
-    if (mediapipeInstance) {
-      faceLandmarkerRef.current = mediapipeInstance;
-      return;
+    try {
+      faceLandmarkerRef.current = await getMediapipeInstance();
+    } catch (error) {
+      console.error('Failed to initialize MediaPipe:', error);
     }
-    const vision = await FilesetResolver.forVisionTasks(
-      'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
-    );
-
-    faceLandmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-        delegate: 'GPU',
-      },
-      outputFaceBlendshapes: true,
-      runningMode: 'VIDEO',
-      numFaces: 2,
-    });
   };
 
   const updateAlert = (messageKey: MessageKey | null) => {

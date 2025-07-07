@@ -2,11 +2,11 @@ import { useState, useEffect } from 'preact/hooks';
 import { IconLoader2 } from '@tabler/icons-preact';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
-import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
 import { getBoolProp } from '@/utils/props';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 import '../selfie-capture/SelfieCapture';
+import { getMediapipeInstance } from '../smartselfie-capture/utils/mediapipeManager';
 
 declare const h: any;
 
@@ -35,36 +35,17 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const startCountdown = getBoolProp(startCountdownProp);
   const [mediapipeReady, setMediapipeReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [mediapipeInstance, setMediapipeInstance] =
-    useState<FaceLandmarker | null>(null);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
   useEffect(() => {
     if (mediapipeReady || mediapipeLoading) return;
+
     const loadMediapipe = async () => {
       setMediapipeLoading(true);
       try {
-        const vision = await import('@mediapipe/tasks-vision');
-        const filesetResolver = await vision.FilesetResolver.forVisionTasks(
-          'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
-        );
-
-        const faceLandmarker = await vision.FaceLandmarker.createFromOptions(
-          filesetResolver,
-          {
-            baseOptions: {
-              modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-              delegate: 'GPU',
-            },
-            outputFaceBlendshapes: true,
-            runningMode: 'VIDEO',
-            numFaces: 2,
-          },
-        );
-
-        setMediapipeInstance(faceLandmarker);
+        await getMediapipeInstance();
         setMediapipeReady(true);
       } catch (error) {
         console.error('Failed to load Mediapipe:', error);
@@ -147,11 +128,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   if (
     initialSessionCompleted &&
     mediapipeReady &&
-    mediapipeInstance &&
     !usingSelfieCapture
   ) {
     return (
-      <SmartSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+      <SmartSelfieCapture {...props} />
     );
   }
 
@@ -159,11 +139,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   if (
     !initialSessionCompleted &&
     mediapipeReady &&
-    mediapipeInstance &&
     !usingSelfieCapture
   ) {
     return (
-      <SmartSelfieCapture {...props} mediapipeInstance={mediapipeInstance} />
+      <SmartSelfieCapture {...props} />
     );
   }
 

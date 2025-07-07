@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'preact/hooks';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
-import { FaceLandmarker } from '@mediapipe/tasks-vision';
 
 import { getBoolProp } from '../../../../utils/props';
 import { useFaceCapture, useCamera } from './hooks';
@@ -21,7 +20,6 @@ interface Props {
   'show-agent-mode-for-tests'?: string | boolean;
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
-  mediapipeInstance?: FaceLandmarker;
 }
 
 const SmartSelfieCapture: FunctionComponent<Props> = ({
@@ -32,7 +30,6 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   'allow-agent-mode': allowAgentModeProp = false,
   'show-agent-mode-for-tests': showAgentModeForTestsProp = false,
   'hide-attribution': hideAttributionProp = false,
-  mediapipeInstance,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigationRef = useRef<HTMLElement | null>(null);
@@ -53,7 +50,6 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   const faceCapture = useFaceCapture({
     videoRef: camera.videoRef,
     canvasRef,
-    mediapipeInstance,
     interval,
     duration,
     smileThreshold,

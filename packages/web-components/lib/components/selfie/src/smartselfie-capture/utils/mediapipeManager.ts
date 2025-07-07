@@ -1,0 +1,60 @@
+import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+
+declare global {
+  interface Window {
+    __smileIdentityMediapipe?: {
+      instance: FaceLandmarker | null;
+      loading: Promise<FaceLandmarker> | null;
+      loaded: boolean;
+    };
+  }
+}
+
+export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
+  if (!window.__smileIdentityMediapipe) {
+    window.__smileIdentityMediapipe = {
+      instance: null,
+      loading: null,
+      loaded: false,
+    };
+  }
+
+  const mediapipeGlobal = window.__smileIdentityMediapipe;
+
+  if (mediapipeGlobal.loaded && mediapipeGlobal.instance) {
+    return mediapipeGlobal.instance;
+  }
+
+  if (mediapipeGlobal.loading) {
+    return mediapipeGlobal.loading;
+  }
+
+  mediapipeGlobal.loading = (async () => {
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
+      );
+
+      const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
+          delegate: 'GPU',
+        },
+        outputFaceBlendshapes: true,
+        runningMode: 'VIDEO',
+        numFaces: 2,
+      });
+
+      mediapipeGlobal.instance = faceLandmarker;
+      mediapipeGlobal.loaded = true;
+      mediapipeGlobal.loading = null;
+
+      return faceLandmarker;
+    } catch (error) {
+      mediapipeGlobal.loading = null;
+      throw error;
+    }
+  })();
+
+  return mediapipeGlobal.loading;
+};

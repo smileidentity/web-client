@@ -34,19 +34,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: clean s3 destination for fresh deployment
-        run: |
-          aws s3 rm s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }} --recursive || true
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
             --exclude "*" \
             --include "smart-camera-web.js" \
             --include "*/smart-camera-web.js" \
-            --cache-control "max-age=300, s-maxage=300" \
-            --metadata-directive REPLACE \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
-
   embed:
     # needs: [test]
     needs: [smart-camera-web]
@@ -78,16 +72,9 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: clean s3 destination for fresh deployment
-        run: |
-          aws s3 rm s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }} --recursive || true
       - name: deploy preview to s3
         run: |
-          aws s3 sync --follow-symlinks --delete \
-            --cache-control "max-age=300, s-maxage=300" \
-            --metadata-directive REPLACE \
-            dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
-
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
   full-stack:
     if: always()
     defaults:
@@ -96,7 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       SST_URL: ${{ steps.deploy_sst_app.outputs.SST_URL }}
-      CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -114,12 +100,6 @@ jobs:
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install
-      - name: cleanup and redeploy sst app
-        run: |
-          echo "Removing existing SST deployment..."
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} || true
-          sleep 30
-          echo "Deployment removed, proceeding with fresh deployment..."
       - name: build application
         run: npm run build
       - name: configure sst secrets
@@ -137,17 +117,6 @@ jobs:
           echo "$SST_OUTPUT"
           SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
-
-          # Extract CloudFront distribution ID from SST output
-          CLOUDFRONT_ID=$(echo "$SST_OUTPUT" | grep -o 'CloudFrontDistribution.*' | sed 's/CloudFrontDistribution: //')
-          echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_ID" >> $GITHUB_OUTPUT
-      - name: invalidate cloudfront after sst deployment
-        if: steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID != ''
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ steps.deploy_sst_app.outputs.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/js/preview-$GITHUB_HEAD_REF/*" "/inline/preview-$GITHUB_HEAD_REF/*"
-
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all

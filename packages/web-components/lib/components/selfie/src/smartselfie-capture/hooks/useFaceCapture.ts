@@ -307,7 +307,6 @@ export const useFaceCapture = ({
         faceProximity.value = 'good';
       }
 
-      // Update alerts based on current state
       updateAlerts();
     } catch (error) {
       faceDetected.value = false;

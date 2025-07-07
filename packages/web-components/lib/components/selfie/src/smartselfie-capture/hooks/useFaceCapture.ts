@@ -135,7 +135,7 @@ export const useFaceCapture = ({
     if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
       updateAlert('neutral-expression');
     } else if (isInNeutralZone) {
-      alertTitle.value = 'Keep a neutral expression';
+      alertTitle.value = 'Hold still - capturing photo...';
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {

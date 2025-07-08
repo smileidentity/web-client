@@ -2,8 +2,8 @@
   "name": "@smileid/web-components",
   "version": "10.0.0",
   "private": "true",
-  "main": "dist/main.js",
-  "module": "dist/main.js",
+  "main": "dist/esm/main.js",
+  "module": "dist/esm/main.js",
   "types": "dist/types/main.d.ts",
   "exports": {
     ".": {

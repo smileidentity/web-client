@@ -17,16 +17,15 @@ export const AlertDisplay: FunctionComponent<AlertDisplayProps> = ({
         .alert-message {
           margin-top: 1.5rem;
           color: #000;
+          color: #151F72;
           padding: 0.5rem 1.5rem;
-          background: #e5e5e5;
-          border: 1px solid #848282;
           border-radius: 4px;
           text-align: start;
           width: 100%;
         }
 
         .alert-title {
-          font-size: 14px;
+          font-size: 16px;
           font-weight: bold;
           text-align: center;
         }

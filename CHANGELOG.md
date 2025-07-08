@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix external modules not being bundled in IIFE.
+- Avoid zooming out captured selfies on low-res webcams.
+- Fix selfie capture fallback when mediapipe fails to load.
 
 ## [10.0.0] - 2025-07-08
 

@@ -2,46 +2,46 @@
   "name": "@smileid/web-components",
   "version": "10.0.0",
   "private": "true",
-  "main": "dist/main.js",
-  "module": "dist/main.js",
+  "main": "dist/esm/main.js",
+  "module": "dist/esm/main.js",
   "types": "dist/types/main.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/main.d.ts",
-      "import": "./dist/main.js",
-      "require": "./dist/main.js"
+      "import": "./dist/esm/main.js",
+      "require": "./dist/esm/main.js"
     },
     "./combobox": {
       "types": "./dist/types/combobox.d.ts",
-      "import": "./dist/combobox.js"
+      "import": "./dist/esm/combobox.js"
     },
     "./document-capture": {
       "types": "./dist/types/document.d.ts",
-      "import": "./dist/document.js"
+      "import": "./dist/esm/document.js"
     },
     "./end-user-consent": {
       "types": "./dist/types/end-user-consent.d.ts",
-      "import": "./dist/end-user-consent.js"
+      "import": "./dist/esm/end-user-consent.js"
     },
     "./navigation": {
       "types": "./dist/types/navigation.d.ts",
-      "import": "./dist/navigation.js"
+      "import": "./dist/esm/navigation.js"
     },
     "./selfie-capture": {
       "types": "./dist/types/selfie.d.ts",
-      "import": "./dist/selfie.js"
+      "import": "./dist/esm/selfie.js"
     },
     "./signature-pad": {
       "types": "./dist/types/signature-pad.d.ts",
-      "import": "./dist/signature-pad.js"
+      "import": "./dist/esm/signature-pad.js"
     },
     "./totp-consent": {
       "types": "./dist/types/totp-consent.d.ts",
-      "import": "./dist/totp-consent.js"
+      "import": "./dist/esm/totp-consent.js"
     },
     "./smart-camera-web": {
       "types": "./dist/types/smart-camera-web.d.ts",
-      "import": "./dist/smart-camera-web.js"
+      "import": "./dist/esm/smart-camera-web.js"
     }
   },
   "files": [

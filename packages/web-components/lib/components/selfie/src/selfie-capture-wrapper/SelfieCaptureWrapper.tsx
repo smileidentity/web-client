@@ -30,7 +30,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   hidden: hiddenProp = false,
   ...props
 }) => {
-  const isCypress = !!(window as any).Cypress || (window.navigator.userAgent.includes('Electron') && (window as any).__Cypress);
+  const isCypress =
+    !!(window as any).Cypress ||
+    (window.navigator.userAgent.includes('Electron') &&
+      (window as any).__Cypress);
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
   const [mediapipeReady, setMediapipeReady] = useState(false);

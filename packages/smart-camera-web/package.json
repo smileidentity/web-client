@@ -1,6 +1,6 @@
 {
   "name": "@smile_identity/smart-camera-web",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "WebComponent for smartly capturing images on the web, for use with SmileIdentity",
   "main": "smart-camera-web.js",
   "scripts": {

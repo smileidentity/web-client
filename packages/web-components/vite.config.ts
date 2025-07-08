@@ -89,8 +89,7 @@ export default defineConfig(({ mode }) => {
     },
     sourcemap: isProduction,
     minify: isProduction,
-    outDir: 'dist',
-    emptyOutDir: true,
+    emptyOutDir: buildFormat === 'esm',
   };
 
   const iifeBuildConfig = {
@@ -113,7 +112,7 @@ export default defineConfig(({ mode }) => {
     sourcemap: isProduction,
     minify: isProduction,
     outDir: 'dist',
-    emptyOutDir: buildFormat === 'iife', // Only clear on IIFE build
+    emptyOutDir: false,
   };
 
   return {

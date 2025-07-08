@@ -47,16 +47,10 @@ jobs:
       - name: deploy to s3 / cloudfront version pinning
         run: |
           aws s3 sync --follow-symlinks --delete \
-          --exclude '*' \
-          --include 'smart-camera-web.js' \
-          --include '*/smart-camera-web.js' \
           ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}
       - name: deploy to s3 / cloudfront major version
         run: |
           aws s3 sync --follow-symlinks --delete \
-          --exclude '*' \
-          --include 'smart-camera-web.js' \
-          --include '*/smart-camera-web.js' \
           ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}
   embed:
     # needs: [test]

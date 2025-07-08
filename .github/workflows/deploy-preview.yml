@@ -37,9 +37,6 @@ jobs:
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
-            --exclude "*" \
-            --include "smart-camera-web.js" \
-            --include "*/smart-camera-web.js" \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
     # needs: [test]

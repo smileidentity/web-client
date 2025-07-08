@@ -65,9 +65,9 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           install: false
-          start: npm start
+          start: npm run dev
           working-directory: ./packages/web-components
-          wait-on: 'http://localhost:8000'
+          wait-on: 'http://localhost:3005'
       - name: upload test failure artifacts
         uses: actions/upload-artifact@v4
         if: failure()

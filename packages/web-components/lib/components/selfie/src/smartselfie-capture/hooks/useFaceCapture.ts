@@ -1,6 +1,8 @@
 import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
+import type { RefObject } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
+
 import {
   calculateFaceSize,
   isFaceInBounds,
@@ -20,8 +22,8 @@ import packageJson from '../../../../../../package.json';
 const COMPONENTS_VERSION = packageJson.version;
 
 interface UseFaceCaptureProps {
-  videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  videoRef: RefObject<HTMLVideoElement>;
+  canvasRef: RefObject<HTMLCanvasElement>;
   interval: number;
   duration: number;
   smileThreshold: number;

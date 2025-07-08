@@ -22,12 +22,26 @@ const App = () => {
   if (isDirect) {
     const component = getInitialComponent();
     const themeColor = getInitialThemeColor();
+    const params = getUrlParams();
 
-    const props = {
+    const props: Record<string, any> = {
       key: `${component}-${themeColor}`,
       'show-navigation': true,
       'theme-color': themeColor,
     };
+
+    const systemParams = ['component', 'direct', 'theme-color'];
+    Array.from(params.entries()).forEach(([key, value]) => {
+      if (!systemParams.includes(key)) {
+        if (value === '' || value === 'true') {
+          props[key] = true;
+        } else if (value === 'false') {
+          props[key] = false;
+        } else {
+          props[key] = value;
+        }
+      }
+    });
 
     let componentElement;
     switch (component) {

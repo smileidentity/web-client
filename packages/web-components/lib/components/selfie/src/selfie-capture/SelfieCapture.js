@@ -1009,7 +1009,15 @@ class SelfieCaptureScreen extends HTMLElement {
       case 'data-camera-ready':
       case 'hidden':
       case 'title':
+        this.shadowRoot.innerHTML = this.render();
+        this.init();
+        break;
       case 'allow-agent-mode':
+        if (this.allowAgentMode) {
+          this.facingMode = 'environment';
+        } else {
+          this.facingMode = 'user';
+        }
         this.shadowRoot.innerHTML = this.render();
         this.init();
         break;

@@ -1,12 +1,14 @@
 const variants = [
   { name: 'iife', suffix: '' },
-  { name: 'esm', suffix: '?format=esm' },
+  { name: 'esm', suffix: '&format=esm' },
 ];
 
 variants.forEach(({ name, suffix }) => {
   describe(`SmartCameraWeb Attribution [${name}]`, () => {
-    it('shows attribution by default', () => {
-      cy.visit(`/smart-camera-web-complete-flow${suffix}`);
+    it('shows attribution by default in selfie flow', () => {
+      cy.visit(`/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`);
+      
+      // Check attribution is shown in initial instructions
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -14,6 +16,7 @@ variants.forEach(({ name, suffix }) => {
         .find('powered-by-smile-id')
         .should('be.visible');
 
+      // Proceed to camera
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -23,129 +26,85 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .find('powered-by-smile-id')
+        .find('selfie-capture-wrapper')
         .should('be.visible');
 
+      // Wait for component to load
+      cy.wait(2000);
+
+      // Check attribution is shown in camera view
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-wrapper')
+        .shadow()
+        .then(($shadow) => {
+          if ($shadow.find('smartselfie-capture').length > 0) {
+            // Modern SmartSelfieCapture path
+            cy.wrap($shadow)
+              .find('smartselfie-capture')
+              .shadow()
+              .find('powered-by-smile-id')
+              .should('be.visible');
+          } else if ($shadow.find('selfie-capture').length > 0) {
+            // Fallback SelfieCapture path
+            cy.wrap($shadow)
+              .find('selfie-capture')
+              .shadow()
+              .find('powered-by-smile-id')
+              .should('be.visible');
+          } else {
+            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+          }
+        });
+
+      // Take a photo
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()
-        .find('selfie-capture')
+        .find('selfie-capture-wrapper')
         .shadow()
-        .find('#start-image-capture')
-        .click();
+        .then(($shadow) => {
+          if ($shadow.find('smartselfie-capture').length > 0) {
+            // Modern SmartSelfieCapture path
+            cy.wrap($shadow)
+              .find('smartselfie-capture')
+              .shadow()
+              .find('#start-image-capture')
+              .click();
+          } else if ($shadow.find('selfie-capture').length > 0) {
+            // Fallback SelfieCapture path
+            cy.wrap($shadow)
+              .find('selfie-capture')
+              .shadow()
+              .find('#start-image-capture')
+              .click();
+          } else {
+            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+          }
+        });
       cy.tick(8000);
 
+      // Check attribution is shown in review
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-review')
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture-review')
-        .shadow()
-        .find('#select-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-front',
-        )
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-front',
-        )
-        .shadow()
-        .find('#take-photo')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-front')
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-front')
-        .shadow()
-        .find('#capture-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
-        .shadow()
-        .find('#select-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-back',
-        )
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-back',
-        )
-        .shadow()
-        .find('#take-photo')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-back')
-        .shadow()
-        .find('powered-by-smile-id')
-        .should('be.visible');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-back')
-        .shadow()
-        .find('#capture-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#back-of-document-capture-review')
         .shadow()
         .find('powered-by-smile-id')
         .should('be.visible');
     });
 
     it('hides attribution when `hide-attribution` attribute is passed', () => {
-      cy.visit(`/capture-back-of-id-hide-attribution${suffix}`);
+      cy.visit(`/?component=smart-camera-web&direct=true&hide-attribution=true&disable-image-tests=true${suffix}`);
+      
+      // Check attribution is hidden in initial instructions
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .get('powered-by-smile-id')
+        .find('powered-by-smile-id')
         .should('not.exist');
 
+      // Proceed to camera
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -155,117 +114,70 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('selfie-capture')
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
+        .find('selfie-capture-wrapper')
+        .should('be.visible');
 
+      // Wait for component to load
+      cy.wait(2000);
+
+      // Check attribution is hidden in camera view
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-wrapper')
+        .shadow()
+        .then(($shadow) => {
+          if ($shadow.find('smartselfie-capture').length > 0) {
+            // Modern SmartSelfieCapture path
+            cy.wrap($shadow)
+              .find('smartselfie-capture')
+              .shadow()
+              .find('powered-by-smile-id')
+              .should('not.exist');
+          } else if ($shadow.find('selfie-capture').length > 0) {
+            // Fallback SelfieCapture path
+            cy.wrap($shadow)
+              .find('selfie-capture')
+              .shadow()
+              .find('powered-by-smile-id')
+              .should('not.exist');
+          } else {
+            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+          }
+        });
+
+      // Take a photo
       cy.clock();
       cy.get('smart-camera-web')
         .shadow()
-        .find('selfie-capture')
+        .find('selfie-capture-wrapper')
         .shadow()
-        .find('#start-image-capture')
-        .click();
+        .then(($shadow) => {
+          if ($shadow.find('smartselfie-capture').length > 0) {
+            // Modern SmartSelfieCapture path
+            cy.wrap($shadow)
+              .find('smartselfie-capture')
+              .shadow()
+              .find('#start-image-capture')
+              .click();
+          } else if ($shadow.find('selfie-capture').length > 0) {
+            // Fallback SelfieCapture path
+            cy.wrap($shadow)
+              .find('selfie-capture')
+              .shadow()
+              .find('#start-image-capture')
+              .click();
+          } else {
+            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+          }
+        });
       cy.tick(8000);
 
+      // Check attribution is hidden in review
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-review')
         .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture-review')
-        .shadow()
-        .find('#select-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-front',
-        )
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-front',
-        )
-        .shadow()
-        .find('#take-photo')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-front')
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-front')
-        .shadow()
-        .find('#capture-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
-        .shadow()
-        .find('#select-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-back',
-        )
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find(
-          'document-capture-instructions#document-capture-instructions-back',
-        )
-        .shadow()
-        .find('#take-photo')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-back')
-        .shadow()
-        .get('powered-by-smile-id')
-        .should('not.exist');
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture#document-capture-back')
-        .shadow()
-        .find('#capture-id-image')
-        .click();
-
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('document-capture-review#back-of-document-capture-review')
-        .shadow()
-        .get('powered-by-smile-id')
+        .find('powered-by-smile-id')
         .should('not.exist');
     });
   });

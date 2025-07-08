@@ -53,7 +53,9 @@
     "package.json"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "npm run build:iife && npm run build:esm",
+    "build:esm": "vite build",
+    "build:iife": "cross-env BUILD_FORMAT=iife vite build",
     "build:stats": "cross-env GENERATE_STATS=true vite build --mode=production && echo Bundle analysis generated at dist/bundle-analysis.html",
     "dev": "vite",
     "preview": "vite preview",

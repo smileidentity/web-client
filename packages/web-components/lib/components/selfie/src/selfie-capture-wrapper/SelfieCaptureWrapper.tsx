@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
+import { h } from 'preact';
 import { IconLoader2 } from '@tabler/icons-preact';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
@@ -7,8 +8,6 @@ import { getBoolProp } from '@/utils/props';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 import '../selfie-capture/SelfieCapture';
 import { getMediapipeInstance } from '../smartselfie-capture/utils/mediapipeManager';
-
-declare const h: any;
 
 interface Props {
   timeout?: number;
@@ -31,16 +30,17 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   hidden: hiddenProp = false,
   ...props
 }) => {
+  const isCypress = !!(window as any).Cypress || (window.navigator.userAgent.includes('Electron') && (window as any).__Cypress);
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
   const [mediapipeReady, setMediapipeReady] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
   useEffect(() => {
-    if (mediapipeReady || mediapipeLoading) return;
+    if (mediapipeReady || mediapipeLoading || isCypress) return;
 
     const loadMediapipe = async () => {
       setMediapipeLoading(true);

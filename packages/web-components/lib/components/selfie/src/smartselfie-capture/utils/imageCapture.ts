@@ -37,7 +37,8 @@ export const captureImageFromVideo = (
   }
 
   // capture more of the user's head and avoid clipping
-  const zoomOutFactor = 1.3;
+  // zoom out only for high resolution (>720p) webcams
+  const zoomOutFactor = videoElement.videoHeight > 720 ? 1.3 : 1.0;
   const sourceWidth = videoElement.videoWidth * zoomOutFactor;
   const sourceHeight = videoElement.videoHeight * zoomOutFactor;
 

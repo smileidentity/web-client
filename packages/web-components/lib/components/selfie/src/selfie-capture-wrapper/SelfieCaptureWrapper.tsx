@@ -24,7 +24,7 @@ interface Props {
 }
 
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
-  timeout = 10000,
+  timeout = 20000,
   'start-countdown': startCountdownProp = false,
   hidden: hiddenProp = false,
   ...props

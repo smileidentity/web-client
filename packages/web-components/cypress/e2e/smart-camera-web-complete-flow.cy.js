@@ -7,7 +7,9 @@ const variants = [
 variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb [${name}]`, () => {
     beforeEach(() => {
-      cy.visit(`/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`);
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
+      );
     });
 
     it('should go through the complete selfie capture flow with theme color', () => {

@@ -6,8 +6,10 @@ const variants = [
 variants.forEach(({ name, suffix }) => {
   describe(`SmartCameraWeb Attribution [${name}]`, () => {
     it('shows attribution by default in selfie flow', () => {
-      cy.visit(`/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`);
-      
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`,
+      );
+
       // Check attribution is shown in initial instructions
       cy.get('smart-camera-web')
         .shadow()
@@ -53,7 +55,9 @@ variants.forEach(({ name, suffix }) => {
               .find('powered-by-smile-id')
               .should('be.visible');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -79,7 +83,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
       cy.tick(8000);
@@ -94,8 +100,10 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('hides attribution when `hide-attribution` attribute is passed', () => {
-      cy.visit(`/?component=smart-camera-web&direct=true&hide-attribution=true&disable-image-tests=true${suffix}`);
-      
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&hide-attribution=true&disable-image-tests=true${suffix}`,
+      );
+
       // Check attribution is hidden in initial instructions
       cy.get('smart-camera-web')
         .shadow()
@@ -141,7 +149,9 @@ variants.forEach(({ name, suffix }) => {
               .find('powered-by-smile-id')
               .should('not.exist');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -167,7 +177,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
       cy.tick(8000);

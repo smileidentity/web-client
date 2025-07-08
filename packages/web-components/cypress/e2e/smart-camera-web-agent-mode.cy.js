@@ -45,12 +45,13 @@ variants.forEach(({ name, suffix }) => {
         .then(($shadow) => {
           const html = $shadow[0].innerHTML;
           cy.log('Shadow DOM content:', html);
-          
+
           // Check what components are present
           const hasSmartSelfie = $shadow.find('smartselfie-capture').length > 0;
           const hasSelfieCapture = $shadow.find('selfie-capture').length > 0;
-          const hasLoading = html.includes('Loading') || html.includes('loading');
-          
+          const hasLoading =
+            html.includes('Loading') || html.includes('loading');
+
           cy.log(`SmartSelfieCapture present: ${hasSmartSelfie}`);
           cy.log(`SelfieCapture present: ${hasSelfieCapture}`);
           cy.log(`Loading text present: ${hasLoading}`);
@@ -77,7 +78,9 @@ variants.forEach(({ name, suffix }) => {
               .shadow()
               .should('contain.text', 'Agent Mode On');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -101,7 +104,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#switch-camera')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -123,7 +128,9 @@ variants.forEach(({ name, suffix }) => {
               .shadow()
               .should('contain.text', 'Agent Mode Off');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -147,7 +154,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#switch-camera')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -169,7 +178,9 @@ variants.forEach(({ name, suffix }) => {
               .shadow()
               .should('contain.text', 'Agent Mode On');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -194,7 +205,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -251,7 +264,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#switch-camera')
               .should('not.exist');
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -276,7 +291,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 

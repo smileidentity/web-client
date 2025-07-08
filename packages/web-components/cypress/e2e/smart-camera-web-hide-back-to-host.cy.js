@@ -7,7 +7,9 @@ variants.forEach(({ name, suffix }) => {
   describe(`SmartCameraWeb HideBackToHost [${name}]`, () => {
     beforeEach(() => {
       // Use dev server with URL-based prop passing - default selfie flow to test navigation
-      cy.visit(`/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`);
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`,
+      );
     });
 
     it('shows navigation by default', () => {
@@ -16,7 +18,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-instructions')
         .should('be.visible');
-      
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -25,7 +27,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('.back-button')
         .should('be.visible');
-        
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -45,7 +47,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-instructions')
         .should('be.visible');
-        
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -54,7 +56,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('.back-button')
         .should('not.exist');
-        
+
       // Verify the cancel button is hidden
       cy.get('smart-camera-web')
         .shadow()

@@ -7,8 +7,10 @@ variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb HideInstructions [${name}]`, () => {
     beforeEach(() => {
       // Use dev server with URL-based prop passing - hide instructions to skip to camera permission
-      cy.visit(`/?component=smart-camera-web&direct=true&hide-instructions=true${suffix}`);
-      
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&hide-instructions=true${suffix}`,
+      );
+
       // Set disable-image-tests attribute on the component like the working tests
       cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
     });
@@ -90,7 +92,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -126,9 +130,9 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .should('be.visible');
-      
+
       cy.clock();
-      
+
       // Handle modern vs fallback component logic for start button
       cy.get('smart-camera-web')
         .shadow()
@@ -150,7 +154,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -185,9 +191,9 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .should('be.visible');
-      
+
       cy.clock();
-      
+
       // Handle modern vs fallback component logic for start button
       cy.get('smart-camera-web')
         .shadow()
@@ -209,7 +215,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -263,9 +271,9 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .should('be.visible');
-      
+
       cy.clock();
-      
+
       // Handle modern vs fallback component logic for start button
       cy.get('smart-camera-web')
         .shadow()
@@ -287,7 +295,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 

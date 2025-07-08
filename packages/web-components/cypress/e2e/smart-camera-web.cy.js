@@ -8,7 +8,7 @@ variants.forEach(({ name, suffix }) => {
     beforeEach(() => {
       // Use dev server with URL-based prop passing - basic selfie flow
       cy.visit(`/?component=smart-camera-web&direct=true${suffix}`);
-      
+
       // Set disable-image-tests attribute on the component like the working tests
       cy.get('smart-camera-web').invoke('attr', 'disable-image-tests', '');
     });
@@ -49,7 +49,7 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .should('be.visible');
-      
+
       // Handle modern vs fallback component logic for start button
       cy.get('smart-camera-web')
         .shadow()
@@ -71,7 +71,9 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 

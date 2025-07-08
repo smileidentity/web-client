@@ -13,7 +13,9 @@ const variants = [
 variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb BackPress [${name}]`, () => {
     beforeEach(() => {
-      cy.visit(`/?component=smart-camera-web&direct=true&capture-id=back&disable-image-tests=true&show-navigation=true${suffix}`);
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&capture-id=back&disable-image-tests=true&show-navigation=true${suffix}`,
+      );
     });
 
     it('should start from the instructions screen', () => {
@@ -72,7 +74,7 @@ variants.forEach(({ name, suffix }) => {
               .find('.back-button')
               .click();
           } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path  
+            // Fallback SelfieCapture path
             cy.wrap($shadow)
               .find('selfie-capture')
               .shadow()
@@ -81,7 +83,9 @@ variants.forEach(({ name, suffix }) => {
               .find('.back-button')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 
@@ -123,14 +127,16 @@ variants.forEach(({ name, suffix }) => {
               .find('#start-image-capture')
               .click();
           } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path  
+            // Fallback SelfieCapture path
             cy.wrap($shadow)
               .find('selfie-capture')
               .shadow()
               .find('#start-image-capture')
               .click();
           } else {
-            throw new Error('Neither smartselfie-capture nor selfie-capture found');
+            throw new Error(
+              'Neither smartselfie-capture nor selfie-capture found',
+            );
           }
         });
 

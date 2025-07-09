@@ -260,7 +260,6 @@ ${typography}
 
   #document-capture-instructions-screen,
   #back-of-document-capture-instructions-screen {
-    padding-block: 2rem;
     display: flex;
     flex-direction: column;
     max-block-size: 100%;

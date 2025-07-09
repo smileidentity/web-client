@@ -179,8 +179,3 @@ jobs:
             ✅ Preview URL for Web Client:
 
             ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
-
-            ✅ Preview URL for Web Client:
-
-            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}

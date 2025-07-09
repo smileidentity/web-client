@@ -100,13 +100,8 @@ export default defineConfig(({ mode }) => {
       fileName: () => 'smart-camera-web.js',
     },
     rollupOptions: {
-      external: ['signature_pad', 'validate.js'],
       output: {
         dir: 'dist',
-        globals: {
-          signature_pad: 'SignaturePad',
-          'validate.js': 'validate',
-        },
       },
     },
     sourcemap: isProduction,

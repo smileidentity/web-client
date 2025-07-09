@@ -210,6 +210,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
+        style='transform: scaleX(-1);'
       />`
             : ''
         }

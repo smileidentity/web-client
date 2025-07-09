@@ -155,9 +155,44 @@ function backDocumentIcon() {
 
 function templateString() {
   return `
+  <style>
+    .controls {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .content-root {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .content-header, .content-body, .content-footer {
+      width: 100%;
+    }
+
+    .content-body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .content-body header {
+      margin-top: 1rem;
+    }
+  </style>
     <div id="document-capture-instructions-screen" class="flow center">
-        <section className="main">
+        <div class="content-root">
+            <div class="content-header">
         <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        </div>
+        <div class="content-body">
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
             <h1 class='text-2xl title-color font-bold'>${this.title}</h1>
@@ -168,7 +203,7 @@ function templateString() {
           Please follow the instructions below.
           </p>
         </header>
-        <div class="flow instructions-wrapper">
+        <div class="instructions-wrapper">
             <div class="instructions">
                 <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -342,9 +377,7 @@ function templateString() {
         <div id="error" class='color-red'>
         </div>
         </div>
-        </section>
-    <section className="footer">
-    <div class='flow'>
+    <div class='controls'>
     ${
       this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
         ? `
@@ -367,9 +400,18 @@ function templateString() {
         : ''
     }
 </div>
-${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
-    </section>
+${
+  this.hideAttribution
+    ? ''
+    : `
+  <div class="content-footer">
+    <powered-by-smile-id></powered-by-smile-id>
   </div>
+  `
+}
+    </div>
+  </div>
+</div>
   ${styles(this.themeColor)}
   `;
 }

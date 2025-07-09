@@ -130,6 +130,7 @@ function templateString() {
       flex-direction: column;
       max-block-size: 100%;
       max-inline-size: 40ch;
+      padding: 1rem;
     }
 
     #document-capture-review-screen .id-image-container.landscape {

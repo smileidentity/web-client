@@ -84,13 +84,18 @@ body {
 }
 
 main {
+  height: 100%;
   width: 100%;
   max-width: 32rem;
   background: #ffffff;
   border-radius: 2rem;
   padding: 2rem;
-  overflow-y: scroll;
+  overflow-y: auto;
   position: absolute;
+}
+
+main:has(smart-camera-web:not([hidden])) {
+  padding: 0;
 }
 
 @media screen and (min-width: 40rem) {

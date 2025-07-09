@@ -407,6 +407,9 @@ class SelfieCaptureScreens extends HTMLElement {
       'show-navigation',
       'hide-back-to-host',
       'initial-screen',
+      'allow-agent-mode',
+      'show-agent-mode-for-tests',
+      'disable-image-tests',
     ];
   }
 
@@ -415,6 +418,9 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'title':
       case 'hidden':
       case 'initial-screen':
+      case 'allow-agent-mode':
+      case 'show-agent-mode-for-tests':
+      case 'disable-image-tests':
         this.connectedCallback();
         break;
       default:

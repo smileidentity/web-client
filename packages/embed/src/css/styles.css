@@ -88,7 +88,7 @@ body {
 }
 
 main {
-  min-height: max(600px, 75vh);
+  height: 100%;
   width: 100%;
   max-width: 32rem;
   background: #ffffff;
@@ -104,6 +104,7 @@ main:has(smart-camera-web:not([hidden])) {
 
 @media screen and (min-width: 40rem) {
   main {
+    height: max(600px, 80vh);
     padding: 2rem 5rem;
   }
 

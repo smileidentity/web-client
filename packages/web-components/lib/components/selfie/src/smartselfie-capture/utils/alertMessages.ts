@@ -7,6 +7,7 @@ export const MESSAGES = {
   'neutral-expression': 'Neutral expression',
   'smile-required': 'Smile!',
   'open-mouth-smile': 'Bigger smile!',
+  'initializing': 'Initializing...',
 };
 
 export type MessageKey = keyof typeof MESSAGES;

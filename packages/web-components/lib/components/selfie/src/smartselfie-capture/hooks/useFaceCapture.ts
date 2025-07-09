@@ -58,6 +58,7 @@ export const useFaceCapture = ({
   const currentMouthOpen = useSignal(0);
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
+  const isInitializing = useSignal(true);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -81,19 +82,23 @@ export const useFaceCapture = ({
       !multipleFaces.value,
   );
 
-  const initializeFaceLandmarker = async () => {
-    try {
-      faceLandmarkerRef.current = await getMediapipeInstance();
-    } catch (error) {
-      console.error('Failed to initialize MediaPipe:', error);
-    }
-  };
-
   const updateAlert = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
       alertTitle.value = MESSAGES[messageKey];
     } else {
       alertTitle.value = '';
+    }
+  };
+
+  const initializeFaceLandmarker = async () => {
+    try {
+      isInitializing.value = true;
+      updateAlert('initializing');
+      faceLandmarkerRef.current = await getMediapipeInstance();
+      isInitializing.value = false;
+    } catch (error) {
+      console.error('Failed to initialize MediaPipe:', error);
+      isInitializing.value = false;
     }
   };
 
@@ -143,7 +148,9 @@ export const useFaceCapture = ({
   };
 
   const updateAlerts = () => {
-    if (multipleFaces.value) {
+    if (isInitializing.value) {
+      updateAlert('initializing');
+    } else if (multipleFaces.value) {
       updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
@@ -174,6 +181,10 @@ export const useFaceCapture = ({
     }
 
     try {
+      if (isInitializing.value) {
+        isInitializing.value = false;
+      }
+
       const croppedCanvas = createCroppedVideoFrame(videoRef.current);
       const detectionSource = croppedCanvas || videoRef.current;
 
@@ -529,6 +540,7 @@ export const useFaceCapture = ({
     currentMouthOpen,
     lastSmileTime,
     alertTitle,
+    isInitializing,
     isReadyToCapture,
 
     isCapturing,

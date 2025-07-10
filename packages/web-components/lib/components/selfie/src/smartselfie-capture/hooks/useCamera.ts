@@ -31,8 +31,11 @@ export const useCamera = () => {
       // Detect actual facing mode from the stream
       const track = stream.getVideoTracks()[0];
       const settings = track.getSettings();
-      const actualFacingMode = settings.facingMode as 'user' | 'environment' | undefined;
-      
+      const actualFacingMode = settings.facingMode as
+        | 'user'
+        | 'environment'
+        | undefined;
+
       // Update our state to match actual camera
       if (actualFacingMode && actualFacingMode !== facingMode) {
         setFacingMode(actualFacingMode);
@@ -89,7 +92,7 @@ export const useCamera = () => {
   const switchCamera = async () => {
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     isSwitchingCameraRef.current = true;
-    
+
     const previousFacingMode = facingMode;
     try {
       setFacingMode(newFacingMode);
@@ -102,50 +105,63 @@ export const useCamera = () => {
     } catch (error) {
       setFacingMode(previousFacingMode);
       isSwitchingCameraRef.current = false;
-      
+
       try {
         await startCamera(previousFacingMode);
       } catch (restoreError) {
         console.error('Failed to restore previous camera:', restoreError);
       }
-      
-      const errorMessage = error instanceof Error ? error.message : 'Unknown camera switch error';
-      window.dispatchEvent(new CustomEvent('camera-switch-failed', {
-        detail: { error: errorMessage }
-      }));
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown camera switch error';
+      window.dispatchEvent(
+        new CustomEvent('camera-switch-failed', {
+          detail: { error: errorMessage },
+        }),
+      );
     }
   };
 
   const detectBrowserEngine = () => {
     const userAgent = navigator.userAgent.toLowerCase();
-    
-    const isGecko = userAgent.includes('firefox') || 
-                    (userAgent.includes('gecko') && !userAgent.includes('chrome') && !userAgent.includes('edge'));
-    
-    const hasFirefoxFeatures = 'mozInnerScreenX' in window || 
-                               'mozInputSource' in window ||
-                               'mozPaintCount' in window ||
-                               typeof (window as any).InstallTrigger !== 'undefined';
-    
-    const supportsMozCSS = CSS.supports && (
-      CSS.supports('-moz-appearance', 'none') || 
-      CSS.supports('-moz-user-select', 'none')
-    );
-    
+
+    const isGecko =
+      userAgent.includes('firefox') ||
+      (userAgent.includes('gecko') &&
+        !userAgent.includes('chrome') &&
+        !userAgent.includes('edge'));
+
+    const hasFirefoxFeatures =
+      'mozInnerScreenX' in window ||
+      'mozInputSource' in window ||
+      'mozPaintCount' in window ||
+      typeof (window as any).InstallTrigger !== 'undefined';
+
+    const supportsMozCSS =
+      CSS.supports &&
+      (CSS.supports('-moz-appearance', 'none') ||
+        CSS.supports('-moz-user-select', 'none'));
+
     return {
       isGecko: isGecko || hasFirefoxFeatures || supportsMozCSS,
-      isChromium: userAgent.includes('chrome') || userAgent.includes('chromium') || userAgent.includes('edge'),
-      isWebKit: userAgent.includes('webkit') && !userAgent.includes('chrome')
+      isChromium:
+        userAgent.includes('chrome') ||
+        userAgent.includes('chromium') ||
+        userAgent.includes('edge'),
+      isWebKit: userAgent.includes('webkit') && !userAgent.includes('chrome'),
     };
   };
 
   const checkAgentSupport = async () => {
     try {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
-      
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ) ||
+        (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+
       const { isGecko } = detectBrowserEngine();
-      
+
       let hasUserCamera = false;
       let hasEnvironmentCamera = false;
 
@@ -172,7 +188,7 @@ export const useCamera = () => {
       }
 
       const hasBothCameras = hasUserCamera && hasEnvironmentCamera;
-      
+
       if (!hasBothCameras) {
         setAgentSupported(false);
         return;

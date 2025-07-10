@@ -15,7 +15,10 @@ export const useCamera = () => {
   const startCamera = async (targetFacingMode?: 'user' | 'environment') => {
     try {
       // eslint-disable-next-line no-console
-      console.log('[Camera] Starting camera with facingMode:', targetFacingMode || facingMode);
+      console.log(
+        '[Camera] Starting camera with facingMode:',
+        targetFacingMode || facingMode,
+      );
       // eslint-disable-next-line no-console
       console.log('[Camera] Current streamRef:', !!streamRef.current);
       // eslint-disable-next-line no-console
@@ -58,7 +61,12 @@ export const useCamera = () => {
       // Update our state to match actual camera
       if (actualFacingMode && actualFacingMode !== facingMode) {
         // eslint-disable-next-line no-console
-        console.log('[Camera] Updating facingMode from', facingMode, 'to', actualFacingMode);
+        console.log(
+          '[Camera] Updating facingMode from',
+          facingMode,
+          'to',
+          actualFacingMode,
+        );
         setFacingMode(actualFacingMode);
       }
 
@@ -83,14 +91,62 @@ export const useCamera = () => {
       if (videoRef.current) {
         // eslint-disable-next-line no-console
         console.log('[Camera] Setting video srcObject and playing...');
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+
+        const video = videoRef.current;
+        video.srcObject = stream;
+
         // eslint-disable-next-line no-console
-        console.log('[Camera] Video is playing, dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+        console.log('[Camera] Applying universal video settings...');
+
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('webkit-playsinline', 'true'); // legacy iOS support
+        video.muted = true;
+        video.autoplay = true;
+
+        video.load();
+
+        const waitForMetadata = () =>
+          new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Video metadata timeout'));
+            }, 10000);
+
+            const onLoadedMetadata = () => {
+              clearTimeout(timeout);
+              video.removeEventListener('loadedmetadata', onLoadedMetadata);
+              // eslint-disable-next-line no-console
+              console.log(
+                '[Camera] Video metadata loaded, dimensions:',
+                video.videoWidth,
+                'x',
+                video.videoHeight,
+              );
+              resolve();
+            };
+
+            if (video.readyState >= 1) {
+              clearTimeout(timeout);
+              resolve();
+            } else {
+              video.addEventListener('loadedmetadata', onLoadedMetadata);
+            }
+          });
+
+        await waitForMetadata();
+
+        await video.play();
+        // eslint-disable-next-line no-console
+        console.log(
+          '[Camera] Video is playing, dimensions:',
+          video.videoWidth,
+          'x',
+          video.videoHeight,
+          'readyState:',
+          video.readyState,
+        );
 
         if (isSwitchingCameraRef.current && onCameraSwitchCallbackRef.current) {
           // wait for video to be ready and call callback
-          const video = videoRef.current;
           const triggerCallback = () => {
             if (video.videoWidth > 0 && video.videoHeight > 0) {
               setTimeout(() => {
@@ -120,7 +176,7 @@ export const useCamera = () => {
       console.error('[Camera] Error details:', {
         name: error instanceof Error ? error.name : 'Unknown',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
     }
   };
@@ -198,7 +254,7 @@ export const useCamera = () => {
     try {
       // eslint-disable-next-line no-console
       console.log('[Camera] Checking agent support...');
-      
+
       const isMobile =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
           navigator.userAgent,
@@ -246,7 +302,10 @@ export const useCamera = () => {
         envStream.getTracks().forEach((track) => track.stop()); // Clean up
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.log('[Camera] ❌ Environment-facing camera not available:', error);
+        console.log(
+          '[Camera] ❌ Environment-facing camera not available:',
+          error,
+        );
       }
 
       const hasBothCameras = hasUserCamera && hasEnvironmentCamera;
@@ -262,14 +321,22 @@ export const useCamera = () => {
 
       if (isMobile) {
         // eslint-disable-next-line no-console
-        console.log('[Camera] Agent mode supported - mobile device with both cameras');
+        console.log(
+          '[Camera] Agent mode supported - mobile device with both cameras',
+        );
         setAgentSupported(true);
         return;
       }
 
       const finalAgentSupported = !isGecko;
       // eslint-disable-next-line no-console
-      console.log('[Camera] Agent mode supported (desktop):', finalAgentSupported, '(not Gecko:', !isGecko, ')');
+      console.log(
+        '[Camera] Agent mode supported (desktop):',
+        finalAgentSupported,
+        '(not Gecko:',
+        !isGecko,
+        ')',
+      );
       setAgentSupported(finalAgentSupported);
     } catch (error) {
       console.error('[Camera] ❌ Error checking agent support:', error);

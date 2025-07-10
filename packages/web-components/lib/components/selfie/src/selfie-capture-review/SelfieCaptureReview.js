@@ -94,7 +94,6 @@ function templateString() {
       }
       #selfie-capture-review-screen {
         block-size: 45rem;
-        padding-block: 2rem;
         display: flex;
         flex-direction: column;
         max-block-size: 100%;
@@ -211,6 +210,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
+        style='transform: scaleX(-1);'
       />`
             : ''
         }

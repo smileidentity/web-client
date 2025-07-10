@@ -260,7 +260,6 @@ function templateString() {
       }
 
       #selfie-capture-instruction-screen {
-        padding-block: 2rem;
         display: flex;
         flex-direction: column;
         max-block-size: 100%;

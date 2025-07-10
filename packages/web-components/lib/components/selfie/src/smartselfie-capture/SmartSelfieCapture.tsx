@@ -196,7 +196,6 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           font-family: sans-serif;
           max-width: 356px;
           margin: 0 auto;
-          padding-block: 2rem;
         }
       `}</style>
     </div>

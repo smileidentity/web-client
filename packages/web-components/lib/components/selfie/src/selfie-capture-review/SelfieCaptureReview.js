@@ -8,20 +8,10 @@ function templateString() {
         color: #FF5805;
       }
 
-      .section {
-        border-radius: .5rem;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 35ch;
-        padding: 1rem;
-      }
-
       #selfie-capture-review-screen {
-        block-size: 45rem;
         display: flex;
         flex-direction: column;
-        max-block-size: 100%;
-        max-inline-size: 40ch;
+        padding: 1rem;
       }
 
       #selfie-capture-review-screen .selfie-review-container.landscape {
@@ -57,7 +47,7 @@ function templateString() {
         color: var(--web-digital-blue, #001096);
         text-align: center;
         /* h1 */
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-style: normal;
         font-weight: 700;
         line-height: 36px; /* 150% */
@@ -67,7 +57,7 @@ function templateString() {
     ${styles(this.themeColor)}
     <div id='selfie-capture-review-screen' class='center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
-    <h1 class="header-title text-2xl title-color font-bold">
+    <h1 class="header-title title-color font-bold">
       Is your whole face visible and clear in this photo?
     </h1>
     <div class='section | flow'>

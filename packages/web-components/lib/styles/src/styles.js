@@ -305,6 +305,7 @@ ${typography}
     display: flex;
     align-items: center;
     text-align: initial;
+    gap: 0.5rem;
   }
 
   .instructions svg {

@@ -125,7 +125,6 @@ function templateString() {
     }
     
     #document-capture-review-screen {
-      block-size: 45rem;
       display: flex;
       flex-direction: column;
       max-block-size: 100%;
@@ -195,7 +194,7 @@ function templateString() {
       text-align: center;
 
       /* h1 */
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-style: normal;
       font-weight: 700;
       line-height: 36px; /* 150% */

@@ -156,6 +156,10 @@ function backDocumentIcon() {
 function templateString() {
   return `
   <style>
+    h1 {
+      font-size: 1.25rem;
+    }
+
     .controls {
       width: 100%;
       margin-top: 1rem;
@@ -195,7 +199,7 @@ function templateString() {
         <div class="content-body">
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
-            <h1 class='text-2xl title-color font-bold'>${this.title}</h1>
+            <h1 class='title-color font-bold'>${this.title}</h1>
         <p class="description text-sm font-normal">
             We'll use it to verify your identity.
           </p>

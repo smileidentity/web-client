@@ -92,25 +92,19 @@ main {
   width: 100%;
   max-width: 32rem;
   background: #ffffff;
-  border-radius: 2rem;
   padding: 2rem;
   overflow-y: auto;
 }
 
-main:has(smart-camera-web:not([hidden])) {
-  height: 100%;
-  padding: 0;
-}
-
 @media screen and (min-width: 40rem) {
   main {
+    border-radius: 2rem;
     height: max(600px, 80vh);
     padding: 2rem 5rem;
   }
 
   main:has(smart-camera-web:not([hidden])) {
-    height: max(600px, 100vh);
-    padding: 2rem 5rem;
+    padding: 1rem 4rem;
   }
 }
 

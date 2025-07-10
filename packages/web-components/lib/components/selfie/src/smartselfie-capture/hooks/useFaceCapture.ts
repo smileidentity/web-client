@@ -92,30 +92,68 @@ export const useFaceCapture = ({
 
   const initializeFaceLandmarker = async () => {
     try {
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Starting MediaPipe initialization...');
       isInitializing.value = true;
       updateAlert('initializing');
       faceLandmarkerRef.current = await getMediapipeInstance();
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] ✅ MediaPipe initialized successfully');
       isInitializing.value = false;
     } catch (error) {
-      console.error('Failed to initialize MediaPipe:', error);
+      console.error('[FaceCapture] ❌ Failed to initialize MediaPipe:', error);
+      console.error('[FaceCapture] Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       isInitializing.value = false;
     }
   };
 
   const setupCanvas = () => {
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] Setting up canvas...');
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] Video ref:', !!videoRef.current);
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] Canvas ref:', !!canvasRef.current);
+    
     if (videoRef.current && canvasRef.current) {
       const { videoWidth, videoHeight } = videoRef.current;
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Video dimensions:', videoWidth, 'x', videoHeight);
+
+      if (videoWidth === 0 || videoHeight === 0) {
+        // eslint-disable-next-line no-console
+        console.warn('[FaceCapture] ⚠️ Video has zero dimensions, canvas setup may fail');
+      }
 
       videoAspectRatio.value = videoWidth / videoHeight;
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Video aspect ratio:', videoAspectRatio.value);
 
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Canvas dimensions set to:', canvasRef.current.width, 'x', canvasRef.current.height);
 
       const container = videoRef.current.parentElement;
       if (container) {
         canvasRef.current.style.left = '50%';
         canvasRef.current.style.top = '50%';
+        // eslint-disable-next-line no-console
+        console.log('[FaceCapture] Canvas positioned');
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('[FaceCapture] ⚠️ No parent container found for video element');
       }
+      
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] ✅ Canvas setup completed');
+    } else {
+      // eslint-disable-next-line no-console
+      console.error('[FaceCapture] ❌ Cannot setup canvas - missing video or canvas ref');
     }
   };
 
@@ -174,7 +212,11 @@ export const useFaceCapture = ({
   };
 
   const detectFace = async () => {
+    const startTime = performance.now();
+    
     if (!faceLandmarkerRef.current || !videoRef.current) {
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Detection loop stopped - missing landmarker or video');
       stopDetectionLoop();
       return;
     }
@@ -185,22 +227,50 @@ export const useFaceCapture = ({
       videoRef.current.videoHeight <= 0 ||
       videoRef.current.readyState < 2
     ) {
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Video not ready - dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight, 'readyState:', videoRef.current.readyState);
       animationFrameRef.current = requestAnimationFrame(detectFace);
       return;
     }
 
     try {
       if (isInitializing.value) {
+        // eslint-disable-next-line no-console
+        console.log('[FaceCapture] Detection starting - no longer initializing');
         isInitializing.value = false;
       }
 
       const croppedCanvas = createCroppedVideoFrame(videoRef.current);
       const detectionSource = croppedCanvas || videoRef.current;
+      
+      const sourceWidth = detectionSource instanceof HTMLVideoElement 
+        ? detectionSource.videoWidth 
+        : detectionSource.width;
+      const sourceHeight = detectionSource instanceof HTMLVideoElement 
+        ? detectionSource.videoHeight 
+        : detectionSource.height;
+      
+      // Only log detailed info on first few detection runs or if there are issues
+      const shouldLogDetails = !faceLandmarks.value.length || Math.random() < 0.01;
+      if (shouldLogDetails) {
+        // eslint-disable-next-line no-console
+        console.log('[FaceCapture] Detection source:', detectionSource.constructor.name, sourceWidth, 'x', sourceHeight);
+      }
 
       const results = faceLandmarkerRef.current.detectForVideo(
         detectionSource,
         performance.now(),
       );
+      
+      if (shouldLogDetails) {
+        // eslint-disable-next-line no-console
+        console.log('[FaceCapture] Detection results:', {
+          faceLandmarks: results.faceLandmarks?.length || 0,
+          faceBlendshapes: results.faceBlendshapes?.length || 0,
+          timestamp: performance.now(),
+          processingTime: performance.now() - startTime
+        });
+      }
 
       faceLandmarks.value = results.faceLandmarks || [];
 
@@ -208,13 +278,12 @@ export const useFaceCapture = ({
         // we run detection on a cropped video frame
         // adjust landmark coordinates back to full video space
         if (croppedCanvas) {
-          const sourceWidth = videoRef.current.videoWidth;
-          const sourceHeight = videoRef.current.videoHeight;
-          const squareSize = Math.min(sourceWidth, sourceHeight);
-          const offsetX = (sourceWidth - squareSize) / (2 * sourceWidth);
-          const offsetY = (sourceHeight - squareSize) / (2 * sourceHeight);
-          const scaleFactor = squareSize / sourceWidth;
-          const scaleFactorY = squareSize / sourceHeight;
+          const { videoWidth, videoHeight } = videoRef.current;
+          const squareSize = Math.min(videoWidth, videoHeight);
+          const offsetX = (videoWidth - squareSize) / (2 * videoWidth);
+          const offsetY = (videoHeight - squareSize) / (2 * videoHeight);
+          const scaleFactor = squareSize / videoWidth;
+          const scaleFactorY = squareSize / videoHeight;
 
           const adjustedLandmarks = results.faceLandmarks.map((face) =>
             face.map((landmark: any) => ({
@@ -316,6 +385,16 @@ export const useFaceCapture = ({
 
       updateAlerts();
     } catch (error) {
+      console.error('[FaceCapture] ❌ Error during face detection:', error);
+      console.error('[FaceCapture] Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        videoReady: videoRef.current?.readyState,
+        videoDimensions: `${videoRef.current?.videoWidth}x${videoRef.current?.videoHeight}`,
+        faceLandmarkerExists: !!faceLandmarkerRef.current
+      });
+      
       faceDetected.value = false;
       faceInBounds.value = false;
       multipleFaces.value = false;
@@ -331,9 +410,33 @@ export const useFaceCapture = ({
   };
 
   const startDetectionLoop = () => {
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] Starting detection loop...');
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] FaceLandmarker available:', !!faceLandmarkerRef.current);
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] Video available:', !!videoRef.current);
+    
     if (animationFrameRef.current) {
+      // eslint-disable-next-line no-console
+      console.log('[FaceCapture] Cancelling existing animation frame');
       cancelAnimationFrame(animationFrameRef.current);
     }
+    
+    if (!faceLandmarkerRef.current) {
+      // eslint-disable-next-line no-console
+      console.error('[FaceCapture] ❌ Cannot start detection loop - no FaceLandmarker instance');
+      return;
+    }
+    
+    if (!videoRef.current) {
+      // eslint-disable-next-line no-console
+      console.error('[FaceCapture] ❌ Cannot start detection loop - no video element');
+      return;
+    }
+    
+    // eslint-disable-next-line no-console
+    console.log('[FaceCapture] ✅ Starting detection loop animation frame');
     animationFrameRef.current = requestAnimationFrame(detectFace);
   };
 

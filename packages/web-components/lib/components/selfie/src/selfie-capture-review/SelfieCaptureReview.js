@@ -61,10 +61,11 @@ function templateString() {
         font-style: normal;
         font-weight: 700;
         line-height: 36px; /* 150% */
+        margin-top: 0;
       }
     </style>
     ${styles(this.themeColor)}
-    <div id='selfie-capture-review-screen' class='flow center'>
+    <div id='selfie-capture-review-screen' class='center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title text-2xl title-color font-bold">
       Is your whole face visible and clear in this photo?

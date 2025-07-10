@@ -14,42 +14,23 @@ export const useCamera = () => {
 
   const startCamera = async (targetFacingMode?: 'user' | 'environment') => {
     try {
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Starting camera with facingMode:', targetFacingMode || facingMode);
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Current streamRef:', !!streamRef.current);
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Current videoRef:', !!videoRef.current);
-
       if (streamRef.current) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Stopping existing stream');
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
 
       if (videoRef.current) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Clearing video srcObject');
         videoRef.current.srcObject = null;
       }
 
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Requesting getUserMedia...');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: targetFacingMode || facingMode },
       });
-      // eslint-disable-next-line no-console
-      console.log('[Camera] getUserMedia successful, stream:', stream);
       streamRef.current = stream;
 
       // Detect actual facing mode from the stream
       const track = stream.getVideoTracks()[0];
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Video track:', track);
       const settings = track.getSettings();
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Track settings:', settings);
       const actualFacingMode = settings.facingMode as
         | 'user'
         | 'environment'
@@ -57,21 +38,15 @@ export const useCamera = () => {
 
       // Update our state to match actual camera
       if (actualFacingMode && actualFacingMode !== facingMode) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Updating facingMode from', facingMode, 'to', actualFacingMode);
         setFacingMode(actualFacingMode);
       }
 
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Enumerating devices...');
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevice = devices.find(
         (device) =>
           device.kind === 'videoinput' &&
           stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
       );
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Found video device:', videoDevice?.label);
 
       const smartCameraWeb = document.querySelector('smart-camera-web');
       smartCameraWeb?.dispatchEvent(
@@ -81,12 +56,8 @@ export const useCamera = () => {
       );
 
       if (videoRef.current) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Setting video srcObject and playing...');
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Video is playing, dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
 
         if (isSwitchingCameraRef.current && onCameraSwitchCallbackRef.current) {
           // wait for video to be ready and call callback
@@ -113,15 +84,8 @@ export const useCamera = () => {
           setTimeout(triggerCallback, 50);
         }
       }
-      // eslint-disable-next-line no-console
-      console.log('[Camera] ✅ Camera started successfully');
     } catch (error) {
-      console.error('[Camera] ❌ Failed to start camera:', error);
-      console.error('[Camera] Error details:', {
-        name: error instanceof Error ? error.name : 'Unknown',
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      });
+      console.error('Failed to start camera:', error);
     }
   };
 
@@ -160,8 +124,6 @@ export const useCamera = () => {
 
   const detectBrowserEngine = () => {
     const userAgent = navigator.userAgent.toLowerCase();
-    // eslint-disable-next-line no-console
-    console.log('[Camera] Detecting browser engine for User Agent:', userAgent);
 
     const isGecko =
       userAgent.includes('firefox') ||
@@ -180,7 +142,7 @@ export const useCamera = () => {
       (CSS.supports('-moz-appearance', 'none') ||
         CSS.supports('-moz-user-select', 'none'));
 
-    const result = {
+    return {
       isGecko: isGecko || hasFirefoxFeatures || supportsMozCSS,
       isChromium:
         userAgent.includes('chrome') ||
@@ -188,91 +150,57 @@ export const useCamera = () => {
         userAgent.includes('edge'),
       isWebKit: userAgent.includes('webkit') && !userAgent.includes('chrome'),
     };
-
-    // eslint-disable-next-line no-console
-    console.log('[Camera] Browser detection result:', result);
-    return result;
   };
 
   const checkAgentSupport = async () => {
     try {
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Checking agent support...');
-      
       const isMobile =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
           navigator.userAgent,
         ) ||
         (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
 
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Is mobile device:', isMobile);
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Max touch points:', navigator.maxTouchPoints);
-
       const { isGecko } = detectBrowserEngine();
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Is Gecko browser:', isGecko);
 
       let hasUserCamera = false;
       let hasEnvironmentCamera = false;
 
       // test if we can get a user-facing camera
       try {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Testing user-facing camera...');
         const userStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user' },
         });
         hasUserCamera = true;
-        // eslint-disable-next-line no-console
-        console.log('[Camera] ✅ User-facing camera available');
         userStream.getTracks().forEach((track) => track.stop()); // Clean up
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] ❌ User-facing camera not available:', error);
+        // no user-facing camera available
       }
 
       // test if we can get an environment-facing camera
       try {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Testing environment-facing camera...');
         const envStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         });
         hasEnvironmentCamera = true;
-        // eslint-disable-next-line no-console
-        console.log('[Camera] ✅ Environment-facing camera available');
         envStream.getTracks().forEach((track) => track.stop()); // Clean up
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] ❌ Environment-facing camera not available:', error);
+        // no environment-facing camera available
       }
 
       const hasBothCameras = hasUserCamera && hasEnvironmentCamera;
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Has both cameras:', hasBothCameras);
 
       if (!hasBothCameras) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Agent mode NOT supported - missing cameras');
         setAgentSupported(false);
         return;
       }
 
       if (isMobile) {
-        // eslint-disable-next-line no-console
-        console.log('[Camera] Agent mode supported - mobile device with both cameras');
         setAgentSupported(true);
         return;
       }
 
-      const finalAgentSupported = !isGecko;
-      // eslint-disable-next-line no-console
-      console.log('[Camera] Agent mode supported (desktop):', finalAgentSupported, '(not Gecko:', !isGecko, ')');
-      setAgentSupported(finalAgentSupported);
+      setAgentSupported(!isGecko);
     } catch (error) {
-      console.error('[Camera] ❌ Error checking agent support:', error);
       setAgentSupported(false);
     }
   };

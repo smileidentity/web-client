@@ -61,112 +61,33 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const initializeCamera = async () => {
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] Starting initialization process');
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] User Agent:', navigator.userAgent);
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] Platform:', navigator.platform);
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] Touch points:', navigator.maxTouchPoints);
-      
-      // iOS-specific detection
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-      const isIOSChrome = /CriOS/.test(navigator.userAgent);
-      const isIOSFirefox = /FxiOS/.test(navigator.userAgent);
-      const isIOSEdge = /EdgiOS/.test(navigator.userAgent);
-      
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] iOS Detection:', {
-        isIOS,
-        isSafari,
-        isIOSChrome,
-        isIOSFirefox,
-        isIOSEdge,
-        supportsWebGL: !!window.WebGLRenderingContext,
-        supportsWebGL2: !!window.WebGL2RenderingContext,
-        supportsWebAssembly: !!window.WebAssembly,
-        mediaDevicesSupported: !!navigator.mediaDevices,
-        getUserMediaSupported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
-      });
-      
-      try {
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 1: Starting camera...');
-        await camera.startCamera();
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 1: Camera started successfully');
-        
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 2: Checking agent support...');
-        await camera.checkAgentSupport();
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 2: Agent support check completed');
-        
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 3: Initializing MediaPipe FaceLandmarker...');
-        await faceCapture.initializeFaceLandmarker();
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 3: MediaPipe FaceLandmarker initialized successfully');
+      await camera.startCamera();
+      await camera.checkAgentSupport();
+      await faceCapture.initializeFaceLandmarker();
 
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Step 4: Setting up canvas and starting detection loop...');
-        setTimeout(() => {
-          try {
-            // eslint-disable-next-line no-console
-            console.log('[SmartSelfie] Setting up canvas...');
-            faceCapture.setupCanvas();
-            // eslint-disable-next-line no-console
-            console.log('[SmartSelfie] Canvas setup completed');
-            
-            // eslint-disable-next-line no-console
-            console.log('[SmartSelfie] Starting detection loop...');
-            faceCapture.startDetectionLoop();
-            // eslint-disable-next-line no-console
-            console.log('[SmartSelfie] Detection loop started');
-            
-            // eslint-disable-next-line no-console
-            console.log('[SmartSelfie] ✅ Full initialization completed successfully');
-          } catch (canvasError) {
-            console.error('[SmartSelfie] ❌ Error during canvas setup or detection start:', canvasError);
-          }
-        }, 500);
-      } catch (error) {
-        console.error('[SmartSelfie] ❌ Critical initialization error:', error);
-        console.error('[SmartSelfie] Error details:', {
-          name: error instanceof Error ? error.name : 'Unknown',
-          message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined
-        });
-      }
+      setTimeout(() => {
+        faceCapture.setupCanvas();
+        faceCapture.startDetectionLoop();
+      }, 500);
     };
 
     camera.registerCameraSwitchCallback(() => {
       try {
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Camera switch callback triggered');
         faceCapture.resetFaceDetectionState();
         faceCapture.setupCanvas();
         faceCapture.stopDetectionLoop();
         faceCapture.startDetectionLoop();
-        // eslint-disable-next-line no-console
-        console.log('[SmartSelfie] Camera switch callback completed');
       } catch (error) {
-        console.error('[SmartSelfie] Error during camera switch callback:', error);
+        console.error('Error during camera switch callback:', error);
       }
     });
 
     initializeCamera();
 
     return () => {
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] Cleanup started');
       faceCapture.stopDetectionLoop();
       camera.stopCamera();
       faceCapture.cleanup();
-      // eslint-disable-next-line no-console
-      console.log('[SmartSelfie] Cleanup completed');
     };
   }, []);
 

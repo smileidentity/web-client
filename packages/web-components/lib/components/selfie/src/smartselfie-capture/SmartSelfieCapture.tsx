@@ -71,17 +71,6 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
       }, 500);
     };
 
-    camera.registerCameraSwitchCallback(() => {
-      try {
-        faceCapture.resetFaceDetectionState();
-        faceCapture.setupCanvas();
-        faceCapture.stopDetectionLoop();
-        faceCapture.startDetectionLoop();
-      } catch (error) {
-        console.error('Error during camera switch callback:', error);
-      }
-    });
-
     initializeCamera();
 
     return () => {

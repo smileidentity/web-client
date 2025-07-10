@@ -115,6 +115,7 @@ export const useFaceCapture = ({
       if (container) {
         canvasRef.current.style.left = '50%';
         canvasRef.current.style.top = '50%';
+        canvasRef.current.style.transform = 'translate(-50%, -50%) scaleX(-1)';
       }
     }
   };
@@ -176,16 +177,6 @@ export const useFaceCapture = ({
   const detectFace = async () => {
     if (!faceLandmarkerRef.current || !videoRef.current) {
       stopDetectionLoop();
-      return;
-    }
-
-    // ensure video has valid dimensions before processing
-    if (
-      videoRef.current.videoWidth <= 0 ||
-      videoRef.current.videoHeight <= 0 ||
-      videoRef.current.readyState < 2
-    ) {
-      animationFrameRef.current = requestAnimationFrame(detectFace);
       return;
     }
 
@@ -537,22 +528,6 @@ export const useFaceCapture = ({
     stopDetectionLoop();
   };
 
-  const resetFaceDetectionState = () => {
-    faceDetected.value = false;
-    faceInBounds.value = false;
-    faceProximity.value = 'good';
-    multipleFaces.value = false;
-    faceLandmarks.value = [];
-    currentSmileScore.value = 0;
-    currentFaceSize.value = 0;
-    currentMouthOpen.value = 0;
-    lastSmileTime.value = 0;
-
-    if (canvasRef.current) {
-      clearCanvas(canvasRef.current);
-    }
-  };
-
   return {
     faceDetected,
     faceInBounds,
@@ -591,6 +566,5 @@ export const useFaceCapture = ({
     handleCancel,
     handleClose,
     cleanup,
-    resetFaceDetectionState,
   };
 };

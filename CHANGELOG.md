@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Styling update
 - Show loading message for face detection
 - Fix agent mode when using face detection
+- Update big smile prompt to make it clearer
 
 ## [10.0.3] - 2025-07-09
 

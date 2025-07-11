@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { createElement } from 'preact';
 import '../lib/main';
+import { DebugPanel } from './components/DebugPanel';
 
 const App = () => {
   const getUrlParams = () => new URLSearchParams(window.location.search);
@@ -14,6 +15,45 @@ const App = () => {
     const params = getUrlParams();
     return params.get('theme-color') || '#001096';
   };
+
+  const [isDebugPanelVisible, setIsDebugPanelVisible] = useState(false);
+
+  const debugPanelBtn = (
+    <button
+      onClick={() => setIsDebugPanelVisible(true)}
+      style={{
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        backgroundColor: '#007bff',
+        color: 'white',
+        border: 'none',
+        fontSize: '12px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '2px',
+      }}
+      title="Open Debug Panel"
+    >
+      <div>🐛</div>
+      <div style={{ fontSize: '8px' }}>DEBUG</div>
+    </button>
+  );
+
+  const debugPanel = (
+    <DebugPanel
+      isVisible={isDebugPanelVisible}
+      onClose={() => setIsDebugPanelVisible(false)}
+    />
+  );
 
   // Check if we should render in direct mode (for Cypress tests)
   const isDirect = getUrlParams().get('direct') === 'true';
@@ -63,11 +103,22 @@ const App = () => {
       <div
         style={{
           height: '100%',
+          display: 'grid',
+          placeItems: 'center',
+        }}
+      >
+      <div
+        style={{
+          width: 360,
+          maxWidth: '100%',
           background: '#fff',
           color: '#213547',
         }}
       >
         {componentElement}
+        {debugPanelBtn}
+        {debugPanel}
+      </div>
       </div>
     );
   }
@@ -174,6 +225,8 @@ const App = () => {
       </form>
 
       <div className="component-container">{renderComponent()}</div>
+      {debugPanelBtn}
+      {debugPanel}
     </>
   );
 };

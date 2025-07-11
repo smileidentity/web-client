@@ -58,6 +58,7 @@ export const useFaceCapture = ({
   const currentMouthOpen = useSignal(0);
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
+  const isInitializing = useSignal(true);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -81,19 +82,23 @@ export const useFaceCapture = ({
       !multipleFaces.value,
   );
 
-  const initializeFaceLandmarker = async () => {
-    try {
-      faceLandmarkerRef.current = await getMediapipeInstance();
-    } catch (error) {
-      console.error('Failed to initialize MediaPipe:', error);
-    }
-  };
-
   const updateAlert = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
       alertTitle.value = MESSAGES[messageKey];
     } else {
       alertTitle.value = '';
+    }
+  };
+
+  const initializeFaceLandmarker = async () => {
+    try {
+      isInitializing.value = true;
+      updateAlert('initializing');
+      faceLandmarkerRef.current = await getMediapipeInstance();
+      isInitializing.value = false;
+    } catch (error) {
+      console.error('Failed to initialize MediaPipe:', error);
+      isInitializing.value = false;
     }
   };
 
@@ -110,7 +115,6 @@ export const useFaceCapture = ({
       if (container) {
         canvasRef.current.style.left = '50%';
         canvasRef.current.style.top = '50%';
-        canvasRef.current.style.transform = 'translate(-50%, -50%) scaleX(-1)';
       }
     }
   };
@@ -143,7 +147,9 @@ export const useFaceCapture = ({
   };
 
   const updateAlerts = () => {
-    if (multipleFaces.value) {
+    if (isInitializing.value) {
+      updateAlert('initializing');
+    } else if (multipleFaces.value) {
       updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
@@ -173,7 +179,21 @@ export const useFaceCapture = ({
       return;
     }
 
+    // ensure video has valid dimensions before processing
+    if (
+      videoRef.current.videoWidth <= 0 ||
+      videoRef.current.videoHeight <= 0 ||
+      videoRef.current.readyState < 2
+    ) {
+      animationFrameRef.current = requestAnimationFrame(detectFace);
+      return;
+    }
+
     try {
+      if (isInitializing.value) {
+        isInitializing.value = false;
+      }
+
       const croppedCanvas = createCroppedVideoFrame(videoRef.current);
       const detectionSource = croppedCanvas || videoRef.current;
 
@@ -517,6 +537,22 @@ export const useFaceCapture = ({
     stopDetectionLoop();
   };
 
+  const resetFaceDetectionState = () => {
+    faceDetected.value = false;
+    faceInBounds.value = false;
+    faceProximity.value = 'good';
+    multipleFaces.value = false;
+    faceLandmarks.value = [];
+    currentSmileScore.value = 0;
+    currentFaceSize.value = 0;
+    currentMouthOpen.value = 0;
+    lastSmileTime.value = 0;
+
+    if (canvasRef.current) {
+      clearCanvas(canvasRef.current);
+    }
+  };
+
   return {
     faceDetected,
     faceInBounds,
@@ -529,6 +565,7 @@ export const useFaceCapture = ({
     currentMouthOpen,
     lastSmileTime,
     alertTitle,
+    isInitializing,
     isReadyToCapture,
 
     isCapturing,
@@ -554,5 +591,6 @@ export const useFaceCapture = ({
     handleCancel,
     handleClose,
     cleanup,
+    resetFaceDetectionState,
   };
 };

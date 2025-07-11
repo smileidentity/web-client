@@ -119,6 +119,7 @@ jobs:
         env:
           SST_TELEMETRY_DISABLED: 1
           DO_NOT_TRACK: 1
+          PULUMI_LOG_LEVEL: debug
         run: |
           SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} --print-logs --verbose)
           echo "$SST_OUTPUT"

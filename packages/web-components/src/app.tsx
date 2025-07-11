@@ -107,18 +107,18 @@ const App = () => {
           placeItems: 'center',
         }}
       >
-      <div
-        style={{
-          width: 360,
-          maxWidth: '100%',
-          background: '#fff',
-          color: '#213547',
-        }}
-      >
-        {componentElement}
-        {debugPanelBtn}
-        {debugPanel}
-      </div>
+        <div
+          style={{
+            width: 360,
+            maxWidth: '100%',
+            background: '#fff',
+            color: '#213547',
+          }}
+        >
+          {componentElement}
+          {debugPanelBtn}
+          {debugPanel}
+        </div>
       </div>
     );
   }

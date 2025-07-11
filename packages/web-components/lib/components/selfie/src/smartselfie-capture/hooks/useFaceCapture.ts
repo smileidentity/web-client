@@ -180,7 +180,11 @@ export const useFaceCapture = ({
     }
 
     // ensure video has valid dimensions before processing
-    if (videoRef.current.videoWidth <= 0 || videoRef.current.videoHeight <= 0 || videoRef.current.readyState < 2) {
+    if (
+      videoRef.current.videoWidth <= 0 ||
+      videoRef.current.videoHeight <= 0 ||
+      videoRef.current.readyState < 2
+    ) {
       animationFrameRef.current = requestAnimationFrame(detectFace);
       return;
     }

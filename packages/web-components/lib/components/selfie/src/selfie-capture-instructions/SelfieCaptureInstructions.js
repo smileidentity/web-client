@@ -578,9 +578,9 @@ function templateString() {
       <div class="instructions">
         <svg  xmlns="http://www.w3.org/2000/svg"  width="38"  height="38"  viewBox="0 0 24 24"  fill="none"  stroke="${this.themeColor}"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-mood-happy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">Big Smile</p>
+          <p class="text-base title-color font-bold tip-header">Wide Smile</p>
           <p class="tip-body">
-            When asked to smile, give a big smile, showing your teeth.
+            When asked to smile, give a wide smile, showing your teeth.
           </p>
         </div>
       </div>

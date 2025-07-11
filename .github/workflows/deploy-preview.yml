@@ -116,6 +116,9 @@ jobs:
       - name: deploy sst app
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
+        env:
+          SST_TELEMETRY_DISABLED: 1
+          DO_NOT_TRACK: 1
         run: |
           npm run sst telemetry disable
           SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} --print-logs --verbose)

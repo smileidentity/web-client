@@ -69,7 +69,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
-        style='transform: scaleX(-1); max-width: 90%;'
+        style='max-width: 90%; transform: scaleX(-1);'
       />`
             : ''
         }

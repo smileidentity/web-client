@@ -204,7 +204,6 @@ export const DebugPanel = ({ isVisible, onClose }: DebugPanelProps) => {
           </div>
         </div>
 
-        {/* Log content */}
         <div
           style={{
             flex: 1,

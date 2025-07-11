@@ -117,7 +117,7 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} --debug)
+          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} --print-logs --verbose)
           echo "$SST_OUTPUT"
           SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT

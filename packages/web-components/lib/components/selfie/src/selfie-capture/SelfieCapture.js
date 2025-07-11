@@ -351,6 +351,7 @@ function templateString() {
     position: relative;
     z-index: 1;
     width: 100%;
+    overflow: hidden;
   }
 
   .video-container video,
@@ -467,11 +468,12 @@ function templateString() {
 
   #selfie-capture-screen,
   #back-of-id-entry-screen {
-    block-size: 45rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     max-block-size: 100%;
     max-inline-size: 40ch;
+    padding: 1rem;
   }
 
   #selfie-capture-screen header p {

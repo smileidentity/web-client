@@ -33,6 +33,6 @@
     "storybook": "^8.6.8"
   },
   "dependencies": {
-    "sst": "3.4.5"
+    "sst": "^3.4.5"
   }
 }

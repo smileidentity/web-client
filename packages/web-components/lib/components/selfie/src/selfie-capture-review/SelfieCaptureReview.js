@@ -58,7 +58,7 @@ function templateString() {
     <div id='selfie-capture-review-screen' class='center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color font-bold">
-      Is your whole face visible and clear in this photo?
+      Is your whole face clear?
     </h1>
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -69,7 +69,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
-        style='transform: scaleX(-1);'
+        style='max-width: 90%; transform: scaleX(-1);'
       />`
             : ''
         }

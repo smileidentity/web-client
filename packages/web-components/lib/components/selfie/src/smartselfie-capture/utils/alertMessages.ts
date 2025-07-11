@@ -6,7 +6,7 @@ export const MESSAGES = {
   'too-far': 'Move closer',
   'neutral-expression': 'Neutral expression',
   'smile-required': 'Smile!',
-  'open-mouth-smile': 'Big smile - teeth visible',
+  'open-mouth-smile': 'Wider smile - teeth visible',
   initializing: 'Initializing...',
 };
 

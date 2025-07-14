@@ -576,7 +576,8 @@ async function getPermissions(
         device.kind === 'videoinput' &&
         stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
     );
-    window.dispatchEvent(
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),

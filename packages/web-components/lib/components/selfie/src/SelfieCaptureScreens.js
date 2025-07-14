@@ -131,12 +131,12 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieReview = this.querySelector('selfie-capture-review');
 
     if (this.hideInstructions && !this.hasAttribute('hidden')) {
-      getPermissions(this.selfieCapture, this.getAgentMode());
+      this.handlePermissionsIfNeeded();
     }
 
     // If the initial screen is selfie-capture, we need to get permissions
     if (this.getAttribute('initial-screen') === 'selfie-capture') {
-      getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
+      this.handlePermissionsIfNeeded().then(() =>
         this.setActiveScreen(this.selfieCapture),
       );
     } else if (this.hideInstructions) {
@@ -152,9 +152,17 @@ class SelfieCaptureScreens extends HTMLElement {
     return this.inAgentMode ? 'environment' : 'user';
   }
 
+  async handlePermissionsIfNeeded() {
+    const selfieCapture = this.selfieCapture.querySelector('selfie-capture');
+    if (selfieCapture && window.getPermissions) {
+      return getPermissions(selfieCapture, { facingMode: this.getAgentMode() });
+    }
+    return Promise.resolve();
+  }
+
   disconnectedCallback() {
     SmartCamera.stopMedia();
-    
+
     if (this._selfieWrapperListeners) {
       this._selfieWrapperListeners.forEach(({ event, handler }) => {
         window.removeEventListener(event, handler);
@@ -173,7 +181,7 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieInstruction.addEventListener(
       'selfie-capture-instructions.capture',
       async () => {
-        await getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
+        await this.handlePermissionsIfNeeded().then(() =>
           this.setActiveScreen(this.selfieCapture),
         );
         smartCameraWeb?.dispatchEvent(
@@ -212,7 +220,7 @@ class SelfieCaptureScreens extends HTMLElement {
         await this.forceWrapperRemount();
 
         this.setActiveScreen(this.selfieCapture);
-        await getPermissions(this.selfieCapture, this.getAgentMode());
+        await this.handlePermissionsIfNeeded();
       },
     );
 
@@ -248,7 +256,7 @@ class SelfieCaptureScreens extends HTMLElement {
       // recreate wrapper element
       oldWrapper.remove();
       const newWrapper = document.createElement('selfie-capture-wrapper');
-      
+
       newWrapper.setAttribute('theme-color', this.themeColor);
       newWrapper.setAttribute('key', this._remountKey.toString());
       newWrapper.setAttribute('start-countdown', 'false');
@@ -284,7 +292,7 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     // give time for the new component to initialize
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
       }, 200);
@@ -300,7 +308,7 @@ class SelfieCaptureScreens extends HTMLElement {
     // If activating selfie-capture-wrapper, enable the countdown and ensure permissions
     if (screen === this.selfieCapture) {
       screen.setAttribute('start-countdown', 'true');
-      getPermissions(this.selfieCapture, this.getAgentMode());
+      this.handlePermissionsIfNeeded();
     } else if (this.selfieCapture) {
       // Disable countdown when not on capture screen
       this.selfieCapture.setAttribute('start-countdown', 'false');

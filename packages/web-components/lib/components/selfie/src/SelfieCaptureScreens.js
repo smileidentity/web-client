@@ -239,13 +239,6 @@ class SelfieCaptureScreens extends HTMLElement {
   async forceWrapperRemount() {
     SmartCamera.stopMedia();
 
-    // Clean up any global mediapipe state
-    if (window.__smileIdentityMediapipe) {
-      window.__smileIdentityMediapipe.loaded = false;
-      window.__smileIdentityMediapipe.loading = null;
-      window.__smileIdentityMediapipe.instance = null;
-    }
-
     this._remountKey++;
 
     const container = this.querySelector('div');

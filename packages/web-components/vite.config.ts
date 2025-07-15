@@ -127,7 +127,6 @@ export default defineConfig(({ mode }) => {
 
     server: {
       port,
-      open: true,
     },
 
     resolve: {

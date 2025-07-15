@@ -260,6 +260,9 @@ function templateString() {
       }
 
       #selfie-capture-instruction-screen {
+        box-sizing: border-box;
+        height: 100%;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         max-block-size: 100%;
@@ -270,17 +273,20 @@ function templateString() {
         margin-block: 0 !important;
       }
 
+      header h1 {
+        font-size: 1.25rem;
+      }
+
       .instructions {
-        margin-block-start: 1.5rem;
         display: flex;
         align-items: center;
         text-align: initial;
-        gap: 1rem;
+        gap: 0.5rem;
       }
 
       .instructions svg {
         flex-shrink: 0;
-        margin-inline-end: 1rem;
+        margin-inline-end: 0.25rem;
       }
 
       .instructions p {
@@ -290,6 +296,8 @@ function templateString() {
       h1 {
         color: ${this.themeColor};
         text-align: center;
+        margin-top: 0;
+        margin-bottom: 1rem;
 
         /* h1 */
         font-size: 1.5rem;
@@ -298,41 +306,73 @@ function templateString() {
         line-height: 36px; /* 150% */
       }
 
+      .controls {
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      .content-root {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .content-header, .content-body, .content-footer {
+        width: 100%;
+      }
+
+      .content-body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       .tip-header {
         color: ${this.themeColor};
       }
+
+      .tip-body {
+        text-align: justify;
+      }
     </style>
     ${styles(this.themeColor)}
-    <div id="selfie-capture-instruction-screen" class="flow center">
-    <smileid-navigation theme-color=${this.themeColor} ${this.hideBack ? 'hide-back' : ''} ${this.showNavigation ? '' : 'hidden'}></smileid-navigation>
-    <header>
-      <svg xmlns="http://www.w3.org/2000/svg" width="65" height="91" viewBox="0 0 65 91" fill="none">
-      <g clip-path="url(#clip0_604_692)">
-        <path d="M36.6833 60.4888C26.9272 54.8682 13.1977 54.3026 5.53473 59.2162C-2.12824 64.1298 -0.851078 72.9318 8.05358 78.9413L17.8806 85.1274L51.5126 69.6797L36.7188 60.4534H36.6478L36.6833 60.4888Z" fill="#3B3837"/>
-        <path d="M27.5624 90.5007L17.9127 85.0923C17.9127 85.0923 17.9127 74.6288 18.1256 70.4929C18.232 68.2305 23.2342 37.441 44.1655 34.6484C48.1389 34.1182 56.8662 40.5871 56.8662 40.5871" fill="#91190F"/>
-        <path d="M27.5624 90.5007L17.9127 85.0923C17.9127 85.0923 17.9127 74.6288 18.1256 70.4929C18.232 68.2305 23.2342 37.441 44.1655 34.6484C48.1389 34.1182 56.8662 40.5871 56.8662 40.5871" fill="#3B3837"/>
-        <path d="M64.0705 51.9698C63.8931 41.0114 56.2301 36.5927 46.7224 42.0366C37.0727 47.5511 29.055 60.9486 28.3454 72.2958L27.5649 90.4655L63.7512 69.5739L64.1769 51.8991H64.106L64.0705 51.9698Z" fill="#7ECAF0"/>
-        <path d="M44.2729 28.3906L30.0112 36.521L30.4015 19.73L44.6631 11.5643L44.2729 28.3906Z" fill="#F8CEEB"/>
-        <path d="M53.959 33.8711L39.6974 42.0368L40.0876 25.2104L54.3493 17.0447L53.959 33.8711Z" fill="#7ECAF0"/>
-        <path d="M44.6631 11.5643L54.3483 17.0434L40.0866 25.2092L39.6964 42.0356L30.0112 36.521L30.4015 19.73L44.6631 11.5643Z" fill="#3B3837"/>
-        <path d="M53.0767 51.0497L59.9591 46.8785L59.9237 36.9099L64.4647 34.3294L64.5002 49.4236L53.0767 56.2461V51.0497Z" fill="#FF5805"/>
-        <path d="M54.0676 54.5139L63.5044 48.8933L63.469 36.026L60.9146 37.4754V47.4439L54.0676 51.5798V54.5139Z" fill="#FF5805"/>
-        <path d="M30.4053 52.2515L34.9463 49.6356V60.8414L44.0638 55.1855V60.4172L30.4407 68.7244L30.4053 52.2515Z" fill="#FF5805"/>
-        <path d="M31.4317 66.9921L43.0681 59.8869V56.9529L33.9506 62.6088V51.3323L31.3962 52.817L31.4317 66.9921Z" fill="#FF5805"/>
-        <path d="M30.4053 19.7312L42.5383 13.0148V18.1759L34.9463 22.3471V32.4924L30.4407 35.073L30.4053 19.7312Z" fill="#FF5805"/>
-        <path d="M31.3962 33.377L33.9506 31.9276V21.7823L41.5426 17.6111V14.6771L31.3962 20.2976V28.7815V33.377Z" fill="#FF5805"/>
-        <path d="M59.9223 8.27746L53.5365 11.9538V6.79277L64.4279 0.500549L64.4633 16.5846L59.9578 19.1651L59.9223 8.27746Z" fill="#FF5805"/>
-        <path d="M60.9142 17.4682L63.504 16.0189L63.4685 2.19722L54.4929 7.35826L54.5284 10.2569L60.9142 6.58057V17.4682Z" fill="#FF5805"/>
-      </g>
-      <defs>
-        <clipPath id="clip0_604_692">
-          <rect width="64" height="90" fill="white" transform="translate(0.5 0.5)"/>
-        </clipPath>
-      </defs>
-    </svg>
-      <h1 class='text-2xl title-color font-bold'>Next, we'll take a quick selfie</h1>
-    </header>
-    <div class="flow instructions-wrapper">
+    <div id="selfie-capture-instruction-screen" class="center">
+    <div class="content-root">
+      <div class="content-header">
+        <smileid-navigation theme-color=${this.themeColor} ${this.hideBack ? 'hide-back' : ''} ${this.showNavigation ? '' : 'hidden'}></smileid-navigation>
+      </div>
+      <div class="content-body">
+        <header>
+          <svg xmlns="http://www.w3.org/2000/svg" width="65" height="91" viewBox="0 0 65 91" fill="none">
+            <g clip-path="url(#clip0_604_692)">
+              <path d="M36.6833 60.4888C26.9272 54.8682 13.1977 54.3026 5.53473 59.2162C-2.12824 64.1298 -0.851078 72.9318 8.05358 78.9413L17.8806 85.1274L51.5126 69.6797L36.7188 60.4534H36.6478L36.6833 60.4888Z" fill="#3B3837"/>
+              <path d="M27.5624 90.5007L17.9127 85.0923C17.9127 85.0923 17.9127 74.6288 18.1256 70.4929C18.232 68.2305 23.2342 37.441 44.1655 34.6484C48.1389 34.1182 56.8662 40.5871 56.8662 40.5871" fill="#91190F"/>
+              <path d="M27.5624 90.5007L17.9127 85.0923C17.9127 85.0923 17.9127 74.6288 18.1256 70.4929C18.232 68.2305 23.2342 37.441 44.1655 34.6484C48.1389 34.1182 56.8662 40.5871 56.8662 40.5871" fill="#3B3837"/>
+              <path d="M64.0705 51.9698C63.8931 41.0114 56.2301 36.5927 46.7224 42.0366C37.0727 47.5511 29.055 60.9486 28.3454 72.2958L27.5649 90.4655L63.7512 69.5739L64.1769 51.8991H64.106L64.0705 51.9698Z" fill="#7ECAF0"/>
+              <path d="M44.2729 28.3906L30.0112 36.521L30.4015 19.73L44.6631 11.5643L44.2729 28.3906Z" fill="#F8CEEB"/>
+              <path d="M53.959 33.8711L39.6974 42.0368L40.0876 25.2104L54.3493 17.0447L53.959 33.8711Z" fill="#7ECAF0"/>
+              <path d="M44.6631 11.5643L54.3483 17.0434L40.0866 25.2092L39.6964 42.0356L30.0112 36.521L30.4015 19.73L44.6631 11.5643Z" fill="#3B3837"/>
+              <path d="M53.0767 51.0497L59.9591 46.8785L59.9237 36.9099L64.4647 34.3294L64.5002 49.4236L53.0767 56.2461V51.0497Z" fill="#FF5805"/>
+              <path d="M54.0676 54.5139L63.5044 48.8933L63.469 36.026L60.9146 37.4754V47.4439L54.0676 51.5798V54.5139Z" fill="#FF5805"/>
+              <path d="M30.4053 52.2515L34.9463 49.6356V60.8414L44.0638 55.1855V60.4172L30.4407 68.7244L30.4053 52.2515Z" fill="#FF5805"/>
+              <path d="M31.4317 66.9921L43.0681 59.8869V56.9529L33.9506 62.6088V51.3323L31.3962 52.817L31.4317 66.9921Z" fill="#FF5805"/>
+              <path d="M30.4053 19.7312L42.5383 13.0148V18.1759L34.9463 22.3471V32.4924L30.4407 35.073L30.4053 19.7312Z" fill="#FF5805"/>
+              <path d="M31.3962 33.377L33.9506 31.9276V21.7823L41.5426 17.6111V14.6771L31.3962 20.2976V28.7815V33.377Z" fill="#FF5805"/>
+              <path d="M59.9223 8.27746L53.5365 11.9538V6.79277L64.4279 0.500549L64.4633 16.5846L59.9578 19.1651L59.9223 8.27746Z" fill="#FF5805"/>
+              <path d="M60.9142 17.4682L63.504 16.0189L63.4685 2.19722L54.4929 7.35826L54.5284 10.2569L60.9142 6.58057V17.4682Z" fill="#FF5805"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_604_692">
+                <rect width="64" height="90" fill="white" transform="translate(0.5 0.5)"/>
+              </clipPath>
+            </defs>
+          </svg>
+          <h1 class='title-color font-bold'>Next, we'll take a quick selfie</h1>
+        </header>
+    <div class="instructions-wrapper">
       <div class="instructions">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -411,8 +451,7 @@ function templateString() {
         <div class="instruction">
           <p class="text-base title-color font-bold tip-header">Good Light</p>
           <p class="tip-body">
-            Make sure you are in a well-lit environment where your face is
-            clear and visible.
+            Make sure you are in a well-lit environment.
           </p>
         </div>
       </div>
@@ -499,9 +538,8 @@ function templateString() {
         </svg>
         <div class="instruction">
           <p class="text-base title-color font-bold tip-header">Clear Image</p>
-          <p>
-            Hold your phone steady so the selfie is clear and sharp. Don't
-            take blurry images.
+          <p class="tip-body">
+            Hold your phone steady so the selfie is clear and sharp.
           </p>
         </div>
       </div>
@@ -532,9 +570,8 @@ function templateString() {
         </svg>
         <div class="instruction">
           <p class="text-base title-color font-bold tip-header">Remove Obstructions</p>
-          <p>
-            Remove anything that covers your face, such glasses, masks, hats
-            and scarves.
+          <p class="tip-body">
+            Remove anything that covers your face, such glasses, masks, and hats.
           </p>
         </div>
       </div>
@@ -542,28 +579,29 @@ function templateString() {
         <svg  xmlns="http://www.w3.org/2000/svg"  width="38"  height="38"  viewBox="0 0 24 24"  fill="none"  stroke="${this.themeColor}"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-mood-happy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>
         <div class="instruction">
           <p class="text-base title-color font-bold tip-header">Big Smile</p>
-          <p>
-            When asked to smile, give a big smile, showing your teeth and keep your eyes open.
+          <p class="tip-body">
+            When asked to smile, give a big smile, showing your teeth.
           </p>
         </div>
       </div>
-      <section class='flow' style='--flow-space: 2.5rem'>
-        <button id='allow' data-variant='solid full-width' class='button theme-background'>
-            Allow
-        </button>
-        <button id='cancel' data-variant='outline full-width' class="button" style='--flow-space: 1.5rem' ${this.hideBack || !this.showNavigation ? 'hidden' : ''}>
-            Cancel
-        </button>
-       </section>
     </div>
+    <section class="controls">
+      <button id='allow' data-variant='solid full-width' class='button theme-background'>
+        Allow
+      </button>
+    </section>
     ${
       this.hideAttribution
         ? ''
         : `
-    <powered-by-smile-id></powered-by-smile-id>
+        <div class="content-footer">
+          <powered-by-smile-id></powered-by-smile-id>
+        </div>
     `
     }
   </div>
+  </div>
+</div>
   `;
 }
 
@@ -585,7 +623,6 @@ class SelfieCaptureInstructions extends HTMLElement {
 
     this.allowButton = this.shadowRoot.querySelector('#allow');
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
-    this.cancelButton = this.shadowRoot.querySelector('#cancel');
 
     this.navigation.addEventListener('navigation.back', () => {
       this.handleBackEvents();
@@ -606,10 +643,6 @@ class SelfieCaptureInstructions extends HTMLElement {
       },
       false,
     );
-
-    this.cancelButton.addEventListener('click', () => {
-      this.handleBackEvents();
-    });
   }
 
   get hideBack() {

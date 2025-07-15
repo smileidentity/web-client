@@ -49,7 +49,6 @@ export const initializeMetadata = async () => {
   metadata.browser_version = parsedUserAgent.browser.version;
   metadata.fingerprint = await getFingerprint();
   metadata.active_liveness_type = 'smile';
-  metadata.active_liveness_version = '0.0.1';
 };
 
 export const getMetadata = () =>
@@ -231,6 +230,9 @@ eventTarget.addEventListener('metadata.document-back-origin', (event) => {
 // Selfie
 eventTarget.addEventListener('metadata.selfie-origin', (event) => {
   metadata.selfie_image_origin = event.detail.imageOrigin;
+});
+eventTarget.addEventListener('metadata.active-liveness-version', (event) => {
+  metadata.active_liveness_version = event.detail.version;
 });
 eventTarget.addEventListener('metadata.selfie-capture-start', () => {
   beginTrackSelfieCapture();

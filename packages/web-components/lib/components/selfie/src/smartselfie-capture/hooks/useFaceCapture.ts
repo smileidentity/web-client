@@ -92,14 +92,15 @@ export const useFaceCapture = ({
 
   const initializeFaceLandmarker = async () => {
     try {
-      const isAlreadyLoaded = window.__smileIdentityMediapipe?.loaded && 
-                             window.__smileIdentityMediapipe?.instance;
-      
+      const isAlreadyLoaded =
+        window.__smileIdentityMediapipe?.loaded &&
+        window.__smileIdentityMediapipe?.instance;
+
       if (!isAlreadyLoaded) {
         isInitializing.value = true;
         updateAlert('initializing');
       }
-      
+
       faceLandmarkerRef.current = await getMediapipeInstance();
       isInitializing.value = false;
     } catch (error) {

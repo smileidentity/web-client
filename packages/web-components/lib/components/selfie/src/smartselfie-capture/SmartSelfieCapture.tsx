@@ -45,7 +45,8 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   const minFaceSize = 0.35;
   const maxFaceSize = 0.5;
 
-  const camera = useCamera();
+  const initialFacingMode = allowAgentMode ? 'environment' : 'user';
+  const camera = useCamera(initialFacingMode);
 
   const faceCapture = useFaceCapture({
     videoRef: camera.videoRef,
@@ -57,6 +58,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     minFaceSize,
     maxFaceSize,
     smileCooldown,
+    getFacingMode: () => camera.facingMode,
   });
 
   useEffect(() => {

@@ -1,9 +1,13 @@
 import { useRef, useState } from 'preact/hooks';
 
-export const useCamera = () => {
+export const useCamera = (
+  initialFacingMode: 'user' | 'environment' = 'user',
+) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>(
+    initialFacingMode,
+  );
   const [agentSupported, setAgentSupported] = useState(false);
   const onCameraSwitchCallbackRef = useRef<(() => void) | null>(null);
   const isSwitchingCameraRef = useRef(false);
@@ -35,7 +39,11 @@ export const useCamera = () => {
         | 'environment'
         | undefined;
 
-      if (actualFacingMode && actualFacingMode !== facingMode) {
+      const requestedFacingMode = targetFacingMode || facingMode;
+
+      if (actualFacingMode && actualFacingMode !== requestedFacingMode) {
+        setFacingMode(actualFacingMode);
+      } else if (actualFacingMode && actualFacingMode !== facingMode) {
         setFacingMode(actualFacingMode);
       }
 
@@ -227,6 +235,5 @@ export const useCamera = () => {
     checkAgentSupport,
     stopCamera,
     registerCameraSwitchCallback,
-    detectBrowserEngine,
   };
 };

@@ -29,6 +29,7 @@ interface UseFaceCaptureProps {
   minFaceSize: number;
   maxFaceSize: number;
   smileCooldown: number;
+  getFacingMode: () => 'user' | 'environment';
 }
 
 export const useFaceCapture = ({
@@ -41,6 +42,7 @@ export const useFaceCapture = ({
   minFaceSize,
   maxFaceSize,
   smileCooldown,
+  getFacingMode,
 }: UseFaceCaptureProps) => {
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -500,6 +502,21 @@ export const useFaceCapture = ({
     totalCaptures.value = Math.ceil(duration / interval);
     capturesTaken.value = 0;
     countdown.value = totalCaptures.value;
+
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-origin', {
+        detail: {
+          imageOrigin: {
+            environment: 'back_camera',
+            user: 'front_camera',
+          }[getFacingMode()],
+        },
+      }),
+    );
 
     startCaptureInterval();
   };

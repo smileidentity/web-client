@@ -397,11 +397,6 @@ export const useFaceCapture = ({
         }),
       );
 
-      const smartCameraWeb = document.querySelector('smart-camera-web');
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.selfie-capture-end'),
-      );
-
       hasFinishedCapture.value = true;
     }
   };

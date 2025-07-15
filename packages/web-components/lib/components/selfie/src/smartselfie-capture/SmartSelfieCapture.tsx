@@ -63,7 +63,14 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const initializeCamera = async () => {
-      await camera.startCamera();
+      await camera.startCamera(initialFacingMode, (cameraName) => {
+        const smartCameraWeb = document.querySelector('smart-camera-web');
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.camera-name', {
+            detail: { cameraName },
+          }),
+        );
+      });
       await camera.checkAgentSupport();
       await faceCapture.initializeFaceLandmarker();
 
@@ -119,6 +126,33 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     return undefined;
   }, [showNavigation]);
 
+  useEffect(() => {
+    if (faceCapture.hasFinishedCapture.value) {
+      const smartCameraWeb = document.querySelector('smart-camera-web');
+      smartCameraWeb?.dispatchEvent(
+        new CustomEvent('metadata.selfie-capture-end'),
+      );
+    }
+  }, [faceCapture.hasFinishedCapture.value]);
+
+  const handleStartCapture = () => {
+    faceCapture.startCapture();
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-origin', {
+        detail: {
+          imageOrigin: {
+            environment: 'back_camera',
+            user: 'front_camera',
+          }[camera.facingMode],
+        },
+      }),
+    );
+  };
+
   return (
     <div className="smartselfie-capture">
       {showNavigation && (
@@ -153,7 +187,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
             showAgentModeForTests={showAgentModeForTests}
             facingMode={camera.facingMode}
             themeColor={themeColor}
-            onStartCapture={faceCapture.startCapture}
+            onStartCapture={handleStartCapture}
             onSwitchCamera={camera.switchCamera}
           />
         )}

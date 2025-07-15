@@ -154,7 +154,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   async handlePermissionsIfNeeded() {
     const selfieCapture = this.selfieCapture.querySelector('selfie-capture');
-    if (selfieCapture && window.getPermissions) {
+    if (selfieCapture) {
       return getPermissions(selfieCapture, { facingMode: this.getAgentMode() });
     }
     return Promise.resolve();
@@ -184,19 +184,24 @@ class SelfieCaptureScreens extends HTMLElement {
         await this.handlePermissionsIfNeeded().then(() =>
           this.setActiveScreen(this.selfieCapture),
         );
-        smartCameraWeb?.dispatchEvent(
-          new CustomEvent('metadata.selfie-capture-start'),
-        );
-        smartCameraWeb?.dispatchEvent(
-          new CustomEvent('metadata.selfie-origin', {
-            detail: {
-              imageOrigin: {
-                environment: 'back_camera',
-                user: 'front_camera',
-              }[this.getAgentMode()],
-            },
-          }),
-        );
+
+        const selfieCapture =
+          this.selfieCapture.querySelector('selfie-capture');
+        if (selfieCapture) {
+          smartCameraWeb?.dispatchEvent(
+            new CustomEvent('metadata.selfie-capture-start'),
+          );
+          smartCameraWeb?.dispatchEvent(
+            new CustomEvent('metadata.selfie-origin', {
+              detail: {
+                imageOrigin: {
+                  environment: 'back_camera',
+                  user: 'front_camera',
+                }[this.getAgentMode()],
+              },
+            }),
+          );
+        }
       },
     );
     this.selfieInstruction.addEventListener(

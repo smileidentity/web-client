@@ -16,7 +16,10 @@ export const useCamera = (
     onCameraSwitchCallbackRef.current = callback;
   };
 
-  const startCamera = async (targetFacingMode?: 'user' | 'environment') => {
+  const startCamera = async (
+    targetFacingMode?: 'user' | 'environment',
+    callback?: (cameraName?: string) => void,
+  ) => {
     try {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
@@ -54,12 +57,7 @@ export const useCamera = (
           stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
       );
 
-      const smartCameraWeb = document.querySelector('smart-camera-web');
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.camera-name', {
-          detail: { cameraName: videoDevice?.label },
-        }),
-      );
+      callback?.(videoDevice?.label);
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -117,14 +115,6 @@ export const useCamera = (
       } catch (restoreError) {
         console.error('Failed to restore previous camera:', restoreError);
       }
-
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown camera switch error';
-      window.dispatchEvent(
-        new CustomEvent('camera-switch-failed', {
-          detail: { error: errorMessage },
-        }),
-      );
     }
   };
 

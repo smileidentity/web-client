@@ -1,3 +1,8 @@
+// This is a utility function to enable debugging during the development process
+// This especially useful for iOS debugging on browser
+// See - https://developer.apple.com/documentation/safari-developer-tools/inspecting-ios
+
+
 export interface LogEntry {
   timestamp: number;
   level: 'log' | 'warn' | 'error' | 'info';

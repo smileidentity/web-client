@@ -154,7 +154,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   disconnectedCallback() {
     SmartCamera.stopMedia();
-    
+
     if (this._selfieWrapperListeners) {
       this._selfieWrapperListeners.forEach(({ event, handler }) => {
         window.removeEventListener(event, handler);
@@ -248,7 +248,7 @@ class SelfieCaptureScreens extends HTMLElement {
       // recreate wrapper element
       oldWrapper.remove();
       const newWrapper = document.createElement('selfie-capture-wrapper');
-      
+
       newWrapper.setAttribute('theme-color', this.themeColor);
       newWrapper.setAttribute('key', this._remountKey.toString());
       newWrapper.setAttribute('start-countdown', 'false');
@@ -284,7 +284,7 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     // give time for the new component to initialize
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
       }, 200);

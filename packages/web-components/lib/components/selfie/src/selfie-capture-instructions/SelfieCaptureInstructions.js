@@ -571,7 +571,7 @@ function templateString() {
         <div class="instruction">
           <p class="text-base title-color font-bold tip-header">Remove Obstructions</p>
           <p class="tip-body">
-            Remove anything that covers your face, such glasses, masks, and hats.
+            Remove anything that covers your face, such as glasses, masks, and hats.
           </p>
         </div>
       </div>

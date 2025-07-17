@@ -132,9 +132,11 @@ export const useFaceCapture = ({
     const isInNeutralZone = capturesTaken.value < neutralZone.value;
     const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
 
-    if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
-      updateAlert('neutral-expression');
-    } else if (isInNeutralZone) {
+    // Neutral expression enforcement disabled
+    // if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
+    //   updateAlert('neutral-expression');
+    // } else 
+    if (isInNeutralZone) {
       alertTitle.value = 'Capturing...';
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
@@ -448,12 +450,13 @@ export const useFaceCapture = ({
         return;
       }
 
-      const isInNeutralZone = capturesTaken.value < neutralZone.value;
+      // const isInNeutralZone = capturesTaken.value < neutralZone.value;
       const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
 
-      if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
-        return;
-      }
+      // Neutral expression enforcement disabled
+      // if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
+      //   return;
+      // }
 
       if (isInSmileZone) {
         const timeSinceSmile = Date.now() - lastSmileTime.value;

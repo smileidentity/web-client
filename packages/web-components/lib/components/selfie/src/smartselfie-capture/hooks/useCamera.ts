@@ -160,16 +160,17 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
 
       const { isGecko } = detectBrowserEngine();
 
-      let hasUserCamera = false;
-      let hasEnvironmentCamera = false;
+      let userCameraId: string | null = null;
+      let environmentCameraId: string | null = null;
 
       // test if we can get a user-facing camera
       try {
         const userStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user' },
         });
-        hasUserCamera = true;
-        userStream.getTracks().forEach((track) => track.stop()); // Clean up
+        userCameraId =
+          userStream.getVideoTracks()[0].getSettings().deviceId ?? null;
+        userStream.getTracks().forEach((track) => track.stop());
       } catch (error) {
         // no user-facing camera available
       }
@@ -179,13 +180,17 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         const envStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         });
-        hasEnvironmentCamera = true;
-        envStream.getTracks().forEach((track) => track.stop()); // Clean up
+        environmentCameraId =
+          envStream.getVideoTracks()[0].getSettings().deviceId ?? null;
+        envStream.getTracks().forEach((track) => track.stop());
       } catch (error) {
         // no environment-facing camera available
       }
 
-      const hasBothCameras = hasUserCamera && hasEnvironmentCamera;
+      const hasBothCameras =
+        userCameraId &&
+        environmentCameraId &&
+        userCameraId !== environmentCameraId;
 
       if (!hasBothCameras) {
         setAgentSupported(false);

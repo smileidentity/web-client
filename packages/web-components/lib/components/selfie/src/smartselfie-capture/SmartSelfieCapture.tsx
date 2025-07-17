@@ -1,6 +1,8 @@
 import { useRef, useEffect } from 'preact/hooks';
+import { useSignal } from '@preact/signals';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
+import { throttle } from 'lodash';
 
 import { getBoolProp } from '../../../../utils/props';
 import { useFaceCapture, useCamera } from './hooks';
@@ -47,6 +49,13 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
   const initialFacingMode = allowAgentMode ? 'environment' : 'user';
   const camera = useCamera(initialFacingMode);
+
+  const throttledMultipleFaces = useSignal(false);
+  const updateMultipleFacesUI = useRef(
+    throttle((value: boolean) => {
+      throttledMultipleFaces.value = value;
+    }, 100),
+  ).current;
 
   const faceCapture = useFaceCapture({
     videoRef: camera.videoRef,
@@ -97,8 +106,13 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
       faceCapture.stopDetectionLoop();
       camera.stopCamera();
       faceCapture.cleanup();
+      updateMultipleFacesUI.cancel();
     };
   }, []);
+
+  useEffect(() => {
+    updateMultipleFacesUI(faceCapture.multipleFaces.value);
+  }, [faceCapture.multipleFaces.value]);
 
   useEffect(() => {
     const navigation = navigationRef.current;
@@ -164,7 +178,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         videoRef={camera.videoRef}
         canvasRef={canvasRef}
         facingMode={camera.facingMode}
-        multipleFaces={faceCapture.multipleFaces.value}
+        multipleFaces={throttledMultipleFaces.value}
         progress={
           faceCapture.capturesTaken.value > 0
             ? faceCapture.capturesTaken.value / faceCapture.totalCaptures.value

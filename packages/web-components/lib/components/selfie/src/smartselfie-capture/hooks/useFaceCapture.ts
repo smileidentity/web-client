@@ -1,6 +1,7 @@
 import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
+import { throttle } from 'lodash';
 import {
   calculateFaceSize,
   isFaceInBounds,
@@ -84,13 +85,19 @@ export const useFaceCapture = ({
       !multipleFaces.value,
   );
 
-  const updateAlert = (messageKey: MessageKey | null) => {
+  const updateAlertImmediate = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
       alertTitle.value = MESSAGES[messageKey];
     } else {
       alertTitle.value = '';
     }
   };
+
+  const updateAlert = useRef(
+    throttle((messageKey: MessageKey | null) => {
+      updateAlertImmediate(messageKey);
+    }, 300),
+  ).current;
 
   const initializeFaceLandmarker = async () => {
     try {
@@ -100,7 +107,7 @@ export const useFaceCapture = ({
 
       if (!isAlreadyLoaded) {
         isInitializing.value = true;
-        updateAlert('initializing');
+        updateAlertImmediate('initializing');
       }
 
       faceLandmarkerRef.current = await getMediapipeInstance();
@@ -135,7 +142,7 @@ export const useFaceCapture = ({
     // Neutral expression enforcement disabled
     // if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
     //   updateAlert('neutral-expression');
-    // } else 
+    // } else
     if (isInNeutralZone) {
       alertTitle.value = 'Capturing...';
     } else if (isInSmileZone) {
@@ -159,7 +166,7 @@ export const useFaceCapture = ({
 
   const updateAlerts = () => {
     if (isInitializing.value) {
-      updateAlert('initializing');
+      updateAlertImmediate('initializing');
     } else if (multipleFaces.value) {
       updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
@@ -557,6 +564,7 @@ export const useFaceCapture = ({
       clearInterval(captureTimerRef.current);
     }
     stopDetectionLoop();
+    updateAlert.cancel();
   };
 
   const resetFaceDetectionState = () => {

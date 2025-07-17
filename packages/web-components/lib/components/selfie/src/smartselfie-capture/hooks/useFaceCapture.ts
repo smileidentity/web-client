@@ -29,7 +29,7 @@ interface UseFaceCaptureProps {
   minFaceSize: number;
   maxFaceSize: number;
   smileCooldown: number;
-  getFacingMode: () => 'user' | 'environment';
+  getFacingMode: () => CameraFacingMode;
 }
 
 export const useFaceCapture = ({

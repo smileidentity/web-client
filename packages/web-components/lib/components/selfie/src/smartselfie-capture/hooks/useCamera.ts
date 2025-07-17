@@ -1,13 +1,9 @@
 import { useRef, useState } from 'preact/hooks';
 
-export const useCamera = (
-  initialFacingMode: 'user' | 'environment' = 'user',
-) => {
+export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>(
-    initialFacingMode,
-  );
+  const [facingMode, setFacingMode] = useState(initialFacingMode);
   const [agentSupported, setAgentSupported] = useState(false);
   const onCameraSwitchCallbackRef = useRef<(() => void) | null>(null);
   const isSwitchingCameraRef = useRef(false);
@@ -17,7 +13,7 @@ export const useCamera = (
   };
 
   const startCamera = async (
-    targetFacingMode?: 'user' | 'environment',
+    targetFacingMode?: CameraFacingMode,
     callback?: (cameraName?: string) => void,
   ) => {
     try {
@@ -38,8 +34,7 @@ export const useCamera = (
       const track = stream.getVideoTracks()[0];
       const settings = track.getSettings();
       const actualFacingMode = settings.facingMode as
-        | 'user'
-        | 'environment'
+        | CameraFacingMode
         | undefined;
 
       const requestedFacingMode = targetFacingMode || facingMode;

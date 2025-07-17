@@ -300,6 +300,12 @@ ${typography}
     flex-direction: column;
     gap: 1rem;
   }
+  
+  @media (min-width: 40rem) {
+    .instructions-wrapper {
+      gap: 1.75rem;
+    }
+  }
 
   .instructions {
     display: flex;

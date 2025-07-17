@@ -842,6 +842,11 @@ class SelfieCaptureScreen extends HTMLElement {
 
   handleStream(stream) {
     try {
+      const videoContainer = this.shadowRoot.querySelector('.video');
+      if (!videoContainer) {
+        return;
+      }
+
       const videoExists = this.shadowRoot.querySelector('video');
       let video = null;
       if (videoExists) {
@@ -865,9 +870,6 @@ class SelfieCaptureScreen extends HTMLElement {
       };
 
       this._video = video;
-      const videoContainer = this.shadowRoot.querySelector(
-        '.video-container > .video',
-      );
       this._data.permissionGranted = true;
 
       if (!videoExists) {
@@ -917,7 +919,10 @@ class SelfieCaptureScreen extends HTMLElement {
 
     if (SmartCamera.stream) {
       this.handleStream(SmartCamera.stream);
-    } else if (this.hasAttribute('data-camera-ready')) {
+    } else if (
+      this.hasAttribute('data-camera-ready') ||
+      !this.hasAttribute('data-camera-error')
+    ) {
       getPermissions(this, { facingMode: this.facingMode });
     }
 
@@ -1008,12 +1013,43 @@ class SelfieCaptureScreen extends HTMLElement {
   attributeChangedCallback(name) {
     switch (name) {
       case 'data-camera-error':
-      case 'data-camera-ready':
       case 'hidden':
       case 'title':
-      case 'allow-agent-mode':
         this.shadowRoot.innerHTML = this.render();
         this.init();
+        break;
+      case 'allow-agent-mode':
+        // only re-render if the shadowRoot is empty or not initialized
+        if (!this.shadowRoot.innerHTML.trim()) {
+          this.shadowRoot.innerHTML = this.render();
+          this.init();
+        } else {
+          // update the setupAgentMode
+          this.setupAgentMode();
+        }
+        break;
+      case 'show-navigation':
+        // update the navigation element if it exists
+        if (this.shadowRoot.innerHTML.trim()) {
+          const navigation =
+            this.shadowRoot.querySelector('smileid-navigation');
+          if (navigation) {
+            if (this.showNavigation) {
+              navigation.setAttribute('show-navigation', '');
+            } else {
+              navigation.removeAttribute('show-navigation');
+            }
+          }
+        } else {
+          this.shadowRoot.innerHTML = this.render();
+          this.init();
+        }
+        break;
+      case 'data-camera-ready':
+        // don't re-render, just handle the stream
+        if (this.hasAttribute('data-camera-ready') && SmartCamera.stream) {
+          this.handleStream(SmartCamera.stream);
+        }
         break;
       default:
         break;

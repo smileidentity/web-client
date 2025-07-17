@@ -80,6 +80,7 @@ jobs:
             --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/${{ env.DEST_DIR_EMBED }}/*"
   full-stack:
+    needs: [embed]
     if: always()
     defaults:
       run:

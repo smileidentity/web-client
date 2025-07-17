@@ -83,6 +83,7 @@ export default function Product() {
     if (typeof window.SmileIdentity === 'function' && config) {
       window.SmileIdentity({
         ...config,
+        allow_agent_mode: true,
         document_ids: [config.document_id],
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''

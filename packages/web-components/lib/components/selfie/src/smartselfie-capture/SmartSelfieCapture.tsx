@@ -1,6 +1,8 @@
 import { useRef, useEffect } from 'preact/hooks';
+import { useSignal } from '@preact/signals';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
+import { throttle } from 'lodash';
 
 import { getBoolProp } from '../../../../utils/props';
 import { useFaceCapture, useCamera } from './hooks';
@@ -45,7 +47,15 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   const minFaceSize = 0.35;
   const maxFaceSize = 0.5;
 
-  const camera = useCamera();
+  const initialFacingMode = allowAgentMode ? 'environment' : 'user';
+  const camera = useCamera(initialFacingMode);
+
+  const throttledMultipleFaces = useSignal(false);
+  const updateMultipleFacesUI = useRef(
+    throttle((value: boolean) => {
+      throttledMultipleFaces.value = value;
+    }, 100),
+  ).current;
 
   const faceCapture = useFaceCapture({
     videoRef: camera.videoRef,
@@ -57,11 +67,19 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     minFaceSize,
     maxFaceSize,
     smileCooldown,
+    getFacingMode: () => camera.facingMode,
   });
 
   useEffect(() => {
     const initializeCamera = async () => {
-      await camera.startCamera();
+      await camera.startCamera(initialFacingMode, (cameraName) => {
+        const smartCameraWeb = document.querySelector('smart-camera-web');
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.camera-name', {
+            detail: { cameraName },
+          }),
+        );
+      });
       await camera.checkAgentSupport();
       await faceCapture.initializeFaceLandmarker();
 
@@ -71,14 +89,30 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
       }, 500);
     };
 
+    camera.registerCameraSwitchCallback(() => {
+      try {
+        faceCapture.resetFaceDetectionState();
+        faceCapture.setupCanvas();
+        faceCapture.stopDetectionLoop();
+        faceCapture.startDetectionLoop();
+      } catch (error) {
+        console.error('Error during camera switch callback:', error);
+      }
+    });
+
     initializeCamera();
 
     return () => {
       faceCapture.stopDetectionLoop();
       camera.stopCamera();
       faceCapture.cleanup();
+      updateMultipleFacesUI.cancel();
     };
   }, []);
+
+  useEffect(() => {
+    updateMultipleFacesUI(faceCapture.multipleFaces.value);
+  }, [faceCapture.multipleFaces.value]);
 
   useEffect(() => {
     const navigation = navigationRef.current;
@@ -106,6 +140,33 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     return undefined;
   }, [showNavigation]);
 
+  useEffect(() => {
+    if (faceCapture.hasFinishedCapture.value) {
+      const smartCameraWeb = document.querySelector('smart-camera-web');
+      smartCameraWeb?.dispatchEvent(
+        new CustomEvent('metadata.selfie-capture-end'),
+      );
+    }
+  }, [faceCapture.hasFinishedCapture.value]);
+
+  const handleStartCapture = () => {
+    faceCapture.startCapture();
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-origin', {
+        detail: {
+          imageOrigin: {
+            environment: 'back_camera',
+            user: 'front_camera',
+          }[camera.facingMode],
+        },
+      }),
+    );
+  };
+
   return (
     <div className="smartselfie-capture">
       {showNavigation && (
@@ -117,7 +178,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         videoRef={camera.videoRef}
         canvasRef={canvasRef}
         facingMode={camera.facingMode}
-        multipleFaces={faceCapture.multipleFaces.value}
+        multipleFaces={throttledMultipleFaces.value}
         progress={
           faceCapture.capturesTaken.value > 0
             ? faceCapture.capturesTaken.value / faceCapture.totalCaptures.value
@@ -140,7 +201,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
             showAgentModeForTests={showAgentModeForTests}
             facingMode={camera.facingMode}
             themeColor={themeColor}
-            onStartCapture={faceCapture.startCapture}
+            onStartCapture={handleStartCapture}
             onSwitchCamera={camera.switchCamera}
           />
         )}
@@ -193,9 +254,8 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         }
 
         .smartselfie-capture {
+          padding: 1rem;
           font-family: sans-serif;
-          max-width: 356px;
-          margin: 0 auto;
         }
       `}</style>
     </div>

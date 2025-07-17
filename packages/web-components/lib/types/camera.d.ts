@@ -1,0 +1,1 @@
+type CameraFacingMode = 'user' | 'environment';

@@ -397,6 +397,7 @@ export const useFaceCapture = ({
         images: [...livenessImages, referenceImage],
         referenceImage: referencePhoto.value,
         previewImage: referencePhoto.value,
+        facingMode: getFacingMode(),
         meta: { libraryVersion: COMPONENTS_VERSION },
       };
 

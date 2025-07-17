@@ -69,7 +69,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
-        style='max-width: 90%; transform: scaleX(-1);'
+        style='max-width: 90%;${this.shouldMirror ? ' transform: scaleX(-1);' : ''}'
       />`
             : ''
         }
@@ -112,7 +112,12 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['hide-back-to-host', 'show-navigation', 'data-image'];
+    return [
+      'hide-back-to-host',
+      'show-navigation',
+      'data-image',
+      'mirror-image',
+    ];
   }
 
   get hideBack() {
@@ -135,6 +140,10 @@ class SelfieCaptureReview extends HTMLElement {
     return this.getAttribute('data-image');
   }
 
+  get shouldMirror() {
+    return this.getAttribute('mirror-image') !== 'false';
+  }
+
   get title() {
     return this.getAttribute('title') || 'Submit Front of ID';
   }
@@ -152,6 +161,7 @@ class SelfieCaptureReview extends HTMLElement {
       case 'data-image':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'mirror-image':
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
         break;

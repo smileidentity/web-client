@@ -797,9 +797,14 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   _publishImages() {
+    const eventDetail = {
+      ...this._data,
+      facingMode: this.facingMode,
+    };
+
     this.dispatchEvent(
       new CustomEvent('selfie-capture.publish', {
-        detail: this._data,
+        detail: eventDetail,
       }),
     );
   }

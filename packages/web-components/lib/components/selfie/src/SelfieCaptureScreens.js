@@ -175,6 +175,7 @@ class SelfieCaptureScreens extends HTMLElement {
           new CustomEvent('metadata.selfie-capture-retry'),
         );
         this.selfieReview.removeAttribute('data-image');
+        this.selfieReview.removeAttribute('mirror-image');
         this._data.images = [];
 
         await this.forceWrapperRemount();
@@ -310,6 +311,11 @@ class SelfieCaptureScreens extends HTMLElement {
       this.selfieReview.setAttribute(
         'data-image',
         await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
+      );
+      const shouldMirror = event.detail.facingMode === 'user';
+      this.selfieReview.setAttribute(
+        'mirror-image',
+        shouldMirror ? 'true' : 'false',
       );
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();

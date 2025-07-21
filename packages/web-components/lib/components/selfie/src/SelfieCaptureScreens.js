@@ -217,9 +217,7 @@ class SelfieCaptureScreens extends HTMLElement {
       const newWrapper = document.createElement('selfie-capture-wrapper');
 
       // copy attributes from old wrapper, but skip key and start-countdown
-      const attributesToCopy = Array.from(oldWrapper.attributes).filter(
-        (attr) => attr.name !== 'key' && attr.name !== 'start-countdown',
-      );
+      const attributesToCopy = Array.from(oldWrapper.attributes);
 
       attributesToCopy.forEach((attr) => {
         newWrapper.setAttribute(attr.name, attr.value);

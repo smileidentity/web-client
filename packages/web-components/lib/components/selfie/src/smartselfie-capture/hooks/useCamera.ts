@@ -1,4 +1,4 @@
-import { useRef, useState } from 'preact/hooks';
+import { useRef, useState, useEffect } from 'preact/hooks';
 
 export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -7,10 +7,43 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
   const [agentSupported, setAgentSupported] = useState(false);
   const onCameraSwitchCallbackRef = useRef<(() => void) | null>(null);
   const isSwitchingCameraRef = useRef(false);
+  const timeoutIdsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const registerCameraSwitchCallback = (callback: () => void) => {
     onCameraSwitchCallbackRef.current = callback;
   };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const handleVideoReady = () => {
+      if (isSwitchingCameraRef.current && onCameraSwitchCallbackRef.current) {
+        const timeoutId = setTimeout(() => {
+          onCameraSwitchCallbackRef.current?.();
+          isSwitchingCameraRef.current = false;
+          timeoutIdsRef.current.delete(timeoutId);
+        }, 100);
+        timeoutIdsRef.current.add(timeoutId);
+      }
+    };
+
+    video.addEventListener('loadedmetadata', handleVideoReady);
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleVideoReady);
+      timeoutIdsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      timeoutIdsRef.current.clear();
+    };
+  }, [videoRef.current?.src]);
+
+  useEffect(
+    () => () => {
+      timeoutIdsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      timeoutIdsRef.current.clear();
+    },
+    [],
+  );
 
   const startCamera = async (
     targetFacingMode?: CameraFacingMode,
@@ -57,31 +90,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-
-        if (isSwitchingCameraRef.current && onCameraSwitchCallbackRef.current) {
-          // wait for video to be ready and call callback
-          const video = videoRef.current;
-          const triggerCallback = () => {
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
-              setTimeout(() => {
-                onCameraSwitchCallbackRef.current?.();
-                isSwitchingCameraRef.current = false;
-              }, 100);
-            } else {
-              // if not ready, wait for loadedmetadata
-              const handleReady = () => {
-                video.removeEventListener('loadedmetadata', handleReady);
-                setTimeout(() => {
-                  onCameraSwitchCallbackRef.current?.();
-                  isSwitchingCameraRef.current = false;
-                }, 100);
-              };
-              video.addEventListener('loadedmetadata', handleReady);
-            }
-          };
-
-          setTimeout(triggerCallback, 50);
-        }
+        // Video ready callback will be handled by useEffect
       }
     } catch (error) {
       console.error('Failed to start camera:', error);

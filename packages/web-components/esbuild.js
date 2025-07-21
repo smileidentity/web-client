@@ -153,6 +153,7 @@ const buildIife = () =>
     ...buildOptions,
     format: 'iife',
     outdir: `${buildDir}`,
+    target: ['chrome69', 'firefox62', 'safari12', 'edge79'], // Support Android 9 Chrome WebView 69+
   });
 
 /**

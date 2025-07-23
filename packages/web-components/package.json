@@ -1,6 +1,6 @@
 {
   "name": "@smileid/web-components",
-  "version": "10.0.4",
+  "version": "10.0.5",
   "private": "true",
   "main": "dist/esm/main.js",
   "module": "dist/esm/main.js",

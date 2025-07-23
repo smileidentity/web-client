@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.5] - 2025-07-23
+
+### Changed
+
+- Fixed agent mode when face detection is in use
+- Responsive styling update
+- Improve face detection support on older mobile devices
+- Remove neutral expression checks
+- Update selfie capture text prompts
+
 ## [10.0.4] - 2025-07-09
 
 ### Changed

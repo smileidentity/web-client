@@ -7,110 +7,27 @@ function templateString() {
       .retake-photo.button[data-variant~="ghost"] {
         color: #FF5805;
       }
-      .icon-btn {
-        appearance: none;
-        background: none;
-        border: none;
-        color: hsl(0deg 0% 94%);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px 8px;
-      }
-      .justify-right {
-        justify-content: end !important;
-      }
-      .nav {
-        display: flex;
-        justify-content: space-between;
-      }
-      .back-wrapper {
-        display: flex;
-        align-items: center;
-      }
-      .back-button-text {
-        font-size: 11px;
-        line-height: 11px;
-        color: rgb(21, 31, 114);
-      }
-      .section {
-        border-radius: .5rem;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 35ch;
-        padding: 1rem;
-      }
-      .selfie-capture-review-image {
-        overflow: hidden;
-        aspect-ratio: 1/1;
-      }
-      #review-image {
-        scale: 1.75;
-      }
-      @media (max-aspect-ratio: 1/1) {
-        #review-image {
-          transform: scaleX(-1) translateY(-10%);
-        }
-      }
-      .tips,
-      .powered-by {
-        align-items: center;
-        border-radius: 0.25rem;
-        color: #4e6577;
-        display: flex;
-        justify-content: center;
-        letter-spacing: 0.075em;
-      }
-      .powered-by {
-        box-shadow: 0px 2.57415px 2.57415px rgba(0, 0, 0, 0.06);
-        display: inline-flex;
-        font-size: 0.5rem;
-      }
-      .tips {
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 17rem;
-      }
-      .tips > * + *,
-      .powered-by > * + * {
-        display: inline-block;
-        margin-left: 0.5em;
-      }
-      .powered-by .company {
-        color: #18406d;
-        font-weight: 700;
-        letter-spacing: 0.15rem;
-      }
-      .logo-mark {
-        background-color: #004071;
-        display: inline-block;
-        padding: 0.25em 0.5em;
-      }
-      .logo-mark svg {
-        height: auto;
-        justify-self: center;
-        width: 0.75em;
-      }
+
       #selfie-capture-review-screen {
-        block-size: 45rem;
         display: flex;
         flex-direction: column;
-        max-block-size: 100%;
-        max-inline-size: 40ch;
+        padding: 1rem;
       }
+
       #selfie-capture-review-screen .selfie-review-container.landscape {
         height: auto;
       }
+
       #selfie-capture-review-screen header p {
         margin-block: 0 !important;
       }
+
       .selfie-review-container.portrait {
         width: 100%;
         position: relative;
         height: calc(200px * 1.4);
       }
-    
+
       .selfie-review-container.portrait img {
         width: calc(213px + 0.9rem);
         height: 100%;
@@ -126,80 +43,22 @@ function templateString() {
         block-size: 100%;
       }
 
-      .selfie-container img {
-        background-color: black;
-        position: absolute;
-        left: 50%;
-        height: calc(100% - 6px);
-        clip-path: ellipse(101px 118px);
-      }
-
-      .description {
-        color: var(--neutral-off-black, #2D2B2A);
-        text-align: center;
-        /* p */
-        font-family: DM Sans;
-        font-size: 0.875rem;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 18px;
-      }
-      .padding-bottom-2 {
-        padding-bottom: 2rem;
-      }
-      .instructions-wrapper {
-        display: inline-flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2rem;
-        margin-block-start: 2rem;
-        margin-block-end: 4rem;
-      }
-      .instructions {
-        display: flex;
-        align-items: center;
-        text-align: initial;
-      }
-      .instructions svg {
-        flex-shrink: 0;
-        margin-inline-end: 2rem;
-      }
-      .instructions p {
-        margin-block: 0;
-      }
-      .instruction-body {
-        font-size: 0.75rem;
-      }
       h1 {
         color: var(--web-digital-blue, #001096);
         text-align: center;
         /* h1 */
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-style: normal;
         font-weight: 700;
         line-height: 36px; /* 150% */
-      }
-      .p2 {
-        font-size: 1rem;
-        font-style: normal;
-        font-weight: 500;
-        line-height: 1rem;
-      }
-      .instruction-header {
-        color: var(--web-digital-blue, #001096);
-      }
-      .h2 {
-        font-size: 1rem;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 1.5rem;
+        margin-top: 0;
       }
     </style>
     ${styles(this.themeColor)}
-    <div id='selfie-capture-review-screen' class='flow center'>
+    <div id='selfie-capture-review-screen' class='center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
-    <h1 class="header-title text-2xl title-color font-bold">
-      Is your whole face visible and clear in this photo?
+    <h1 class="header-title title-color font-bold">
+      Is your whole face clear?
     </h1>
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -210,7 +69,7 @@ function templateString() {
         id='document-capture-review-image'
         src='${this.imageSrc}'
         width='396'
-        style='transform: scaleX(-1);'
+        style='max-width: 90%;${this.shouldMirror ? ' transform: scaleX(-1);' : ''}'
       />`
             : ''
         }
@@ -253,7 +112,12 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['hide-back-to-host', 'show-navigation', 'data-image'];
+    return [
+      'hide-back-to-host',
+      'show-navigation',
+      'data-image',
+      'mirror-image',
+    ];
   }
 
   get hideBack() {
@@ -276,6 +140,10 @@ class SelfieCaptureReview extends HTMLElement {
     return this.getAttribute('data-image');
   }
 
+  get shouldMirror() {
+    return this.getAttribute('mirror-image') !== 'false';
+  }
+
   get title() {
     return this.getAttribute('title') || 'Submit Front of ID';
   }
@@ -293,6 +161,7 @@ class SelfieCaptureReview extends HTMLElement {
       case 'data-image':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'mirror-image':
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
         break;

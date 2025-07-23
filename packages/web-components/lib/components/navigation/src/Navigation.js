@@ -23,7 +23,7 @@ button {
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
-  font-size: 20px;
+  font-size: 1rem;
   font-weight: 500;
   inline-size: 100%;
   justify-content: center;
@@ -76,8 +76,8 @@ button[data-type="icon"] {
     backButton.innerHTML = `
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="40"
-        height="40"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
       >
@@ -103,8 +103,8 @@ button[data-type="icon"] {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        width="40"
-        height="40"
+        width="24"
+        height="24"
         fill="none"
       >
         <path

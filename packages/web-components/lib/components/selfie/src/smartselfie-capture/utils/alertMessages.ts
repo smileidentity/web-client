@@ -6,7 +6,8 @@ export const MESSAGES = {
   'too-far': 'Move closer',
   'neutral-expression': 'Neutral expression',
   'smile-required': 'Smile!',
-  'open-mouth-smile': 'Bigger smile!',
+  'open-mouth-smile': 'Wider smile - teeth visible',
+  initializing: 'Initializing...',
 };
 
 export type MessageKey = keyof typeof MESSAGES;

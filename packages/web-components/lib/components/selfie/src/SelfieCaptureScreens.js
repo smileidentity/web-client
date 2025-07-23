@@ -9,34 +9,6 @@ const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
 
-async function getPermissions(captureScreen, facingMode = 'user') {
-  try {
-    const stream = await SmartCamera.getMedia({
-      audio: false,
-      video: { facingMode },
-    });
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevice = devices.find(
-      (device) =>
-        device.kind === 'videoinput' &&
-        stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
-    );
-    smartCameraWeb?.dispatchEvent(
-      new CustomEvent('metadata.camera-name', {
-        detail: { cameraName: videoDevice?.label },
-      }),
-    );
-    captureScreen.removeAttribute('data-camera-error');
-    captureScreen.setAttribute('data-camera-ready', true);
-  } catch (error) {
-    captureScreen.removeAttribute('data-camera-ready');
-    captureScreen.setAttribute(
-      'data-camera-error',
-      SmartCamera.handleCameraError(error),
-    );
-  }
-}
-
 const cropImageFromDataUri = (
   dataUri,
   cropPercentX = 0,
@@ -113,7 +85,7 @@ class SelfieCaptureScreens extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
             ${styles(this.themeColor)}
-            <div>
+            <div style="height: 100%;">
               <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
               <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
               <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
@@ -130,16 +102,10 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieCapture = this.querySelector('selfie-capture-wrapper');
     this.selfieReview = this.querySelector('selfie-capture-review');
 
-    if (this.hideInstructions && !this.hasAttribute('hidden')) {
-      getPermissions(this.selfieCapture, this.getAgentMode());
-    }
-
-    // If the initial screen is selfie-capture, we need to get permissions
-    if (this.getAttribute('initial-screen') === 'selfie-capture') {
-      getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
-        this.setActiveScreen(this.selfieCapture),
-      );
-    } else if (this.hideInstructions) {
+    if (
+      this.getAttribute('initial-screen') === 'selfie-capture' ||
+      this.hideInstructions
+    ) {
       this.setActiveScreen(this.selfieCapture);
     } else {
       this.setActiveScreen(this.selfieInstruction);
@@ -154,6 +120,14 @@ class SelfieCaptureScreens extends HTMLElement {
 
   disconnectedCallback() {
     SmartCamera.stopMedia();
+
+    if (this._selfieWrapperListeners) {
+      this._selfieWrapperListeners.forEach(({ event, handler }) => {
+        window.removeEventListener(event, handler);
+      });
+      this._selfieWrapperListeners = null;
+    }
+
     if (this.activeScreen) {
       this.activeScreen.removeAttribute('hidden');
     }
@@ -165,22 +139,25 @@ class SelfieCaptureScreens extends HTMLElement {
     this.selfieInstruction.addEventListener(
       'selfie-capture-instructions.capture',
       async () => {
-        await getPermissions(this.selfieCapture, this.getAgentMode()).then(() =>
-          this.setActiveScreen(this.selfieCapture),
-        );
-        smartCameraWeb?.dispatchEvent(
-          new CustomEvent('metadata.selfie-capture-start'),
-        );
-        smartCameraWeb?.dispatchEvent(
-          new CustomEvent('metadata.selfie-origin', {
-            detail: {
-              imageOrigin: {
-                environment: 'back_camera',
-                user: 'front_camera',
-              }[this.getAgentMode()],
-            },
-          }),
-        );
+        this.setActiveScreen(this.selfieCapture);
+
+        const selfieCapture =
+          this.selfieCapture.querySelector('selfie-capture');
+        if (selfieCapture) {
+          smartCameraWeb?.dispatchEvent(
+            new CustomEvent('metadata.selfie-capture-start'),
+          );
+          smartCameraWeb?.dispatchEvent(
+            new CustomEvent('metadata.selfie-origin', {
+              detail: {
+                imageOrigin: {
+                  environment: 'back_camera',
+                  user: 'front_camera',
+                }[this.getAgentMode()],
+              },
+            }),
+          );
+        }
       },
     );
     this.selfieInstruction.addEventListener(
@@ -189,7 +166,6 @@ class SelfieCaptureScreens extends HTMLElement {
         this.handleBackEvents();
       },
     );
-    // Setup selfie-wrapper event listeners
     this.setupSelfieWrapperEventListeners();
 
     this.selfieReview.addEventListener(
@@ -199,17 +175,12 @@ class SelfieCaptureScreens extends HTMLElement {
           new CustomEvent('metadata.selfie-capture-retry'),
         );
         this.selfieReview.removeAttribute('data-image');
+        this.selfieReview.removeAttribute('mirror-image');
         this._data.images = [];
 
-        // Force remount by incrementing key
-        this.forceWrapperRemount();
+        await this.forceWrapperRemount();
 
-        if (this.hideInstructions) {
-          this.setActiveScreen(this.selfieCapture);
-          await getPermissions(this.selfieCapture, this.getAgentMode());
-        } else {
-          this.setActiveScreen(this.selfieInstruction);
-        }
+        this.setActiveScreen(this.selfieCapture);
       },
     );
 
@@ -233,52 +204,66 @@ class SelfieCaptureScreens extends HTMLElement {
   }
 
   // Force remount of selfie-capture-wrapper component for clean state
-  forceWrapperRemount() {
+  async forceWrapperRemount() {
+    SmartCamera.stopMedia();
+
     this._remountKey++;
+
     const container = this.querySelector('div');
-    const oldSelfieCapture = this.selfieCapture;
+    const oldWrapper = this.selfieCapture;
 
-    // Create new selfie-capture-wrapper element with same attributes
-    const newSelfieCapture = document.createElement('selfie-capture-wrapper');
-    newSelfieCapture.setAttribute('theme-color', this.themeColor);
-    newSelfieCapture.setAttribute('key', this._remountKey.toString());
-    newSelfieCapture.setAttribute('start-countdown', 'false');
+    if (oldWrapper && container) {
+      // recreate wrapper element
+      const newWrapper = document.createElement('selfie-capture-wrapper');
 
-    // Copy all the correct attributes based on the getter logic
-    const showNav = this.hasAttribute('show-navigation');
-    const allowAgent = this.getAttribute('allow-agent-mode') === 'true';
-    const allowAgentTests = this.hasAttribute('show-agent-mode-for-tests');
-    const hideAttr = this.hasAttribute('hide-attribution');
-    const disableTests = this.hasAttribute('disable-image-tests');
+      // copy attributes from old wrapper, but skip key and start-countdown
+      const attributesToCopy = Array.from(oldWrapper.attributes);
 
-    if (showNav) newSelfieCapture.setAttribute('show-navigation', '');
-    if (allowAgent) newSelfieCapture.setAttribute('allow-agent-mode', 'true');
-    if (allowAgentTests)
-      newSelfieCapture.setAttribute('show-agent-mode-for-tests', '');
-    if (hideAttr) newSelfieCapture.setAttribute('hide-attribution', '');
-    if (disableTests) newSelfieCapture.setAttribute('disable-image-tests', '');
-    newSelfieCapture.setAttribute('hidden', '');
+      attributesToCopy.forEach((attr) => {
+        newWrapper.setAttribute(attr.name, attr.value);
+      });
+      oldWrapper.remove();
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
 
-    // Replace old element with new one
-    container.replaceChild(newSelfieCapture, oldSelfieCapture);
+      newWrapper.setAttribute('key', this._remountKey.toString());
+      newWrapper.setAttribute('start-countdown', 'false');
+      newWrapper.setAttribute('hidden', '');
 
-    // Update reference
-    this.selfieCapture = newSelfieCapture;
+      const reviewElement = container.querySelector('selfie-capture-review');
+      if (reviewElement) {
+        container.insertBefore(newWrapper, reviewElement);
+      } else {
+        container.appendChild(newWrapper);
+      }
 
-    // Re-add event listeners for the new element
-    this.setupSelfieWrapperEventListeners();
+      this.selfieCapture = newWrapper;
+
+      this.setupSelfieWrapperEventListeners();
+    }
+
+    // give time for the new component to initialize
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 200);
+    });
   }
 
   // Override setActiveScreen to enable countdown when selfie-capture is active
   setActiveScreen(screen) {
+    if (this.activeScreen === screen) {
+      return;
+    }
+
     this.activeScreen?.setAttribute('hidden', '');
     screen.removeAttribute('hidden');
     this.activeScreen = screen;
 
-    // If activating selfie-capture-wrapper, enable the countdown and ensure permissions
+    // If activating selfie-capture-wrapper, enable the countdown
     if (screen === this.selfieCapture) {
       screen.setAttribute('start-countdown', 'true');
-      getPermissions(this.selfieCapture, this.getAgentMode());
     } else if (this.selfieCapture) {
       // Disable countdown when not on capture screen
       this.selfieCapture.setAttribute('start-countdown', 'false');
@@ -286,11 +271,19 @@ class SelfieCaptureScreens extends HTMLElement {
   }
 
   setupSelfieWrapperEventListeners() {
-    window.addEventListener('selfie-capture.cancelled', () => {
+    // Remove existing event listeners if they exist
+    if (this._selfieWrapperListeners) {
+      this._selfieWrapperListeners.forEach(({ event, handler }) => {
+        window.removeEventListener(event, handler);
+      });
+    }
+
+    // Create new event handlers
+    const cancelledHandler = async () => {
       SmartCamera.stopMedia();
 
       // Force remount of selfie-capture-wrapper for clean state on next visit
-      this.forceWrapperRemount();
+      await this.forceWrapperRemount();
 
       if (this.hideInstructions) {
         this.handleBackEvents();
@@ -298,19 +291,18 @@ class SelfieCaptureScreens extends HTMLElement {
       }
 
       this.setActiveScreen(this.selfieInstruction);
-    });
+    };
 
-    // Add specific close event handler for selfie-capture-wrapper
-    window.addEventListener('selfie-capture.close', () => {
+    const closeHandler = async () => {
       SmartCamera.stopMedia();
 
       // Force remount of selfie-capture-wrapper for clean state on next visit
-      this.forceWrapperRemount();
+      await this.forceWrapperRemount();
 
       this.handleCloseEvent();
-    });
+    };
 
-    window.addEventListener('selfie-capture.publish', async (event) => {
+    const publishHandler = async (event) => {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
@@ -318,25 +310,31 @@ class SelfieCaptureScreens extends HTMLElement {
         'data-image',
         await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
       );
+      const shouldMirror = event.detail.facingMode === 'user';
+      this.selfieReview.setAttribute(
+        'mirror-image',
+        shouldMirror ? 'true' : 'false',
+      );
       this._data.images = event.detail.images;
       SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
+    };
+
+    // Store references to remove them later
+    this._selfieWrapperListeners = [
+      { event: 'selfie-capture.cancelled', handler: cancelledHandler },
+      { event: 'selfie-capture.close', handler: closeHandler },
+      { event: 'selfie-capture.publish', handler: publishHandler },
+    ];
+
+    // Add event listeners
+    this._selfieWrapperListeners.forEach(({ event, handler }) => {
+      window.addEventListener(event, handler);
     });
 
     // Also listen for the publish event on the parent SelfieCaptureScreens element
     // in case smartselfie-capture dispatches it there
-    this.addEventListener('selfie-capture.publish', async (event) => {
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.selfie-capture-end'),
-      );
-      this.selfieReview.setAttribute(
-        'data-image',
-        await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
-      );
-      this._data.images = event.detail.images;
-      SmartCamera.stopMedia();
-      this.setActiveScreen(this.selfieReview);
-    });
+    this.addEventListener('selfie-capture.publish', publishHandler);
   }
 
   _publishSelectedImages() {

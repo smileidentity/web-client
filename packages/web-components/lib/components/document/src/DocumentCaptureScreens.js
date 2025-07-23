@@ -50,7 +50,7 @@ class DocumentCaptureScreens extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       ${styles(this.themeColor)}
-      <div>
+      <div style="height: 100%;">
       <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title}
       ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}
       ${this.hideAttribution}

@@ -8,7 +8,7 @@ These components can be used to capture id document or liveness images
 
 ## Orchestration
 
-To build your own flow, we have several components that can be used together
+To build your own flow, we have several components that can be used together.
 
 ### document-capture-instructions
 

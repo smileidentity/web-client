@@ -4,6 +4,13 @@ build
 # IDE
 .vscode
 .idea
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+*.sw?
+*.kate-swp
+*.atom
+*.nvimlog
 
 # Logs
 logs

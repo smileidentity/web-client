@@ -1,6 +1,10 @@
 # build packages
 build
 
+# IDE
+.vscode
+.idea
+
 # Logs
 logs
 *.log

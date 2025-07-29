@@ -96,7 +96,7 @@ export const useFaceCapture = ({
   const updateAlert = useRef(
     throttle((messageKey: MessageKey | null) => {
       updateAlertImmediate(messageKey);
-    }, 300),
+    }, 600),
   ).current;
 
   const initializeFaceLandmarker = async () => {

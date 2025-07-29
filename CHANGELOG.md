@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.6] - 2025-07-29
+
+### Changed
+
+- Support older browsers (ES6) in IIFE builds
+- Improve face detection prompt timings
+
 ## [10.0.5] - 2025-07-23
 
 ### Changed

@@ -16,9 +16,11 @@ const hasFP16Support = () => {
     canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
   if (!gl) return false;
 
-  const hasHalfFloatExt = gl.getExtension('OES_texture_half_float');
-  const hasHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
-  const hasColorBufferHalfFloat = gl.getExtension(
+  const hasHalfFloatExt = (gl as any).getExtension('OES_texture_half_float');
+  const hasHalfFloatLinear = (gl as any).getExtension(
+    'OES_texture_half_float_linear',
+  );
+  const hasColorBufferHalfFloat = (gl as any).getExtension(
     'EXT_color_buffer_half_float',
   );
 

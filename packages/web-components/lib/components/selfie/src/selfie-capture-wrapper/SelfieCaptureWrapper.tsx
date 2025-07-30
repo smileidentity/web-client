@@ -25,7 +25,7 @@ interface Props {
 }
 
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
-  timeout = 10000,
+  timeout = 20000,
   'start-countdown': startCountdownProp = false,
   hidden: hiddenProp = false,
   ...props
@@ -145,39 +145,40 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     const propsWithoutHidden = { ...props };
     delete (propsWithoutHidden as any).hidden;
 
-    const selfieCapture = h('selfie-capture', {
-      ...propsWithoutHidden,
-      ref: (el: HTMLElement) => {
-        if (el && !el.hasAttribute('data-events-setup')) {
-          el.setAttribute('data-events-setup', 'true');
+    return (
+      // @ts-ignore
+      <selfie-capture
+        {...propsWithoutHidden}
+        ref={(el: HTMLElement) => {
+          if (el && !el.hasAttribute('data-events-setup')) {
+            el.setAttribute('data-events-setup', 'true');
 
-          const forwardEvent = (event: Event) => {
-            const customEvent = event as CustomEvent;
+            const forwardEvent = (event: Event) => {
+              const customEvent = event as CustomEvent;
 
-            if (
-              customEvent.type === 'selfie-capture.publish' ||
-              customEvent.type === 'selfie-capture.cancelled' ||
-              customEvent.type === 'selfie-capture.close'
-            ) {
-              setInitialSessionCompleted(true);
-            }
+              if (
+                customEvent.type === 'selfie-capture.publish' ||
+                customEvent.type === 'selfie-capture.cancelled' ||
+                customEvent.type === 'selfie-capture.close'
+              ) {
+                setInitialSessionCompleted(true);
+              }
 
-            window.dispatchEvent(
-              new CustomEvent(customEvent.type, {
-                detail: customEvent.detail,
-                bubbles: true,
-              }),
-            );
-          };
+              window.dispatchEvent(
+                new CustomEvent(customEvent.type, {
+                  detail: customEvent.detail,
+                  bubbles: true,
+                }),
+              );
+            };
 
-          el.addEventListener('selfie-capture.publish', forwardEvent);
-          el.addEventListener('selfie-capture.cancelled', forwardEvent);
-          el.addEventListener('selfie-capture.close', forwardEvent);
-        }
-      },
-    });
-
-    return selfieCapture;
+            el.addEventListener('selfie-capture.publish', forwardEvent);
+            el.addEventListener('selfie-capture.cancelled', forwardEvent);
+            el.addEventListener('selfie-capture.close', forwardEvent);
+          }
+        }}
+      />
+    );
   }
 
   return (

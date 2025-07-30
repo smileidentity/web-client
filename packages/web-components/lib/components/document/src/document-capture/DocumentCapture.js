@@ -61,7 +61,6 @@ function templateString() {
       #document-capture-screen,
       #back-of-document-capture-screen {
         block-size: 45rem;
-        padding-block: 2rem;
         display: flex;
         flex-direction: column;
         max-block-size: 100%;

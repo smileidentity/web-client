@@ -37,8 +37,7 @@ export const captureImageFromVideo = (
   }
 
   // capture more of the user's head and avoid clipping
-  // zoom out only for high resolution (>720p) webcams
-  const zoomOutFactor = videoElement.videoHeight > 720 ? 1.3 : 1.0;
+  const zoomOutFactor = 1;
   const sourceWidth = videoElement.videoWidth * zoomOutFactor;
   const sourceHeight = videoElement.videoHeight * zoomOutFactor;
 
@@ -47,7 +46,7 @@ export const captureImageFromVideo = (
   const offsetY = (sourceHeight - videoElement.videoHeight) / 2;
 
   // vertical offset to shift up and capture full head
-  const verticalOffset = videoElement.videoHeight * 0.05;
+  const verticalOffset = 0;
 
   ctx.drawImage(
     videoElement,

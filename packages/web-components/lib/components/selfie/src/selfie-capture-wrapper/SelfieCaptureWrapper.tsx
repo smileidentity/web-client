@@ -123,6 +123,19 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     };
   }, [hidden, mediapipeReady, loadingProgress]);
 
+  useEffect(() => {
+    if (hidden || mediapipeLoading) return;
+
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.active-liveness-version', {
+        detail: {
+          version: usingSelfieCapture ? '0.0.1' : '1.0.0',
+        },
+      }),
+    );
+  }, [usingSelfieCapture, hidden, mediapipeLoading]);
+
   if (hidden) {
     return null;
   }

@@ -10,8 +10,14 @@ const COMPONENTS_VERSION = packageJson.version;
 
 function scwTemplateString() {
   return `
+  <style>
+    :host {
+      display: block;
+      height: 100%;
+    }
+  </style>
   ${styles(this.themeColor)}
-  <div>
+  <div style="height: 100%;">
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}

@@ -10,6 +10,23 @@ declare global {
   }
 }
 
+const hasFP16Support = () => {
+  const canvas = document.createElement('canvas');
+  const gl =
+    canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return false;
+
+  const hasHalfFloatExt = (gl as any).getExtension('OES_texture_half_float');
+  const hasHalfFloatLinear = (gl as any).getExtension(
+    'OES_texture_half_float_linear',
+  );
+  const hasColorBufferHalfFloat = (gl as any).getExtension(
+    'EXT_color_buffer_half_float',
+  );
+
+  return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
+};
+
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
   if (!window.__smileIdentityMediapipe) {
     window.__smileIdentityMediapipe = {
@@ -38,7 +55,7 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: 'GPU',
+          delegate: hasFP16Support() ? 'GPU' : 'CPU',
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

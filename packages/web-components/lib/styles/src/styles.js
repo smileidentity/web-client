@@ -260,6 +260,9 @@ ${typography}
 
   #document-capture-instructions-screen,
   #back-of-document-capture-instructions-screen {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     max-block-size: 100%;
@@ -287,22 +290,33 @@ ${typography}
     padding-bottom: 2rem;
   }
 
+  smart-camera-web, selfie-capture-screens, selfie-capture-instructions, document-capture-screens, document-capture-instructions {
+    height: 100%;
+    display: block;
+  }
+
   .instructions-wrapper {
     display: inline-flex;
     flex-direction: column;
-    gap: 1.5rem;
-    margin-block-start: 2rem;
-    margin-block-end: 2rem;
+    gap: 1rem;
   }
+  
+  @media (min-width: 40rem) {
+    .instructions-wrapper {
+      gap: 1.75rem;
+    }
+  }
+
   .instructions {
     display: flex;
     align-items: center;
     text-align: initial;
+    gap: 0.5rem;
   }
 
   .instructions svg {
     flex-shrink: 0;
-    margin-inline-end: 2rem;
+    margin-inline-end: 0.25rem;
   }
 
   .instructions p {

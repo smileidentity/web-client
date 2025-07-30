@@ -93,6 +93,7 @@ export default defineConfig(({ mode }) => {
   };
 
   const iifeBuildConfig = {
+    target: 'es2015',
     lib: {
       entry: resolve(__dirname, 'lib/main.ts'),
       name: 'SmartCameraWeb',
@@ -127,7 +128,6 @@ export default defineConfig(({ mode }) => {
 
     server: {
       port,
-      open: true,
     },
 
     resolve: {

@@ -55,6 +55,8 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
         flex-direction: column;
         gap: 1rem;
         justify-content: center;
+        max-width: 356px;
+        margin: 0 auto;
       }
 
       .agent-mode-btn {

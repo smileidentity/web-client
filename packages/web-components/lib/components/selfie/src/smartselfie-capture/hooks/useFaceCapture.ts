@@ -2,7 +2,7 @@ import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
 import type { RefObject } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
-
+import { throttle } from 'lodash';
 import {
   calculateFaceSize,
   isFaceInBounds,
@@ -31,6 +31,7 @@ interface UseFaceCaptureProps {
   minFaceSize: number;
   maxFaceSize: number;
   smileCooldown: number;
+  getFacingMode: () => CameraFacingMode;
 }
 
 export const useFaceCapture = ({
@@ -43,6 +44,7 @@ export const useFaceCapture = ({
   minFaceSize,
   maxFaceSize,
   smileCooldown,
+  getFacingMode,
 }: UseFaceCaptureProps) => {
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -60,6 +62,7 @@ export const useFaceCapture = ({
   const currentMouthOpen = useSignal(0);
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
+  const isInitializing = useSignal(true);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -83,19 +86,36 @@ export const useFaceCapture = ({
       !multipleFaces.value,
   );
 
-  const initializeFaceLandmarker = async () => {
-    try {
-      faceLandmarkerRef.current = await getMediapipeInstance();
-    } catch (error) {
-      console.error('Failed to initialize MediaPipe:', error);
-    }
-  };
-
-  const updateAlert = (messageKey: MessageKey | null) => {
+  const updateAlertImmediate = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
       alertTitle.value = MESSAGES[messageKey];
     } else {
       alertTitle.value = '';
+    }
+  };
+
+  const updateAlert = useRef(
+    throttle((messageKey: MessageKey | null) => {
+      updateAlertImmediate(messageKey);
+    }, 600),
+  ).current;
+
+  const initializeFaceLandmarker = async () => {
+    try {
+      const isAlreadyLoaded =
+        window.__smileIdentityMediapipe?.loaded &&
+        window.__smileIdentityMediapipe?.instance;
+
+      if (!isAlreadyLoaded) {
+        isInitializing.value = true;
+        updateAlertImmediate('initializing');
+      }
+
+      faceLandmarkerRef.current = await getMediapipeInstance();
+      isInitializing.value = false;
+    } catch (error) {
+      console.error('Failed to initialize MediaPipe:', error);
+      isInitializing.value = false;
     }
   };
 
@@ -112,7 +132,6 @@ export const useFaceCapture = ({
       if (container) {
         canvasRef.current.style.left = '50%';
         canvasRef.current.style.top = '50%';
-        canvasRef.current.style.transform = 'translate(-50%, -50%) scaleX(-1)';
       }
     }
   };
@@ -121,9 +140,7 @@ export const useFaceCapture = ({
     const isInNeutralZone = capturesTaken.value < neutralZone.value;
     const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
 
-    if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
-      updateAlert('neutral-expression');
-    } else if (isInNeutralZone) {
+    if (isInNeutralZone) {
       alertTitle.value = 'Capturing...';
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
@@ -145,7 +162,9 @@ export const useFaceCapture = ({
   };
 
   const updateAlerts = () => {
-    if (multipleFaces.value) {
+    if (isInitializing.value) {
+      updateAlertImmediate('initializing');
+    } else if (multipleFaces.value) {
       updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
@@ -175,7 +194,21 @@ export const useFaceCapture = ({
       return;
     }
 
+    // ensure video has valid dimensions before processing
+    if (
+      videoRef.current.videoWidth <= 0 ||
+      videoRef.current.videoHeight <= 0 ||
+      videoRef.current.readyState < 2
+    ) {
+      animationFrameRef.current = requestAnimationFrame(detectFace);
+      return;
+    }
+
     try {
+      if (isInitializing.value) {
+        isInitializing.value = false;
+      }
+
       const croppedCanvas = createCroppedVideoFrame(videoRef.current);
       const detectionSource = croppedCanvas || videoRef.current;
 
@@ -361,6 +394,7 @@ export const useFaceCapture = ({
         images: [...livenessImages, referenceImage],
         referenceImage: referencePhoto.value,
         previewImage: referencePhoto.value,
+        facingMode: getFacingMode(),
         meta: { libraryVersion: COMPONENTS_VERSION },
       };
 
@@ -368,11 +402,6 @@ export const useFaceCapture = ({
         new CustomEvent('selfie-capture.publish', {
           detail: eventDetail,
         }),
-      );
-
-      const smartCameraWeb = document.querySelector('smart-camera-web');
-      smartCameraWeb?.dispatchEvent(
-        new CustomEvent('metadata.selfie-capture-end'),
       );
 
       hasFinishedCapture.value = true;
@@ -426,12 +455,7 @@ export const useFaceCapture = ({
         return;
       }
 
-      const isInNeutralZone = capturesTaken.value < neutralZone.value;
       const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
-
-      if (isInNeutralZone && currentSmileScore.value >= smileThreshold) {
-        return;
-      }
 
       if (isInSmileZone) {
         const timeSinceSmile = Date.now() - lastSmileTime.value;
@@ -476,6 +500,21 @@ export const useFaceCapture = ({
     capturesTaken.value = 0;
     countdown.value = totalCaptures.value;
 
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-origin', {
+        detail: {
+          imageOrigin: {
+            environment: 'back_camera',
+            user: 'front_camera',
+          }[getFacingMode()],
+        },
+      }),
+    );
+
     startCaptureInterval();
   };
 
@@ -517,6 +556,23 @@ export const useFaceCapture = ({
       clearInterval(captureTimerRef.current);
     }
     stopDetectionLoop();
+    updateAlert.cancel();
+  };
+
+  const resetFaceDetectionState = () => {
+    faceDetected.value = false;
+    faceInBounds.value = false;
+    faceProximity.value = 'good';
+    multipleFaces.value = false;
+    faceLandmarks.value = [];
+    currentSmileScore.value = 0;
+    currentFaceSize.value = 0;
+    currentMouthOpen.value = 0;
+    lastSmileTime.value = 0;
+
+    if (canvasRef.current) {
+      clearCanvas(canvasRef.current);
+    }
   };
 
   return {
@@ -531,6 +587,7 @@ export const useFaceCapture = ({
     currentMouthOpen,
     lastSmileTime,
     alertTitle,
+    isInitializing,
     isReadyToCapture,
 
     isCapturing,
@@ -556,5 +613,6 @@ export const useFaceCapture = ({
     handleCancel,
     handleClose,
     cleanup,
+    resetFaceDetectionState,
   };
 };

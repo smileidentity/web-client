@@ -60,11 +60,11 @@ function templateString() {
 
       #document-capture-screen,
       #back-of-document-capture-screen {
-        block-size: 45rem;
         display: flex;
         flex-direction: column;
         max-block-size: 100%;
         max-inline-size: 40ch;
+        padding: 1rem;
       }
 
       #document-capture-screen header p {
@@ -121,6 +121,7 @@ function templateString() {
         inset: -1px;
       }
       canvas {
+        width: 100%;
         border-width: 0.25rem;
         border-color: #9394ab;
         border-style: solid;

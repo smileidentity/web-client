@@ -351,6 +351,7 @@ function templateString() {
     position: relative;
     z-index: 1;
     width: 100%;
+    overflow: hidden;
   }
 
   .video-container video,
@@ -467,11 +468,12 @@ function templateString() {
 
   #selfie-capture-screen,
   #back-of-id-entry-screen {
-    block-size: 45rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     max-block-size: 100%;
     max-inline-size: 40ch;
+    padding: 1rem;
   }
 
   #selfie-capture-screen header p {
@@ -574,7 +576,8 @@ async function getPermissions(
         device.kind === 'videoinput' &&
         stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
     );
-    window.dispatchEvent(
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.camera-name', {
         detail: { cameraName: videoDevice?.label },
       }),
@@ -669,7 +672,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     setTimeout(() => {
       this.smileCTABox.style.opacity = 1;
-      this.smileCTA.textContent = 'BIGGER SMILE';
+      this.smileCTA.textContent = 'WIDER SMILE';
       this.mouth.setAttribute(
         'd',
         'm 213.88314,319.4551 c -1.58,0.97 -0.35309,9.33393 1.50671,9.30586 6.05679,-0.0914 16.11631,0.17227 34.57066,0.13346 18.45435,-0.0388 28.15778,-0.0418 31.09964,-0.79956 1.80122,-0.46394 2.75061,-7.48365 1.16061,-8.45365 -1.6,-1.74874 -2.96432,-0.94348 -6.77747,-1.56441 -12.83012,0.04 -36.52534,0.50197 -41.29469,0.43262 -2.51525,-0.0713 -18.41588,-0.61 -20.01588,0.35 z m 57.29363,1.36599 c -9.24417,-2.23757 -8.08363,-2.42362 -20.78363,-2.42362 -12.7,0 -17.77931,2.69528 -26.84042,5.36549 12.57883,3.28731 33.57775,-4.29887 49.70067,2.24964 z',
@@ -794,9 +797,14 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   _publishImages() {
+    const eventDetail = {
+      ...this._data,
+      facingMode: this.facingMode,
+    };
+
     this.dispatchEvent(
       new CustomEvent('selfie-capture.publish', {
-        detail: this._data,
+        detail: eventDetail,
       }),
     );
   }
@@ -839,6 +847,11 @@ class SelfieCaptureScreen extends HTMLElement {
 
   handleStream(stream) {
     try {
+      const videoContainer = this.shadowRoot.querySelector('.video');
+      if (!videoContainer) {
+        return;
+      }
+
       const videoExists = this.shadowRoot.querySelector('video');
       let video = null;
       if (videoExists) {
@@ -862,9 +875,6 @@ class SelfieCaptureScreen extends HTMLElement {
       };
 
       this._video = video;
-      const videoContainer = this.shadowRoot.querySelector(
-        '.video-container > .video',
-      );
       this._data.permissionGranted = true;
 
       if (!videoExists) {
@@ -914,7 +924,10 @@ class SelfieCaptureScreen extends HTMLElement {
 
     if (SmartCamera.stream) {
       this.handleStream(SmartCamera.stream);
-    } else if (this.hasAttribute('data-camera-ready')) {
+    } else if (
+      this.hasAttribute('data-camera-ready') ||
+      !this.hasAttribute('data-camera-error')
+    ) {
       getPermissions(this, { facingMode: this.facingMode });
     }
 
@@ -1005,20 +1018,43 @@ class SelfieCaptureScreen extends HTMLElement {
   attributeChangedCallback(name) {
     switch (name) {
       case 'data-camera-error':
-      case 'data-camera-ready':
       case 'hidden':
       case 'title':
         this.shadowRoot.innerHTML = this.render();
         this.init();
         break;
       case 'allow-agent-mode':
-        if (this.allowAgentMode) {
-          this.facingMode = 'environment';
+        // only re-render if the shadowRoot is empty or not initialized
+        if (!this.shadowRoot.innerHTML.trim()) {
+          this.shadowRoot.innerHTML = this.render();
+          this.init();
         } else {
-          this.facingMode = 'user';
+          // update the setupAgentMode
+          this.setupAgentMode();
         }
-        this.shadowRoot.innerHTML = this.render();
-        this.init();
+        break;
+      case 'show-navigation':
+        // update the navigation element if it exists
+        if (this.shadowRoot.innerHTML.trim()) {
+          const navigation =
+            this.shadowRoot.querySelector('smileid-navigation');
+          if (navigation) {
+            if (this.showNavigation) {
+              navigation.setAttribute('show-navigation', '');
+            } else {
+              navigation.removeAttribute('show-navigation');
+            }
+          }
+        } else {
+          this.shadowRoot.innerHTML = this.render();
+          this.init();
+        }
+        break;
+      case 'data-camera-ready':
+        // don't re-render, just handle the stream
+        if (this.hasAttribute('data-camera-ready') && SmartCamera.stream) {
+          this.handleStream(SmartCamera.stream);
+        }
         break;
       default:
         break;

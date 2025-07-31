@@ -13,7 +13,7 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('shows navigation by default', () => {
-      // Check that back and cancel buttons exist in selfie instructions
+      // Check that back and close buttons exist in selfie instructions
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -32,11 +32,13 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .find('#cancel')
+        .find('smileid-navigation')
+        .shadow()
+        .find('[part="close-button"]')
         .should('be.visible');
     });
 
-    it('hides back exit and cancel button when `hide-back-to-host` attribute is passed', () => {
+    it('hides back exit and close button when `hide-back-to-host` attribute is passed', () => {
       // Set the hide-back-to-host attribute
       cy.get('smart-camera-web')
         .invoke('attr', 'hide-back-to-host', 'true')
@@ -57,13 +59,15 @@ variants.forEach(({ name, suffix }) => {
         .find('.back-button')
         .should('not.exist');
 
-      // Verify the cancel button is hidden
+      // Verify the close button still exists
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .find('#cancel', { timeout: 0 })
-        .should('not.be.visible');
+        .find('smileid-navigation')
+        .shadow()
+        .find('[part="close-button"]')
+        .should('be.visible');
     });
   });
 });

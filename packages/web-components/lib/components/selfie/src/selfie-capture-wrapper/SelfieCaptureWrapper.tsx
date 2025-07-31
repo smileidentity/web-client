@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'preact/hooks';
-import { h } from 'preact';
 import { IconLoader2 } from '@tabler/icons-preact';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';

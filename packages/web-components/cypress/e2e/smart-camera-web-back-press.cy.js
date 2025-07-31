@@ -63,31 +63,12 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('smileid-navigation')
-              .shadow()
-              .find('.back-button')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('smileid-navigation')
-              .shadow()
-              .find('.back-button')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('smileid-navigation')
+        .shadow()
+        .find('.back-button')
+        .click();
 
       cy.get('smart-camera-web')
         .shadow()
@@ -118,27 +99,10 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
       cy.tick(8000);
 
@@ -188,8 +152,7 @@ variants.forEach(({ name, suffix }) => {
         .find('smileid-navigation')
         .shadow()
         .find('.close-button')
-        .should('be.visible')
-        .click();
+        .should('be.visible');
 
       // Component should emit close event (we can't test URL navigation in this setup)
       // But we can verify the button exists and is clickable

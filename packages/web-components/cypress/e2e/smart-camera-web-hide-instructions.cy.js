@@ -71,32 +71,15 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-wrapper')
         .should('be.visible');
 
-      // Handle modern vs fallback component logic for start button
+      // Click start button in selfie capture
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
       cy.wait(8000);
 
@@ -133,32 +116,15 @@ variants.forEach(({ name, suffix }) => {
 
       cy.clock();
 
-      // Handle modern vs fallback component logic for start button
+      // Click start button in selfie capture
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
       cy.tick(8000);
 
@@ -173,6 +139,7 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-review')
         .should('be.visible');
     });
+
     it.skip('should switch from the review screen back to the selfie capture screen on clicking "Re-take selfie"', () => {
       // Skipped: Selfie capture requires camera access which fails in Cypress environment
       cy.get('smart-camera-web')
@@ -194,32 +161,15 @@ variants.forEach(({ name, suffix }) => {
 
       cy.clock();
 
-      // Handle modern vs fallback component logic for start button
+      // Click start button in selfie capture
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
       cy.tick(8000);
 
@@ -274,32 +224,15 @@ variants.forEach(({ name, suffix }) => {
 
       cy.clock();
 
-      // Handle modern vs fallback component logic for start button
+      // Click start button in selfie capture
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-wrapper')
         .shadow()
-        .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
-        });
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
 
       cy.tick(8000);
 

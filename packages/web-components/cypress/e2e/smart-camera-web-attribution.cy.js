@@ -40,25 +40,11 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-wrapper')
         .shadow()
         .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('powered-by-smile-id')
-              .should('be.visible');
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('powered-by-smile-id')
-              .should('be.visible');
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
+          cy.wrap($shadow)
+            .find('selfie-capture')
+            .shadow()
+            .find('powered-by-smile-id')
+            .should('be.visible');
         });
 
       // Take a photo
@@ -68,25 +54,11 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-wrapper')
         .shadow()
         .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
+          cy.wrap($shadow)
+            .find('selfie-capture')
+            .shadow()
+            .find('#start-image-capture')
+            .click();
         });
       cy.tick(8000);
 
@@ -134,25 +106,11 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-wrapper')
         .shadow()
         .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('powered-by-smile-id')
-              .should('not.exist');
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('powered-by-smile-id')
-              .should('not.exist');
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
+          cy.wrap($shadow)
+            .find('selfie-capture')
+            .shadow()
+            .find('powered-by-smile-id')
+            .should('not.exist');
         });
 
       // Take a photo
@@ -162,25 +120,11 @@ variants.forEach(({ name, suffix }) => {
         .find('selfie-capture-wrapper')
         .shadow()
         .then(($shadow) => {
-          if ($shadow.find('smartselfie-capture').length > 0) {
-            // Modern SmartSelfieCapture path
-            cy.wrap($shadow)
-              .find('smartselfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else if ($shadow.find('selfie-capture').length > 0) {
-            // Fallback SelfieCapture path
-            cy.wrap($shadow)
-              .find('selfie-capture')
-              .shadow()
-              .find('#start-image-capture')
-              .click();
-          } else {
-            throw new Error(
-              'Neither smartselfie-capture nor selfie-capture found',
-            );
-          }
+          cy.wrap($shadow)
+            .find('selfie-capture')
+            .shadow()
+            .find('#start-image-capture')
+            .click();
         });
       cy.tick(8000);
 

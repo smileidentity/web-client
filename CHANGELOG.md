@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.6] - 2025-07-30
+
+### Changed
+
+- Support older browsers (ES6) in IIFE builds
+- Improve face detection prompt timings
+
+## [10.0.5] - 2025-07-23
+
+### Changed
+
+- Fixed agent mode when face detection is in use
+- Responsive styling update
+- Improve face detection support on older mobile devices
+- Remove neutral expression checks
+- Update selfie capture text prompts
+
+## [10.0.4] - 2025-07-09
+
+### Changed
+
+- Styling update
+- Show loading message for face detection
+- Update big smile prompt to make it clearer
+
+## [10.0.3] - 2025-07-09
+
+### Changed
+
+- Fix selfie capture image composition
+- Mirror selfie capture image preview
+
+## [10.0.2] - 2025-07-08
+
+### Changed
+
+- Increase mediapipe loading grace period.
+
+## [10.0.1] - 2025-07-08
+
+### Changed
+
+- Fix external modules not being bundled in IIFE.
+- Avoid zooming out captured selfies on low-res webcams.
+- Fix selfie capture fallback when mediapipe fails to load.
+
+## [10.0.0] - 2025-07-08
+
+### Added
+
+- Add face detection for selfie capture
+
 ## [2.0.2] - 2025-05-28
 
 ### Changed

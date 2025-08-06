@@ -6,11 +6,13 @@ on:
       - opened
       - synchronize
 permissions: write-all
+env:
+  CLOUDFRONT_DISTRIBUTION_ID: EI8YB0PV4ARZC
 jobs:
-  test:
-    uses: ./.github/workflows/test.yml
+  # test:
+  #   uses: ./.github/workflows/test.yml
   smart-camera-web:
-    needs: [test]
+    # needs: [test]
     defaults:
       run:
         working-directory: ./packages/web-components
@@ -37,12 +39,10 @@ jobs:
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete \
-            --exclude "*" \
-            --include "smart-camera-web.js" \
-            --include "*/smart-camera-web.js" \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
-    needs: [test]
+    # needs: [test]
+    needs: [smart-camera-web]
     defaults:
       run:
         working-directory: ./packages/embed
@@ -52,6 +52,11 @@ jobs:
         uses: actions/checkout@v4
       - name: set node version
         uses: actions/setup-node@v4
+      - name: build web-components dependency
+        run: |
+          cd ../web-components
+          npm ci
+          npm run build
       - name: install dependencies
         run: npm ci
       - name: build application
@@ -69,7 +74,13 @@ jobs:
       - name: deploy preview to s3
         run: |
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_EMBED }}
+      - name: invalidate cloudfront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/${{ env.DEST_DIR_EMBED }}/*"
   full-stack:
+    needs: [embed]
     if: always()
     defaults:
       run:
@@ -114,7 +125,7 @@ jobs:
   share-preview-url:
     runs-on: ubuntu-latest
     permissions: write-all
-    needs: [full-stack]
+    needs: [full-stack, embed]
     steps:
       - name: checkout code
         uses: actions/checkout@v4

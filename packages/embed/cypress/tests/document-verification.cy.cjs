@@ -67,7 +67,7 @@ describe('document verification', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image', { timeout: 10000 })
+      .find('#capture-id-image')
       .click();
 
     cy.getIFrameBody()
@@ -208,7 +208,7 @@ describe('legacy support - preselected country / id_types', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image', { timeout: 10000 })
+      .find('#capture-id-image')
       .click();
 
     cy.getIFrameBody()

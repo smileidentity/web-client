@@ -104,6 +104,8 @@ describe('back-button', () => {
       cy.getIFrameBody()
         .find('smart-camera-web')
         .shadow()
+        .find('selfie-capture-wrapper')
+        .shadow()
         .find('selfie-capture')
         .shadow()
         .find('smileid-navigation')

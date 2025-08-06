@@ -153,7 +153,7 @@ const buildIife = () =>
     ...buildOptions,
     format: 'iife',
     outdir: `${buildDir}`,
-    target: ['chrome63', 'firefox57', 'safari11', 'edge79'], // Support Android 8.1+ Chrome WebView 63+
+        target: ['chrome55', 'firefox57', 'safari11', 'edge79'], // Support Android 7.1.1+ Chrome WebView 55+
   });
 
 /**

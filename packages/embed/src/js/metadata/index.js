@@ -100,30 +100,45 @@ const getLocalIP = () => {
   pc.createDataChannel('');
 
   return new Promise((resolve) => {
+    let resolved = false;
+
+    const cleanup = () => {
+      if (!resolved) {
+        resolved = true;
+        pc.onicecandidate = null;
+        pc.close();
+      }
+    };
+
     pc.onicecandidate = (evt) => {
-      if (!evt.candidate) return;
+      if (resolved) return;
+
+      if (!evt.candidate) {
+        cleanup();
+        resolve(null);
+        return;
+      }
 
       const match = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/.exec(
         evt.candidate.candidate,
       );
       if (match) {
         const ip = match[1];
+        cleanup();
         resolve(ip);
-        pc.onicecandidate = null;
-        pc.close();
       }
     };
 
     pc.createOffer()
       .then((offer) => pc.setLocalDescription(offer))
       .catch(() => {
+        cleanup();
         resolve(null);
-        pc.close();
       });
 
     setTimeout(() => {
+      cleanup();
       resolve(null);
-      pc.close();
     }, 1500);
   });
 };

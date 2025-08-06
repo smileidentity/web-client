@@ -166,6 +166,14 @@ describe('No ID Selection', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
+      .find('.actions')
+      .should('not.have.attr', 'hidden');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
       .find('#capture-id-image')
       .click();
 

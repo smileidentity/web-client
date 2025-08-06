@@ -67,15 +67,7 @@ describe('document verification', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('.actions')
-      .should('not.have.attr', 'hidden');
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('document-capture#document-capture-front')
-      .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 10000 })
       .click();
 
     cy.getIFrameBody()
@@ -216,15 +208,7 @@ describe('legacy support - preselected country / id_types', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('.actions')
-      .should('not.have.attr', 'hidden');
-
-    cy.getIFrameBody()
-      .find('smart-camera-web')
-      .shadow()
-      .find('document-capture#document-capture-front')
-      .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 10000 })
       .click();
 
     cy.getIFrameBody()

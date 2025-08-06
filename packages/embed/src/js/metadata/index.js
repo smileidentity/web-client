@@ -381,3 +381,33 @@ eventTarget.addEventListener(
   'metadata.selfie-capture-end',
   endTrackSelfieCapture,
 );
+
+/**
+ * Cleans up all resources including intervals and event listeners
+ */
+export const cleanupMetadata = () => {
+  if (ipPollInterval) {
+    clearInterval(ipPollInterval);
+    ipPollInterval = null;
+  }
+
+  if (orientationListenerAdded && window.screen?.orientation) {
+    try {
+      window.screen.orientation.removeEventListener(
+        'change',
+        handleDeviceOrientationChange,
+      );
+      orientationListenerAdded = false;
+    } catch (e) {
+      // do nothing
+    }
+  }
+
+  // Reset state variables
+  capturing = null;
+  activeCameraName = null;
+  captureStartTimestamp = null;
+  metadata = [];
+};
+
+eventTarget.addEventListener('metadata.cleanup', cleanupMetadata);

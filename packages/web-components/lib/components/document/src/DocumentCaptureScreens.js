@@ -104,6 +104,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
   disconnectedCallback() {
     SmartCamera.stopMedia();
+    smartCameraWeb?.dispatchEvent(new CustomEvent('metadata.cleanup'));
     if (this.activeScreen) {
       this.activeScreen.removeAttribute('hidden');
     }

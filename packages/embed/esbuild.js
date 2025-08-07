@@ -123,6 +123,11 @@ files.forEach((file) => {
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'smile-identity',
           project: 'web-client',
+          errorHandler: (err) => {
+            // eslint-disable-next-line no-console
+            console.warn('Sentry plugin error:', err);
+            return true;
+          },
         }),
       ],
     });

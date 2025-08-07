@@ -140,24 +140,6 @@ class SelfieCaptureScreens extends HTMLElement {
       'selfie-capture-instructions.capture',
       async () => {
         this.setActiveScreen(this.selfieCapture);
-
-        const selfieCapture =
-          this.selfieCapture.querySelector('selfie-capture');
-        if (selfieCapture) {
-          smartCameraWeb?.dispatchEvent(
-            new CustomEvent('metadata.selfie-capture-start'),
-          );
-          smartCameraWeb?.dispatchEvent(
-            new CustomEvent('metadata.selfie-origin', {
-              detail: {
-                imageOrigin: {
-                  environment: 'back_camera',
-                  user: 'front_camera',
-                }[this.getAgentMode()],
-              },
-            }),
-          );
-        }
       },
     );
     this.selfieInstruction.addEventListener(
@@ -405,6 +387,9 @@ class SelfieCaptureScreens extends HTMLElement {
       'show-navigation',
       'hide-back-to-host',
       'initial-screen',
+      'allow-agent-mode',
+      'show-agent-mode-for-tests',
+      'disable-image-tests',
     ];
   }
 
@@ -413,6 +398,9 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'title':
       case 'hidden':
       case 'initial-screen':
+      case 'allow-agent-mode':
+      case 'show-agent-mode-for-tests':
+      case 'disable-image-tests':
         this.connectedCallback();
         break;
       default:

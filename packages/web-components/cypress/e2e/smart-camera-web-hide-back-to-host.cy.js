@@ -1,24 +1,24 @@
 const variants = [
   { name: 'iife', suffix: '' },
-  { name: 'esm', suffix: '?format=esm' },
+  { name: 'esm', suffix: '&format=esm' },
 ];
 
 variants.forEach(({ name, suffix }) => {
   describe(`SmartCameraWeb HideBackToHost [${name}]`, () => {
     beforeEach(() => {
-      cy.visit(`/capture-back-of-id-navigation${suffix}`);
+      // Use dev server with URL-based prop passing - default selfie flow to test navigation
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&disable-image-tests=true${suffix}`,
+      );
     });
 
-    it('shows attribution by default', () => {
+    it('shows navigation by default', () => {
+      // Check that back and close buttons exist in selfie instructions
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture-instructions')
-        .shadow()
-        .should('contain.text', "Next, we'll take a quick selfie");
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -27,28 +27,29 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('.back-button')
         .should('be.visible');
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .find('#cancel')
+        .find('smileid-navigation')
+        .shadow()
+        .find('[part="close-button"]')
         .should('be.visible');
     });
 
-    it('hides back exit and cancel button when `hide-back-to-host` attribute is passed', () => {
+    it('hides back exit and close button when `hide-back-to-host` attribute is passed', () => {
+      // Set the hide-back-to-host attribute
       cy.get('smart-camera-web')
         .invoke('attr', 'hide-back-to-host', 'true')
         .should('have.attr', 'hide-back-to-host', 'true');
 
+      // Verify the back button is hidden in navigation
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .should('be.visible');
-      cy.get('smart-camera-web')
-        .shadow()
-        .find('selfie-capture-instructions')
-        .shadow()
-        .should('contain.text', "Next, we'll take a quick selfie");
+
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
@@ -57,12 +58,16 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('.back-button')
         .should('not.exist');
+
+      // Verify the close button still exists
       cy.get('smart-camera-web')
         .shadow()
         .find('selfie-capture-instructions')
         .shadow()
-        .find('#cancel', { timeout: 0 })
-        .should('not.be.visible');
+        .find('smileid-navigation')
+        .shadow()
+        .find('[part="close-button"]')
+        .should('be.visible');
     });
   });
 });

@@ -643,6 +643,21 @@ class SelfieCaptureScreen extends HTMLElement {
       this.switchCamera.disabled = true;
     }
 
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.selfie-origin', {
+        detail: {
+          imageOrigin: {
+            environment: 'back_camera',
+            user: 'front_camera',
+          }[this.inAgentMode ? 'environment' : 'user'],
+        },
+      }),
+    );
+
     /**
      * this was culled from https://jakearchibald.com/2013/animated-line-drawing-svg/
      */

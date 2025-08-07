@@ -10,6 +10,8 @@ let metadata = [];
 let captureStartTimestamp = null;
 let orientationListenerAdded = false;
 let ipPollInterval = null;
+let initializationTimeout = null;
+let isInitializing = false;
 
 /**
  * Keys that should only have a single entry in metadata
@@ -89,7 +91,12 @@ const getOrientationString = () => {
 };
 
 const handleDeviceOrientationChange = () => {
-  addMetadataEntry('device_orientation', getOrientationString());
+  const newOrientation = getOrientationString();
+  const lastOrientation = getLastMetadataValue('device_orientation');
+
+  if (newOrientation !== lastOrientation) {
+    addMetadataEntry('device_orientation', newOrientation);
+  }
 };
 
 const getLocalIP = () => {
@@ -172,7 +179,6 @@ export const initializeMetadata = async () => {
   addMetadataEntry('browser_version', parsedUserAgent.browser.version);
   addMetadataEntry('fingerprint', await getFingerprint());
   addMetadataEntry('active_liveness_type', 'smile');
-  addMetadataEntry('active_liveness_version', '0.0.1');
   addMetadataEntry('security_policy_version', '0.3.0');
   addMetadataEntry(
     'timezone',
@@ -193,6 +199,8 @@ export const initializeMetadata = async () => {
   addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
 
   // Device orientation
+  console.log('setting initial orientation');
+
   const orientation = getOrientationString();
   addMetadataEntry('device_orientation', orientation);
   if (
@@ -338,7 +346,37 @@ export const endTrackSelfieCapture = () => {
 
 const eventTarget = document.querySelector('smart-camera-web');
 
-eventTarget.addEventListener('metadata.initialize', initializeMetadata);
+// debounced initialization to handle multiple rapid initialize events
+const debouncedInitializeMetadata = () => {
+  if (initializationTimeout) {
+    clearTimeout(initializationTimeout);
+  }
+
+  if (isInitializing) {
+    return;
+  }
+
+  initializationTimeout = setTimeout(async () => {
+    // check again in case of rapid calls
+    if (isInitializing) return;
+
+    isInitializing = true;
+
+    try {
+      await initializeMetadata();
+    } catch (error) {
+      console.error('Failed to initialize metadata:', error);
+    } finally {
+      isInitializing = false;
+      initializationTimeout = null;
+    }
+  }, 50); // 50ms delay to debounce rapid calls
+};
+
+eventTarget.addEventListener(
+  'metadata.initialize',
+  debouncedInitializeMetadata,
+);
 eventTarget.addEventListener(
   'metadata.document-front-capture-start',
   beginTrackDocumentFrontCapture,
@@ -396,6 +434,9 @@ eventTarget.addEventListener(
   'metadata.selfie-capture-end',
   endTrackSelfieCapture,
 );
+eventTarget.addEventListener('metadata.active-liveness-version', (event) => {
+  addMetadataEntry('active_liveness_version', event.detail.version);
+});
 
 /**
  * Cleans up all resources including intervals and event listeners
@@ -418,11 +459,18 @@ export const cleanupMetadata = () => {
     }
   }
 
-  // Reset state variables
+  // reset state variables
   capturing = null;
   activeCameraName = null;
   captureStartTimestamp = null;
   metadata = [];
+
+  // reset initialization tracking
+  if (initializationTimeout) {
+    clearTimeout(initializationTimeout);
+    initializationTimeout = null;
+  }
+  isInitializing = false;
 };
 
 eventTarget.addEventListener('metadata.cleanup', cleanupMetadata);

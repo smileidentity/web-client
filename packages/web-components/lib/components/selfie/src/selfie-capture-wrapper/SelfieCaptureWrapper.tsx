@@ -29,10 +29,17 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   hidden: hiddenProp = false,
   ...props
 }) => {
-  const isParentCypress =
-    !!(window.parent as any).Cypress ||
-    (window.parent.navigator.userAgent.includes('Electron') &&
-      (window.parent as any).__Cypress);
+  const isParentCypress = (() => {
+    try {
+      return (
+        !!(window.parent as any).Cypress ||
+        (window.parent.navigator.userAgent.includes('Electron') &&
+          (window.parent as any).__Cypress)
+      );
+    } catch {
+      return false;
+    }
+  })();
   const isCypress =
     isParentCypress ||
     !!(window as any).Cypress ||

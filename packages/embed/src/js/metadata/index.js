@@ -191,10 +191,10 @@ export const initializeMetadata = async () => {
     'screen_resolution',
     `${window.screen.width}x${window.screen.height}`,
   );
-  // Memory in bytes
+  // RAM in MB
   addMetadataEntry(
     'memory_info',
-    navigator.deviceMemory ? navigator.deviceMemory * 1024 ** 3 : null,
+    navigator.deviceMemory ? navigator.deviceMemory * 1024 : null,
   );
   addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
 

@@ -108,6 +108,7 @@ const getLocalIP = () => {
 
   return new Promise((resolve) => {
     let resolved = false;
+    const ips = [];
 
     const cleanup = () => {
       if (!resolved) {
@@ -117,12 +118,23 @@ const getLocalIP = () => {
       }
     };
 
+    const isPrivateIP = (ip) => {
+      return /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.)/.test(ip);
+    };
+
+    const selectBestIP = () => {
+      if (ips.length === 0) return null;
+
+      const publicIPs = ips.filter((ip) => !isPrivateIP(ip));
+      return publicIPs.length > 0 ? publicIPs[0] : ips[0];
+    };
+
     pc.onicecandidate = (evt) => {
       if (resolved) return;
 
       if (!evt.candidate) {
         cleanup();
-        resolve(null);
+        resolve(selectBestIP());
         return;
       }
 
@@ -131,8 +143,9 @@ const getLocalIP = () => {
       );
       if (match) {
         const ip = match[1];
-        cleanup();
-        resolve(ip);
+        if (!ips.includes(ip)) {
+          ips.push(ip);
+        }
       }
     };
 
@@ -145,7 +158,7 @@ const getLocalIP = () => {
 
     setTimeout(() => {
       cleanup();
-      resolve(null);
+      resolve(selectBestIP());
     }, 1500);
   });
 };

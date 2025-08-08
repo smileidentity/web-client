@@ -191,15 +191,13 @@ export const initializeMetadata = async () => {
     'screen_resolution',
     `${window.screen.width}x${window.screen.height}`,
   );
+
   // RAM in MB
   addMetadataEntry(
     'memory_info',
     navigator.deviceMemory ? navigator.deviceMemory * 1024 : null,
   );
   addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
-
-  // Device orientation
-  console.log('setting initial orientation');
 
   const orientation = getOrientationString();
   addMetadataEntry('device_orientation', orientation);
@@ -332,6 +330,11 @@ export const beginTrackSelfieCapture = () => {
   captureStartTimestamp = Date.now();
 };
 
+const retrySelfieCapture = () => {
+  const prev = getLastMetadataValue('selfie_retries') || 0;
+  addMetadataEntry('selfie_retries', prev + 1);
+};
+
 export const endTrackSelfieCapture = () => {
   if (!captureStartTimestamp) {
     return;
@@ -433,6 +436,10 @@ eventTarget.addEventListener('metadata.selfie-capture-start', () => {
 eventTarget.addEventListener(
   'metadata.selfie-capture-end',
   endTrackSelfieCapture,
+);
+eventTarget.addEventListener(
+  'metadata.selfie-capture-retry',
+  retrySelfieCapture,
 );
 eventTarget.addEventListener('metadata.active-liveness-version', (event) => {
   addMetadataEntry('active_liveness_version', event.detail.version);

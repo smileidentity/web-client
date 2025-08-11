@@ -163,12 +163,49 @@ const getLocalIP = () => {
   });
 };
 
+const getWebGLRenderer = () => {
+  if (!window.WebGLRenderingContext) {
+    return null;
+  }
+
+  const canvas = document.createElement('canvas');
+  const gl =
+    canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+  if (!gl) {
+    return null;
+  }
+
+  const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+  if (!debugInfo) {
+    return null;
+  }
+
+  return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+};
+
+const getArchitectureFromWebGPU = async () => {
+  try {
+    if (!('gpu' in navigator)) {
+      return null;
+    }
+
+    const gpuAdapter = await navigator.gpu.requestAdapter();
+    if (!gpuAdapter) {
+      return null;
+    }
+
+    return gpuAdapter.info?.architecture || null;
+  } catch (error) {
+    return null;
+  }
+};
+
 export const initializeMetadata = async () => {
   metadata = [];
   const hostApplication = `${window.location.protocol}//${window.location.hostname}`;
   addMetadataEntry('host_application', hostApplication);
 
-  // Add proximity_sensor: true if present, nothing if not present
   if (
     'ondeviceproximity' in window ||
     'onuserproximity' in window ||
@@ -210,7 +247,13 @@ export const initializeMetadata = async () => {
     'memory_info',
     navigator.deviceMemory ? navigator.deviceMemory * 1024 : null,
   );
-  addMetadataEntry('system_architecture', parsedUserAgent.cpu.architecture);
+
+  const architecture =
+    parsedUserAgent.cpu.architecture ||
+    (await getArchitectureFromWebGPU()) ||
+    getWebGLRenderer();
+
+  addMetadataEntry('system_architecture', architecture);
 
   const orientation = getOrientationString();
   addMetadataEntry('device_orientation', orientation);

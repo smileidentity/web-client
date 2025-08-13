@@ -178,7 +178,7 @@ const getWebGLRenderer = () => {
 
   const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
   if (!debugInfo) {
-    return null;
+    return gl.getParameter(gl.RENDERER) || null;
   }
 
   return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);

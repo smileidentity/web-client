@@ -1,4 +1,5 @@
 const WASM_PATH = 'https://secure.smileidentity.com/web_client_guard_bg.wasm';
+const JS_PATH = 'https://secure.smileidentity.com/web_client_guard.js';
 const INTEGRITY_PATH = 'https://secure.smileidentity.com/integrity.json';
 let wasmModule = null;
 let lastFetchTime = 0;
@@ -43,9 +44,7 @@ async function initWasm(forceRefetch = false) {
           throw new Error('WASM integrity check failed');
         }
 
-        const newModule = await import(
-          `${WASM_PATH.replace('_bg.wasm', '.js')}${cacheBuster}`
-        );
+        const newModule = await import(`${JS_PATH}${cacheBuster}`);
 
         newModule.initSync({ module: wasmBuffer });
 

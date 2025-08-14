@@ -28,7 +28,9 @@ async function initWasm(forceRefetch = false) {
         ]);
 
         if (!wasmResponse.ok || !integrityResponse.ok) {
-          throw new Error('Failed to fetch required resources');
+          throw new Error(
+            'Failed to fetch required wasm and integrity resources',
+          );
         }
 
         const { hash: expectedHash } = await integrityResponse.json();

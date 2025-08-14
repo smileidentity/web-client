@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import getHeaders from './request';
 
 (function SmartSelfie() {
   'use strict';
@@ -243,6 +244,7 @@ import { getMetadata } from './metadata';
       cache: 'no-cache',
       mode: 'cors',
       headers: {
+        ...(await getHeaders(payload, config.partner_details.partner_id)),
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },

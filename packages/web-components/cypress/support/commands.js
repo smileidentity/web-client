@@ -43,21 +43,30 @@ Cypress.Commands.add('navigateFaceCaptureScreens', () => {
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('selfie-capture')
+    .find('selfie-capture-wrapper')
     .should('be.visible');
+
+  // Wait for component to load
+  cy.wait(2000);
+
   cy.clock();
   cy.get('smart-camera-web')
     .shadow()
-    .find('selfie-capture')
+    .find('selfie-capture-wrapper')
     .shadow()
-    .find('#start-image-capture')
-    .click();
+    .then(($shadow) => {
+      cy.wrap($shadow)
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
+    });
 
   cy.tick(8000);
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('selfie-capture')
+    .find('selfie-capture-wrapper')
     .shadow()
     .should('not.be.visible');
 

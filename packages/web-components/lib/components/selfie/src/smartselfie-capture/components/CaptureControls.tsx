@@ -28,6 +28,7 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
   <>
     <div className="controls">
       <button
+        id="start-image-capture"
         class="btn-primary"
         onClick={onStartCapture}
         disabled={isCapturing || hasFinishedCapture || !isReadyToCapture}
@@ -37,6 +38,7 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
 
       {allowAgentMode && (agentSupported || showAgentModeForTests) && (
         <button
+          id="switch-camera"
           onClick={onSwitchCamera}
           className="agent-mode-btn"
           disabled={isCapturing || hasFinishedCapture}

@@ -9,10 +9,10 @@ permissions: write-all
 env:
   CLOUDFRONT_DISTRIBUTION_ID: EI8YB0PV4ARZC
 jobs:
-  # test:
-  #   uses: ./.github/workflows/test.yml
+  test:
+    uses: ./.github/workflows/test.yml
   smart-camera-web:
-    # needs: [test]
+    needs: [test]
     defaults:
       run:
         working-directory: ./packages/web-components
@@ -41,7 +41,6 @@ jobs:
           aws s3 sync --follow-symlinks --delete \
             ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ env.DEST_DIR_SMART_CAMERA_WEB }}
   embed:
-    # needs: [test]
     needs: [smart-camera-web]
     defaults:
       run:

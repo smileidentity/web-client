@@ -120,6 +120,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   disconnectedCallback() {
     SmartCamera.stopMedia();
+    smartCameraWeb?.dispatchEvent(new CustomEvent('metadata.cleanup'));
 
     if (this._selfieWrapperListeners) {
       this._selfieWrapperListeners.forEach(({ event, handler }) => {

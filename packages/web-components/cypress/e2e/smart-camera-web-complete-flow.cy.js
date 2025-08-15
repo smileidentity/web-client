@@ -158,7 +158,7 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
+        .find('selfie-capture-review')
         .shadow()
         .find('#select-id-image')
         .click();
@@ -169,7 +169,7 @@ variants.forEach(({ name, suffix }) => {
           'document-capture-instructions#document-capture-instructions-back',
         )
         .shadow()
-        .find('#take-photo')
+        .find('#select-id-image')
         .click();
 
       cy.get('smart-camera-web')

@@ -149,24 +149,6 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     }
   }, [faceCapture.hasFinishedCapture.value]);
 
-  const handleStartCapture = () => {
-    faceCapture.startCapture();
-    const smartCameraWeb = document.querySelector('smart-camera-web');
-    smartCameraWeb?.dispatchEvent(
-      new CustomEvent('metadata.selfie-capture-start'),
-    );
-    smartCameraWeb?.dispatchEvent(
-      new CustomEvent('metadata.selfie-origin', {
-        detail: {
-          imageOrigin: {
-            environment: 'back_camera',
-            user: 'front_camera',
-          }[camera.facingMode],
-        },
-      }),
-    );
-  };
-
   return (
     <div className="smartselfie-capture">
       {showNavigation && (
@@ -201,7 +183,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
             showAgentModeForTests={showAgentModeForTests}
             facingMode={camera.facingMode}
             themeColor={themeColor}
-            onStartCapture={handleStartCapture}
+            onStartCapture={faceCapture.startCapture}
             onSwitchCamera={camera.switchCamera}
           />
         )}

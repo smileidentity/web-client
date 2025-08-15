@@ -152,7 +152,13 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-review#front-of-document-capture-review')
+        .find('document-capture#document-capture-front')
+        .invoke('attr', 'theme-color')
+        .should('equal', themeColor);
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-review')
         .shadow()
         .find('#select-id-image')
         .click();
@@ -163,7 +169,7 @@ variants.forEach(({ name, suffix }) => {
           'document-capture-instructions#document-capture-instructions-back',
         )
         .shadow()
-        .find('#take-photo')
+        .find('#select-id-image')
         .click();
 
       cy.get('smart-camera-web')
@@ -177,6 +183,12 @@ variants.forEach(({ name, suffix }) => {
         .shadow()
         .find('document-capture-review#back-of-document-capture-review')
         .should('be.visible');
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('document-capture-review#back-of-document-capture-review')
+        .invoke('attr', 'theme-color')
+        .should('equal', themeColor);
     });
   });
 });

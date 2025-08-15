@@ -86,6 +86,9 @@ async function getHeaders(payload, partnerId, isBinary = false) {
   };
 }
 
+// make the first call to initialize the WASM module
+initWasm();
+
 // periodically check for expired WASM module
 setInterval(async () => {
   if (wasmModule && isStale()) {

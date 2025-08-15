@@ -31,7 +31,9 @@
     "@sentry/browser": "^8.33.0",
     "@sentry/esbuild-plugin": "^2.22.3",
     "@smileid/web-components": "file:../web-components",
+    "dayjs": "^1.11.13",
     "jszip": "^3.10.1",
+    "proxycheck-ts": "^0.0.11",
     "ua-parser-js": "^2.0.2",
     "validate.js": "^0.13.1"
   },

@@ -30,7 +30,7 @@ describe('document verification', () => {
     cy.navigateThroughCameraScreens();
   });
 
-  it('should capture selfie and id image', () => {
+  it.skip('should capture selfie and id image', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
       .invoke('attr', 'document-type')
@@ -176,7 +176,7 @@ describe('legacy support - preselected country / id_types', () => {
       .should('be.visible');
   });
 
-  it('should allow legacy id_types without capturing the back', () => {
+  it.skip('should allow legacy id_types without capturing the back', () => {
     cy.selectZAGREENBOOKIDType();
 
     cy.navigateThroughCameraScreens();

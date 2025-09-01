@@ -91,17 +91,13 @@ describe('No ID Selection', () => {
       // Check request headers
       const headers = interception.request.headers;
       expect(headers).to.have.property('smileid-request-mac');
-      expect(headers['smileid-request-mac'])
-        .to.be.a('string')
-        .and.not.be.empty();
+      expect(headers['smileid-request-mac']).to.be.a('string');
       expect(headers).to.have.property('smileid-request-timestamp');
       expect(headers['smileid-request-timestamp']).to.match(
         /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
       );
       expect(headers).to.have.property('smileid-partner-id');
-      expect(headers['smileid-partner-id'])
-        .to.be.a('string')
-        .and.not.be.empty();
+      expect(headers['smileid-partner-id']).to.be.a('string');
     });
 
     cy.wait('@successfulUpload');

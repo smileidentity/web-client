@@ -102,7 +102,7 @@ describe('No ID Selection', () => {
       .should('contain', 'Bank Verification');
   });
 
-  it.skip('document_verification', () => {
+  it('document_verification', () => {
     cy.visit('/document-verification');
 
     cy.intercept(
@@ -352,7 +352,7 @@ describe('Preselected Country', () => {
       .should('be.visible');
   });
 
-  it.skip('document_verification', () => {
+  it('document_verification', () => {
     cy.visit('/document-verification-pre-select-country');
 
     cy.intercept(
@@ -608,7 +608,7 @@ describe('Preselected Country and ID Type', () => {
       .should('contain', 'Bank Verification');
   });
 
-  it.skip('document_verification', () => {
+  it('document_verification', () => {
     cy.visit('/document-verification-pre-select-id-type');
 
     cy.intercept(

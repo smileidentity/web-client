@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Payload signing
 - Collect more metadata for fraud analysis
+- Fixed DocV form submission
 
 ## [10.0.6] - 2025-07-30
 

@@ -636,7 +636,7 @@ import getHeaders from './request';
       cache: 'no-cache',
       mode: 'cors',
       headers: {
-        ...(await getHeaders(data, config.partner_details.partner_id)),
+        ...(await getHeaders(payload, config.partner_details.partner_id)),
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },

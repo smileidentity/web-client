@@ -96,24 +96,33 @@ describe('enhanced document verification', () => {
       .find('document-capture-review#front-of-document-capture-review')
       .should('not.be.visible');
 
-    cy.wait('@getUploadURL')
-      .its('request.body')
-      .should((body) => {
-        const metadata = {};
-        body.metadata.forEach(({ name, value }) => {
-          metadata[name] = value;
-        });
-        expect(metadata.browser_version).to.match(/^\d+(\.\d+)+$/);
-        expect(metadata.selfie_image_origin).to.equal('front_camera');
-        expect(metadata.active_liveness_type).to.equal('smile');
-        expect(metadata.active_liveness_version).to.equal('0.0.1');
-        expect(metadata.fingerprint).to.be.a('string');
-        expect(metadata.user_agent).to.be.a('string');
-        expect(metadata.camera_name).to.be.a('string');
-        expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(
-          0,
-        );
+    cy.wait('@getUploadURL').should((interception) => {
+      // Check request body
+      const body = interception.request.body;
+      const metadata = {};
+      body.metadata.forEach(({ name, value }) => {
+        metadata[name] = value;
       });
+      expect(metadata.browser_version).to.match(/^\d+(\.\d+)+$/);
+      expect(metadata.selfie_image_origin).to.equal('front_camera');
+      expect(metadata.active_liveness_type).to.equal('smile');
+      expect(metadata.active_liveness_version).to.equal('0.0.1');
+      expect(metadata.fingerprint).to.be.a('string');
+      expect(metadata.user_agent).to.be.a('string');
+      expect(metadata.camera_name).to.be.a('string');
+      expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(0);
+
+      // Check request headers
+      const headers = interception.request.headers;
+      expect(headers).to.have.property('smileid-request-mac');
+      expect(headers['smileid-request-mac']).to.be.a('string');
+      expect(headers).to.have.property('smileid-request-timestamp');
+      expect(headers['smileid-request-timestamp']).to.match(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      );
+      expect(headers).to.have.property('smileid-partner-id');
+      expect(headers['smileid-partner-id']).to.be.a('string');
+    });
 
     cy.wait('@successfulUpload');
 

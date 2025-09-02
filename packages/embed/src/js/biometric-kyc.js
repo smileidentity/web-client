@@ -4,6 +4,7 @@ import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import getHeaders from './request';
 
 (function biometricKyc() {
   'use strict';
@@ -49,12 +50,14 @@ import { getMetadata } from './metadata';
   let fileToUpload;
   let uploadURL;
 
-  function postData(url = '', data = {}) {
+  async function postData(url = '', data = {}, shouldSignPayload = false) {
     return fetch(url, {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers: {
+        ...(shouldSignPayload &&
+          (await getHeaders(data, config.partner_details.partner_id))),
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
@@ -854,7 +857,7 @@ import { getMetadata } from './metadata';
     const URL = `${getEndpoint(config.environment)}/upload`;
 
     try {
-      const response = await postData(URL, payload);
+      const response = await postData(URL, payload, true);
       const json = await response.json();
 
       if (json.error) throw new Error(json.error);

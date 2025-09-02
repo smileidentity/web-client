@@ -7,8 +7,6 @@ on:
 permissions:
   id-token: write
   contents: read
-env:
-  CLOUDFRONT_DISTRIBUTION_ID: EI8YB0PV4ARZC
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -56,7 +54,7 @@ jobs:
           ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}
       - name: invalidate cloudfront smart-camera-web
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}/*" "/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}/*"
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}/*" "/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}/*"
   embed:
     # needs: [test]
     runs-on: ubuntu-latest
@@ -101,4 +99,4 @@ jobs:
           aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_EMBED }}
       - name: invalidate cloudfront embed
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.MAJOR_VERSION_EMBED }}/*"
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.MAJOR_VERSION_EMBED }}/*"

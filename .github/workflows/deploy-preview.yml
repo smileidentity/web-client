@@ -6,8 +6,6 @@ on:
       - opened
       - synchronize
 permissions: write-all
-env:
-  CLOUDFRONT_DISTRIBUTION_ID: EI8YB0PV4ARZC
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -76,7 +74,7 @@ jobs:
       - name: invalidate cloudfront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/${{ env.DEST_DIR_EMBED }}/*"
   full-stack:
     needs: [embed]

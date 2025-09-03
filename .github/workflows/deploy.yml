@@ -52,6 +52,9 @@ jobs:
         run: |
           aws s3 sync --follow-symlinks --delete \
           ./dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}
+      - name: invalidate cloudfront smart-camera-web
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}/*" "/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}/*"
   embed:
     # needs: [test]
     runs-on: ubuntu-latest
@@ -76,6 +79,12 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
         with:
           path: packages/embed
+      - name: set destination directory
+        id: set_destination
+        run: |
+          TAG=${{ steps.package-version.outputs.current-version }}
+          MAJOR_VERSION=$(echo "$TAG" | cut -d '.' -f 1)
+          echo "MAJOR_VERSION_EMBED=inline/v$MAJOR_VERSION" >> $GITHUB_OUTPUT
       - name: build application
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
@@ -87,6 +96,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: deploy to s3 / cloudfront
         run: |
-          TAG=${{ steps.package-version.outputs.current-version }}
-          MAJOR_VERSION=$(echo "$TAG" | cut -d '.' -f 1)
-          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/inline/v$MAJOR_VERSION
+          aws s3 sync --follow-symlinks --delete dist s3://${{ secrets.AWS_S3_BUCKET }}/${{ steps.set_destination.outputs.MAJOR_VERSION_EMBED }}
+      - name: invalidate cloudfront embed
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.MAJOR_VERSION_EMBED }}/*"

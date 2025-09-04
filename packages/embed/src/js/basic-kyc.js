@@ -2,6 +2,7 @@ import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
 import { version as sdkVersion } from '../../package.json';
+import getHeaders from './request';
 
 (function basicKyc() {
   'use strict';
@@ -37,12 +38,14 @@ import { version as sdkVersion } from '../../package.json';
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
-  function postData(url = '', data = {}) {
+  async function postData(url = '', data = {}, shouldSignPayload = false) {
     return fetch(url, {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers: {
+        ...(shouldSignPayload &&
+          (await getHeaders(data, config.partner_details.partner_id))),
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
@@ -836,7 +839,7 @@ import { version as sdkVersion } from '../../package.json';
     };
 
     const URL = `${getEndpoint(config.environment)}/v2/verify_async`;
-    const response = await postData(URL, payload);
+    const response = await postData(URL, payload, true);
     const json = await response.json();
 
     if (json.error) throw new Error(json.error);

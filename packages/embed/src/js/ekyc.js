@@ -2,7 +2,7 @@ import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
 import { version as sdkVersion } from '../../package.json';
-import getHeaders from './request';
+import { getHeaders } from './request';
 
 (function eKYC() {
   'use strict';

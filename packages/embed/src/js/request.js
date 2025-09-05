@@ -86,6 +86,31 @@ async function getHeaders(payload, partnerId, isBinary = false) {
   };
 }
 
+async function getZipSignature(fileDataForMac, partnerId) {
+  await initWasm();
+
+  const encoder = new TextEncoder();
+  const timestamp = new Date().toISOString();
+
+  const dataToSign = fileDataForMac.join('');
+  const payload = { data: dataToSign };
+
+  const headers = {
+    'smileid-request-timestamp': timestamp,
+    'smileid-partner-id': partnerId,
+  };
+
+  const { signature, timestamp: wasmTimestamp } = wasmModule.signDataPayload(
+    encoder.encode(JSON.stringify(payload)),
+    encoder.encode(JSON.stringify(headers)),
+  );
+
+  return {
+    timestamp: wasmTimestamp,
+    mac: signature,
+  };
+}
+
 // make the first call to initialize the WASM module
 initWasm();
 
@@ -96,4 +121,4 @@ setInterval(async () => {
   }
 }, GRACE_PERIOD);
 
-export default getHeaders;
+export { getHeaders, getZipSignature };

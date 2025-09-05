@@ -87,7 +87,6 @@ async function getHeaders(payload, partnerId, isBinary = false) {
 }
 
 async function getZipSignature(fileDataForMac, partnerId) {
-  // always check for WASM updates before signing
   await initWasm();
 
   const encoder = new TextEncoder();
@@ -101,7 +100,7 @@ async function getZipSignature(fileDataForMac, partnerId) {
     'smileid-partner-id': partnerId,
   };
 
-  const { signature, timestamp: wasmTimestamp } = wasmModule.signPayload(
+  const { signature, timestamp: wasmTimestamp } = wasmModule.signDataPayload(
     encoder.encode(JSON.stringify(payload)),
     encoder.encode(JSON.stringify(headers)),
   );

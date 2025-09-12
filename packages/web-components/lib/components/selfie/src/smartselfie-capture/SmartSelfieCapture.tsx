@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'preact/hooks';
 import { useSignal } from '@preact/signals';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 
 import { getBoolProp } from '../../../../utils/props';
 import { useFaceCapture, useCamera } from './hooks';

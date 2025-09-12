@@ -4,7 +4,7 @@ import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
-import getHeaders from './request';
+import { getHeaders, getZipSignature } from './request';
 
 (function biometricKyc() {
   'use strict';
@@ -814,25 +814,30 @@ import getHeaders from './request';
   async function createZip() {
     const zip = new JSZip();
 
-    zip.file(
-      'info.json',
-      JSON.stringify({
-        package_information: {
-          language: 'Hosted Web Integration',
-          apiVersion: {
-            buildNumber: 0,
-            majorVersion: 2,
-            minorVersion: 0,
-          },
+    const infoJson = JSON.stringify({
+      package_information: {
+        language: 'Hosted Web Integration',
+        apiVersion: {
+          buildNumber: 0,
+          majorVersion: 2,
+          minorVersion: 0,
         },
-        id_info,
-        images,
-      }),
-    );
+      },
+      id_info,
+      images,
+    });
+    zip.file('info.json', infoJson);
+    const fileDataForMac = [infoJson];
 
     try {
-      const zipFile = await zip.generateAsync({ type: 'blob' });
+      const securityInfo = await getZipSignature(
+        fileDataForMac,
+        config.partner_details.partner_id,
+      );
 
+      zip.file('security_info.json', JSON.stringify(securityInfo));
+
+      const zipFile = await zip.generateAsync({ type: 'blob' });
       return zipFile;
     } catch (error) {
       throw new Error('createZip failed', { cause: error });

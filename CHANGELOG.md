@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.0.0] - 2025-09-04
+
+### Changed
+
+- Payload signing on more endpoints
+
 ## [10.0.7] - 2025-08-29
 
 ### Changed

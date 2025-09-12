@@ -27,15 +27,15 @@
   },
   "homepage": "https://github.com/smileidentity/hosted-web-integration#readme",
   "dependencies": {
-    "@fingerprintjs/fingerprintjs": "^4.5.1",
+    "@fingerprintjs/fingerprintjs": "^4.6.2",
     "@sentry/browser": "^8.33.0",
     "@sentry/esbuild-plugin": "^2.22.3",
     "@smileid/web-components": "file:../web-components",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.18",
     "jszip": "^3.10.1",
     "proxycheck-ts": "^0.0.11",
-    "ua-parser-js": "^2.0.2",
-    "validate.js": "^0.13.1"
+    "ua-parser-js": "^2.0.5",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.12.46",
@@ -44,7 +44,7 @@
     "@types/mocha": "^10.0.10",
     "cross-env": "^7.0.3",
     "cypress": "^13.17.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.9",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

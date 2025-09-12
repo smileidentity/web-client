@@ -1,4 +1,4 @@
-import validate from 'validate.js';
+import { z } from 'zod';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
@@ -296,24 +296,33 @@ function getHumanSize(numberOfBytes) {
   }
 
   function validateInputs(payload) {
-    const validationConstraints = {
-      name: {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      },
-    };
+    const schema = z.object({
+      name: z.string().min(1, 'is required'),
+    });
 
-    const validation = validate(payload, validationConstraints);
+    try {
+      schema.parse(payload);
+      return null; // No validation errors
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Convert zod errors to the format expected by handleValidationErrors
+        const validationErrors = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0];
+          if (!validationErrors[field]) {
+            validationErrors[field] = [];
+          }
+          validationErrors[field].push(err.message);
+        });
 
-    if (validation) {
-      handleValidationErrors(validation);
-      const submitButton = PersonalInfoForm.querySelector("[type='button']");
-      submitButton.removeAttribute('disabled');
+        handleValidationErrors(validationErrors);
+        const submitButton = PersonalInfoForm.querySelector("[type='button']");
+        submitButton.removeAttribute('disabled');
+
+        return validationErrors;
+      }
+      throw error;
     }
-
-    return validation;
   }
 
   function handleValidationErrors(errors) {

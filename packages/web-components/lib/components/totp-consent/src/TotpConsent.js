@@ -1,4 +1,4 @@
-import validate from 'validate.js';
+import { z } from 'zod';
 
 function postData(url, data) {
   return fetch(url, {
@@ -691,23 +691,33 @@ class TotpConsent extends HTMLElement {
   }
 
   validateIdNumber(idNumber) {
-    const validationConstraints = {
-      id_number: {
-        format: new RegExp(this.idRegex),
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      },
-    };
+    const schema = z.object({
+      id_number: z
+        .string()
+        .min(1, 'is required')
+        .regex(new RegExp(this.idRegex), 'is invalid'),
+    });
 
-    const errors = validate({ id_number: idNumber }, validationConstraints);
+    try {
+      schema.parse({ id_number: idNumber });
+      return null; // No validation errors
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Convert zod errors to the format expected by handleIdNumberValidationErrors
+        const validationErrors = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0];
+          if (!validationErrors[field]) {
+            validationErrors[field] = [];
+          }
+          validationErrors[field].push(err.message);
+        });
 
-    if (errors) {
-      this.handleIdNumberValidationErrors(errors);
+        this.handleIdNumberValidationErrors(validationErrors);
+        return validationErrors;
+      }
+      throw error;
     }
-
-    return errors;
   }
 
   async queryOtpModes(event) {

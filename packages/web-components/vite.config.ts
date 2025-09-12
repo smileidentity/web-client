@@ -81,7 +81,7 @@ export default defineConfig(({ mode }) => {
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['signature_pad', 'validate.js'],
+      external: ['signature_pad'],
       output: {
         dir: 'dist/esm',
         entryFileNames: '[name].js',

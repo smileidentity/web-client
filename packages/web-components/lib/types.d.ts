@@ -1,8 +1,3 @@
-declare module 'validate.js' {
-  const validate: any;
-  export default validate;
-}
-
 declare module 'signature_pad' {
   export default class SignaturePad {
     constructor(canvas: HTMLCanvasElement, options?: any);

@@ -1,0 +1,86 @@
+name: audit
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+  web-components:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/web-components
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+  smart-camera-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/smart-camera-web
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+  embed:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/embed
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+  example:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./example
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+  previews:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./previews
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: set node version
+        uses: actions/setup-node@v4
+      - name: install dependencies
+        run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=moderate

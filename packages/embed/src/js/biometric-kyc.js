@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import validate from 'validate.js';
+import { z } from 'zod';
 import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
 import { version as sdkVersion } from '../../package.json';
@@ -659,8 +659,6 @@ import { getHeaders, getZipSignature } from './request';
   }
 
   function validateInputs(payload) {
-    const validationConstraints = {};
-
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
         .required_fields;
@@ -669,73 +667,65 @@ import { getHeaders, getZipSignature } from './request';
       fieldName.includes('id_number'),
     );
 
-    if (showIdNumber) {
-      validationConstraints.id_number = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-        format: new RegExp(
-          productConstraints[id_info.country].id_types[
-            id_info.id_type
-          ].id_number_regex,
-        ),
-      };
-    }
-
     const showNames = requiredFields.some((fieldName) =>
       fieldName.includes('name'),
     );
-
-    if (showNames) {
-      validationConstraints.first_name = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      };
-      validationConstraints.last_name = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      };
-    }
 
     const showDOB = requiredFields.some((fieldName) =>
       fieldName.includes('dob'),
     );
 
+    // Create dynamic zod schema based on required fields
+    let schemaObject = {};
+
+    if (showIdNumber) {
+      const idNumberRegex = new RegExp(
+        productConstraints[id_info.country].id_types[
+          id_info.id_type
+        ].id_number_regex,
+      );
+      schemaObject.id_number = z
+        .string()
+        .min(1, 'is required')
+        .regex(idNumberRegex, 'is invalid');
+    }
+
+    if (showNames) {
+      schemaObject.first_name = z.string().min(1, 'is required');
+      schemaObject.last_name = z.string().min(1, 'is required');
+    }
+
     if (showDOB) {
-      validationConstraints.day = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      };
-      validationConstraints.month = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      };
-      validationConstraints.year = {
-        presence: {
-          allowEmpty: false,
-          message: 'is required',
-        },
-      };
+      schemaObject.day = z.string().min(1, 'is required');
+      schemaObject.month = z.string().min(1, 'is required');
+      schemaObject.year = z.string().min(1, 'is required');
     }
 
-    const validation = validate(payload, validationConstraints);
+    const schema = z.object(schemaObject);
 
-    if (validation) {
-      handleValidationErrors(validation);
-      const submitButton = IDInfoForm.querySelector('[type="button"]');
-      submitButton.removeAttribute('disabled');
+    try {
+      schema.parse(payload);
+      return null; // No validation errors
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Convert zod errors to the format expected by handleValidationErrors
+        const validationErrors = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0];
+          if (!validationErrors[field]) {
+            validationErrors[field] = [];
+          }
+          validationErrors[field].push(err.message);
+        });
+
+        handleValidationErrors(validationErrors);
+        const submitButton = IDInfoForm.querySelector('[type="button"]');
+        submitButton.removeAttribute('disabled');
+
+        return validationErrors;
+      }
+      throw error;
     }
-
-    return validation;
   }
 
   function handleValidationErrors(errors) {

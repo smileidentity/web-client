@@ -30,6 +30,7 @@ describe('document verification', () => {
     cy.navigateThroughCameraScreens();
   });
 
+  // TODO: fix flakiness
   it.skip('should capture selfie and id image', () => {
     cy.getIFrameBody()
       .find('smart-camera-web')
@@ -176,6 +177,7 @@ describe('legacy support - preselected country / id_types', () => {
       .should('be.visible');
   });
 
+  // TODO: fix flakiness
   it.skip('should allow legacy id_types without capturing the back', () => {
     cy.selectZAGREENBOOKIDType();
 

@@ -111,6 +111,7 @@ describe('No ID Selection', () => {
       .should('contain', 'Bank Verification');
   });
 
+  // TODO: fix flakiness
   it.skip('document_verification', () => {
     cy.visit('/document-verification');
 
@@ -361,6 +362,7 @@ describe('Preselected Country', () => {
       .should('be.visible');
   });
 
+  // TODO: fix flakiness
   it.skip('document_verification', () => {
     cy.visit('/document-verification-pre-select-country');
 
@@ -617,6 +619,7 @@ describe('Preselected Country and ID Type', () => {
       .should('contain', 'Bank Verification');
   });
 
+  // TODO: fix flakiness
   it.skip('document_verification', () => {
     cy.visit('/document-verification-pre-select-id-type');
 

@@ -2,7 +2,7 @@ import { useRef } from 'preact/hooks';
 import { useSignal, useComputed } from '@preact/signals';
 import type { RefObject } from 'preact';
 import { FaceLandmarker } from '@mediapipe/tasks-vision';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import {
   calculateFaceSize,
   isFaceInBounds,

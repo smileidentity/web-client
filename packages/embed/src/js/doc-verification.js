@@ -712,9 +712,8 @@ import { getHeaders, getZipSignature } from './request';
   }
 
   function handleSuccess() {
-    (referenceWindow.parent || referenceWindow).postMessage(
-      'SmileIdentity::Success',
-      '*',
-    );
+    [referenceWindow.parent, referenceWindow].forEach((win) => {
+      win.postMessage('SmileIdentity::Success', '*');
+    });
   }
 })();

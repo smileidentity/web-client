@@ -44,10 +44,9 @@ function getHumanSize(numberOfBytes) {
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
   function handleSuccess() {
-    (referenceWindow.parent || referenceWindow).postMessage(
-      'SmileIdentity::Success',
-      '*',
-    );
+    [referenceWindow.parent, referenceWindow].forEach((win) => {
+      win.postMessage('SmileIdentity::Success', '*');
+    });
   }
 
   function handleBadDocuments(error) {

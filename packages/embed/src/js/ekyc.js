@@ -869,7 +869,9 @@ import { getHeaders } from './request';
 
   function handleSuccess() {
     [referenceWindow.parent, referenceWindow].forEach((win) => {
-      win.postMessage('SmileIdentity::Success', '*');
+      if (win) {
+        win.postMessage('SmileIdentity::Success', '*');
+      }
     });
   }
 })();

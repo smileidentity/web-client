@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed events not sent to parent window when presented in an iframe
-  
+
 ## [11.0.0] - 2025-09-04
 
 ### Changed

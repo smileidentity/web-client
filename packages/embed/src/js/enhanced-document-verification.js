@@ -305,7 +305,7 @@ import { getHeaders, getZipSignature } from './request';
   SmartCameraWeb.addEventListener(
     'smart-camera-web.close',
     () => {
-      closeWindow();
+      closeWindow(true);
     },
     false,
   );
@@ -322,7 +322,7 @@ import { getHeaders, getZipSignature } from './request';
     button.addEventListener(
       'click',
       () => {
-        closeWindow();
+        closeWindow(true);
       },
       false,
     );
@@ -513,11 +513,15 @@ import { getHeaders, getZipSignature } from './request';
     return fileUploaded;
   }
 
-  function closeWindow() {
-    (referenceWindow.parent || referenceWindow).postMessage(
-      'SmileIdentity::Close',
-      '*',
-    );
+  function closeWindow(userTriggered) {
+    const message = userTriggered
+      ? 'SmileIdentity::Close'
+      : 'SmileIdentity::Close::System';
+    [referenceWindow.parent, referenceWindow].forEach((win) => {
+      if (win) {
+        win.postMessage(message, '*');
+      }
+    });
   }
 
   function handleSuccess() {

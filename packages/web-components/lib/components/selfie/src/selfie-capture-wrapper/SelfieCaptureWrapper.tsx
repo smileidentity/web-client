@@ -5,7 +5,9 @@ import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '@/utils/props';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
+// Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';
+// Mediapipe loader/manager used by SmartSelfieCapture
 import { getMediapipeInstance } from '../smartselfie-capture/utils/mediapipeManager';
 
 interface Props {
@@ -23,12 +25,17 @@ interface Props {
   hidden?: string | boolean;
 }
 
+
+// Wrapper component that decides whether to use the modern
+// SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
+// web component after a timeout of 20 seconds. 
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   timeout = 20000,
   'start-countdown': startCountdownProp = false,
   hidden: hiddenProp = false,
   ...props
 }) => {
+  // Detect if tests are running under Cypress/Electron (affects loading behavior)
   const isParentCypress = (() => {
     try {
       return (
@@ -48,12 +55,21 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
+  // Component state:
+  // - mediapipeReady: whether the mediapipe instance has successfully loaded
+  // - loadingProgress: percentage used for the visible loading UI
+  // - initialSessionCompleted: set when the legacy component emits publish/cancel/close
+  // - mediapipeLoading: true while attempting to load mediapipe
+  // - usingSelfieCapture: whether we've mounted the legacy `selfie-capture` element
   const [mediapipeReady, setMediapipeReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
+  // Attempt to load Mediapipe (once). If Mediapipe is already ready, loading,
+  // or running under Cypress, skip the attempt. This side-effect flips
+  // mediapipeReady/mediapipeLoading flags which control which component is used.
   useEffect(() => {
     if (mediapipeReady || mediapipeLoading || isCypress) return;
 
@@ -63,6 +79,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         await getMediapipeInstance();
         setMediapipeReady(true);
       } catch (error) {
+        // Loading failed; we'll fall back to the legacy selfie-capture component
+        // after the loadingProgress reaches 100%.
         console.error('Failed to load Mediapipe:', error);
       }
       setMediapipeLoading(false);
@@ -71,6 +89,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     loadMediapipe();
   }, [mediapipeReady, mediapipeLoading]);
 
+  // When using the loading countdown (startCountdown), increment the
+  // visible loading progress. This is only used while mediapipe hasn't
+  // reported ready; once mediapipeReady becomes true we stop the timer.
   useEffect(() => {
     if (hidden || !startCountdown || mediapipeReady) return undefined;
 
@@ -135,6 +156,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     };
   }, [hidden, mediapipeReady, loadingProgress]);
 
+  // Announce to any `smart-camera-web` element which liveness version is active.
+  // The old capture users 0.0.1, the new one 1.0.0.
   useEffect(() => {
     if (hidden || mediapipeLoading) return;
 
@@ -162,7 +185,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return <SmartSelfieCapture {...props} />;
   }
 
-  if (loadingProgress >= 100) {
+    if (loadingProgress >= 100) {
+    // When loading completes without Mediapipe becoming ready, mount the legacy
+    // `selfie-capture` web component. We also set `usingSelfieCapture` so other
+    // effects can react (e.g. metadata dispatch).
     if (!usingSelfieCapture) {
       setUsingSelfieCapture(true);
     }

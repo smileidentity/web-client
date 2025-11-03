@@ -1,6 +1,6 @@
 {
   "name": "@smileid/signature-pad",
-  "version": "11.0.1",
+  "version": "11.0.2",
   "private": "true",
   "exports": {
     ".": "./index.js"

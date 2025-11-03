@@ -1,5 +1,5 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
-const excluded_devices = ['sm-s911b', 'sm-s918b'];
+const EXCLUDED_DEVICES = ['sm-s911b', 'sm-s918b'];
 
 declare global {
   interface Window {
@@ -36,15 +36,8 @@ const hasFP16Support = () => {
  */
 const isExcludedDevice = (): boolean => {
   if (typeof navigator === 'undefined' || !navigator.userAgent) return false;
-
   const ua = navigator.userAgent.toLowerCase();
-
-  for (const device of excluded_devices) {
-    if (ua.includes(device)) {
-      return true;
-    }
-  }
-  return false;
+  return EXCLUDED_DEVICES.some((device) => ua.includes(device));
 };
 
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {

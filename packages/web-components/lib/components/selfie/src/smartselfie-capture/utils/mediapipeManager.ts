@@ -13,7 +13,6 @@ declare global {
   }
 }
 
-
 /**
  * @description Detects if the user is on an excluded device using the modern and more accurate
  * User-Agent Client Hints (UA-CH) API to get the device model.
@@ -24,7 +23,9 @@ const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
   if (typeof navigator !== 'undefined' && navigator.userAgentData) {
     try {
       // Request the 'model' high-entropy value
-      const data = await navigator.userAgentData.getHighEntropyValues(["model"]);
+      const data = await navigator.userAgentData.getHighEntropyValues([
+        'model',
+      ]);
       const model = data.model;
       if (!model) {
         return false;
@@ -39,7 +40,6 @@ const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
 
   return false;
 };
-  
 
 // this was added because devices (mostly older) that do not support FP16 will fail to load the model.
 const hasFP16Support = () => {
@@ -58,7 +58,6 @@ const hasFP16Support = () => {
 
   return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
 };
-
 
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
   if (!window.__smileIdentityMediapipe) {

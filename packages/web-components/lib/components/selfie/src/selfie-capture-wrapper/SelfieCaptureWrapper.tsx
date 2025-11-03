@@ -25,10 +25,9 @@ interface Props {
   hidden?: string | boolean;
 }
 
-
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
-// web component after a timeout of 20 seconds. 
+// web component after a timeout of 20 seconds.
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   timeout = 20000,
   'start-countdown': startCountdownProp = false,
@@ -185,7 +184,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return <SmartSelfieCapture {...props} />;
   }
 
-    if (loadingProgress >= 100) {
+  if (loadingProgress >= 100) {
     // When loading completes without Mediapipe becoming ready, mount the legacy
     // `selfie-capture` web component. We also set `usingSelfieCapture` so other
     // effects can react (e.g. metadata dispatch).

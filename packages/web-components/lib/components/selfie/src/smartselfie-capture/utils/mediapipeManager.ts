@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+
 const EXCLUDED_DEVICES = ['sm-s911b', 'sm-s918b'];
 
 declare global {
@@ -11,7 +12,7 @@ declare global {
   }
 }
 
-// this was added because devices (mostly older) that do not support FP16 will fail to load the model. 
+// this was added because devices (mostly older) that do not support FP16 will fail to load the model.
 const hasFP16Support = () => {
   const canvas = document.createElement('canvas');
   const gl =

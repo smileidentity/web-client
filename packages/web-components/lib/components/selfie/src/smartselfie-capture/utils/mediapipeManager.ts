@@ -96,7 +96,7 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: isExcluded() || !hasFP16Support() ? 'CPU' : 'GPU',
+          delegate: isExcluded || !hasFP16Support() ? 'CPU' : 'GPU',
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

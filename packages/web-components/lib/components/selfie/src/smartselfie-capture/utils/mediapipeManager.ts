@@ -1,6 +1,7 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_DEVICES = ['sm-s911b', 'sm-s918b'];
+//  SM-S931 (for the standard S25), SM-S936 (for the S25+), and SM-S938 (for the S25 Ultra)
+const EXCLUDED_DEVICES = ['sm-s936', 'sm-s931', 'sm-s938'];
 
 declare global {
   interface Window {
@@ -11,6 +12,34 @@ declare global {
     };
   }
 }
+
+
+/**
+ * @description Detects if the user is on an excluded device using the modern and more accurate
+ * User-Agent Client Hints (UA-CH) API to get the device model.
+ * @returns {Promise<boolean>} - True if the device model is in the exclusion list.
+ */
+const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
+  // Check for User-Agent Client Hints API support
+  if (typeof navigator !== 'undefined' && navigator.userAgentData) {
+    try {
+      // Request the 'model' high-entropy value
+      const data = await navigator.userAgentData.getHighEntropyValues(["model"]);
+      const model = data.model;
+      if (!model) {
+        return false;
+      }
+      // Check if the extracted model string matches any of the excluded prefixes
+      const lowerModel = model.toLowerCase();
+      return EXCLUDED_DEVICES.some((prefix) => lowerModel.includes(prefix));
+    } catch (error) {
+      return false;
+    }
+  }
+
+  return false;
+};
+  
 
 // this was added because devices (mostly older) that do not support FP16 will fail to load the model.
 const hasFP16Support = () => {
@@ -30,16 +59,6 @@ const hasFP16Support = () => {
   return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
 };
 
-/**
- * Detects if the user is on a an excluded device eg Samsung Galaxy S25 or S25 Ultra device.
- * This uses the User-Agent string for identification.
- * The reason for this is tied to the mediapipe (see here bug https://github.com/google-ai-edge/mediapipe/issues/5908)
- */
-const isExcludedDevice = (): boolean => {
-  if (typeof navigator === 'undefined' || !navigator.userAgent) return false;
-  const ua = navigator.userAgent.toLowerCase();
-  return EXCLUDED_DEVICES.some((device) => ua.includes(device));
-};
 
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
   if (!window.__smileIdentityMediapipe) {
@@ -66,10 +85,12 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
         'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
       );
 
+      const isExcluded = await isExcludedDeviceUsingHints();
+
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: isExcludedDevice() || !hasFP16Support() ? 'CPU' : 'GPU',
+          delegate: isExcluded() || !hasFP16Support() ? 'CPU' : 'GPU',
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

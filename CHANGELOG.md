@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fixed face detection glitches for Samsung S25 devices 
+- Fixed face detection glitches for Samsung S25 devices
 
 ## [11.0.1] - 2025-10-16
 

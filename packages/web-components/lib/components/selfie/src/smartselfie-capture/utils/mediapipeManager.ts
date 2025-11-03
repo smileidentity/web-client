@@ -22,24 +22,28 @@ const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
   // Check for User-Agent Client Hints API support
   if (typeof navigator !== 'undefined' && navigator.userAgentData) {
     try {
-      // Request the 'model' high-entropy value
-      const data = await navigator.userAgentData.getHighEntropyValues([
-        'model',
-      ]);
-      const model = data.model;
+      // Request the 'model' high-entropy value and destructure it directly
+      const { model } = await navigator.userAgentData.getHighEntropyValues(["model"]);
+
       if (!model) {
         return false;
       }
-      // Check if the extracted model string matches any of the excluded prefixes
+      
       const lowerModel = model.toLowerCase();
+
+      // Check if the extracted model string matches any of the excluded prefixes
       return EXCLUDED_DEVICES.some((prefix) => lowerModel.includes(prefix));
+
     } catch (error) {
+      // Log the error but fail safe (return false)
+      console.warn("UA-CH model fetch failed, falling back to UA string check.", error);
       return false;
     }
   }
-
+  // If API is not supported, return false (rely on synchronous isExcludedDevice)
   return false;
 };
+
 
 // this was added because devices (mostly older) that do not support FP16 will fail to load the model.
 const hasFP16Support = () => {

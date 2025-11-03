@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+const excluded_devices = ['sm-s911b', 'sm-s918b'];
 
 declare global {
   interface Window {
@@ -10,6 +11,7 @@ declare global {
   }
 }
 
+// this was added because devices (mostly older) that do not support FP16 will fail to load the model. 
 const hasFP16Support = () => {
   const canvas = document.createElement('canvas');
   const gl =
@@ -25,6 +27,24 @@ const hasFP16Support = () => {
   );
 
   return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
+};
+
+/**
+ * Detects if the user is on a an excluded device eg Samsung Galaxy S25 or S25 Ultra device.
+ * This uses the User-Agent string for identification.
+ * The reason for this is tied to the mediapipe (see here bug https://github.com/google-ai-edge/mediapipe/issues/5908)
+ */
+const isExcludedDevice = (): boolean => {
+  if (typeof navigator === 'undefined' || !navigator.userAgent) return false;
+
+  const ua = navigator.userAgent.toLowerCase();
+
+  for (const device of excluded_devices) {
+    if (ua.includes(device)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
@@ -55,7 +75,7 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: hasFP16Support() ? 'GPU' : 'CPU',
+          delegate: isExcludedDevice() || !hasFP16Support() ? 'CPU' : 'GPU',
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

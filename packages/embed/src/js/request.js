@@ -56,59 +56,62 @@ async function initWasm(forceRefetch = false) {
         wasmInitPromise = null;
       }
     })();
-
-    return wasmInitPromise;
   }
+  return wasmInitPromise;
 }
 
 async function getHeaders(payload, partnerId, isBinary = false) {
   // always check for WASM updates before signing
-  await initWasm();
+  // await initWasm();
 
-  const encoder = new TextEncoder();
-  const timestamp = new Date().toISOString();
-  const headers = {
-    'smileid-request-timestamp': timestamp,
-    'smileid-partner-id': partnerId,
-  };
+  // const encoder = new TextEncoder();
+  // const timestamp = new Date().toISOString();
+  // const headers = {
+  //   'smileid-request-timestamp': timestamp,
+  //   'smileid-partner-id': partnerId,
+  // };
 
-  const { signature } = wasmModule.signPayload(
-    isBinary
-      ? new Uint8Array(payload)
-      : encoder.encode(JSON.stringify(payload)),
-    encoder.encode(JSON.stringify(headers)),
-  );
+  // const { signature } = wasmModule.signPayload(
+  //   isBinary
+  //     ? new Uint8Array(payload)
+  //     : encoder.encode(JSON.stringify(payload)),
+  //   encoder.encode(JSON.stringify(headers)),
+  // );
 
-  return {
-    'SmileID-Request-Mac': signature,
-    'SmileID-Request-Timestamp': timestamp,
-    'SmileID-Partner-ID': partnerId,
-  };
+  // return {
+  //   'SmileID-Request-Mac': signature,
+  //   'SmileID-Request-Timestamp': timestamp,
+  //   'SmileID-Partner-ID': partnerId,
+  // };
+
+  return { isBinary };
 }
 
 async function getZipSignature(fileDataForMac, partnerId) {
-  await initWasm();
+  // await initWasm();
 
-  const encoder = new TextEncoder();
+  // const encoder = new TextEncoder();
   const timestamp = new Date().toISOString();
 
-  const dataToSign = fileDataForMac.join('');
-  const payload = { data: dataToSign };
+  // const dataToSign = fileDataForMac.join('');
+  // const payload = { data: dataToSign };
 
   const headers = {
     'smileid-request-timestamp': timestamp,
     'smileid-partner-id': partnerId,
   };
 
-  const { signature, timestamp: wasmTimestamp } = wasmModule.signDataPayload(
-    encoder.encode(JSON.stringify(payload)),
-    encoder.encode(JSON.stringify(headers)),
-  );
+  // const { signature, timestamp: wasmTimestamp } = wasmModule.signDataPayload(
+  //   encoder.encode(JSON.stringify(payload)),
+  //   encoder.encode(JSON.stringify(headers)),
+  // );
 
-  return {
-    timestamp: wasmTimestamp,
-    mac: signature,
-  };
+  // return {
+  //   timestamp: wasmTimestamp,
+  //   mac: signature,
+  // };
+
+  return headers;
 }
 
 // make the first call to initialize the WASM module

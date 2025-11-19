@@ -862,7 +862,7 @@ import { getHeaders, getZipSignature } from './request';
     const URL = `${getEndpoint(config.environment)}/upload`;
 
     try {
-      const response = await postData(URL, payload, true);
+      const response = await postData(URL, payload, false);
       const json = await response.json();
 
       if (json.error) throw new Error(json.error);

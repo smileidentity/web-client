@@ -3,40 +3,40 @@
 /* eslint-disable */
 /* deno-fmt-ignore-file */
 
-declare module "sst" {
+declare module 'sst' {
   export interface Resource {
-    "CallbackUrl": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "EmbedUrl": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GetToken": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
-    }
-    "PartnerId": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "PreviewApp": {
-      "type": "sst.aws.Remix"
-      "url": string
-    }
-    "SmileIdApiKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SmileIdEnvironment": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
+    CallbackUrl: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    EmbedUrl: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    GetToken: {
+      name: string;
+      type: 'sst.aws.Function';
+      url: string;
+    };
+    PartnerId: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    PreviewApp: {
+      type: 'sst.aws.Remix';
+      url: string;
+    };
+    SmileIdApiKey: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    SmileIdEnvironment: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
   }
 }
 /// <reference path="sst-env.d.ts" />
 
-import "sst"
-export {}
+import 'sst';
+export {};

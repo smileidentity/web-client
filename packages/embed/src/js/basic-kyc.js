@@ -839,7 +839,7 @@ import { getHeaders } from './request';
     };
 
     const URL = `${getEndpoint(config.environment)}/v2/verify_async`;
-    const response = await postData(URL, payload, false);
+    const response = await postData(URL, payload, true);
     const json = await response.json();
 
     if (json.error) throw new Error(json.error);

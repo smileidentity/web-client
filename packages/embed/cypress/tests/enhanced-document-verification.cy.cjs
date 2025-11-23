@@ -117,15 +117,15 @@ describe('enhanced document verification', () => {
       expect(Number(metadata.selfie_capture_duration_ms)).to.be.greaterThan(0);
 
       // Check request headers
-      // const headers = interception.request.headers;
-      // // expect(headers).to.have.property('smileid-request-mac');
-      // // expect(headers['smileid-request-mac']).to.be.a('string');
-      // expect(headers).to.have.property('smileid-request-timestamp');
-      // expect(headers['smileid-request-timestamp']).to.match(
-      //   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
-      // );
-      // expect(headers).to.have.property('smileid-partner-id');
-      // expect(headers['smileid-partner-id']).to.be.a('string');
+      const headers = interception.request.headers;
+      expect(headers).to.have.property('smileid-request-mac');
+      expect(headers['smileid-request-mac']).to.be.a('string');
+      expect(headers).to.have.property('smileid-request-timestamp');
+      expect(headers['smileid-request-timestamp']).to.match(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      );
+      expect(headers).to.have.property('smileid-partner-id');
+      expect(headers['smileid-partner-id']).to.be.a('string');
     });
 
     cy.wait('@successfulUpload');

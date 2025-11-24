@@ -48,7 +48,7 @@ async function initWasm(forceRefetch = false) {
 
         const newModule = await import(`${JS_PATH}${cacheBuster}`);
 
-        newModule.initSync({ module: wasmBuffer });
+        await newModule.default(wasmBuffer);
 
         wasmModule = newModule;
         lastFetchTime = now;

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Fixed submission issue on Huawei browser
+- Fixed submission issue on Xaomi (MI) browser
+
 ## [11.0.2] - 2025-11-03
 
 ### Changed

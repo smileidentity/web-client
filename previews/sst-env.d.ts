@@ -2,11 +2,14 @@
 /* tslint:disable */
 /* eslint-disable */
 /* deno-fmt-ignore-file */
-import 'sst';
-export {};
+
 declare module 'sst' {
   export interface Resource {
     CallbackUrl: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    EmbedUrl: {
       type: 'sst.sst.Secret';
       value: string;
     };
@@ -33,3 +36,7 @@ declare module 'sst' {
     };
   }
 }
+/// <reference path="sst-env.d.ts" />
+
+import 'sst';
+export {};

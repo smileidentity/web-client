@@ -100,67 +100,71 @@ const handleDeviceOrientationChange = () => {
 };
 
 const getLocalIP = () => {
-  const pc = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  });
+  try {
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
 
-  pc.createDataChannel('');
+    pc.createDataChannel('');
 
-  return new Promise((resolve) => {
-    let resolved = false;
-    const ips = [];
+    return new Promise((resolve) => {
+      let resolved = false;
+      const ips = [];
 
-    const cleanup = () => {
-      if (!resolved) {
-        resolved = true;
-        pc.onicecandidate = null;
-        pc.close();
-      }
-    };
+      const cleanup = () => {
+        if (!resolved) {
+          resolved = true;
+          pc.onicecandidate = null;
+          pc.close();
+        }
+      };
 
-    const isPrivateIP = (ip) => {
-      return /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.)/.test(ip);
-    };
+      const isPrivateIP = (ip) => {
+        return /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.)/.test(ip);
+      };
 
-    const selectBestIP = () => {
-      if (ips.length === 0) return null;
+      const selectBestIP = () => {
+        if (ips.length === 0) return null;
 
-      const publicIPs = ips.filter((ip) => !isPrivateIP(ip));
-      return publicIPs.length > 0 ? publicIPs[0] : ips[0];
-    };
+        const publicIPs = ips.filter((ip) => !isPrivateIP(ip));
+        return publicIPs.length > 0 ? publicIPs[0] : ips[0];
+      };
 
-    pc.onicecandidate = (evt) => {
-      if (resolved) return;
+      pc.onicecandidate = (evt) => {
+        if (resolved) return;
 
-      if (!evt.candidate) {
+        if (!evt.candidate) {
+          cleanup();
+          resolve(selectBestIP());
+          return;
+        }
+
+        const match = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/.exec(
+          evt.candidate.candidate,
+        );
+        if (match) {
+          const ip = match[1];
+          if (!ips.includes(ip)) {
+            ips.push(ip);
+          }
+        }
+      };
+
+      pc.createOffer()
+        .then((offer) => pc.setLocalDescription(offer))
+        .catch(() => {
+          cleanup();
+          resolve(null);
+        });
+
+      setTimeout(() => {
         cleanup();
         resolve(selectBestIP());
-        return;
-      }
-
-      const match = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/.exec(
-        evt.candidate.candidate,
-      );
-      if (match) {
-        const ip = match[1];
-        if (!ips.includes(ip)) {
-          ips.push(ip);
-        }
-      }
-    };
-
-    pc.createOffer()
-      .then((offer) => pc.setLocalDescription(offer))
-      .catch(() => {
-        cleanup();
-        resolve(null);
-      });
-
-    setTimeout(() => {
-      cleanup();
-      resolve(selectBestIP());
-    }, 1500);
-  });
+      }, 1500);
+    });
+  } catch (error) {
+    return Promise.resolve(null);
+  }
 };
 
 const getWebGLRenderer = () => {

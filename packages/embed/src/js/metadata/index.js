@@ -163,6 +163,7 @@ const getLocalIP = () => {
       }, 1500);
     });
   } catch (error) {
+    console.warn('RTCPeerConnection not available or failed:', error);
     return Promise.resolve(null);
   }
 };

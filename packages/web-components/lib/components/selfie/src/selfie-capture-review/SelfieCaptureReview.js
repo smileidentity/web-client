@@ -1,5 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { t, loadLocale } from '../../../../i18n.js';
 
 function templateString() {
   return `
@@ -58,7 +59,7 @@ function templateString() {
     <div id='selfie-capture-review-screen' class='center'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color font-bold">
-      Is your whole face clear?
+      ${t('selfie.review.question')}
     </h1>
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -76,10 +77,10 @@ function templateString() {
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-          Yes, use this
+          ${t('selfie.review.acceptButton')}
         </button>
         <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-image'>
-          No, Retake Selfie
+          ${t('selfie.review.retakeButton')}
         </button>
       </div>
       ${
@@ -104,6 +105,9 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   connectedCallback() {
+    if (!window.SmileI18n || !window.SmileI18n.locales) {
+      loadLocale('en', null).catch(() => {});
+    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
     this.shadowRoot.innerHTML = '';

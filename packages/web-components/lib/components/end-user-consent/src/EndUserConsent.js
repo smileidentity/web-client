@@ -1,6 +1,7 @@
 import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 import '../../attribution/PoweredBySmileId';
+import { t, loadLocale } from '../../../i18n.js';
 
 function templateString() {
   return `
@@ -598,6 +599,9 @@ class EndUserConsent extends HTMLElement {
 
   connectedCallback() {
     this.pages = [];
+    if (!window.SmileI18n || !window.SmileI18n.locales) {
+      loadLocale('en', null).catch(() => {});
+    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
 

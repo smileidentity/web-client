@@ -1,5 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { t, loadLocale } from '../../../../i18n.js';
 
 function templateString() {
   return `
@@ -370,7 +371,7 @@ function templateString() {
               </clipPath>
             </defs>
           </svg>
-          <h1 class='title-color font-bold'>Next, we'll take a quick selfie</h1>
+          <h1 class='title-color font-bold'>${t('selfie.instructions.title')}</h1>
         </header>
     <div class="instructions-wrapper">
       <div class="instructions">
@@ -449,9 +450,9 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">Good Light</p>
+          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.goodLight.header')}</p>
           <p class="tip-body">
-            Make sure you are in a well-lit environment.
+            ${t('selfie.instructions.tips.goodLight.body')}
           </p>
         </div>
       </div>
@@ -537,9 +538,9 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">Clear Image</p>
+          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.clearImage.header')}</p>
           <p class="tip-body">
-            Hold your phone steady so the selfie is clear and sharp.
+            ${t('selfie.instructions.tips.clearImage.body')}
           </p>
         </div>
       </div>
@@ -569,25 +570,25 @@ function templateString() {
           />
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">Remove Obstructions</p>
+          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.removeObstructions.header')}</p>
           <p class="tip-body">
-            Remove anything that covers your face, such as glasses, masks, and hats.
+            ${t('selfie.instructions.tips.removeObstructions.body')}
           </p>
         </div>
       </div>
       <div class="instructions">
         <svg  xmlns="http://www.w3.org/2000/svg"  width="38"  height="38"  viewBox="0 0 24 24"  fill="none"  stroke="${this.themeColor}"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-mood-happy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">Wide Smile</p>
+          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.wideSmile.header')}</p>
           <p class="tip-body">
-            When asked to smile, give a wide smile, showing your teeth.
+            ${t('selfie.instructions.tips.wideSmile.body')}
           </p>
         </div>
       </div>
     </div>
     <section class="controls">
       <button id='allow' data-variant='solid full-width' class='button theme-background'>
-        Allow
+        ${t('selfie.instructions.allowButton')}
       </button>
     </section>
     ${
@@ -616,6 +617,9 @@ class SelfieCaptureInstructions extends HTMLElement {
 
   connectedCallback() {
     this.pages = [];
+    if (!window.SmileI18n || !window.SmileI18n.locales) {
+      loadLocale('en', null).catch(() => {});
+    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
 

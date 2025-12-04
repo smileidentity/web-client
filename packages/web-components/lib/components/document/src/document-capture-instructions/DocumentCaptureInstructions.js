@@ -1,6 +1,7 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { t, loadLocale } from '../../../../i18n.js';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -201,10 +202,10 @@ function templateString() {
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
             <h1 class='title-color font-bold'>${this.title}</h1>
         <p class="description text-sm font-normal">
-            We'll use it to verify your identity.
+            ${t('document.instructions.description')}
           </p>
           <p class="description padding-bottom-2">
-          Please follow the instructions below.
+          ${t('document.instructions.followInstructions')}
           </p>
         </header>
         <div class="instructions-wrapper">
@@ -430,6 +431,9 @@ class DocumentInstruction extends HTMLElement {
   }
 
   connectedCallback() {
+    if (!window.SmileI18n || !window.SmileI18n.locales) {
+      loadLocale('en', null).catch(() => {});
+    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
 

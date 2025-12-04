@@ -1,0 +1,44 @@
+{
+  "direction": "ltr",
+  "camera": {
+    "permission": {
+      "description": "We need access to your camera so that we can capture your details.",
+      "requestButton": "Request Camera Access"
+    }
+  },
+  "selfie": {
+    "instructions": {
+      "title": "Next, we'll take a quick selfie",
+      "allowButton": "Allow",
+      "tips": {
+        "goodLight": {
+          "header": "Good Light",
+          "body": "Make sure you are in a well-lit environment."
+        },
+        "clearImage": {
+          "header": "Clear Image",
+          "body": "Hold your phone steady so the selfie is clear and sharp."
+        },
+        "removeObstructions": {
+          "header": "Remove Obstructions",
+          "body": "Remove anything that covers your face, such as glasses, masks, and hats."
+        },
+        "wideSmile": {
+          "header": "Wide Smile",
+          "body": "When asked to smile, give a wide smile, showing your teeth."
+        }
+      }
+    },
+    "review": {
+      "question": "Is your whole face clear?",
+      "acceptButton": "Yes, use this",
+      "retakeButton": "No, Retake Selfie"
+    }
+  },
+  "document": {
+    "instructions": {
+      "description": "We'll use it to verify your identity.",
+      "followInstructions": "Please follow the instructions below."
+    }
+  }
+}

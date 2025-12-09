@@ -2,7 +2,7 @@ import SmartCamera from '../../domain/camera/src/SmartCamera';
 import styles from '../../styles/src/styles';
 import '../attribution/PoweredBySmileId';
 import '../navigation/src';
-import { t, loadLocale } from '../../i18n.js';
+import { t } from '../../i18n';
 
 function templateString() {
   return `
@@ -88,9 +88,6 @@ class CameraPermission extends HTMLElement {
     this.templateString = templateString.bind(this);
     this.render = () => this.templateString();
     this.attachShadow({ mode: 'open' });
-    if (!window.SmileI18n || !window.SmileI18n.locales) {
-      loadLocale('en', null).catch(() => {});
-    }
     this.shadowRoot.innerHTML = this.render();
     this.setUpEventListeners();
   }

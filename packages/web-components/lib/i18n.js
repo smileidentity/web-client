@@ -3,8 +3,16 @@
  * Provides simple locale registration, loading, and translation lookup.
  */
 
-let currentLocale = 'en';
-const locales = {};
+// Default English locale - bundled for offline/fallback support
+import defaultLocale from '../locales/en.json';
+
+const DEFAULT_LOCALE = 'en';
+const FETCH_TIMEOUT_MS = 5000;
+
+let currentLocale = DEFAULT_LOCALE;
+const locales = {
+  [DEFAULT_LOCALE]: defaultLocale, // Pre-register bundled English locale
+};
 
 /**
  * Register a locale object (in-memory).
@@ -16,6 +24,24 @@ export function registerLocale(lang, data) {
 }
 
 /**
+ * Fetch with timeout wrapper.
+ * @param {string} url - URL to fetch
+ * @param {number} timeout - Timeout in milliseconds
+ * @returns {Promise<Response>} Fetch response
+ */
+async function fetchWithTimeout(url, timeout = FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
  * Register a locale by URL (fetch and cache).
  * @param {string} lang - Language code
  * @param {string} url - URL to locale JSON file
@@ -23,13 +49,24 @@ export function registerLocale(lang, data) {
  */
 export async function registerLocaleUrl(lang, url) {
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to load locale from ${url}: ${response.status}`);
+    const response = await fetchWithTimeout(url);
+    if (!response.ok) {
+      throw new Error(`Failed to load locale from ${url}: ${response.status}`);
+    }
     const data = await response.json();
     registerLocale(lang, data);
     return data;
   } catch (error) {
-    console.error(`Error loading locale ${lang} from ${url}:`, error);
+    const errorMessage = error.name === 'AbortError'
+      ? `Timeout loading locale '${lang}' from ${url}`
+      : `Error loading locale '${lang}' from ${url}: ${error.message}`;
+    console.error(errorMessage);
+
+    // Fallback to default locale if available
+    if (lang !== DEFAULT_LOCALE && locales[DEFAULT_LOCALE]) {
+      console.warn(`Falling back to default locale '${DEFAULT_LOCALE}'`);
+      return locales[DEFAULT_LOCALE];
+    }
     throw error;
   }
 }
@@ -41,61 +78,101 @@ export async function registerLocaleUrl(lang, url) {
  * @returns {Promise<object>} Loaded locale data
  */
 export async function loadLocale(lang, url) {
+  // Return cached locale if available
   if (locales[lang]) {
     return locales[lang];
   }
+
+  // Fetch from URL if provided
   if (url) {
     return registerLocaleUrl(lang, url);
   }
-  console.warn(`Locale '${lang}' not found and no URL provided`);
-  return {};
+
+  // No URL provided and locale not cached - fallback to default
+  console.warn(`Locale '${lang}' not found and no URL provided, using default '${DEFAULT_LOCALE}'`);
+  return locales[DEFAULT_LOCALE] || {};
+}
+
+/**
+ * Helper to get nested value from object using dot notation.
+ * @param {object} obj - Object to traverse
+ * @param {string} key - Dot-separated key path
+ * @returns {string|undefined} Value at path or undefined
+ */
+function getNestedValue(obj, key) {
+  if (!obj) return undefined;
+
+  const value = key.split('.').reduce((acc, k) => {
+    if (acc && typeof acc === 'object' && k in acc) {
+      return acc[k];
+    }
+    return undefined;
+  }, obj);
+
+  return typeof value === 'string' ? value : undefined;
 }
 
 /**
  * Get translation for a key.
  * Supports nested keys with dot notation (e.g., 'camera.permission.description').
- * Falls back to key itself if translation not found.
+ * Fallback chain: current locale → default locale (English) → raw key.
  * @param {string} key - Translation key
- * @returns {string} Translated string or fallback key
+ * @returns {string} Translated string or fallback
  */
 export function t(key) {
-  const locale = locales[currentLocale];
-  if (!locale) {
-    console.warn(`No locale data for '${currentLocale}'`);
-    return key;
+  // Try current locale first
+  const currentLocaleData = locales[currentLocale];
+  const value = getNestedValue(currentLocaleData, key);
+  if (value) {
+    return value;
   }
 
-  const keys = key.split('.');
-  let value = locale;
-  for (const k of keys) {
-    if (value && typeof value === 'object' && k in value) {
-      value = value[k];
-    } else {
-      console.warn(`Translation key '${key}' not found in locale '${currentLocale}'`);
-      return key;
+  // Fallback to default locale if different from current
+  if (currentLocale !== DEFAULT_LOCALE) {
+    const defaultValue = getNestedValue(locales[DEFAULT_LOCALE], key);
+    if (defaultValue) {
+      return defaultValue;
     }
   }
 
-  return typeof value === 'string' ? value : key;
+  // Final fallback: return the key itself
+  console.warn(`Translation key '${key}' not found in any locale`);
+  return key;
 }
 
 /**
  * Set the current locale.
- * Optionally applies RTL direction to document element if direction is specified in locale.
+ * If the locale is not registered, it will attempt to load it from the provided URL.
+ * Applies RTL direction to document element if direction is specified in locale.
  * @param {string} lang - Language code
+ * @param {string} [url] - Optional URL to fetch locale from if not registered
+ * @returns {Promise<boolean>} Whether locale was successfully set
  */
-export function setCurrentLocale(lang) {
+export async function setCurrentLocale(lang, url) {
+  // If locale not registered, try to load it
   if (!locales[lang]) {
-    console.warn(`Locale '${lang}' not registered`);
-    return;
+    if (url) {
+      try {
+        await loadLocale(lang, url);
+      } catch (error) {
+        console.error(`Failed to load locale '${lang}', keeping current locale '${currentLocale}'`);
+        return false;
+      }
+    } else {
+      console.warn(`Locale '${lang}' not registered and no URL provided`);
+      return false;
+    }
   }
+
   currentLocale = lang;
-  
+
   // Apply RTL/LTR direction if specified in locale data
   const locale = locales[lang];
   if (locale && locale.direction) {
     document.documentElement.dir = locale.direction;
   }
+
+  return true;
 }
 
 /**
@@ -104,6 +181,23 @@ export function setCurrentLocale(lang) {
  */
 export function getCurrentLocale() {
   return currentLocale;
+}
+
+/**
+ * Get the default locale code.
+ * @returns {string} Default language code
+ */
+export function getDefaultLocale() {
+  return DEFAULT_LOCALE;
+}
+
+/**
+ * Check if a locale is registered.
+ * @param {string} lang - Language code
+ * @returns {boolean} Whether locale is registered
+ */
+export function hasLocale(lang) {
+  return lang in locales;
 }
 
 /**
@@ -118,11 +212,13 @@ export function setDocumentDir(lang) {
 }
 
 export default {
-  t,
+  getCurrentLocale,
+  getDefaultLocale,
+  hasLocale,
   loadLocale,
   registerLocale,
   registerLocaleUrl,
   setCurrentLocale,
-  getCurrentLocale,
   setDocumentDir,
+  t,
 };

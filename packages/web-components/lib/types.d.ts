@@ -15,17 +15,20 @@ declare module 'signature_pad' {
 
     isEmpty(): boolean;
 
-    on(event: string, callback: Function): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
 
-    off(event: string, callback: Function): void;
+    off(event: string, callback: (...args: unknown[]) => void): void;
   }
 }
 
 // Global constants
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const SMILE_COMPONENTS_VERSION: string;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const COMPONENTS_VERSION: string;
 
 // Custom Elements
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare namespace JSX {
   interface IntrinsicElements {
     'camera-permission': any;

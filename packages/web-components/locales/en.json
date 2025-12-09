@@ -65,8 +65,8 @@
         "description": "Partner can process your photo, ID expiration date, country of issuance and document number"
       }
     },
-    "privacyPolicy": "You can view {{partnerName}}'s privacy policy {{link}}",
-    "privacyPolicyLink": "here",
+    "privacyPolicy": "You can view {{partnerName}}'s privacy policy",
+    "privacyPolicyLink": "here.",
     "grantConsent": "By choosing \"Allow\", you grant {{partnerName}} consent to process your personal data to offer you this service",
     "denied": {
       "title": "Consent Denied",

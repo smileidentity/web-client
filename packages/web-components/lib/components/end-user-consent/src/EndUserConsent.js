@@ -411,10 +411,8 @@ function templateString() {
 
       <section class='callout | flow center' style='--flow-space: 2rem; margin: var(--flow-space) auto;'>
         <p>
-          ${tHtml('consent.privacyPolicy', {
-            link: `<a class='theme' href='${this.partnerPolicyURL}' rel='noreferer noopener' target='_blank'>${t('consent.privacyPolicyLink')}</a>`,
-            partnerName: this.partnerName
-          })}
+          ${tHtml('consent.privacyPolicy', { partnerName: this.partnerName })}
+          <a class='theme' href='${this.partnerPolicyURL}' rel='noreferer noopener' target='_blank'>${t('consent.privacyPolicyLink')}</a>
         </p>
 
         <p style='--flow-space: .75rem'>

@@ -1,5 +1,11 @@
 {
   "direction": "ltr",
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "allow": "Allow",
+    "cancel": "Cancel"
+  },
   "camera": {
     "permission": {
       "description": "We need access to your camera so that we can capture your details.",
@@ -39,6 +45,35 @@
     "instructions": {
       "description": "We'll use it to verify your identity.",
       "followInstructions": "Please follow the instructions below."
+    }
+  },
+  "consent": {
+    "demoTip": "This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.",
+    "accessRequest": "{{partnerName}} wants to access your {{idTypeLabel}} information",
+    "allowPartner": "This will allow {{partnerName}} to:",
+    "processing": {
+      "personalDetails": {
+        "title": "Process your personal details",
+        "description": "Partner can process your names, DoB and gender"
+      },
+      "contactInfo": {
+        "title": "Process your contact information",
+        "description": "Partner can process your phone numbers and address"
+      },
+      "documentInfo": {
+        "title": "Process your document information",
+        "description": "Partner can process your photo, ID expiration date, country of issuance and document number"
+      }
+    },
+    "privacyPolicy": "You can view {{partnerName}}'s privacy policy {{link}}",
+    "privacyPolicyLink": "here",
+    "grantConsent": "By choosing \"Allow\", you grant {{partnerName}} consent to process your personal data to offer you this service",
+    "denied": {
+      "title": "Consent Denied",
+      "message": "We cannot verify you without your consent",
+      "prompt": "Wish to correct that?",
+      "goBack": "Go Back",
+      "confirmCancel": "No, Cancel Verification"
     }
   }
 }

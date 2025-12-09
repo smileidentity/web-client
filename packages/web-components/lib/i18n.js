@@ -141,6 +141,56 @@ export function t(key) {
 }
 
 /**
+ * Escape HTML special characters to prevent XSS.
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/**
+ * Get translation with HTML interpolation for styled placeholders.
+ * Placeholders in format {{key}} will be replaced with provided values.
+ * Values can be plain strings or objects with {value, className} for styled spans.
+ * @param {string} key - Translation key
+ * @param {Object} params - Interpolation parameters
+ * @returns {string} Translated string with interpolations
+ * @example
+ * // Plain interpolation
+ * tHtml('greeting', { name: 'John' }) // "Hello, John"
+ *
+ * // Styled interpolation
+ * tHtml('consent.accessRequest', {
+ *   partnerName: { value: 'Acme', className: 'theme' }
+ * }) // "<span class="theme">Acme</span> wants to access..."
+ */
+export function tHtml(key, params = {}) {
+  let text = t(key);
+
+  Object.keys(params).forEach((paramKey) => {
+    const paramValue = params[paramKey];
+    const placeholder = `{{${paramKey}}}`;
+
+    if (paramValue && typeof paramValue === 'object' && 'value' in paramValue) {
+      // Styled interpolation: { value: 'text', className: 'theme' }
+      const escapedValue = escapeHtml(String(paramValue.value || ''));
+      const className = escapeHtml(String(paramValue.className || ''));
+      text = text.split(placeholder).join(
+        className ? `<span class="${className}">${escapedValue}</span>` : escapedValue,
+      );
+    } else {
+      // Plain text interpolation
+      text = text.split(placeholder).join(escapeHtml(String(paramValue)));
+    }
+  });
+
+  return text;
+}
+
+/**
  * Set the current locale.
  * If the locale is not registered, it will attempt to load it from the provided URL.
  * Applies RTL direction to document element if direction is specified in locale.
@@ -221,4 +271,5 @@ export default {
   setCurrentLocale,
   setDocumentDir,
   t,
+  tHtml,
 };

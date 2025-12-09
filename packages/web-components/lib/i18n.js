@@ -3,15 +3,17 @@
  * Provides simple locale registration, loading, and translation lookup.
  */
 
-// Default English locale - bundled for offline/fallback support
-import defaultLocale from '../locales/en.json';
+// Bundle supported locales for offline/instant switching
+import arLocale from '../locales/ar.json';
+import enLocale from '../locales/en.json';
 
 const DEFAULT_LOCALE = 'en';
 const FETCH_TIMEOUT_MS = 5000;
 
 let currentLocale = DEFAULT_LOCALE;
 const locales = {
-  [DEFAULT_LOCALE]: defaultLocale, // Pre-register bundled English locale
+  ar: arLocale,
+  en: enLocale,
 };
 
 /**

@@ -1,10 +1,15 @@
 import './EndUserConsent';
+import { setCurrentLocale } from '../../../i18n';
 
 const meta = {
   args: {
     'theme-color': '#001096',
   },
   argTypes: {
+    language: {
+      control: 'select',
+      options: ['en', 'ar'],
+    },
     'theme-color': { control: 'color' },
   },
   component: 'end-user-consent',
@@ -13,7 +18,10 @@ const meta = {
 export default meta;
 
 export const EndUserConsent = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+
+    return `
         <end-user-consent
             country="NG"
             id-type="NATIONAL_ID"
@@ -25,5 +33,6 @@ export const EndUserConsent = {
             partner-logo="https://portal.usesmileid.com/favicon.ico"
         >
         </end-user-consent>
-    `,
+    `;
+  },
 };

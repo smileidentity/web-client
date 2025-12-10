@@ -24,7 +24,11 @@ module.exports = {
       },
     },
     {
-      extends: ['airbnb-base', 'plugin:@typescript-eslint/recommended', 'prettier'],
+      extends: [
+        'airbnb-base',
+        'plugin:@typescript-eslint/recommended',
+        'prettier',
+      ],
       files: ['src/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
       parserOptions: {

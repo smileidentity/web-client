@@ -59,9 +59,10 @@ export async function registerLocaleUrl(lang, url) {
     registerLocale(lang, data);
     return data;
   } catch (error) {
-    const errorMessage = error.name === 'AbortError'
-      ? `Timeout loading locale '${lang}' from ${url}`
-      : `Error loading locale '${lang}' from ${url}: ${error.message}`;
+    const errorMessage =
+      error.name === 'AbortError'
+        ? `Timeout loading locale '${lang}' from ${url}`
+        : `Error loading locale '${lang}' from ${url}: ${error.message}`;
     console.error(errorMessage);
 
     // Fallback to default locale if available
@@ -91,7 +92,9 @@ export async function loadLocale(lang, url) {
   }
 
   // No URL provided and locale not cached - fallback to default
-  console.warn(`Locale '${lang}' not found and no URL provided, using default '${DEFAULT_LOCALE}'`);
+  console.warn(
+    `Locale '${lang}' not found and no URL provided, using default '${DEFAULT_LOCALE}'`,
+  );
   return locales[DEFAULT_LOCALE] || {};
 }
 
@@ -180,9 +183,13 @@ export function tHtml(key, params = {}) {
       // Styled interpolation: { value: 'text', className: 'theme' }
       const escapedValue = escapeHtml(String(paramValue.value || ''));
       const className = escapeHtml(String(paramValue.className || ''));
-      text = text.split(placeholder).join(
-        className ? `<span class="${className}">${escapedValue}</span>` : escapedValue,
-      );
+      text = text
+        .split(placeholder)
+        .join(
+          className
+            ? `<span class="${className}">${escapedValue}</span>`
+            : escapedValue,
+        );
     } else {
       // Plain text interpolation
       text = text.split(placeholder).join(escapeHtml(String(paramValue)));
@@ -207,7 +214,9 @@ export async function setCurrentLocale(lang, url) {
       try {
         await loadLocale(lang, url);
       } catch (error) {
-        console.error(`Failed to load locale '${lang}', keeping current locale '${currentLocale}'`);
+        console.error(
+          `Failed to load locale '${lang}', keeping current locale '${currentLocale}'`,
+        );
         return false;
       }
     } else {

@@ -352,7 +352,7 @@ function templateString() {
         <h1 class='text-base font-bold'>
           ${tHtml('consent.accessRequest', {
             idTypeLabel: { className: 'theme', value: this.idTypeLabel },
-            partnerName: { className: 'theme', value: this.partnerName }
+            partnerName: { className: 'theme', value: this.partnerName },
           })}
         </h1>
         <p class='text-base font-normal'>

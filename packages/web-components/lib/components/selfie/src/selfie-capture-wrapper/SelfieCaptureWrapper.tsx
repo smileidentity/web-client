@@ -196,7 +196,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     delete (propsWithoutHidden as any).hidden;
 
     return (
-      // @ts-ignore
+      // @ts-expect-error --- preact-custom-element doesn't have proper types for refs
       <selfie-capture
         {...propsWithoutHidden}
         ref={(el: HTMLElement) => {

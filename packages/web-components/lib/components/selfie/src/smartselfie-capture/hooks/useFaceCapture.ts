@@ -330,7 +330,7 @@ export const useFaceCapture = ({
       }
 
       updateAlerts();
-    } catch (error) {
+    } catch {
       faceDetected.value = false;
       faceInBounds.value = false;
       multipleFaces.value = false;

@@ -79,6 +79,7 @@ class Logger {
         }),
       );
     } catch (error) {
+      console.error(error);
       return `[Unserializable: ${typeof data}]`;
     }
   }

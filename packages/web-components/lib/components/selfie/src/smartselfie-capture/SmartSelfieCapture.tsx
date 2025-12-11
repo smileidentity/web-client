@@ -152,7 +152,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   return (
     <div className="smartselfie-capture">
       {showNavigation && (
-        // @ts-ignore
+        // @ts-expect-error --- preact-custom-element doesn't have proper types for refs
         <smileid-navigation ref={navigationRef} theme-color={themeColor} />
       )}
 
@@ -188,7 +188,7 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           />
         )}
 
-      {/* @ts-ignore */}
+      {/* @ts-expect-error -- preact-custom-element doesn't have proper types for refs */}
       {!hideAttribution && <powered-by-smile-id />}
 
       <style>{`

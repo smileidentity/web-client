@@ -5,7 +5,7 @@ Sentry.init({
     // Check if the error originates from the library's source files
     if (event.exception && event.exception.values) {
       const isLibraryError = event.exception.values.some((exception) => {
-        return exception.stacktrace.frames.some((frame) =>
+        return exception.stacktrace?.frames?.some((frame) =>
           frame.filename.includes('inline/src'),
         );
       });

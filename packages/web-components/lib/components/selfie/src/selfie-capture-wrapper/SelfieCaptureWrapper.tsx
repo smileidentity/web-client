@@ -3,7 +3,7 @@ import { IconLoader2 } from '@tabler/icons-preact';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
-import { getBoolProp } from '@/utils/props';
+import { getBoolProp } from '../../../../utils/props';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';

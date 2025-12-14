@@ -1,6 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../i18n';
+import { t } from '../../../../domain/locale/src/i18n';
 
 function templateString() {
   return `

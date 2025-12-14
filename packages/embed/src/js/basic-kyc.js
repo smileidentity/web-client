@@ -1,6 +1,7 @@
 import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
+import { setCurrentLocale } from '@smileid/web-components/locale';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
 
@@ -119,6 +120,7 @@ import { getHeaders } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        setCurrentLocale(config.translation?.language || 'en');
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

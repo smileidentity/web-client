@@ -4,8 +4,8 @@
  */
 
 // Bundle supported locales for offline/instant switching
-import arLocale from '../locales/ar.json';
-import enLocale from '../locales/en.json';
+import arLocale from '../../../../locales/ar.json';
+import enLocale from '../../../../locales/en.json';
 
 const DEFAULT_LOCALE = 'en';
 const FETCH_TIMEOUT_MS = 5000;

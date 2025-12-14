@@ -41,12 +41,17 @@
     "./smart-camera-web": {
       "types": "./dist/types/smart-camera-web.d.ts",
       "import": "./dist/esm/smart-camera-web.js"
+    },
+    "./locale": {
+      "types": "./dist/types/locale.d.ts",
+      "import": "./dist/esm/locale.js"
     }
   },
   "files": [
     "./lib/components/",
     "./lib/domain/",
     "./lib/styles/",
+    "./lib/i18n/",
     "./dist/",
     "./README.md",
     "package.json"

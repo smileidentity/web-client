@@ -1,4 +1,4 @@
-import { setCurrentLocale } from '../../../../domain/locale/src/i18n';
+import { setCurrentLocale } from '../../../../domain/localisation';
 import './index';
 
 const meta = {

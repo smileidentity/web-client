@@ -1,7 +1,7 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../domain/locale/src/i18n';
+import { t } from '../../../../domain/localisation';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">

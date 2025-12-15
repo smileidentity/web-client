@@ -110,7 +110,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
       }
 
       await startCamera(newFacingMode);
-    } catch (error) {
+    } catch {
       setFacingMode(previousFacingMode);
       isSwitchingCameraRef.current = false;
 
@@ -180,7 +180,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         userCameraId =
           userStream.getVideoTracks()[0].getSettings().deviceId ?? null;
         userStream.getTracks().forEach((track) => track.stop());
-      } catch (error) {
+      } catch {
         // no user-facing camera available
       }
 
@@ -192,7 +192,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         environmentCameraId =
           envStream.getVideoTracks()[0].getSettings().deviceId ?? null;
         envStream.getTracks().forEach((track) => track.stop());
-      } catch (error) {
+      } catch {
         // no environment-facing camera available
       }
 
@@ -207,7 +207,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
       }
 
       setAgentSupported(!isGecko);
-    } catch (error) {
+    } catch {
       setAgentSupported(false);
     }
   };

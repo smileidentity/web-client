@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => {
         main: resolve(__dirname, 'lib/main.ts'),
         combobox: resolve(__dirname, 'lib/components/combobox/src/index.js'),
         document: resolve(__dirname, 'lib/components/document/src/index.js'),
-        localisation: resolve(__dirname, 'lib/domain/locale/src/i18n.js'),
+        localisation: resolve(__dirname, 'lib/domain/localisation/index.js'),
         'end-user-consent': resolve(
           __dirname,
           'lib/components/end-user-consent/src/index.js',

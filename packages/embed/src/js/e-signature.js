@@ -2,7 +2,7 @@ import validate from 'validate.js';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
-import { setCurrentLocale } from '@smileid/web-components/locale';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit

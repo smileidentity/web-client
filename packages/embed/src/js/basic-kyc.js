@@ -1,7 +1,7 @@
 import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
-import { setCurrentLocale } from '@smileid/web-components/locale';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
 

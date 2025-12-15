@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
-import { setCurrentLocale } from '@smileid/web-components/locale';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';

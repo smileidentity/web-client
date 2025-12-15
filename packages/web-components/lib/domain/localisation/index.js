@@ -4,8 +4,8 @@
  */
 
 // Bundle supported locales for offline/instant switching
-import arLocale from '../../../../locales/ar.json';
-import enLocale from '../../../../locales/en.json';
+import arLocale from '../../../locales/ar.json';
+import enLocale from '../../../locales/en.json';
 
 const DEFAULT_LOCALE = 'en';
 const FETCH_TIMEOUT_MS = 5000;
@@ -207,9 +207,12 @@ export function tHtml(key, params = {}) {
  * @param {string} [url] - Optional URL to fetch locale from if not registered
  * @returns {Promise<boolean>} Whether locale was successfully set
  */
-export async function setCurrentLocale(lang, url) {
+export async function setCurrentLocale(lang, { url, translation } = {}) {
   // If locale not registered, try to load it
   if (!locales[lang]) {
+    if (translation) {
+      registerLocale(lang, translation);
+    }
     if (url) {
       try {
         await loadLocale(lang, url);
@@ -229,7 +232,7 @@ export async function setCurrentLocale(lang, url) {
 
   // Apply RTL/LTR direction if specified in locale data
   const locale = locales[lang];
-  if (locale && locale.direction) {
+  if (locale && locale.direction && document?.documentElement?.dir) {
     document.documentElement.dir = locale.direction;
   }
 

@@ -42,9 +42,9 @@
       "types": "./dist/types/smart-camera-web.d.ts",
       "import": "./dist/esm/smart-camera-web.js"
     },
-    "./locale": {
-      "types": "./dist/types/locale.d.ts",
-      "import": "./dist/esm/locale.js"
+    "./localisation": {
+      "types": "./dist/types/localisation.d.ts",
+      "import": "./dist/esm/localisation.js"
     }
   },
   "files": [

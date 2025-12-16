@@ -89,7 +89,7 @@ export const useFaceCapture = ({
 
   const updateAlertImmediate = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
-      alertTitle.value = MESSAGES[messageKey]();
+      alertTitle.value = MESSAGES[messageKey]?.();
     } else {
       alertTitle.value = '';
     }

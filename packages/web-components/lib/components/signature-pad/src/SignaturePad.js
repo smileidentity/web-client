@@ -404,8 +404,11 @@ button:disabled {
           }),
         );
       } else {
-        const action = this.allowUpload ? 'Draw or upload' : 'Draw';
-        throw new Error(`No signature detected. ${action} a signature`);
+        throw new Error(
+          `No signature present. ${
+            this.allowUpload ? 'Draw or upload' : 'Draw'
+          } a signature`,
+        );
       }
     } catch (error) {
       this.handleError(error.message);

@@ -1,10 +1,10 @@
 import './EndUserConsent';
-import { setCurrentLocale } from '../../../domain/locale/src/i18n';
+import { setCurrentLocale } from '../../../domain/localisation';
 
 const meta = {
   args: {
-    'theme-color': '#001096',
     language: 'en',
+    'theme-color': '#001096',
   },
   argTypes: {
     language: {

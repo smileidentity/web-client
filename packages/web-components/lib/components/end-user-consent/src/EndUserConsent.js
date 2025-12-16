@@ -1,7 +1,7 @@
 import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 import '../../attribution/PoweredBySmileId';
-import { t, tHtml } from '../../../domain/locale/src/i18n';
+import { t, tHtml } from '../../../domain/localisation';
 
 function templateString() {
   return `

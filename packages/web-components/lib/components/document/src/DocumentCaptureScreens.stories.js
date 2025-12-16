@@ -74,7 +74,7 @@ export const DocumentCapturePortraitMode = {
   render: (args) => {
     setCurrentLocale(args.language);
     return `
-        <document-capture-screens hide-back-of-id hide-instructions document-type="GREEN_BOOK">
+        <document-capture-screens hide-back-of-id hide-instructions theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''} document-type="GREEN_BOOK">
         </document-capture-screens>
     `;
   },

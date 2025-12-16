@@ -17,6 +17,7 @@ import { captureImageFromVideo } from '../utils/imageCapture';
 import { ImageType } from '../constants';
 import { MESSAGES, type MessageKey } from '../utils/alertMessages';
 import { getMediapipeInstance } from '../utils/mediapipeManager';
+import { t } from '../../../../../domain/localisation';
 import packageJson from '../../../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
@@ -88,7 +89,7 @@ export const useFaceCapture = ({
 
   const updateAlertImmediate = (messageKey: MessageKey | null) => {
     if (messageKey && MESSAGES[messageKey]) {
-      alertTitle.value = MESSAGES[messageKey];
+      alertTitle.value = MESSAGES[messageKey]();
     } else {
       alertTitle.value = '';
     }
@@ -141,7 +142,7 @@ export const useFaceCapture = ({
     const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
 
     if (isInNeutralZone) {
-      alertTitle.value = 'Capturing...';
+      alertTitle.value = t('selfie.smart.status.capturing');
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {
@@ -154,7 +155,7 @@ export const useFaceCapture = ({
           updateAlert('smile-required');
         }
       } else {
-        alertTitle.value = 'Keep smiling!';
+        alertTitle.value = t('selfie.smart.status.keepSmiling');
       }
     } else {
       updateAlert(null);
@@ -177,7 +178,7 @@ export const useFaceCapture = ({
     } else if (isCapturing.value) {
       updateCaptureAlerts();
     } else {
-      alertTitle.value = 'Ready to capture';
+      alertTitle.value = t('selfie.smart.status.readyToCapture');
     }
   };
 

@@ -1,3 +1,5 @@
+import { t, tHtml } from '../../localisation';
+
 class SmartFileUpload {
   static memoryLimit = 10240000;
 
@@ -28,9 +30,7 @@ class SmartFileUpload {
       };
       reader.onerror = () => {
         reject(
-          new Error(
-            'An error occurred reading the file. Please check the file, and try again',
-          ),
+          new Error(t('fileUpload.error.readingFile')),
         );
       };
       reader.readAsDataURL(file);
@@ -39,20 +39,21 @@ class SmartFileUpload {
 
   static async retrieve(files) {
     if (files.length > 1) {
-      throw new Error('Only one file upload is permitted at a time');
+      throw new Error(t('fileUpload.error.multipleFiles'));
     }
 
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
-      throw new Error(
-        'Unsupported file format. Please ensure that you are providing a JPG or PNG image',
-      );
+      throw new Error(t('fileUpload.error.unsupportedFormat'));
     }
 
     if (file.size > SmartFileUpload.memoryLimit) {
       throw new Error(
-        `${file.name} is too large. Please ensure that the file is less than ${SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit)}.`,
+        tHtml('fileUpload.error.fileTooLarge', {
+          filename: file.name,
+          size: SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit),
+        }),
       );
     }
 

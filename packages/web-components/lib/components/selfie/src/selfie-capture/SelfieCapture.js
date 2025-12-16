@@ -3,6 +3,7 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
+import { t } from '../../../../domain/localisation';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -28,8 +29,7 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      'SmartCameraWeb: Minimum required no of frames is ',
-      numberOfFramesRequired,
+      t('selfie.capture.error.minFrames').replace('{{count}}', numberOfFramesRequired),
     );
   }
 
@@ -512,7 +512,7 @@ function templateString() {
   <div id='selfie-capture-screen' class='flow center'>
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
 
-    <div class='tips'>Fit your head inside the oval frame</div>
+    <div class='tips'>${t('selfie.capture.tip.fitHead')}</div>
 
     <div className="error">
       ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
@@ -544,15 +544,15 @@ function templateString() {
             </svg>
           </div>
           <div>
-            <p id='smile-cta'>SMILE</p>
+            <p id='smile-cta'>${t('selfie.capture.cta.smile')}</p>
           </div>
         </div>
       </div>
 
-      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? 'Agent Mode On' : 'Agent Mode Off'}</button>` : ''}
+      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? t('selfie.capture.agentMode.on') : t('selfie.capture.agentMode.off')}</button>` : ''}
 
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
-        Take Selfie
+        ${t('selfie.capture.button.takeSelfie')}
       </button>
 
       ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
@@ -687,7 +687,7 @@ class SelfieCaptureScreen extends HTMLElement {
 
     setTimeout(() => {
       this.smileCTABox.style.opacity = 1;
-      this.smileCTA.textContent = 'WIDER SMILE';
+      this.smileCTA.textContent = t('selfie.capture.cta.widerSmile');
       this.mouth.setAttribute(
         'd',
         'm 213.88314,319.4551 c -1.58,0.97 -0.35309,9.33393 1.50671,9.30586 6.05679,-0.0914 16.11631,0.17227 34.57066,0.13346 18.45435,-0.0388 28.15778,-0.0418 31.09964,-0.79956 1.80122,-0.46394 2.75061,-7.48365 1.16061,-8.45365 -1.6,-1.74874 -2.96432,-0.94348 -6.77747,-1.56441 -12.83012,0.04 -36.52534,0.50197 -41.29469,0.43262 -2.51525,-0.0713 -18.41588,-0.61 -20.01588,0.35 z m 57.29363,1.36599 c -9.24417,-2.23757 -8.08363,-2.42362 -20.78363,-2.42362 -12.7,0 -17.77931,2.69528 -26.84042,5.36549 12.57883,3.28731 33.57775,-4.29887 49.70067,2.24964 z',
@@ -853,7 +853,7 @@ class SelfieCaptureScreen extends HTMLElement {
         return context;
       }
       throw new Error(
-        'Unable to capture webcam images - Please try another device',
+        t('selfie.capture.error.webcamCapture'),
       );
     } else {
       return context;

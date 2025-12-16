@@ -17,21 +17,6 @@
     "back": "رجوع",
     "closeVerificationFrame": "إغلاق إطار التحقق من SmileIdentity"
   },
-  "signaturePad": {
-    "clearButton": "مسح التوقيع",
-    "or": "أو",
-    "uploadLabel": "تحميل توقيع",
-    "continueButton": "متابعة",
-    "noSignature": "لا يوجد توقيع. {{action}} توقيعاً",
-    "noSignatureActionDraw": "ارسم",
-    "noSignatureActionDrawOrUpload": "ارسم أو حمّل",
-    "error": {
-      "readingFile": "حدث خطأ أثناء قراءة الملف. يرجى التحقق من الملف والمحاولة مرة أخرى",
-      "multipleFiles": "يُسمح برفع ملف واحد فقط في كل مرة",
-      "unsupportedFormat": "تنسيق ملف غير مدعوم. يرجى التأكد من تقديم صورة بصيغة JPG أو PNG أو SVG",
-      "fileTooLarge": "{{filename}} كبير جداً. يرجى التأكد من أن حجم الملف أقل من {{size}}."
-    }
-  },
   "camera": {
     "permission": {
       "description": "نحتاج إلى الوصول إلى كاميرتك حتى نتمكن من التقاط تفاصيلك.",

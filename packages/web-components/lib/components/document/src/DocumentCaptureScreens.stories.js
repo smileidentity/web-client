@@ -4,16 +4,16 @@ import { setCurrentLocale } from '../../../domain/localisation';
 const meta = {
   args: {
     'hide-attribution': false,
-    'theme-color': '#001096',
     language: 'en',
+    'theme-color': '#001096',
   },
   argTypes: {
     'hide-attribution': { control: 'boolean' },
-    'theme-color': { control: 'color' },
     language: {
       control: { type: 'select' },
       options: ['en', 'ar'],
     },
+    'theme-color': { control: 'color' },
   },
   component: 'document-capture-screens',
 };

@@ -29,7 +29,9 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      tHtml('selfie.capture.error.minFrames', { count: numberOfFramesRequired }),
+      tHtml('selfie.capture.error.minFrames', {
+        count: numberOfFramesRequired,
+      }),
     );
   }
 

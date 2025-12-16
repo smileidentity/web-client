@@ -3,7 +3,7 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
-import { t } from '../../../../domain/localisation';
+import { t, tHtml } from '../../../../domain/localisation';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -29,7 +29,7 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      t('selfie.capture.error.minFrames').replace('{{count}}', numberOfFramesRequired),
+      tHtml('selfie.capture.error.minFrames', { count: numberOfFramesRequired }),
     );
   }
 
@@ -852,9 +852,7 @@ class SelfieCaptureScreen extends HTMLElement {
       if (hasEnoughColors) {
         return context;
       }
-      throw new Error(
-        t('selfie.capture.error.webcamCapture'),
-      );
+      throw new Error(t('selfie.capture.error.webcamCapture'));
     } else {
       return context;
     }

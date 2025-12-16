@@ -29,9 +29,7 @@ class SmartFileUpload {
         resolve(e.target.result);
       };
       reader.onerror = () => {
-        reject(
-          new Error(t('fileUpload.error.readingFile')),
-        );
+        reject(new Error(t('fileUpload.error.readingFile')));
       };
       reader.readAsDataURL(file);
     });

@@ -285,9 +285,9 @@ function templateString() {
                 </defs>
                 </svg>
                 <div class="instruction">
-                <p class="instruction-header font-bold text-base">Good Light</p>
+                <p class="instruction-header font-bold text-base">${t('document.instructions.goodLight.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  Make sure the image is taken in a well-lit environment where the ID document is easy to read.
+                  ${t('document.instructions.goodLight.body')}
                 </p>
             </div>
         </div>
@@ -373,9 +373,9 @@ function templateString() {
             </defs>
             </svg>
             <div>
-                <p class="instruction-header font-bold text-base">Clear Image</p>
+                <p class="instruction-header font-bold text-base">${t('document.instructions.clearImage.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  Hold your camera steady so the words on the ID are not blurry.
+                  ${t('document.instructions.clearImage.body')}
                 </p>
             </div>
         </div>
@@ -387,7 +387,7 @@ function templateString() {
       this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
         ? `
     <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
-        Take Photo
+        ${t('document.instructions.takePhotoButton')}
     </button>
     `
         : ''
@@ -399,7 +399,7 @@ function templateString() {
       this.supportBothCaptureModes ? 'outline' : 'solid'
     }' class='button'>
         <input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
-        <span>Upload Photo</span>
+        <span>${t('document.instructions.uploadPhotoButton')}</span>
     </label>
     `
         : ''

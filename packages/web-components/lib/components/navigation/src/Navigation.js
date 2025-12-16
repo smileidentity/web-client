@@ -1,3 +1,5 @@
+import { t } from '../../../domain/localisation';
+
 class Navigation extends HTMLElement {
   connectedCallback() {
     const shadow = this.attachShadow({ mode: 'open' });
@@ -91,7 +93,7 @@ button[data-type="icon"] {
           d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"
         />
       </svg>
-      <span part="back-button-text">Back</span>
+      <span part="back-button-text">${t('navigation.back')}</span>
     `;
 
     const closeButton = document.createElement('button');
@@ -118,7 +120,7 @@ button[data-type="icon"] {
         />
       </svg>
       <span class="visually-hidden"
-        >Close SmileIdentity Verification frame</span
+        >${t('navigation.closeVerificationFrame')}</span
       >
     `;
 

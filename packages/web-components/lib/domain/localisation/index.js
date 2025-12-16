@@ -146,14 +146,23 @@ export function t(key) {
 }
 
 /**
+ * HTML entity map for escaping special characters.
+ */
+const HTML_ENTITIES = {
+  '"': '&quot;',
+  '&': '&amp;',
+  "'": '&#39;',
+  '<': '&lt;',
+  '>': '&gt;',
+};
+
+/**
  * Escape HTML special characters to prevent XSS.
  * @param {string} str - String to escape
  * @returns {string} Escaped string
  */
 function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  return str.replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
 }
 
 /**

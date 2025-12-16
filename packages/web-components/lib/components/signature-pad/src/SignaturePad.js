@@ -30,11 +30,7 @@ class SmartFileUpload {
         resolve(e.target.result);
       };
       reader.onerror = () => {
-        reject(
-          new Error(
-            t('signaturePad.error.readingFile'),
-          ),
-        );
+        reject(new Error(t('signaturePad.error.readingFile')));
       };
       reader.readAsDataURL(file);
     });
@@ -48,9 +44,7 @@ class SmartFileUpload {
     const file = files[0];
 
     if (!SmartFileUpload.supportedTypes.includes(file.type)) {
-      throw new Error(
-        t('signaturePad.error.unsupportedFormat'),
-      );
+      throw new Error(t('signaturePad.error.unsupportedFormat'));
     }
 
     if (file.size > SmartFileUpload.memoryLimit) {
@@ -407,9 +401,7 @@ button:disabled {
         const action = this.allowUpload
           ? t('signaturePad.noSignatureActionDrawOrUpload')
           : t('signaturePad.noSignatureActionDraw');
-        throw new Error(
-          tHtml('signaturePad.noSignature', { action }),
-        );
+        throw new Error(tHtml('signaturePad.noSignature', { action }));
       }
     } catch (error) {
       this.handleError(error.message);

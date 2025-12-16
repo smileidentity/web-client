@@ -2,7 +2,6 @@ import './Navigation';
 import { setCurrentLocale } from '../../../domain/localisation';
 
 const meta = {
-  component: 'smileid-navigation',
   args: {
     language: 'en',
   },
@@ -12,6 +11,7 @@ const meta = {
       options: ['en', 'ar'],
     },
   },
+  component: 'smileid-navigation',
 };
 
 export default meta;

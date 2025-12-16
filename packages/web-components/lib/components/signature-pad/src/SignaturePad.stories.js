@@ -1,17 +1,17 @@
 import './SignaturePad';
-import { setCurrentLocale } from '../../../domain/localisation';
+import { setCurrentLocale } from "@smileid/web-components/lib/domain/localisation/localisation";
 
 const meta = {
   args: {
-    'theme-color': '#001096',
     language: 'en',
+    'theme-color': '#001096',
   },
   argTypes: {
-    'theme-color': { control: 'color' },
     language: {
       control: { type: 'select' },
       options: ['en', 'ar'],
     },
+    'theme-color': { control: 'color' },
   },
   component: 'smileid-signature-pad',
 };

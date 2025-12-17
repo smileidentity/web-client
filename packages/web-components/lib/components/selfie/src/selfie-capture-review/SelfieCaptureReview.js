@@ -1,6 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t, loadLocale } from '../../../../i18n.js';
+import { t } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -105,9 +105,6 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!window.SmileI18n || !window.SmileI18n.locales) {
-      loadLocale('en', null).catch(() => {});
-    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
     this.shadowRoot.innerHTML = '';

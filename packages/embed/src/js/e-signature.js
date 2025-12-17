@@ -2,6 +2,7 @@ import validate from 'validate.js';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
@@ -188,6 +189,7 @@ function getHumanSize(numberOfBytes) {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        setCurrentLocale(config.translation?.language || 'en');
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

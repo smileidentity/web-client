@@ -1,7 +1,7 @@
 import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 import '../../attribution/PoweredBySmileId';
-import { t, loadLocale } from '../../../i18n.js';
+import { t, tHtml } from '../../../domain/localisation';
 
 function templateString() {
   return `
@@ -327,14 +327,14 @@ function templateString() {
                 <path fill="${this.themeColor}" d="M15.5 11.25h-5.19l1.72-1.72c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-3 3c-.29.29-.29.77 0 1.06l3 3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-1.72-1.72h5.19c.41 0 .75-.34.75-.75s-.34-.75-.75-.75Z"/>
               </svg>
             </button>
-            <div class="back-button-text">Back</div>
+            <div class="back-button-text">${t('common.back')}</div>
           </div>
           <button data-type='icon' type='button' class='close-iframe'>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
               <path fill="#DBDBC4" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" opacity=".4"/>
               <path fill="#91190F" d="m13.06 12 2.3-2.3c.29-.29.29-.77 0-1.06a.754.754 0 0 0-1.06 0l-2.3 2.3-2.3-2.3a.754.754 0 0 0-1.06 0c-.29.29-.29.77 0 1.06l2.3 2.3-2.3 2.3c-.29.29-.29.77 0 1.06.15.15.34.22.53.22s.38-.07.53-.22l2.3-2.3 2.3 2.3c.15.15.34.22.53.22s.38-.07.53-.22c.29-.29.29-.77 0-1.06l-2.3-2.3Z"/>
             </svg>
-            <span class='visually-hidden'>Close SmileIdentity Verification frame</span>
+            <span class='visually-hidden'>${t('common.close')} SmileIdentity Verification frame</span>
           </button>
         </div>
         <img alt='' width='50' height='50' src='${this.partnerLogoURL}' />
@@ -346,17 +346,17 @@ function templateString() {
           </svg>
 
           <span>
-            This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.
+            ${t('consent.demoTip')}
           </span>
         </p>
         <h1 class='text-base font-bold'>
-          <span class='theme'>${this.partnerName}</span>
-          wants to access your
-          <span class='theme'>${this.idTypeLabel}</span>
-          information
+          ${tHtml('consent.accessRequest', {
+            idTypeLabel: { className: 'theme', value: this.idTypeLabel },
+            partnerName: { className: 'theme', value: this.partnerName },
+          })}
         </h1>
         <p class='text-base font-normal'>
-          This will allow ${this.partnerName} to:
+          ${tHtml('consent.allowPartner', { partnerName: this.partnerName })}
         </p>
       </section>
 
@@ -368,8 +368,8 @@ function templateString() {
             <path d="M14.9238 19.0148L13.8262 17.931C13.8262 17.931 13.6341 17.7956 13.5244 17.7956C13.4146 17.7956 13.3049 17.8498 13.2226 17.931C13.1402 18.0123 13.0854 18.1207 13.0854 18.2291C13.0854 18.3374 13.1402 18.4458 13.2226 18.5271L14.622 19.9089C14.622 19.9089 14.814 20.0443 14.9238 20.0443C15.0335 20.0443 15.1433 19.9901 15.2256 19.9089L17.8323 17.335C17.8323 17.335 17.9421 17.1724 17.9421 17.0369C17.9421 16.9015 17.9146 16.8202 17.8323 16.7389C17.75 16.6576 17.6677 16.6305 17.5579 16.6305C17.4482 16.6305 17.3384 16.6576 17.2835 16.7389L15.0061 18.9877L14.9238 19.0148ZM15.5 24C15.5 24 15.4177 24 15.3902 24C15.3628 24 15.3354 24 15.3079 24C14.0457 23.6207 13.0305 22.8621 12.2073 21.7241C11.4116 20.5862 11 19.3128 11 17.931V15.2217C11 15.0591 11.0549 14.8965 11.1646 14.734C11.2744 14.5714 11.4116 14.4901 11.5488 14.4089L15.1982 13.0542C15.1982 13.0542 15.3902 13 15.5 13C15.6098 13 15.6921 13 15.8018 13.0542L19.4512 14.4089C19.6159 14.4631 19.753 14.5714 19.8354 14.734C19.9177 14.8965 20 15.032 20 15.2217V17.931C20 19.3128 19.5884 20.5862 18.7927 21.7241C17.9969 22.8621 16.9543 23.6478 15.6921 24H15.5Z" fill="#2CC05C"/>
           </svg>        
           <div class='processing-list__items-item'>
-            <p class='font-medium text-base processing-list__item__title'>Process your personal details</p>
-            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your names, DoB and gender</p>
+            <p class='font-medium text-base processing-list__item__title'>${t('consent.processing.personalDetails.title')}</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>${t('consent.processing.personalDetails.description')}</p>
           </div
         </li>
         <li class='processing-list__items'>
@@ -379,8 +379,8 @@ function templateString() {
             <path d="M20 16.83C19.9987 17.2074 19.9131 17.5798 19.7496 17.92C19.5794 18.28 19.359 18.62 19.0686 18.94C18.5779 19.48 18.037 19.87 17.4261 20.12C17.4161 20.12 17.4061 20.13 17.3961 20.13C16.8052 20.37 16.1642 20.5 15.4732 20.5C14.4517 20.5 13.36 20.26 12.2083 19.77C11.0566 19.28 9.90483 18.62 8.76312 17.79C8.37253 17.5 7.98195 17.21 7.61139 16.9L10.8863 13.63C11.1667 13.84 11.4171 14 11.6274 14.11C11.6775 14.13 11.7376 14.16 11.8077 14.19C11.8878 14.22 11.9679 14.23 12.0581 14.23C12.2283 14.23 12.3585 14.17 12.4687 14.06L13.2298 13.31C13.4802 13.06 13.7206 12.87 13.9509 12.75C14.1813 12.61 14.4116 12.54 14.662 12.54C14.8523 12.54 15.0526 12.58 15.2729 12.67C15.4932 12.76 15.7236 12.89 15.9739 13.06L19.2889 15.41C19.5493 15.59 19.7296 15.8 19.8397 16.05C19.9399 16.3 20 16.55 20 16.83Z" fill="#151F72"/>
           </svg>
           <div class='processing-list__items-item'>
-            <p class='font-medium text-base processing-list__item__title'>Process your contact information</p>
-            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your phone numbers and address</p>
+            <p class='font-medium text-base processing-list__item__title'>${t('consent.processing.contactInfo.title')}</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>${t('consent.processing.contactInfo.description')}</p>
           </div
         </li>
         <li class='processing-list__items'>
@@ -403,34 +403,30 @@ function templateString() {
             </defs>
           </svg>
           <div class='processing-list__items-item'>
-            <p class='font-medium text-base processing-list__item__title'>Process your document information</p>
-            <p class='text-xs font-medium processing-list__items-item__description'>Partner can process your photo, ID expiration date, country of issuance and document number</p>
+            <p class='font-medium text-base processing-list__item__title'>${t('consent.processing.documentInfo.title')}</p>
+            <p class='text-xs font-medium processing-list__items-item__description'>${t('consent.processing.documentInfo.description')}</p>
           </div
         </li>
       </ul>
 
       <section class='callout | flow center' style='--flow-space: 2rem; margin: var(--flow-space) auto;'>
         <p>
-          You can view <span class='theme'>${this.partnerName}</span>'s privacy policy
-          <a class='theme' href='${
-            this.partnerPolicyURL
-          }' rel='noreferer noopener' target='_blank'>here</a>
+          ${tHtml('consent.privacyPolicy', { partnerName: this.partnerName })}
+          <a class='theme' href='${this.partnerPolicyURL}' rel='noreferer noopener' target='_blank'>${t('consent.privacyPolicyLink')}</a>
         </p>
 
         <p style='--flow-space: .75rem'>
-          By choosing "Allow", you grant
-          <span class='theme'>${this.partnerName}</span>
-          consent to process your personal data to offer you this service
+          ${tHtml('consent.grantConsent', { partnerName: this.partnerName })}
         </p>
       </section>
 
       <section class='flow' style='--flow-space: 2.5rem'>
         <button id='allow' data-variant='solid'>
-          Allow
+          ${t('common.allow')}
         </button>
 
         <button id='cancel' data-variant='ghost' class='color-danger' style='--flow-space: 1.5rem'>
-          Cancel
+          ${t('common.cancel')}
         </button>
       </section>
     </div>
@@ -558,15 +554,15 @@ function templateString() {
         </svg>
 
         <h1 style='font-size: 36px; line-height: 1; font-weight: 500; --flow-space: 1.5rem'>
-          Consent Denied
+          ${t('consent.denied.title')}
         </h1>
 
         <p class='color-grey' style='--flow-space: 1rem'>
-          We cannot verify you without your consent
+          ${t('consent.denied.message')}
         </p>
 
         <p>
-          Wish to correct that?
+          ${t('consent.denied.prompt')}
         </p>
       </section>
 
@@ -574,11 +570,11 @@ function templateString() {
         <svg style='transform: rotate(.5turn);' width="25" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 12h11m0 0-4.588-4M18 12l-4.588 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Go Back
+        ${t('consent.denied.goBack')}
       </button>
 
       <button data-variant='outline' id='confirm-consent-rejection' style='--flow-space: 1rem; border-radius: 2rem'>
-        No, Cancel Verification
+        ${t('consent.denied.confirmCancel')}
       </button>
 
       ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
@@ -599,9 +595,6 @@ class EndUserConsent extends HTMLElement {
 
   connectedCallback() {
     this.pages = [];
-    if (!window.SmileI18n || !window.SmileI18n.locales) {
-      loadLocale('en', null).catch(() => {});
-    }
     const template = document.createElement('template');
     template.innerHTML = this.render();
 

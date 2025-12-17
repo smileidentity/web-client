@@ -221,8 +221,7 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
   if (!locales[lang]) {
     if (translation) {
       registerLocale(lang, translation);
-    }
-    if (url) {
+    } else if (url) {
       try {
         await loadLocale(lang, url);
       } catch (error) {
@@ -238,15 +237,6 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
   }
 
   currentLocale = lang;
-
-  // Apply RTL/LTR direction if specified in locale data
-  const locale = locales[lang];
-  if (locale && locale.direction && document?.documentElement?.dir) {
-    document.documentElement.dir = locale.direction;
-  }
-
-  return true;
-}
 
 /**
  * Get the current locale.

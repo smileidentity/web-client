@@ -5,6 +5,10 @@ import '@smileid/web-components/smart-camera-web';
 document.querySelector('#app').innerHTML = `
   <div>
     <form name="hosted-web-config" novalidate class="box center flow">
+      <select id="language">
+        <option value="en">English</option>
+        <option value="ar">العربية (Arabic)</option>
+      </select>
       <select id="product">
         <option value="">--Select Product---</option>
         <option value="biometric_kyc">Biometric KYC</option>

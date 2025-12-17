@@ -14,6 +14,7 @@ export default function setupForm() {
   const form = document.querySelector('form[name="hosted-web-config"]');
   const button = document.querySelector('#submitForm');
   const product = document.querySelector('#product');
+  const language = document.querySelector('#language');
 
   const resetButton = () => {
     button.textContent = 'Verify with Smile Identity';
@@ -76,9 +77,9 @@ export default function setupForm() {
         hide_attribution: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,
-        // translation: {
-        //   language: 'ar',
-        // },
+        translation: {
+          language: language.value,
+        },
         // id_selection: {
         //   NG: ['PASSPORT']
         // },

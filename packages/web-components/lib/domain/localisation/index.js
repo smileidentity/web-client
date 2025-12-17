@@ -284,9 +284,19 @@ export function setDocumentDir(lang) {
   }
 }
 
+/**
+ * Get the text direction for the current locale.
+ * @returns {string} Direction ('ltr' or 'rtl'), defaults to 'ltr'
+ */
+export function getDirection() {
+  const locale = locales[currentLocale];
+  return locale?.direction || 'ltr';
+}
+
 export default {
   getCurrentLocale,
   getDefaultLocale,
+  getDirection,
   hasLocale,
   loadLocale,
   registerLocale,

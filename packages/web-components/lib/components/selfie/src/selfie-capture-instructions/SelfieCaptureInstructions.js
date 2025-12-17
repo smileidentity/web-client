@@ -1,6 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../domain/localisation';
+import { t, getDirection } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -340,7 +340,7 @@ function templateString() {
       }
     </style>
     ${styles(this.themeColor)}
-    <div id="selfie-capture-instruction-screen" class="center">
+    <div id="selfie-capture-instruction-screen" class="center" dir="${this.direction}">
     <div class="content-root">
       <div class="content-header">
         <smileid-navigation theme-color=${this.themeColor} ${this.hideBack ? 'hide-back' : ''} ${this.showNavigation ? '' : 'hidden'}></smileid-navigation>
@@ -666,6 +666,10 @@ class SelfieCaptureInstructions extends HTMLElement {
 
   get showNavigation() {
     return this.hasAttribute('show-navigation');
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleCloseEvents() {

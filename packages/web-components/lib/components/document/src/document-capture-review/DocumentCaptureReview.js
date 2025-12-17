@@ -1,6 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { getDirection } from '../../../../domain/localisation';
+import { t, getDirection } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -222,10 +222,9 @@ function templateString() {
   <div id='document-capture-review-screen' class='flow center' dir='${this.direction}'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color">
-      Is the document clear and readable?
+      ${t('document.review.question')}
     </h1>
-    <p class="description">Make sure all corners of the document 
-    are visible and there is no glare</p>
+    <p class="description">${t('document.review.description')}</p>
     <div class='section | flow'>
       <div class='id-image-container'>
         <div class='id-image'>
@@ -234,10 +233,10 @@ function templateString() {
           </div>
         <div class='flow action-buttons'>
           <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-            Yes, my ID is readable
+            ${t('document.review.acceptButton')}
           </button>
           <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-id-image'>
-            No, retake photo
+            ${t('document.review.retakeButton')}
           </button>
         </div>
       </div>

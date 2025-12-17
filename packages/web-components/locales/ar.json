@@ -3,8 +3,19 @@
   "common": {
     "back": "رجوع",
     "close": "إغلاق",
+    "closeVerificationFrame": "إغلاق إطار التحقق من SmileIdentity",
     "allow": "السماح",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "continue": "متابعة",
+    "or": "أو",
+    "toggle": "تبديل"
+  },
+  "combobox": {
+    "noItems": "لا توجد عناصر"
+  },
+  "navigation": {
+    "back": "رجوع",
+    "closeVerificationFrame": "إغلاق إطار التحقق من SmileIdentity"
   },
   "camera": {
     "permission": {
@@ -88,9 +99,30 @@
     }
   },
   "document": {
+    "capture": {
+      "checkingPermissions": "جارٍ التحقق من الصلاحيات",
+      "instructionText": "تأكد من أن جميع الزوايا مرئية ولا يوجد وهج.",
+      "captureButton": "التقط المستند"
+    },
     "instructions": {
       "description": "سنستخدمه للتحقق من هويتك.",
-      "followInstructions": "يرجى اتباع التعليمات أدناه."
+      "followInstructions": "يرجى اتباع التعليمات أدناه.",
+      "goodLight": {
+        "header": "إضاءة جيدة",
+        "body": "تأكد من التقاط الصورة في بيئة مضاءة جيداً حيث يسهل قراءة وثيقة الهوية."
+      },
+      "clearImage": {
+        "header": "صورة واضحة",
+        "body": "امسك الكاميرا بثبات حتى لا تكون الكلمات على الهوية ضبابية."
+      },
+      "takePhotoButton": "التقط صورة",
+      "uploadPhotoButton": "تحميل صورة"
+    },
+    "review": {
+      "question": "هل المستند واضح وقابل للقراءة؟",
+      "description": "تأكد من أن جميع زوايا المستند مرئية ولا يوجد وهج",
+      "acceptButton": "نعم، هويتي مقروءة",
+      "retakeButton": "لا، أعد التقاط الصورة"
     }
   },
   "fileUpload": {

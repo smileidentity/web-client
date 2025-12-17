@@ -238,6 +238,15 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
 
   currentLocale = lang;
 
+  // Apply RTL/LTR direction if specified in locale data
+  const locale = locales[lang];
+  if (locale && locale.direction && document?.documentElement?.dir) {
+    document.documentElement.dir = locale.direction;
+  }
+
+  return true;
+}
+
 /**
  * Get the current locale.
  * @returns {string} Current language code

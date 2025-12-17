@@ -1,7 +1,7 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../domain/localisation';
+import { t, getDirection } from '../../../../domain/localisation';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -192,7 +192,7 @@ function templateString() {
       margin-top: 1rem;
     }
   </style>
-    <div id="document-capture-instructions-screen" class="flow center">
+    <div id="document-capture-instructions-screen" class="flow center" dir="${this.direction}">
         <div class="content-root">
             <div class="content-header">
         <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
@@ -520,6 +520,10 @@ class DocumentInstruction extends HTMLElement {
 
   get isBackOfId() {
     return !this.isFrontOfId;
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleBackEvents() {

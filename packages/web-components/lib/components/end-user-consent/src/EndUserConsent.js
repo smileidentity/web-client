@@ -1,7 +1,7 @@
 import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 import '../../attribution/PoweredBySmileId';
-import { t, tHtml } from '../../../domain/localisation';
+import { t, tHtml, getDirection } from '../../../domain/localisation';
 
 function templateString() {
   return `
@@ -317,7 +317,7 @@ function templateString() {
       }
     </style>
     ${styles(this.themeColor)}
-    <div id='consent-screen'>
+    <div id='consent-screen' dir='${this.direction}'>
       <section class='flow center'>
         <div class="nav ${this.hideBack ? 'justify-right' : ''}">
           <div class="back-wrapper" ${this.hideBack ? 'hidden' : ''}>
@@ -720,6 +720,10 @@ class EndUserConsent extends HTMLElement {
 
   get themeColor() {
     return this.getAttribute('theme-color') || '#151F72';
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   get token() {

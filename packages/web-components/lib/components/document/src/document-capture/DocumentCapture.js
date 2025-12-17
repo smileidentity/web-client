@@ -1,6 +1,7 @@
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { getDirection } from '../../../../domain/localisation';
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -161,7 +162,7 @@ function templateString() {
       }
   </style>
   ${styles(this.themeColor)}
-  <div id='document-capture-screen' class='flow center flex-column'>
+  <div id='document-capture-screen' class='flow center flex-column' dir='${this.direction}'>
   <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
     <h2 class='text-base font-bold title-color'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
@@ -696,6 +697,10 @@ class DocumentCapture extends HTMLElement {
 
   get isBackOfId() {
     return !this.isFrontOfId;
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   get documentType() {

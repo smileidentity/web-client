@@ -2,7 +2,7 @@ import SmartCamera from '../../domain/camera/src/SmartCamera';
 import styles from '../../styles/src/styles';
 import '../attribution/PoweredBySmileId';
 import '../navigation/src';
-import { t } from '../../domain/localisation';
+import { t, getDirection } from '../../domain/localisation';
 
 function templateString() {
   return `
@@ -31,7 +31,7 @@ function templateString() {
             text-align: center;
         }
     </style>
-    <div class='camera-permission-screen flow center'>
+    <div class='camera-permission-screen flow center' dir='${this.direction}'>
         <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <div class='flow center'>
           <p class='color-red | center' id='error'>
@@ -130,6 +130,10 @@ class CameraPermission extends HTMLElement {
 
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 }
 

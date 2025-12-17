@@ -1,5 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { getDirection } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -218,7 +219,7 @@ function templateString() {
     }
   </style>
   ${styles(this.themeColor)}
-  <div id='document-capture-review-screen' class='flow center'>
+  <div id='document-capture-review-screen' class='flow center' dir='${this.direction}'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color">
       Is the document clear and readable?
@@ -296,6 +297,10 @@ class IdReview extends HTMLElement {
 
   get title() {
     return this.getAttribute('title') || 'Submit Front of ID';
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleBackEvents() {

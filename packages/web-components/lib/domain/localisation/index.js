@@ -221,8 +221,7 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
   if (!locales[lang]) {
     if (translation) {
       registerLocale(lang, translation);
-    }
-    if (url) {
+    } else if (url) {
       try {
         await loadLocale(lang, url);
       } catch (error) {

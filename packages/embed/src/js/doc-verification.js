@@ -1,5 +1,6 @@
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
@@ -107,6 +108,7 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        setCurrentLocale(config.translation?.language || 'en');
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

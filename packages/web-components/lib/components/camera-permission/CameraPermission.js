@@ -2,6 +2,7 @@ import SmartCamera from '../../domain/camera/src/SmartCamera';
 import styles from '../../styles/src/styles';
 import '../attribution/PoweredBySmileId';
 import '../navigation/src';
+import { t } from '../../domain/localisation';
 
 function templateString() {
   return `
@@ -69,10 +70,10 @@ function templateString() {
                 </clipPath>
                 </defs>
             </svg>
-            <p class='text-2xl font-bold'>We need access to your camera so that we can capture your details.</p>
+            <p class='text-2xl font-bold'>${t('camera.permission.description')}</p>
             <div class='flow action-buttons'>
                 <button data-variant='solid full-width' class='button' type='button' id='request-camera-access'>
-                  Request Camera Access
+                  ${t('camera.permission.requestButton')}
                 </button>
                 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
             </div>

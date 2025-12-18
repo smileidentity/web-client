@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
+import { setCurrentLocale } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
@@ -59,6 +60,7 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        setCurrentLocale(config.translation?.language || 'en');
 
         CloseIframeButton.setAttribute('hidden', true);
         partner_params = getPartnerParams();

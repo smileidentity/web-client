@@ -93,12 +93,20 @@
       }
     },
     "review": {
+      "title": "مراجعة الصورة الذاتية",
       "question": "هل وجهك كله واضح؟",
       "acceptButton": "نعم، استخدم هذا",
       "retakeButton": "لا، أعد التقاط الصورة الذاتية"
     }
   },
   "document": {
+    "name": {
+      "default": "مستند"
+    },
+    "title": {
+      "front": "إرسال واجهة الهوية",
+      "back": "إرسال خلفية الهوية"
+    },
     "capture": {
       "checkingPermissions": "جارٍ التحقق من الصلاحيات",
       "instructionText": "تأكد من أن جميع الزوايا مرئية ولا يوجد وهج.",

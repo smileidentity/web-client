@@ -708,7 +708,7 @@ class DocumentCapture extends HTMLElement {
   }
 
   get documentName() {
-    return this.getAttribute('document-name') || 'Document';
+    return this.getAttribute('document-name') || t('document.name.default');
   }
 
   get isPortraitCaptureView() {

@@ -76,9 +76,9 @@ export default function setupForm() {
         hide_attribution: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,
-        translation: {
-          language: 'ar-EG',
-        },
+        // translation: {
+        //   language: 'ar',
+        // },
         // id_selection: {
         //   NG: ['PASSPORT']
         // },

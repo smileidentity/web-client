@@ -131,8 +131,10 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        setCurrentLocale(config.translation?.language || 'en');
+        await setCurrentLocale(config.translation?.language || 'en');
         applyPageTranslations();
+        // this makes the main content visible after translations are applied and prevents the flash of untranslated content
+        document.querySelector('main').hidden = false;
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;

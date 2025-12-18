@@ -1,8 +1,8 @@
-import { t } from '../../../domain/localisation';
-
+import { t, getDirection } from '../../../domain/localisation';
 class Navigation extends HTMLElement {
   connectedCallback() {
     const shadow = this.attachShadow({ mode: 'open' });
+    const direction = getDirection();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -10,6 +10,12 @@ class Navigation extends HTMLElement {
   display: flex;
   max-inline-size: 100%;
   justify-content: ${this.showBackButton ? 'space-between' : 'flex-end'};
+  direction: ${direction};
+}
+
+:host([dir="rtl"]) .back-button svg,
+:host .back-button svg[data-rtl="true"] {
+  transform: scaleX(-1);
 }
 
 button {
@@ -82,6 +88,7 @@ button[data-type="icon"] {
         height="24"
         viewBox="0 0 24 24"
         fill="none"
+        data-rtl="${direction === 'rtl'}"
       >
         <path
           fill="#DBDBC4"
@@ -127,6 +134,9 @@ button[data-type="icon"] {
     shadow.appendChild(style);
     if (this.showBackButton) shadow.appendChild(backButton);
     shadow.appendChild(closeButton);
+
+    // Set language direction attribute on host for CSS selectors
+    this.setAttribute('dir', direction);
 
     // Back Button Controls
     this.backButton = backButton;

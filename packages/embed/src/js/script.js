@@ -71,7 +71,7 @@ Sentry.init({
 * partner organization
 * @param { Object } [config.translation] - optional translation configuration
 * @param { string } [config.translation.language=en] - the language to use for the UI.
-* Supported languages are: en, fr, ar,
+* Supported languages are: en, ar,
 * @param { Object } [config.id_selection=all our [supported id types / countries]{@link https://docs.usesmileid.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
 * e.g. { 'NG': ['BVN', 'NIN'] }
 * @param { Object } [config.consent_required=none of our [supported id types / countries]{@link https://docs.usesmileid.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types

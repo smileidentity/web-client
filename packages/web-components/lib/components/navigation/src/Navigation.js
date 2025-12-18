@@ -1,4 +1,5 @@
 import { t, getDirection } from '../../../domain/localisation';
+
 class Navigation extends HTMLElement {
   connectedCallback() {
     const shadow = this.attachShadow({ mode: 'open' });

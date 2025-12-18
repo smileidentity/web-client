@@ -169,5 +169,39 @@
       "goBack": "Go Back",
       "confirmCancel": "No, Cancel Verification"
     }
+  },
+  "pages": {
+    "loading": {
+      "title": "Setting up",
+      "subtitle": "Just a few more seconds",
+      "description": "We are setting up your verification flow"
+    },
+    "idSelection": {
+      "title": "Select ID Type",
+      "selectCountry": "Select Country",
+      "selectIdType": "Select ID Type",
+      "selectDocument": "Select Document",
+      "searchCountry": "Search Country",
+      "placeholder": "--Please Select--",
+      "noCountryFound": "No country found",
+      "noIdTypeFound": "No ID type found"
+    },
+    "upload": {
+      "title": "Uploading",
+      "subtitle": "Just a few more seconds",
+      "description": "We are processing your request"
+    },
+    "complete": {
+      "title": "Submission Complete",
+      "subtitle": "That's all you need to verify your identity"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "generic": "Something went wrong",
+      "uploadFailed": "We could not upload your information",
+      "checkInternet": "Please check that you have a stable internet connection. Then try again!",
+      "tryAgain": "Try again",
+      "countryNotSupported": "{{country}} is not supported"
+    }
   }
 }

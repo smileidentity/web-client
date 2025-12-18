@@ -1,6 +1,6 @@
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
-import { setCurrentLocale } from '@smileid/web-components/localisation';
+import { setCurrentLocale, t } from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
@@ -44,6 +44,29 @@ import { getHeaders, getZipSignature } from './request';
 
   let fileToUpload;
   let uploadURL;
+
+  function applyPageTranslations() {
+    // Apply translations to all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+      const key = element.getAttribute('data-i18n');
+      const translation = t(key);
+
+      // For elements with child SVGs (buttons), preserve the SVG
+      const svg = element.querySelector('svg');
+      if (svg) {
+        element.textContent = translation;
+        element.appendChild(svg);
+      } else {
+        element.textContent = translation;
+      }
+    });
+
+    // Close button accessibility text
+    CloseIframeButtons.forEach((button) => {
+      const srText = button.querySelector('.visually-hidden');
+      if (srText) srText.textContent = t('common.closeVerificationFrame');
+    });
+  }
 
   async function getProductConstraints() {
     const payload = {
@@ -109,6 +132,7 @@ import { getHeaders, getZipSignature } from './request';
       ) {
         config = JSON.parse(event.data);
         setCurrentLocale(config.translation?.language || 'en');
+        applyPageTranslations();
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -136,10 +160,10 @@ import { getHeaders, getZipSignature } from './request';
       <smileid-combobox-trigger
         ${isSingleCountry ? 'disabled' : ''}
         ${isSingleCountry ? `value="${countries[0].name}"` : ''}
-        label="Search Country">
+        label="${t('pages.idSelection.searchCountry')}">
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="No country found">
+      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noCountryFound')}">
         ${countries
           .map(
             (country) =>
@@ -174,12 +198,12 @@ import { getHeaders, getZipSignature } from './request';
       <smileid-combobox-trigger
         ${isSingleIdType ? 'disabled' : ''}
         ${isSingleIdType ? `value="${idTypes[0].name}"` : ''}
-        label="Select Document"
+        label="${t('pages.idSelection.selectDocument')}"
         type="button"
       >
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="No country found">
+      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noIdTypeFound')}">
         ${idTypes
           .map(
             (idType) =>
@@ -310,7 +334,9 @@ import { getHeaders, getZipSignature } from './request';
         const isCountrySupported = supportedCountries.includes(countryCode);
 
         if (!isCountrySupported) {
-          throw new Error(`SmileIdentity - ${countryCode} is not supported`);
+          throw new Error(
+            `SmileIdentity - ${t('pages.error.countryNotSupported', { country: countryCode })}`,
+          );
         }
 
         const countryIndex = constraints.findIndex(
@@ -572,7 +598,7 @@ import { getHeaders, getZipSignature } from './request';
       event.target.disabled = false;
     } catch (error) {
       event.target.disabled = false;
-      displayErrorMessage('Something went wrong');
+      displayErrorMessage(t('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );

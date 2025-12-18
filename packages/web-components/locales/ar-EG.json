@@ -169,5 +169,39 @@
       "goBack": "العودة",
       "confirmCancel": "لا، إلغاء التحقق"
     }
+  },
+  "pages": {
+    "loading": {
+      "title": "جارٍ الإعداد",
+      "subtitle": "لحظات قليلة",
+      "description": "نحن نقوم بإعداد عملية التحقق الخاصة بك"
+    },
+    "idSelection": {
+      "title": "اختر نوع الهوية",
+      "selectCountry": "اختر الدولة",
+      "selectIdType": "اختر نوع الهوية",
+      "selectDocument": "اختر المستند",
+      "searchCountry": "ابحث عن الدولة",
+      "placeholder": "--يرجى الاختيار--",
+      "noCountryFound": "لم يتم العثور على دولة",
+      "noIdTypeFound": "لم يتم العثور على نوع الهوية"
+    },
+    "upload": {
+      "title": "جارٍ الرفع",
+      "subtitle": "لحظات قليلة",
+      "description": "نحن نعالج طلبك"
+    },
+    "complete": {
+      "title": "تم الإرسال بنجاح",
+      "subtitle": "هذا كل ما تحتاجه للتحقق من هويتك"
+    },
+    "error": {
+      "title": "حدث خطأ ما",
+      "generic": "حدث خطأ ما",
+      "uploadFailed": "لم نتمكن من رفع معلوماتك",
+      "checkInternet": "يرجى التأكد من وجود اتصال إنترنت مستقر. ثم حاول مرة أخرى!",
+      "tryAgain": "حاول مرة أخرى",
+      "countryNotSupported": "{{country}} غير مدعومة"
+    }
   }
 }

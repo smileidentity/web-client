@@ -93,12 +93,20 @@
       }
     },
     "review": {
+      "title": "Review Selfie",
       "question": "Is your whole face clear?",
       "acceptButton": "Yes, use this",
       "retakeButton": "No, Retake Selfie"
     }
   },
   "document": {
+    "name": {
+      "default": "Document"
+    },
+    "title": {
+      "front": "Submit Front of ID",
+      "back": "Submit Back of ID"
+    },
     "capture": {
       "checkingPermissions": "Checking permissions",
       "instructionText": "Make sure all corners are visible and there is no glare.",

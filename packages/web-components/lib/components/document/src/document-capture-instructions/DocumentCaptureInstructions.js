@@ -507,7 +507,7 @@ class DocumentInstruction extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute('title') || t('document.title.front');
   }
 
   get sideOfId() {

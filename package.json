@@ -30,7 +30,7 @@
     "@vitejs/plugin-basic-ssl": "^1.2.0",
     "check-dependency-version-consistency": "^4.1.0",
     "prettier": "^3.3.3",
-    "storybook": "^8.6.8"
+    "storybook": "^8.6.15"
   },
   "dependencies": {
     "sst": "^3.9.28"

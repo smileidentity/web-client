@@ -135,11 +135,17 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        const language = config.translation?.language || 'en-GB';
-        await setCurrentLocale(language);
-        document.documentElement.lang = language;
-        document.documentElement.dir = getDirection();
-        applyPageTranslations();
+        try {
+          const language = config.translation?.language || 'en-GB';
+          await setCurrentLocale(language);
+          document.documentElement.lang = language;
+          document.documentElement.dir = getDirection();
+          applyPageTranslations();
+        } catch (error) {
+          console.error(
+            `SmileIdentity - Failed to set locale: ${error.message}`,
+          );
+        }
         // this makes the main content visible after translations are applied and prevents the flash of untranslated content
         document.querySelector('main').hidden = false;
 

@@ -257,7 +257,7 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
     }
   }
 
-  currentLocale = lang;
+  currentLocale = resolvedLang;
 
   // Apply RTL/LTR direction if specified in locale data
   const locale = locales[resolvedLang];

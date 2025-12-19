@@ -1,6 +1,10 @@
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
-import { setCurrentLocale, t } from '@smileid/web-components/localisation';
+import {
+  setCurrentLocale,
+  t,
+  getDirection,
+} from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
@@ -131,7 +135,10 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        await setCurrentLocale(config.translation?.language || 'en');
+        const language = config.translation?.language || 'en-GB';
+        await setCurrentLocale(language);
+        document.documentElement.lang = language;
+        document.documentElement.dir = getDirection();
         applyPageTranslations();
         // this makes the main content visible after translations are applied and prevents the flash of untranslated content
         document.querySelector('main').hidden = false;

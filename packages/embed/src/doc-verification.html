@@ -98,12 +98,18 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">Setting up</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">
+          Setting up
+        </h1>
 
         <p>
-          <span data-i18n="pages.loading.subtitle">Just a few more seconds</span>
+          <span data-i18n="pages.loading.subtitle"
+            >Just a few more seconds</span
+          >
           <br />
-          <span data-i18n="pages.loading.description">We are setting up your verification flow</span>
+          <span data-i18n="pages.loading.description"
+            >We are setting up your verification flow</span
+          >
         </p>
 
         <p class="center credits" hidden>
@@ -197,23 +203,39 @@
             >
           </button>
         </div>
-        <h1 class="center font-size-500 max-width:100ch" data-i18n="pages.idSelection.title">Select ID Type</h1>
+        <h1
+          class="center font-size-500 max-width:100ch"
+          data-i18n="pages.idSelection.title"
+        >
+          Select ID Type
+        </h1>
 
         <form name="hosted-web-config" class="flow flow-space:800">
           <div class="flow flow-space:400">
             <div class="flow input-group">
-              <label for="country" data-i18n="pages.idSelection.selectCountry"> Select Country </label>
+              <label for="country" data-i18n="pages.idSelection.selectCountry">
+                Select Country
+              </label>
               <select disabled required id="country" name="country">
-                <option value="" data-i18n="pages.idSelection.placeholder">--Please Select--</option>
+                <option value="" data-i18n="pages.idSelection.placeholder">
+                  --Please Select--
+                </option>
               </select>
             </div>
 
             <div id="id-type-selector" hidden class="flow input-group">
-              <label for="id_type" data-i18n="pages.idSelection.selectIdType"> Select ID Type </label>
+              <label for="id_type" data-i18n="pages.idSelection.selectIdType">
+                Select ID Type
+              </label>
             </div>
           </div>
 
-          <button data-variant="solid" type="submit" id="submitConfig" data-i18n="common.continue">
+          <button
+            data-variant="solid"
+            type="submit"
+            id="submitConfig"
+            data-i18n="common.continue"
+          >
             Continue
             <svg
               aria-hidden="true"
@@ -253,12 +275,16 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">Uploading</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">
+          Uploading
+        </h1>
 
         <p>
           <span data-i18n="pages.upload.subtitle">Just a few more seconds</span>
           <br />
-          <span data-i18n="pages.upload.description">We are processing your request</span>
+          <span data-i18n="pages.upload.description"
+            >We are processing your request</span
+          >
         </p>
 
         <p class="center credits">
@@ -357,14 +383,21 @@
 
         <h1 data-i18n="pages.error.title">Something went wrong</h1>
 
-        <p data-i18n="pages.error.uploadFailed">We could not upload your information</p>
+        <p data-i18n="pages.error.uploadFailed">
+          We could not upload your information
+        </p>
 
         <p data-i18n="pages.error.checkInternet">
           Please check that you have a stable internet connection. Then try
           again!
         </p>
 
-        <button data-variant="solid" type="button" id="retry-upload" data-i18n="pages.error.tryAgain">
+        <button
+          data-variant="solid"
+          type="button"
+          id="retry-upload"
+          data-i18n="pages.error.tryAgain"
+        >
           Try again
           <svg
             aria-hidden="true"
@@ -425,7 +458,9 @@
 
         <h1 data-i18n="pages.complete.title">Submission Complete</h1>
 
-        <p data-i18n="pages.complete.subtitle">That's all you need to verify your identity</p>
+        <p data-i18n="pages.complete.subtitle">
+          That's all you need to verify your identity
+        </p>
 
         <p class="center credits">
           <span class="visually-hidden">Powered by SmileID</span>

@@ -1,7 +1,7 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../domain/localisation';
+import { t, escapeHtml } from '../../../../domain/localisation';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -200,7 +200,7 @@ function templateString() {
         <div class="content-body">
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
-            <h1 class='title-color font-bold'>${this.title}</h1>
+            <h1 class='title-color font-bold'>${escapeHtml(this.title)}</h1>
         <p class="description text-sm font-normal">
             ${t('document.instructions.description')}
           </p>

@@ -161,7 +161,7 @@ const HTML_ENTITIES = {
  * @param {string} str - String to escape
  * @returns {string} Escaped string
  */
-function escapeHtml(str) {
+export function escapeHtml(str) {
   return str.replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
 }
 
@@ -284,6 +284,7 @@ export function setDocumentDir(lang) {
 }
 
 export default {
+  escapeHtml,
   getCurrentLocale,
   getDefaultLocale,
   hasLocale,

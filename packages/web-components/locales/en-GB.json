@@ -141,14 +141,6 @@
       "fileTooLarge": "{{filename}} is too large. Please ensure that the file is less than {{size}}."
     }
   },
-  "fileUpload": {
-    "error": {
-      "readingFile": "An error occurred reading the file. Please check the file, and try again",
-      "multipleFiles": "Only one file upload is permitted at a time",
-      "unsupportedFormat": "Unsupported file format. Please ensure that you are providing a JPG or PNG image",
-      "fileTooLarge": "{{filename}} is too large. Please ensure that the file is less than {{size}}."
-    }
-  },
   "consent": {
     "demoTip": "This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.",
     "accessRequest": "{{partnerName}} wants to access your {{idTypeLabel}} information",
@@ -191,6 +183,7 @@
       "selectDocument": "Select Document",
       "searchCountry": "Search Country",
       "placeholder": "--Please Select--",
+      "selectCountryFirst": "--Select Country First--",
       "noCountryFound": "No country found",
       "noIdTypeFound": "No ID type found"
     },

@@ -194,7 +194,19 @@
     },
     "complete": {
       "title": "Submission Complete",
-      "subtitle": "That's all you need to verify your identity"
+      "subtitle": "That's all you need to verify your identity",
+      "defaultMessage": "That's all you need to verify your identity",
+      "processingInfo": "We will process your {{country}} - {{idType}} information to verify your identity"
+    },
+    "idInfo": {
+      "title": "Enter ID Information",
+      "back": "Back",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dateOfBirth": "Date of Birth",
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
     },
     "error": {
       "title": "Something went wrong",

@@ -200,7 +200,6 @@
     },
     "idInfo": {
       "title": "Enter ID Information",
-      "back": "Back",
       "firstName": "First Name",
       "lastName": "Last Name",
       "dateOfBirth": "Date of Birth",

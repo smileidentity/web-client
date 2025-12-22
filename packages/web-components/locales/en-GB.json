@@ -200,6 +200,7 @@
     },
     "idInfo": {
       "title": "Enter ID Information",
+      "idNumber": "ID Number",
       "firstName": "First Name",
       "lastName": "Last Name",
       "dateOfBirth": "Date of Birth",
@@ -214,6 +215,9 @@
       "checkInternet": "Please check that you have a stable internet connection. Then try again!",
       "tryAgain": "Try again",
       "countryNotSupported": "{{country}} is not supported"
+    },
+    "validation": {
+      "isRequired": "{{field}} is required"
     }
   }
 }

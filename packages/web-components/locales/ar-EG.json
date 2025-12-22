@@ -200,6 +200,7 @@
     },
     "idInfo": {
       "title": "أدخل معلومات الهوية",
+      "idNumber": "رقم الهوية",
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
       "dateOfBirth": "تاريخ الميلاد",
@@ -214,6 +215,9 @@
       "checkInternet": "يرجى التأكد من وجود اتصال إنترنت مستقر. ثم حاول مرة أخرى!",
       "tryAgain": "حاول مرة أخرى",
       "countryNotSupported": "{{country}} غير مدعومة"
+    },
+    "validation": {
+      "isRequired": "{{field}} مطلوب"
     }
   }
 }

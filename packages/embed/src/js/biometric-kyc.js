@@ -685,6 +685,22 @@ import { getHeaders, getZipSignature } from './request';
     validationMessages.forEach((el) => el.remove());
   }
 
+  // Map field names to their translation keys
+  const fieldTranslationKeys = {
+    id_number: 'pages.idInfo.idNumber',
+    first_name: 'pages.idInfo.firstName',
+    last_name: 'pages.idInfo.lastName',
+    day: 'pages.idInfo.day',
+    month: 'pages.idInfo.month',
+    year: 'pages.idInfo.year',
+  };
+
+  function getTranslatedValidationMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+  }
+
   function validateInputs(payload) {
     const validationConstraints = {};
 
@@ -776,7 +792,7 @@ import { getHeaders, getZipSignature } from './request';
       const errorDiv = document.createElement('div');
       errorDiv.setAttribute('id', `${field}-hint`);
       errorDiv.setAttribute('class', 'validation-message');
-      errorDiv.textContent = errors[field][0];
+      errorDiv.textContent = getTranslatedValidationMessage(field);
 
       input.insertAdjacentElement('afterend', errorDiv);
     });

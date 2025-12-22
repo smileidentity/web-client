@@ -58,8 +58,13 @@ import { getHeaders, getZipSignature } from './request';
       // For elements with child SVGs (buttons), preserve the SVG
       const svg = element.querySelector('svg');
       if (svg) {
-        element.textContent = translation;
-        element.appendChild(svg);
+        // Clear text nodes only, preserve SVG
+        Array.from(element.childNodes).forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            node.remove();
+          }
+        });
+        element.insertBefore(document.createTextNode(translation), svg);
       } else {
         element.textContent = translation;
       }

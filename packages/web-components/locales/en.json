@@ -10,6 +10,13 @@
     "permission": {
       "description": "We need access to your camera so that we can capture your details.",
       "requestButton": "Request Camera Access"
+    },
+    "error": {
+      "notAllowed": "Looks like camera access was not granted, or was blocked by a browser level setting / extension. Please follow the prompt from the URL bar, or extensions, and enable access. You may need to refresh to start all over again",
+      "abort": "Oops! Something happened, and we lost access to your stream. Please refresh to start all over again",
+      "notReadable": "There seems to be a problem with your device's camera, or its connection. Please check this, and when resolved, try again. Or try another device.",
+      "notFound": "We are unable to find a video stream. You may need to refresh to start all over again",
+      "insecure": "This site is insecure, and as such cannot have access to your camera. Try to navigate to a secure version of this page, or contact the owner."
     }
   },
   "selfie": {
@@ -35,6 +42,45 @@
         }
       }
     },
+    "capture": {
+      "tip": {
+        "fitHead": "Fit your head inside the oval frame"
+      },
+      "cta": {
+        "smile": "SMILE",
+        "widerSmile": "WIDER SMILE"
+      },
+      "button": {
+        "takeSelfie": "Take Selfie",
+        "startCapture": "Start Capture"
+      },
+      "agentMode": {
+        "on": "Agent Mode On",
+        "off": "Agent Mode Off"
+      },
+      "error": {
+        "minFrames": "SmartCameraWeb: Minimum required no of frames is {{count}}",
+        "webcamCapture": "Unable to capture webcam images - Please try another device"
+      }
+    },
+    "smart": {
+      "alert": {
+        "multipleFaces": "Ensure only one face is visible",
+        "noFace": "Position your face in the oval",
+        "outOfBounds": "Position your face in the oval",
+        "tooClose": "Move farther away",
+        "tooFar": "Move closer",
+        "neutralExpression": "Neutral expression",
+        "smileRequired": "Smile!",
+        "openMouthSmile": "Wider smile - teeth visible",
+        "initializing": "Initializing..."
+      },
+      "status": {
+        "capturing": "Capturing...",
+        "keepSmiling": "Keep smiling!",
+        "readyToCapture": "Ready to capture"
+      }
+    },
     "review": {
       "question": "Is your whole face clear?",
       "acceptButton": "Yes, use this",
@@ -45,6 +91,14 @@
     "instructions": {
       "description": "We'll use it to verify your identity.",
       "followInstructions": "Please follow the instructions below."
+    }
+  },
+  "fileUpload": {
+    "error": {
+      "readingFile": "An error occurred reading the file. Please check the file, and try again",
+      "multipleFiles": "Only one file upload is permitted at a time",
+      "unsupportedFormat": "Unsupported file format. Please ensure that you are providing a JPG or PNG image",
+      "fileTooLarge": "{{filename}} is too large. Please ensure that the file is less than {{size}}."
     }
   },
   "consent": {

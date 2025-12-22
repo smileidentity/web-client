@@ -1,3 +1,5 @@
+import { t } from '../../localisation';
+
 class SmartCamera {
   static stream = null;
 
@@ -74,32 +76,15 @@ class SmartCamera {
     switch (e.name) {
       case 'NotAllowedError':
       case 'SecurityError':
-        return `
-              Looks like camera access was not granted, or was blocked by a browser
-              level setting / extension. Please follow the prompt from the URL bar,
-              or extensions, and enable access.
-              You may need to refresh to start all over again
-            `;
+        return t('camera.error.notAllowed');
       case 'AbortError':
-        return `
-              Oops! Something happened, and we lost access to your stream.
-              Please refresh to start all over again
-            `;
+        return t('camera.error.abort');
       case 'NotReadableError':
-        return `
-              There seems to be a problem with your device's camera, or its connection.
-              Please check this, and when resolved, try again. Or try another device.
-            `;
+        return t('camera.error.notReadable');
       case 'NotFoundError':
-        return `
-              We are unable to find a video stream.
-              You may need to refresh to start all over again
-            `;
+        return t('camera.error.notFound');
       case 'TypeError':
-        return `
-              This site is insecure, and as such cannot have access to your camera.
-              Try to navigate to a secure version of this page, or contact the owner.
-            `;
+        return t('camera.error.insecure');
       default:
         return e.message;
     }

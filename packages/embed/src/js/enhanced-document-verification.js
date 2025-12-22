@@ -16,7 +16,14 @@ function applyPageTranslations() {
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     const key = element.getAttribute('data-i18n');
     if (key) {
-      element.textContent = translate(key);
+      try {
+        const translation = translate(key);
+        if (translation) {
+          element.textContent = translation;
+        }
+      } catch (error) {
+        console.error(`Translation failed for key: ${key}`, error);
+      }
     }
   });
 }

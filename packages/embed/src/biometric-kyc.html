@@ -98,12 +98,18 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">Setting up</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">
+          Setting up
+        </h1>
 
         <p>
-          <span data-i18n="pages.loading.subtitle">Just a few more seconds</span>
+          <span data-i18n="pages.loading.subtitle"
+            >Just a few more seconds</span
+          >
           <br />
-          <span data-i18n="pages.loading.description">We are setting up your verification flow</span>
+          <span data-i18n="pages.loading.description"
+            >We are setting up your verification flow</span
+          >
         </p>
 
         <p class="center credits" hidden>
@@ -197,21 +203,38 @@
             >
           </button>
         </div>
-        <h1 class="center font-size-500 max-width:100ch" data-i18n="pages.idSelection.title">Select ID Type</h1>
+        <h1
+          class="center font-size-500 max-width:100ch"
+          data-i18n="pages.idSelection.title"
+        >
+          Select ID Type
+        </h1>
 
         <form name="hosted-web-config" class="flow flow-space:800">
           <div class="split-pair flow-space:400">
             <div class="flow input-group">
-              <label for="country" data-i18n="pages.idSelection.selectCountry"> Select Country </label>
+              <label for="country" data-i18n="pages.idSelection.selectCountry">
+                Select Country
+              </label>
               <select disabled required id="country" name="country">
-                <option value="" data-i18n="pages.idSelection.placeholder">--Please Select--</option>
+                <option value="" data-i18n="pages.idSelection.placeholder">
+                  --Please Select--
+                </option>
               </select>
             </div>
 
             <div class="flow input-group">
-              <label for="id_type" data-i18n="pages.idSelection.selectIdType"> Select ID Type </label>
+              <label for="id_type" data-i18n="pages.idSelection.selectIdType">
+                Select ID Type
+              </label>
               <select required id="id_type" name="id_type" disabled>
-                <option value="" disabled data-i18n="pages.idSelection.selectCountryFirst">Select Country First</option>
+                <option
+                  value=""
+                  disabled
+                  data-i18n="pages.idSelection.selectCountryFirst"
+                >
+                  Select Country First
+                </option>
               </select>
             </div>
           </div>
@@ -301,7 +324,9 @@
             >
           </button>
         </div>
-        <h1 class="center" data-i18n="pages.idInfo.title">Enter ID Information</h1>
+        <h1 class="center" data-i18n="pages.idInfo.title">
+          Enter ID Information
+        </h1>
         <p class="demo-tip" data-variant="yellow" hidden>
           <svg
             aria-hidden="true"
@@ -348,7 +373,13 @@
 
           <fieldset hidden id="names" class="split-pair" data-variant="start">
             <div class="input-group flow">
-              <label class="required" for="first_name" data-i18n="pages.idInfo.firstName"> First Name </label>
+              <label
+                class="required"
+                for="first_name"
+                data-i18n="pages.idInfo.firstName"
+              >
+                First Name
+              </label>
 
               <input
                 aria-required="true"
@@ -361,7 +392,13 @@
             </div>
 
             <div class="input-group flow">
-              <label class="required" for="last_name" data-i18n="pages.idInfo.lastName"> Last Name </label>
+              <label
+                class="required"
+                for="last_name"
+                data-i18n="pages.idInfo.lastName"
+              >
+                Last Name
+              </label>
 
               <input
                 aria-required="true"
@@ -378,7 +415,9 @@
 
             <div class="dob">
               <div class="input-group flow">
-                <label class="required" for="day" data-i18n="pages.idInfo.day"> Day </label>
+                <label class="required" for="day" data-i18n="pages.idInfo.day">
+                  Day
+                </label>
 
                 <input
                   aria-required="true"
@@ -391,7 +430,13 @@
               </div>
 
               <div class="input-group flow">
-                <label class="required" for="month" data-i18n="pages.idInfo.month"> Month </label>
+                <label
+                  class="required"
+                  for="month"
+                  data-i18n="pages.idInfo.month"
+                >
+                  Month
+                </label>
 
                 <input
                   aria-required="true"
@@ -404,7 +449,13 @@
               </div>
 
               <div class="input-group flow">
-                <label class="required" for="year" data-i18n="pages.idInfo.year"> Year </label>
+                <label
+                  class="required"
+                  for="year"
+                  data-i18n="pages.idInfo.year"
+                >
+                  Year
+                </label>
 
                 <input
                   aria-required="true"
@@ -478,12 +529,16 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">Uploading</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">
+          Uploading
+        </h1>
 
         <p>
           <span data-i18n="pages.upload.subtitle">Just a few more seconds</span>
           <br />
-          <span data-i18n="pages.upload.description">We are processing your request</span>
+          <span data-i18n="pages.upload.description"
+            >We are processing your request</span
+          >
         </p>
 
         <p class="center credits">
@@ -582,11 +637,15 @@
 
         <h1 data-i18n="pages.error.generic">Something went wrong</h1>
 
-        <p data-i18n="pages.error.uploadFailed">We could not upload your information</p>
+        <p data-i18n="pages.error.uploadFailed">
+          We could not upload your information
+        </p>
 
         <p>
-          <span data-i18n="pages.error.checkInternet">Please check that you have a stable internet connection. Then try
-          again!</span>
+          <span data-i18n="pages.error.checkInternet"
+            >Please check that you have a stable internet connection. Then try
+            again!</span
+          >
         </p>
 
         <button data-variant="solid" type="button" id="retry-upload">

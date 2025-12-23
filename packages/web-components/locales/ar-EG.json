@@ -224,7 +224,8 @@
       "countryNotSupported": "{{country}} غير مدعومة"
     },
     "validation": {
-      "isRequired": "{{field}} مطلوب"
+      "isRequired": "{{field}} مطلوب",
+      "invalidFormat": "{{field}} غير صالح"
     }
   }
 }

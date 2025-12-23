@@ -716,7 +716,7 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.id_number = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('id_number')}`,
         },
         format: new RegExp(
           productConstraints[id_info.country].id_types[
@@ -734,13 +734,13 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.first_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('first_name')}`,
         },
       };
       validationConstraints.last_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('last_name')}`,
         },
       };
     }
@@ -753,19 +753,19 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.day = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('day')}`,
         },
       };
       validationConstraints.month = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('month')}`,
         },
       };
       validationConstraints.year = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('year')}`,
         },
       };
     }
@@ -792,7 +792,7 @@ import { getHeaders, getZipSignature } from './request';
       const errorDiv = document.createElement('div');
       errorDiv.setAttribute('id', `${field}-hint`);
       errorDiv.setAttribute('class', 'validation-message');
-      errorDiv.textContent = getTranslatedValidationMessage(field);
+      errorDiv.textContent = errors[field][0];
 
       input.insertAdjacentElement('afterend', errorDiv);
     });

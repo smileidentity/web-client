@@ -701,6 +701,14 @@ import { getHeaders, getZipSignature } from './request';
     return translateHtml('pages.validation.isRequired', { field: fieldLabel });
   }
 
+  function getTranslatedFormatMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.invalidFormat', {
+      field: fieldLabel,
+    });
+  }
+
   function validateInputs(payload) {
     const validationConstraints = {};
 
@@ -716,13 +724,16 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.id_number = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('id_number')}`,
         },
-        format: new RegExp(
-          productConstraints[id_info.country].id_types[
-            id_info.id_type
-          ].id_number_regex,
-        ),
+        format: {
+          pattern: new RegExp(
+            productConstraints[id_info.country].id_types[
+              id_info.id_type
+            ].id_number_regex,
+          ),
+          message: `^${getTranslatedFormatMessage('id_number')}`,
+        },
       };
     }
 
@@ -734,13 +745,13 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.first_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('first_name')}`,
         },
       };
       validationConstraints.last_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('last_name')}`,
         },
       };
     }
@@ -753,19 +764,19 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.day = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('day')}`,
         },
       };
       validationConstraints.month = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('month')}`,
         },
       };
       validationConstraints.year = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('year')}`,
         },
       };
     }
@@ -792,7 +803,7 @@ import { getHeaders, getZipSignature } from './request';
       const errorDiv = document.createElement('div');
       errorDiv.setAttribute('id', `${field}-hint`);
       errorDiv.setAttribute('class', 'validation-message');
-      errorDiv.textContent = getTranslatedValidationMessage(field);
+      errorDiv.textContent = errors[field][0];
 
       input.insertAdjacentElement('afterend', errorDiv);
     });

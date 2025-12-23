@@ -1,6 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t } from '../../../../domain/localisation';
+import { t, getDirection } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -219,7 +219,7 @@ function templateString() {
     }
   </style>
   ${styles(this.themeColor)}
-  <div id='document-capture-review-screen' class='flow center'>
+  <div id='document-capture-review-screen' class='flow center' dir='${this.direction}'>
   <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color">
       ${t('document.review.question')}
@@ -296,6 +296,10 @@ class IdReview extends HTMLElement {
 
   get title() {
     return this.getAttribute('title') || t('document.title.front');
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleBackEvents() {

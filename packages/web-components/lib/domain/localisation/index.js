@@ -4,21 +4,36 @@
  */
 
 // Bundle supported locales for offline/instant switching
-import arLocale from '../../../locales/ar.json';
-import enLocale from '../../../locales/en.json';
+import arLocale from '../../../locales/ar-EG.json';
+import enLocale from '../../../locales/en-GB.json';
 
-const DEFAULT_LOCALE = 'en';
+// Locale alias mapping for short codes
+const LOCALE_ALIASES = {
+  ar: 'ar-EG',
+  en: 'en-GB',
+};
+
+/**
+ * Resolve locale alias to full locale code.
+ * @param {string} lang - Language code (e.g., 'en', 'ar', 'en-GB')
+ * @returns {string} Resolved locale code
+ */
+function resolveLocale(lang) {
+  return LOCALE_ALIASES[lang] || lang;
+}
+
+const DEFAULT_LOCALE = 'en-GB';
 const FETCH_TIMEOUT_MS = 5000;
 
 let currentLocale = DEFAULT_LOCALE;
 const locales = {
-  ar: arLocale,
-  en: enLocale,
+  'ar-EG': arLocale,
+  'en-GB': enLocale,
 };
 
 /**
  * Register a locale object (in-memory).
- * @param {string} lang - Language code (e.g., 'en', 'ar')
+ * @param {string} lang - Language code (e.g., 'en-GB', 'ar-EG')
  * @param {object} data - Locale translation object
  */
 export function registerLocale(lang, data) {
@@ -81,9 +96,11 @@ export async function registerLocaleUrl(lang, url) {
  * @returns {Promise<object>} Loaded locale data
  */
 export async function loadLocale(lang, url) {
+  const resolvedLang = resolveLocale(lang);
+
   // Return cached locale if available
-  if (locales[lang]) {
-    return locales[lang];
+  if (locales[resolvedLang]) {
+    return locales[resolvedLang];
   }
 
   // Fetch from URL if provided
@@ -126,15 +143,17 @@ function getNestedValue(obj, key) {
  */
 export function t(key) {
   // Try current locale first
-  const currentLocaleData = locales[currentLocale];
+  const resolvedLocale = resolveLocale(currentLocale);
+  const currentLocaleData = locales[resolvedLocale];
   const value = getNestedValue(currentLocaleData, key);
   if (value) {
     return value;
   }
 
   // Fallback to default locale if different from current
-  if (currentLocale !== DEFAULT_LOCALE) {
-    const defaultValue = getNestedValue(locales[DEFAULT_LOCALE], key);
+  const resolvedDefault = resolveLocale(DEFAULT_LOCALE);
+  if (resolvedLocale !== resolvedDefault) {
+    const defaultValue = getNestedValue(locales[resolvedDefault], key);
     if (defaultValue) {
       return defaultValue;
     }
@@ -229,13 +248,15 @@ export const translateHtml = tHtml;
  * @returns {Promise<boolean>} Whether locale was successfully set
  */
 export async function setCurrentLocale(lang, { url, translation } = {}) {
+  const resolvedLang = resolveLocale(lang);
+
   // If locale not registered, try to load it
-  if (!locales[lang]) {
+  if (!locales[resolvedLang]) {
     if (translation) {
-      registerLocale(lang, translation);
+      registerLocale(resolvedLang, translation);
     } else if (url) {
       try {
-        await loadLocale(lang, url);
+        await loadLocale(resolvedLang, url);
       } catch (error) {
         console.error(
           `Failed to load locale '${lang}', keeping current locale '${currentLocale}'`,
@@ -248,10 +269,10 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
     }
   }
 
-  currentLocale = lang;
+  currentLocale = resolvedLang;
 
   // Apply RTL/LTR direction if specified in locale data
-  const locale = locales[lang];
+  const locale = locales[resolvedLang];
   if (locale && locale.direction && document?.documentElement?.dir) {
     document.documentElement.dir = locale.direction;
   }
@@ -295,10 +316,20 @@ export function setDocumentDir(lang) {
   }
 }
 
+/**
+ * Get the text direction for the current locale.
+ * @returns {string} Direction ('ltr' or 'rtl'), defaults to 'ltr'
+ */
+export function getDirection() {
+  const locale = locales[currentLocale];
+  return locale?.direction || 'ltr';
+}
+
 export default {
   escapeHtml,
   getCurrentLocale,
   getDefaultLocale,
+  getDirection,
   hasLocale,
   loadLocale,
   registerLocale,

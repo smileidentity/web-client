@@ -3,7 +3,7 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
-import { t, tHtml } from '../../../../domain/localisation';
+import { t, tHtml, getDirection } from '../../../../domain/localisation';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -511,7 +511,7 @@ function templateString() {
     margin-inline-start; 1em;
   }
   </style>
-  <div id='selfie-capture-screen' class='flow center'>
+  <div id='selfie-capture-screen' class='flow center' dir='${this.direction}'>
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
 
     <div class='tips'>${t('selfie.capture.tip.fitHead')}</div>
@@ -995,6 +995,10 @@ class SelfieCaptureScreen extends HTMLElement {
 
   get title() {
     return this.getAttribute('title') || t('selfie.instructions.title');
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   get hidden() {

@@ -701,6 +701,14 @@ import { getHeaders, getZipSignature } from './request';
     return translateHtml('pages.validation.isRequired', { field: fieldLabel });
   }
 
+  function getTranslatedFormatMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.invalidFormat', {
+      field: fieldLabel,
+    });
+  }
+
   function validateInputs(payload) {
     const validationConstraints = {};
 
@@ -718,11 +726,14 @@ import { getHeaders, getZipSignature } from './request';
           allowEmpty: false,
           message: `^${getTranslatedValidationMessage('id_number')}`,
         },
-        format: new RegExp(
-          productConstraints[id_info.country].id_types[
-            id_info.id_type
-          ].id_number_regex,
-        ),
+        format: {
+          pattern: new RegExp(
+            productConstraints[id_info.country].id_types[
+              id_info.id_type
+            ].id_number_regex,
+          ),
+          message: `^${getTranslatedFormatMessage('id_number')}`,
+        },
       };
     }
 

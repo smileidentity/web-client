@@ -217,7 +217,8 @@
       "countryNotSupported": "{{country}} is not supported"
     },
     "validation": {
-      "isRequired": "{{field}} is required"
+      "isRequired": "{{field}} is required",
+      "invalidFormat": "{{field}} is invalid"
     }
   }
 }

@@ -1,7 +1,12 @@
 import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
-import { setCurrentLocale } from '@smileid/web-components/localisation';
+import {
+  setCurrentLocale,
+  translate,
+  translateHtml,
+  getDirection,
+} from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
 
@@ -110,6 +115,19 @@ import { getHeaders } from './request';
     }
   }
 
+  function applyPageTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (key) {
+        try {
+          el.textContent = translate(key);
+        } catch (e) {
+          console.error(`Translation failed for key: ${key}`, e);
+        }
+      }
+    });
+  }
+
   window.addEventListener(
     'message',
     async (event) => {
@@ -119,7 +137,11 @@ import { getHeaders } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        setCurrentLocale(config.translation?.language || 'en');
+        await setCurrentLocale(config.translation?.language || 'en');
+        document.documentElement.dir = getDirection();
+        applyPageTranslations();
+        document.querySelector('main').hidden = false;
+
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
         const attributions = document.querySelectorAll('.credits');
@@ -260,7 +282,9 @@ import { getHeaders } from './request';
           selectIDType.innerHTML = '';
           const initialOption = document.createElement('option');
           initialOption.setAttribute('value', '');
-          initialOption.textContent = '--Please Select--';
+          initialOption.textContent = translate(
+            'pages.idSelection.placeholder',
+          );
           selectIDType.appendChild(initialOption);
 
           // ACTION: Load ID Types as <option>s
@@ -519,10 +543,10 @@ import { getHeaders } from './request';
     autocomplete.setAttribute('id', 'bank_code');
     autocomplete.innerHTML = `
       <smileid-combobox-trigger
-        label="Search Bank">
+        label="${translate('pages.idInfo.searchBank')}">
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="No bank found">
+      <smileid-combobox-listbox empty-label="${translate('pages.idInfo.noBankFound')}">
         ${bankCodes
           .map(
             (bank) =>
@@ -647,6 +671,24 @@ import { getHeaders } from './request';
     validationMessages.forEach((el) => el.remove());
   }
 
+  // Map field names to their translation keys
+  const fieldTranslationKeys = {
+    id_number: 'pages.idInfo.idNumber',
+    first_name: 'pages.idInfo.firstName',
+    last_name: 'pages.idInfo.lastName',
+    day: 'pages.idInfo.day',
+    month: 'pages.idInfo.month',
+    year: 'pages.idInfo.year',
+    citizenship: 'pages.idInfo.citizenship',
+    bank_code: 'pages.idInfo.bank',
+  };
+
+  function getTranslatedValidationMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+  }
+
   function validateInputs(payload) {
     const validationConstraints = {};
 
@@ -763,7 +805,7 @@ import { getHeaders } from './request';
       const errorDiv = document.createElement('div');
       errorDiv.setAttribute('id', `${field}-hint`);
       errorDiv.setAttribute('class', 'validation-message');
-      errorDiv.textContent = errors[field][0];
+      errorDiv.textContent = getTranslatedValidationMessage(field);
 
       input.insertAdjacentElement('afterend', errorDiv);
     });

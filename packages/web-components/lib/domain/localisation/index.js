@@ -146,6 +146,12 @@ export function t(key) {
 }
 
 /**
+ * Alias for t() function.
+ * @see t
+ */
+export const translate = t;
+
+/**
  * HTML entity map for escaping special characters.
  */
 const HTML_ENTITIES = {
@@ -161,7 +167,7 @@ const HTML_ENTITIES = {
  * @param {string} str - String to escape
  * @returns {string} Escaped string
  */
-function escapeHtml(str) {
+export function escapeHtml(str) {
   return str.replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
 }
 
@@ -207,6 +213,12 @@ export function tHtml(key, params = {}) {
 
   return text;
 }
+
+/**
+ * Alias for tHtml() function.
+ * @see tHtml
+ */
+export const translateHtml = tHtml;
 
 /**
  * Set the current locale.
@@ -284,6 +296,7 @@ export function setDocumentDir(lang) {
 }
 
 export default {
+  escapeHtml,
   getCurrentLocale,
   getDefaultLocale,
   hasLocale,
@@ -294,4 +307,6 @@ export default {
   setDocumentDir,
   t,
   tHtml,
+  translate,
+  translateHtml,
 };

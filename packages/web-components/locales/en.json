@@ -3,8 +3,19 @@
   "common": {
     "back": "Back",
     "close": "Close",
+    "closeVerificationFrame": "Close SmileIdentity Verification frame",
     "allow": "Allow",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "or": "or",
+    "toggle": "Toggle"
+  },
+  "combobox": {
+    "noItems": "No items"
+  },
+  "navigation": {
+    "back": "Back",
+    "closeVerificationFrame": "Close SmileIdentity Verification frame"
   },
   "camera": {
     "permission": {
@@ -82,15 +93,52 @@
       }
     },
     "review": {
+      "title": "Review Selfie",
       "question": "Is your whole face clear?",
       "acceptButton": "Yes, use this",
       "retakeButton": "No, Retake Selfie"
     }
   },
   "document": {
+    "name": {
+      "default": "Document"
+    },
+    "title": {
+      "front": "Submit Front of ID",
+      "back": "Submit Back of ID"
+    },
+    "capture": {
+      "checkingPermissions": "Checking permissions",
+      "instructionText": "Make sure all corners are visible and there is no glare.",
+      "captureButton": "Capture Document"
+    },
     "instructions": {
       "description": "We'll use it to verify your identity.",
-      "followInstructions": "Please follow the instructions below."
+      "followInstructions": "Please follow the instructions below.",
+      "goodLight": {
+        "header": "Good Light",
+        "body": "Make sure the image is taken in a well-lit environment where the ID document is easy to read."
+      },
+      "clearImage": {
+        "header": "Clear Image",
+        "body": "Hold your camera steady so the words on the ID are not blurry."
+      },
+      "takePhotoButton": "Take Photo",
+      "uploadPhotoButton": "Upload Photo"
+    },
+    "review": {
+      "question": "Is the document clear and readable?",
+      "description": "Make sure all corners of the document are visible and there is no glare",
+      "acceptButton": "Yes, my ID is readable",
+      "retakeButton": "No, retake photo"
+    }
+  },
+  "fileUpload": {
+    "error": {
+      "readingFile": "An error occurred reading the file. Please check the file, and try again",
+      "multipleFiles": "Only one file upload is permitted at a time",
+      "unsupportedFormat": "Unsupported file format. Please ensure that you are providing a JPG or PNG image",
+      "fileTooLarge": "{{filename}} is too large. Please ensure that the file is less than {{size}}."
     }
   },
   "fileUpload": {

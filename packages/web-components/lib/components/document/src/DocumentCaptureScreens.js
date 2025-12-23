@@ -1,6 +1,7 @@
 import { IMAGE_TYPE } from '../../../domain/constants/src/Constants';
 import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
+import { t } from '../../../domain/localisation';
 
 import './document-capture';
 import './document-capture-review';
@@ -56,13 +57,13 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.hideAttribution}
       ></document-capture-instructions>
       <document-capture id='document-capture-front' side-of-id='Front'
-      ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
+      ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
       ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
       ></document-capture>
-      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='Submit Back of ID'
+      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
        ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></document-capture-instructions>
-      <document-capture id='document-capture-back' side-of-id='Back' ${this.title} ${this.showNavigation}
+      <document-capture id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
       ${this.documentCaptureModes} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden 
       ></document-capture>

@@ -146,7 +146,7 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute('title') || t('selfie.review.title');
   }
 
   handleBackEvents() {

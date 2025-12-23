@@ -895,7 +895,13 @@ import { getHeaders } from './request';
       productConstraints[id_info.country].id_types[id_info.id_type].label;
 
     const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
-    thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
+    thankYouMessage.textContent = translateHtml(
+      'pages.complete.processingInfo',
+      {
+        country: countryName,
+        idType: idTypeName,
+      },
+    );
 
     setActiveScreen(CompleteScreen);
     handleSuccess();

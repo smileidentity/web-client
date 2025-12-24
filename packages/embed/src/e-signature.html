@@ -69,18 +69,24 @@
       crossorigin="anonymous"
     ></script>
 
-    <main>
+    <main hidden>
       <div id="loading-screen" class="flow center">
         <smileid-navigation hide-back></smileid-navigation>
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem">Setting up</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">
+          Setting up
+        </h1>
 
         <p>
-          Just a few more seconds
+          <span data-i18n="pages.loading.subtitle"
+            >Just a few more seconds</span
+          >
           <br />
-          We are setting up
+          <span data-i18n="pages.eSignature.loading.description"
+            >We are setting up</span
+          >
         </p>
 
         <p class="center credits" hidden>
@@ -173,9 +179,11 @@
             </defs>
           </svg>
 
-          <h1>Provide Signature</h1>
+          <h1 data-i18n="pages.eSignature.entry.title">Provide Signature</h1>
 
-          <p>Read and accept the agreements you would see in the next page</p>
+          <p data-i18n="pages.eSignature.entry.subtitle">
+            Read and accept the agreements you would see in the next page
+          </p>
         </header>
 
         <div class="flow">
@@ -198,9 +206,11 @@
             </svg>
 
             <div>
-              <p>Read document</p>
+              <p data-i18n="pages.eSignature.tips.read.title">Read document</p>
 
-              <p>Read the document(s) provided carefully</p>
+              <p data-i18n="pages.eSignature.tips.read.description">
+                Read the document(s) provided carefully
+              </p>
             </div>
           </div>
 
@@ -223,9 +233,11 @@
             </svg>
 
             <div>
-              <p>Add your full name</p>
+              <p data-i18n="pages.eSignature.tips.name.title">
+                Add your full name
+              </p>
 
-              <p>
+              <p data-i18n="pages.eSignature.tips.name.description">
                 Type your full name once you agree with the document(s) shared
                 with you
               </p>
@@ -251,13 +263,22 @@
             </svg>
 
             <div>
-              <p>Append your signature</p>
+              <p data-i18n="pages.eSignature.tips.signature.title">
+                Append your signature
+              </p>
 
-              <p>Sign or upload your signature to certify the documents</p>
+              <p data-i18n="pages.eSignature.tips.signature.description">
+                Sign or upload your signature to certify the documents
+              </p>
             </div>
           </div>
 
-          <button data-variant="solid" type="button" id="getStarted">
+          <button
+            data-variant="solid"
+            type="button"
+            id="getStarted"
+            data-i18n="pages.eSignature.getStarted"
+          >
             Get started
             <svg
               aria-hidden="true"
@@ -293,8 +314,12 @@
       <div hidden id="document-review-screen" class="flow center">
         <smileid-navigation></smileid-navigation>
 
-        <h1 class="center">Review documents</h1>
-        <p>Before accepting, carefully read through the document(s)</p>
+        <h1 class="center" data-i18n="pages.eSignature.review.title">
+          Review documents
+        </h1>
+        <p data-i18n="pages.eSignature.review.subtitle">
+          Before accepting, carefully read through the document(s)
+        </p>
 
         <ul class="document-list"></ul>
 
@@ -308,14 +333,24 @@
                 type="checkbox"
               />
 
-              <label class="required" for="i_agree">
+              <label
+                class="required"
+                for="i_agree"
+                data-i18n="pages.eSignature.review.consent"
+              >
                 By ticking this checkbox, you agree to the conditions in the
                 document(s)
               </label>
             </div>
           </fieldset>
 
-          <button data-variant="solid" type="button" disabled id="agreeToTerms">
+          <button
+            data-variant="solid"
+            type="button"
+            disabled
+            id="agreeToTerms"
+            data-i18n="common.continue"
+          >
             Continue
             <svg
               aria-hidden="true"
@@ -351,8 +386,10 @@
       <div hidden id="personal-info-screen" class="flow">
         <smileid-navigation></smileid-navigation>
 
-        <h1 class="center">Add your full name</h1>
-        <p class="center">
+        <h1 class="center" data-i18n="pages.eSignature.personalInfo.title">
+          Add your full name
+        </h1>
+        <p class="center" data-i18n="pages.eSignature.personalInfo.subtitle">
           Kindly add your full name to verify that you read the document(s)
           provided earlier.
         </p>
@@ -360,20 +397,32 @@
         <form name="user-details" class="flow">
           <fieldset id="names" class="flow" data-variant="start">
             <div class="input-group flow">
-              <label class="required" for="name"> Full Name </label>
+              <label
+                class="required"
+                for="name"
+                data-i18n="pages.eSignature.fullName"
+              >
+                Full Name
+              </label>
 
               <input
                 aria-required="true"
                 id="name"
                 name="name"
                 placeholder="James Momodu"
+                data-i18n-placeholder="pages.eSignature.personalInfo.placeholder"
                 required=""
                 type="text"
               />
             </div>
           </fieldset>
 
-          <button data-variant="solid" type="button" id="submitForm">
+          <button
+            data-variant="solid"
+            type="button"
+            id="submitForm"
+            data-i18n="common.continue"
+          >
             Continue
             <svg
               aria-hidden="true"
@@ -410,8 +459,12 @@
         <smileid-navigation></smileid-navigation>
 
         <header class="flow center">
-          <h1>Add your signature</h1>
-          <p>Sign or upload your signature below</p>
+          <h1 data-i18n="pages.eSignature.signature.title">
+            Add your signature
+          </h1>
+          <p data-i18n="pages.eSignature.signature.subtitle">
+            Sign or upload your signature below
+          </p>
         </header>
 
         <smileid-signature-pad allow-upload></smileid-signature-pad>
@@ -433,8 +486,10 @@
         <smileid-navigation></smileid-navigation>
 
         <header class="flow center">
-          <h1>Confirm details</h1>
-          <p>
+          <h1 data-i18n="pages.eSignature.confirmDetails.title">
+            Confirm details
+          </h1>
+          <p data-i18n="pages.eSignature.confirmDetails.subtitle">
             Make sure your name is correctly spelled, and the signature looks
             like the one in your ID
           </p>
@@ -442,7 +497,7 @@
 
         <div class="flow">
           <p>
-            <strong>Full Name</strong>
+            <strong data-i18n="pages.eSignature.fullName">Full Name</strong>
             <br />
             <span id="name"> </span>
           </p>
@@ -451,7 +506,12 @@
         </div>
 
         <div class="flow">
-          <button data-variant="solid" type="button" id="uploadSignature">
+          <button
+            data-variant="solid"
+            type="button"
+            id="uploadSignature"
+            data-i18n="pages.eSignature.confirmDetails.yes"
+          >
             Yes, it's correct
             <svg
               aria-hidden="true"
@@ -491,7 +551,9 @@
                 stroke-linejoin="round"
               />
             </svg>
-            No, change them
+            <span data-i18n="pages.eSignature.confirmDetails.no"
+              >No, change them</span
+            >
           </button>
         </div>
 
@@ -512,12 +574,16 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem">Uploading</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">
+          Uploading
+        </h1>
 
         <p>
-          Just a few more seconds
+          <span data-i18n="pages.upload.subtitle">Just a few more seconds</span>
           <br />
-          We are processing your request
+          <span data-i18n="pages.eSignature.upload.description"
+            >We are processing your request</span
+          >
         </p>
 
         <p class="center credits">
@@ -592,16 +658,23 @@
           </defs>
         </svg>
 
-        <h1>Something went wrong</h1>
+        <h1 data-i18n="pages.error.title">Something went wrong</h1>
 
-        <p>We could not upload your signature</p>
+        <p data-i18n="pages.eSignature.error.uploadFailed">
+          We could not upload your signature
+        </p>
 
-        <p>
+        <p data-i18n="pages.error.checkInternet">
           Please check that you have a stable internet connection. Then try
           again!
         </p>
 
-        <button data-variant="solid" type="button" id="retry-upload">
+        <button
+          data-variant="solid"
+          type="button"
+          id="retry-upload"
+          data-i18n="pages.error.tryAgain"
+        >
           Try again
           <svg
             aria-hidden="true"
@@ -660,9 +733,9 @@
           />
         </svg>
 
-        <h1>Submission Complete</h1>
+        <h1 data-i18n="pages.complete.title">Submission Complete</h1>
 
-        <p>That's all you need</p>
+        <p data-i18n="pages.complete.subtitle">That's all you need</p>
 
         <p class="center credits">
           <span class="visually-hidden">Powered by SmileID</span>

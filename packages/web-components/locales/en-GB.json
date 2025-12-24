@@ -195,8 +195,17 @@
     "complete": {
       "title": "Submission Complete",
       "subtitle": "That's all you need to verify your identity",
-      "defaultMessage": "That's all you need to verify your identity",
       "processingInfo": "We will process your {{country}} - {{idType}} information to verify your identity"
+    },
+    "smartSelfie": {
+      "authentication": {
+        "title": "SmartSelfie™ Authentication",
+        "upload": "Authenticating User"
+      },
+      "registration": {
+        "title": "SmartSelfie™ Registration",
+        "upload": "Registering User"
+      }
     },
     "idInfo": {
       "title": "Enter ID Information",

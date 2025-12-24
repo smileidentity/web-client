@@ -195,8 +195,17 @@
     "complete": {
       "title": "تم الإرسال بنجاح",
       "subtitle": "هذا كل ما تحتاجه للتحقق من هويتك",
-      "defaultMessage": "هذا كل ما تحتاجه للتحقق من هويتك",
       "processingInfo": "سنقوم بمعالجة معلومات {{country}} - {{idType}} الخاصة بك للتحقق من هويتك"
+    },
+    "smartSelfie": {
+      "authentication": {
+        "title": "مصادقة SmartSelfie™",
+        "upload": "جارٍ مصادقة المستخدم"
+      },
+      "registration": {
+        "title": "تسجيل SmartSelfie™",
+        "upload": "جارٍ تسجيل المستخدم"
+      }
     },
     "idInfo": {
       "title": "أدخل معلومات الهوية",

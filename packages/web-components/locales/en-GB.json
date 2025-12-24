@@ -206,7 +206,14 @@
       "dateOfBirth": "Date of Birth",
       "day": "Day",
       "month": "Month",
-      "year": "Year"
+      "year": "Year",
+      "bank": "Bank",
+      "selectBank": "--Select Bank--",
+      "searchBank": "Search Bank",
+      "noBankFound": "No bank found",
+      "citizenship": "Citizenship",
+      "selectCitizenship": "Select Citizenship Type",
+      "dob": "Date of Birth"
     },
     "error": {
       "title": "Something went wrong",

@@ -206,7 +206,14 @@
       "dateOfBirth": "تاريخ الميلاد",
       "day": "اليوم",
       "month": "الشهر",
-      "year": "السنة"
+      "year": "السنة",
+      "bank": "البنك",
+      "selectBank": "--اختر البنك--",
+      "searchBank": "ابحث عن بنك",
+      "noBankFound": "لم يتم العثور على بنك",
+      "citizenship": "الجنسية",
+      "selectCitizenship": "اختر نوع الجنسية",
+      "dob": "تاريخ الميلاد"
     },
     "error": {
       "title": "حدث خطأ ما",

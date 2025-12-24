@@ -108,7 +108,7 @@ describe('KRA PIN verification enhanced kyc', () => {
 
     cy.getIFrameBody()
       .find('#id_number-hint')
-      .should('contain', 'Id number is required');
+      .should('contain', 'ID Number is required');
     cy.getIFrameBody().find('#citizenship-hint').should('be.visible');
 
     cy.getIFrameBody()
@@ -121,7 +121,7 @@ describe('KRA PIN verification enhanced kyc', () => {
 
     cy.getIFrameBody()
       .find('#id_number-hint')
-      .should('contain', 'Id number is invalid');
+      .should('contain', 'ID Number is invalid');
   });
 
   it('should progress when input is valid', () => {

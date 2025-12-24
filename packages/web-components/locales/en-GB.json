@@ -194,7 +194,19 @@
     },
     "complete": {
       "title": "Submission Complete",
-      "subtitle": "That's all you need to verify your identity"
+      "subtitle": "That's all you need to verify your identity",
+      "defaultMessage": "That's all you need to verify your identity",
+      "processingInfo": "We will process your {{country}} - {{idType}} information to verify your identity"
+    },
+    "idInfo": {
+      "title": "Enter ID Information",
+      "idNumber": "ID Number",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dateOfBirth": "Date of Birth",
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
     },
     "error": {
       "title": "Something went wrong",
@@ -203,6 +215,10 @@
       "checkInternet": "Please check that you have a stable internet connection. Then try again!",
       "tryAgain": "Try again",
       "countryNotSupported": "{{country}} is not supported"
+    },
+    "validation": {
+      "isRequired": "{{field}} is required",
+      "invalidFormat": "{{field}} is invalid"
     }
   }
 }

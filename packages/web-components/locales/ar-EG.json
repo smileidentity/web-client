@@ -194,7 +194,19 @@
     },
     "complete": {
       "title": "تم الإرسال بنجاح",
-      "subtitle": "هذا كل ما تحتاجه للتحقق من هويتك"
+      "subtitle": "هذا كل ما تحتاجه للتحقق من هويتك",
+      "defaultMessage": "هذا كل ما تحتاجه للتحقق من هويتك",
+      "processingInfo": "سنقوم بمعالجة معلومات {{country}} - {{idType}} الخاصة بك للتحقق من هويتك"
+    },
+    "idInfo": {
+      "title": "أدخل معلومات الهوية",
+      "idNumber": "رقم الهوية",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "dateOfBirth": "تاريخ الميلاد",
+      "day": "اليوم",
+      "month": "الشهر",
+      "year": "السنة"
     },
     "error": {
       "title": "حدث خطأ ما",
@@ -203,6 +215,10 @@
       "checkInternet": "يرجى التأكد من وجود اتصال إنترنت مستقر. ثم حاول مرة أخرى!",
       "tryAgain": "حاول مرة أخرى",
       "countryNotSupported": "{{country}} غير مدعومة"
+    },
+    "validation": {
+      "isRequired": "{{field}} مطلوب",
+      "invalidFormat": "{{field}} غير صالح"
     }
   }
 }

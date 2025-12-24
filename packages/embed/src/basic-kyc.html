@@ -70,7 +70,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <main>
+    <main hidden>
       <section id="loading-screen" class="flow center">
         <div class="nav justify-right">
           <button data-type="icon" type="button" class="close-iframe">
@@ -98,12 +98,18 @@
         <br />
         <p class="spinner"></p>
 
-        <h1 style="--flow-space: 4rem">Setting up</h1>
+        <h1 style="--flow-space: 4rem" data-i18n="pages.loading.title">
+          Setting up
+        </h1>
 
         <p>
-          Just a few more seconds
+          <span data-i18n="pages.loading.subtitle"
+            >Just a few more seconds</span
+          >
           <br />
-          We are setting up your verification flow
+          <span data-i18n="pages.loading.description"
+            >We are setting up your verification flow</span
+          >
         </p>
 
         <p class="center credits" hidden>
@@ -197,26 +203,48 @@
             >
           </button>
         </div>
-        <h1 class="center font-size-500 max-width:100ch">Select ID Type</h1>
+        <h1
+          class="center font-size-500 max-width:100ch"
+          data-i18n="pages.idSelection.title"
+        >
+          Select ID Type
+        </h1>
 
         <form name="hosted-web-config" class="flow flow-space:800">
           <div class="split-pair flow-space:400">
             <div class="flow input-group">
-              <label for="country"> Select Country </label>
+              <label for="country" data-i18n="pages.idSelection.selectCountry">
+                Select Country
+              </label>
               <select disabled required id="country" name="country">
-                <option value="">--Please Select--</option>
+                <option value="" data-i18n="pages.idSelection.placeholder">
+                  --Please Select--
+                </option>
               </select>
             </div>
 
             <div class="flow input-group">
-              <label for="id_type"> Select ID Type </label>
+              <label for="id_type" data-i18n="pages.idSelection.selectIdType">
+                Select ID Type
+              </label>
               <select required id="id_type" name="id_type" disabled>
-                <option value="" disabled>Select Country First</option>
+                <option
+                  value=""
+                  disabled
+                  data-i18n="pages.idSelection.selectCountryFirst"
+                >
+                  Select Country First
+                </option>
               </select>
             </div>
           </div>
 
-          <button data-variant="solid" type="submit" id="submitConfig">
+          <button
+            data-variant="solid"
+            type="submit"
+            id="submitConfig"
+            data-i18n="common.continue"
+          >
             Continue
             <svg
               aria-hidden="true"
@@ -275,7 +303,11 @@
                 />
               </svg>
             </button>
-            <div class="back-button-text" style="color: var(--color-default)">
+            <div
+              class="back-button-text"
+              style="color: var(--color-default)"
+              data-i18n="common.back"
+            >
               Back
             </div>
           </div>
@@ -301,7 +333,9 @@
             >
           </button>
         </div>
-        <h1 class="center">Enter ID Information</h1>
+        <h1 class="center" data-i18n="pages.idInfo.title">
+          Enter ID Information
+        </h1>
         <p class="demo-tip" data-variant="yellow" hidden>
           <svg
             aria-hidden="true"
@@ -336,7 +370,13 @@
 
         <form name="user-details" class="flow">
           <fieldset hidden id="bank-code" data-variant="start">
-            <label class="required" for="bank_code"> Bank </label>
+            <label
+              class="required"
+              for="bank_code"
+              data-i18n="pages.idInfo.bank"
+            >
+              Bank
+            </label>
 
             <select
               aria-required="true"
@@ -344,12 +384,20 @@
               id="bank_code"
               required
             >
-              <option key="" value="">--Select Bank--</option>
+              <option key="" value="" data-i18n="pages.idInfo.selectBank">
+                --Select Bank--
+              </option>
             </select>
           </fieldset>
 
           <div hidden id="id-number" class="input-group flow">
-            <label class="required" for="id_number"> ID Number </label>
+            <label
+              class="required"
+              for="id_number"
+              data-i18n="pages.idInfo.idNumber"
+            >
+              ID Number
+            </label>
 
             <input
               aria-required="true"
@@ -361,7 +409,13 @@
 
           <fieldset hidden id="names" class="split-pair" data-variant="start">
             <div class="input-group flow">
-              <label class="required" for="first_name"> First Name </label>
+              <label
+                class="required"
+                for="first_name"
+                data-i18n="pages.idInfo.firstName"
+              >
+                First Name
+              </label>
 
               <input
                 aria-required="true"
@@ -374,7 +428,13 @@
             </div>
 
             <div class="input-group flow">
-              <label class="required" for="last_name"> Last Name </label>
+              <label
+                class="required"
+                for="last_name"
+                data-i18n="pages.idInfo.lastName"
+              >
+                Last Name
+              </label>
 
               <input
                 aria-required="true"
@@ -387,7 +447,13 @@
             </div>
           </fieldset>
           <fieldset hidden id="citizenships" data-variant="start">
-            <label class="required" for="citizenship"> Citizenship </label>
+            <label
+              class="required"
+              for="citizenship"
+              data-i18n="pages.idInfo.citizenship"
+            >
+              Citizenship
+            </label>
 
             <select
               aria-required="true"
@@ -395,17 +461,25 @@
               id="citizenship"
               required
             >
-              <option key="" value="">Select Citizenship Type</option>
+              <option
+                key=""
+                value=""
+                data-i18n="pages.idInfo.selectCitizenship"
+              >
+                Select Citizenship Type
+              </option>
               <option value="Kenyan">Kenyan</option>
               <option value="Alien">Alien</option>
             </select>
           </fieldset>
           <fieldset hidden id="dob" class="flow">
-            <legend>Date of Birth</legend>
+            <legend data-i18n="pages.idInfo.dateOfBirth">Date of Birth</legend>
 
             <div class="dob">
               <div class="input-group flow">
-                <label class="required" for="day"> Day </label>
+                <label class="required" for="day" data-i18n="pages.idInfo.day">
+                  Day
+                </label>
 
                 <input
                   aria-required="true"
@@ -418,7 +492,13 @@
               </div>
 
               <div class="input-group flow">
-                <label class="required" for="last_name"> Month </label>
+                <label
+                  class="required"
+                  for="month"
+                  data-i18n="pages.idInfo.month"
+                >
+                  Month
+                </label>
 
                 <input
                   aria-required="true"
@@ -431,7 +511,13 @@
               </div>
 
               <div class="input-group flow">
-                <label class="required" for="year"> Year </label>
+                <label
+                  class="required"
+                  for="year"
+                  data-i18n="pages.idInfo.year"
+                >
+                  Year
+                </label>
 
                 <input
                   aria-required="true"
@@ -445,7 +531,12 @@
             </div>
           </fieldset>
 
-          <button data-variant="solid" type="button" id="submitForm">
+          <button
+            data-variant="solid"
+            type="button"
+            id="submitForm"
+            data-i18n="common.continue"
+          >
             Continue
             <svg
               aria-hidden="true"
@@ -505,9 +596,9 @@
           />
         </svg>
 
-        <h1>Submission Complete</h1>
+        <h1 data-i18n="pages.complete.title">Submission Complete</h1>
 
-        <p id="thank-you-message">
+        <p id="thank-you-message" data-i18n="pages.complete.subtitle">
           That's all you need to verify your identity
         </p>
 

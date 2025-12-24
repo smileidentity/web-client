@@ -1,6 +1,10 @@
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
-import { setCurrentLocale } from '@smileid/web-components/localisation';
+import {
+  setCurrentLocale,
+  translate,
+  getDirection,
+} from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
@@ -22,14 +26,15 @@ import { getHeaders, getZipSignature } from './request';
   const referenceWindow = window.parent;
   referenceWindow.postMessage('SmileIdentity::ChildPageReady', '*');
 
-  const labels = {
+  // Translation keys for job types
+  const labelKeys = {
     2: {
-      title: 'SmartSelfie™ Authentication',
-      upload: 'Authenticating User',
+      title: 'pages.smartSelfie.authentication.title',
+      upload: 'pages.smartSelfie.authentication.upload',
     },
     4: {
-      title: 'SmartSelfie™ Registration',
-      upload: 'Registering User',
+      title: 'pages.smartSelfie.registration.title',
+      upload: 'pages.smartSelfie.registration.upload',
     },
   };
   let config;
@@ -51,6 +56,19 @@ import { getHeaders, getZipSignature } from './request';
   let fileToUpload;
   let uploadURL;
 
+  function applyPageTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (key) {
+        try {
+          el.textContent = translate(key);
+        } catch (e) {
+          console.error(`Translation failed for key: ${key}`, e);
+        }
+      }
+    });
+  }
+
   window.addEventListener(
     'message',
     async (event) => {
@@ -60,7 +78,10 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        setCurrentLocale(config.translation?.language || 'en');
+        await setCurrentLocale(config.translation?.language || 'en');
+        document.documentElement.dir = getDirection();
+        applyPageTranslations();
+        document.querySelector('main').hidden = false;
 
         CloseIframeButton.setAttribute('hidden', true);
         partner_params = getPartnerParams();
@@ -93,7 +114,8 @@ import { getHeaders, getZipSignature } from './request';
     (event) => {
       images = event.detail.images;
       const title = document.querySelector('#uploadTitle');
-      title.innerHTML = labels[`${partner_params.job_type}`].upload;
+      const jobType = partner_params.job_type;
+      title.textContent = translate(labelKeys[jobType].upload);
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit();
     },
@@ -183,7 +205,7 @@ import { getHeaders, getZipSignature } from './request';
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage('Something went wrong');
+      displayErrorMessage(translate('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );

@@ -19,7 +19,7 @@ describe('ID verification', () => {
 
     cy.getIFrameBody()
       .find('#id_number-hint')
-      .should('contain', 'Id number is invalid');
+      .should('contain', 'ID Number is invalid');
   });
 
   it('should progress when input is valid', () => {

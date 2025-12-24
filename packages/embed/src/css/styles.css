@@ -3,6 +3,11 @@
   --color-active: #2d2b2a;
   --color-default: #001096;
   --color-disabled: #848282;
+  --spinner-offset: -50%;
+}
+
+[dir='rtl'] {
+  --spinner-offset: 50%;
 }
 
 *,
@@ -408,10 +413,10 @@ button[data-type='icon'] {
 
 @keyframes spin {
   0% {
-    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+    transform: translate3d(var(--spinner-offset), -50%, 0) rotate(0deg);
   }
   100% {
-    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    transform: translate3d(var(--spinner-offset), -50%, 0) rotate(360deg);
   }
 }
 
@@ -428,7 +433,7 @@ button[data-type='icon'] {
   will-change: transform;
   position: relative;
   top: 5rem;
-  left: 50%;
+  inset-inline-start: 50%;
 }
 
 @keyframes rotate {

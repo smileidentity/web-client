@@ -195,8 +195,68 @@
     "complete": {
       "title": "Submission Complete",
       "subtitle": "That's all you need to verify your identity",
-      "defaultMessage": "That's all you need to verify your identity",
       "processingInfo": "We will process your {{country}} - {{idType}} information to verify your identity"
+    },
+    "smartSelfie": {
+      "authentication": {
+        "title": "SmartSelfie™ Authentication",
+        "upload": "Authenticating User"
+      },
+      "registration": {
+        "title": "SmartSelfie™ Registration",
+        "upload": "Registering User"
+      }
+    },
+    "eSignature": {
+      "fullName": "Full Name",
+      "loading": {
+        "description": "We are setting up"
+      },
+      "upload": {
+        "description": "We are processing your request"
+      },
+      "entry": {
+        "title": "Provide Signature",
+        "subtitle": "Read and accept the agreements you would see in the next page"
+      },
+      "tips": {
+        "read": {
+          "title": "Read document",
+          "description": "Read the document(s) provided carefully"
+        },
+        "name": {
+          "title": "Add your full name",
+          "description": "Type your full name once you agree with the document(s) shared with you"
+        },
+        "signature": {
+          "title": "Append your signature",
+          "description": "Sign or upload your signature to certify the documents"
+        }
+      },
+      "getStarted": "Get started",
+      "review": {
+        "title": "Review documents",
+        "subtitle": "Before accepting, carefully read through the document(s)",
+        "consent": "By ticking this checkbox, you agree to the conditions in the document(s)"
+      },
+      "personalInfo": {
+        "title": "Add your full name",
+        "subtitle": "Kindly add your full name to verify that you read the document(s) provided earlier.",
+        "placeholder": "James Momodu"
+      },
+      "signature": {
+        "title": "Add your signature",
+        "subtitle": "Sign or upload your signature below"
+      },
+      "confirmDetails": {
+        "title": "Confirm details",
+        "subtitle": "Make sure your name is correctly spelled, and the signature looks like the one in your ID",
+        "yes": "Yes, it's correct",
+        "no": "No, change them"
+      },
+      "error": {
+        "uploadFailed": "We could not upload your signature"
+      }
     },
     "idInfo": {
       "title": "Enter ID Information",

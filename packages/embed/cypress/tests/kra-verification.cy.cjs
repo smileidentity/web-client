@@ -29,7 +29,7 @@ describe('KE Drivers License verification basic kyc', () => {
 
     cy.getIFrameBody()
       .find('#id_number-hint')
-      .should('contain', 'ID Number is required');
+      .should('contain', 'Id number is required');
     cy.getIFrameBody().find('#citizenship-hint').should('be.visible');
 
     cy.getIFrameBody()
@@ -42,7 +42,7 @@ describe('KE Drivers License verification basic kyc', () => {
 
     cy.getIFrameBody()
       .find('#id_number-hint')
-      .should('contain', 'ID Number is invalid');
+      .should('contain', 'Id number is invalid');
   });
 
   it('should progress when input is valid', () => {

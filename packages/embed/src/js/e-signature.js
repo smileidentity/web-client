@@ -1,8 +1,60 @@
 import validate from 'validate.js';
+import {
+  setCurrentLocale,
+  translate,
+  translateHtml,
+  getDirection,
+} from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
-import { setCurrentLocale } from '@smileid/web-components/localisation';
+
+const fieldTranslationKeys = {
+  name: 'pages.eSignature.fullName',
+};
+
+function getTranslatedValidationMessage(field) {
+  const fieldKey = fieldTranslationKeys[field];
+  const fieldLabel = fieldKey ? translate(fieldKey) : field;
+  return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+}
+
+function applyPageTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    if (key) {
+      try {
+        const translation = translate(key);
+        // For elements with child SVGs (buttons), preserve the SVG
+        const svg = el.querySelector('svg');
+        if (svg) {
+          // Clear text nodes only, preserve SVG
+          Array.from(el.childNodes).forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              node.remove();
+            }
+          });
+          el.insertBefore(document.createTextNode(translation), svg);
+        } else {
+          el.textContent = translation;
+        }
+      } catch (e) {
+        console.error(`Translation failed for key: ${key}`, e);
+      }
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) {
+      try {
+        el.setAttribute('placeholder', translate(key));
+      } catch (e) {
+        console.error(`Translation failed for key: ${key}`, e);
+      }
+    }
+  });
+}
 
 function getHumanSize(numberOfBytes) {
   // Approximate to the closest prefixed unit
@@ -189,7 +241,10 @@ function getHumanSize(numberOfBytes) {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        setCurrentLocale(config.translation?.language || 'en');
+        await setCurrentLocale(config.translation?.language || 'en');
+        document.documentElement.dir = getDirection();
+        applyPageTranslations();
+        document.querySelector('main').hidden = false;
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -303,7 +358,7 @@ function getHumanSize(numberOfBytes) {
       name: {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('name')}`,
         },
       },
     };

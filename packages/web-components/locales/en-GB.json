@@ -3,7 +3,7 @@
   "common": {
     "back": "Back",
     "close": "Close",
-    "closeVerificationFrame": "Close SmileIdentity Verification frame",
+    "closeVerificationFrame": "Close Smile ID Verification",
     "allow": "Allow",
     "cancel": "Cancel",
     "continue": "Continue",
@@ -15,19 +15,19 @@
   },
   "navigation": {
     "back": "Back",
-    "closeVerificationFrame": "Close SmileIdentity Verification frame"
+    "closeVerificationFrame": "Close Smile ID Verification"
   },
   "camera": {
     "permission": {
-      "description": "We need access to your camera so that we can capture your details.",
+      "description": "Allow camera access to verify your details",
       "requestButton": "Request Camera Access"
     },
     "error": {
-      "notAllowed": "Looks like camera access was not granted, or was blocked by a browser level setting / extension. Please follow the prompt from the URL bar, or extensions, and enable access. You may need to refresh to start all over again",
-      "abort": "Oops! Something happened, and we lost access to your stream. Please refresh to start all over again",
-      "notReadable": "There seems to be a problem with your device's camera, or its connection. Please check this, and when resolved, try again. Or try another device.",
-      "notFound": "We are unable to find a video stream. You may need to refresh to start all over again",
-      "insecure": "This site is insecure, and as such cannot have access to your camera. Try to navigate to a secure version of this page, or contact the owner."
+      "notAllowed": "Camera access not granted or blocked by a browser/extensions.  Enable access in your browser/extension to continue. You may need to refresh.",
+      "abort": "Something happened, and we lost access to your camera. Please refresh.",
+      "notReadable": "There seems to be a problem with your camera connection. Please check and try again or try using device.",
+      "notFound": "We are unable to find your camera. Please refresh.",
+      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner."
     }
   },
   "selfie": {
@@ -41,7 +41,7 @@
         },
         "clearImage": {
           "header": "Clear Image",
-          "body": "Hold your phone steady so the selfie is clear and sharp."
+          "body": "Hold your device steady so the selfie is clear and sharp."
         },
         "removeObstructions": {
           "header": "Remove Obstructions",
@@ -62,7 +62,7 @@
         "widerSmile": "WIDER SMILE"
       },
       "button": {
-        "takeSelfie": "Take Selfie",
+        "takeSelfie": "Capture Selfie",
         "startCapture": "Start Capture"
       },
       "agentMode": {
@@ -70,7 +70,7 @@
         "off": "Agent Mode Off"
       },
       "error": {
-        "minFrames": "SmartCameraWeb: Minimum required no of frames is {{count}}",
+        "minFrames": "SmartCameraWeb: The minimum no of frames required is {{count}}",
         "webcamCapture": "Unable to capture webcam images - Please try another device"
       }
     },
@@ -84,7 +84,7 @@
         "neutralExpression": "Neutral expression",
         "smileRequired": "Smile!",
         "openMouthSmile": "Wider smile - teeth visible",
-        "initializing": "Initializing..."
+        "initializing": "Initialising..."
       },
       "status": {
         "capturing": "Capturing...",
@@ -108,7 +108,7 @@
       "back": "Submit Back of ID"
     },
     "capture": {
-      "checkingPermissions": "Checking permissions",
+      "checkingPermissions": "Checking permissions...",
       "instructionText": "Make sure all corners are visible and there is no glare.",
       "captureButton": "Capture Document"
     },
@@ -121,7 +121,7 @@
       },
       "clearImage": {
         "header": "Clear Image",
-        "body": "Hold your camera steady so the words on the ID are not blurry."
+        "body": "Hold your device steady so the information on the ID are not blurry."
       },
       "takePhotoButton": "Take Photo",
       "uploadPhotoButton": "Upload Photo"
@@ -147,7 +147,7 @@
     "allowPartner": "This will allow {{partnerName}} to:",
     "processing": {
       "personalDetails": {
-        "title": "Process your personal details",
+        "title": "Process your personal information",
         "description": "Partner can process your names, DoB and gender"
       },
       "contactInfo": {
@@ -225,8 +225,8 @@
           "description": "Read the document(s) provided carefully"
         },
         "name": {
-          "title": "Add your full name",
-          "description": "Type your full name once you agree with the document(s) shared with you"
+          "title": "Add your full names",
+          "description": "Type your full names once you agree with the document(s) shared with you"
         },
         "signature": {
           "title": "Append your signature",
@@ -240,9 +240,9 @@
         "consent": "By ticking this checkbox, you agree to the conditions in the document(s)"
       },
       "personalInfo": {
-        "title": "Add your full name",
-        "subtitle": "Kindly add your full name to verify that you read the document(s) provided earlier.",
-        "placeholder": "James Momodu"
+        "title": "Add your full names",
+        "subtitle": "Kindly add your full names to verify that you read the document(s) provided earlier.",
+        "placeholder": "James Doe"
       },
       "signature": {
         "title": "Add your signature",
@@ -250,7 +250,7 @@
       },
       "confirmDetails": {
         "title": "Confirm details",
-        "subtitle": "Make sure your name is correctly spelled, and the signature looks like the one in your ID",
+        "subtitle": "Make sure your name is correctly spelled, and the signature matches the one on your ID",
         "yes": "Yes, it's correct",
         "no": "No, change them"
       },
@@ -276,7 +276,7 @@
       "dob": "Date of Birth"
     },
     "error": {
-      "title": "Something went wrong",
+      "title": "An error occurred",
       "generic": "Something went wrong",
       "uploadFailed": "We could not upload your information",
       "checkInternet": "Please check that you have a stable internet connection. Then try again!",

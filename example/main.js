@@ -8,6 +8,7 @@ document.querySelector('#app').innerHTML = `
       <select id="language">
         <option value="en">English</option>
         <option value="ar">العربية (Arabic)</option>
+        <option value="fr">Français (French)</option>
       </select>
       <select id="product">
         <option value="">--Select Product---</option>

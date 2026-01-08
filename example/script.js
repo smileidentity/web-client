@@ -87,7 +87,7 @@ export default function setupForm() {
               },
               selfie: {
                 instructions: {
-                  title: 'Let\'s take a quick selfie',
+                  title: "Let's take a quick selfie",
                 },
               },
             },

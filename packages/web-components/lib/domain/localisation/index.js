@@ -44,6 +44,68 @@ export function registerLocale(lang, data) {
 }
 
 /**
+ * Deep merge source object into target object.
+ * Recursively merges nested objects while preserving non-overridden values.
+ * @param {object} target - Base object to merge into
+ * @param {object} source - Object with values to merge/override
+ * @returns {object} New merged object (does not mutate inputs)
+ */
+export function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') {
+    return target;
+  }
+
+  if (!target || typeof target !== 'object') {
+    return source;
+  }
+
+  return Object.keys(source).reduce(
+    (result, key) => {
+      const sourceValue = source[key];
+      const targetValue = target[key];
+
+      if (
+        sourceValue &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(sourceValue) &&
+        targetValue &&
+        typeof targetValue === 'object' &&
+        !Array.isArray(targetValue)
+      ) {
+        // Recursively merge nested objects
+        return { ...result, [key]: deepMerge(targetValue, sourceValue) };
+      }
+      // Override with source value
+      return { ...result, [key]: sourceValue };
+    },
+    { ...target },
+  );
+}
+
+/**
+ * Required translation keys for a complete locale.
+ * These are the minimum keys needed for the SDK to function properly.
+ */
+const REQUIRED_LOCALE_KEYS = [
+  'direction',
+  'common.back',
+  'common.close',
+  'common.continue',
+  'common.cancel',
+  'camera.permission.description',
+  'camera.permission.requestButton',
+  'camera.error.notAllowed',
+  'selfie.instructions.title',
+  'selfie.capture.button.takeSelfie',
+  'selfie.review.title',
+  'selfie.review.acceptButton',
+  'selfie.review.retakeButton',
+  'document.capture.captureButton',
+  'document.review.acceptButton',
+  'document.review.retakeButton',
+];
+
+/**
  * Fetch with timeout wrapper.
  * @param {string} url - URL to fetch
  * @param {number} timeout - Timeout in milliseconds
@@ -135,6 +197,29 @@ function getNestedValue(obj, key) {
   }, obj);
 
   return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Validate that a locale has all required translation keys.
+ * @param {object} locale - Locale data to validate
+ * @returns {{ missingKeys: string[], valid: boolean }} Validation result
+ */
+export function validateLocale(locale) {
+  if (!locale || typeof locale !== 'object') {
+    return { missingKeys: REQUIRED_LOCALE_KEYS, valid: false };
+  }
+
+  const missingKeys = REQUIRED_LOCALE_KEYS.filter((key) => {
+    if (key === 'direction') {
+      return !locale.direction;
+    }
+    return !getNestedValue(locale, key);
+  });
+
+  return {
+    missingKeys,
+    valid: missingKeys.length === 0,
+  };
 }
 
 /**
@@ -247,13 +332,44 @@ export const translateHtml = tHtml;
  * If the locale is not registered, it will attempt to load it from the provided URL.
  * Applies RTL direction to document element if direction is specified in locale.
  * @param {string} lang - Language code
- * @param {string} [url] - Optional URL to fetch locale from if not registered
+ * @param {Object} [options] - Configuration options
+ * @param {string} [options.url] - URL to fetch locale from if not registered
+ * @param {Object} [options.translation] - Complete locale data object (legacy)
+ * @param {Object} [options.locales] - Locale data keyed by language code (new API)
+ * @param {boolean} [options.validate] - Whether to validate locale completeness
  * @returns {Promise<boolean>} Whether locale was successfully set
  */
-export async function setCurrentLocale(lang, { url, translation } = {}) {
+export async function setCurrentLocale(
+  lang,
+  { url, translation, locales: customLocales, validate = false } = {},
+) {
   const resolvedLang = resolveLocale(lang);
 
-  // If locale not registered, try to load it
+  // Step 1: Process custom locales (new API - keyed by language code)
+  if (customLocales && typeof customLocales === 'object') {
+    Object.entries(customLocales).forEach(([localeKey, localeData]) => {
+      if (!localeData || typeof localeData !== 'object') {
+        return;
+      }
+
+      const resolvedKey = resolveLocale(localeKey);
+
+      if (locales[resolvedKey]) {
+        // Deep merge into existing bundled locale
+        locales[resolvedKey] = deepMerge(locales[resolvedKey], localeData);
+      } else {
+        // Register as new locale
+        registerLocale(resolvedKey, localeData);
+
+        // Add alias if short code provided
+        if (localeKey !== resolvedKey) {
+          LOCALE_ALIASES[localeKey] = resolvedKey;
+        }
+      }
+    });
+  }
+
+  // Step 2: Handle legacy translation option (for backward compatibility)
   if (!locales[resolvedLang]) {
     if (translation) {
       registerLocale(resolvedLang, translation);
@@ -269,6 +385,17 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
     } else {
       console.warn(`Locale '${lang}' not registered and no URL provided`);
       return false;
+    }
+  }
+
+  // Step 3: Validate locale completeness if requested
+  if (validate && locales[resolvedLang]) {
+    const validation = validateLocale(locales[resolvedLang]);
+    if (!validation.valid) {
+      console.warn(
+        `Locale '${lang}' is missing required keys:`,
+        validation.missingKeys,
+      );
     }
   }
 
@@ -329,6 +456,7 @@ export function getDirection() {
 }
 
 export default {
+  deepMerge,
   escapeHtml,
   getCurrentLocale,
   getDefaultLocale,
@@ -343,4 +471,5 @@ export default {
   tHtml,
   translate,
   translateHtml,
+  validateLocale,
 };

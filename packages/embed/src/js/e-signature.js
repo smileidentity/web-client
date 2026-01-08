@@ -241,7 +241,9 @@ function getHumanSize(numberOfBytes) {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
-        await setCurrentLocale(config.translation?.language || 'en');
+        await setCurrentLocale(config.translation?.language || 'en', {
+          locales: config.translation?.locales,
+        });
         document.documentElement.dir = getDirection();
         applyPageTranslations();
         document.querySelector('main').hidden = false;

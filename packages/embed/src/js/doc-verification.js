@@ -142,7 +142,9 @@ import { getHeaders, getZipSignature } from './request';
         config = JSON.parse(event.data);
         try {
           const language = config.translation?.language || 'en-GB';
-          await setCurrentLocale(language);
+          await setCurrentLocale(language, {
+            locales: config.translation?.locales,
+          });
           document.documentElement.lang = language;
           document.documentElement.dir = getDirection();
           applyPageTranslations();

@@ -79,6 +79,19 @@ export default function setupForm() {
         allow_agent_mode: true,
         translation: {
           language: language.value,
+          locales: {
+            en: {
+              common: {
+                continue: 'Proceed to Next Step',
+                back: 'Go Back',
+              },
+              selfie: {
+                instructions: {
+                  title: "Let's take a quick selfie",
+                },
+              },
+            },
+          },
         },
         // id_selection: {
         //   NG: ['PASSPORT']

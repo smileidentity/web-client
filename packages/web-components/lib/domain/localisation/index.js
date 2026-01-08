@@ -3,6 +3,8 @@
  * Provides simple locale registration, loading, and translation lookup.
  */
 
+import merge from 'lodash/merge';
+
 // Bundle supported locales for offline/instant switching
 import arLocale from '../../../locales/ar-EG.json';
 import enLocale from '../../../locales/en-GB.json';
@@ -42,6 +44,50 @@ const locales = {
 export function registerLocale(lang, data) {
   locales[lang] = data;
 }
+
+/**
+ * Deep merge source object into target object.
+ * Recursively merges nested objects while preserving non-overridden values.
+ * Uses lodash merge under the hood but returns a new object (does not mutate inputs).
+ * @param {object} target - Base object to merge into
+ * @param {object} source - Object with values to merge/override
+ * @returns {object} New merged object (does not mutate inputs)
+ */
+export function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') {
+    return target;
+  }
+
+  if (!target || typeof target !== 'object') {
+    return source;
+  }
+
+  // Use lodash merge with empty object as first arg to avoid mutating target
+  return merge({}, target, source);
+}
+
+/**
+ * Required translation keys for a complete locale.
+ * These are the minimum keys needed for the SDK to function properly.
+ */
+const REQUIRED_LOCALE_KEYS = [
+  'direction',
+  'common.back',
+  'common.close',
+  'common.continue',
+  'common.cancel',
+  'camera.permission.description',
+  'camera.permission.requestButton',
+  'camera.error.notAllowed',
+  'selfie.instructions.title',
+  'selfie.capture.button.takeSelfie',
+  'selfie.review.title',
+  'selfie.review.acceptButton',
+  'selfie.review.retakeButton',
+  'document.capture.captureButton',
+  'document.review.acceptButton',
+  'document.review.retakeButton',
+];
 
 /**
  * Fetch with timeout wrapper.
@@ -135,6 +181,29 @@ function getNestedValue(obj, key) {
   }, obj);
 
   return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Validate that a locale has all required translation keys.
+ * @param {object} locale - Locale data to validate
+ * @returns {{ missingKeys: string[], valid: boolean }} Validation result
+ */
+export function validateLocale(locale) {
+  if (!locale || typeof locale !== 'object') {
+    return { missingKeys: REQUIRED_LOCALE_KEYS, valid: false };
+  }
+
+  const missingKeys = REQUIRED_LOCALE_KEYS.filter((key) => {
+    if (key === 'direction') {
+      return !locale.direction;
+    }
+    return !getNestedValue(locale, key);
+  });
+
+  return {
+    missingKeys,
+    valid: missingKeys.length === 0,
+  };
 }
 
 /**
@@ -247,19 +316,49 @@ export const translateHtml = tHtml;
  * If the locale is not registered, it will attempt to load it from the provided URL.
  * Applies RTL direction to document element if direction is specified in locale.
  * @param {string} lang - Language code
- * @param {string} [url] - Optional URL to fetch locale from if not registered
+ * @param {Object} [options] - Configuration options
+ * @param {string} [options.url] - URL to fetch locale from if not registered
+ * @param {Object} [options.translation] - Complete locale data object (legacy)
+ * @param {Object} [options.locales] - Locale data keyed by language code (new API)
+ * @param {boolean} [options.validate] - Whether to validate locale completeness
  * @returns {Promise<boolean>} Whether locale was successfully set
  */
-export async function setCurrentLocale(lang, { url, translation } = {}) {
-  const resolvedLang = resolveLocale(lang);
+export async function setCurrentLocale(
+  lang,
+  { url, translation, locales: customLocales, validate = false } = {},
+) {
+  currentLocale = resolveLocale(lang);
+  // Step 1: Process custom locales (new API - keyed by language code)
+  if (customLocales && typeof customLocales === 'object') {
+    Object.entries(customLocales).forEach(([localeKey, localeData]) => {
+      if (!localeData || typeof localeData !== 'object') {
+        return;
+      }
 
-  // If locale not registered, try to load it
-  if (!locales[resolvedLang]) {
+      const resolvedKey = resolveLocale(localeKey);
+
+      if (locales[resolvedKey]) {
+        // Deep merge into existing bundled locale
+        locales[resolvedKey] = deepMerge(locales[resolvedKey], localeData);
+      } else {
+        // Register as new locale
+        registerLocale(resolvedKey, localeData);
+
+        // Add alias if short code provided
+        if (localeKey !== resolvedKey) {
+          LOCALE_ALIASES[localeKey] = resolvedKey;
+        }
+      }
+    });
+  }
+
+  // Step 2: Handle legacy translation option (for backward compatibility)
+  if (!locales[currentLocale]) {
     if (translation) {
-      registerLocale(resolvedLang, translation);
+      registerLocale(currentLocale, translation);
     } else if (url) {
       try {
-        await loadLocale(resolvedLang, url);
+        await loadLocale(currentLocale, url);
       } catch (error) {
         console.error(
           `Failed to load locale '${lang}', keeping current locale '${currentLocale}'`,
@@ -272,11 +371,20 @@ export async function setCurrentLocale(lang, { url, translation } = {}) {
     }
   }
 
-  currentLocale = resolvedLang;
+  // Step 3: Validate locale completeness if requested
+  if (validate && locales[currentLocale]) {
+    const validation = validateLocale(locales[currentLocale]);
+    if (!validation.valid) {
+      console.warn(
+        `Locale '${lang}' is missing required keys:`,
+        validation.missingKeys,
+      );
+    }
+  }
 
-  // Apply RTL/LTR direction if specified in locale data
-  const locale = locales[resolvedLang];
-  if (locale && locale.direction && document?.documentElement?.dir) {
+  // Step 4: Apply RTL/LTR direction if specified in locale data
+  const locale = locales[currentLocale];
+  if (locale && locale.direction && document?.documentElement) {
     document.documentElement.dir = locale.direction;
   }
 
@@ -329,6 +437,7 @@ export function getDirection() {
 }
 
 export default {
+  deepMerge,
   escapeHtml,
   getCurrentLocale,
   getDefaultLocale,
@@ -343,4 +452,5 @@ export default {
   tHtml,
   translate,
   translateHtml,
+  validateLocale,
 };

@@ -44,6 +44,7 @@ interface TokenResults {
 const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'ar', label: 'العربية (Arabic)' },
+  { code: 'fr', label: 'Français (French)' },
 ];
 
 const getToken = async (apiUrl: string, body: string | object) => {

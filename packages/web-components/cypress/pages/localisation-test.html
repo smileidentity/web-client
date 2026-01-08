@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Localisation Test Page</title>
+  </head>
+  <body>
+    <div id="test-container">
+      <p id="translation-result"></p>
+      <p id="direction-result"></p>
+      <p id="locale-result"></p>
+    </div>
+
+    <script type="module">
+      import {
+        t,
+        tHtml,
+        setCurrentLocale,
+        getCurrentLocale,
+        getDirection,
+        registerLocale,
+        validateLocale,
+        deepMerge,
+      } from '../../lib/domain/localisation/index.js';
+
+      // Expose functions globally for Cypress tests
+      window.localisation = {
+        t,
+        tHtml,
+        setCurrentLocale,
+        getCurrentLocale,
+        getDirection,
+        registerLocale,
+        validateLocale,
+        deepMerge,
+      };
+
+      // Signal that the module is loaded
+      window.localisationLoaded = true;
+    </script>
+  </body>
+</html>

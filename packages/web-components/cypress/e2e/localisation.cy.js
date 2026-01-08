@@ -238,7 +238,7 @@ describe('Localisation Module', () => {
         await setCurrentLocale('ar', {});
 
         expect(getDirection()).to.equal('rtl');
-        expect(document.documentElement.dir).to.equal('rtl');
+        expect(win.document.documentElement.dir).to.equal('rtl');
       });
     });
 

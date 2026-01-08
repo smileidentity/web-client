@@ -343,8 +343,7 @@ export async function setCurrentLocale(
   lang,
   { url, translation, locales: customLocales, validate = false } = {},
 ) {
-  const resolvedLang = resolveLocale(lang);
-
+  currentLocale = resolveLocale(lang);
   // Step 1: Process custom locales (new API - keyed by language code)
   if (customLocales && typeof customLocales === 'object') {
     Object.entries(customLocales).forEach(([localeKey, localeData]) => {
@@ -367,15 +366,15 @@ export async function setCurrentLocale(
         }
       }
     });
-  }
+  }  
 
   // Step 2: Handle legacy translation option (for backward compatibility)
-  if (!locales[resolvedLang]) {
+  if (!locales[currentLocale]) {
     if (translation) {
-      registerLocale(resolvedLang, translation);
+      registerLocale(currentLocale, translation);
     } else if (url) {
       try {
-        await loadLocale(resolvedLang, url);
+        await loadLocale(currentLocale, url);
       } catch (error) {
         console.error(
           `Failed to load locale '${lang}', keeping current locale '${currentLocale}'`,
@@ -389,8 +388,8 @@ export async function setCurrentLocale(
   }
 
   // Step 3: Validate locale completeness if requested
-  if (validate && locales[resolvedLang]) {
-    const validation = validateLocale(locales[resolvedLang]);
+  if (validate && locales[currentLocale]) {
+    const validation = validateLocale(locales[currentLocale]);
     if (!validation.valid) {
       console.warn(
         `Locale '${lang}' is missing required keys:`,
@@ -399,11 +398,9 @@ export async function setCurrentLocale(
     }
   }
 
-  currentLocale = resolvedLang;
-
-  // Apply RTL/LTR direction if specified in locale data
-  const locale = locales[resolvedLang];
-  if (locale && locale.direction && document?.documentElement?.dir) {
+  // Step 4: Apply RTL/LTR direction if specified in locale data
+  const locale = locales[currentLocale];
+  if (locale && locale.direction && document?.documentElement) {
     document.documentElement.dir = locale.direction;
   }
 

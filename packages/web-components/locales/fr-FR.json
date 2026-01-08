@@ -1,0 +1,291 @@
+{
+  "direction": "ltr",
+  "common": {
+    "back": "Retour",
+    "close": "Fermer",
+    "closeVerificationFrame": "Fermer la vérification Smile ID",
+    "allow": "Autoriser",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "or": "ou",
+    "toggle": "Basculer"
+  },
+  "combobox": {
+    "noItems": "Aucun article"
+  },
+  "navigation": {
+    "back": "Retour",
+    "closeVerificationFrame": "Fermer la vérification d'identité Smile ID"
+  },
+  "camera": {
+    "permission": {
+      "description": "Autorisez l'accès à la caméra pour vérifier vos informations.",
+      "requestButton": "Demander l'accès à la caméra"
+    },
+    "error": {
+      "notAllowed": "L'accès à la caméra est refusé ou bloqué par votre navigateur/vos extensions. Pour continuer, autorisez l'accès dans votre navigateur/vos extensions. Il se peut que vous deviez actualiser la page.",
+      "abort": "Un problème est survenu et nous avons perdu l'accès à votre caméra. Veuillez actualiser.",
+      "notReadable": "Il semble y avoir un problème avec la connexion de votre caméra. Veuillez vérifier et réessayer, ou essayez d'utiliser un autre appareil.",
+      "notFound": "Nous ne parvenons pas à trouver votre caméra. Veuillez actualiser.",
+      "insecure": "Connexion sécurisée requise. L'accès à la caméra est désactivé sur les sites non sécurisés. Veuillez vous rendre sur la page sécurisée ou contacter le propriétaire de l'application."
+    }
+  },
+  "selfie": {
+    "instructions": {
+      "title": "Ensuite, nous allons prendre un selfie rapide",
+      "allowButton": "Autoriser",
+      "tips": {
+        "goodLight": {
+          "header": "Bonne lumière",
+          "body": "Assurez-vous d'être dans un environnement bien éclairé."
+        },
+        "clearImage": {
+          "header": "Image Claire",
+          "body": "Tenez votre téléphone stable pour que le selfie soit net et clair."
+        },
+        "removeObstructions": {
+          "header": "Retirer les Obstructions",
+          "body": "Retirez tout ce qui vous couvre le visage, comme les lunettes, masques et chapeaux."
+        },
+        "wideSmile": {
+          "header": "large sourire",
+          "body": "Lorsque l'on vous demande de sourire, faites un large sourire, en montrant vos dents."
+        }
+      }
+    },
+    "capture": {
+      "tip": {
+        "fitHead": "Placez votre visage dans le cadre ovale"
+      },
+      "cta": {
+        "smile": "SOURIRE",
+        "widerSmile": "UN SOURIRE PLUS LARGE"
+      },
+      "button": {
+        "takeSelfie": "Prendre un selfie",
+        "startCapture": "Démarrer la capture"
+      },
+      "agentMode": {
+        "on": "Mode Agent Activé",
+        "off": "Mode Agent Désactivé"
+      },
+      "error": {
+        "minFrames": "SmartCameraWeb : Le nombre minimum d'images requis est de {{count}}",
+        "webcamCapture": "Impossible de capturer les images de la webcam - Veuillez essayer un autre appareil"
+      }
+    },
+    "smart": {
+      "alert": {
+        "multipleFaces": "Assurez-vous qu'un seul visage soit visible",
+        "noFace": "Positionnez votre visage dans l'ovale",
+        "outOfBounds": "Positionnez votre visage dans l'ovale",
+        "tooClose": "Éloignez-vous",
+        "tooFar": "Rapprochez-vous",
+        "neutralExpression": "Expression neutre",
+        "smileRequired": "Souriez !",
+        "openMouthSmile": "Sourire plus large - dents visibles",
+        "initializing": "Initialisation en cours..."
+      },
+      "status": {
+        "capturing": "Capture en cours...",
+        "keepSmiling": "Continuez de sourire!",
+        "readyToCapture": "Prêt à enregistrer"
+      }
+    },
+    "review": {
+      "title": "Vérification du selfie",
+      "question": "Votre visage est-il entièrement net ?",
+      "acceptButton": "Oui, utiliser ceci",
+      "retakeButton": "Non, refaire le selfie"
+    }
+  },
+  "document": {
+    "name": {
+      "default": "Document"
+    },
+    "title": {
+      "front": "Soumettre le recto de la pièce d'identité",
+      "back": "Soumettre le verso de la pièce d'identité"
+    },
+    "capture": {
+      "checkingPermissions": "Vérification des autorisations...",
+      "instructionText": "Assurez-vous que tous les coins sont visibles et qu'il n'y a pas de reflet.",
+      "captureButton": "Capturez le document"
+    },
+    "instructions": {
+      "description": "Nous l'utiliserons pour vérifier votre identité.",
+      "followInstructions": "Veuillez suivre les instructions ci-dessous.",
+      "goodLight": {
+        "header": "Bonne lumière",
+        "body": "Assurez-vous que l'image est prise dans un environnement bien éclairé où le document d'identité est facile à lire."
+      },
+      "clearImage": {
+        "header": "Image Claire",
+        "body": "Tenez votre appareil photo fermement pour que les mots sur la pièce d'identité ne soient pas flous."
+      },
+      "takePhotoButton": "Prendre une photo",
+      "uploadPhotoButton": "Télécharger une photo"
+    },
+    "review": {
+      "question": "Le document est-il clair et lisible ?",
+      "description": "Assurez-vous que tous les coins du document sont visibles et qu'il n'y a pas de reflet.",
+      "acceptButton": "Oui, ma pièce d'identité est lisible",
+      "retakeButton": "Non, reprendre la photo"
+    }
+  },
+  "fileUpload": {
+    "error": {
+      "readingFile": "Une erreur s'est produite lors de la lecture du fichier. Veuillez vérifier le fichier et réessayer.",
+      "multipleFiles": "Seulement un téléchargement de fichier est autorisé à la fois",
+      "unsupportedFormat": "Format de fichier non pris en charge. Veuillez vous assurer que vous fournissez une image JPG ou PNG",
+      "fileTooLarge": "{{filename}} est trop volumineux. Veuillez vous assurer que la taille du fichier est inférieure à {{size}}."
+    }
+  },
+  "consent": {
+    "demoTip": "Cet écran de consentement est présenté à titre indicatif uniquement. L'application de démonstration ne collecte pas de données d'identification personnelle.",
+    "accessRequest": "{{partnerName}} veut accéder à vos informations {{idTypeLabel}}",
+    "allowPartner": "Ceci permettra à {{partnerName}} de :",
+    "processing": {
+      "personalDetails": {
+        "title": "Traiter vos informations personnelles",
+        "description": "Le partenaire peut traiter votre nom, date de naissance et sexe"
+      },
+      "contactInfo": {
+        "title": "Traiter vos coordonnées",
+        "description": "Le partenaire peut traiter vos numéros de téléphone et votre adresse"
+      },
+      "documentInfo": {
+        "title": "Traitez les informations de votre document",
+        "description": "Le partenaire peut traiter votre photo, la date d'expiration de votre pièce d'identité, le pays d'émission et le numéro de document"
+      }
+    },
+    "privacyPolicy": "Vous pouvez consulter la politique de confidentialité de {{partnerName}}",
+    "privacyPolicyLink": "ici.",
+    "grantConsent": "En choisissant \"Autoriser\", vous accordez à {{partnerName}} le consentement de traiter vos données personnelles pour permettre ce service",
+    "denied": {
+      "title": "Consentement refusé",
+      "message": "Nous ne pouvons pas vous vérifier sans votre consentement",
+      "prompt": "Souhaitez-vous corriger cela?",
+      "goBack": "Retour",
+      "confirmCancel": "Non, Annuler la vérification"
+    }
+  },
+  "pages": {
+    "loading": {
+      "title": "Configuration",
+      "subtitle": "Juste quelques secondes de plus",
+      "description": "Nous mettons en place votre processus de vérification"
+    },
+    "idSelection": {
+      "title": "Sélectionner le type de pièce d'identité",
+      "selectCountry": "Sélectionnez le pays",
+      "selectIdType": "Sélectionnez le type de pièce d'identité",
+      "selectDocument": "Sélectionner le document",
+      "searchCountry": "Rechercher un pays",
+      "placeholder": "--Veuillez sélectionner--",
+      "selectCountryFirst": "--Sélectionnez le pays d'abord--",
+      "noCountryFound": "Aucun pays trouvé",
+      "noIdTypeFound": "Aucun type de pièce d'identité trouvé"
+    },
+    "upload": {
+      "title": "Téléchargement en cours",
+      "subtitle": "Plus que quelques secondes",
+      "description": "Nous traitons votre demande"
+    },
+    "complete": {
+      "title": "Envoie terminée",
+      "subtitle": "C'est tout ce dont vous avez besoin pour vérifier votre identité.",
+      "processingInfo": "Nous traiterons vos informations {{country}} - {{idType}} pour vérifier votre identité"
+    },
+    "smartSelfie": {
+      "authentication": {
+        "title": "Authentification SmartSelfie™",
+        "upload": "Authentification de l'utilisateur"
+      },
+      "registration": {
+        "title": "Inscription SmartSelfie™",
+        "upload": "Inscription de l'utilisateur"
+      }
+    },
+    "eSignature": {
+      "fullName": "Nom complet",
+      "loading": {
+        "description": "Nous mettons en place"
+      },
+      "upload": {
+        "description": "Nous traitons votre demande"
+      },
+      "entry": {
+        "title": "Fournir une signature",
+        "subtitle": "Lisez et acceptez les accords que vous verrez à la page suivante"
+      },
+      "tips": {
+        "read": {
+          "title": "Lire le document",
+          "description": "Lisez attentivement le(s) document(s) fourni(s)"
+        },
+        "name": {
+          "title": "Ajouter votre nom complet",
+          "description": "Tapez votre nom complet une fois que vous êtes d'accord avec le(s) document(s) partagé(s) avec vous"
+        },
+        "signature": {
+          "title": "Ajouter votre signature",
+          "description": "Signez ou téléchargez votre signature pour certifier les documents"
+        }
+      },
+      "getStarted": "Commencer",
+      "review": {
+        "title": "Examiner les documents",
+        "subtitle": "Veuillez lire attentivement le(s) document(s) avant d'accepter.",
+        "consent": "En cochant cette case, vous acceptez les conditions contenues dans le(s) document(s)"
+      },
+      "personalInfo": {
+        "title": "Ajoutez votre nom complet",
+        "subtitle": "Veuillez ajouter votre nom complet pour confirmer que vous avez lu le(s) document(s) fourni(s) précédemment.",
+        "placeholder": "James Doe"
+      },
+      "signature": {
+        "title": "Ajoutez votre signature",
+        "subtitle": "Signez ou téléchargez votre signature ci-dessous"
+      },
+      "confirmDetails": {
+        "title": "Confirmer les détails",
+        "subtitle": "Assurez-vous que votre nom est correctement orthographié et que la signature ressemble à celle de votre pièce d'identité",
+        "yes": "Oui, c'est exact",
+        "no": "Non, les changer"
+      },
+      "error": {
+        "uploadFailed": "Nous n'avons pas pu télécharger votre signature"
+      }
+    },
+    "idInfo": {
+      "title": "Saisir les informations d'identité",
+      "idNumber": "Numéro d'identification",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "dateOfBirth": "Date de Naissance",
+      "day": "Jour",
+      "month": "Mois",
+      "year": "Année",
+      "bank": "Banque",
+      "selectBank": "--Sélectionner la banque--",
+      "searchBank": "Rechercher une banque",
+      "noBankFound": "Aucune banque trouvée",
+      "citizenship": "Citoyenneté",
+      "selectCitizenship": "Sélectionner le type de citoyenneté",
+      "dob": "Date de naissance"
+    },
+    "error": {
+      "title": "Une erreur est survenue",
+      "generic": "Quelque chose s'est mal passé",
+      "uploadFailed": "Nous n'avons pas pu télécharger vos informations",
+      "checkInternet": "Veuillez vérifier que vous disposez d'une connexion Internet stable. Ensuite, veuillez réessayer !",
+      "tryAgain": "Essayez à nouveau",
+      "countryNotSupported": "{{country}} n'est pas pris en charge"
+    },
+    "validation": {
+      "isRequired": "{{field}} est obligatoire",
+      "invalidFormat": "{{field}} n'est pas valide"
+    }
+  }
+}

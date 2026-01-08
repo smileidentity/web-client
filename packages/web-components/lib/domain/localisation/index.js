@@ -6,11 +6,13 @@
 // Bundle supported locales for offline/instant switching
 import arLocale from '../../../locales/ar-EG.json';
 import enLocale from '../../../locales/en-GB.json';
+import frLocale from '../../../locales/fr-FR.json';
 
 // Locale alias mapping for short codes
 const LOCALE_ALIASES = {
   ar: 'ar-EG',
   en: 'en-GB',
+  fr: 'fr-FR',
 };
 
 /**
@@ -29,6 +31,7 @@ let currentLocale = DEFAULT_LOCALE;
 const locales = {
   'ar-EG': arLocale,
   'en-GB': enLocale,
+  'fr-FR': frLocale,
 };
 
 /**

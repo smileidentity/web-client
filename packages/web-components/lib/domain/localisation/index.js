@@ -366,7 +366,7 @@ export async function setCurrentLocale(
         }
       }
     });
-  }  
+  }
 
   // Step 2: Handle legacy translation option (for backward compatibility)
   if (!locales[currentLocale]) {

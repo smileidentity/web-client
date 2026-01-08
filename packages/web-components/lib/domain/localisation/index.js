@@ -3,6 +3,8 @@
  * Provides simple locale registration, loading, and translation lookup.
  */
 
+import merge from 'lodash/merge';
+
 // Bundle supported locales for offline/instant switching
 import arLocale from '../../../locales/ar-EG.json';
 import enLocale from '../../../locales/en-GB.json';
@@ -46,6 +48,7 @@ export function registerLocale(lang, data) {
 /**
  * Deep merge source object into target object.
  * Recursively merges nested objects while preserving non-overridden values.
+ * Uses lodash merge under the hood but returns a new object (does not mutate inputs).
  * @param {object} target - Base object to merge into
  * @param {object} source - Object with values to merge/override
  * @returns {object} New merged object (does not mutate inputs)
@@ -59,27 +62,8 @@ export function deepMerge(target, source) {
     return source;
   }
 
-  return Object.keys(source).reduce(
-    (result, key) => {
-      const sourceValue = source[key];
-      const targetValue = target[key];
-
-      if (
-        sourceValue &&
-        typeof sourceValue === 'object' &&
-        !Array.isArray(sourceValue) &&
-        targetValue &&
-        typeof targetValue === 'object' &&
-        !Array.isArray(targetValue)
-      ) {
-        // Recursively merge nested objects
-        return { ...result, [key]: deepMerge(targetValue, sourceValue) };
-      }
-      // Override with source value
-      return { ...result, [key]: sourceValue };
-    },
-    { ...target },
-  );
+  // Use lodash merge with empty object as first arg to avoid mutating target
+  return merge({}, target, source);
 }
 
 /**

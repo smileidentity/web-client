@@ -10,12 +10,7 @@ const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
 
-const cropImageFromDataUri = (
-  dataUri,
-  cropPercentX = 0,
-  cropPercentY = 0,
-  quality = JPEG_QUALITY,
-) =>
+const cropImageFromDataUri = (dataUri, cropPercentX = 0, cropPercentY = 0) =>
   new Promise((resolve, reject) => {
     if (!dataUri || typeof dataUri !== 'string') {
       reject(new Error('Invalid data URI provided'));
@@ -61,7 +56,7 @@ const cropImageFromDataUri = (
           newHeight,
         );
 
-        const croppedDataUri = canvas.toDataURL('image/jpeg', quality);
+        const croppedDataUri = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
         resolve(croppedDataUri);
       } catch (error) {
         reject(new Error(`Failed to process image: ${error.message}`));

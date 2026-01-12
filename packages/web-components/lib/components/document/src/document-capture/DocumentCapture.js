@@ -2,6 +2,7 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
 import { t, getDirection } from '../../../../domain/localisation';
+import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
 function hasMoreThanNColors(data, n = 16) {
   const colors = new Set();
@@ -48,7 +49,7 @@ function templateString() {
         overflow: visible;
         margin: 0 auto;
       }
-      
+
       @media (max-width: 600px) {
         .section {
           width: 99%;
@@ -81,7 +82,7 @@ function templateString() {
           -webkit-tap-highlight-color: transparent;
           content: normal;
         }
-      
+
         .id-video {
           width: 99%;
           text-align: center;
@@ -112,7 +113,7 @@ function templateString() {
         box-sizing: border-box;
         inset: 0px;
       }
-      
+
       .video-overlay .inner-border {
         position: absolute;
         border-width: 0.25rem;
@@ -128,7 +129,7 @@ function templateString() {
         border-style: solid;
         border-radius: 0.25rem;
       }
-      
+
       .description {
         align-self: center;
         padding-bottom: 1.75rem;
@@ -142,7 +143,7 @@ function templateString() {
       .id-side {
         padding-bottom: 0.5rem;
       }
-      
+
       .circle-progress {
         display: flex;
         flex-direction: column;
@@ -262,8 +263,8 @@ class DocumentCapture extends HTMLElement {
 
       this.updatePortraitId(canvas, video, 1, 1);
       this.updatePortraitId(previewCanvas, video);
-      const image = canvas.toDataURL('image/jpeg');
-      const previewImage = previewCanvas.toDataURL('image/jpeg');
+      const image = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+      const previewImage = previewCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
       return {
         image,
         originalHeight: canvas.height,
@@ -295,9 +296,9 @@ class DocumentCapture extends HTMLElement {
       this._drawLandscapeImage(canvas, video, 1, 1);
       this._drawLandscapeImage(previewCanvas, video);
     }
-    const image = canvas.toDataURL('image/jpeg');
+    const image = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 
-    const previewImage = previewCanvas.toDataURL('image/jpeg');
+    const previewImage = previewCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
     return {
       image,
       originalHeight: canvas.height,

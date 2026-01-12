@@ -23,5 +23,33 @@ export const IMAGE_TYPE = {
 };
 
 export const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
+
+/**
+ * JPEG compression quality for captured images (selfies, liveness frames, ID documents).
+ *
+ * Value: 0.95 (95% quality)
+ *
+ * This value is optimized for identity verification and biometric matching:
+ * - Preserves fine facial details needed for accurate facial recognition
+ * - Maintains skin tone gradients without JPEG blocking artifacts
+ * - Ensures ID document text remains readable for OCR processing
+ * - Provides minimal compression artifacts that could affect liveness detection
+ *
+ * Quality comparison:
+ * - 1.0:  No compression, very large files (diminishing returns)
+ * - 0.95: Virtually lossless to human eye, ideal for biometrics ✓
+ * - 0.92: Browser default, acceptable but why leave it to chance
+ * - 0.85: Visible artifacts in gradients and skin tones
+ * - 0.80: Noticeable blocking artifacts that hurt matching accuracy
+ *
+ * ⚠️  WARNING: DO NOT LOWER THIS VALUE
+ * Reducing JPEG quality can negatively impact downstream systems:
+ * - Facial recognition matching accuracy may decrease
+ * - Liveness detection anti-spoofing checks may fail
+ * - ID document OCR text extraction may produce errors
+ * - Overall verification success rates may drop
+ *
+ */
+export const JPEG_QUALITY = 0.95;
 export const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 export const PORTRAIT_ID_PREVIEW_HEIGHT = 527;

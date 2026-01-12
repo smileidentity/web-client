@@ -4,6 +4,7 @@ import './selfie-capture-wrapper/index.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import packageJson from '../../../../package.json';
+import { JPEG_QUALITY } from '../../../domain/constants/src/Constants';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -13,7 +14,7 @@ const cropImageFromDataUri = (
   dataUri,
   cropPercentX = 0,
   cropPercentY = 0,
-  quality = 0.9,
+  quality = JPEG_QUALITY,
 ) =>
   new Promise((resolve, reject) => {
     if (!dataUri || typeof dataUri !== 'string') {

@@ -3,6 +3,33 @@ const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
 
+/**
+ * JPEG compression quality for captured images (selfies, liveness frames, ID documents).
+ *
+ * Value: 0.95 (95% quality)
+ *
+ * This value is optimized for identity verification and biometric matching:
+ * - Preserves fine facial details needed for accurate facial recognition
+ * - Maintains skin tone gradients without JPEG blocking artifacts
+ * - Ensures ID document text remains readable for OCR processing
+ * - Provides minimal compression artifacts that could affect liveness detection
+ *
+ * Quality comparison:
+ * - 1.0:  No compression, very large files (diminishing returns)
+ * - 0.95: Virtually lossless to human eye, ideal for biometrics ✓
+ * - 0.92: Browser default, acceptable but why leave it to chance
+ * - 0.85: Visible artifacts in gradients and skin tones
+ * - 0.80: Noticeable blocking artifacts that hurt matching accuracy
+ *
+ * ⚠️  WARNING: DO NOT LOWER THIS VALUE
+ * Reducing JPEG quality can negatively impact downstream systems:
+ * - Facial recognition matching accuracy may decrease
+ * - Liveness detection anti-spoofing checks may fail
+ * - ID document OCR text extraction may produce errors
+ * - Overall verification success rates may drop
+ */
+const JPEG_QUALITY = 0.95;
+
 function isSamsungMultiCameraDevice() {
   const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);
   if (!matchedModelNumber) {
@@ -123,7 +150,7 @@ class SmartFileUpload {
 
 function scwTemplateString() {
   return `
-  <link rel="preconnect" href="https://fonts.gstatic.com"> 
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
@@ -1922,7 +1949,7 @@ class SmartCameraWeb extends HTMLElement {
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
 
-    this._rawImages.push(canvas.toDataURL('image/jpeg'));
+    this._rawImages.push(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
   }
 
   _captureReferencePhoto() {
@@ -1950,7 +1977,7 @@ class SmartCameraWeb extends HTMLElement {
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);
 
-    const image = canvas.toDataURL('image/jpeg');
+    const image = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 
     this._referenceImage = image;
 
@@ -2041,7 +2068,7 @@ class SmartCameraWeb extends HTMLElement {
         cropHeight,
       );
 
-      return croppedCanvas.toDataURL('image/jpeg');
+      return croppedCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
     }
 
     canvas.width = 2240;
@@ -2079,10 +2106,10 @@ class SmartCameraWeb extends HTMLElement {
         canvas.width,
         canvas.height,
       );
-      return canvas.toDataURL('image/jpeg');
+      return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg');
+    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
   }
 
   _stopVideoStream(stream) {

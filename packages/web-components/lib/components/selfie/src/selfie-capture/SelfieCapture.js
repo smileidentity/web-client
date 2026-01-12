@@ -1,4 +1,4 @@
-import { IMAGE_TYPE } from '../../../../domain/constants/src/Constants';
+import { IMAGE_TYPE, JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';
@@ -148,7 +148,7 @@ function templateString() {
   .title-color {
     color: ${this.themeColor};
   }
-  
+
   .theme-color {
     color: ${this.themeColor};
   }
@@ -775,7 +775,7 @@ class SelfieCaptureScreen extends HTMLElement {
     // NOTE: we do not want to test POL images
     this._drawImage(canvas, false);
 
-    this._rawImages.push(canvas.toDataURL('image/jpeg'));
+    this._rawImages.push(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
   }
 
   _captureReferencePhoto() {
@@ -803,7 +803,7 @@ class SelfieCaptureScreen extends HTMLElement {
     // NOTE: we want to test the image quality of the reference photo
     this._drawImage(canvas, !this.disableImageTests);
 
-    const image = canvas.toDataURL('image/jpeg');
+    const image = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 
     this._referenceImage = image;
 

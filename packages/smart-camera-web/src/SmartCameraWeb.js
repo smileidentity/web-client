@@ -5,31 +5,59 @@ const DEFAULT_NO_OF_LIVENESS_FRAMES = 8;
 const PORTRAIT_ID_PREVIEW_WIDTH = 396;
 const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
 
+/**
+ * JPEG compression quality for captured images (selfies, liveness frames, ID documents).
+ *
+ * Value: 0.95 (95% quality)
+ *
+ * This value is optimized for identity verification and biometric matching:
+ * - Preserves fine facial details needed for accurate facial recognition
+ * - Maintains skin tone gradients without JPEG blocking artifacts
+ * - Ensures ID document text remains readable for OCR processing
+ * - Provides minimal compression artifacts that could affect liveness detection
+ *
+ * Quality comparison:
+ * - 1.0:  No compression, very large files (diminishing returns)
+ * - 0.95: Virtually lossless to human eye, ideal for biometrics ✓
+ * - 0.92: Browser default, acceptable but why leave it to chance
+ * - 0.85: Visible artifacts in gradients and skin tones
+ * - 0.80: Noticeable blocking artifacts that hurt matching accuracy
+ *
+ * ⚠️  WARNING: DO NOT LOWER THIS VALUE
+ * Reducing JPEG quality can negatively impact downstream systems:
+ * - Facial recognition matching accuracy may decrease
+ * - Liveness detection anti-spoofing checks may fail
+ * - ID document OCR text extraction may produce errors
+ * - Overall verification success rates may drop
+ *
+ */
+const JPEG_QUALITY = 0.95;
+
 function scwTemplateString() {
   return `
-    <link rel="preconnect" href="https://fonts.gstatic.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
-  
+
     <style>
       :host {
         --color-active: #001096;
         --color-default: #2D2B2A;
         --color-disabled: #848282;
       }
-  
+
       * {
         font-family: 'DM Sans', sans-serif;
       }
-  
+
       [hidden] {
         display: none !important;
       }
-  
+
       [disabled] {
         cursor: not-allowed !important;
         filter: grayscale(75%);
       }
-  
+
       .visually-hidden {
         border: 0;
         clip: rect(1px 1px 1px 1px);
@@ -42,80 +70,80 @@ function scwTemplateString() {
         white-space: nowrap;
         width: 1px;
       }
-  
+
       img {
         height: auto;
         max-width: 100%;
         transform: scaleX(-1);
       }
-  
+
       video {
         background-color: black;
       }
-  
+
       a {
         color: currentColor;
         text-decoration: none;
       }
-  
+
       svg {
         max-width: 100%;
       }
-  
+
       .color-gray {
         color: #797979;
       }
-  
+
       .color-red {
         color: red;
       }
-  
+
       .color-richblue {
         color: #4E6577;
       }
-  
+
       .color-richblue-shade {
         color: #0E1B42;
       }
-  
+
       .color-digital-blue {
         color: #001096 !important;
       }
-  
+
       .color-deep-blue {
         color: #001096;
       }
-  
+
       .center {
         text-align: center;
         margin-left: auto;
         margin-right: auto;
       }
-  
+
       .font-size-small {
         font-size: .75rem;
       }
-  
+
       .font-size-large {
         font-size: 1.5rem;
       }
-  
+
       .text-transform-uppercase {
         text-transform: uppercase;
       }
-  
+
       [id*=-"screen"] {
         min-block-size: 100%;
       }
-  
+
       [data-variant~="full-width"] {
         inline-size: 100%;
       }
-  
+
       .flow > * + * {
         margin-top: 1rem;
       }
-  
+
       .button {
         --button-color: var(--color-default);
         -webkit-appearance: none;
@@ -131,33 +159,33 @@ function scwTemplateString() {
         padding: .75rem 1.5rem;
         text-align: center;
       }
-  
+
       .button:hover,
       .button:focus,
       .button:active {
         --button-color: var(--color-active);
       }
-  
+
       .button:disabled {
         --button-color: var(--color-disabled);
       }
-  
+
       .button[data-variant~='solid'] {
         background-color: var(--button-color);
         border: 2px solid var(--button-color);
       }
-  
+
       .button[data-variant~='outline'] {
         color: var(--button-color);
         border: 2px solid var(--button-color);
       }
-  
+
       .button[data-variant~='ghost'] {
         padding: 0px;
         color: var(--button-color);
         background-color: transparent;
       }
-  
+
       .icon-btn {
         appearance: none;
         background: none;
@@ -176,12 +204,12 @@ function scwTemplateString() {
         display: flex;
         justify-content: space-between;
       }
-  
+
       .back-wrapper {
         display: flex;
         align-items: center;
       }
-  
+
       .back-button {
         display: block !important;
       }
@@ -198,22 +226,22 @@ function scwTemplateString() {
         max-width: 35ch;
         padding: 1rem;
       }
-  
+
       .selfie-review-image {
         overflow: hidden;
         aspect-ratio: 1/1;
       }
-  
+
       #review-image {
         scale: 1.75;
       }
-  
+
       @media (max-aspect-ratio: 1/1) {
         #review-image {
           transform: scaleX(-1) translateY(-10%);
         }
       }
-  
+
       .tips,
       .powered-by {
         align-items: center;
@@ -223,63 +251,63 @@ function scwTemplateString() {
         justify-content: center;
         letter-spacing: .075em;
       }
-  
+
       .powered-by {
         box-shadow: 0px 2.57415px 2.57415px rgba(0, 0, 0, 0.06);
         display: inline-flex;
         font-size: .5rem;
       }
-  
+
       .tips {
         margin-left: auto;
         margin-right: auto;
         max-width: 17rem;
       }
-  
+
       .tips > * + *,
       .powered-by > * + * {
         display: inline-block;
         margin-left: .5em;
       }
-  
+
       .powered-by .company {
         color: #18406D;
         font-weight: 700;
         letter-spacing: .15rem;
       }
-  
+
       .logo-mark {
         background-color: #004071;
         display: inline-block;
         padding: .25em .5em;
       }
-  
+
       .logo-mark svg {
         height: auto;
         justify-self: center;
         width: .75em;
       }
-  
+
       @keyframes fadeInOut {
         12.5% {
           opacity: 0;
         }
-  
+
         50% {
           opacity: 1;
         }
-  
+
         87.5% {
           opacity: 0;
         }
       }
-  
+
       .id-video-container.portrait {
         width: 100%;
         position: relative;
         height: calc(200px * 1.4);
       }
-  
+
       .id-video-container.portrait video {
         width: calc(213px + 0.9rem);
         height: 100%;
@@ -289,19 +317,19 @@ function scwTemplateString() {
         padding-bottom: calc((214px * 1.4) / 3);
         padding-top: calc((191px * 1.4) / 3);
         object-fit: cover;
-  
+
         transform: translateX(-50%) translateY(-50%);
         z-index: 1;
         block-size: 100%;
       }
-  
+
       .video-container,
       .id-video-container.landscape {
         position: relative;
         z-index: 1;
         width: 100%;
       }
-  
+
       .video-container #smile-cta,
       .video-container video,
       .id-video-container.landscape video {
@@ -311,7 +339,7 @@ function scwTemplateString() {
         top: calc(50% - 3px);
         transform: translateX(-50%) translateY(50%);
       }
-  
+
       .video-container #smile-cta {
         color: white;
         font-size: 2rem;
@@ -319,12 +347,12 @@ function scwTemplateString() {
         opacity: 0;
         top: calc(50% - 3rem);
       }
-  
+
       .video-container video {
         min-height: 100%;
         transform: scaleX(-1) translateX(50%) translateY(-50%);
       }
-  
+
       .video-container .video {
         background-color: black;
         position: absolute;
@@ -332,12 +360,12 @@ function scwTemplateString() {
         height: calc(100% - 6px);
         clip-path: ellipse(101px 118px);
       }
-  
+
       .id-video-container.landscape {
         min-height: calc((2 * 10rem) + 198px);
         height: auto;
       }
-  
+
       .id-video-container.portrait .image-frame-portrait {
         border-width: 0.9rem;
         border-color: rgba(0, 0, 0, 0.7);
@@ -350,7 +378,7 @@ function scwTemplateString() {
         width: 200px;
         height: calc(200px * 1.4);
       }
-  
+
       .id-video-container.landscape .image-frame {
         border-width: 10rem 1rem;
         border-color: rgba(0, 0, 0, 0.7);
@@ -362,7 +390,7 @@ function scwTemplateString() {
         left: 0;
         z-index: 2;
       }
-  
+
       .id-video-container.landscape video {
         width: 100%;
         transform: translateX(-50%) translateY(-50%);
@@ -370,7 +398,7 @@ function scwTemplateString() {
         height: 100%;
         block-size: 100%;
       }
-  
+
       .id-video-container.landscape img {
         position: absolute;
         top: 50%;
@@ -378,12 +406,12 @@ function scwTemplateString() {
         transform: translateX(-50%) translateY(-50%);
         max-width: 90%;
       }
-  
+
       #id-review-screen .id-video-container,
       #back-of-id-review-screen .id-video-container {
         background-color: rgba(0, 0, 0, 1);
       }
-  
+
       #id-review-screen .id-video-container.portrait, #back-of-id-review-screen .id-video-container.portrait {
         height: calc((200px * 1.4) + 100px);
       }
@@ -403,17 +431,17 @@ function scwTemplateString() {
         width: 90%;
         z-index: 2;
       }
-  
+
       #back-of-id-camera-screen .id-video-container.portrait .actions,
       #id-camera-screen .id-video-container.portrait .actions {
         top: 145%;
         width: calc(200px * 1.4);
       }
-  
+
       #back-of-id-camera-screen .section.portrait, #id-camera-screen .section.portrait {
         min-height: calc((200px * 1.4) + 260px);
       }
-  
+
       #id-entry-screen,
       #back-of-id-entry-screen {
         block-size: 45rem;
@@ -423,77 +451,77 @@ function scwTemplateString() {
         max-block-size: 100%;
         max-inline-size: 40ch;
       }
-  
+
       #id-entry-screen header p {
         margin-block: 0 !important;
       }
-  
+
       .document-tips {
         margin-block-start: 1.5rem;
         display: flex;
         align-items: center;
         text-align: initial;
       }
-  
+
       .document-tips svg {
         flex-shrink: 0;
         margin-inline-end: 1rem;
       }
-  
+
       .document-tips p {
         margin-block: 0;
       }
-  
+
       .document-tips p:first-of-type {
         font-size; 1.875rem;
         font-weight: bold
       }
-  
+
       [type='file'] {
         display: none;
       }
-  
+
       .document-tips > * + * {
         margin-inline-start; 1em;
       }
     </style>
-  
+
     <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259">
       <symbol id="image-frame">
         <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0v69.605h13.349V13.349h56.256V0H0zM396 0h-69.605v13.349h56.256v56.256H396V0zM0 258.604V189h13.349v56.256h56.256v13.348H0zM396 258.604h-69.605v-13.348h56.256V189H396v69.604z" fill="#f00"/>
       </symbol>
     </svg>
-  
+
     <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527">
       <symbol id="image-frame-portrait">
         <path fill-rule="evenodd" clip-rule="evenodd" d="M 0.59 0.2 L 0.59 142.384 L 13.912 142.384 L 13.912 17 L 70.05 17 L 70.05 0.2 L 0.59 0.2 Z M 395.764 0.2 L 326.303 0.2 L 326.303 17 L 382.442 17 L 382.442 142.384 L 395.764 142.384 L 395.764 0.2 Z M 0.59 528.461 L 0.59 386.277 L 13.912 386.277 L 13.912 511.663 L 70.05 511.663 L 70.05 528.461 L 0.59 528.461 Z M 395.764 528.461 L 326.303 528.461 L 326.303 511.663 L 382.442 511.663 L 382.442 386.277 L 395.764 386.277 L 395.764 528.461 Z" fill="#f00"/>
       </symbol>
     </svg>
-  
+
     <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
       <symbol id="close-icon">
         <path fill-rule="evenodd" clip-rule="evenodd" d="M.732.732a2.5 2.5 0 013.536 0L10 6.464 15.732.732a2.5 2.5 0 013.536 3.536L13.536 10l5.732 5.732a2.5 2.5 0 01-3.536 3.536L10 13.536l-5.732 5.732a2.5 2.5 0 11-3.536-3.536L6.464 10 .732 4.268a2.5 2.5 0 010-3.536z" fill="#fff"/>
       </symbol>
     </svg>
-  
+
     <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41">
       <symbol id="approve-icon">
         <circle cx="20.5" cy="20.5" r="20" stroke="#fff"/>
         <path d="M12.3 20.5l6.15 6.15 12.3-12.3" stroke="#fff" stroke-width="3.075" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
       </symbol>
     </svg>
-  
+
     <svg hidden fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 18">
       <symbol id="refresh-icon">
         <path d="M3.314 15.646a8.004 8.004 0 01-2.217-4.257 8.06 8.06 0 01.545-4.655l1.789.788a6.062 6.062 0 001.264 6.737 6.033 6.033 0 008.551 0c2.358-2.37 2.358-6.224 0-8.592a5.996 5.996 0 00-4.405-1.782l.662 2.354-3.128-.796-3.127-.796 2.25-2.324L7.748 0l.55 1.953a7.966 7.966 0 016.33 2.326 8.004 8.004 0 012.342 5.684 8.005 8.005 0 01-2.343 5.683A7.928 7.928 0 018.97 18a7.928 7.928 0 01-5.656-2.354z" fill="currentColor"/>
       </symbol>
     </svg>
-  
+
     <div class='flow center'>
       <p class='color-red | center' id='error'>
       </p>
     </div>
-  
+
     <div id='request-screen' class='flow center'>
       ${
         this.showNavigation
@@ -529,11 +557,11 @@ function scwTemplateString() {
         <p>
           We need access to your camera so that we can take selfie and proof-of-life images.
         </p>
-  
+
         <button data-variant='solid' id='request-camera-access' class='button | center' type='button'>
           Request Camera Access
         </button>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -543,7 +571,7 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='camera-screen' class='flow center'>
       ${
         this.showNavigation
@@ -576,7 +604,7 @@ function scwTemplateString() {
           : ''
       }
       <h1>Take a Selfie</h1>
-  
+
       <div class='section | flow'>
         <div class='video-container'>
           <div class='video'>
@@ -586,18 +614,18 @@ function scwTemplateString() {
           </svg>
           <p id='smile-cta' class='color-gray'>SMILE</p>
         </div>
-  
+
         <small class='tips'>
           <svg width='44' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40">
             <path fill="#F8F8FA" fill-rule="evenodd" d="M17.44 0h4.2c4.92 0 7.56.68 9.95 1.96a13.32 13.32 0 015.54 5.54c1.27 2.39 1.95 5.02 1.95 9.94v4.2c0 4.92-.68 7.56-1.95 9.95a13.32 13.32 0 01-5.54 5.54c-2.4 1.27-5.03 1.95-9.95 1.95h-4.2c-4.92 0-7.55-.68-9.94-1.95a13.32 13.32 0 01-5.54-5.54C.68 29.19 0 26.56 0 21.64v-4.2C0 12.52.68 9.9 1.96 7.5A13.32 13.32 0 017.5 1.96C9.89.68 12.52 0 17.44 0z" clip-rule="evenodd"/>
             <path fill="#AEB6CB" d="M19.95 10.58a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.54 2.3a.71.71 0 000 1.43.71.71 0 000-1.43zm11.08 0a.71.71 0 000 1.43.71.71 0 000-1.43zm-5.63 1.27a4.98 4.98 0 00-2.05 9.48v1.2a2.14 2.14 0 004.28 0v-1.2a4.99 4.99 0 00-2.23-9.48zm-7.75 4.27a.71.71 0 000 1.43.71.71 0 000-1.43zm15.68 0a.71.71 0 000 1.43.71.71 0 000-1.43z"/>
           </svg>
           <span>Tips: Put your face inside the oval frame and click to "take selfie"</span> </small>
-  
+
         <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
           Take Selfie
         </button>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -607,7 +635,7 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='review-screen' class='flow center'>
       ${
         this.showNavigation
@@ -625,7 +653,7 @@ function scwTemplateString() {
           : ''
       }
       <h1>Review Selfie</h1>
-  
+
       <div class='section | flow'>
         <div class='selfie-review-image'>
           <img
@@ -636,19 +664,19 @@ function scwTemplateString() {
             height='480'
           />
         </div>
-  
+
         <p class='color-richblue-shade font-size-large'>
           Is this clear enough?
         </p>
-  
+
         <p class='color-gray font-size-small'>
           Make sure your face is clear enough and the photo is not blurry
         </p>
-  
+
         <button data-variant='solid' id='select-selfie' class='button | center' type='button'>
           Yes, use this one
         </button>
-  
+
         <button data-variant='outline' id='restart-image-capture' class='button | center' type='button'>
           Re-take selfie
         </button>
@@ -661,7 +689,7 @@ function scwTemplateString() {
       `
       }
     </div>
-  
+
     <div hidden id='id-entry-screen' class='flow center'>
       ${
         this.showNavigation
@@ -781,7 +809,7 @@ function scwTemplateString() {
       `
       }
     </div>
-  
+
     <div hidden id='id-camera-screen' class='flow center'>
       ${
         this.showNavigation
@@ -813,11 +841,11 @@ function scwTemplateString() {
           <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame' />
           </svg>
-  
+
           <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame-portrait' />
           </svg>
-  
+
           <div class='actions' hidden>
             <button id='capture-id-image' class='button icon-btn | center' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="60" width="60">
@@ -827,7 +855,7 @@ function scwTemplateString() {
             </button>
           </div>
         </div>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -837,7 +865,7 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='id-review-screen' class='flow center'>
       ${
         this.showNavigation
@@ -872,7 +900,7 @@ function scwTemplateString() {
               <span class='visually-hidden'>Accept Image</span>
             </button>
           </div>
-  
+
           <img
             alt='your ID card'
             id='id-review-image'
@@ -880,7 +908,7 @@ function scwTemplateString() {
             width='396'
           />
         </div>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -890,7 +918,7 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='back-of-id-entry-screen' class='flow center'>
       ${
         this.showNavigation
@@ -1020,7 +1048,7 @@ function scwTemplateString() {
       `
       }
     </div>
-  
+
     <div hidden id='back-of-id-camera-screen' class='flow center'>
       ${
         this.showNavigation
@@ -1052,11 +1080,11 @@ function scwTemplateString() {
           <svg class="image-frame" fill="none" height="259" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 259" ${this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame' />
           </svg>
-  
+
           <svg class="image-frame-portrait" fill="none" height="527" width="396" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 396 527" ${!this.isPortraitCaptureView ? 'hidden' : ''}>
             <use href='#image-frame-portrait' />
           </svg>
-  
+
           <div class='actions' hidden>
             <button id='capture-back-of-id-image' class='button icon-btn | center' type='button'>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="60" width="60">
@@ -1066,7 +1094,7 @@ function scwTemplateString() {
             </button>
           </div>
         </div>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -1076,7 +1104,7 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='back-of-id-review-screen' class='flow center'>
       ${
         this.showNavigation
@@ -1111,7 +1139,7 @@ function scwTemplateString() {
               <span class='visually-hidden'>Accept Image</span>
             </button>
           </div>
-  
+
           <img
             alt='your ID card'
             id='back-of-id-review-image'
@@ -1119,7 +1147,7 @@ function scwTemplateString() {
             width='396'
           />
         </div>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -1129,11 +1157,11 @@ function scwTemplateString() {
         }
       </div>
     </div>
-  
+
     <div hidden id='thanks-screen' class='flow center'>
       <div class='section | flow'>
         <h1>Thank you</h1>
-  
+
         ${
           this.hideAttribution
             ? ''
@@ -1695,7 +1723,7 @@ class SmartCameraWeb extends HTMLElement {
 
     this._drawImage(canvas);
 
-    this._rawImages.push(canvas.toDataURL('image/jpeg'));
+    this._rawImages.push(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
   }
 
   _captureReferencePhoto() {
@@ -1722,7 +1750,7 @@ class SmartCameraWeb extends HTMLElement {
 
     this._drawImage(canvas);
 
-    const image = canvas.toDataURL('image/jpeg');
+    const image = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 
     this._referenceImage = image;
 
@@ -1813,7 +1841,7 @@ class SmartCameraWeb extends HTMLElement {
         cropHeight,
       );
 
-      return croppedCanvas.toDataURL('image/jpeg');
+      return croppedCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
     }
 
     canvas.width = 2240;
@@ -1851,10 +1879,10 @@ class SmartCameraWeb extends HTMLElement {
         canvas.width,
         canvas.height,
       );
-      return canvas.toDataURL('image/jpeg');
+      return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg');
+    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
   }
 
   _stopVideoStream(stream) {

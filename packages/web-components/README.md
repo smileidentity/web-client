@@ -18,8 +18,8 @@ import {
   getDirection,
 } from '@smileid/web-components/localisation';
 
-// Set language (supports 'en', 'fr', 'ar')
-await setCurrentLocale('fr');
+// Set language (supports 'en-GB', 'fr-FR', 'ar-EG')
+await setCurrentLocale('fr-FR');
 
 // Apply RTL direction for Arabic
 document.documentElement.dir = getDirection();
@@ -30,9 +30,9 @@ document.documentElement.dir = getDirection();
 Override specific UI text:
 
 ```javascript
-await setCurrentLocale('en', {
+await setCurrentLocale('en-GB', {
   locales: {
-    en: {
+    'en-GB': {
       selfie: {
         instructions: {
           title: 'Verify your identity with a selfie',
@@ -53,7 +53,7 @@ import {
   setCurrentLocale,
 } from '@smileid/web-components/localisation';
 
-registerLocale('sw', {
+registerLocale('sw-KE', {
   direction: 'ltr',
   common: {
     back: 'Rudi',
@@ -62,7 +62,7 @@ registerLocale('sw', {
   },
 });
 
-await setCurrentLocale('sw');
+await setCurrentLocale('sw-KE');
 ```
 
 📖 **[Full Localization Guide](https://github.com/smileidentity/web-client/blob/main/packages/web-components/LOCALIZATION.md)** - Complete documentation including available languages, all translation keys, and custom language setup.

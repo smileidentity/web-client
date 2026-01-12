@@ -87,7 +87,7 @@ window.SmileIdentity({
 
   // Set language to French
   translation: {
-    language: 'fr',
+    language: 'fr-FR',
   },
 
   partner_details: {
@@ -110,9 +110,9 @@ window.SmileIdentity({
   callback_url: 'https://your-callback.com',
 
   translation: {
-    language: 'en',
+    language: 'en-GB',
     locales: {
-      en: {
+      'en-GB': {
         // Override common button labels
         common: {
           continue: 'Proceed to Next Step',
@@ -146,7 +146,7 @@ Here's a complete example showing language selection with custom overrides:
 
 ```javascript
 // Get language from user preference or browser
-const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
+const userLanguage = navigator.language.startsWith('fr') ? 'fr-FR' : 'en-GB';
 
 window.SmileIdentity({
   token: tokenFromServer,
@@ -158,7 +158,7 @@ window.SmileIdentity({
     language: userLanguage,
     locales: {
       // English customizations
-      en: {
+      'en-GB': {
         common: {
           continue: 'Next',
           back: 'Previous',
@@ -176,7 +176,7 @@ window.SmileIdentity({
         },
       },
       // French customizations
-      fr: {
+      'fr-FR': {
         common: {
           continue: 'Suivant',
           back: 'Précédent',
@@ -225,7 +225,7 @@ import {
 
 // Set locale when your app initializes
 async function initializeSmileID() {
-  await setCurrentLocale('fr');
+  await setCurrentLocale('fr-FR');
 
   // Now render your components
   renderVerificationUI();
@@ -245,7 +245,7 @@ import {
 } from '@smileid/web-components/localisation';
 
 async function initializeWithRTL() {
-  await setCurrentLocale('ar');
+  await setCurrentLocale('ar-EG');
 
   // Apply direction to document or container
   document.documentElement.dir = getDirection(); // Returns 'rtl' for Arabic
@@ -298,9 +298,9 @@ Here's a complete example using web components with locale configuration:
 
       async function initializeVerification() {
         // Set locale with custom overrides
-        await setCurrentLocale('en', {
+        await setCurrentLocale('en-GB', {
           locales: {
-            en: {
+            'en-GB': {
               selfie: {
                 instructions: {
                   title: 'Verify your identity',
@@ -353,10 +353,10 @@ window.SmileIdentity({
   callback_url: 'https://your-callback.com',
 
   translation: {
-    language: 'sw', // Use the new language
+    language: 'sw-KE', // Use the new language
     locales: {
-      // Define the new Swahili language
-      sw: {
+      // Define the new Swahili (Kenya) language
+      'sw-KE': {
         direction: 'ltr',
         common: {
           back: 'Rudi',
@@ -439,7 +439,7 @@ import {
 } from '@smileid/web-components/localisation';
 
 // Register a new language
-registerLocale('sw', {
+registerLocale('sw-KE', {
   direction: 'ltr',
   common: {
     back: 'Rudi',
@@ -453,7 +453,7 @@ registerLocale('sw', {
 });
 
 // Then set it as the current locale
-await setCurrentLocale('sw');
+await setCurrentLocale('sw-KE');
 ```
 
 > **Tip**: Use the [English translation file](https://github.com/smileidentity/web-client/blob/main/packages/web-components/locales/en-GB.json) as a starting point for your custom language.
@@ -560,8 +560,8 @@ translation: {
 
 // ✅ Correct: language matches locale key
 translation: {
-  language: 'en',
-  locales: { en: { ... } }
+  language: 'en-GB',
+  locales: { 'en-GB': { ... } }
 }
 ```
 
@@ -586,11 +586,6 @@ document.documentElement.dir = getDirection();
 
 1. The key may be misspelled - check the [Translation Key Reference](#translation-key-reference)
 2. For custom languages, ensure all required keys are included
-3. Use `validate: true` to identify missing keys:
-
-```javascript
-await setCurrentLocale('sw', { validate: true });
-```
 
 ---
 

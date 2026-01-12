@@ -117,9 +117,9 @@ window.SmileIdentity({
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
 
-  // Set language (supports 'en', 'fr', 'ar')
+  // Set language (supports 'en-GB', 'fr-FR', 'ar-EG')
   translation: {
-    language: 'fr',
+    language: 'fr-FR',
   },
 
   partner_details: {
@@ -136,9 +136,9 @@ Override specific UI text while keeping defaults:
 
 ```javascript
 translation: {
-  language: 'en',
+  language: 'en-GB',
   locales: {
-    en: {
+    'en-GB': {
       common: {
         continue: 'Proceed',
         back: 'Go Back'
@@ -159,9 +159,9 @@ Provide complete translations for unsupported languages:
 
 ```javascript
 translation: {
-  language: 'sw', // Swahili
+  language: 'sw-KE', // Swahili (Kenya)
   locales: {
-    sw: {
+    'sw-KE': {
       direction: 'ltr',
       common: {
         back: 'Rudi',

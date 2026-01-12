@@ -65,7 +65,7 @@ registerLocale('sw', {
 await setCurrentLocale('sw');
 ```
 
-📖 **[Full Localization Guide](../../docs/LOCALIZATION.md)** - Complete documentation including available languages, all translation keys, and custom language setup.
+📖 **[Full Localization Guide](https://github.com/smileidentity/web-client/blob/main/packages/web-components/LOCALIZATION.md)** - Complete documentation including available languages, all translation keys, and custom language setup.
 
 ## Orchestration
 

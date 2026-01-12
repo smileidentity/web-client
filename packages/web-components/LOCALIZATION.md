@@ -456,7 +456,7 @@ registerLocale('sw', {
 await setCurrentLocale('sw');
 ```
 
-> **Tip**: Use the [English translation file](../packages/web-components/locales/en-GB.json) as a starting point for your custom language.
+> **Tip**: Use the [English translation file](https://github.com/smileidentity/web-client/blob/main/packages/web-components/locales/en-GB.json) as a starting point for your custom language.
 
 ---
 
@@ -596,6 +596,6 @@ await setCurrentLocale('sw', { validate: true });
 
 ## Additional Resources
 
-- [English Translation (Template)](../packages/web-components/locales/en-GB.json) - Use as a starting point for custom languages
-- [Example App](../example/) - Working example with locale configuration
+- [English Translation (Template)](https://github.com/smileidentity/web-client/blob/main/packages/web-components/locales/en-GB.json) - Use as a starting point for custom languages
+- [Example App](../../example/) - Working example with locale configuration
 - [SmileID Documentation](https://docs.usesmileid.com/) - Full SDK documentation

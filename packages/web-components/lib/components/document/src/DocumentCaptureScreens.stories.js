@@ -1,12 +1,18 @@
 import './index';
+import { setCurrentLocale } from '../../../domain/localisation';
 
 const meta = {
   args: {
     'hide-attribution': false,
+    language: 'en',
     'theme-color': '#001096',
   },
   argTypes: {
     'hide-attribution': { control: 'boolean' },
+    language: {
+      control: { type: 'select' },
+      options: ['en', 'ar'],
+    },
     'theme-color': { control: 'color' },
   },
   component: 'document-capture-screens',
@@ -15,43 +21,61 @@ const meta = {
 export default meta;
 
 export const DocumentCapture = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
         <document-capture-screens theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''}>
         </document-capture-screens>
-    `,
+    `;
+  },
 };
 
 export const DocumentCaptureHiddenInstructions = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
         <document-capture-screens hide-instructions theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''}>
         </document-capture-screens>
-    `,
+    `;
+  },
 };
 
 export const DocumentCaptureHideBackOfId = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
         <document-capture-screens hide-back-of-id theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''}>
         </document-capture-screens>
-    `,
+    `;
+  },
 };
 
 export const DocumentCaptureAllowAttributes = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
         <document-capture-screens document-capture-screens-modes='camera,upload' theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''}>
         </document-capture-screens>
-    `,
+    `;
+  },
 };
 
 export const DocumentCaptureHideInstructionNBackOfId = {
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
         <document-capture-screens hide-back-of-id hide-instructions theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''}>
         </document-capture-screens>
-    `,
+    `;
+  },
 };
 
 export const DocumentCapturePortraitMode = {
-  render: () => `
-        <document-capture-screens hide-back-of-id hide-instructions document-type="GREEN_BOOK">
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
+        <document-capture-screens hide-back-of-id hide-instructions theme-color='${args['theme-color']}' ${args['hide-attribution'] ? 'hide-attribution' : ''} document-type="GREEN_BOOK">
         </document-capture-screens>
-    `,
+    `;
+  },
 };

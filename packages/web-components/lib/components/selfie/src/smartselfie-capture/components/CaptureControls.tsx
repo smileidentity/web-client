@@ -1,4 +1,5 @@
 import type { FunctionComponent } from 'preact';
+import { t } from '../../../../../domain/localisation';
 
 interface CaptureControlsProps {
   isCapturing: boolean;
@@ -33,7 +34,7 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
         onClick={onStartCapture}
         disabled={isCapturing || hasFinishedCapture || !isReadyToCapture}
       >
-        Start Capture
+        {t('selfie.capture.button.startCapture')}
       </button>
 
       {allowAgentMode && (agentSupported || showAgentModeForTests) && (
@@ -43,7 +44,9 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
           className="agent-mode-btn"
           disabled={isCapturing || hasFinishedCapture}
         >
-          {facingMode === 'user' ? 'Agent Mode Off' : 'Agent Mode On'}
+          {facingMode === 'user'
+            ? t('selfie.capture.agentMode.off')
+            : t('selfie.capture.agentMode.on')}
         </button>
       )}
     </div>

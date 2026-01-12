@@ -1,15 +1,23 @@
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
+import { setCurrentLocale } from '../../../../domain/localisation';
 import './index';
 
 const meta = {
   args: {
+    language: 'en',
     'theme-color': '#001096',
   },
   argTypes: {
+    language: {
+      control: { type: 'select' },
+      options: ['en', 'ar'],
+    },
     'theme-color': { control: 'color' },
   },
   component: 'document-capture',
-  render: (args) => `
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
     <document-capture
         show-navigation
         document-capture-modes="camera,upload"
@@ -19,7 +27,8 @@ const meta = {
         theme-color='${args['theme-color']}'
     >
     </document-capture>
-`,
+`;
+  },
 };
 
 export default meta;

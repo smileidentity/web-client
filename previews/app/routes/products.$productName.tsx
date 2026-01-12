@@ -41,6 +41,12 @@ interface TokenResults {
   token: string;
 }
 
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'ar', label: 'العربية (Arabic)' },
+  { code: 'fr', label: 'Français (French)' },
+];
+
 const getToken = async (apiUrl: string, body: string | object) => {
   try {
     const result = await fetch(apiUrl, {
@@ -78,6 +84,7 @@ export default function Product() {
     embedUrl?: string;
   }>();
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -94,6 +101,9 @@ export default function Product() {
           logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
           policy_url: 'https://usesmileid.com/privacy-privacy',
           theme_color: '#000',
+        },
+        translation: {
+          language: selectedLanguage,
         },
         onSuccess: () => {},
         onClose: () => {},
@@ -132,6 +142,23 @@ export default function Product() {
               </legend>
 
               <input type="hidden" name="product" value={product.name} />
+
+              <div>
+                <label htmlFor="language-select">Language</label>
+                <select
+                  id="language-select"
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  disabled={isGettingToken}
+                >
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {product.input_fields.map((input, inputIdx) => (
                 <div key={inputIdx}>
                   {input.type === 'select' ? (

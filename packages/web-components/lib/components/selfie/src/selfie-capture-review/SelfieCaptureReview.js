@@ -1,5 +1,6 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { t, getDirection } from '../../../../domain/localisation';
 
 function templateString() {
   return `
@@ -55,10 +56,10 @@ function templateString() {
       }
     </style>
     ${styles(this.themeColor)}
-    <div id='selfie-capture-review-screen' class='center'>
+    <div id='selfie-capture-review-screen' class='center' dir='${this.direction}'>
     <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
     <h1 class="header-title title-color font-bold">
-      Is your whole face clear?
+      ${t('selfie.review.question')}
     </h1>
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -76,10 +77,10 @@ function templateString() {
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-          Yes, use this
+          ${t('selfie.review.acceptButton')}
         </button>
         <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-image'>
-          No, Retake Selfie
+          ${t('selfie.review.retakeButton')}
         </button>
       </div>
       ${
@@ -145,7 +146,11 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute('title') || t('selfie.review.title');
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleBackEvents() {

@@ -1,5 +1,10 @@
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
+import {
+  setCurrentLocale,
+  t,
+  getDirection,
+} from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
@@ -43,6 +48,34 @@ import { getHeaders, getZipSignature } from './request';
 
   let fileToUpload;
   let uploadURL;
+
+  function applyPageTranslations() {
+    // Apply translations to all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+      const key = element.getAttribute('data-i18n');
+      const translation = t(key);
+
+      // For elements with child SVGs (buttons), preserve the SVG
+      const svg = element.querySelector('svg');
+      if (svg) {
+        // Clear text nodes only, preserve SVG
+        Array.from(element.childNodes).forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            node.remove();
+          }
+        });
+        element.insertBefore(document.createTextNode(translation), svg);
+      } else {
+        element.textContent = translation;
+      }
+    });
+
+    // Close button accessibility text
+    CloseIframeButtons.forEach((button) => {
+      const srText = button.querySelector('.visually-hidden');
+      if (srText) srText.textContent = t('common.closeVerificationFrame');
+    });
+  }
 
   async function getProductConstraints() {
     const payload = {
@@ -107,6 +140,21 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        try {
+          const language = config.translation?.language || 'en-GB';
+          await setCurrentLocale(language, {
+            locales: config.translation?.locales,
+          });
+          document.documentElement.lang = language;
+          document.documentElement.dir = getDirection();
+          applyPageTranslations();
+        } catch (error) {
+          console.error(
+            `SmileIdentity - Failed to set locale: ${error.message}`,
+          );
+        }
+        // this makes the main content visible after translations are applied and prevents the flash of untranslated content
+        document.querySelector('main').hidden = false;
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -134,10 +182,10 @@ import { getHeaders, getZipSignature } from './request';
       <smileid-combobox-trigger
         ${isSingleCountry ? 'disabled' : ''}
         ${isSingleCountry ? `value="${countries[0].name}"` : ''}
-        label="Search Country">
+        label="${t('pages.idSelection.searchCountry')}">
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="No country found">
+      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noCountryFound')}">
         ${countries
           .map(
             (country) =>
@@ -172,12 +220,12 @@ import { getHeaders, getZipSignature } from './request';
       <smileid-combobox-trigger
         ${isSingleIdType ? 'disabled' : ''}
         ${isSingleIdType ? `value="${idTypes[0].name}"` : ''}
-        label="Select Document"
+        label="${t('pages.idSelection.selectDocument')}"
         type="button"
       >
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="No country found">
+      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noIdTypeFound')}">
         ${idTypes
           .map(
             (idType) =>
@@ -308,7 +356,9 @@ import { getHeaders, getZipSignature } from './request';
         const isCountrySupported = supportedCountries.includes(countryCode);
 
         if (!isCountrySupported) {
-          throw new Error(`SmileIdentity - ${countryCode} is not supported`);
+          throw new Error(
+            `SmileIdentity - ${t('pages.error.countryNotSupported', { country: countryCode })}`,
+          );
         }
 
         const countryIndex = constraints.findIndex(
@@ -570,7 +620,7 @@ import { getHeaders, getZipSignature } from './request';
       event.target.disabled = false;
     } catch (error) {
       event.target.disabled = false;
-      displayErrorMessage('Something went wrong');
+      displayErrorMessage(t('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );

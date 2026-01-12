@@ -1,3 +1,5 @@
+import { t } from '../../../domain/localisation';
+
 function generateId(prefix) {
   const id = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
   return `${prefix}-${id}`;
@@ -111,7 +113,7 @@ class ComboboxTrigger extends HTMLElement {
             this.disabled ? ' disabled ' : ''
           }type="text" placeholder="${this.label}" />
           <button ${this.disabled ? 'disabled ' : ''}tabindex='-1' type='button'>
-            <span class="visually-hidden">Toggle</span>
+            <span class="visually-hidden">${t('common.toggle')}</span>
           </button>
         </div>
       `
@@ -336,7 +338,7 @@ class ComboboxListbox extends HTMLElement {
   get emptyState() {
     return `
       <p id='empty-state' style="text-align: center;">
-        ${this.emptyLabel || 'No items'}
+        ${this.emptyLabel || t('combobox.noItems')}
       </p>
     `;
   }

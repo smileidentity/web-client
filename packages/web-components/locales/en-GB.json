@@ -1,0 +1,291 @@
+{
+  "direction": "ltr",
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "closeVerificationFrame": "Close Smile ID Verification",
+    "allow": "Allow",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "or": "or",
+    "toggle": "Toggle"
+  },
+  "combobox": {
+    "noItems": "No items"
+  },
+  "navigation": {
+    "back": "Back",
+    "closeVerificationFrame": "Close Smile ID Verification"
+  },
+  "camera": {
+    "permission": {
+      "description": "Allow camera access to verify your details",
+      "requestButton": "Request Camera Access"
+    },
+    "error": {
+      "notAllowed": "Camera access not granted or blocked by a browser/extensions.  Enable access in your browser/extension to continue. You may need to refresh.",
+      "abort": "Something happened, and we lost access to your camera. Please refresh.",
+      "notReadable": "There seems to be a problem with your camera connection. Please check and try again or try using device.",
+      "notFound": "We are unable to find your camera. Please refresh.",
+      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner."
+    }
+  },
+  "selfie": {
+    "instructions": {
+      "title": "Next, we'll take a quick selfie",
+      "allowButton": "Allow",
+      "tips": {
+        "goodLight": {
+          "header": "Good Light",
+          "body": "Make sure you are in a well-lit environment."
+        },
+        "clearImage": {
+          "header": "Clear Image",
+          "body": "Hold your device steady so the selfie is clear and sharp."
+        },
+        "removeObstructions": {
+          "header": "Remove Obstructions",
+          "body": "Remove anything that covers your face, such as glasses, masks, and hats."
+        },
+        "wideSmile": {
+          "header": "Wide Smile",
+          "body": "When asked to smile, give a wide smile, showing your teeth."
+        }
+      }
+    },
+    "capture": {
+      "tip": {
+        "fitHead": "Fit your head inside the oval frame"
+      },
+      "cta": {
+        "smile": "SMILE",
+        "widerSmile": "WIDER SMILE"
+      },
+      "button": {
+        "takeSelfie": "Capture Selfie",
+        "startCapture": "Start Capture"
+      },
+      "agentMode": {
+        "on": "Agent Mode On",
+        "off": "Agent Mode Off"
+      },
+      "error": {
+        "minFrames": "SmartCameraWeb: The minimum no of frames required is {{count}}",
+        "webcamCapture": "Unable to capture webcam images - Please try another device"
+      }
+    },
+    "smart": {
+      "alert": {
+        "multipleFaces": "Ensure only one face is visible",
+        "noFace": "Position your face in the oval",
+        "outOfBounds": "Position your face in the oval",
+        "tooClose": "Move farther away",
+        "tooFar": "Move closer",
+        "neutralExpression": "Neutral expression",
+        "smileRequired": "Smile!",
+        "openMouthSmile": "Wider smile - teeth visible",
+        "initializing": "Initialising..."
+      },
+      "status": {
+        "capturing": "Capturing...",
+        "keepSmiling": "Keep smiling!",
+        "readyToCapture": "Ready to capture"
+      }
+    },
+    "review": {
+      "title": "Review Selfie",
+      "question": "Is your whole face clear?",
+      "acceptButton": "Yes, use this",
+      "retakeButton": "No, Retake Selfie"
+    }
+  },
+  "document": {
+    "name": {
+      "default": "Document"
+    },
+    "title": {
+      "front": "Submit Front of ID",
+      "back": "Submit Back of ID"
+    },
+    "capture": {
+      "checkingPermissions": "Checking permissions...",
+      "instructionText": "Make sure all corners are visible and there is no glare.",
+      "captureButton": "Capture Document"
+    },
+    "instructions": {
+      "description": "We'll use it to verify your identity.",
+      "followInstructions": "Please follow the instructions below.",
+      "goodLight": {
+        "header": "Good Light",
+        "body": "Make sure the image is taken in a well-lit environment where the ID document is easy to read."
+      },
+      "clearImage": {
+        "header": "Clear Image",
+        "body": "Hold your device steady so the information on the ID are not blurry."
+      },
+      "takePhotoButton": "Take Photo",
+      "uploadPhotoButton": "Upload Photo"
+    },
+    "review": {
+      "question": "Is the document clear and readable?",
+      "description": "Make sure all corners of the document are visible and there is no glare",
+      "acceptButton": "Yes, my ID is readable",
+      "retakeButton": "No, retake photo"
+    }
+  },
+  "fileUpload": {
+    "error": {
+      "readingFile": "An error occurred reading the file. Please check the file, and try again",
+      "multipleFiles": "Only one file upload is permitted at a time",
+      "unsupportedFormat": "Unsupported file format. Please ensure that you are providing a JPG or PNG image",
+      "fileTooLarge": "{{filename}} is too large. Please ensure that the file is less than {{size}}."
+    }
+  },
+  "consent": {
+    "demoTip": "This consent screen is for illustrative purposes only. Demo App does not collect personal ID data.",
+    "accessRequest": "{{partnerName}} wants to access your {{idTypeLabel}} information",
+    "allowPartner": "This will allow {{partnerName}} to:",
+    "processing": {
+      "personalDetails": {
+        "title": "Process your personal information",
+        "description": "Partner can process your names, DoB and gender"
+      },
+      "contactInfo": {
+        "title": "Process your contact information",
+        "description": "Partner can process your phone numbers and address"
+      },
+      "documentInfo": {
+        "title": "Process your document information",
+        "description": "Partner can process your photo, ID expiration date, country of issuance and document number"
+      }
+    },
+    "privacyPolicy": "You can view {{partnerName}}'s privacy policy",
+    "privacyPolicyLink": "here.",
+    "grantConsent": "By choosing \"Allow\", you grant {{partnerName}} consent to process your personal data to offer you this service",
+    "denied": {
+      "title": "Consent Denied",
+      "message": "We cannot verify you without your consent",
+      "prompt": "Wish to correct that?",
+      "goBack": "Go Back",
+      "confirmCancel": "No, Cancel Verification"
+    }
+  },
+  "pages": {
+    "loading": {
+      "title": "Setting up",
+      "subtitle": "Just a few more seconds",
+      "description": "We are setting up your verification flow"
+    },
+    "idSelection": {
+      "title": "Select ID Type",
+      "selectCountry": "Select Country",
+      "selectIdType": "Select ID Type",
+      "selectDocument": "Select Document",
+      "searchCountry": "Search Country",
+      "placeholder": "--Please Select--",
+      "selectCountryFirst": "--Select Country First--",
+      "noCountryFound": "No country found",
+      "noIdTypeFound": "No ID type found"
+    },
+    "upload": {
+      "title": "Uploading",
+      "subtitle": "Just a few more seconds",
+      "description": "We are processing your request"
+    },
+    "complete": {
+      "title": "Submission Complete",
+      "subtitle": "That's all you need to verify your identity",
+      "processingInfo": "We will process your {{country}} - {{idType}} information to verify your identity"
+    },
+    "smartSelfie": {
+      "authentication": {
+        "title": "SmartSelfie™ Authentication",
+        "upload": "Authenticating User"
+      },
+      "registration": {
+        "title": "SmartSelfie™ Registration",
+        "upload": "Registering User"
+      }
+    },
+    "eSignature": {
+      "fullName": "Full Name",
+      "loading": {
+        "description": "We are setting up"
+      },
+      "upload": {
+        "description": "We are processing your request"
+      },
+      "entry": {
+        "title": "Provide Signature",
+        "subtitle": "Read and accept the agreements you would see in the next page"
+      },
+      "tips": {
+        "read": {
+          "title": "Read document",
+          "description": "Read the document(s) provided carefully"
+        },
+        "name": {
+          "title": "Add your full names",
+          "description": "Type your full names once you agree with the document(s) shared with you"
+        },
+        "signature": {
+          "title": "Append your signature",
+          "description": "Sign or upload your signature to certify the documents"
+        }
+      },
+      "getStarted": "Get started",
+      "review": {
+        "title": "Review documents",
+        "subtitle": "Before accepting, carefully read through the document(s)",
+        "consent": "By ticking this checkbox, you agree to the conditions in the document(s)"
+      },
+      "personalInfo": {
+        "title": "Add your full names",
+        "subtitle": "Kindly add your full names to verify that you read the document(s) provided earlier.",
+        "placeholder": "James Doe"
+      },
+      "signature": {
+        "title": "Add your signature",
+        "subtitle": "Sign or upload your signature below"
+      },
+      "confirmDetails": {
+        "title": "Confirm details",
+        "subtitle": "Make sure your name is correctly spelled, and the signature matches the one on your ID",
+        "yes": "Yes, it's correct",
+        "no": "No, change them"
+      },
+      "error": {
+        "uploadFailed": "We could not upload your signature"
+      }
+    },
+    "idInfo": {
+      "title": "Enter ID Information",
+      "idNumber": "ID Number",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dateOfBirth": "Date of Birth",
+      "day": "Day",
+      "month": "Month",
+      "year": "Year",
+      "bank": "Bank",
+      "selectBank": "--Select Bank--",
+      "searchBank": "Search Bank",
+      "noBankFound": "No bank found",
+      "citizenship": "Citizenship",
+      "selectCitizenship": "Select Citizenship Type",
+      "dob": "Date of Birth"
+    },
+    "error": {
+      "title": "An error occurred",
+      "generic": "Something went wrong",
+      "uploadFailed": "We could not upload your information",
+      "checkInternet": "Please check that you have a stable internet connection. Then try again!",
+      "tryAgain": "Try again",
+      "countryNotSupported": "{{country}} is not supported"
+    },
+    "validation": {
+      "isRequired": "{{field}} is required",
+      "invalidFormat": "{{field}} is invalid"
+    }
+  }
+}

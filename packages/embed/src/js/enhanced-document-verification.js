@@ -1,8 +1,32 @@
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
+import {
+  setCurrentLocale,
+  translate,
+  getDirection,
+} from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+
+/**
+ * Apply translations to all elements with data-i18n attribute
+ */
+function applyPageTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    const key = element.getAttribute('data-i18n');
+    if (key) {
+      try {
+        const translation = translate(key);
+        if (translation) {
+          element.textContent = translation;
+        }
+      } catch (error) {
+        console.error(`Translation failed for key: ${key}`, error);
+      }
+    }
+  });
+}
 
 (function enhancedDocumentVerification() {
   'use strict';
@@ -65,6 +89,12 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        await setCurrentLocale(config.translation?.language || 'en', {
+          locales: config.translation?.locales,
+        });
+        document.documentElement.dir = getDirection();
+        applyPageTranslations();
+        document.querySelector('main').hidden = false;
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -186,7 +216,9 @@ import { getHeaders, getZipSignature } from './request';
           selectIDType.innerHTML = '';
           const initialOption = document.createElement('option');
           initialOption.setAttribute('value', '');
-          initialOption.textContent = '--Please Select--';
+          initialOption.textContent = translate(
+            'pages.idSelection.placeholder',
+          );
           selectIDType.appendChild(initialOption);
 
           // ACTION: Load ID Types as <option>s
@@ -208,7 +240,9 @@ import { getHeaders, getZipSignature } from './request';
           const option = document.createElement('option');
           option.disabled = true;
           option.setAttribute('value', '');
-          option.textContent = '--Select Country First--';
+          option.textContent = translate(
+            'pages.idSelection.selectCountryFirst',
+          );
           selectIDType.appendChild(option);
         }
       };
@@ -379,7 +413,7 @@ import { getHeaders, getZipSignature } from './request';
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage('Something went wrong');
+      displayErrorMessage(translate('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );

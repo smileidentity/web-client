@@ -1,6 +1,7 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
+import { t, escapeHtml, getDirection } from '../../../../domain/localisation';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -191,7 +192,7 @@ function templateString() {
       margin-top: 1rem;
     }
   </style>
-    <div id="document-capture-instructions-screen" class="flow center">
+    <div id="document-capture-instructions-screen" class="flow center" dir="${this.direction}">
         <div class="content-root">
             <div class="content-header">
         <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
@@ -199,12 +200,12 @@ function templateString() {
         <div class="content-body">
         <header>
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
-            <h1 class='title-color font-bold'>${this.title}</h1>
+            <h1 class='title-color font-bold'>${escapeHtml(this.title)}</h1>
         <p class="description text-sm font-normal">
-            We'll use it to verify your identity.
+            ${t('document.instructions.description')}
           </p>
           <p class="description padding-bottom-2">
-          Please follow the instructions below.
+          ${t('document.instructions.followInstructions')}
           </p>
         </header>
         <div class="instructions-wrapper">
@@ -284,9 +285,9 @@ function templateString() {
                 </defs>
                 </svg>
                 <div class="instruction">
-                <p class="instruction-header font-bold text-base">Good Light</p>
+                <p class="instruction-header font-bold text-base">${t('document.instructions.goodLight.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  Make sure the image is taken in a well-lit environment where the ID document is easy to read.
+                  ${t('document.instructions.goodLight.body')}
                 </p>
             </div>
         </div>
@@ -372,9 +373,9 @@ function templateString() {
             </defs>
             </svg>
             <div>
-                <p class="instruction-header font-bold text-base">Clear Image</p>
+                <p class="instruction-header font-bold text-base">${t('document.instructions.clearImage.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  Hold your camera steady so the words on the ID are not blurry.
+                  ${t('document.instructions.clearImage.body')}
                 </p>
             </div>
         </div>
@@ -386,7 +387,7 @@ function templateString() {
       this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
         ? `
     <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
-        Take Photo
+        ${t('document.instructions.takePhotoButton')}
     </button>
     `
         : ''
@@ -398,7 +399,7 @@ function templateString() {
       this.supportBothCaptureModes ? 'outline' : 'solid'
     }' class='button'>
         <input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
-        <span>Upload Photo</span>
+        <span>${t('document.instructions.uploadPhotoButton')}</span>
     </label>
     `
         : ''
@@ -506,7 +507,7 @@ class DocumentInstruction extends HTMLElement {
   }
 
   get title() {
-    return this.getAttribute('title') || 'Submit Front of ID';
+    return this.getAttribute('title') || t('document.title.front');
   }
 
   get sideOfId() {
@@ -519,6 +520,10 @@ class DocumentInstruction extends HTMLElement {
 
   get isBackOfId() {
     return !this.isFrontOfId;
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   handleBackEvents() {

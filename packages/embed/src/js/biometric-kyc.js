@@ -2,6 +2,12 @@ import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
+import {
+  setCurrentLocale,
+  translate,
+  translateHtml,
+  getDirection,
+} from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
@@ -119,6 +125,19 @@ import { getHeaders, getZipSignature } from './request';
     }
   }
 
+  function applyPageTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (key) {
+        try {
+          el.textContent = translate(key);
+        } catch (e) {
+          console.error(`Translation failed for key: ${key}`, e);
+        }
+      }
+    });
+  }
+
   window.addEventListener(
     'message',
     async (event) => {
@@ -128,6 +147,12 @@ import { getHeaders, getZipSignature } from './request';
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        await setCurrentLocale(config.translation?.language || 'en', {
+          locales: config.translation?.locales,
+        });
+        document.documentElement.dir = getDirection();
+        applyPageTranslations();
+        document.querySelector('main').hidden = false;
 
         LoadingScreen.querySelector('.credits').hidden =
           config.hide_attribution;
@@ -280,7 +305,9 @@ import { getHeaders, getZipSignature } from './request';
           selectIDType.innerHTML = '';
           const initialOption = document.createElement('option');
           initialOption.setAttribute('value', '');
-          initialOption.textContent = '--Please Select--';
+          initialOption.textContent = translate(
+            'pages.idSelection.placeholder',
+          );
           selectIDType.appendChild(initialOption);
 
           // ACTION: Load ID Types as <option>s
@@ -302,7 +329,9 @@ import { getHeaders, getZipSignature } from './request';
           const option = document.createElement('option');
           option.disabled = true;
           option.setAttribute('value', '');
-          option.textContent = '--Select Country First--';
+          option.textContent = translate(
+            'pages.idSelection.selectCountryFirst',
+          );
           selectIDType.appendChild(option);
         }
       };
@@ -658,6 +687,30 @@ import { getHeaders, getZipSignature } from './request';
     validationMessages.forEach((el) => el.remove());
   }
 
+  // Map field names to their translation keys
+  const fieldTranslationKeys = {
+    id_number: 'pages.idInfo.idNumber',
+    first_name: 'pages.idInfo.firstName',
+    last_name: 'pages.idInfo.lastName',
+    day: 'pages.idInfo.day',
+    month: 'pages.idInfo.month',
+    year: 'pages.idInfo.year',
+  };
+
+  function getTranslatedValidationMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+  }
+
+  function getTranslatedFormatMessage(field) {
+    const fieldKey = fieldTranslationKeys[field];
+    const fieldLabel = fieldKey ? translate(fieldKey) : field;
+    return translateHtml('pages.validation.invalidFormat', {
+      field: fieldLabel,
+    });
+  }
+
   function validateInputs(payload) {
     const validationConstraints = {};
 
@@ -673,13 +726,16 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.id_number = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('id_number')}`,
         },
-        format: new RegExp(
-          productConstraints[id_info.country].id_types[
-            id_info.id_type
-          ].id_number_regex,
-        ),
+        format: {
+          pattern: new RegExp(
+            productConstraints[id_info.country].id_types[
+              id_info.id_type
+            ].id_number_regex,
+          ),
+          message: `^${getTranslatedFormatMessage('id_number')}`,
+        },
       };
     }
 
@@ -691,13 +747,13 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.first_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('first_name')}`,
         },
       };
       validationConstraints.last_name = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('last_name')}`,
         },
       };
     }
@@ -710,19 +766,19 @@ import { getHeaders, getZipSignature } from './request';
       validationConstraints.day = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('day')}`,
         },
       };
       validationConstraints.month = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('month')}`,
         },
       };
       validationConstraints.year = {
         presence: {
           allowEmpty: false,
-          message: 'is required',
+          message: `^${getTranslatedValidationMessage('year')}`,
         },
       };
     }
@@ -790,7 +846,7 @@ import { getHeaders, getZipSignature } from './request';
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage('Something went wrong');
+      displayErrorMessage(translate('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -900,7 +956,10 @@ import { getHeaders, getZipSignature } from './request';
 
         const thankYouMessage =
           CompleteScreen.querySelector('#thank-you-message');
-        thankYouMessage.textContent = `We will process your ${countryName} - ${idTypeName} information to verify your identity`;
+        thankYouMessage.innerHTML = translateHtml(
+          'pages.complete.processingInfo',
+          { country: countryName, idType: idTypeName },
+        );
 
         setActiveScreen(CompleteScreen);
         handleSuccess();

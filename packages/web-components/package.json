@@ -41,12 +41,17 @@
     "./smart-camera-web": {
       "types": "./dist/types/smart-camera-web.d.ts",
       "import": "./dist/esm/smart-camera-web.js"
+    },
+    "./localisation": {
+      "types": "./dist/types/localisation.d.ts",
+      "import": "./dist/esm/localisation.js"
     }
   },
   "files": [
     "./lib/components/",
     "./lib/domain/",
     "./lib/styles/",
+    "./lib/i18n/",
     "./dist/",
     "./README.md",
     "package.json"
@@ -77,7 +82,7 @@
     "@preact/signals": "^2.1.1",
     "@tabler/icons-preact": "^3.34.0",
     "lodash": "^4.17.21",
-    "preact": "^10.26.9",
+    "preact": "^10.27.3",
     "preact-custom-element": "^4.3.0",
     "preact-router": "^4.1.2",
     "signature_pad": "^5.0.2",
@@ -100,12 +105,15 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-prettier": "^5.2.1",
-    "glob": "^10.3.10",
+    "glob": "^10.5.0",
     "prettier": "^3.6.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.8.3",
     "vite": "^7.2.2",
     "vite-plugin-dts": "^4.5.4",
     "vite-plugin-tsconfig-paths": "^1.4.1"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.53.5"
   }
 }

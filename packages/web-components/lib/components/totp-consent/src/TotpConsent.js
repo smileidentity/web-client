@@ -1,4 +1,5 @@
 import validate from 'validate.js';
+import { getDirection } from '../../../domain/localisation';
 
 function postData(url, data) {
   return fetch(url, {
@@ -284,7 +285,7 @@ function markup() {
             }
         </style>
 
-        <div class='flow center' id='id-entry'>
+        <div class='flow center' id='id-entry' dir='${this.direction}'>
             <div class="nav">
                 <div class="back-wrapper">
                     <button type='button' data-type='icon' id="back-button" class="back-button">
@@ -331,7 +332,7 @@ function markup() {
             </form>
         </div>
 
-        <div hidden class='flow center' id='select-mode'>
+        <div hidden class='flow center' id='select-mode' dir='${this.direction}'>
             <div class="nav">
                 <div class="back-wrapper">
                     <button type='button' data-type='icon' id="back-to-entry-button" class="back-button">
@@ -459,7 +460,7 @@ function markup() {
             </form>
         </div>
 
-        <div hidden class='flow center' id='otp-verification'>
+        <div hidden class='flow center' id='otp-verification' dir='${this.direction}'>
             <div class="nav justify-right">
                 <button data-type='icon' type='button' class='close-iframe'>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -897,6 +898,10 @@ class TotpConsent extends HTMLElement {
 
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 
   get hideBack() {

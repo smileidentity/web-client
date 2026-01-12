@@ -7,3 +7,4 @@ export { default as SelfieCaptureScreens } from './components/selfie/src/index';
 export { default as SignaturePad } from './components/signature-pad/src/index';
 export * from './components/totp-consent/src/index';
 export { default as SmartCameraWeb } from './components/smart-camera-web/src/SmartCameraWeb';
+export * from './domain/localisation';

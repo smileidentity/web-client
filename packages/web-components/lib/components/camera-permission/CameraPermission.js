@@ -2,6 +2,7 @@ import SmartCamera from '../../domain/camera/src/SmartCamera';
 import styles from '../../styles/src/styles';
 import '../attribution/PoweredBySmileId';
 import '../navigation/src';
+import { t, getDirection } from '../../domain/localisation';
 
 function templateString() {
   return `
@@ -30,7 +31,7 @@ function templateString() {
             text-align: center;
         }
     </style>
-    <div class='camera-permission-screen flow center'>
+    <div class='camera-permission-screen flow center' dir='${this.direction}'>
         <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
         <div class='flow center'>
           <p class='color-red | center' id='error'>
@@ -69,10 +70,10 @@ function templateString() {
                 </clipPath>
                 </defs>
             </svg>
-            <p class='text-2xl font-bold'>We need access to your camera so that we can capture your details.</p>
+            <p class='text-2xl font-bold'>${t('camera.permission.description')}</p>
             <div class='flow action-buttons'>
                 <button data-variant='solid full-width' class='button' type='button' id='request-camera-access'>
-                  Request Camera Access
+                  ${t('camera.permission.requestButton')}
                 </button>
                 ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
             </div>
@@ -129,6 +130,10 @@ class CameraPermission extends HTMLElement {
 
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
+  }
+
+  get direction() {
+    return this.getAttribute('dir') || getDirection() || 'ltr';
   }
 }
 

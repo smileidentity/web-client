@@ -1,4 +1,7 @@
-import { IMAGE_TYPE, JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
+import {
+  IMAGE_TYPE,
+  JPEG_QUALITY,
+} from '../../../../domain/constants/src/Constants';
 import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';

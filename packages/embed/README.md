@@ -116,15 +116,17 @@ window.SmileIdentity({
   token: 'your-token',
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
-  
+
   // Set language (supports 'en', 'fr', 'ar')
   translation: {
-    language: 'fr'
+    language: 'fr',
   },
-  
-  partner_details: { /* ... */ },
+
+  partner_details: {
+    /* ... */
+  },
   onSuccess: () => {},
-  onError: () => {}
+  onError: () => {},
 });
 ```
 

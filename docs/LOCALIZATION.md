@@ -4,26 +4,36 @@ This guide explains how to configure languages, customize UI strings, and add cu
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Available Languages](#available-languages)
-- [Using Locale with the Embed Script](#using-locale-with-the-embed-script)
-  - [Setting the Language](#setting-the-language)
-  - [Customizing Specific Strings](#customizing-specific-strings)
-  - [Complete Embed Example](#complete-embed-example)
-- [Using Locale with Web Components](#using-locale-with-web-components)
-  - [Basic Setup](#basic-setup)
-  - [Applying RTL Direction](#applying-rtl-direction)
-  - [Using Translations in Your Code](#using-translations-in-your-code)
-  - [Complete Web Components Example](#complete-web-components-example)
-- [Adding a Custom Language](#adding-a-custom-language)
-  - [Custom Language via Embed](#custom-language-via-embed)
-  - [Custom Language via Web Components](#custom-language-via-web-components)
-  - [Loading Translations from a URL](#loading-translations-from-a-url)
-  - [Required Translation Keys](#required-translation-keys)
-- [Translation Key Reference](#translation-key-reference)
-  - [Key Structure](#key-structure)
-  - [Commonly Customized Keys](#commonly-customized-keys)
-- [Troubleshooting](#troubleshooting)
+- [Localization Guide](#localization-guide)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+    - [Fallback Behavior](#fallback-behavior)
+  - [Available Languages](#available-languages)
+  - [Using Locale with the Embed Script](#using-locale-with-the-embed-script)
+    - [Setting the Language](#setting-the-language)
+    - [Customizing Specific Strings](#customizing-specific-strings)
+    - [Complete Embed Example](#complete-embed-example)
+  - [Using Locale with Web Components](#using-locale-with-web-components)
+    - [Basic Setup](#basic-setup)
+    - [Applying RTL Direction](#applying-rtl-direction)
+    - [Using Translations in Your Code](#using-translations-in-your-code)
+    - [Complete Web Components Example](#complete-web-components-example)
+  - [Adding a Custom Language](#adding-a-custom-language)
+    - [Custom Language via Embed](#custom-language-via-embed)
+    - [Custom Language via Web Components](#custom-language-via-web-components)
+  - [Translation Key Reference](#translation-key-reference)
+    - [Key Structure](#key-structure)
+    - [Commonly Customized Keys](#commonly-customized-keys)
+      - [Common/Navigation](#commonnavigation)
+      - [Selfie Capture](#selfie-capture)
+      - [Document Capture](#document-capture)
+      - [Camera Permission](#camera-permission)
+      - [Status Pages](#status-pages)
+  - [Troubleshooting](#troubleshooting)
+    - [Translations Not Appearing](#translations-not-appearing)
+    - [RTL Layout Not Working](#rtl-layout-not-working)
+    - [Console Warnings About Missing Keys](#console-warnings-about-missing-keys)
+  - [Additional Resources](#additional-resources)
 
 ---
 
@@ -51,11 +61,11 @@ This ensures the UI always displays something meaningful, even if a translation 
 
 The SDK includes these bundled languages:
 
-| Language | Code | Short Code | Direction |
-|----------|------|------------|-----------|
-| English (British) | `en-GB` | `en` | LTR |
-| French (France) | `fr-FR` | `fr` | LTR |
-| Arabic (Egyptian) | `ar-EG` | `ar` | RTL |
+| Language          | Code    | Short Code | Direction |
+| ----------------- | ------- | ---------- | --------- |
+| English (British) | `en-GB` | `en`       | LTR       |
+| French (France)   | `fr-FR` | `fr`       | LTR       |
+| Arabic (Egyptian) | `ar-EG` | `ar`       | RTL       |
 
 You can use either the full code (e.g., `en-GB`) or the short code (e.g., `en`).
 
@@ -74,18 +84,18 @@ window.SmileIdentity({
   token: 'your-token',
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
-  
+
   // Set language to French
   translation: {
-    language: 'fr'
+    language: 'fr',
   },
-  
+
   partner_details: {
     partner_id: 'your-partner-id',
     // ... other details
   },
   onSuccess: () => console.log('Success'),
-  onError: (error) => console.error(error)
+  onError: (error) => console.error(error),
 });
 ```
 
@@ -98,7 +108,7 @@ window.SmileIdentity({
   token: 'your-token',
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
-  
+
   translation: {
     language: 'en',
     locales: {
@@ -106,25 +116,27 @@ window.SmileIdentity({
         // Override common button labels
         common: {
           continue: 'Proceed to Next Step',
-          back: 'Go Back'
+          back: 'Go Back',
         },
         // Override selfie screen text
         selfie: {
           instructions: {
-            title: "Time for a quick selfie!"
+            title: 'Time for a quick selfie!',
           },
           review: {
             acceptButton: 'Looks good!',
-            retakeButton: 'Try again'
-          }
-        }
-      }
-    }
+            retakeButton: 'Try again',
+          },
+        },
+      },
+    },
   },
-  
-  partner_details: { /* ... */ },
+
+  partner_details: {
+    /* ... */
+  },
   onSuccess: () => {},
-  onError: () => {}
+  onError: () => {},
 });
 ```
 
@@ -141,7 +153,7 @@ window.SmileIdentity({
   product: 'biometric_kyc',
   callback_url: 'https://api.yourcompany.com/callback',
   environment: 'sandbox',
-  
+
   translation: {
     language: userLanguage,
     locales: {
@@ -149,30 +161,30 @@ window.SmileIdentity({
       en: {
         common: {
           continue: 'Next',
-          back: 'Previous'
+          back: 'Previous',
         },
         selfie: {
           instructions: {
-            title: 'Verify your identity with a selfie'
-          }
+            title: 'Verify your identity with a selfie',
+          },
         },
         document: {
           title: {
             front: 'Scan the front of your ID',
-            back: 'Scan the back of your ID'
-          }
-        }
+            back: 'Scan the back of your ID',
+          },
+        },
       },
       // French customizations
       fr: {
         common: {
           continue: 'Suivant',
-          back: 'Précédent'
-        }
-      }
-    }
+          back: 'Précédent',
+        },
+      },
+    },
   },
-  
+
   partner_details: {
     partner_id: 'your-partner-id',
     signature: 'your-signature',
@@ -180,9 +192,9 @@ window.SmileIdentity({
     name: 'Your Company',
     logo_url: 'https://yourcompany.com/logo.png',
     policy_url: 'https://yourcompany.com/privacy',
-    theme_color: '#007bff'
+    theme_color: '#007bff',
   },
-  
+
   onSuccess: (response) => {
     console.log('Verification successful', response);
   },
@@ -191,7 +203,7 @@ window.SmileIdentity({
   },
   onError: (error) => {
     console.error('Verification error', error);
-  }
+  },
 });
 ```
 
@@ -206,16 +218,15 @@ When using SmileID web components directly (e.g., `<selfie-capture-screens>`, `<
 Import and set the locale before rendering components:
 
 ```javascript
-import { 
-  setCurrentLocale, 
-  t, 
-  getDirection 
+import {
+  setCurrentLocale,
+  getDirection,
 } from '@smileid/web-components/localisation';
 
 // Set locale when your app initializes
 async function initializeSmileID() {
   await setCurrentLocale('fr');
-  
+
   // Now render your components
   renderVerificationUI();
 }
@@ -228,14 +239,17 @@ initializeSmileID();
 For right-to-left languages like Arabic, apply the text direction to your container:
 
 ```javascript
-import { setCurrentLocale, getDirection } from '@smileid/web-components/localisation';
+import {
+  setCurrentLocale,
+  getDirection,
+} from '@smileid/web-components/localisation';
 
 async function initializeWithRTL() {
   await setCurrentLocale('ar');
-  
+
   // Apply direction to document or container
   document.documentElement.dir = getDirection(); // Returns 'rtl' for Arabic
-  
+
   // Or apply to a specific container
   const container = document.getElementById('smileid-container');
   container.dir = getDirection();
@@ -253,15 +267,15 @@ import { t, tHtml } from '@smileid/web-components/localisation';
 const backButtonText = t('common.back'); // "Back" (or translation)
 
 // Translation with interpolation
-const errorMessage = tHtml('pages.error.countryNotSupported', { 
-  country: 'Nigeria' 
+const errorMessage = tHtml('pages.error.countryNotSupported', {
+  country: 'Nigeria',
 }); // "Nigeria is not supported"
 
 // Translation with styled interpolation
 const consentMessage = tHtml('consent.accessRequest', {
   partnerName: { value: 'Acme Corp', className: 'highlight' },
-  idTypeLabel: 'BVN'
-}); 
+  idTypeLabel: 'BVN',
+});
 // Returns: "<span class="highlight">Acme Corp</span> wants to access your BVN information"
 ```
 
@@ -272,54 +286,53 @@ Here's a complete example using web components with locale configuration:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>SmileID Verification</title>
-  <script type="module">
-    import '@smileid/web-components';
-    import { 
-      setCurrentLocale, 
-      getDirection,
-      t 
-    } from '@smileid/web-components/localisation';
-    
-    async function initializeVerification() {
-      // Set locale with custom overrides
-      await setCurrentLocale('en', {
-        locales: {
-          en: {
-            selfie: {
-              instructions: {
-                title: 'Verify your identity'
-              }
-            }
-          }
-        }
-      });
-      
-      // Apply text direction
-      document.documentElement.dir = getDirection();
-      
-      // Get the selfie capture component
-      const selfieCapture = document.querySelector('selfie-capture-screens');
-      
-      // Listen for capture complete
-      selfieCapture.addEventListener('selfie-capture.publish', (event) => {
-        console.log('Selfie captured:', event.detail);
-      });
-    }
-    
-    document.addEventListener('DOMContentLoaded', initializeVerification);
-  </script>
-</head>
-<body>
-  <div id="verification-container">
-    <selfie-capture-screens
-      show-navigation="true"
-      hide-back-to-host="false"
-    ></selfie-capture-screens>
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SmileID Verification</title>
+    <script type="module">
+      import '@smileid/web-components';
+      import {
+        setCurrentLocale,
+        getDirection,
+      } from '@smileid/web-components/localisation';
+
+      async function initializeVerification() {
+        // Set locale with custom overrides
+        await setCurrentLocale('en', {
+          locales: {
+            en: {
+              selfie: {
+                instructions: {
+                  title: 'Verify your identity',
+                },
+              },
+            },
+          },
+        });
+
+        // Apply text direction
+        document.documentElement.dir = getDirection();
+
+        // Get the selfie capture component
+        const selfieCapture = document.querySelector('selfie-capture-screens');
+
+        // Listen for capture complete
+        selfieCapture.addEventListener('selfie-capture.publish', (event) => {
+          console.log('Selfie captured:', event.detail);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', initializeVerification);
+    </script>
+  </head>
+  <body>
+    <div id="verification-container">
+      <selfie-capture-screens
+        show-navigation="true"
+        hide-back-to-host="false"
+      ></selfie-capture-screens>
+    </div>
+  </body>
 </html>
 ```
 
@@ -338,7 +351,7 @@ window.SmileIdentity({
   token: 'your-token',
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
-  
+
   translation: {
     language: 'sw', // Use the new language
     locales: {
@@ -351,64 +364,67 @@ window.SmileIdentity({
           continue: 'Endelea',
           cancel: 'Ghairi',
           or: 'au',
-          allow: 'Ruhusu'
+          allow: 'Ruhusu',
         },
         camera: {
           permission: {
             description: 'Ruhusu ufikiaji wa kamera kuthibitisha maelezo yako',
-            requestButton: 'Omba Ufikiaji wa Kamera'
+            requestButton: 'Omba Ufikiaji wa Kamera',
           },
           error: {
-            notAllowed: 'Ufikiaji wa kamera haukuruhusiwa. Wezesha ufikiaji katika kivinjari chako kuendelea.',
-            notFound: 'Hatuwezi kupata kamera yako. Tafadhali onyesha upya.'
-          }
+            notAllowed:
+              'Ufikiaji wa kamera haukuruhusiwa. Wezesha ufikiaji katika kivinjari chako kuendelea.',
+            notFound: 'Hatuwezi kupata kamera yako. Tafadhali onyesha upya.',
+          },
         },
         selfie: {
           instructions: {
-            title: 'Ifuatayo, tutapiga picha ya haraka'
+            title: 'Ifuatayo, tutapiga picha ya haraka',
           },
           capture: {
             button: {
-              takeSelfie: 'Piga Picha'
-            }
+              takeSelfie: 'Piga Picha',
+            },
           },
           review: {
             title: 'Kagua Picha',
             question: 'Je, uso wako wote unaonekana wazi?',
             acceptButton: 'Ndiyo, tumia hii',
-            retakeButton: 'Hapana, piga tena'
-          }
+            retakeButton: 'Hapana, piga tena',
+          },
         },
         document: {
           title: {
             front: 'Wasilisha Mbele ya Kitambulisho',
-            back: 'Wasilisha Nyuma ya Kitambulisho'
+            back: 'Wasilisha Nyuma ya Kitambulisho',
           },
           capture: {
-            captureButton: 'Piga Hati'
+            captureButton: 'Piga Hati',
           },
           review: {
             acceptButton: 'Ndiyo, kitambulisho changu kinasomeka',
-            retakeButton: 'Hapana, piga tena'
-          }
+            retakeButton: 'Hapana, piga tena',
+          },
         },
         pages: {
           loading: {
             title: 'Inaandaa',
-            description: 'Tunaandaa mtiririko wako wa uthibitishaji'
+            description: 'Tunaandaa mtiririko wako wa uthibitishaji',
           },
           complete: {
-            title: 'Uwasilishaji Umekamilika'
-          }
-        }
-        // ... include all required keys (see Required Translation Keys section)
-      }
-    }
+            title: 'Uwasilishaji Umekamilika',
+          },
+        },
+        // ... add more translations as needed
+      },
+    },
   },
-  
-  partner_details: { /* ... */ },
+
+  partner_details: {
+    /* ... */
+  },
   onSuccess: () => {},
-  onError: () => {}
+  onError: () => {},
 });
 ```
 
@@ -417,9 +433,9 @@ window.SmileIdentity({
 Use `registerLocale()` for inline definitions:
 
 ```javascript
-import { 
-  registerLocale, 
-  setCurrentLocale 
+import {
+  registerLocale,
+  setCurrentLocale,
 } from '@smileid/web-components/localisation';
 
 // Register a new language
@@ -431,7 +447,7 @@ registerLocale('sw', {
     continue: 'Endelea',
     cancel: 'Ghairi',
     or: 'au',
-    allow: 'Ruhusu'
+    allow: 'Ruhusu',
   },
   // ... rest of translations
 });
@@ -440,68 +456,7 @@ registerLocale('sw', {
 await setCurrentLocale('sw');
 ```
 
-### Loading Translations from a URL
-
-For larger translation files, load them from an external URL:
-
-```javascript
-import { 
-  registerLocaleUrl, 
-  setCurrentLocale 
-} from '@smileid/web-components/localisation';
-
-// Load locale from your server
-await registerLocaleUrl('sw', 'https://yourcdn.com/locales/sw.json');
-
-// Set as current locale
-await setCurrentLocale('sw');
-```
-
-Or combine URL loading with `setCurrentLocale`:
-
-```javascript
-await setCurrentLocale('sw', {
-  url: 'https://yourcdn.com/locales/sw.json'
-});
-```
-
-### Required Translation Keys
-
-When adding a custom language, these keys **must** be included for the SDK to function properly:
-
-| Key | Description |
-|-----|-------------|
-| `direction` | Text direction: `"ltr"` or `"rtl"` |
-| `common.back` | Back button label |
-| `common.close` | Close button label |
-| `common.continue` | Continue/Next button label |
-| `common.cancel` | Cancel button label |
-| `camera.permission.description` | Camera permission request message |
-| `camera.permission.requestButton` | Camera permission button label |
-| `camera.error.notAllowed` | Camera access denied error message |
-| `selfie.instructions.title` | Selfie instructions screen title |
-| `selfie.capture.button.takeSelfie` | Selfie capture button label |
-| `selfie.review.title` | Selfie review screen title |
-| `selfie.review.acceptButton` | Accept selfie button label |
-| `selfie.review.retakeButton` | Retake selfie button label |
-| `document.capture.captureButton` | Document capture button label |
-| `document.review.acceptButton` | Accept document button label |
-| `document.review.retakeButton` | Retake document button label |
-
 > **Tip**: Use the [locale-template.json](./locale-template.json) file as a starting point for your custom language.
-
-### Validating Your Custom Locale
-
-Enable validation to check for missing required keys:
-
-```javascript
-import { setCurrentLocale } from '@smileid/web-components/localisation';
-
-await setCurrentLocale('sw', {
-  locales: { sw: mySwahiliTranslations },
-  validate: true // Logs warnings for missing keys
-});
-```
 
 ---
 
@@ -533,54 +488,54 @@ Here are the most frequently customized translation keys:
 
 #### Common/Navigation
 
-| Key | Default (English) | Description |
-|-----|-------------------|-------------|
-| `common.continue` | "Continue" | Primary action button |
-| `common.back` | "Back" | Back navigation button |
-| `common.cancel` | "Cancel" | Cancel action button |
-| `common.close` | "Close" | Close modal/screen button |
+| Key               | Default (English) | Description               |
+| ----------------- | ----------------- | ------------------------- |
+| `common.continue` | "Continue"        | Primary action button     |
+| `common.back`     | "Back"            | Back navigation button    |
+| `common.cancel`   | "Cancel"          | Cancel action button      |
+| `common.close`    | "Close"           | Close modal/screen button |
 
 #### Selfie Capture
 
-| Key | Default (English) | Description |
-|-----|-------------------|-------------|
-| `selfie.instructions.title` | "Next, we'll take a quick selfie" | Selfie instructions heading |
-| `selfie.capture.button.takeSelfie` | "Capture Selfie" | Capture button label |
-| `selfie.capture.tip.fitHead` | "Fit your head inside the oval frame" | Capture guidance text |
-| `selfie.review.title` | "Review Selfie" | Review screen heading |
-| `selfie.review.question` | "Is your whole face clear?" | Review prompt |
-| `selfie.review.acceptButton` | "Yes, use this" | Accept button |
-| `selfie.review.retakeButton` | "No, Retake Selfie" | Retake button |
+| Key                                | Default (English)                     | Description                 |
+| ---------------------------------- | ------------------------------------- | --------------------------- |
+| `selfie.instructions.title`        | "Next, we'll take a quick selfie"     | Selfie instructions heading |
+| `selfie.capture.button.takeSelfie` | "Capture Selfie"                      | Capture button label        |
+| `selfie.capture.tip.fitHead`       | "Fit your head inside the oval frame" | Capture guidance text       |
+| `selfie.review.title`              | "Review Selfie"                       | Review screen heading       |
+| `selfie.review.question`           | "Is your whole face clear?"           | Review prompt               |
+| `selfie.review.acceptButton`       | "Yes, use this"                       | Accept button               |
+| `selfie.review.retakeButton`       | "No, Retake Selfie"                   | Retake button               |
 
 #### Document Capture
 
-| Key | Default (English) | Description |
-|-----|-------------------|-------------|
-| `document.title.front` | "Submit Front of ID" | Front capture heading |
-| `document.title.back` | "Submit Back of ID" | Back capture heading |
-| `document.capture.captureButton` | "Capture Document" | Capture button |
-| `document.capture.instructionText` | "Make sure all corners are visible..." | Capture guidance |
-| `document.review.acceptButton` | "Yes, my ID is readable" | Accept button |
-| `document.review.retakeButton` | "No, retake photo" | Retake button |
+| Key                                | Default (English)                      | Description           |
+| ---------------------------------- | -------------------------------------- | --------------------- |
+| `document.title.front`             | "Submit Front of ID"                   | Front capture heading |
+| `document.title.back`              | "Submit Back of ID"                    | Back capture heading  |
+| `document.capture.captureButton`   | "Capture Document"                     | Capture button        |
+| `document.capture.instructionText` | "Make sure all corners are visible..." | Capture guidance      |
+| `document.review.acceptButton`     | "Yes, my ID is readable"               | Accept button         |
+| `document.review.retakeButton`     | "No, retake photo"                     | Retake button         |
 
 #### Camera Permission
 
-| Key | Default (English) | Description |
-|-----|-------------------|-------------|
-| `camera.permission.description` | "Allow camera access to verify your details" | Permission request message |
-| `camera.permission.requestButton` | "Request Camera Access" | Permission button |
-| `camera.error.notAllowed` | "Camera access not granted..." | Access denied error |
-| `camera.error.notFound` | "We are unable to find your camera..." | No camera error |
+| Key                               | Default (English)                            | Description                |
+| --------------------------------- | -------------------------------------------- | -------------------------- |
+| `camera.permission.description`   | "Allow camera access to verify your details" | Permission request message |
+| `camera.permission.requestButton` | "Request Camera Access"                      | Permission button          |
+| `camera.error.notAllowed`         | "Camera access not granted..."               | Access denied error        |
+| `camera.error.notFound`           | "We are unable to find your camera..."       | No camera error            |
 
 #### Status Pages
 
-| Key | Default (English) | Description |
-|-----|-------------------|-------------|
-| `pages.loading.title` | "Setting up" | Loading screen title |
-| `pages.loading.description` | "We are setting up your verification flow" | Loading message |
-| `pages.complete.title` | "Submission Complete" | Success screen title |
-| `pages.error.title` | "An error occurred" | Error screen title |
-| `pages.error.tryAgain` | "Try again" | Retry button |
+| Key                         | Default (English)                          | Description          |
+| --------------------------- | ------------------------------------------ | -------------------- |
+| `pages.loading.title`       | "Setting up"                               | Loading screen title |
+| `pages.loading.description` | "We are setting up your verification flow" | Loading message      |
+| `pages.complete.title`      | "Submission Complete"                      | Success screen title |
+| `pages.error.title`         | "An error occurred"                        | Error screen title   |
+| `pages.error.tryAgain`      | "Try again"                                | Retry button         |
 
 ---
 
@@ -591,6 +546,7 @@ Here are the most frequently customized translation keys:
 **Issue**: Custom translations aren't showing up in the UI.
 
 **Solutions**:
+
 1. Ensure you're using the correct key structure (dot notation)
 2. Check that the locale is set before components render
 3. Verify the `language` value matches the key in `locales`
@@ -614,6 +570,7 @@ translation: {
 **Issue**: Arabic text displays left-to-right.
 
 **Solutions**:
+
 1. Ensure your locale includes `"direction": "rtl"`
 2. For web components, manually apply direction:
 
@@ -626,35 +583,13 @@ document.documentElement.dir = getDirection();
 **Issue**: Console shows "Translation key 'x' not found in any locale".
 
 **Solutions**:
+
 1. The key may be misspelled - check the [Translation Key Reference](#translation-key-reference)
 2. For custom languages, ensure all required keys are included
 3. Use `validate: true` to identify missing keys:
 
 ```javascript
 await setCurrentLocale('sw', { validate: true });
-```
-
-### Locale Not Loading from URL
-
-**Issue**: External locale JSON fails to load.
-
-**Solutions**:
-1. Check the URL is accessible (CORS enabled)
-2. Verify the JSON is valid
-3. The SDK has a 5-second timeout - ensure your server responds quickly
-4. Check browser console for network errors
-
-```javascript
-// Add error handling
-try {
-  await setCurrentLocale('sw', {
-    url: 'https://yourcdn.com/locales/sw.json'
-  });
-} catch (error) {
-  console.error('Failed to load locale:', error);
-  // Fall back to default language
-  await setCurrentLocale('en');
-}
 ```
 
 ---

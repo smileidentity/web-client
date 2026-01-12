@@ -13,7 +13,10 @@ The web components support multiple languages and string customization through t
 ### Quick Start
 
 ```javascript
-import { setCurrentLocale, getDirection } from '@smileid/web-components/localisation';
+import {
+  setCurrentLocale,
+  getDirection,
+} from '@smileid/web-components/localisation';
 
 // Set language (supports 'en', 'fr', 'ar')
 await setCurrentLocale('fr');
@@ -32,11 +35,11 @@ await setCurrentLocale('en', {
     en: {
       selfie: {
         instructions: {
-          title: 'Verify your identity with a selfie'
-        }
-      }
-    }
-  }
+          title: 'Verify your identity with a selfie',
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -45,7 +48,10 @@ await setCurrentLocale('en', {
 Register a new language:
 
 ```javascript
-import { registerLocale, setCurrentLocale } from '@smileid/web-components/localisation';
+import {
+  registerLocale,
+  setCurrentLocale,
+} from '@smileid/web-components/localisation';
 
 registerLocale('sw', {
   direction: 'ltr',
@@ -53,18 +59,9 @@ registerLocale('sw', {
     back: 'Rudi',
     continue: 'Endelea',
     // ... all required keys
-  }
+  },
 });
 
-await setCurrentLocale('sw');
-```
-
-Or load from a URL:
-
-```javascript
-import { registerLocaleUrl, setCurrentLocale } from '@smileid/web-components/localisation';
-
-await registerLocaleUrl('sw', 'https://yourcdn.com/locales/sw.json');
 await setCurrentLocale('sw');
 ```
 

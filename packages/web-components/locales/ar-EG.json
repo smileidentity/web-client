@@ -33,6 +33,7 @@
   "selfie": {
     "instructions": {
       "title": "بعد ذلك، سنأخذ صورة سيلفي سريعة",
+      "allowButton": "اسمح",
       "tips": {
         "goodLight": {
           "header": "إضاءة جيدة",

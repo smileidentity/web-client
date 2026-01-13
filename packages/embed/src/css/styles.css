@@ -4,10 +4,12 @@
   --color-default: #001096;
   --color-disabled: #848282;
   --spinner-offset: -50%;
+  --dropdown-icon-position: right;
 }
 
 [dir='rtl'] {
   --spinner-offset: 50%;
+  --dropdown-icon-position: left;
 }
 
 *,
@@ -501,7 +503,7 @@ smileid-combobox-trigger button {
   text-align: initial;
   background-repeat: no-repeat, repeat;
   background-position:
-    right 1rem top 50%,
+    var(--dropdown-icon-position) 1rem top 50%,
     0 0;
   background-size:
     24px auto,

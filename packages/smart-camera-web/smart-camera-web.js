@@ -6,7 +6,7 @@ const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
 /**
  * JPEG compression quality for captured images (selfies, liveness frames, ID documents).
  *
- * Value: 0.95 (95% quality)
+ * Value: 0.92 (92% quality)
  *
  * This value is optimized for identity verification and biometric matching:
  * - Preserves fine facial details needed for accurate facial recognition
@@ -15,20 +15,20 @@ const PORTRAIT_ID_PREVIEW_HEIGHT = 527;
  * - Provides minimal compression artifacts that could affect liveness detection
  *
  * Quality comparison:
- * - 1.0:  No compression, very large files (diminishing returns)
- * - 0.95: Virtually lossless to human eye, ideal for biometrics ✓
- * - 0.92: Browser default, acceptable but why leave it to chance
+ * - 1.0:  No compression, very large files
+ * - 0.95: Virtually lossless, larger files
+ * - 0.92: Good quality, reasonable file size
  * - 0.85: Visible artifacts in gradients and skin tones
  * - 0.80: Noticeable blocking artifacts that hurt matching accuracy
  *
- * ⚠️  WARNING: DO NOT LOWER THIS VALUE
+ * WARNING: DO NOT LOWER THIS VALUE BELOW 0.92
  * Reducing JPEG quality can negatively impact downstream systems:
  * - Facial recognition matching accuracy may decrease
  * - Liveness detection anti-spoofing checks may fail
  * - ID document OCR text extraction may produce errors
  * - Overall verification success rates may drop
  */
-const JPEG_QUALITY = 0.95;
+const JPEG_QUALITY = 0.92;
 
 function isSamsungMultiCameraDevice() {
   const matchedModelNumber = navigator.userAgent.match(/SM-[N|G]\d{3}/);

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added language translation support for web components with locale customization
+
 ## [11.0.3] - 2025-11-24
 
 ### Changed

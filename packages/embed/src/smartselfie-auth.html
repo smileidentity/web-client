@@ -46,7 +46,8 @@
           beforeSend(event) {
             // Check if the error originates from the library's source files
             /// https://sentry.zendesk.com/hc/en-us/articles/24076831568027--JS-Filter-events-based-on-their-entire-stack-trace
-            const traces = event.exception.values?.[0]?.stacktrace?.frames || [];
+            const traces =
+              event.exception.values?.[0]?.stacktrace?.frames || [];
             for (let i in traces) {
               if (
                 !event.exception.values[0].stacktrace.frames[i].filename.match(

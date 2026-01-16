@@ -13,8 +13,13 @@ This guide explains how to configure languages, customize UI strings, and add cu
     - [Setting the Language](#setting-the-language)
     - [Customizing Specific Strings](#customizing-specific-strings)
     - [Complete Embed Example](#complete-embed-example)
-  - [Using Locale with Web Components](#using-locale-with-web-components)
+  - [Using Locale with CDN](#using-locale-with-cdn)
     - [Basic Setup](#basic-setup)
+    - [Customizing Specific Strings](#customizing-specific-strings-1)
+    - [Registering a Custom Language](#registering-a-custom-language)
+    - [Complete CDN Example](#complete-cdn-example)
+  - [Using Locale with Web Components (ESM)](#using-locale-with-web-components-esm)
+    - [Basic Setup](#basic-setup-1)
     - [Applying RTL Direction](#applying-rtl-direction)
     - [Using Translations in Your Code](#using-translations-in-your-code)
     - [Complete Web Components Example](#complete-web-components-example)
@@ -209,9 +214,180 @@ window.SmileIdentity({
 
 ---
 
-## Using Locale with Web Components
+## Using Locale with CDN
 
-When using SmileID web components directly (e.g., `<selfie-capture-screens>`, `<document-capture-screens>`), you configure locale programmatically using the localization module.
+When loading the SmileID Web Components via CDN script tag, you can configure locale using the global `SmartCameraWeb` object exposed on the `window`.
+
+### Basic Setup
+
+Include the script and set the locale before your components render:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SmileID Verification</title>
+    <!-- Load SmileID Web Components from CDN -->
+    <script src="https://cdn.smileidentity.com/js/<version>/smart-camera-web.js"></script>
+  </head>
+  <body>
+    <smart-camera-web></smart-camera-web>
+
+    <script>
+      // Set locale before the component renders
+      window.SmartCameraWeb.setCurrentLocale('fr-FR');
+    </script>
+  </body>
+</html>
+```
+
+### Customizing Specific Strings
+
+Override specific UI strings while keeping the rest of the default translations using the `locales` option:
+
+```html
+<script>
+  window.SmartCameraWeb.setCurrentLocale('en-GB', {
+    locales: {
+      'en-GB': {
+        // Override common button labels
+        common: {
+          continue: 'Proceed to Next Step',
+          back: 'Go Back',
+        },
+        // Override selfie screen text
+        selfie: {
+          instructions: {
+            title: 'Time for a quick selfie!',
+          },
+          review: {
+            acceptButton: 'Looks good!',
+            retakeButton: 'Try again',
+          },
+        },
+      },
+    },
+  });
+
+  // Re-render the component to apply the new language
+  // Only needed if the component was previously rendered
+  const app = document.querySelector('smart-camera-web');
+  app.reset();
+</script>
+```
+
+### Registering a Custom Language
+
+To add a completely new language, use `registerLocale` before setting it as the current locale:
+
+```html
+<script>
+  // Register a new Swahili (Kenya) locale
+  window.SmartCameraWeb.registerLocale('sw-KE', {
+    direction: 'ltr',
+    common: {
+      back: 'Rudi',
+      close: 'Funga',
+      continue: 'Endelea',
+      cancel: 'Ghairi',
+      or: 'au',
+      allow: 'Ruhusu',
+    },
+    selfie: {
+      instructions: {
+        title: 'Ifuatayo, tutapiga picha ya haraka',
+      },
+      capture: {
+        button: {
+          takeSelfie: 'Piga Picha',
+        },
+      },
+      review: {
+        title: 'Kagua Picha',
+        question: 'Je, uso wako wote unaonekana wazi?',
+        acceptButton: 'Ndiyo, tumia hii',
+        retakeButton: 'Hapana, piga tena',
+      },
+    },
+    // ... add all other required translation keys
+  });
+
+  // Now set the registered locale as active
+  window.SmartCameraWeb.setCurrentLocale('sw-KE');
+
+  // Re-render the component to apply the new language
+  // Only needed if the component was previously rendered
+  const app = document.querySelector('smart-camera-web');
+  app.reset();
+</script>
+```
+
+### Complete CDN Example
+
+Here's a complete example showing language selection with custom overrides:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SmileID Verification</title>
+    <script src="https://cdn.smileidentity.com/js/<version>/smart-camera-web.js"></script>
+  </head>
+  <body>
+    <div id="verification-container">
+      <smart-camera-web></smart-camera-web>
+    </div>
+
+    <script>
+      // Detect user's preferred language
+      const userLanguage = navigator.language.startsWith('fr')
+        ? 'fr-FR'
+        : 'en-GB';
+
+      // Set locale with custom overrides
+      window.SmartCameraWeb.setCurrentLocale(userLanguage, {
+        locales: {
+          'en-GB': {
+            common: {
+              continue: 'Next',
+              back: 'Previous',
+            },
+            selfie: {
+              instructions: {
+                title: 'Verify your identity with a selfie',
+              },
+            },
+          },
+          'fr-FR': {
+            common: {
+              continue: 'Suivant',
+              back: 'Précédent',
+            },
+          },
+        },
+      });
+
+      // Get the component and re-render to apply the new language
+      // Only needed if the component was previously rendered
+      const smartCamera = document.querySelector('smart-camera-web');
+      smartCamera.reset();
+
+      // Listen for events
+      smartCamera.addEventListener('capture.complete', (event) => {
+        console.log('Capture complete:', event.detail);
+      });
+    </script>
+  </body>
+</html>
+```
+
+---
+
+## Using Locale with Web Components (ESM)
+
+When using SmileID web components directly via ES modules (e.g., `<selfie-capture-screens>`, `<document-capture-screens>`), you configure locale programmatically using the localization module.
 
 ### Basic Setup
 

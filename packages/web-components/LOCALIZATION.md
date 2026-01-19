@@ -493,9 +493,12 @@ Here's a complete example using web components with locale configuration:
         const selfieCapture = document.querySelector('selfie-capture-screens');
 
         // Listen for capture complete
-        selfieCapture.addEventListener('selfie-capture-screens.publish', (event) => {
-          console.log('Selfie captured:', event.detail);
-        });
+        selfieCapture.addEventListener(
+          'selfie-capture-screens.publish',
+          (event) => {
+            console.log('Selfie captured:', event.detail);
+          },
+        );
       }
 
       document.addEventListener('DOMContentLoaded', initializeVerification);

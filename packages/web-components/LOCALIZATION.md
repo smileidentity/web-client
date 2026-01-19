@@ -375,7 +375,7 @@ Here's a complete example showing language selection with custom overrides:
       smartCamera.reset();
 
       // Listen for events
-      smartCamera.addEventListener('capture.complete', (event) => {
+      smartCamera.addEventListener('smart-camera-web.publish', (event) => {
         console.log('Capture complete:', event.detail);
       });
     </script>

@@ -1,3 +1,5 @@
+import { JPEG_QUALITY } from '../../../../../domain/constants/src/Constants';
+
 export const captureImageFromVideo = (
   videoElement: HTMLVideoElement,
   isReference: boolean = false,
@@ -60,5 +62,5 @@ export const captureImageFromVideo = (
     canvas.height,
   );
 
-  return canvas.toDataURL('image/jpeg');
+  return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 };

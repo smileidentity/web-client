@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.1.0] - 2026-01-20
+
+## Changed
+
+- Improve capture quality by setting image quality to 0.92
+- Fixed error reporting issue
+
 ### Added
 
 - Added language translation support for web components with locale customization

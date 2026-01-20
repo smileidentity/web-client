@@ -1,6 +1,6 @@
 {
   "name": "@smileid/embed",
-  "version": "11.0.3",
+  "version": "11.1.0",
   "description": "Self Hosted Integration for Smile Identity on the Web",
   "private": true,
   "main": "inline.js",

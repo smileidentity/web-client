@@ -51,7 +51,6 @@
     "./lib/components/",
     "./lib/domain/",
     "./lib/styles/",
-    "./lib/i18n/",
     "./dist/",
     "./README.md",
     "package.json"

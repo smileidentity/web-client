@@ -104,3 +104,73 @@ When you're ready to create a new release for this project, follow the steps bel
    git tag v[NEW_VERSION]
    git push origin v[NEW_VERSION]
    ```
+
+## Localization
+
+The embed supports multiple languages and string customization through the `translation` option.
+
+### Quick Start
+
+```javascript
+window.SmileIdentity({
+  token: 'your-token',
+  product: 'biometric_kyc',
+  callback_url: 'https://your-callback.com',
+
+  // Set language (supports 'en-GB', 'fr-FR', 'ar-EG')
+  translation: {
+    language: 'fr-FR',
+  },
+
+  partner_details: {
+    /* ... */
+  },
+  onSuccess: () => {},
+  onError: () => {},
+});
+```
+
+### Customizing Strings
+
+Override specific UI text while keeping defaults:
+
+```javascript
+translation: {
+  language: 'en-GB',
+  locales: {
+    'en-GB': {
+      common: {
+        continue: 'Proceed',
+        back: 'Go Back'
+      },
+      selfie: {
+        instructions: {
+          title: 'Time for a quick selfie!'
+        }
+      }
+    }
+  }
+}
+```
+
+### Adding Custom Languages
+
+Provide complete translations for unsupported languages:
+
+```javascript
+translation: {
+  language: 'sw-KE', // Swahili (Kenya)
+  locales: {
+    'sw-KE': {
+      direction: 'ltr',
+      common: {
+        back: 'Rudi',
+        continue: 'Endelea',
+        // ... all required keys
+      }
+    }
+  }
+}
+```
+
+📖 **[Full Localization Guide](https://github.com/smileidentity/web-client/blob/main/packages/web-components/LOCALIZATION.md)** - Complete documentation including available languages, all translation keys, and custom language setup.

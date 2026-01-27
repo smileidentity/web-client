@@ -15,6 +15,7 @@ export default $config({
     const SMILEID_API_KEY = new sst.Secret('SmileIdApiKey');
     const SMILE_ID_ENVIRONMENT = new sst.Secret('SmileIdEnvironment');
     const EmbedUrl = new sst.Secret('EmbedUrl');
+    const WafWebAclArn = new sst.Secret('WafWebAclArn');
 
     const api = new sst.aws.Function('GetToken', {
       handler: 'api/lambda.handler',
@@ -24,6 +25,15 @@ export default $config({
 
     const site = new sst.aws.Remix('PreviewApp', {
       link: [api, EmbedUrl],
+      transform: {
+        cdn: {
+          transform: {
+            distribution: (args) => {
+              args.webAclId = WafWebAclArn.value;
+            },
+          },
+        },
+      },
     });
 
     return {

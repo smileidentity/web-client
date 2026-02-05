@@ -15,7 +15,9 @@ export default function setupForm() {
   const button = document.querySelector('#submitForm');
   const product = document.querySelector('#product');
   const language = document.querySelector('#language');
-  const allowLegacySelfieFallback = document.querySelector('#allowLegacySelfieFallback');
+  const allowLegacySelfieFallback = document.querySelector(
+    '#allowLegacySelfieFallback',
+  );
 
   const resetButton = () => {
     button.textContent = 'Verify with Smile Identity';
@@ -75,7 +77,8 @@ export default function setupForm() {
         use_new_component: true,
         //demo_mode: true,
         previewBVNMFA: true,
-        allow_legacy_selfie_fallback: allowLegacySelfieFallback.value === 'true',
+        allow_legacy_selfie_fallback:
+          allowLegacySelfieFallback.value === 'true',
         hide_attribution: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,

@@ -17,6 +17,7 @@ interface Props {
   'theme-color'?: string;
   'show-navigation'?: string | boolean;
   'allow-agent-mode'?: string | boolean;
+  'allow-legacy-selfie-fallback'?: string | boolean;
   'show-agent-mode-for-tests'?: string | boolean;
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
@@ -25,12 +26,16 @@ interface Props {
   hidden?: string | boolean;
 }
 
+// 90 seconds in milliseconds
+const DEFAULT_MEDIAPIPE_WAIT_MS = 90 * 1000;
+
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
-// web component after a timeout of 20 seconds.
+// web component after a timeout (default 90 seconds).
 const SelfieCaptureWrapper: FunctionComponent<Props> = ({
-  timeout = 20000,
+  timeout = DEFAULT_MEDIAPIPE_WAIT_MS,
   'start-countdown': startCountdownProp = false,
+  'allow-legacy-selfie-fallback': allowLegacySelfieFallbackProp = false,
   hidden: hiddenProp = false,
   ...props
 }) => {
@@ -54,6 +59,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
+  const allowLegacySelfieFallback = getBoolProp(allowLegacySelfieFallbackProp);
   // Component state:
   // - mediapipeReady: whether the mediapipe instance has successfully loaded
   // - loadingProgress: percentage used for the visible loading UI
@@ -185,51 +191,70 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   }
 
   if (loadingProgress >= 100) {
-    // When loading completes without Mediapipe becoming ready, mount the legacy
-    // `selfie-capture` web component. We also set `usingSelfieCapture` so other
-    // effects can react (e.g. metadata dispatch).
-    if (!usingSelfieCapture) {
-      setUsingSelfieCapture(true);
+    // When loading completes without Mediapipe becoming ready, check if legacy
+    // fallback is allowed. Legacy is allowed if:
+    // 1. allow-legacy-selfie-fallback attribute is set to true, OR
+    // 2. Running under Cypress (to keep existing test behavior)
+    const legacyFallbackAllowed = allowLegacySelfieFallback || isCypress;
+
+    if (legacyFallbackAllowed) {
+      // Mount the legacy `selfie-capture` web component. We also set
+      // `usingSelfieCapture` so other effects can react (e.g. metadata dispatch).
+      if (!usingSelfieCapture) {
+        setUsingSelfieCapture(true);
+      }
+
+      const propsWithoutHidden = { ...props };
+      delete (propsWithoutHidden as any).hidden;
+
+      return (
+        // @ts-expect-error --- preact-custom-element doesn't have proper types for refs
+        <selfie-capture
+          {...propsWithoutHidden}
+          ref={(el: HTMLElement) => {
+            if (el && !el.hasAttribute('data-events-setup')) {
+              el.setAttribute('data-events-setup', 'true');
+
+              const forwardEvent = (event: Event) => {
+                const customEvent = event as CustomEvent;
+
+                if (
+                  customEvent.type === 'selfie-capture.publish' ||
+                  customEvent.type === 'selfie-capture.cancelled' ||
+                  customEvent.type === 'selfie-capture.close'
+                ) {
+                  setInitialSessionCompleted(true);
+                }
+
+                window.dispatchEvent(
+                  new CustomEvent(customEvent.type, {
+                    detail: customEvent.detail,
+                    bubbles: true,
+                  }),
+                );
+              };
+
+              el.addEventListener('selfie-capture.publish', forwardEvent);
+              el.addEventListener('selfie-capture.cancelled', forwardEvent);
+              el.addEventListener('selfie-capture.close', forwardEvent);
+            }
+          }}
+        />
+      );
     }
 
-    const propsWithoutHidden = { ...props };
-    delete (propsWithoutHidden as any).hidden;
-
+    // Legacy fallback is NOT allowed: show error message
     return (
-      // @ts-expect-error --- preact-custom-element doesn't have proper types for refs
-      <selfie-capture
-        {...propsWithoutHidden}
-        ref={(el: HTMLElement) => {
-          if (el && !el.hasAttribute('data-events-setup')) {
-            el.setAttribute('data-events-setup', 'true');
-
-            const forwardEvent = (event: Event) => {
-              const customEvent = event as CustomEvent;
-
-              if (
-                customEvent.type === 'selfie-capture.publish' ||
-                customEvent.type === 'selfie-capture.cancelled' ||
-                customEvent.type === 'selfie-capture.close'
-              ) {
-                setInitialSessionCompleted(true);
-              }
-
-              window.dispatchEvent(
-                new CustomEvent(customEvent.type, {
-                  detail: customEvent.detail,
-                  bubbles: true,
-                }),
-              );
-            };
-
-            el.addEventListener('selfie-capture.publish', forwardEvent);
-            el.addEventListener('selfie-capture.cancelled', forwardEvent);
-            el.addEventListener('selfie-capture.close', forwardEvent);
-          }
-        }}
-      />
+      <div style={{ textAlign: 'center', marginTop: '20%', padding: '0 20px' }}>
+        <p style={{ fontSize: '1.2rem', color: '#333' }}>
+          Internet connection error, check your connection and retry
+        </p>
+      </div>
     );
   }
+
+  // Midpoint threshold (40s out of 90s ≈ 44%)
+  const SLOW_CONNECTION_THRESHOLD = 44;
 
   return (
     <div style={{ textAlign: 'center', marginTop: '20%' }}>
@@ -245,7 +270,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
           style={{ animation: 'spin 1s linear infinite' }}
         />
       </div>
-      <p>Loading... {loadingProgress}%</p>
+      {loadingProgress >= SLOW_CONNECTION_THRESHOLD ? (
+        <p>Internet is too slow, wait a little more...</p>
+      ) : (
+        <p>Loading... {loadingProgress}%</p>
+      )}
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
@@ -267,6 +296,7 @@ if (!customElements.get('selfie-capture-wrapper')) {
       'theme-color',
       'show-navigation',
       'allow-agent-mode',
+      'allow-legacy-selfie-fallback',
       'show-agent-mode-for-tests',
       'hide-attribution',
       'disable-image-tests',

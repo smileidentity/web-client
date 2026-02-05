@@ -98,6 +98,10 @@ import { getHeaders, getZipSignature } from './request';
           config.partner_details.theme_color,
         );
 
+        if (config.allow_legacy_selfie_fallback) {
+          SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
+        }
+
         if (config.hide_attribution) {
           const attributions = document.querySelectorAll('.credits');
           Array.prototype.forEach.call(attributions, (attribution) => {

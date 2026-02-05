@@ -109,10 +109,10 @@ When you're ready to create a new release for this project, follow the steps bel
 
 The embed supports several configuration options:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `hide_attribution` | `boolean` | `false` | Hide Smile ID attribution/credits |
-| `allow_agent_mode` | `boolean` | `false` | Allow agent mode for assisted capture |
+| Option                         | Type      | Default | Description                                                                                                                                                          |
+| ------------------------------ | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hide_attribution`             | `boolean` | `false` | Hide Smile ID attribution/credits                                                                                                                                    |
+| `allow_agent_mode`             | `boolean` | `false` | Allow agent mode for assisted capture                                                                                                                                |
 | `allow_legacy_selfie_fallback` | `boolean` | `false` | Allow fallback to legacy selfie capture if Mediapipe fails to load. When `false` (default), an error message is shown instead of falling back to the legacy capture. |
 
 ## Localization

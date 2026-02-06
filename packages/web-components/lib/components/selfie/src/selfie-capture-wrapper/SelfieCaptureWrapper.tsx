@@ -162,8 +162,22 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     };
   }, [hidden, mediapipeReady, loadingProgress]);
 
+  // Dispatch allow_legacy_selfie_fallback config for observability
+  useEffect(() => {
+    if (hidden) return;
+
+    const smartCameraWeb = document.querySelector('smart-camera-web');
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.allow-legacy-selfie-fallback', {
+        detail: {
+          allow_legacy_selfie_fallback: allowLegacySelfieFallback,
+        },
+      }),
+    );
+  }, [hidden, allowLegacySelfieFallback]);
+
   // Announce to any `smart-camera-web` element which liveness version is active.
-  // The old capture users 0.0.1, the new one 1.0.0.
+  // The old capture uses 0.0.1, the new one 1.0.0.
   useEffect(() => {
     if (hidden || mediapipeLoading) return;
 

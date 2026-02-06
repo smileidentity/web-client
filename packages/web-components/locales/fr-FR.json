@@ -72,6 +72,11 @@
       "error": {
         "minFrames": "SmartCameraWeb : Le nombre minimum d'images requis est de {{count}}",
         "webcamCapture": "Impossible de capturer les images de la webcam - Veuillez essayer un autre appareil"
+      },
+      "loading": {
+        "progress": "Chargement... {{progress}}%",
+        "slowConnection": "La connexion Internet est trop lente, veuillez patienter...",
+        "connectionError": "Erreur de connexion Internet, vérifiez votre connexion et réessayez"
       }
     },
     "smart": {

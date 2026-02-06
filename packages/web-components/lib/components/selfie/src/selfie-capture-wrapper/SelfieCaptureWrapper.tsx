@@ -4,6 +4,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { translate, translateHtml } from '../../../../domain/localisation';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';
@@ -247,7 +248,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return (
       <div style={{ textAlign: 'center', marginTop: '20%', padding: '0 20px' }}>
         <p style={{ fontSize: '1.2rem', color: '#333' }}>
-          Internet connection error, check your connection and retry
+          {translate('selfie.capture.loading.connectionError')}
         </p>
       </div>
     );
@@ -271,9 +272,13 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         />
       </div>
       {loadingProgress >= SLOW_CONNECTION_THRESHOLD ? (
-        <p>Internet is too slow, wait a little more...</p>
+        <p>{translate('selfie.capture.loading.slowConnection')}</p>
       ) : (
-        <p>Loading... {loadingProgress}%</p>
+        <p>
+          {translateHtml('selfie.capture.loading.progress', {
+            progress: loadingProgress,
+          })}
+        </p>
       )}
       <style>{`
         @keyframes spin {

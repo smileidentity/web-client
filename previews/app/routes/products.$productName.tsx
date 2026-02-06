@@ -85,7 +85,8 @@ export default function Product() {
   }>();
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
-  const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] = useState<boolean>(false);
+  const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
+    useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -195,11 +196,15 @@ export default function Product() {
                 </div>
               ))}
               <div>
-                <label htmlFor="legacy-fallback-select">Legacy Selfie Fallback</label>
+                <label htmlFor="legacy-fallback-select">
+                  Legacy Selfie Fallback
+                </label>
                 <select
                   id="legacy-fallback-select"
                   value={allowLegacySelfieFallback ? 'true' : 'false'}
-                  onChange={(e) => setAllowLegacySelfieFallback(e.target.value === 'true')}
+                  onChange={(e) =>
+                    setAllowLegacySelfieFallback(e.target.value === 'true')
+                  }
                   disabled={isGettingToken}
                 >
                   <option value="false">Disabled</option>

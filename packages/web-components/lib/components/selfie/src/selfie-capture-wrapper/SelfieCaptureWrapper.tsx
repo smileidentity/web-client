@@ -27,8 +27,8 @@ interface Props {
   hidden?: string | boolean;
 }
 
-// 90 seconds in milliseconds
-const DEFAULT_MEDIAPIPE_WAIT_MS = 90 * 1000;
+const DEFAULT_MEDIAPIPE_WAIT_MS = 90 * 1000; // For when legacy fallback is NOT allowed, we wait the full 90s for mediapipe to load before showing an error.
+const DEFAULT_WAIT_MS = 20 * 1000; // default for when legacy fallback is allowed we wait for 20s
 
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
@@ -61,6 +61,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
   const allowLegacySelfieFallback = getBoolProp(allowLegacySelfieFallbackProp);
+  const loadingTime = allowLegacySelfieFallback ? DEFAULT_WAIT_MS : timeout;
+
   // Component state:
   // - mediapipeReady: whether the mediapipe instance has successfully loaded
   // - loadingProgress: percentage used for the visible loading UI
@@ -103,12 +105,12 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
     const timer = setInterval(() => {
       setLoadingProgress((prev: number) => Math.min(prev + 1, 100));
-    }, timeout / 100);
+    }, loadingTime / 100);
 
     return () => {
       clearInterval(timer);
     };
-  }, [hidden, startCountdown, timeout, mediapipeReady]);
+  }, [hidden, startCountdown, loadingTime, mediapipeReady]);
 
   useEffect(() => {
     if (hidden || mediapipeReady || loadingProgress < 100) return undefined;

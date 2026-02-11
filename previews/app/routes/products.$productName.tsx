@@ -71,18 +71,23 @@ export async function loader({ params }: LoaderFunctionArgs) {
       apiUrl: Resource.GetToken.url,
       appStage: Resource.App.stage,
       embedUrl: Resource.EmbedUrl.value || `preview-${Resource.App.stage}`,
+      partnerId: Resource.PartnerId.value,
     };
   }
   return {};
 }
 
 export default function Product() {
-  const { product, apiUrl, appStage, embedUrl } = useLoaderData<{
+  const { product, apiUrl, appStage, embedUrl, partnerId } = useLoaderData<{
     product?: Product;
     apiUrl?: string;
     appStage?: string;
     embedUrl?: string;
+    partnerId?: string;
   }>();
+  const defaultCallbackUrl = partnerId
+    ? `https://callbacks.dev.smileidentity.com/${partnerId}`
+    : '';
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
@@ -190,6 +195,11 @@ export default function Product() {
                         required={input.required}
                         type={input.type}
                         name={input.name}
+                        defaultValue={
+                          input.name === 'callback_url'
+                            ? defaultCallbackUrl
+                            : undefined
+                        }
                       />
                     </label>
                   )}

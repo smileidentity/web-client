@@ -57,7 +57,7 @@ function templateString() {
     </style>
     ${styles(this.themeColor)}
     <div id='selfie-capture-review-screen' class='center' dir='${this.direction}'>
-   ${this.showNavigation ?  `<smileid-navigation show-navigation hide-back></smileid-navigation>` : ''}
+   ${this.showNavigation ? `<smileid-navigation hide-back></smileid-navigation>` : ''}
     <h1 class="header-title title-color font-bold">
       ${t('selfie.review.question')}
     </h1>

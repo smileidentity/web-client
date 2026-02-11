@@ -19,6 +19,7 @@ let isInitializing = false;
 const SINGLE_ENTRY_KEYS = [
   'active_liveness_type',
   'active_liveness_version',
+  'allow_legacy_selfie_fallback',
   'browser_name',
   'browser_version',
   'device_model',
@@ -505,6 +506,15 @@ eventTarget.addEventListener(
 eventTarget.addEventListener('metadata.active-liveness-version', (event) => {
   addMetadataEntry('active_liveness_version', event.detail.version);
 });
+eventTarget.addEventListener(
+  'metadata.allow-legacy-selfie-fallback',
+  (event) => {
+    addMetadataEntry(
+      'allow_legacy_selfie_fallback',
+      event.detail.allow_legacy_selfie_fallback,
+    );
+  },
+);
 
 /**
  * Cleans up all resources including intervals and event listeners

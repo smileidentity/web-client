@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `allow-legacy-selfie-fallback` attribute to control fallback to legacy selfie capture when Mediapipe fails to load
+- Added `allow_legacy_selfie_fallback` config option to embed for enabling legacy selfie fallback
+
+### Changed
+
+- Legacy selfie capture fallback is now opt-in (default: disabled)
+- Increased Mediapipe loading timeout from 20 seconds to 90 seconds
+- When Mediapipe fails and legacy fallback is disabled, shows "Internet connection error, check your connection and retry" message
+
 ## [11.1.0] - 2026-01-20
 
 ### Changed

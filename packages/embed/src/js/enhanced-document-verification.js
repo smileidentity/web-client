@@ -114,6 +114,9 @@ function applyPageTranslations() {
 
   function initializeSession(constraints) {
     SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    if (config.allow_legacy_selfie_fallback) {
+      SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
+    }
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

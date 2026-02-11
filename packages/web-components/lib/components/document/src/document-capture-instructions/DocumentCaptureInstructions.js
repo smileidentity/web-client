@@ -195,7 +195,7 @@ function templateString() {
     <div id="document-capture-instructions-screen" class="flow center" dir="${this.direction}">
         <div class="content-root">
             <div class="content-header">
-        <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' show-navigation ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
         </div>
         <div class="content-body">
         <header>
@@ -441,11 +441,11 @@ class DocumentInstruction extends HTMLElement {
     this.uploadDocumentPhotoButton =
       this.shadowRoot.querySelector('#upload-photo');
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation?.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation?.addEventListener('navigation.close', () => {
       this.handleCloseEvents();
     });
 

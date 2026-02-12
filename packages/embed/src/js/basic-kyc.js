@@ -6,6 +6,7 @@ import {
   translate,
   translateHtml,
   getDirection,
+  getCurrentLocale,
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
@@ -74,8 +75,9 @@ import { getHeaders } from './request';
         productsConfigUrl,
         productsConfigPayload,
       );
+      const locale = getCurrentLocale();
       const servicesPromise = fetch(
-        `${getEndpoint(config.environment)}/v1/services${config.translation?.language ? `?locale=${config.translation.language}` : ''}`,
+        `${getEndpoint(config.environment)}/v1/services${locale ? `?locale=${locale}` : ''}`,
       );
       const [productsConfigResponse, servicesResponse] = await Promise.all([
         productsConfigPromise,

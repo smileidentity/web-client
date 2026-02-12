@@ -4,6 +4,7 @@ import {
   setCurrentLocale,
   t,
   getDirection,
+  getCurrentLocale,
 } from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
@@ -94,7 +95,7 @@ import { getHeaders, getZipSignature } from './request';
       body: JSON.stringify(payload),
     };
 
-    const locale = config.translation?.language;
+    const locale = getCurrentLocale();
     const url = new URL(
       `${getEndpoint(config.environment)}/valid_documents`,
     );
@@ -123,7 +124,7 @@ import { getHeaders, getZipSignature } from './request';
       method: 'GET',
     };
 
-    const locale = config.translation?.language;
+    const locale = getCurrentLocale();
     const url = new URL(`${getEndpoint(config.environment)}/services`);
     if (locale) {
       url.searchParams.append('locale', locale);

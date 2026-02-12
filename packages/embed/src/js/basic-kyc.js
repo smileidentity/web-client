@@ -75,7 +75,7 @@ import { getHeaders } from './request';
         productsConfigPayload,
       );
       const servicesPromise = fetch(
-        `${getEndpoint(config.environment)}/v1/services`,
+        `${getEndpoint(config.environment)}/v1/services${config.translation?.language ? `?locale=${config.translation.language}` : ''}`,
       );
       const [productsConfigResponse, servicesResponse] = await Promise.all([
         productsConfigPromise,

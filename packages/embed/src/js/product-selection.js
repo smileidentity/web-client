@@ -56,11 +56,16 @@
       body: JSON.stringify(payload),
     };
 
+    const locale = config.translation?.language;
+    const url = new URL(
+      `${getEndpoint(config.environment)}/valid_documents`,
+    );
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/valid_documents`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.valid_documents;
@@ -80,11 +85,14 @@
       method: 'GET',
     };
 
+    const locale = config.translation?.language;
+    const url = new URL(`${getEndpoint(config.environment)}/services`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/services`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.hosted_web;

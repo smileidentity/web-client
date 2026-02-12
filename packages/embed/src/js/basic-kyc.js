@@ -76,9 +76,13 @@ import { getHeaders } from './request';
         productsConfigPayload,
       );
       const locale = getCurrentLocale();
-      const servicesPromise = fetch(
-        `${getEndpoint(config.environment)}/v1/services${locale ? `?locale=${locale}` : ''}`,
+      const servicesUrl = new URL(
+        `${getEndpoint(config.environment)}/v1/services`,
       );
+      if (locale) {
+        servicesUrl.searchParams.append('locale', locale);
+      }
+      const servicesPromise = fetch(servicesUrl.toString());
       const [productsConfigResponse, servicesResponse] = await Promise.all([
         productsConfigPromise,
         servicesPromise,

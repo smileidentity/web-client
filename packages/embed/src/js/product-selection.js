@@ -67,9 +67,7 @@
     const locale = config.translation?.language
       ? resolveLocale(config.translation.language)
       : null;
-    const url = new URL(
-      `${getEndpoint(config.environment)}/valid_documents`,
-    );
+    const url = new URL(`${getEndpoint(config.environment)}/valid_documents`);
     if (locale) {
       url.searchParams.append('locale', locale);
     }

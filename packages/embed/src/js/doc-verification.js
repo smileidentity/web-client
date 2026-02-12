@@ -96,9 +96,7 @@ import { getHeaders, getZipSignature } from './request';
     };
 
     const locale = getCurrentLocale();
-    const url = new URL(
-      `${getEndpoint(config.environment)}/valid_documents`,
-    );
+    const url = new URL(`${getEndpoint(config.environment)}/valid_documents`);
     if (locale) {
       url.searchParams.append('locale', locale);
     }

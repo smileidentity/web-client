@@ -32,7 +32,7 @@ function templateString() {
         }
     </style>
     <div class='camera-permission-screen flow center' dir='${this.direction}'>
-        <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+        ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
         <div class='flow center'>
           <p class='color-red | center' id='error'>
           </p>

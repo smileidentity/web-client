@@ -343,7 +343,7 @@ function templateString() {
     <div id="selfie-capture-instruction-screen" class="center" dir="${this.direction}">
     <div class="content-root">
       <div class="content-header">
-        <smileid-navigation theme-color=${this.themeColor} ${this.hideBack ? 'hide-back' : ''} ${this.showNavigation ? '' : 'hidden'}></smileid-navigation>
+        ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
       </div>
       <div class="content-body">
         <header>
@@ -625,7 +625,7 @@ class SelfieCaptureInstructions extends HTMLElement {
     this.allowButton = this.shadowRoot.querySelector('#allow');
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation?.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
@@ -637,7 +637,7 @@ class SelfieCaptureInstructions extends HTMLElement {
       });
     }
 
-    this.navigation.addEventListener(
+    this.navigation?.addEventListener(
       'navigation.close',
       () => {
         this.handleCloseEvents();

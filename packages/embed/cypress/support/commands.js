@@ -37,54 +37,57 @@ Cypress.Commands.add('getIFrameBody', () => {
     .then((body) => cy.wrap(body, { log: false }));
 });
 
-Cypress.Commands.add('loadIDOptions', (baseApiUrl = '**/v1') => {
-  cy.log('loadingIDOptions');
+Cypress.Commands.add(
+  'loadIDOptions',
+  (baseApiUrl = '**/v1', locale = 'en-GB') => {
+    cy.log('loadingIDOptions');
 
-  cy.intercept('GET', `${baseApiUrl}/services`, {
-    fixture: 'services.json',
-  });
+    cy.intercept('GET', `${baseApiUrl}/services?locale=${locale}`, {
+      fixture: 'services.json',
+    });
 
-  cy.intercept('POST', `${baseApiUrl}/valid_documents`, {
-    fixture: 'valid_documents.json',
-  });
+    cy.intercept('POST', `${baseApiUrl}/valid_documents?locale=${locale}`, {
+      fixture: 'valid_documents.json',
+    });
 
-  cy.intercept('POST', `${baseApiUrl}/products_config`, {
-    fixture: 'products_config.json',
-  });
+    cy.intercept('POST', `${baseApiUrl}/products_config`, {
+      fixture: 'products_config.json',
+    });
 
-  cy.intercept('POST', `${baseApiUrl}/totp_consent`, {
-    statusCode: 200,
-    body: {
-      message: 'Select OTP Delivery Mode',
-      modes: [
-        {
-          sms: '08001****67',
-        },
-        {
-          email: 'fa*****il@gmail.com',
-        },
-      ],
-      session_id: '0000000000000',
-      success: true,
-    },
-  });
+    cy.intercept('POST', `${baseApiUrl}/totp_consent`, {
+      statusCode: 200,
+      body: {
+        message: 'Select OTP Delivery Mode',
+        modes: [
+          {
+            sms: '08001****67',
+          },
+          {
+            email: 'fa*****il@gmail.com',
+          },
+        ],
+        session_id: '0000000000000',
+        success: true,
+      },
+    });
 
-  cy.intercept('POST', `${baseApiUrl}/totp_consent/mode`, {
-    statusCode: 200,
-    body: {
-      message: 'OTP Delivery Mode Selected',
-      success: true,
-    },
-  });
+    cy.intercept('POST', `${baseApiUrl}/totp_consent/mode`, {
+      statusCode: 200,
+      body: {
+        message: 'OTP Delivery Mode Selected',
+        success: true,
+      },
+    });
 
-  cy.intercept('POST', `${baseApiUrl}/totp_consent/otp`, {
-    statusCode: 200,
-    body: {
-      message: 'OTP Confirmed',
-      success: true,
-    },
-  });
-});
+    cy.intercept('POST', `${baseApiUrl}/totp_consent/otp`, {
+      statusCode: 200,
+      body: {
+        message: 'OTP Confirmed',
+        success: true,
+      },
+    });
+  },
+);
 
 Cypress.Commands.add('selectBVNIDType', () => {
   cy.loadIDOptions('https://example.smileidentity.com/v1');

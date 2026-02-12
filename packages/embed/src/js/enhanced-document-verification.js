@@ -4,6 +4,7 @@ import {
   setCurrentLocale,
   translate,
   getDirection,
+  getCurrentLocale,
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
@@ -68,10 +69,14 @@ function applyPageTranslations() {
   let uploadURL;
 
   async function getProductConstraints() {
+    const locale = getCurrentLocale();
+    const url = new URL(`${getEndpoint(config.environment)}/services`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/services`,
-      );
+      const response = await fetch(url.toString());
       const json = await response.json();
 
       return json.hosted_web.enhanced_document_verification;

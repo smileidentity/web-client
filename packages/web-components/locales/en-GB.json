@@ -72,6 +72,11 @@
       "error": {
         "minFrames": "SmartCameraWeb: The minimum no of frames required is {{count}}",
         "webcamCapture": "Unable to capture webcam images - Please try another device"
+      },
+      "loading": {
+        "progress": "Loading... {{progress}}%",
+        "slowConnection": "Internet is too slow, wait a little more...",
+        "connectionError": "Internet connection error, check your connection and retry"
       }
     },
     "smart": {

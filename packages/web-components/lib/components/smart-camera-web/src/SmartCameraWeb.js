@@ -20,7 +20,7 @@ function scwTemplateString() {
   <div style="height: 100%;">
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests}
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
     ></selfie-capture-screens>
     <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
@@ -69,6 +69,7 @@ class SmartCameraWeb extends HTMLElement {
   static get observedAttributes() {
     return [
       'allow-agent-mode',
+      'allow-legacy-selfie-fallback',
       'disable-image-tests',
       'document-capture-modes',
       'document-type',
@@ -83,6 +84,7 @@ class SmartCameraWeb extends HTMLElement {
   attributeChangedCallback(name) {
     switch (name) {
       case 'allow-agent-mode':
+      case 'allow-legacy-selfie-fallback':
       case 'disable-image-tests':
       case 'document-capture-modes':
       case 'document-type':
@@ -263,6 +265,12 @@ class SmartCameraWeb extends HTMLElement {
   get disableImageTests() {
     return this.hasAttribute('disable-image-tests')
       ? 'disable-image-tests'
+      : '';
+  }
+
+  get allowLegacySelfieFallback() {
+    return this.hasAttribute('allow-legacy-selfie-fallback')
+      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
       : '';
   }
 

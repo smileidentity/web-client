@@ -83,7 +83,7 @@ class SelfieCaptureScreens extends HTMLElement {
             ${styles(this.themeColor)}
             <div style="height: 100%;">
               <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
+              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
               <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
@@ -365,6 +365,12 @@ class SelfieCaptureScreens extends HTMLElement {
       : '';
   }
 
+  get allowLegacySelfieFallback() {
+    return this.hasAttribute('allow-legacy-selfie-fallback')
+      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      : '';
+  }
+
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
   }
@@ -385,6 +391,7 @@ class SelfieCaptureScreens extends HTMLElement {
       'hide-back-to-host',
       'initial-screen',
       'allow-agent-mode',
+      'allow-legacy-selfie-fallback',
       'show-agent-mode-for-tests',
       'disable-image-tests',
     ];
@@ -396,6 +403,7 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'hidden':
       case 'initial-screen':
       case 'allow-agent-mode':
+      case 'allow-legacy-selfie-fallback':
       case 'show-agent-mode-for-tests':
       case 'disable-image-tests':
         this.connectedCallback();

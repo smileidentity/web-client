@@ -85,12 +85,15 @@ export default function Product() {
   }>();
   const [isGettingToken, setIsGettingToken] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+  const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
+    useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
       window.SmileIdentity({
         ...config,
         allow_agent_mode: true,
+        allow_legacy_selfie_fallback: allowLegacySelfieFallback,
         document_ids: [config.document_id],
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''
@@ -192,6 +195,23 @@ export default function Product() {
                   )}
                 </div>
               ))}
+              <div>
+                <label htmlFor="legacy-fallback-select">
+                  Legacy Selfie Fallback
+                </label>
+                <select
+                  id="legacy-fallback-select"
+                  value={allowLegacySelfieFallback ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setAllowLegacySelfieFallback(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
+
               <button disabled={isGettingToken} type="submit">
                 Create Preview
               </button>

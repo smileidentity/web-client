@@ -932,11 +932,11 @@ class SelfieCaptureScreen extends HTMLElement {
       this._switchCamera();
     });
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation?.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation?.addEventListener('navigation.close', () => {
       this.closeWindow();
     });
 

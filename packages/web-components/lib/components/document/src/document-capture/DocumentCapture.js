@@ -164,7 +164,7 @@ function templateString() {
   </style>
   ${styles(this.themeColor)}
   <div id='document-capture-screen' class='flow center flex-column' dir='${this.direction}'>
-  <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
+  ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' show-navigation ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
     <h2 class='text-base font-bold title-color'>${this.documentName}</h2>
     <div class="circle-progress" id="loader">
         ${this.cameraError ? '' : '<p class="spinner"></p>'}
@@ -629,11 +629,11 @@ class DocumentCapture extends HTMLElement {
       this.handleIDStream(SmartCamera.stream);
     }
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation?.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
 
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation?.addEventListener('navigation.close', () => {
       this.handleCloseEvents();
     });
 

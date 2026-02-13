@@ -4,6 +4,7 @@ import {
   setCurrentLocale,
   t,
   getDirection,
+  getCurrentLocale,
 } from '@smileid/web-components/localisation';
 
 import JSZip from 'jszip';
@@ -94,11 +95,14 @@ import { getHeaders, getZipSignature } from './request';
       body: JSON.stringify(payload),
     };
 
+    const locale = getCurrentLocale();
+    const url = new URL(`${getEndpoint(config.environment)}/valid_documents`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/valid_documents`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.valid_documents;
@@ -118,11 +122,14 @@ import { getHeaders, getZipSignature } from './request';
       method: 'GET',
     };
 
+    const locale = getCurrentLocale();
+    const url = new URL(`${getEndpoint(config.environment)}/services`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/services`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.hosted_web.doc_verification;

@@ -24,7 +24,7 @@ export default $config({
     });
 
     const site = new sst.aws.Remix('PreviewApp', {
-      link: [api, EmbedUrl],
+      link: [api, EmbedUrl, PARTNER_ID],
       transform: {
         cdn: {
           transform: {

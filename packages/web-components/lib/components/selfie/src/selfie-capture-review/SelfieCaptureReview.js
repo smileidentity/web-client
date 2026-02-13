@@ -57,7 +57,7 @@ function templateString() {
     </style>
     ${styles(this.themeColor)}
     <div id='selfie-capture-review-screen' class='center' dir='${this.direction}'>
-    <smileid-navigation ${this.showNavigation ? 'show-navigation' : ''} hide-back></smileid-navigation>
+   ${this.showNavigation ? `<smileid-navigation hide-back></smileid-navigation>` : ''}
     <h1 class="header-title title-color font-bold">
       ${t('selfie.review.question')}
     </h1>
@@ -180,10 +180,10 @@ class SelfieCaptureReview extends HTMLElement {
     this.reCaptureImage = this.shadowRoot.querySelector('#re-capture-image');
     this.navigation = this.shadowRoot.querySelector('smileid-navigation');
 
-    this.navigation.addEventListener('navigation.back', () => {
+    this.navigation?.addEventListener('navigation.back', () => {
       this.handleBackEvents();
     });
-    this.navigation.addEventListener('navigation.close', () => {
+    this.navigation?.addEventListener('navigation.close', () => {
       this.handleCloseEvents();
     });
 

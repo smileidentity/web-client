@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.2.0] - 2026-02-13
+
 ### Added
 
 - Added `allow-legacy-selfie-fallback` attribute to control fallback to legacy selfie capture when Mediapipe fails to load

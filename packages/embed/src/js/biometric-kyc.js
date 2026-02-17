@@ -12,6 +12,14 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+import {
+  hasIdInfo,
+  extractIdInfoData,
+  validatePrefilledFields,
+  parseDOB,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+} from './id-info-utils.js';
 
 (function biometricKyc() {
   'use strict';
@@ -56,6 +64,7 @@ import { getHeaders, getZipSignature } from './request';
 
   let fileToUpload;
   let uploadURL;
+  let skipInputScreen = false;
 
   async function postData(url = '', data = {}, shouldSignPayload = false) {
     return fetch(url, {
@@ -260,9 +269,31 @@ import { getHeaders, getZipSignature } from './request';
 
     let validCountries = [];
 
-    if (config.id_selection) {
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
       validCountries = supportedCountries.filter((value) =>
-        Object.keys(config.id_selection).includes(value),
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        id_info = { country, id_type: idType };
+        disableBackOnFirstScreen = true;
+        setInitialScreen(partnerConstraints);
+      } else if (validCountries.length === 1) {
+        id_info = { country: validCountries[0] };
+      }
+    } else if (effectiveIdSelection) {
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
       );
 
       if (validCountries.length === 1) {
@@ -271,7 +302,7 @@ import { getHeaders, getZipSignature } from './request';
           country: validCountries[0],
         };
 
-        const idTypes = config.id_selection[selectedCountry];
+        const idTypes = effectiveIdSelection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           disableBackOnFirstScreen = true;
@@ -300,9 +331,9 @@ import { getHeaders, getZipSignature } from './request';
 
       const loadIdTypes = (countryCode) => {
         if (countryCode) {
-          const validIDTypes = config.id_selection
-            ? config.id_selection
-            : partnerConstraints.idSelection.biometric_kyc;
+          const validIDTypes =
+            effectiveIdSelection ||
+            partnerConstraints.idSelection.biometric_kyc;
           const constrainedIDTypes = Object.keys(
             generalConstraints[countryCode].id_types,
           );
@@ -412,7 +443,7 @@ import { getHeaders, getZipSignature } from './request';
     (event) => {
       images = event.detail.images;
       const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
-      if (idRequiresTOTPConsent) {
+      if (idRequiresTOTPConsent || skipInputScreen) {
         handleFormSubmit();
       } else {
         setActiveScreen(IDInfoForm);
@@ -594,7 +625,10 @@ import { getHeaders, getZipSignature } from './request';
 
   function customizeForm() {
     setGuideTextForIDType();
-    setFormInputs();
+    const result = setFormInputs();
+    if (result === 'skip') {
+      skipInputScreen = true;
+    }
   }
 
   function setGuideTextForIDType() {
@@ -618,6 +652,8 @@ import { getHeaders, getZipSignature } from './request';
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
         .required_fields;
+    const idTypeConstraints =
+      productConstraints[id_info.country].id_types[id_info.id_type];
 
     const showIdNumber = requiredFields.some((fieldName) =>
       fieldName.includes('id_number'),
@@ -645,6 +681,88 @@ import { getHeaders, getZipSignature } from './request';
       const DOB = IDInfoForm.querySelector('fieldset#dob');
       DOB.hidden = false;
     }
+
+    // Handle pre-filled data from id_info param
+    if (hasIdInfo(config)) {
+      const prefilledData = extractIdInfoData(
+        config.id_info,
+        id_info.country,
+        id_info.id_type,
+      );
+
+      if (prefilledData) {
+        // Expand DOB if provided as single string
+        let expandedData = { ...prefilledData };
+        if (prefilledData.dob && typeof prefilledData.dob === 'string') {
+          const parsed = parseDOB(prefilledData.dob);
+          if (parsed) {
+            expandedData = { ...expandedData, ...parsed };
+          }
+        }
+
+        const validation = validatePrefilledFields(
+          expandedData,
+          requiredFields,
+          idTypeConstraints,
+        );
+
+        if (validation.allValid) {
+          // All fields valid — pre-fill and skip input screen
+          prefillFormFields(expandedData);
+          mergePrefilledIntoIdInfo(expandedData);
+          return 'skip';
+        }
+
+        // Pre-fill valid fields and lock them
+        Object.entries(validation.validFields).forEach(([field, value]) => {
+          const input = IDInfoForm.querySelector(`#${field}`);
+          if (input) {
+            input.value = value;
+            input.setAttribute('readonly', '');
+            input.classList.add('locked-field');
+          }
+        });
+
+        // Pre-fill invalid fields (editable, with error display)
+        Object.entries(validation.invalidFields).forEach(([field, value]) => {
+          const input = IDInfoForm.querySelector(`#${field}`);
+          if (input) {
+            input.value = value;
+            input.setAttribute('aria-invalid', 'true');
+          }
+        });
+
+        // Focus first editable field
+        const firstEditable =
+          validation.missingFields[0] ||
+          Object.keys(validation.invalidFields)[0];
+        if (firstEditable) {
+          const input = IDInfoForm.querySelector(`#${firstEditable}`);
+          if (input) {
+            requestAnimationFrame(() => input.focus());
+          }
+        }
+      }
+    }
+
+    return 'show';
+  }
+
+  function prefillFormFields(data) {
+    Object.entries(data).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      const input = IDInfoForm.querySelector(`#${field}`);
+      if (input) {
+        input.value = value;
+      }
+    });
+  }
+
+  function mergePrefilledIntoIdInfo(data) {
+    Object.entries(data).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      id_info[field] = value;
+    });
   }
 
   function getPartnerParams() {

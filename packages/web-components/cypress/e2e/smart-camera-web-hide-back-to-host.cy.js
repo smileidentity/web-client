@@ -69,5 +69,26 @@ variants.forEach(({ name, suffix }) => {
         .find('[part="close-button"]')
         .should('be.visible');
     });
+
+    it('does not render navigation element when `show-navigation` is not provided', () => {
+      // Visit with show-navigation=false to disable navigation
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&disable-image-tests=true&show-navigation=false${suffix}`,
+      );
+
+      // Verify selfie-capture-instructions screen is visible
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .should('be.visible');
+
+      // Verify smileid-navigation does not exist in the DOM
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('smileid-navigation')
+        .should('not.exist');
+    });
   });
 });

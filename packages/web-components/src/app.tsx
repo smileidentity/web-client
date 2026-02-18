@@ -76,7 +76,11 @@ const App = () => {
         if (value === '' || value === 'true') {
           props[key] = true;
         } else if (value === 'false') {
-          props[key] = false;
+          if (key === 'show-navigation') {
+            delete props[key];
+          } else {
+            props[key] = false;
+          }
         } else {
           props[key] = value;
         }

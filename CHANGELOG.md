@@ -7,16 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.2.0] - 2026-02-13
+
 ### Added
 
 - Added `allow-legacy-selfie-fallback` attribute to control fallback to legacy selfie capture when Mediapipe fails to load
 - Added `allow_legacy_selfie_fallback` config option to embed for enabling legacy selfie fallback
+- Added locale parameter to `/v1/services` and `/v1/valid_documents` API endpoints for localized label responses
 
 ### Changed
 
 - Legacy selfie capture fallback is now opt-in (default: disabled)
 - Increased Mediapipe loading timeout from 20 seconds to 90 seconds
 - When Mediapipe fails and legacy fallback is disabled, shows "Internet connection error, check your connection and retry" message
+- API calls now resolve short locale codes (e.g., 'en' → 'en-GB') before sending to backend
 
 ## [11.1.0] - 2026-01-20
 

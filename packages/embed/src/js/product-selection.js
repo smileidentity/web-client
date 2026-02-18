@@ -9,6 +9,14 @@
     production: 'https://api.smileidentity.com/v1',
   };
 
+  const LOCALE_ALIASES = {
+    ar: 'ar-EG',
+    en: 'en-GB',
+    fr: 'fr-FR',
+  };
+
+  const resolveLocale = (lang) => LOCALE_ALIASES[lang] || lang;
+
   const getEndpoint = (environment) =>
     endpoints[environment] || `${environment}/v1`;
 
@@ -56,11 +64,16 @@
       body: JSON.stringify(payload),
     };
 
+    const locale = config.translation?.language
+      ? resolveLocale(config.translation.language)
+      : null;
+    const url = new URL(`${getEndpoint(config.environment)}/valid_documents`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/valid_documents`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.valid_documents;
@@ -80,11 +93,16 @@
       method: 'GET',
     };
 
+    const locale = config.translation?.language
+      ? resolveLocale(config.translation.language)
+      : null;
+    const url = new URL(`${getEndpoint(config.environment)}/services`);
+    if (locale) {
+      url.searchParams.append('locale', locale);
+    }
+
     try {
-      const response = await fetch(
-        `${getEndpoint(config.environment)}/services`,
-        fetchConfig,
-      );
+      const response = await fetch(url.toString(), fetchConfig);
       const json = await response.json();
 
       return json.hosted_web;

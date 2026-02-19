@@ -104,6 +104,17 @@ export default function setupForm() {
         // consent_required: {
         //   NG: ['BVN'],
         // },
+        id_info: {
+          GH: {
+            GHANA_CARD: {
+              id_number: '',
+            },
+          },
+          NG: {
+            BVN: {},
+            PASSPORT: {},
+          },
+        },
         partner_details: {
           partner_id,
           signature,

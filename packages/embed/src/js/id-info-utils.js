@@ -94,11 +94,15 @@ export function validatePrefilledFields(
     'job_id',
   ];
 
+  const processedFields = new Set();
+
   requiredFields
     .filter((reqField) => !nonUserFields.includes(reqField))
     .forEach((reqField) => {
       if (reqField === 'dob') {
         ['day', 'month', 'year'].forEach((dobPart) => {
+          if (processedFields.has(dobPart)) return;
+          processedFields.add(dobPart);
           const val = expandedFields[dobPart];
           if (val == null || val.toString().trim() === '') {
             missingFields.push(dobPart);
@@ -108,6 +112,9 @@ export function validatePrefilledFields(
         });
         return;
       }
+
+      if (processedFields.has(reqField)) return;
+      processedFields.add(reqField);
 
       const value = expandedFields[reqField];
       const checker = fieldChecks[reqField];

@@ -10,6 +10,14 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
+import {
+  hasIdInfo,
+  extractIdInfoData,
+  validatePrefilledFields,
+  parseDOB,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+} from './id-info-utils.js';
 
 (function basicKyc() {
   'use strict';
@@ -42,6 +50,7 @@ import { getHeaders } from './request';
   const IDInfoForm = document.querySelector('#id-info');
   const CompleteScreen = document.querySelector('#complete-screen');
   let disableBackOnFirstScreen = false;
+  let skipInputScreen = false;
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
@@ -173,6 +182,8 @@ import { getHeaders } from './request';
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
 
+    customizeForm();
+
     const selectedIdRequiresConsent = partnerConstraints.consentRequired[
       selectedCountry
     ]
@@ -194,15 +205,17 @@ import { getHeaders } from './request';
       if (IDRequiresConsent || config.demo_mode) {
         customizeConsentScreen();
         setActiveScreen(EndUserConsent);
+      } else if (skipInputScreen) {
+        handleFormSubmit();
       } else {
         setActiveScreen(IDInfoForm);
       }
+    } else if (skipInputScreen) {
+      handleFormSubmit();
     } else {
       hideIdFromBackExit();
       setActiveScreen(IDInfoForm);
     }
-
-    customizeForm();
   }
 
   function hideIdFromBackExit() {
@@ -240,8 +253,30 @@ import { getHeaders } from './request';
 
     let validCountries = [];
 
-    if (config.id_selection) {
-      const selectedCountryList = Object.keys(config.id_selection);
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        id_info = { country, id_type: idType };
+        disableBackOnFirstScreen = true;
+        setInitialScreen(partnerConstraints);
+      } else if (validCountries.length === 1) {
+        id_info = { country: validCountries[0] };
+      }
+    } else if (effectiveIdSelection) {
+      const selectedCountryList = Object.keys(effectiveIdSelection);
       validCountries = supportedCountries.filter((value) =>
         selectedCountryList.includes(value),
       );
@@ -252,7 +287,7 @@ import { getHeaders } from './request';
           country: validCountries[0],
         };
 
-        const idTypes = config.id_selection[selectedCountry];
+        const idTypes = effectiveIdSelection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           disableBackOnFirstScreen = true;
@@ -279,9 +314,8 @@ import { getHeaders } from './request';
 
       const loadIdTypes = (countryCode) => {
         if (countryCode) {
-          const validIDTypes = config.id_selection
-            ? config.id_selection
-            : partnerConstraints.idSelection.basic_kyc;
+          const validIDTypes =
+            effectiveIdSelection || partnerConstraints.idSelection.basic_kyc;
           const constrainedIDTypes = Object.keys(
             generalConstraints[countryCode].id_types,
           );
@@ -480,7 +514,11 @@ import { getHeaders } from './request';
         consent_information = event.detail;
 
         if (consent_information.consented.personal_details) {
-          setActiveScreen(IDInfoForm);
+          if (skipInputScreen) {
+            handleFormSubmit();
+          } else {
+            setActiveScreen(IDInfoForm);
+          }
         }
       },
       false,
@@ -495,7 +533,11 @@ import { getHeaders } from './request';
           id_info.id_number = consent_information.id_number;
           id_info.session_id = consent_information.session_id;
           id_info.consent_information = consent_information;
-          setActiveScreen(IDInfoForm);
+          if (skipInputScreen) {
+            handleFormSubmit();
+          } else {
+            setActiveScreen(IDInfoForm);
+          }
         }
       },
       false,
@@ -531,7 +573,10 @@ import { getHeaders } from './request';
 
   function customizeForm() {
     setGuideTextForIDType();
-    setFormInputs();
+    const result = setFormInputs();
+    if (result === 'skip') {
+      skipInputScreen = true;
+    }
   }
 
   function setGuideTextForIDType() {
@@ -587,6 +632,8 @@ import { getHeaders } from './request';
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
         .required_fields;
+    const idTypeConstraints =
+      productConstraints[id_info.country].id_types[id_info.id_type];
 
     const showIdNumber = requiredFields.some((fieldName) =>
       fieldName.includes('id_number'),
@@ -633,6 +680,88 @@ import { getHeaders } from './request';
       loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
       BankCode.hidden = false;
     }
+
+    // Handle pre-filled data from id_info param
+    if (hasIdInfo(config)) {
+      const prefilledData = extractIdInfoData(
+        config.id_info,
+        id_info.country,
+        id_info.id_type,
+      );
+
+      if (prefilledData) {
+        // Expand DOB if provided as single string
+        let expandedData = { ...prefilledData };
+        if (prefilledData.dob && typeof prefilledData.dob === 'string') {
+          const parsed = parseDOB(prefilledData.dob);
+          if (parsed) {
+            expandedData = { ...expandedData, ...parsed };
+          }
+        }
+
+        const validation = validatePrefilledFields(
+          expandedData,
+          requiredFields,
+          idTypeConstraints,
+        );
+
+        if (validation.allValid) {
+          // All fields valid — pre-fill and skip input screen
+          prefillFormFields(expandedData);
+          mergePrefilledIntoIdInfo(expandedData);
+          return 'skip';
+        }
+
+        // Pre-fill valid fields and lock them
+        Object.entries(validation.validFields).forEach(([field, value]) => {
+          const input = IDInfoForm.querySelector(`#${field}`);
+          if (input) {
+            input.value = value;
+            input.setAttribute('readonly', '');
+            input.classList.add('locked-field');
+          }
+        });
+
+        // Pre-fill invalid fields (editable, with error display)
+        Object.entries(validation.invalidFields).forEach(([field, value]) => {
+          const input = IDInfoForm.querySelector(`#${field}`);
+          if (input) {
+            input.value = value;
+            input.setAttribute('aria-invalid', 'true');
+          }
+        });
+
+        // Focus first editable field
+        const firstEditable =
+          validation.missingFields[0] ||
+          Object.keys(validation.invalidFields)[0];
+        if (firstEditable) {
+          const input = IDInfoForm.querySelector(`#${firstEditable}`);
+          if (input) {
+            requestAnimationFrame(() => input.focus());
+          }
+        }
+      }
+    }
+
+    return 'show';
+  }
+
+  function prefillFormFields(data) {
+    Object.entries(data).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      const input = IDInfoForm.querySelector(`#${field}`);
+      if (input) {
+        input.value = value;
+      }
+    });
+  }
+
+  function mergePrefilledIntoIdInfo(data) {
+    Object.entries(data).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      id_info[field] = value;
+    });
   }
 
   function getPartnerParams() {
@@ -836,9 +965,13 @@ import { getHeaders } from './request';
   }
 
   async function handleFormSubmit(event) {
-    event.target.disabled = true;
-    event.preventDefault();
-    resetForm();
+    if (event && event.target) event.target.disabled = true;
+
+    if (event) {
+      event.preventDefault();
+      resetForm();
+    }
+
     const form = IDInfoForm.querySelector('form');
 
     const formData = new FormData(form);
@@ -847,7 +980,7 @@ import { getHeaders } from './request';
     const isInvalid = validateInputs(payload);
 
     if (isInvalid) {
-      event.target.disabled = false;
+      if (event && event.target) event.target.disabled = false;
       return;
     }
 
@@ -867,7 +1000,7 @@ import { getHeaders } from './request';
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     } finally {
-      event.target.disabled = false;
+      if (event && event.target) event.target.disabled = false;
     }
   }
 

@@ -74,6 +74,11 @@ Sentry.init({
 * Supported languages are: en, ar,
 * @param { Object } [config.id_selection=all our [supported id types / countries]{@link https://docs.usesmileid.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
 * e.g. { 'NG': ['BVN', 'NIN'] }
+* @param { Object } [config.id_info] - a mapping of country code to id types with pre-filled field data.
+* Takes precedence over id_selection when both are provided.
+* If exactly 1 country + 1 ID type is provided, the selection screen is skipped.
+* If all required fields pass validation, the input screen is also skipped.
+* e.g. { 'NG': { 'BVN': { id_number: '12345678901', first_name: 'John', last_name: 'Doe', dob: '1990-03-15' } } }
 * @param { Object } [config.consent_required=none of our [supported id types / countries]{@link https://docs.usesmileid.com/general/supported-id-types}] - a mapping of country code to a selection of supported id types
 * e.g. { 'NG': ['BVN', 'NIN'] }
 * N.B.: This controls the display of the screen for the provision of end-user

@@ -11,6 +11,11 @@ import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+import {
+  hasIdInfo,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+} from './id-info-utils.js';
 
 (function documentVerification() {
   'use strict';
@@ -293,14 +298,20 @@ import { getHeaders, getZipSignature } from './request';
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
 
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
     function loadIdTypes(countryCode) {
       const countryIdTypes = constraints.find(
         (item) => item.country.code === countryCode,
       ).id_types;
 
-      if (config.id_selection) {
+      if (effectiveIdSelection && effectiveIdSelection[countryCode] && effectiveIdSelection[countryCode].length > 0) {
         const result = countryIdTypes.filter((idType) => {
-          return config.id_selection[countryCode].find((validIdType) => {
+          return effectiveIdSelection[countryCode].find((validIdType) => {
             if (validIdType === '' || validIdType.toLowerCase() === 'others') {
               return !idType.code;
             }
@@ -341,7 +352,43 @@ import { getHeaders, getZipSignature } from './request';
 
     let validCountries = [];
 
-    if (config.id_selection) {
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        selectedCountry = country;
+        id_info = { country, id_type: idType };
+
+        const countryConstraint = constraints.find(
+          (entry) => entry.country.code === country,
+        );
+        const documentCaptureConfig = countryConstraint.id_types.find(
+          (entry) => entry.code === idType,
+        );
+
+        SmartCameraWeb.setAttribute('document-type', id_info.id_type);
+        if (documentCaptureConfig && !documentCaptureConfig.has_back) {
+          SmartCameraWeb.setAttribute('hide-back-of-id', true);
+        }
+        if (config.document_capture_modes) {
+          SmartCameraWeb.setAttribute(
+            'document-capture-modes',
+            config.document_capture_modes.join(','),
+          );
+        }
+        SmartCameraWeb.setAttribute('hide-back-to-host', true);
+        setActiveScreen(SmartCameraWeb);
+      } else if (validCountries.length === 1) {
+        selectedCountry = validCountries[0];
+        id_info = { country: validCountries[0] };
+      }
+    } else if (config.id_selection) {
       /**
        * when id selection list is made, we have two sources for id_types:
        *  1. `valid_documents`, the new approach

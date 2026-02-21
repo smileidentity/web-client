@@ -105,8 +105,15 @@ export default function setupForm() {
         //   NG: ['BVN'],
         // },
         id_info: {
-          // GH: {
-          // },
+          GH: {
+            GHANA_CARD_NO_PHOTO: {
+            //   id_number: 'GHA-727301688-2',
+            },
+          },
+          NG: {
+            // BVN: {},
+            // NATIONAL_ID: {},
+          },
         },
         partner_details: {
           partner_id,

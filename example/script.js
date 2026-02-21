@@ -105,8 +105,8 @@ export default function setupForm() {
         //   NG: ['BVN'],
         // },
         id_info: {
-          GH: {
-          },
+          // GH: {
+          // },
         },
         partner_details: {
           partner_id,

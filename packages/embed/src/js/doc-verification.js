@@ -309,7 +309,11 @@ import {
         (item) => item.country.code === countryCode,
       ).id_types;
 
-      if (effectiveIdSelection && effectiveIdSelection[countryCode] && effectiveIdSelection[countryCode].length > 0) {
+      if (
+        effectiveIdSelection &&
+        effectiveIdSelection[countryCode] &&
+        effectiveIdSelection[countryCode].length > 0
+      ) {
         const result = countryIdTypes.filter((idType) => {
           return effectiveIdSelection[countryCode].find((validIdType) => {
             if (validIdType === '' || validIdType.toLowerCase() === 'others') {

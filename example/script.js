@@ -106,13 +106,6 @@ export default function setupForm() {
         // },
         id_info: {
           GH: {
-            GHANA_CARD: {
-              id_number: '',
-            },
-          },
-          NG: {
-            BVN: {},
-            PASSPORT: {},
           },
         },
         partner_details: {

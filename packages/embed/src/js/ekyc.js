@@ -317,17 +317,15 @@ import {
           const constrainedIDTypes = Object.keys(
             generalConstraints[countryCode].id_types,
           );
-          let selectedIDTypes = constrainedIDTypes;
           const idSelectionSource =
-            effectiveIdSelection || partnerConstraints.idSelection.enhanced_kyc;
-          if (
-            idSelectionSource[countryCode] &&
-            idSelectionSource[countryCode].length > 0
-          ) {
-            selectedIDTypes = idSelectionSource[countryCode].filter((value) =>
-              constrainedIDTypes.includes(value),
-            );
-          }
+            effectiveIdSelection &&
+            effectiveIdSelection[countryCode] &&
+            effectiveIdSelection[countryCode].length > 0
+              ? effectiveIdSelection
+              : partnerConstraints.idSelection.enhanced_kyc;
+          const selectedIDTypes = (
+            idSelectionSource[countryCode] || constrainedIDTypes
+          ).filter((value) => constrainedIDTypes.includes(value));
 
           // ACTION: Reset ID Type <select>
           selectIDType.innerHTML = '';

@@ -710,8 +710,11 @@ import {
           idTypeConstraints,
         );
 
-        if (validation.allValid || !isStrictMode(config)) {
-          // All fields valid, or non-strict mode — pre-fill and skip input screen
+        if (
+          validation.allValid ||
+          (!isStrictMode(config) && validation.missingFields.length === 0)
+        ) {
+          // All valid, or non-strict with no missing fields — skip input screen
           prefillFormFields(expandedData);
           mergePrefilledIntoIdInfo(expandedData);
           return 'skip';

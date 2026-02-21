@@ -1,15 +1,42 @@
 /**
+ * Non-country keys that can appear in id_info alongside country codes.
+ */
+const reservedKeys = ['strict'];
+
+/**
  * Checks if the config has the new `id_info` parameter (not to be confused
  * with the internal `id_info` state object used throughout the product files).
  * @param {Object} config
  * @returns {boolean}
  */
 export function hasIdInfo(config) {
-  return (
+  if (
+    config.id_info == null ||
+    typeof config.id_info !== 'object'
+  ) {
+    return false;
+  }
+  return Object.keys(config.id_info).filter(
+    (key) => !reservedKeys.includes(key),
+  ).length > 0;
+}
+
+/**
+ * Returns whether strict validation mode is enabled for id_info.
+ * Defaults to true — set `id_info.strict: false` to skip input screen
+ * even when provided data is invalid or incomplete.
+ * @param {Object} config
+ * @returns {boolean}
+ */
+export function isStrictMode(config) {
+  if (
     config.id_info != null &&
     typeof config.id_info === 'object' &&
-    Object.keys(config.id_info).length > 0
-  );
+    config.id_info.strict === false
+  ) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -143,7 +170,9 @@ export function validatePrefilledFields(
  * @returns {{ shouldSkip: boolean, country: string|null, idType: string|null }}
  */
 export function shouldSkipSelection(idInfo) {
-  const countries = Object.keys(idInfo);
+  const countries = Object.keys(idInfo).filter(
+    (key) => !reservedKeys.includes(key),
+  );
   if (countries.length !== 1) {
     return { shouldSkip: false, country: null, idType: null };
   }
@@ -162,8 +191,10 @@ export function shouldSkipSelection(idInfo) {
  */
 export function idInfoToIdSelection(idInfo) {
   const result = {};
-  Object.keys(idInfo).forEach((country) => {
-    result[country] = Object.keys(idInfo[country]);
-  });
+  Object.keys(idInfo)
+    .filter((key) => !reservedKeys.includes(key))
+    .forEach((country) => {
+      result[country] = Object.keys(idInfo[country]);
+    });
   return result;
 }

@@ -14,6 +14,7 @@ import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
 import {
   hasIdInfo,
+  isStrictMode,
   extractIdInfoData,
   validatePrefilledFields,
   parseDOB,
@@ -709,8 +710,8 @@ import {
           idTypeConstraints,
         );
 
-        if (validation.allValid) {
-          // All fields valid — pre-fill and skip input screen
+        if (validation.allValid || !isStrictMode(config)) {
+          // All fields valid, or non-strict mode — pre-fill and skip input screen
           prefillFormFields(expandedData);
           mergePrefilledIntoIdInfo(expandedData);
           return 'skip';

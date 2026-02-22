@@ -228,6 +228,188 @@ describe('id_info - Biometric KYC', () => {
   });
 });
 
+describe('id_info - strict mode', () => {
+  beforeEach(() => {
+    cy.loadIDOptions();
+  });
+
+  it('strict:false — should skip input screen when fields are invalid (not missing)', () => {
+    cy.visit('/biometric_kyc_id_info_strict_false_invalid');
+
+    cy.loadIDOptions();
+
+    // Selection screen should be skipped (1 country + 1 id type)
+    cy.getIFrameBody().find('#country').should('not.be.visible');
+    cy.getIFrameBody().find('#id_type').should('not.be.visible');
+
+    // Should go to camera
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      {
+        upload_url:
+          'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+    ).as('getUploadURL');
+
+    cy.intercept(
+      {
+        method: 'PUT',
+        url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+      {
+        statusCode: 200,
+      },
+    ).as('successfulUpload');
+
+    cy.navigateThroughCameraScreens();
+
+    // Input screen should be skipped — invalid id_number but strict:false
+    cy.getIFrameBody().find('#id-info').should('not.be.visible');
+
+    cy.wait('@getUploadURL');
+    cy.wait('@successfulUpload');
+
+    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+  });
+
+  it('strict:false — should still show input screen when fields are missing', () => {
+    cy.visit('/biometric_kyc_id_info_strict_false_missing');
+
+    cy.loadIDOptions();
+
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      {
+        upload_url:
+          'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+    ).as('getUploadURL');
+
+    cy.intercept(
+      {
+        method: 'PUT',
+        url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+      {
+        statusCode: 200,
+      },
+    ).as('successfulUpload');
+
+    cy.navigateThroughCameraScreens();
+
+    // Input screen should be shown — missing last_name and dob even though strict:false
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+
+    // id_number and first_name should be locked (valid provided fields)
+    cy.getIFrameBody()
+      .find('#id_number')
+      .should('have.value', 'ABC123456789')
+      .should('have.attr', 'readonly');
+    cy.getIFrameBody()
+      .find('#first_name')
+      .should('have.value', 'John')
+      .should('have.attr', 'readonly');
+
+    // last_name should be empty and editable (missing)
+    cy.getIFrameBody()
+      .find('#last_name')
+      .should('have.value', '')
+      .should('not.have.attr', 'readonly');
+
+    // dob fields should be empty and editable (missing)
+    cy.getIFrameBody()
+      .find('#day')
+      .should('have.value', '')
+      .should('not.have.attr', 'readonly');
+
+    // Fill in missing fields and submit
+    cy.getIFrameBody().find('#last_name').type('Doe');
+    cy.getIFrameBody().find('#day').type('15');
+    cy.getIFrameBody().find('#month').type('03');
+    cy.getIFrameBody().find('#year').type('1990');
+    cy.getIFrameBody().find('#submitForm').click();
+
+    cy.wait('@getUploadURL');
+    cy.wait('@successfulUpload');
+
+    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+  });
+
+  it('strict:true — should show input screen when fields are invalid', () => {
+    cy.visit('/biometric_kyc_id_info_strict_true_invalid');
+
+    cy.loadIDOptions();
+
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      {
+        upload_url:
+          'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+    ).as('getUploadURL');
+
+    cy.intercept(
+      {
+        method: 'PUT',
+        url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+      {
+        statusCode: 200,
+      },
+    ).as('successfulUpload');
+
+    cy.navigateThroughCameraScreens();
+
+    // Input screen should be shown — strict:true (default behavior) and id_number is invalid
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+
+    // id_number should be pre-filled with invalid value and editable
+    cy.getIFrameBody().find('#id_number').should('have.value', '1234');
+    cy.getIFrameBody()
+      .find('#id_number')
+      .should('have.attr', 'aria-invalid', 'true');
+    cy.getIFrameBody().find('#id_number').should('not.have.attr', 'readonly');
+
+    // Valid fields should be locked
+    cy.getIFrameBody()
+      .find('#first_name')
+      .should('have.value', 'John')
+      .should('have.class', 'locked-field');
+    cy.getIFrameBody()
+      .find('#last_name')
+      .should('have.value', 'Doe')
+      .should('have.class', 'locked-field');
+    cy.getIFrameBody()
+      .find('#day')
+      .should('have.value', '15')
+      .should('have.class', 'locked-field');
+
+    // Fix the invalid field and submit
+    cy.getIFrameBody().find('#id_number').clear().type('ABC123456789');
+    cy.getIFrameBody().find('#submitForm').click();
+
+    cy.wait('@getUploadURL');
+    cy.wait('@successfulUpload');
+
+    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+  });
+});
+
 describe('id_info - Enhanced KYC', () => {
   beforeEach(() => {
     cy.loadIDOptions();

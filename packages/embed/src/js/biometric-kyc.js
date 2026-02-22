@@ -960,7 +960,7 @@ import {
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid) {
+    if (isInvalid && isStrictMode(config)) {
       if (event && event.target) event.target.disabled = false;
       return;
     }

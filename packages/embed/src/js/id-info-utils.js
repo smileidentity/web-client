@@ -10,15 +10,13 @@ const reservedKeys = ['strict'];
  * @returns {boolean}
  */
 export function hasIdInfo(config) {
-  if (
-    config.id_info == null ||
-    typeof config.id_info !== 'object'
-  ) {
+  if (config.id_info == null || typeof config.id_info !== 'object') {
     return false;
   }
-  return Object.keys(config.id_info).filter(
-    (key) => !reservedKeys.includes(key),
-  ).length > 0;
+  return (
+    Object.keys(config.id_info).filter((key) => !reservedKeys.includes(key))
+      .length > 0
+  );
 }
 
 /**

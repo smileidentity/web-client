@@ -974,7 +974,7 @@ import {
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid) {
+    if (isInvalid && isStrictMode(config)) {
       return;
     }
 

@@ -173,14 +173,14 @@ id_info: {
 }
 ```
 
-| `strict` | Fields status              | Behavior                                       |
-| -------- | -------------------------- | ---------------------------------------------- |
-| `true`   | All valid                  | Skip input screen, submit                      |
-| `true`   | Some invalid               | Show form with invalid fields editable          |
-| `true`   | Some missing               | Show form with missing fields editable          |
-| `false`  | All valid                  | Skip input screen, submit                      |
-| `false`  | Some invalid (none missing)| Skip input screen, submit with data as-is      |
-| `false`  | Some missing               | Show form with missing fields editable          |
+| `strict` | Fields status               | Behavior                                  |
+| -------- | --------------------------- | ----------------------------------------- |
+| `true`   | All valid                   | Skip input screen, submit                 |
+| `true`   | Some invalid                | Show form with invalid fields editable    |
+| `true`   | Some missing                | Show form with missing fields editable    |
+| `false`  | All valid                   | Skip input screen, submit                 |
+| `false`  | Some invalid (none missing) | Skip input screen, submit with data as-is |
+| `false`  | Some missing                | Show form with missing fields editable    |
 
 ### Date of Birth
 

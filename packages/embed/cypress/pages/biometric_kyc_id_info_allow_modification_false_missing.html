@@ -30,7 +30,13 @@
           'https://webhook.site/1aaa7a7b-accb-40ac-8643-fd8a8703e9be',
         environment: 'sandbox',
         id_info: {
-          strict: false,
+          allow_modification: false,
+          NG: {
+            DRIVERS_LICENSE: {
+              id_number: 'ABC123456789',
+              first_name: 'John',
+            },
+          },
         },
         partner_details: {
           name: 'Test Org',

@@ -12,7 +12,7 @@ import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
 import {
   hasIdInfo,
-  isStrictMode,
+  allowsModification,
   shouldSkipSelection,
   idInfoToIdSelection,
   applyIdInfoPrefill,
@@ -924,7 +924,7 @@ import {
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid && (!skipInputScreen || isStrictMode(config))) {
+    if (isInvalid && (!skipInputScreen || allowsModification(config))) {
       if (event && event.target) event.target.disabled = false;
       return;
     }

@@ -151,17 +151,17 @@ window.SmileIdentity({
 - **Single country + single ID type**: The selection screen is automatically skipped.
 - **All required fields valid**: The input screen is also skipped — the user goes straight to the next step (e.g. selfie capture).
 - **Missing fields**: The input screen is shown with valid fields locked (read-only) and missing fields editable.
-- **Invalid fields**: By default (`strict: true`), invalid fields are shown as editable with error indicators. With `strict: false`, the input screen is skipped and data is submitted as-is.
+- **Invalid fields**: By default (`allow_modification: true`), invalid fields are shown as editable with error indicators. With `allow_modification: false`, the input screen is skipped and data is submitted as-is.
 - **Multiple countries or ID types**: The selection screen is shown with options constrained to the provided entries.
 - **Precedence**: `id_info` takes precedence over `id_selection` when both are provided.
 
-### Strict Mode
+### Allow Modification
 
 Control whether invalid (but provided) fields should block the user:
 
 ```javascript
 id_info: {
-  strict: false, // default: true
+  allow_modification: false, // default: true
   NG: {
     DRIVERS_LICENSE: {
       id_number: '1234', // doesn't match regex, but submit anyway
@@ -173,14 +173,14 @@ id_info: {
 }
 ```
 
-| `strict` | Fields status               | Behavior                                  |
-| -------- | --------------------------- | ----------------------------------------- |
-| `true`   | All valid                   | Skip input screen, submit                 |
-| `true`   | Some invalid                | Show form with invalid fields editable    |
-| `true`   | Some missing                | Show form with missing fields editable    |
-| `false`  | All valid                   | Skip input screen, submit                 |
-| `false`  | Some invalid (none missing) | Skip input screen, submit with data as-is |
-| `false`  | Some missing                | Show form with missing fields editable    |
+| `allow_modification` | Fields status               | Behavior                                  |
+| -------------------- | --------------------------- | ----------------------------------------- |
+| `true`               | All valid                   | Skip input screen, submit                 |
+| `true`               | Some invalid                | Show form with invalid fields editable    |
+| `true`               | Some missing                | Show form with missing fields editable    |
+| `false`              | All valid                   | Skip input screen, submit                 |
+| `false`              | Some invalid (none missing) | Skip input screen, submit with data as-is |
+| `false`              | Some missing                | Show form with missing fields editable    |
 
 ### Date of Birth
 

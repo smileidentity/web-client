@@ -228,13 +228,13 @@ describe('id_info - Biometric KYC', () => {
   });
 });
 
-describe('id_info - strict mode', () => {
+describe('id_info - allow_modification mode', () => {
   beforeEach(() => {
     cy.loadIDOptions();
   });
 
-  it('strict:false — should skip input screen when fields are invalid (not missing)', () => {
-    cy.visit('/biometric_kyc_id_info_strict_false_invalid');
+  it('allow_modification:false — should skip input screen when fields are invalid (not missing)', () => {
+    cy.visit('/biometric_kyc_id_info_allow_modification_false_invalid');
 
     cy.loadIDOptions();
 
@@ -268,7 +268,7 @@ describe('id_info - strict mode', () => {
 
     cy.navigateThroughCameraScreens();
 
-    // Input screen should be skipped — invalid id_number but strict:false
+    // Input screen should be skipped — invalid id_number but allow_modification:false
     cy.getIFrameBody().find('#id-info').should('not.be.visible');
 
     cy.wait('@getUploadURL');
@@ -277,8 +277,8 @@ describe('id_info - strict mode', () => {
     cy.getIFrameBody().find('#complete-screen').should('be.visible');
   });
 
-  it('strict:false — should still show input screen when fields are missing', () => {
-    cy.visit('/biometric_kyc_id_info_strict_false_missing');
+  it('allow_modification:false — should still show input screen when fields are missing', () => {
+    cy.visit('/biometric_kyc_id_info_allow_modification_false_missing');
 
     cy.loadIDOptions();
 
@@ -307,7 +307,7 @@ describe('id_info - strict mode', () => {
 
     cy.navigateThroughCameraScreens();
 
-    // Input screen should be shown — missing last_name and dob even though strict:false
+    // Input screen should be shown — missing last_name and dob even though allow_modification:false
     cy.getIFrameBody().find('#id-info').should('be.visible');
 
     // id_number and first_name should be locked (valid provided fields)
@@ -345,8 +345,8 @@ describe('id_info - strict mode', () => {
     cy.getIFrameBody().find('#complete-screen').should('be.visible');
   });
 
-  it('strict:true — should show input screen when fields are invalid', () => {
-    cy.visit('/biometric_kyc_id_info_strict_true_invalid');
+  it('allow_modification:true — should show input screen when fields are invalid', () => {
+    cy.visit('/biometric_kyc_id_info_allow_modification_true_invalid');
 
     cy.loadIDOptions();
 
@@ -375,7 +375,7 @@ describe('id_info - strict mode', () => {
 
     cy.navigateThroughCameraScreens();
 
-    // Input screen should be shown — strict:true (default behavior) and id_number is invalid
+    // Input screen should be shown — allow_modification:true (default behavior) and id_number is invalid
     cy.getIFrameBody().find('#id-info').should('be.visible');
 
     // id_number should be pre-filled with invalid value and editable
@@ -409,8 +409,8 @@ describe('id_info - strict mode', () => {
     cy.getIFrameBody().find('#complete-screen').should('be.visible');
   });
 
-  it('strict:false — should still validate when user fills form manually (no id_info data)', () => {
-    cy.visit('/biometric_kyc_id_info_strict_false_no_data');
+  it('allow_modification:false — should still validate when user fills form manually (no id_info data)', () => {
+    cy.visit('/biometric_kyc_id_info_allow_modification_false_no_data');
 
     cy.loadIDOptions();
 
@@ -441,7 +441,7 @@ describe('id_info - strict mode', () => {
     // Input screen should be shown (user fills form manually)
     cy.getIFrameBody().find('#id-info').should('be.visible');
 
-    // Submit with empty fields — validation should block even though strict:false
+    // Submit with empty fields — validation should block even though allow_modification:false
     cy.getIFrameBody().find('#submitForm').click();
 
     // Should NOT proceed to upload — form should still be visible with validation errors
@@ -449,8 +449,8 @@ describe('id_info - strict mode', () => {
     cy.getIFrameBody().find('#complete-screen').should('not.be.visible');
   });
 
-  it('strict:false — should validate when user edits form after partial id_info prefill', () => {
-    cy.visit('/biometric_kyc_id_info_strict_false_missing');
+  it('allow_modification:false — should validate when user edits form after partial id_info prefill', () => {
+    cy.visit('/biometric_kyc_id_info_allow_modification_false_missing');
 
     cy.loadIDOptions();
 

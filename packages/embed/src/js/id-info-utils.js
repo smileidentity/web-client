@@ -1,7 +1,7 @@
 /**
  * Non-country keys that can appear in id_info alongside country codes.
  */
-const reservedKeys = ['strict'];
+const reservedKeys = ['allow_modification'];
 
 /**
  * Checks if the config has the new `id_info` parameter (not to be confused
@@ -20,17 +20,17 @@ export function hasIdInfo(config) {
 }
 
 /**
- * Returns whether strict validation mode is enabled for id_info.
- * Defaults to true — set `id_info.strict: false` to skip input screen
- * even when provided data is invalid or incomplete.
+ * Returns whether the user is allowed to modify pre-filled id_info fields.
+ * Defaults to true — set `id_info.allow_modification: false` to skip the
+ * input screen even when provided data is invalid or incomplete.
  * @param {Object} config
  * @returns {boolean}
  */
-export function isStrictMode(config) {
+export function allowsModification(config) {
   if (
     config.id_info != null &&
     typeof config.id_info === 'object' &&
-    config.id_info.strict === false
+    config.id_info.allow_modification === false
   ) {
     return false;
   }
@@ -210,7 +210,7 @@ export function idInfoToIdSelection(idInfo) {
  * @param {string[]} params.requiredFields - from product constraints
  * @param {Object} params.idTypeConstraints - the id type constraints object
  * @returns {{ action: 'skip'|'show', mergedFields: Object|null }}
- *   - action: 'skip' if all data is valid (or non-strict with no missing), 'show' otherwise
+ *   - action: 'skip' if all data is valid (or allow_modification:false with no missing), 'show' otherwise
  *   - mergedFields: on 'skip', the expanded field data to merge into id_info (excludes 'dob'); null on 'show'
  */
 export function applyIdInfoPrefill({
@@ -248,9 +248,9 @@ export function applyIdInfoPrefill({
 
   if (
     validation.allValid ||
-    (!isStrictMode(config) && validation.missingFields.length === 0)
+    (!allowsModification(config) && validation.missingFields.length === 0)
   ) {
-    // All valid, or non-strict with no missing fields — skip input screen
+    // All valid, or allow_modification:false with no missing fields — skip input screen
     // Prefill form fields (for potential back-navigation)
     Object.entries(expandedData).forEach(([field, value]) => {
       if (field === 'dob') return;

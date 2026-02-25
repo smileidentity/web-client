@@ -982,8 +982,15 @@ import {
 
     const form = IDInfoForm.querySelector('form');
 
-    const formData = new FormData(form);
-    const payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+    let payload;
+    if (skipInputScreen) {
+      // Skip path: form was never shown, use id_info directly
+      payload = { ...id_info };
+    } else {
+      // Non-skip path: merge form data over id_info (user may have edited fields)
+      const formData = new FormData(form);
+      payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+    }
 
     const isInvalid = validateInputs(payload);
 

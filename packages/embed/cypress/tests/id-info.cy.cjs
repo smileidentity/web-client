@@ -408,6 +408,66 @@ describe('id_info - strict mode', () => {
 
     cy.getIFrameBody().find('#complete-screen').should('be.visible');
   });
+
+  it('strict:false — should still validate when user fills form manually (no id_info data)', () => {
+    cy.visit('/biometric_kyc_id_info_strict_false_no_data');
+
+    cy.loadIDOptions();
+
+    // Selection screen should be shown (no country/type provided)
+    cy.getIFrameBody().find('#select-id-type').should('be.visible');
+
+    // Select country and ID type manually
+    cy.getIFrameBody().find('#country').select('NG');
+    cy.getIFrameBody().find('#id_type').select('DRIVERS_LICENSE');
+    cy.getIFrameBody().find('#submitConfig').click();
+
+    // Should go to camera
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      {
+        upload_url:
+          'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+    ).as('getUploadURL');
+
+    cy.navigateThroughCameraScreens();
+
+    // Input screen should be shown (user fills form manually)
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+
+    // Submit with empty fields — validation should block even though strict:false
+    cy.getIFrameBody().find('#submitForm').click();
+
+    // Should NOT proceed to upload — form should still be visible with validation errors
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+    cy.getIFrameBody().find('#complete-screen').should('not.be.visible');
+  });
+
+  it('strict:false — should validate when user edits form after partial id_info prefill', () => {
+    cy.visit('/biometric_kyc_id_info_strict_false_missing');
+
+    cy.loadIDOptions();
+
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    cy.navigateThroughCameraScreens();
+
+    // Input screen should be shown — missing last_name and dob
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+
+    // Submit without filling missing fields — validation should block
+    cy.getIFrameBody().find('#submitForm').click();
+
+    // Should NOT proceed — form should still be visible
+    cy.getIFrameBody().find('#id-info').should('be.visible');
+    cy.getIFrameBody().find('#complete-screen').should('not.be.visible');
+  });
 });
 
 describe('id_info - Enhanced KYC', () => {

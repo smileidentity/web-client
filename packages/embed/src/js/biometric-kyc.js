@@ -897,7 +897,7 @@ import {
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid && isStrictMode(config)) {
+    if (isInvalid && (!skipInputScreen || isStrictMode(config))) {
       if (event && event.target) event.target.disabled = false;
       return;
     }

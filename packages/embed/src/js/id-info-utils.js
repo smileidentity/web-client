@@ -196,3 +196,108 @@ export function idInfoToIdSelection(idInfo) {
     });
   return result;
 }
+
+/**
+ * Handles pre-filled id_info data: validates fields, prefills the form,
+ * locks valid fields, marks invalid fields, and determines whether to skip
+ * the input screen.
+ *
+ * @param {Object} params
+ * @param {Object} params.config - the SDK config object
+ * @param {string} params.country - selected country code
+ * @param {string} params.idType - selected ID type
+ * @param {HTMLElement} params.formElement - the ID info form DOM element
+ * @param {string[]} params.requiredFields - from product constraints
+ * @param {Object} params.idTypeConstraints - the id type constraints object
+ * @returns {{ action: 'skip'|'show', mergedFields: Object|null }}
+ *   - action: 'skip' if all data is valid (or non-strict with no missing), 'show' otherwise
+ *   - mergedFields: on 'skip', the expanded field data to merge into id_info (excludes 'dob'); null on 'show'
+ */
+export function applyIdInfoPrefill({
+  config,
+  country,
+  idType,
+  formElement,
+  requiredFields,
+  idTypeConstraints,
+}) {
+  if (!hasIdInfo(config)) {
+    return { action: 'show', mergedFields: null };
+  }
+
+  const prefilledData = extractIdInfoData(config.id_info, country, idType);
+
+  if (!prefilledData) {
+    return { action: 'show', mergedFields: null };
+  }
+
+  // Expand DOB if provided as single string
+  let expandedData = { ...prefilledData };
+  if (prefilledData.dob && typeof prefilledData.dob === 'string') {
+    const parsed = parseDOB(prefilledData.dob);
+    if (parsed) {
+      expandedData = { ...expandedData, ...parsed };
+    }
+  }
+
+  const validation = validatePrefilledFields(
+    expandedData,
+    requiredFields,
+    idTypeConstraints,
+  );
+
+  if (
+    validation.allValid ||
+    (!isStrictMode(config) && validation.missingFields.length === 0)
+  ) {
+    // All valid, or non-strict with no missing fields — skip input screen
+    // Prefill form fields (for potential back-navigation)
+    Object.entries(expandedData).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      const input = formElement.querySelector(`#${field}`);
+      if (input) {
+        input.value = value;
+      }
+    });
+
+    // Build merged fields (excluding 'dob' key)
+    const mergedFields = {};
+    Object.entries(expandedData).forEach(([field, value]) => {
+      if (field === 'dob') return;
+      mergedFields[field] = value;
+    });
+
+    return { action: 'skip', mergedFields };
+  }
+
+  // Pre-fill valid fields and lock them
+  Object.entries(validation.validFields).forEach(([field, value]) => {
+    const input = formElement.querySelector(`#${field}`);
+    if (input) {
+      input.value = value;
+      input.setAttribute('readonly', '');
+      input.classList.add('locked-field');
+    }
+  });
+
+  // Pre-fill invalid fields (editable, with error display)
+  Object.entries(validation.invalidFields).forEach(([field, value]) => {
+    const input = formElement.querySelector(`#${field}`);
+    if (input) {
+      input.value = value;
+      input.setAttribute('aria-invalid', 'true');
+    }
+  });
+
+  // Focus first editable field
+  const firstEditable =
+    validation.missingFields[0] || Object.keys(validation.invalidFields)[0];
+  if (firstEditable) {
+    const input = formElement.querySelector(`#${firstEditable}`);
+    if (input) {
+      requestAnimationFrame(() => input.focus());
+    }
+  }
+
+  return { action: 'show', mergedFields: null };
+}

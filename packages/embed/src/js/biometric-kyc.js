@@ -15,11 +15,9 @@ import { getHeaders, getZipSignature } from './request';
 import {
   hasIdInfo,
   isStrictMode,
-  extractIdInfoData,
-  validatePrefilledFields,
-  parseDOB,
   shouldSkipSelection,
   idInfoToIdSelection,
+  applyIdInfoPrefill,
 } from './id-info-utils.js';
 
 (function biometricKyc() {
@@ -687,89 +685,21 @@ import {
     }
 
     // Handle pre-filled data from id_info param
-    if (hasIdInfo(config)) {
-      const prefilledData = extractIdInfoData(
-        config.id_info,
-        id_info.country,
-        id_info.id_type,
-      );
+    const { action, mergedFields } = applyIdInfoPrefill({
+      config,
+      country: id_info.country,
+      idType: id_info.id_type,
+      formElement: IDInfoForm,
+      requiredFields,
+      idTypeConstraints,
+    });
 
-      if (prefilledData) {
-        // Expand DOB if provided as single string
-        let expandedData = { ...prefilledData };
-        if (prefilledData.dob && typeof prefilledData.dob === 'string') {
-          const parsed = parseDOB(prefilledData.dob);
-          if (parsed) {
-            expandedData = { ...expandedData, ...parsed };
-          }
-        }
-
-        const validation = validatePrefilledFields(
-          expandedData,
-          requiredFields,
-          idTypeConstraints,
-        );
-
-        if (
-          validation.allValid ||
-          (!isStrictMode(config) && validation.missingFields.length === 0)
-        ) {
-          // All valid, or non-strict with no missing fields — skip input screen
-          prefillFormFields(expandedData);
-          mergePrefilledIntoIdInfo(expandedData);
-          return 'skip';
-        }
-
-        // Pre-fill valid fields and lock them
-        Object.entries(validation.validFields).forEach(([field, value]) => {
-          const input = IDInfoForm.querySelector(`#${field}`);
-          if (input) {
-            input.value = value;
-            input.setAttribute('readonly', '');
-            input.classList.add('locked-field');
-          }
-        });
-
-        // Pre-fill invalid fields (editable, with error display)
-        Object.entries(validation.invalidFields).forEach(([field, value]) => {
-          const input = IDInfoForm.querySelector(`#${field}`);
-          if (input) {
-            input.value = value;
-            input.setAttribute('aria-invalid', 'true');
-          }
-        });
-
-        // Focus first editable field
-        const firstEditable =
-          validation.missingFields[0] ||
-          Object.keys(validation.invalidFields)[0];
-        if (firstEditable) {
-          const input = IDInfoForm.querySelector(`#${firstEditable}`);
-          if (input) {
-            requestAnimationFrame(() => input.focus());
-          }
-        }
-      }
+    if (action === 'skip') {
+      Object.assign(id_info, mergedFields);
+      return 'skip';
     }
 
     return 'show';
-  }
-
-  function prefillFormFields(data) {
-    Object.entries(data).forEach(([field, value]) => {
-      if (field === 'dob') return;
-      const input = IDInfoForm.querySelector(`#${field}`);
-      if (input) {
-        input.value = value;
-      }
-    });
-  }
-
-  function mergePrefilledIntoIdInfo(data) {
-    Object.entries(data).forEach(([field, value]) => {
-      if (field === 'dob') return;
-      id_info[field] = value;
-    });
   }
 
   function getPartnerParams() {

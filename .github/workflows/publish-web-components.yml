@@ -6,6 +6,12 @@ on:
         description: 'Skip test suite for faster release'
         type: boolean
         default: true
+  workflow_call:
+    inputs:
+      skip_tests:
+        description: 'Skip test suite for faster release'
+        type: boolean
+        default: true
 
 permissions:
   contents: read

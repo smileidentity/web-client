@@ -10,6 +10,13 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getHeaders } from './request';
+import {
+  hasIdInfo,
+  allowsModification,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+  applyIdInfoPrefill,
+} from './id-info-utils.js';
 
 (function eKYC() {
   'use strict';
@@ -45,6 +52,7 @@ import { getHeaders } from './request';
   let disableBackOnFirstScreen = false;
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
+  let skipInputScreen = false;
 
   async function postData(url = '', data = {}, shouldSignPayload = false) {
     return fetch(url, {
@@ -177,6 +185,15 @@ import { getHeaders } from './request';
           selectedIDType,
         )
       : false;
+
+    customizeForm();
+
+    if (skipInputScreen) {
+      // All pre-filled data is valid — skip directly to submission
+      handleFormSubmit();
+      return;
+    }
+
     if (
       selectedIdRequiresConsent ||
       config.consent_required ||
@@ -198,8 +215,6 @@ import { getHeaders } from './request';
       hideIdFromBackExit();
       setActiveScreen(IDInfoForm);
     }
-
-    customizeForm();
   }
 
   function hideIdFromBackExit() {
@@ -236,8 +251,30 @@ import { getHeaders } from './request';
 
     let validCountries = [];
 
-    if (config.id_selection) {
-      const selectedCountryList = Object.keys(config.id_selection);
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        id_info = { country, id_type: idType };
+        disableBackOnFirstScreen = true;
+        setInitialScreen(partnerConstraints);
+      } else if (validCountries.length === 1) {
+        id_info = { country: validCountries[0] };
+      }
+    } else if (effectiveIdSelection) {
+      const selectedCountryList = Object.keys(effectiveIdSelection);
       validCountries = supportedCountries.filter((value) =>
         selectedCountryList.includes(value),
       );
@@ -248,7 +285,7 @@ import { getHeaders } from './request';
           country: validCountries[0],
         };
 
-        const idTypes = config.id_selection[selectedCountry];
+        const idTypes = effectiveIdSelection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
@@ -276,15 +313,18 @@ import { getHeaders } from './request';
 
       const loadIdTypes = (countryCode) => {
         if (countryCode) {
-          const validIDTypes = config.id_selection
-            ? config.id_selection
-            : partnerConstraints.idSelection.enhanced_kyc;
           const constrainedIDTypes = Object.keys(
             generalConstraints[countryCode].id_types,
           );
-          const selectedIDTypes = validIDTypes[countryCode].filter((value) =>
-            constrainedIDTypes.includes(value),
-          );
+          const idSelectionSource =
+            effectiveIdSelection &&
+            effectiveIdSelection[countryCode] &&
+            effectiveIdSelection[countryCode].length > 0
+              ? effectiveIdSelection
+              : partnerConstraints.idSelection.enhanced_kyc;
+          const selectedIDTypes = (
+            idSelectionSource[countryCode] || constrainedIDTypes
+          ).filter((value) => constrainedIDTypes.includes(value));
 
           // ACTION: Reset ID Type <select>
           selectIDType.innerHTML = '';
@@ -526,7 +566,10 @@ import { getHeaders } from './request';
 
   function customizeForm() {
     setGuideTextForIDType();
-    setFormInputs();
+    const result = setFormInputs();
+    if (result === 'skip') {
+      skipInputScreen = true;
+    }
   }
 
   function setGuideTextForIDType() {
@@ -582,6 +625,8 @@ import { getHeaders } from './request';
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
         .required_fields;
+    const idTypeConstraints =
+      productConstraints[id_info.country].id_types[id_info.id_type];
 
     const showIdNumber = requiredFields.some((fieldName) =>
       fieldName.includes('id_number'),
@@ -628,6 +673,23 @@ import { getHeaders } from './request';
       loadBankCodes(ngBankCodes, BankCode.querySelector('#bank_code'));
       BankCode.hidden = false;
     }
+
+    // Handle pre-filled data from id_info param
+    const { action, mergedFields } = applyIdInfoPrefill({
+      config,
+      country: id_info.country,
+      idType: id_info.id_type,
+      formElement: IDInfoForm,
+      requiredFields,
+      idTypeConstraints,
+    });
+
+    if (action === 'skip') {
+      Object.assign(id_info, mergedFields);
+      return 'skip';
+    }
+
+    return 'show';
   }
 
   function getPartnerParams() {
@@ -837,12 +899,19 @@ import { getHeaders } from './request';
     }
     const form = IDInfoForm.querySelector('form');
 
-    const formData = new FormData(form);
-    const payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+    let payload;
+    if (skipInputScreen) {
+      // Skip path: form was never shown, use id_info directly
+      payload = { ...id_info };
+    } else {
+      // Non-skip path: merge form data over id_info (user may have edited fields)
+      const formData = new FormData(form);
+      payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+    }
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid) {
+    if (isInvalid && (!skipInputScreen || allowsModification(config))) {
       return;
     }
 

@@ -9,6 +9,11 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+import {
+  hasIdInfo,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+} from './id-info-utils.js';
 
 /**
  * Apply translations to all elements with data-i18n attribute
@@ -158,8 +163,38 @@ function applyPageTranslations() {
 
     let validCountries = [];
 
-    if (config.id_selection) {
-      const selectedCountryList = Object.keys(config.id_selection);
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        id_info = { country, id_type: idType };
+        SmartCameraWeb.setAttribute('document-type', id_info.id_type);
+        if (config.document_capture_modes) {
+          SmartCameraWeb.setAttribute(
+            'document-capture-modes',
+            config.document_capture_modes.join(','),
+          );
+        }
+        SmartCameraWeb.setAttribute('hide-back-to-host', true);
+        SmartCameraWeb.setAttribute('hide-back-of-id', true);
+        setActiveScreen(SmartCameraWeb);
+      } else if (validCountries.length === 1) {
+        id_info = { country: validCountries[0] };
+      }
+    } else if (effectiveIdSelection) {
+      const selectedCountryList = Object.keys(effectiveIdSelection);
       validCountries = supportedCountries.filter((value) =>
         selectedCountryList.includes(value),
       );
@@ -170,7 +205,7 @@ function applyPageTranslations() {
           country: validCountries[0],
         };
 
-        const idTypes = config.id_selection[selectedCountry];
+        const idTypes = effectiveIdSelection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
 
@@ -213,8 +248,14 @@ function applyPageTranslations() {
           const constrainedIDTypes = Object.keys(
             productConstraints[countryCode].id_types,
           );
-          const validIDTypes = config.id_selection
-            ? config.id_selection[countryCode]
+          const idSelectionSource =
+            effectiveIdSelection &&
+            effectiveIdSelection[countryCode] &&
+            effectiveIdSelection[countryCode].length > 0
+              ? effectiveIdSelection
+              : null;
+          const validIDTypes = idSelectionSource
+            ? idSelectionSource[countryCode]
             : constrainedIDTypes;
           const selectedIDTypes = validIDTypes.filter((value) =>
             constrainedIDTypes.includes(value),

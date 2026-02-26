@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `id_info` config option to pre-fill ID information fields (country, ID type, field values) across all products
+  - Supports biometric KYC, enhanced KYC, basic KYC, document verification, and enhanced document verification
+  - When exactly 1 country and 1 ID type are provided, the selection screen is automatically skipped
+  - When all required fields are provided and valid, the input screen is also skipped
+  - Valid pre-filled fields are locked (read-only), while missing or invalid fields remain editable
+  - Takes precedence over `id_selection` when both are provided
+- Added `allow_modification` option within `id_info` to control validation behavior
+  - `allow_modification: true` (default): shows the input form when fields fail validation, allowing the user to correct them
+  - `allow_modification: false`: skips the input screen when all fields are provided but some are invalid (e.g. regex mismatch); missing fields still require user input
+
 ## [11.2.0] - 2026-02-13
 
 ### Added

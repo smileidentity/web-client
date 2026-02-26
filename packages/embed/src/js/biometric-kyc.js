@@ -12,6 +12,13 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+import {
+  hasIdInfo,
+  allowsModification,
+  shouldSkipSelection,
+  idInfoToIdSelection,
+  applyIdInfoPrefill,
+} from './id-info-utils.js';
 
 (function biometricKyc() {
   'use strict';
@@ -56,6 +63,7 @@ import { getHeaders, getZipSignature } from './request';
 
   let fileToUpload;
   let uploadURL;
+  let skipInputScreen = false;
 
   async function postData(url = '', data = {}, shouldSignPayload = false) {
     return fetch(url, {
@@ -260,9 +268,31 @@ import { getHeaders, getZipSignature } from './request';
 
     let validCountries = [];
 
-    if (config.id_selection) {
+    // id_info takes precedence over id_selection
+    const useIdInfo = hasIdInfo(config);
+    const effectiveIdSelection = useIdInfo
+      ? idInfoToIdSelection(config.id_info)
+      : config.id_selection;
+
+    if (useIdInfo) {
+      const { shouldSkip, country, idType } = shouldSkipSelection(
+        config.id_info,
+      );
+
       validCountries = supportedCountries.filter((value) =>
-        Object.keys(config.id_selection).includes(value),
+        Object.keys(effectiveIdSelection).includes(value),
+      );
+
+      if (shouldSkip) {
+        id_info = { country, id_type: idType };
+        disableBackOnFirstScreen = true;
+        setInitialScreen(partnerConstraints);
+      } else if (validCountries.length === 1) {
+        id_info = { country: validCountries[0] };
+      }
+    } else if (effectiveIdSelection) {
+      validCountries = supportedCountries.filter((value) =>
+        Object.keys(effectiveIdSelection).includes(value),
       );
 
       if (validCountries.length === 1) {
@@ -271,7 +301,7 @@ import { getHeaders, getZipSignature } from './request';
           country: validCountries[0],
         };
 
-        const idTypes = config.id_selection[selectedCountry];
+        const idTypes = effectiveIdSelection[selectedCountry];
         if (idTypes.length === 1 || typeof idTypes === 'string') {
           id_info.id_type = Array.isArray(idTypes) ? idTypes[0] : idTypes;
           disableBackOnFirstScreen = true;
@@ -300,15 +330,18 @@ import { getHeaders, getZipSignature } from './request';
 
       const loadIdTypes = (countryCode) => {
         if (countryCode) {
-          const validIDTypes = config.id_selection
-            ? config.id_selection
-            : partnerConstraints.idSelection.biometric_kyc;
           const constrainedIDTypes = Object.keys(
             generalConstraints[countryCode].id_types,
           );
-          const selectedIDTypes = validIDTypes[countryCode].filter((value) =>
-            constrainedIDTypes.includes(value),
-          );
+          const idSelectionSource =
+            effectiveIdSelection &&
+            effectiveIdSelection[countryCode] &&
+            effectiveIdSelection[countryCode].length > 0
+              ? effectiveIdSelection
+              : partnerConstraints.idSelection.biometric_kyc;
+          const selectedIDTypes = (
+            idSelectionSource[countryCode] || constrainedIDTypes
+          ).filter((value) => constrainedIDTypes.includes(value));
 
           // ACTION: Reset ID Type <select>
           selectIDType.innerHTML = '';
@@ -412,7 +445,7 @@ import { getHeaders, getZipSignature } from './request';
     (event) => {
       images = event.detail.images;
       const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
-      if (idRequiresTOTPConsent) {
+      if (idRequiresTOTPConsent || skipInputScreen) {
         handleFormSubmit();
       } else {
         setActiveScreen(IDInfoForm);
@@ -594,7 +627,10 @@ import { getHeaders, getZipSignature } from './request';
 
   function customizeForm() {
     setGuideTextForIDType();
-    setFormInputs();
+    const result = setFormInputs();
+    if (result === 'skip') {
+      skipInputScreen = true;
+    }
   }
 
   function setGuideTextForIDType() {
@@ -618,6 +654,8 @@ import { getHeaders, getZipSignature } from './request';
     const requiredFields =
       productConstraints[id_info.country].id_types[id_info.id_type]
         .required_fields;
+    const idTypeConstraints =
+      productConstraints[id_info.country].id_types[id_info.id_type];
 
     const showIdNumber = requiredFields.some((fieldName) =>
       fieldName.includes('id_number'),
@@ -645,6 +683,23 @@ import { getHeaders, getZipSignature } from './request';
       const DOB = IDInfoForm.querySelector('fieldset#dob');
       DOB.hidden = false;
     }
+
+    // Handle pre-filled data from id_info param
+    const { action, mergedFields } = applyIdInfoPrefill({
+      config,
+      country: id_info.country,
+      idType: id_info.id_type,
+      formElement: IDInfoForm,
+      requiredFields,
+      idTypeConstraints,
+    });
+
+    if (action === 'skip') {
+      Object.assign(id_info, mergedFields);
+      return 'skip';
+    }
+
+    return 'show';
   }
 
   function getPartnerParams() {
@@ -830,12 +885,19 @@ import { getHeaders, getZipSignature } from './request';
 
     const form = IDInfoForm.querySelector('form');
 
-    const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
+    let payload;
+    if (skipInputScreen) {
+      // Skip path: form was never shown, use id_info directly
+      payload = { ...id_info };
+    } else {
+      // Non-skip path: merge form data over id_info (user may have edited fields)
+      const formData = new FormData(form);
+      payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+    }
 
     const isInvalid = validateInputs(payload);
 
-    if (isInvalid) {
+    if (isInvalid && (!skipInputScreen || allowsModification(config))) {
       if (event && event.target) event.target.disabled = false;
       return;
     }

@@ -172,6 +172,14 @@ select {
   height: 3rem;
 }
 
+input.locked-field,
+select.locked-field {
+  background-color: #f5f5f5;
+  color: #6b6b6b;
+  cursor: not-allowed;
+  border-color: #d0d0d0;
+}
+
 textarea {
   min-height: 10rem;
 }

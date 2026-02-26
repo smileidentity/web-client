@@ -5,13 +5,13 @@ on:
       skip_tests:
         description: 'Skip test suite for faster deploy'
         type: boolean
-        default: false
+        default: true
   workflow_call:
     inputs:
       skip_tests:
         description: 'Skip test suite for faster deploy'
         type: boolean
-        default: false
+        default: true
 permissions:
   id-token: write
   contents: read

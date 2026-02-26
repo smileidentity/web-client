@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.3.0] - 2026-02-26
+
 ### Added
 
 - Added `id_info` config option to pre-fill ID information fields (country, ID type, field values) across all products

@@ -1,17 +1,46 @@
 name: deploy
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip test suite for faster deploy'
+        type: boolean
+        default: false
 permissions:
   id-token: write
   contents: read
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: ensure running from a v* tag
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          echo "::error::This workflow must be triggered from a v* tag. Current ref: ${{ github.ref }}"
+          exit 1
+
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: verify tag matches package version
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          PKG_VERSION=$(node -p "require('./packages/web-components/package.json').version")
+          if [[ "$TAG_VERSION" != "$PKG_VERSION" ]]; then
+            echo "::error::Tag version (v$TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+            exit 1
+          fi
+          echo "Version verified: $PKG_VERSION"
+
   test:
+    needs: [validate]
+    if: ${{ inputs.skip_tests == false }}
     uses: ./.github/workflows/test.yml
+
   smart-camera-web:
-    needs: [test]
+    needs: [validate, test]
+    if: ${{ always() && needs.validate.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:
@@ -56,7 +85,8 @@ jobs:
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}/*" "/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}/*"
   embed:
-    # needs: [test]
+    needs: [validate, test]
+    if: ${{ always() && needs.validate.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:

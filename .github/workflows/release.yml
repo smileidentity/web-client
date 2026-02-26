@@ -24,6 +24,11 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: verify tag matches package version
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"

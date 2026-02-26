@@ -30,6 +30,11 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: verify tag matches package version
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"
@@ -66,7 +71,7 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-          cache-dependency-path: packages/web-components/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: install dependencies
         run: npm ci

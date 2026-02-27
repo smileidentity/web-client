@@ -47,6 +47,7 @@ jobs:
     uses: ./.github/workflows/publish-web-components.yml
     with:
       skip_tests: ${{ inputs.skip_tests }}
+      skip_validation: true
 
   deploy:
     needs: [validate]
@@ -56,4 +57,5 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       skip_tests: ${{ inputs.skip_tests }}
+      skip_validation: true
     secrets: inherit

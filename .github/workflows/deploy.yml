@@ -12,11 +12,16 @@ on:
         description: 'Skip test suite for faster deploy'
         type: boolean
         default: true
+      skip_validation:
+        description: 'Skip tag validation (already validated by caller)'
+        type: boolean
+        default: false
 permissions:
   id-token: write
   contents: read
 jobs:
   validate:
+    if: ${{ !inputs.skip_validation }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -46,12 +51,12 @@ jobs:
 
   test:
     needs: [validate]
-    if: ${{ inputs.skip_tests == false }}
+    if: ${{ always() && !failure() && !cancelled() && inputs.skip_tests == false }}
     uses: ./.github/workflows/test.yml
 
   smart-camera-web:
     needs: [validate, test]
-    if: ${{ always() && needs.validate.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    if: ${{ always() && !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:
@@ -97,7 +102,7 @@ jobs:
           aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/${{ steps.set_destination.outputs.DEST_DIR_SMART_CAMERA_WEB }}/*" "/${{ steps.set_destination.outputs.MAJOR_VERSION_SMART_CAMERA_WEB }}/*"
   embed:
     needs: [validate, test]
-    if: ${{ always() && needs.validate.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    if: ${{ always() && !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     defaults:

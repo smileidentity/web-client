@@ -12,12 +12,17 @@ on:
         description: 'Skip test suite for faster release'
         type: boolean
         default: true
+      skip_validation:
+        description: 'Skip tag validation (already validated by caller)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   validate:
+    if: ${{ !inputs.skip_validation }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -47,12 +52,12 @@ jobs:
 
   test:
     needs: [validate]
-    if: ${{ inputs.skip_tests == false }}
+    if: ${{ always() && !failure() && !cancelled() && inputs.skip_tests == false }}
     uses: ./.github/workflows/test.yml
 
   publish:
     needs: [validate, test]
-    if: ${{ always() && needs.validate.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    if: ${{ always() && !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

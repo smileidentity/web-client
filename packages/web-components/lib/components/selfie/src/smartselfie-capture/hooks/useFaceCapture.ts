@@ -161,9 +161,7 @@ export const useFaceCapture = ({
     );
     const hasProgressedMouth = mouthOpen >= requiredMouthOpen;
     const hasProgressedSmile =
-      isSmileEligible &&
-      smileScore >= requiredSmileScore &&
-      hasProgressedMouth;
+      isSmileEligible && smileScore >= requiredSmileScore && hasProgressedMouth;
 
     if (hasProgressedSmile) {
       smileConsecutiveFramesRef.current += 1;

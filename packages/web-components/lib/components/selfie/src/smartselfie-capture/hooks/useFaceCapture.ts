@@ -33,7 +33,6 @@ interface UseFaceCaptureProps {
   smileProgressDelta: number;
   mouthDeformationDelta: number;
   smileProgressConsecutiveFrames: number;
-  smileBaselineSampleSize: number;
   minFaceSize: number;
   maxFaceSize: number;
   smileCooldown: number;
@@ -51,7 +50,6 @@ export const useFaceCapture = ({
   smileProgressDelta,
   mouthDeformationDelta,
   smileProgressConsecutiveFrames,
-  smileBaselineSampleSize,
   minFaceSize,
   maxFaceSize,
   smileCooldown,
@@ -61,8 +59,6 @@ export const useFaceCapture = ({
   const animationFrameRef = useRef<number | null>(null);
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
-  const smileBaselineSamplesRef = useRef<number[]>([]);
-  const mouthBaselineSamplesRef = useRef<number[]>([]);
   const smileConsecutiveFramesRef = useRef(0);
   const smileZoneMinScoreRef = useRef<number | null>(null);
   const smileZoneMinMouthOpenRef = useRef<number | null>(null);
@@ -95,7 +91,6 @@ export const useFaceCapture = ({
   const smileCheckpoint = useComputed(() =>
     Math.floor(livenessCaptureCount.value / 2),
   );
-  const neutralZone = useComputed(() => Math.floor(totalCaptures.value * 0.2));
 
   const isReadyToCapture = useComputed(
     () =>
@@ -114,8 +109,6 @@ export const useFaceCapture = ({
   };
 
   const resetSmileProgressTracking = () => {
-    smileBaselineSamplesRef.current = [];
-    mouthBaselineSamplesRef.current = [];
     smileConsecutiveFramesRef.current = 0;
     smileZoneMinScoreRef.current = null;
     smileZoneMinMouthOpenRef.current = null;
@@ -131,21 +124,6 @@ export const useFaceCapture = ({
       smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold;
 
     if (!isCapturing.value || !isSmileZone) {
-      if (
-        isCapturing.value &&
-        capturesTaken.value <= smileCheckpoint.value &&
-        smileBaselineSamplesRef.current.length < smileBaselineSampleSize
-      ) {
-        smileBaselineSamplesRef.current = [
-          ...smileBaselineSamplesRef.current,
-          smileScore,
-        ];
-
-        mouthBaselineSamplesRef.current = [
-          ...mouthBaselineSamplesRef.current,
-          mouthOpen,
-        ];
-      }
       smileConsecutiveFramesRef.current = 0;
       smileZoneMinScoreRef.current = null;
       smileZoneMinMouthOpenRef.current = null;
@@ -252,11 +230,6 @@ export const useFaceCapture = ({
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {
         if (
-          currentSmileScore.value >= smileThreshold &&
-          currentMouthOpen.value >= mouthOpenThreshold
-        ) {
-          updateAlert('smile-required');
-        } else if (
           currentSmileScore.value >= smileThreshold &&
           currentMouthOpen.value < mouthOpenThreshold
         ) {
@@ -743,7 +716,6 @@ export const useFaceCapture = ({
     capturesTaken,
     hasFinishedCapture,
     smileCheckpoint,
-    neutralZone,
 
     initializeFaceLandmarker,
     setupCanvas,

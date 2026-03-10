@@ -44,6 +44,9 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
   const smileCooldown = 300;
   const smileThreshold = 0.25;
   const mouthOpenThreshold = 0.05;
+  const smileProgressDelta = 0.08;
+  const smileProgressConsecutiveFrames = 4;
+  const smileBaselineSampleSize = 8;
   const minFaceSize = 0.35;
   const maxFaceSize = 0.5;
 
@@ -64,6 +67,9 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     duration,
     smileThreshold,
     mouthOpenThreshold,
+    smileProgressDelta,
+    smileProgressConsecutiveFrames,
+    smileBaselineSampleSize,
     minFaceSize,
     maxFaceSize,
     smileCooldown,

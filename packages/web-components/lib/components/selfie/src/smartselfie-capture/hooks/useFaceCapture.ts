@@ -28,7 +28,11 @@ interface UseFaceCaptureProps {
   interval: number;
   duration: number;
   smileThreshold: number;
+  neutralSmileMaxThreshold: number;
   mouthOpenThreshold: number;
+  smileProgressDelta: number;
+  mouthDeformationDelta: number;
+  smileProgressConsecutiveFrames: number;
   minFaceSize: number;
   maxFaceSize: number;
   smileCooldown: number;
@@ -41,7 +45,11 @@ export const useFaceCapture = ({
   interval,
   duration,
   smileThreshold,
+  neutralSmileMaxThreshold,
   mouthOpenThreshold,
+  smileProgressDelta,
+  mouthDeformationDelta,
+  smileProgressConsecutiveFrames,
   minFaceSize,
   maxFaceSize,
   smileCooldown,
@@ -51,6 +59,9 @@ export const useFaceCapture = ({
   const animationFrameRef = useRef<number | null>(null);
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
+  const smileConsecutiveFramesRef = useRef(0);
+  const smileZoneMinScoreRef = useRef<number | null>(null);
+  const smileZoneMinMouthOpenRef = useRef<number | null>(null);
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
@@ -74,10 +85,12 @@ export const useFaceCapture = ({
   const capturesTaken = useSignal(0);
   const hasFinishedCapture = useSignal(false);
 
-  const smileCheckpoint = useComputed(() =>
-    Math.floor(totalCaptures.value * 0.4),
+  const livenessCaptureCount = useComputed(() =>
+    Math.max(totalCaptures.value - 1, 0),
   );
-  const neutralZone = useComputed(() => Math.floor(totalCaptures.value * 0.2));
+  const smileCheckpoint = useComputed(() =>
+    Math.floor(livenessCaptureCount.value / 2),
+  );
 
   const isReadyToCapture = useComputed(
     () =>
@@ -93,6 +106,70 @@ export const useFaceCapture = ({
     } else {
       alertTitle.value = '';
     }
+  };
+
+  const resetSmileProgressTracking = () => {
+    smileConsecutiveFramesRef.current = 0;
+    smileZoneMinScoreRef.current = null;
+    smileZoneMinMouthOpenRef.current = null;
+  };
+
+  const hasLightNeutralExpression = () =>
+    currentSmileScore.value <= neutralSmileMaxThreshold &&
+    currentMouthOpen.value < mouthOpenThreshold;
+
+  const trackSmileProgress = (smileScore: number, mouthOpen: number) => {
+    const isSmileZone = capturesTaken.value > smileCheckpoint.value;
+    const isSmileEligible =
+      smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold;
+
+    if (!isCapturing.value || !isSmileZone) {
+      smileConsecutiveFramesRef.current = 0;
+      smileZoneMinScoreRef.current = null;
+      smileZoneMinMouthOpenRef.current = null;
+      return false;
+    }
+
+    if (smileZoneMinScoreRef.current === null) {
+      smileZoneMinScoreRef.current = smileScore;
+    } else {
+      smileZoneMinScoreRef.current = Math.min(
+        smileZoneMinScoreRef.current,
+        smileScore,
+      );
+    }
+
+    if (smileZoneMinMouthOpenRef.current === null) {
+      smileZoneMinMouthOpenRef.current = mouthOpen;
+    } else {
+      smileZoneMinMouthOpenRef.current = Math.min(
+        smileZoneMinMouthOpenRef.current,
+        mouthOpen,
+      );
+    }
+
+    const smileProgressionBaseline = smileZoneMinScoreRef.current;
+    const mouthProgressionBaseline = smileZoneMinMouthOpenRef.current;
+
+    const requiredSmileScore = Math.max(
+      smileThreshold,
+      smileProgressionBaseline + smileProgressDelta,
+    );
+    const requiredMouthOpen = Math.max(
+      mouthOpenThreshold,
+      mouthProgressionBaseline + mouthDeformationDelta,
+    );
+    const hasProgressedMouth = mouthOpen >= requiredMouthOpen;
+    const hasProgressedSmile =
+      isSmileEligible && smileScore >= requiredSmileScore && hasProgressedMouth;
+
+    if (hasProgressedSmile) {
+      smileConsecutiveFramesRef.current += 1;
+    } else {
+      smileConsecutiveFramesRef.current = 0;
+    }
+
+    return smileConsecutiveFramesRef.current >= smileProgressConsecutiveFrames;
   };
 
   const updateAlert = useRef(
@@ -138,11 +215,15 @@ export const useFaceCapture = ({
   };
 
   const updateCaptureAlerts = () => {
-    const isInNeutralZone = capturesTaken.value < neutralZone.value;
-    const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
+    const isInNeutralZone = capturesTaken.value <= smileCheckpoint.value;
+    const isInSmileZone = capturesTaken.value > smileCheckpoint.value;
 
     if (isInNeutralZone) {
-      alertTitle.value = t('selfie.smart.status.capturing');
+      if (hasLightNeutralExpression()) {
+        alertTitle.value = t('selfie.smart.status.capturing');
+      } else {
+        updateAlert('neutral-expression');
+      }
     } else if (isInSmileZone) {
       const timeSinceSmile = Date.now() - lastSmileTime.value;
       if (timeSinceSmile > smileCooldown) {
@@ -303,7 +384,7 @@ export const useFaceCapture = ({
         currentSmileScore.value = smileScore;
         currentMouthOpen.value = mouthOpen;
 
-        if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
+        if (trackSmileProgress(smileScore, mouthOpen)) {
           lastSmileTime.value = Date.now();
 
           if (isPaused.value && isCapturing.value && resumeCaptureRef.current) {
@@ -320,12 +401,34 @@ export const useFaceCapture = ({
               }
             }, 0);
           }
+        } else {
+          const isInSmileZone = capturesTaken.value > smileCheckpoint.value;
+
+          if (
+            !isInSmileZone &&
+            hasLightNeutralExpression() &&
+            isPaused.value &&
+            isCapturing.value &&
+            resumeCaptureRef.current
+          ) {
+            setTimeout(() => {
+              if (
+                isPaused.value &&
+                isCapturing.value &&
+                resumeCaptureRef.current
+              ) {
+                resumeCaptureRef.current();
+              }
+            }, 0);
+          }
         }
       } else {
         // No face detected or multiple faces - reset values
         currentSmileScore.value = 0;
         currentFaceSize.value = 0;
         currentMouthOpen.value = 0;
+        smileConsecutiveFramesRef.current = 0;
+        smileZoneMinMouthOpenRef.current = null;
         faceInBounds.value = false;
         faceProximity.value = 'good';
       }
@@ -409,7 +512,7 @@ export const useFaceCapture = ({
     }
   };
 
-  const pauseCapture = () => {
+  const pauseCapture = (messageKey: MessageKey = 'smile-required') => {
     if (captureTimerRef.current) {
       clearInterval(captureTimerRef.current);
       captureTimerRef.current = null;
@@ -422,7 +525,7 @@ export const useFaceCapture = ({
       faceInBounds.value &&
       faceProximity.value === 'good'
     ) {
-      updateAlert('smile-required');
+      updateAlert(messageKey);
     }
   };
 
@@ -456,7 +559,12 @@ export const useFaceCapture = ({
         return;
       }
 
-      const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
+      const isInSmileZone = capturesTaken.value > smileCheckpoint.value;
+
+      if (!isInSmileZone && !hasLightNeutralExpression()) {
+        pauseCapture('neutral-expression');
+        return;
+      }
 
       if (isInSmileZone) {
         const timeSinceSmile = Date.now() - lastSmileTime.value;
@@ -477,7 +585,11 @@ export const useFaceCapture = ({
       faceInBounds.value &&
       !multipleFaces.value
     ) {
-      const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
+      const isInSmileZone = capturesTaken.value > smileCheckpoint.value;
+      if (!isInSmileZone && !hasLightNeutralExpression()) {
+        return;
+      }
+
       if (isInSmileZone) {
         const timeSinceSmile = Date.now() - lastSmileTime.value;
         if (timeSinceSmile > smileCooldown) {
@@ -497,6 +609,7 @@ export const useFaceCapture = ({
     capturedImages.value = [];
     isCapturing.value = true;
     isPaused.value = false;
+    resetSmileProgressTracking();
     totalCaptures.value = Math.ceil(duration / interval);
     capturesTaken.value = 0;
     countdown.value = totalCaptures.value;
@@ -570,6 +683,7 @@ export const useFaceCapture = ({
     currentFaceSize.value = 0;
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
+    resetSmileProgressTracking();
 
     if (canvasRef.current) {
       clearCanvas(canvasRef.current);
@@ -600,7 +714,6 @@ export const useFaceCapture = ({
     capturesTaken,
     hasFinishedCapture,
     smileCheckpoint,
-    neutralZone,
 
     initializeFaceLandmarker,
     setupCanvas,

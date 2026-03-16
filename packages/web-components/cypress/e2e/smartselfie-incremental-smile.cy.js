@@ -16,11 +16,7 @@ const createLandmarks = (upperLipY = 0.55, lowerLipY = 0.58) => {
   return [points];
 };
 
-const installBrowserMocks = (
-  win,
-  mode = 'always-smile',
-  options = {},
-) => {
+const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
   const { switchAfterMs = 1600 } = options;
   const srcObjectStore = new WeakMap();
   const originalSrcObjectDescriptor = Object.getOwnPropertyDescriptor(
@@ -57,8 +53,7 @@ const installBrowserMocks = (
     return Promise.resolve();
   };
 
-  const originalDrawImage =
-    win.CanvasRenderingContext2D.prototype.drawImage;
+  const originalDrawImage = win.CanvasRenderingContext2D.prototype.drawImage;
   win.CanvasRenderingContext2D.prototype.drawImage = () => {};
 
   win.__restoreBrowserMocks = () => {
@@ -76,29 +71,29 @@ const installBrowserMocks = (
   Object.defineProperty(win.navigator, 'mediaDevices', {
     configurable: true,
     value: {
-    getUserMedia: (constraints = {}) => {
-      const requestedFacingMode = constraints?.video?.facingMode || 'user';
-      const track = {
-        stop: () => {},
-        getSettings: () => ({
-          facingMode: requestedFacingMode,
-          deviceId: 'fake-camera-device',
-        }),
-      };
+      getUserMedia: (constraints = {}) => {
+        const requestedFacingMode = constraints?.video?.facingMode || 'user';
+        const track = {
+          stop: () => {},
+          getSettings: () => ({
+            facingMode: requestedFacingMode,
+            deviceId: 'fake-camera-device',
+          }),
+        };
 
-      return Promise.resolve({
-        getTracks: () => [track],
-        getVideoTracks: () => [track],
-      });
-    },
-    enumerateDevices: () =>
-      Promise.resolve([
-        {
-          kind: 'videoinput',
-          deviceId: 'fake-camera-device',
-          label: 'Fake Camera',
-        },
-      ]),
+        return Promise.resolve({
+          getTracks: () => [track],
+          getVideoTracks: () => [track],
+        });
+      },
+      enumerateDevices: () =>
+        Promise.resolve([
+          {
+            kind: 'videoinput',
+            deviceId: 'fake-camera-device',
+            label: 'Fake Camera',
+          },
+        ]),
     },
   });
 
@@ -219,10 +214,15 @@ context('SmartSelfie Incremental Smile', () => {
   });
 
   it('keeps capture active when user is neutral first then progressively smiles', () => {
-    cy.visit('/?component=smartselfie-capture&direct=true&interval=350&duration=700', {
-      onBeforeLoad: (win) =>
-        installBrowserMocks(win, 'neutral-then-smile', { switchAfterMs: 500 }),
-    });
+    cy.visit(
+      '/?component=smartselfie-capture&direct=true&interval=350&duration=700',
+      {
+        onBeforeLoad: (win) =>
+          installBrowserMocks(win, 'neutral-then-smile', {
+            switchAfterMs: 500,
+          }),
+      },
+    );
 
     cy.get('smartselfie-capture')
       .shadow()

@@ -71,14 +71,22 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
   Object.defineProperty(win.navigator, 'mediaDevices', {
     configurable: true,
     value: {
+      enumerateDevices: () =>
+        Promise.resolve([
+          {
+            deviceId: 'fake-camera-device',
+            kind: 'videoinput',
+            label: 'Fake Camera',
+          },
+        ]),
       getUserMedia: (constraints = {}) => {
         const requestedFacingMode = constraints?.video?.facingMode || 'user';
         const track = {
-          stop: () => {},
           getSettings: () => ({
-            facingMode: requestedFacingMode,
             deviceId: 'fake-camera-device',
+            facingMode: requestedFacingMode,
           }),
+          stop: () => {},
         };
 
         return Promise.resolve({
@@ -86,19 +94,10 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
           getVideoTracks: () => [track],
         });
       },
-      enumerateDevices: () =>
-        Promise.resolve([
-          {
-            kind: 'videoinput',
-            deviceId: 'fake-camera-device',
-            label: 'Fake Camera',
-          },
-        ]),
     },
   });
 
   const nonNeutralFrame = {
-    faceLandmarks: createLandmarks(0.55, 0.58),
     faceBlendshapes: [
       {
         categories: [
@@ -107,10 +106,10 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
         ],
       },
     ],
+    faceLandmarks: createLandmarks(0.55, 0.58),
   };
 
   const neutralFrame = {
-    faceLandmarks: createLandmarks(0.55, 0.565),
     faceBlendshapes: [
       {
         categories: [
@@ -119,6 +118,7 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
         ],
       },
     ],
+    faceLandmarks: createLandmarks(0.55, 0.565),
   };
 
   let progressiveFrameIndex = 0;
@@ -145,7 +145,6 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
     const mouthOpen = Math.min(mouthBase + progressiveFrameIndex * 0.015, 0.3);
 
     return {
-      faceLandmarks: createLandmarks(0.55, 0.55 + mouthOpen),
       faceBlendshapes: [
         {
           categories: [
@@ -154,6 +153,7 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
           ],
         },
       ],
+      faceLandmarks: createLandmarks(0.55, 0.55 + mouthOpen),
     };
   };
 
@@ -172,11 +172,11 @@ const installBrowserMocks = (win, mode = 'always-smile', options = {}) => {
   };
 
   win.__smileIdentityMediapipe = {
-    loaded: true,
-    loading: null,
     instance: {
       detectForVideo: () => getDetectionFrame(),
     },
+    loaded: true,
+    loading: null,
   };
 
   win.__selfiePublishEvents = 0;

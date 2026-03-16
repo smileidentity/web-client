@@ -107,21 +107,21 @@ jobs:
         run: npm run build
       - name: configure sst secrets
         run: |
-            # Sandbox stage
-            npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-            npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-            npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-            npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-            npm run sst secret set EmbedUrl ${{ env.DEST_DIR_EMBED }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
-            npm run sst secret set WafWebAclArn ${{ secrets.WAF_WEB_ACL_ARN }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
-            # Production stage
-            PROD_STAGE="${{ steps.get_branch_name.outputs.SST_STAGE }}-prod"
-            npm run sst secret set PartnerId ${{ secrets.PROD_PREVIEW_PARTNER_ID }} -- --stage $PROD_STAGE &&
-            npm run sst secret set CallbackUrl ${{ secrets.PROD_PREVIEW_CALLBACK_URL }} -- --stage $PROD_STAGE &&
-            npm run sst secret set SmileIdApiKey ${{ secrets.PROD_PREVIEW_SMILEID_API_KEY }} -- --stage $PROD_STAGE &&
-            npm run sst secret set SmileIdEnvironment ${{ secrets.PROD_PREVIEW_SMILEID_ENVIRONMENT }} -- --stage $PROD_STAGE &&
-            npm run sst secret set EmbedUrl ${{ env.DEST_DIR_EMBED }} -- --stage $PROD_STAGE &&
-            npm run sst secret set WafWebAclArn ${{ secrets.WAF_WEB_ACL_ARN }} -- --stage $PROD_STAGE
+          # Sandbox stage
+          npm run sst secret set PartnerId ${{ secrets.PREVIEW_PARTNER_ID }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set CallbackUrl ${{ secrets.PREVIEW_CALLBACK_URL }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdApiKey ${{ secrets.PREVIEW_SMILEID_API_KEY }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set SmileIdEnvironment ${{ secrets.PREVIEW_SMILEID_ENVIRONMENT }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set EmbedUrl ${{ env.DEST_DIR_EMBED }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} &&
+          npm run sst secret set WafWebAclArn ${{ secrets.WAF_WEB_ACL_ARN }} -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          # Production stage
+          PROD_STAGE="${{ steps.get_branch_name.outputs.SST_STAGE }}-prod"
+          npm run sst secret set PartnerId ${{ secrets.PROD_PREVIEW_PARTNER_ID }} -- --stage $PROD_STAGE &&
+          npm run sst secret set CallbackUrl ${{ secrets.PROD_PREVIEW_CALLBACK_URL }} -- --stage $PROD_STAGE &&
+          npm run sst secret set SmileIdApiKey ${{ secrets.PROD_PREVIEW_SMILEID_API_KEY }} -- --stage $PROD_STAGE &&
+          npm run sst secret set SmileIdEnvironment ${{ secrets.PROD_PREVIEW_SMILEID_ENVIRONMENT }} -- --stage $PROD_STAGE &&
+          npm run sst secret set EmbedUrl ${{ env.DEST_DIR_EMBED }} -- --stage $PROD_STAGE &&
+          npm run sst secret set WafWebAclArn ${{ secrets.WAF_WEB_ACL_ARN }} -- --stage $PROD_STAGE
       - name: deploy sst app (sandbox)
         if: github.event.pull_request.merged != true
         id: deploy_sst_app

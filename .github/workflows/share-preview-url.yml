@@ -45,23 +45,23 @@ jobs:
           else
             BRANCH_NAME="${{ github.ref_name }}"
           fi
+          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> $GITHUB_ENV
       - name: retrieve sst app url (sandbox)
         continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |
-          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage $SANITIZED_BRANCH_NAME --print-logs)
+          APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$SANITIZED_BRANCH_NAME" --print-logs)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: retrieve sst app url (prod)
         continue-on-error: true
         id: get_app_url_prod
         working-directory: ./previews
         run: |
-          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           PROD_STAGE="$SANITIZED_BRANCH_NAME-prod"
-          APP_PROD_URL=$(npm run sst -- shell node get_app_url.js -- --stage $PROD_STAGE --print-logs)
+          APP_PROD_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$PROD_STAGE" --print-logs)
           echo "PREVIEW_PROD_APP_URL=$APP_PROD_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web

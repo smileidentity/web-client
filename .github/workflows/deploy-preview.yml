@@ -126,18 +126,18 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }})
+          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} 2>&1)
           echo "$SST_OUTPUT"
-          SST_URL=$(echo "$SST_OUTPUT" | sed -n 's/^.*site: //p')
+          SST_URL=$(echo "$SST_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
       - name: deploy sst app (prod)
         if: github.event.pull_request.merged != true
         id: deploy_sst_app_prod
         run: |
           PROD_STAGE="${{ steps.get_branch_name.outputs.SST_STAGE }}-prod"
-          SST_PROD_OUTPUT=$(npm run sst deploy -- --stage $PROD_STAGE)
+          SST_PROD_OUTPUT=$(npm run sst deploy -- --stage $PROD_STAGE 2>&1)
           echo "$SST_PROD_OUTPUT"
-          SST_PROD_URL=$(echo "$SST_PROD_OUTPUT" | sed -n 's/^.*site: //p')
+          SST_PROD_URL=$(echo "$SST_PROD_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
           echo "SST_PROD_URL=$SST_PROD_URL" >> $GITHUB_OUTPUT
   share-preview-url:
     runs-on: ubuntu-latest
@@ -159,6 +159,9 @@ jobs:
         continue-on-error: true
         run: |
           curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
+      - name: install previews dependencies
+        working-directory: ./previews
+        run: npm install
       - name: set branch name
         run: |
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}

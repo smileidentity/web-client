@@ -172,9 +172,13 @@ jobs:
         id: get_app_url
         working-directory: ./previews
         run: |
-          PREVIEW_APP_URL=${{ needs.full-stack.outputs.SST_URL }}
+          SHELL_SANDBOX_OUTPUT=$(npm run sst -- shell node get_app_url.js -- --stage "$SANITIZED_BRANCH_NAME" --print-logs || true)
+          SHELL_SANDBOX_URL=$(printf '%s\n' "$SHELL_SANDBOX_OUTPUT" | grep -Eo 'https://[^[:space:]]+' | head -1)
+          DEPLOY_SANDBOX_URL=$(printf '%s\n' "${{ needs.full-stack.outputs.SST_URL }}" | grep -Eo 'https://[^[:space:]]+' | head -1)
+
+          PREVIEW_APP_URL="$SHELL_SANDBOX_URL"
           if [ -z "$PREVIEW_APP_URL" ]; then
-            PREVIEW_APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$SANITIZED_BRANCH_NAME" --print-logs || true)
+            PREVIEW_APP_URL="$DEPLOY_SANDBOX_URL"
           fi
           echo "PREVIEW_APP_URL=$PREVIEW_APP_URL" >> $GITHUB_OUTPUT
       - name: retrieve sst app url (prod)
@@ -182,10 +186,14 @@ jobs:
         id: get_app_url_prod
         working-directory: ./previews
         run: |
-          PREVIEW_PROD_APP_URL=${{ needs.full-stack.outputs.SST_PROD_URL }}
+          PROD_STAGE="${SANITIZED_BRANCH_NAME}-prod"
+          SHELL_PROD_OUTPUT=$(npm run sst -- shell node get_app_url.js -- --stage "$PROD_STAGE" --print-logs || true)
+          SHELL_PROD_URL=$(printf '%s\n' "$SHELL_PROD_OUTPUT" | grep -Eo 'https://[^[:space:]]+' | head -1)
+          DEPLOY_PROD_URL=$(printf '%s\n' "${{ needs.full-stack.outputs.SST_PROD_URL }}" | grep -Eo 'https://[^[:space:]]+' | head -1)
+
+          PREVIEW_PROD_APP_URL="$SHELL_PROD_URL"
           if [ -z "$PREVIEW_PROD_APP_URL" ]; then
-            PROD_STAGE="${SANITIZED_BRANCH_NAME}-prod"
-            PREVIEW_PROD_APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$PROD_STAGE" --print-logs || true)
+            PREVIEW_PROD_APP_URL="$DEPLOY_PROD_URL"
           fi
           echo "PREVIEW_PROD_APP_URL=$PREVIEW_PROD_APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web

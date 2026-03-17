@@ -36,5 +36,6 @@ jobs:
         run: |
           npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}
       - name: remove sst app (prod)
+        if: always()
         run: |
           npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}-prod

@@ -159,13 +159,32 @@ jobs:
         continue-on-error: true
         run: |
           curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
+      - name: set branch name
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> "$GITHUB_ENV"
       - name: retrieve sst app url
         continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |
           PREVIEW_APP_URL=${{ needs.full-stack.outputs.SST_URL }}
+          if [ -z "$PREVIEW_APP_URL" ]; then
+            PREVIEW_APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$SANITIZED_BRANCH_NAME" --print-logs || true)
+          fi
           echo "PREVIEW_APP_URL=$PREVIEW_APP_URL" >> $GITHUB_OUTPUT
+      - name: retrieve sst app url (prod)
+        continue-on-error: true
+        id: get_app_url_prod
+        working-directory: ./previews
+        run: |
+          PREVIEW_PROD_APP_URL=${{ needs.full-stack.outputs.SST_PROD_URL }}
+          if [ -z "$PREVIEW_PROD_APP_URL" ]; then
+            PROD_STAGE="${SANITIZED_BRANCH_NAME}-prod"
+            PREVIEW_PROD_APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage "$PROD_STAGE" --print-logs || true)
+          fi
+          echo "PREVIEW_PROD_APP_URL=$PREVIEW_PROD_APP_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web
         working-directory: ./packages/smart-camera-web
@@ -200,4 +219,4 @@ jobs:
 
             ✅ Preview URL for Web Client (Production):
 
-              ${{ needs.full-stack.outputs.SST_PROD_URL }}
+              ${{ steps.get_app_url_prod.outputs.PREVIEW_PROD_APP_URL }}

@@ -32,6 +32,10 @@ jobs:
           echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
       - name: install dependencies
         run: npm install
-      - name: remove sst app
+      - name: remove sst app (sandbox)
         run: |
           npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}
+      - name: remove sst app (prod)
+        if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SS_STAGE != '' }}
+        run: |
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}-prod

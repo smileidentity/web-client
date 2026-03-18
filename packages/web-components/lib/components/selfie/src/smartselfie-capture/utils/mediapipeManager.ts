@@ -1,8 +1,8 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_GPUS = ['Adreno 830'];
+const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx'];
 //  SM-S931 (for the standard S25), SM-S936 (for the S25+), and SM-S938 (for the S25 Ultra)
-const EXCLUDED_DEVICES = [''];
+const EXCLUDED_DEVICES = ['sm-s936', 'sm-s931', 'sm-s938'];
 
 declare global {
   interface Window {
@@ -50,9 +50,12 @@ const getDelegateFromArchitectureHints = async (): Promise<'CPU' | 'GPU'> => {
     return 'CPU';
   }
 
-  const hasExcludedGpu = EXCLUDED_GPUS.some((gpu) =>
-    hintString.includes(gpu.toLowerCase()),
-  );
+  const normalizedHintString = hintString.replace(/[\s_-]/g, '');
+
+  const hasExcludedGpu =
+    EXCLUDED_GPUS.some((gpu) =>
+      normalizedHintString.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
+    ) || /adreno8\d{2}/.test(normalizedHintString);
 
   return hasExcludedGpu ? 'CPU' : 'GPU';
 };

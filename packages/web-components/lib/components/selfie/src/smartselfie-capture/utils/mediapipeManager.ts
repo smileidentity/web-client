@@ -1,5 +1,6 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
+const EXCLUDED_GPUS = ['Adreno 830'];
 //  SM-S931 (for the standard S25), SM-S936 (for the S25+), and SM-S938 (for the S25 Ultra)
 const EXCLUDED_DEVICES = ['sm-s936', 'sm-s931', 'sm-s938'];
 
@@ -14,38 +15,73 @@ declare global {
 }
 
 /**
- * @description Detects if the user is on an excluded device using the modern and more accurate
- * User-Agent Client Hints (UA-CH) API to get the device model.
- * @returns {Promise<boolean>} - True if the device model is in the exclusion list.
+ * @description Reads system architecture hints from User-Agent Client Hints.
+ * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
+ */
+const getSystemArchitectureHints = async (): Promise<string | null> => {
+  if (typeof navigator === 'undefined' || !navigator.userAgentData) {
+    return null;
+  }
+
+  try {
+    const hints = await navigator.userAgentData.getHighEntropyValues([
+      'architecture',
+      'model',
+      'platform',
+      'platformVersion',
+      'fullVersionList',
+    ]);
+
+    return JSON.stringify(hints).toLowerCase();
+  } catch (error) {
+    console.warn('UA-CH architecture hints fetch failed.', error);
+    return null;
+  }
+};
+
+/**
+ * @description Determines the MediaPipe delegate based on architecture hints and excluded GPUs.
+ * @returns {Promise<'CPU' | 'GPU'>} CPU when hints are unavailable or excluded GPU is detected; otherwise GPU.
+ */
+const getDelegateFromArchitectureHints = async (): Promise<'CPU' | 'GPU'> => {
+  const hintString = await getSystemArchitectureHints();
+
+  if (!hintString) {
+    return 'CPU';
+  }
+
+  const hasExcludedGpu = EXCLUDED_GPUS.some((gpu) =>
+    hintString.includes(gpu.toLowerCase()),
+  );
+
+  return hasExcludedGpu ? 'CPU' : 'GPU';
+};
+
+/**
+ * @description Detects if the current device model is excluded using UA-CH model hints.
+ * @returns {Promise<boolean>} True when the model matches one of the excluded devices.
  */
 const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
-  // Check for User-Agent Client Hints API support
-  if (typeof navigator !== 'undefined' && navigator.userAgentData) {
-    try {
-      // Request the 'model' high-entropy value and destructure it directly
-      const { model } = await navigator.userAgentData.getHighEntropyValues([
-        'model',
-      ]);
+  if (typeof navigator === 'undefined' || !navigator.userAgentData) {
+    return false;
+  }
 
-      if (!model) {
-        return false;
-      }
+  try {
+    const { model } = await navigator.userAgentData.getHighEntropyValues([
+      'model',
+    ]);
 
-      const lowerModel = model.toLowerCase();
-
-      // Check if the extracted model string matches any of the excluded prefixes
-      return EXCLUDED_DEVICES.some((prefix) => lowerModel.includes(prefix));
-    } catch (error) {
-      // Log the error but fail safe (return false)
-      console.warn(
-        'UA-CH model fetch failed, falling back to UA string check.',
-        error,
-      );
+    if (!model) {
       return false;
     }
+
+    const lowerModel = model.toLowerCase();
+
+    return EXCLUDED_DEVICES.some((prefix) => lowerModel.includes(prefix));
+  } catch (error) {
+    console.warn('UA-CH model fetch failed for excluded device check.', error);
+    return false;
   }
-  // If API is not supported, return false (rely on synchronous isExcludedDevice)
-  return false;
 };
 
 // this was added because devices (mostly older) that do not support FP16 will fail to load the model.
@@ -91,12 +127,17 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
         'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
       );
 
-      const isExcluded = await isExcludedDeviceUsingHints();
+      const architectureDelegate = await getDelegateFromArchitectureHints();
+      const isExcludedDevice = await isExcludedDeviceUsingHints();
+      const delegate =
+        architectureDelegate === 'CPU' || isExcludedDevice || !hasFP16Support()
+          ? 'CPU'
+          : 'GPU';
 
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: isExcluded || !hasFP16Support() ? 'CPU' : 'GPU',
+          delegate,
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

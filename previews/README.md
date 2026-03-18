@@ -18,12 +18,26 @@ it requires that the following secrets are added to the repository:
 `PREVIEW_CALLBACK_URL`: callback url for webhook responses
 `PREVIEW_SMILEID_API_KEY`: api key for the partner
 `PREVIEW_SMILEID_ENVIRONMENT`: environment code should be run in
+`PROD_PREVIEW_PARTNER_ID`: production partner_id used for the preview app
+`PROD_PREVIEW_CALLBACK_URL`: production callback url for webhook responses
+`PROD_PREVIEW_SMILEID_API_KEY`: production api key for the partner
+`PROD_PREVIEW_SMILEID_ENVIRONMENT`: production environment code (for example, `production`)
 
 note: api_key, partner_id, and environment need to be in alignment for this to
 work effectively.
 
-there is a step to create a preview when a PR is created / updated, and a step
-to remove the preview app when the PR is removed.
+for each PR, we now deploy two preview stages:
+
+- sandbox stage: `<sanitized-branch-name>`
+- production stage: `<sanitized-branch-name>-prod`
+
+the PR comment includes both web client preview URLs:
+
+- web client (sandbox)
+- web client (production)
+
+there is a step to create preview apps when a PR is created / updated, and a
+step to remove both preview stages when the PR is removed.
 
 ## how it works?
 

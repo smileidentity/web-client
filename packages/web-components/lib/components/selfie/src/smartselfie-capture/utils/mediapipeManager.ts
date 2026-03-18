@@ -2,7 +2,7 @@ import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
 const EXCLUDED_GPUS = ['Adreno 830'];
 //  SM-S931 (for the standard S25), SM-S936 (for the S25+), and SM-S938 (for the S25 Ultra)
-const EXCLUDED_DEVICES = ['sm-s936', 'sm-s931', 'sm-s938'];
+const EXCLUDED_DEVICES = [''];
 
 declare global {
   interface Window {

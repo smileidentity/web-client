@@ -1,6 +1,6 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx'];
+const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx'];
 
 /**
  * @description Gets the GPU renderer string using WebGL debug info extension.

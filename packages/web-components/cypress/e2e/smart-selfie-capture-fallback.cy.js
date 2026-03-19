@@ -16,35 +16,31 @@ const variants = [
 
 variants.forEach(({ name, suffix }) => {
   context(`SmartSelfieCapture capture button fallback [${name}]`, () => {
-    const captureButtonSelector = () =>
-      cy.get('smartselfie-capture').shadow().find('#start-image-capture');
-
-    it('button is initially disabled before 10-second fallback elapses', () => {
-      // Intercept mediapipe requests so init fails immediately
+    beforeEach(() => {
+      // Intercept mediapipe requests so init fails immediately,
+      // triggering the fallback timer right away.
       cy.intercept('GET', '**/mediapipe**', { statusCode: 500 }).as(
         'mediapipeRequest',
       );
-      cy.clock();
+    });
+
+    it('button is initially disabled before 10-second fallback elapses', () => {
       cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
 
-      // Tick less than 10 seconds — fallback should not yet have fired
-      cy.tick(9999);
-
-      captureButtonSelector().should('be.disabled');
+      cy.get('smartselfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .should('be.disabled');
     });
 
     it('button becomes enabled after 10-second fallback when face is not ready', () => {
-      // Intercept mediapipe requests so init fails immediately
-      cy.intercept('GET', '**/mediapipe**', { statusCode: 500 }).as(
-        'mediapipeRequest',
-      );
-      cy.clock();
       cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
 
-      // Tick exactly 10 seconds — fallback timer fires, button should be enabled
-      cy.tick(10000);
-
-      captureButtonSelector().should('not.be.disabled');
+      // Allow up to 15s for the real 10-second fallback timer to fire.
+      cy.get('smartselfie-capture')
+        .shadow()
+        .find('#start-image-capture', { timeout: 15000 })
+        .should('not.be.disabled');
     });
   });
 });

@@ -84,7 +84,7 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
 
   // Primary check: WebGL renderer info (most reliable for GPU detection)
   if (isExcludedGpuFromWebGL()) {
-    alert(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
+    console.log(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
     return 'CPU';
   }
 
@@ -100,7 +100,7 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
       ) || /adreno8\d{2}/.test(normalizedHintString);
 
     if (hasExcludedGpuInHints) {
-      alert(
+      console.log(
         `[SmileID] Excluded GPU via UA-CH hints: ${hintString}. Using CPU.`,
       );
       return 'CPU';
@@ -108,7 +108,7 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   }
 
   // Default to GPU when no exclusion is detected
-  alert(
+  console.log(
     `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}, UA-CH: ${hintString ?? 'unavailable'}. Using GPU.`,
   );
   return 'GPU';

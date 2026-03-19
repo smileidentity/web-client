@@ -3,7 +3,7 @@
 > npx cypress run --spec cypress/e2e/smart-selfie-capture-fallback.cy.js
 
 
-====================================================================================
+=============================================
 
   (Run Starting)
 
@@ -37,26 +37,22 @@
   1) SmartSelfieCapture capture button fallback [iife]
        button is initially disabled before 10-second fallback elapses:
      AssertionError: Timed out retrying after 4000ms: Expected to find element: `smartselfie-capture`, but never found it.
-      at captureButtonSelector (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:20:9)
-      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:33:6)
+      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:30:9)
 
   2) SmartSelfieCapture capture button fallback [iife]
        button becomes enabled after 10-second fallback when face is not ready:
      AssertionError: Timed out retrying after 4000ms: Expected to find element: `smartselfie-capture`, but never found it.
-      at captureButtonSelector (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:20:9)
-      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:47:6)
+      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:40:9)
 
   3) SmartSelfieCapture capture button fallback [esm]
        button is initially disabled before 10-second fallback elapses:
      AssertionError: Timed out retrying after 4000ms: Expected to find element: `smartselfie-capture`, but never found it.
-      at captureButtonSelector (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:20:9)
-      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:33:6)
+      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:30:9)
 
   4) SmartSelfieCapture capture button fallback [esm]
        button becomes enabled after 10-second fallback when face is not ready:
      AssertionError: Timed out retrying after 4000ms: Expected to find element: `smartselfie-capture`, but never found it.
-      at captureButtonSelector (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:20:9)
-      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:47:6)
+      at Context.eval (webpack://@smileid/web-components/./cypress/e2e/smart-selfie-capture-fallback.cy.js:40:9)
 
 
 

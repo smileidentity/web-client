@@ -16,14 +16,6 @@ const variants = [
 
 variants.forEach(({ name, suffix }) => {
   context(`SmartSelfieCapture capture button fallback [${name}]`, () => {
-    beforeEach(() => {
-      // Intercept mediapipe requests so init fails immediately,
-      // triggering the fallback timer right away.
-      cy.intercept('GET', '**/mediapipe**', { statusCode: 500 }).as(
-        'mediapipeRequest',
-      );
-    });
-
     it('button is initially disabled before 10-second fallback elapses', () => {
       cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
 
@@ -37,6 +29,8 @@ variants.forEach(({ name, suffix }) => {
       cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
 
       // Allow up to 15s for the real 10-second fallback timer to fire.
+      // No camera is available in Cypress so isReadyToCapture stays false,
+      // triggering the fallback.
       cy.get('smartselfie-capture')
         .shadow()
         .find('#start-image-capture', { timeout: 15000 })

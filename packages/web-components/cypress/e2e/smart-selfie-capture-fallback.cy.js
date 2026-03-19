@@ -26,26 +26,14 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('button becomes enabled after 10-second fallback when face is not ready', () => {
-      // Use fake timers so we don't wait 10 real seconds.
-      // onBeforeLoad runs before app scripts so cy.clock() takes effect
-      // before any setTimeout calls are made by the component.
-      cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`, {
-        onBeforeLoad(win) {
-          cy.stub(win, 'setTimeout').callsFake((fn, delay, ...args) => {
-            // Let short timeouts (≤500ms) run normally so app init isn't broken.
-            // Immediately invoke the fallback timer (10s) so the test is fast.
-            if (delay >= 10000) {
-              fn(...args);
-              return 0;
-            }
-            return win.setTimeout.wrappedMethod.call(win, fn, delay, ...args);
-          });
-        },
-      });
+      cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
 
+      // Allow up to 15s for the real 10-second fallback timer to fire.
+      // No camera is available in Cypress so isReadyToCapture stays false,
+      // triggering the fallback.
       cy.get('smartselfie-capture')
         .shadow()
-        .find('#start-image-capture')
+        .find('#start-image-capture', { timeout: 15000 })
         .should('not.be.disabled');
     });
   });

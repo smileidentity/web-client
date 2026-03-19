@@ -97,6 +97,7 @@ const getSystemArchitectureHints = async (): Promise<string | null> => {
  */
 const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   const renderer = getGpuRenderer();
+  const hasWebGlRendererInfo = !!renderer;
 
   // Primary check: WebGL renderer info (most reliable for GPU detection)
   if (isExcludedGpuFromWebGL(renderer)) {
@@ -106,6 +107,7 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
 
   // Secondary check: UA-CH hints (may contain GPU info in some browsers)
   const hintString = await getSystemArchitectureHints();
+  const hasUaHints = !!hintString;
 
   if (hintString) {
     const hasExcludedGpuInHints = matchesExcludedGpu(hintString);
@@ -114,6 +116,13 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
       console.info(`[SmileID] Excluded GPU via UA-CH hints. Using CPU.`);
       return 'CPU';
     }
+  }
+
+  if (!hasWebGlRendererInfo && !hasUaHints) {
+    console.info(
+      '[SmileID] No WebGL renderer or UA-CH hints available. Using CPU.',
+    );
+    return 'CPU';
   }
 
   // Default to GPU when no exclusion is detected

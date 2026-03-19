@@ -103,7 +103,7 @@ export const useFaceCapture = ({
     }, 600),
   ).current;
 
-  const CAPTURE_FALLBACK_TIMEOUT_MS = 5000;
+  const CAPTURE_FALLBACK_TIMEOUT_MS = 10000;
 
   const startFallbackTimer = () => {
     if (fallbackTimerRef.current) {

@@ -55,12 +55,12 @@ declare global {
  * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
  */
 const getSystemArchitectureHints = async (): Promise<string | null> => {
-  if (typeof navigator === 'undefined' || !navigator.userAgentData) {
+  if (typeof navigator === 'undefined' || !(navigator as any).userAgentData) {
     return null;
   }
 
   try {
-    const hints = await navigator.userAgentData.getHighEntropyValues([
+    const hints = await (navigator as any).userAgentData.getHighEntropyValues([
       'architecture',
       'model',
       'platform',

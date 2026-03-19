@@ -46,11 +46,5 @@ variants.forEach(({ name, suffix }) => {
 
       captureButtonSelector().should('not.be.disabled');
     });
-
-    it.skip('button is enabled immediately when face is detected and ready before 5 seconds (no fallback needed)', () => {
-      // Skipped: requires a real camera and face detection to set isReadyToCapture=true
-      // When isReadyToCapture becomes true, the button should be enabled naturally
-      // without waiting for the 5s fallback timer.
-    });
   });
 });

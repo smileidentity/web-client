@@ -1,6 +1,27 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx'];
+const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx', 'adreno-840'];
+
+const normalizeGpuText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/\(tm\)|\btm\b/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+const matchesExcludedGpu = (value: string): boolean => {
+  const normalizedValue = normalizeGpuText(value);
+
+  return EXCLUDED_GPUS.some((gpuPattern) => {
+    const normalizedPattern = normalizeGpuText(gpuPattern);
+
+    if (normalizedPattern.endsWith('xx')) {
+      const familyPrefix = normalizedPattern.slice(0, -2);
+      return new RegExp(`${familyPrefix}\\d{2}`).test(normalizedValue);
+    }
+
+    return normalizedValue.includes(normalizedPattern);
+  });
+};
 
 /**
  * @description Gets the GPU renderer string using WebGL debug info extension.
@@ -24,19 +45,14 @@ const getGpuRenderer = (): string | null => {
 
 /**
  * @description Checks if the GPU renderer matches any excluded GPU.
+ * @param {string | null} [renderer] Optional GPU renderer string to use. If not provided, it will be fetched via WebGL.
  * @returns {boolean} True if the GPU is excluded.
  */
-const isExcludedGpuFromWebGL = (): boolean => {
-  const renderer = getGpuRenderer()?.toLowerCase() ?? '';
-  if (!renderer) return false;
+const isExcludedGpuFromWebGL = (renderer?: string | null): boolean => {
+  const rendererString = (renderer ?? getGpuRenderer())?.toLowerCase() ?? '';
+  if (!rendererString) return false;
 
-  const normalizedRenderer = renderer.replace(/[\s_-]/g, '');
-
-  return (
-    EXCLUDED_GPUS.some((gpu) =>
-      normalizedRenderer.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
-    ) || /adreno8\d{2}/.test(normalizedRenderer)
-  );
+  return matchesExcludedGpu(rendererString);
 };
 
 declare global {
@@ -54,12 +70,12 @@ declare global {
  * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
  */
 const getSystemArchitectureHints = async (): Promise<string | null> => {
-  if (typeof navigator === 'undefined' || !navigator.userAgentData) {
+  if (typeof navigator === 'undefined' || !(navigator as any).userAgentData) {
     return null;
   }
 
   try {
-    const hints = await navigator.userAgentData.getHighEntropyValues([
+    const hints = await (navigator as any).userAgentData.getHighEntropyValues([
       'architecture',
       'model',
       'platform',
@@ -83,8 +99,8 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   const renderer = getGpuRenderer();
 
   // Primary check: WebGL renderer info (most reliable for GPU detection)
-  if (isExcludedGpuFromWebGL()) {
-    console.log(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
+  if (isExcludedGpuFromWebGL(renderer)) {
+    console.info(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
     return 'CPU';
   }
 
@@ -92,24 +108,17 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   const hintString = await getSystemArchitectureHints();
 
   if (hintString) {
-    const normalizedHintString = hintString.replace(/[\s_-]/g, '');
-
-    const hasExcludedGpuInHints =
-      EXCLUDED_GPUS.some((gpu) =>
-        normalizedHintString.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
-      ) || /adreno8\d{2}/.test(normalizedHintString);
+    const hasExcludedGpuInHints = matchesExcludedGpu(hintString);
 
     if (hasExcludedGpuInHints) {
-      console.log(
-        `[SmileID] Excluded GPU via UA-CH hints: ${hintString}. Using CPU.`,
-      );
+      console.info(`[SmileID] Excluded GPU via UA-CH hints. Using CPU.`);
       return 'CPU';
     }
   }
 
   // Default to GPU when no exclusion is detected
-  console.log(
-    `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}, UA-CH: ${hintString ?? 'unavailable'}. Using GPU.`,
+  console.info(
+    `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}. Using GPU.`,
   );
   return 'GPU';
 };

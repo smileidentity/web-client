@@ -1,7 +1,43 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-//  SM-S931 (for the standard S25), SM-S936 (for the S25+), and SM-S938 (for the S25 Ultra)
-const EXCLUDED_DEVICES = ['sm-s936', 'sm-s931', 'sm-s938'];
+const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx'];
+
+/**
+ * @description Gets the GPU renderer string using WebGL debug info extension.
+ * @returns {string | null} The GPU renderer string or null if unavailable.
+ */
+const getGpuRenderer = (): string | null => {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl =
+      canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl || !(gl instanceof WebGLRenderingContext)) return null;
+
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    if (!ext) return null;
+
+    return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string | null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * @description Checks if the GPU renderer matches any excluded GPU.
+ * @returns {boolean} True if the GPU is excluded.
+ */
+const isExcludedGpuFromWebGL = (): boolean => {
+  const renderer = getGpuRenderer()?.toLowerCase() ?? '';
+  if (!renderer) return false;
+
+  const normalizedRenderer = renderer.replace(/[\s_-]/g, '');
+
+  return (
+    EXCLUDED_GPUS.some((gpu) =>
+      normalizedRenderer.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
+    ) || /adreno8\d{2}/.test(normalizedRenderer)
+  );
+};
 
 declare global {
   interface Window {
@@ -14,38 +50,68 @@ declare global {
 }
 
 /**
- * @description Detects if the user is on an excluded device using the modern and more accurate
- * User-Agent Client Hints (UA-CH) API to get the device model.
- * @returns {Promise<boolean>} - True if the device model is in the exclusion list.
+ * @description Reads system architecture hints from User-Agent Client Hints.
+ * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
  */
-const isExcludedDeviceUsingHints = async (): Promise<boolean> => {
-  // Check for User-Agent Client Hints API support
-  if (typeof navigator !== 'undefined' && navigator.userAgentData) {
-    try {
-      // Request the 'model' high-entropy value and destructure it directly
-      const { model } = await navigator.userAgentData.getHighEntropyValues([
-        'model',
-      ]);
+const getSystemArchitectureHints = async (): Promise<string | null> => {
+  if (typeof navigator === 'undefined' || !navigator.userAgentData) {
+    return null;
+  }
 
-      if (!model) {
-        return false;
-      }
+  try {
+    const hints = await navigator.userAgentData.getHighEntropyValues([
+      'architecture',
+      'model',
+      'platform',
+      'platformVersion',
+      'fullVersionList',
+    ]);
 
-      const lowerModel = model.toLowerCase();
+    return JSON.stringify(hints).toLowerCase();
+  } catch (error) {
+    console.warn('UA-CH architecture hints fetch failed.', error);
+    return null;
+  }
+};
 
-      // Check if the extracted model string matches any of the excluded prefixes
-      return EXCLUDED_DEVICES.some((prefix) => lowerModel.includes(prefix));
-    } catch (error) {
-      // Log the error but fail safe (return false)
-      console.warn(
-        'UA-CH model fetch failed, falling back to UA string check.',
-        error,
+/**
+ * @description Determines the MediaPipe delegate based on WebGL renderer info and UA-CH hints.
+ * Uses WebGL renderer as primary detection, UA-CH hints as secondary.
+ * @returns {Promise<'CPU' | 'GPU'>} CPU when excluded GPU is detected; otherwise GPU.
+ */
+const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
+  const renderer = getGpuRenderer();
+
+  // Primary check: WebGL renderer info (most reliable for GPU detection)
+  if (isExcludedGpuFromWebGL()) {
+    alert(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
+    return 'CPU';
+  }
+
+  // Secondary check: UA-CH hints (may contain GPU info in some browsers)
+  const hintString = await getSystemArchitectureHints();
+
+  if (hintString) {
+    const normalizedHintString = hintString.replace(/[\s_-]/g, '');
+
+    const hasExcludedGpuInHints =
+      EXCLUDED_GPUS.some((gpu) =>
+        normalizedHintString.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
+      ) || /adreno8\d{2}/.test(normalizedHintString);
+
+    if (hasExcludedGpuInHints) {
+      alert(
+        `[SmileID] Excluded GPU via UA-CH hints: ${hintString}. Using CPU.`,
       );
-      return false;
+      return 'CPU';
     }
   }
-  // If API is not supported, return false (rely on synchronous isExcludedDevice)
-  return false;
+
+  // Default to GPU when no exclusion is detected
+  alert(
+    `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}, UA-CH: ${hintString ?? 'unavailable'}. Using GPU.`,
+  );
+  return 'GPU';
 };
 
 // this was added because devices (mostly older) that do not support FP16 will fail to load the model.
@@ -91,12 +157,14 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
         'https://web-models.smileidentity.com/mediapipe-tasks-vision-wasm',
       );
 
-      const isExcluded = await isExcludedDeviceUsingHints();
+      const gpuDelegate = await getDelegateFromGpuDetection();
+      const delegate =
+        gpuDelegate === 'CPU' || !hasFP16Support() ? 'CPU' : 'GPU';
 
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate: isExcluded || !hasFP16Support() ? 'CPU' : 'GPU',
+          delegate,
         },
         outputFaceBlendshapes: true,
         runningMode: 'VIDEO',

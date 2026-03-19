@@ -51,6 +51,7 @@ export const useFaceCapture = ({
   const animationFrameRef = useRef<number | null>(null);
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
+  const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
@@ -64,6 +65,7 @@ export const useFaceCapture = ({
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
   const isInitializing = useSignal(true);
+  const captureButtonFallbackEnabled = useSignal(false);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -101,6 +103,19 @@ export const useFaceCapture = ({
     }, 600),
   ).current;
 
+  const CAPTURE_FALLBACK_TIMEOUT_MS = 5000;
+
+  const startFallbackTimer = () => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
+    fallbackTimerRef.current = setTimeout(() => {
+      if (!isReadyToCapture.value) {
+        captureButtonFallbackEnabled.value = true;
+      }
+    }, CAPTURE_FALLBACK_TIMEOUT_MS);
+  };
+
   const initializeFaceLandmarker = async () => {
     try {
       const isAlreadyLoaded =
@@ -118,6 +133,7 @@ export const useFaceCapture = ({
       console.error('Failed to initialize MediaPipe:', error);
       isInitializing.value = false;
     }
+    startFallbackTimer();
   };
 
   const setupCanvas = () => {
@@ -556,6 +572,9 @@ export const useFaceCapture = ({
     if (captureTimerRef.current) {
       clearInterval(captureTimerRef.current);
     }
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
     stopDetectionLoop();
     updateAlert.cancel();
   };
@@ -590,6 +609,7 @@ export const useFaceCapture = ({
     alertTitle,
     isInitializing,
     isReadyToCapture,
+    captureButtonFallbackEnabled,
 
     isCapturing,
     isPaused,

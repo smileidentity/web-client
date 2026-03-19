@@ -61,7 +61,8 @@ describe('MediaPipe Manager GPU detection', () => {
         Object.defineProperty(win.navigator, 'userAgentData', {
           configurable: true,
           value: {
-            getHighEntropyValues: () => Promise.reject(new Error('UA disabled')),
+            getHighEntropyValues: () =>
+              Promise.reject(new Error('UA disabled')),
           },
         });
 

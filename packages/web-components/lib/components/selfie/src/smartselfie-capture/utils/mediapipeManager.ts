@@ -1,6 +1,6 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx', 'adreno-840'];
+const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx', 'adreno-840', 'adreno-810'];
 
 const normalizeGpuText = (value: string): string =>
   value
@@ -201,4 +201,9 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
   })();
 
   return mediapipeGlobal.loading;
+};
+
+export const __testUtils = {
+  matchesExcludedGpu,
+  getDelegateFromGpuDetection,
 };

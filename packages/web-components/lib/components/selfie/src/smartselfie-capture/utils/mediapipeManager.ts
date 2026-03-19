@@ -24,13 +24,14 @@ const getGpuRenderer = (): string | null => {
 
 /**
  * @description Checks if the GPU renderer matches any excluded GPU.
+ * @param {string | null} [renderer] Optional GPU renderer string to use. If not provided, it will be fetched via WebGL.
  * @returns {boolean} True if the GPU is excluded.
  */
-const isExcludedGpuFromWebGL = (): boolean => {
-  const renderer = getGpuRenderer()?.toLowerCase() ?? '';
-  if (!renderer) return false;
+const isExcludedGpuFromWebGL = (renderer?: string | null): boolean => {
+  const rendererString = (renderer ?? getGpuRenderer())?.toLowerCase() ?? '';
+  if (!rendererString) return false;
 
-  const normalizedRenderer = renderer.replace(/[\s_-]/g, '');
+  const normalizedRenderer = rendererString.replace(/[\s_-]/g, '');
 
   return (
     EXCLUDED_GPUS.some((gpu) =>
@@ -83,8 +84,8 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   const renderer = getGpuRenderer();
 
   // Primary check: WebGL renderer info (most reliable for GPU detection)
-  if (isExcludedGpuFromWebGL()) {
-    alert(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
+  if (isExcludedGpuFromWebGL(renderer)) {
+    console.info(`[SmileID] Excluded GPU via WebGL: ${renderer}. Using CPU.`);
     return 'CPU';
   }
 
@@ -100,16 +101,16 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
       ) || /adreno8\d{2}/.test(normalizedHintString);
 
     if (hasExcludedGpuInHints) {
-      alert(
-        `[SmileID] Excluded GPU via UA-CH hints: ${hintString}. Using CPU.`,
+      console.info(
+        `[SmileID] Excluded GPU via UA-CH hints. Using CPU.`,
       );
       return 'CPU';
     }
   }
 
   // Default to GPU when no exclusion is detected
-  alert(
-    `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}, UA-CH: ${hintString ?? 'unavailable'}. Using GPU.`,
+  console.info(
+    `[SmileID] No excluded GPU detected. WebGL renderer: ${renderer ?? 'unavailable'}. Using GPU.`,
   );
   return 'GPU';
 };

@@ -2,6 +2,27 @@ import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
 const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx'];
 
+const normalizeGpuText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/\(tm\)|\btm\b/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+const matchesExcludedGpu = (value: string): boolean => {
+  const normalizedValue = normalizeGpuText(value);
+
+  return EXCLUDED_GPUS.some((gpuPattern) => {
+    const normalizedPattern = normalizeGpuText(gpuPattern);
+
+    if (normalizedPattern.endsWith('xx')) {
+      const familyPrefix = normalizedPattern.slice(0, -2);
+      return new RegExp(`${familyPrefix}\\d{2}`).test(normalizedValue);
+    }
+
+    return normalizedValue.includes(normalizedPattern);
+  });
+};
+
 /**
  * @description Gets the GPU renderer string using WebGL debug info extension.
  * @returns {string | null} The GPU renderer string or null if unavailable.
@@ -31,13 +52,7 @@ const isExcludedGpuFromWebGL = (renderer?: string | null): boolean => {
   const rendererString = (renderer ?? getGpuRenderer())?.toLowerCase() ?? '';
   if (!rendererString) return false;
 
-  const normalizedRenderer = rendererString.replace(/[\s_-]/g, '');
-
-  return (
-    EXCLUDED_GPUS.some((gpu) =>
-      normalizedRenderer.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
-    ) || /adreno8\d{2}/.test(normalizedRenderer)
-  );
+  return matchesExcludedGpu(rendererString);
 };
 
 declare global {
@@ -93,12 +108,7 @@ const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
   const hintString = await getSystemArchitectureHints();
 
   if (hintString) {
-    const normalizedHintString = hintString.replace(/[\s_-]/g, '');
-
-    const hasExcludedGpuInHints =
-      EXCLUDED_GPUS.some((gpu) =>
-        normalizedHintString.includes(gpu.toLowerCase().replace(/[\s_-]/g, '')),
-      ) || /adreno8\d{2}/.test(normalizedHintString);
+    const hasExcludedGpuInHints = matchesExcludedGpu(hintString);
 
     if (hasExcludedGpuInHints) {
       console.info(

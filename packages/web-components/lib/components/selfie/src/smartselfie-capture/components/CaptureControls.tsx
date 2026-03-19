@@ -34,7 +34,11 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
         id="start-image-capture"
         class="btn-primary"
         onClick={onStartCapture}
-        disabled={isCapturing || hasFinishedCapture || (!isReadyToCapture && !captureButtonFallbackEnabled)}
+        disabled={
+          isCapturing ||
+          hasFinishedCapture ||
+          (!isReadyToCapture && !captureButtonFallbackEnabled)
+        }
       >
         {t('selfie.capture.button.startCapture')}
       </button>

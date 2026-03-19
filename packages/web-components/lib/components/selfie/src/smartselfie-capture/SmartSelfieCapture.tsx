@@ -178,7 +178,9 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
             isCapturing={faceCapture.isCapturing.value}
             hasFinishedCapture={faceCapture.hasFinishedCapture.value}
             isReadyToCapture={faceCapture.isReadyToCapture.value}
-            captureButtonFallbackEnabled={faceCapture.captureButtonFallbackEnabled.value}
+            captureButtonFallbackEnabled={
+              faceCapture.captureButtonFallbackEnabled.value
+            }
             allowAgentMode={allowAgentMode}
             agentSupported={camera.agentSupported}
             showAgentModeForTests={showAgentModeForTests}

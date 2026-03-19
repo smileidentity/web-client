@@ -17,10 +17,7 @@ const variants = [
 variants.forEach(({ name, suffix }) => {
   context(`SmartSelfieCapture capture button fallback [${name}]`, () => {
     const captureButtonSelector = () =>
-      cy
-        .get('smartselfie-capture')
-        .shadow()
-        .find('#start-image-capture');
+      cy.get('smartselfie-capture').shadow().find('#start-image-capture');
 
     it('button is initially disabled before 5-second fallback elapses', () => {
       // Intercept mediapipe requests so init fails immediately
@@ -50,13 +47,10 @@ variants.forEach(({ name, suffix }) => {
       captureButtonSelector().should('not.be.disabled');
     });
 
-    it.skip(
-      'button is enabled immediately when face is detected and ready before 5 seconds (no fallback needed)',
-      () => {
-        // Skipped: requires a real camera and face detection to set isReadyToCapture=true
-        // When isReadyToCapture becomes true, the button should be enabled naturally
-        // without waiting for the 5s fallback timer.
-      },
-    );
+    it.skip('button is enabled immediately when face is detected and ready before 5 seconds (no fallback needed)', () => {
+      // Skipped: requires a real camera and face detection to set isReadyToCapture=true
+      // When isReadyToCapture becomes true, the button should be enabled naturally
+      // without waiting for the 5s fallback timer.
+    });
   });
 });

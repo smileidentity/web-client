@@ -1,6 +1,12 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const EXCLUDED_GPUS = ['adreno-830', 'adreno-8xx', 'adreno-9xx', 'adreno-840', 'adreno-810'];
+const EXCLUDED_GPUS = [
+  'adreno-830',
+  'adreno-8xx',
+  'adreno-9xx',
+  'adreno-840',
+  'adreno-810',
+];
 
 const normalizeGpuText = (value: string): string =>
   value

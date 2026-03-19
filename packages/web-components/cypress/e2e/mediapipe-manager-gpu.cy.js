@@ -1,18 +1,34 @@
-import { __testUtils } from '../../lib/components/selfie/src/smartselfie-capture/utils/mediapipeManager';
-
 describe('MediaPipe Manager GPU detection', () => {
+  const importManager = (win) =>
+    win.eval(
+      "import('/lib/components/selfie/src/smartselfie-capture/utils/mediapipeManager.ts')",
+    );
+
   it("matches excluded GPU for 'Adreno (TM) 830'", () => {
-    expect(__testUtils.matchesExcludedGpu('Adreno (TM) 830')).to.equal(true);
+    cy.visit('/');
+
+    cy.window().then(async (win) => {
+      const mod = await importManager(win);
+      expect(mod.__testUtils.matchesExcludedGpu('Adreno (TM) 830')).to.equal(
+        true,
+      );
+    });
   });
 
-  it("matches excluded GPU for 'ADRENO-8XX'", () => {
-    expect(__testUtils.matchesExcludedGpu('ADRENO-8XX')).to.equal(true);
+  it("matches excluded GPU family for 'Adreno 899'", () => {
+    cy.visit('/');
+
+    cy.window().then(async (win) => {
+      const mod = await importManager(win);
+      expect(mod.__testUtils.matchesExcludedGpu('Adreno 899')).to.equal(true);
+    });
   });
 
   it('uses CPU when WebGL renderer and UA hints are both unavailable', () => {
     cy.visit('/');
 
     cy.window().then(async (win) => {
+      const mod = await importManager(win);
       const originalCreateElement = win.document.createElement.bind(
         win.document,
       );
@@ -26,7 +42,10 @@ describe('MediaPipe Manager GPU detection', () => {
       );
 
       try {
-        win.document.createElement = function patchedCreateElement(tag, ...args) {
+        win.document.createElement = function patchedCreateElement(
+          tag,
+          ...args
+        ) {
           const element = originalCreateElement(tag, ...args);
 
           if (String(tag).toLowerCase() === 'canvas') {
@@ -41,10 +60,12 @@ describe('MediaPipe Manager GPU detection', () => {
 
         Object.defineProperty(win.navigator, 'userAgentData', {
           configurable: true,
-          value: undefined,
+          value: {
+            getHighEntropyValues: () => Promise.reject(new Error('UA disabled')),
+          },
         });
 
-        const delegate = await __testUtils.getDelegateFromGpuDetection();
+        const delegate = await mod.__testUtils.getDelegateFromGpuDetection();
         expect(delegate).to.equal('CPU');
       } finally {
         win.document.createElement = originalCreateElement;

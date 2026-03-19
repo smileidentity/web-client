@@ -129,11 +129,14 @@ export const useFaceCapture = ({
 
       faceLandmarkerRef.current = await getMediapipeInstance();
       isInitializing.value = false;
+      // Only start the fallback timer after successful initialization.
+      // If MediaPipe fails, the detection loop can't run and the capture
+      // pipeline can't complete, so enabling the button would be a dead end.
+      startFallbackTimer();
     } catch (error) {
       console.error('Failed to initialize MediaPipe:', error);
       isInitializing.value = false;
     }
-    startFallbackTimer();
   };
 
   const setupCanvas = () => {
@@ -453,6 +456,13 @@ export const useFaceCapture = ({
         return;
       }
 
+      // When the fallback is active (face detection unavailable), capture
+      // frames unconditionally so the flow can still complete.
+      if (captureButtonFallbackEnabled.value) {
+        captureImage();
+        return;
+      }
+
       if (multipleFaces.value) {
         pauseCapture();
         return;
@@ -589,6 +599,7 @@ export const useFaceCapture = ({
     currentFaceSize.value = 0;
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
+    captureButtonFallbackEnabled.value = false;
 
     if (canvasRef.current) {
       clearCanvas(canvasRef.current);

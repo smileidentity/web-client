@@ -1,9 +1,9 @@
 /**
  * Tests for the capture button 10-second fallback in SmartSelfieCapture.
  *
- * After mediapipe initialization completes (success or failure), if
- * isReadyToCapture is still false after 10 seconds, captureButtonFallbackEnabled
- * becomes true and the start-capture button is enabled regardless of face state.
+ * After mediapipe initialization completes successfully, if isReadyToCapture
+ * is still false after 10 seconds, captureButtonFallbackEnabled becomes true
+ * and the start-capture button is enabled regardless of face state.
  *
  * These tests target `smartselfie-capture` directly (not through
  * `selfie-capture-wrapper`, which bypasses SmartSelfieCapture in Cypress).
@@ -26,14 +26,26 @@ variants.forEach(({ name, suffix }) => {
     });
 
     it('button becomes enabled after 10-second fallback when face is not ready', () => {
-      cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`);
+      // Use fake timers so we don't wait 10 real seconds.
+      // onBeforeLoad runs before app scripts so cy.clock() takes effect
+      // before any setTimeout calls are made by the component.
+      cy.visit(`/?component=smartselfie-capture&direct=true${suffix}`, {
+        onBeforeLoad(win) {
+          cy.stub(win, 'setTimeout').callsFake((fn, delay, ...args) => {
+            // Let short timeouts (≤500ms) run normally so app init isn't broken.
+            // Immediately invoke the fallback timer (10s) so the test is fast.
+            if (delay >= 10000) {
+              fn(...args);
+              return 0;
+            }
+            return win.setTimeout.wrappedMethod.call(win, fn, delay, ...args);
+          });
+        },
+      });
 
-      // Allow up to 15s for the real 10-second fallback timer to fire.
-      // No camera is available in Cypress so isReadyToCapture stays false,
-      // triggering the fallback.
       cy.get('smartselfie-capture')
         .shadow()
-        .find('#start-image-capture', { timeout: 15000 })
+        .find('#start-image-capture')
         .should('not.be.disabled');
     });
   });

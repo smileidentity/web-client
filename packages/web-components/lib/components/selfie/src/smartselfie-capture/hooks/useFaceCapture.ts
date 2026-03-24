@@ -456,13 +456,6 @@ export const useFaceCapture = ({
         return;
       }
 
-      // When the fallback is active (face detection unavailable), capture
-      // frames unconditionally so the flow can still complete.
-      if (captureButtonFallbackEnabled.value) {
-        captureImage();
-        return;
-      }
-
       if (multipleFaces.value) {
         pauseCapture();
         return;

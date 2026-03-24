@@ -1,9 +1,9 @@
 /**
  * Tests for the capture button 10-second fallback in SmartSelfieCapture.
  *
- * After mediapipe initialization completes (success or failure), if
- * isReadyToCapture is still false after 10 seconds, captureButtonFallbackEnabled
- * becomes true and the start-capture button is enabled regardless of face state.
+ * After mediapipe initialization completes successfully, if isReadyToCapture
+ * is still false after 10 seconds, captureButtonFallbackEnabled becomes true
+ * and the start-capture button is enabled regardless of face state.
  *
  * These tests target `smartselfie-capture` directly (not through
  * `selfie-capture-wrapper`, which bypasses SmartSelfieCapture in Cypress).

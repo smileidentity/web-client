@@ -129,13 +129,13 @@ export const useFaceCapture = ({
 
       faceLandmarkerRef.current = await getMediapipeInstance();
       isInitializing.value = false;
-      // Only start the fallback timer after successful initialization.
-      // If MediaPipe fails, the detection loop can't run and the capture
-      // pipeline can't complete, so enabling the button would be a dead end.
       startFallbackTimer();
     } catch (error) {
       console.error('Failed to initialize MediaPipe:', error);
       isInitializing.value = false;
+      // MediaPipe failed — start the fallback timer so the button eventually
+      // enables and the user isn't permanently stuck.
+      startFallbackTimer();
     }
   };
 
@@ -593,6 +593,10 @@ export const useFaceCapture = ({
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
     captureButtonFallbackEnabled.value = false;
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
 
     if (canvasRef.current) {
       clearCanvas(canvasRef.current);

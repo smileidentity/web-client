@@ -137,6 +137,7 @@ export const useFaceCapture = ({
       // enables and the user isn't permanently stuck.
       startFallbackTimer();
     }
+    startFallbackTimer();
   };
 
   const setupCanvas = () => {

@@ -5,7 +5,6 @@ interface CameraPreviewProps {
   videoRef: Ref<HTMLVideoElement>;
   canvasRef: Ref<HTMLCanvasElement>;
   facingMode: 'user' | 'environment';
-  multipleFaces: boolean;
   progress: number;
   interval: number;
   themeColor: string;
@@ -15,7 +14,6 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
   videoRef,
   canvasRef,
   facingMode,
-  multipleFaces,
   progress,
   interval,
   themeColor,
@@ -25,7 +23,7 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
       <div
         className="video-wrapper"
         style={{
-          clipPath: multipleFaces ? 'none' : 'url(#selfie-clip-path)',
+      clipPath: 'url(#selfie-clip-path)',
         }}
       >
         <div className="video-container">
@@ -42,13 +40,11 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
           />
         </div>
       </div>
-      {!multipleFaces && (
-        <OvalProgress
+      <OvalProgress
           progress={progress}
           duration={interval}
           themeColor={themeColor}
         />
-      )}
     </div>
 
     <style>{`

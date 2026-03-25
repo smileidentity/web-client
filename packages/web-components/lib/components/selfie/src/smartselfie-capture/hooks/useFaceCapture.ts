@@ -56,7 +56,6 @@ export const useFaceCapture = ({
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
   const faceProximity = useSignal<'too-close' | 'too-far' | 'good'>('good');
-  const multipleFaces = useSignal(false);
   const videoAspectRatio = useSignal(16 / 9);
   const faceLandmarks = useSignal<any[]>([]);
   const currentSmileScore = useSignal(0);
@@ -85,8 +84,7 @@ export const useFaceCapture = ({
     () =>
       faceDetected.value &&
       faceInBounds.value &&
-      faceProximity.value === 'good' &&
-      !multipleFaces.value,
+      faceProximity.value === 'good',
   );
 
   const updateAlertImmediate = (messageKey: MessageKey | null) => {
@@ -185,8 +183,6 @@ export const useFaceCapture = ({
   const updateAlerts = () => {
     if (isInitializing.value) {
       updateAlertImmediate('initializing');
-    } else if (multipleFaces.value) {
-      updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
     } else if (faceProximity.value === 'too-close') {
@@ -280,13 +276,12 @@ export const useFaceCapture = ({
 
       // Check number of faces
       const numFaces = results.faceLandmarks ? results.faceLandmarks.length : 0;
-      multipleFaces.value = numFaces > 1;
 
       // Check if face is detected
       const hasFace =
         results.faceBlendshapes &&
         results.faceBlendshapes.length > 0 &&
-        numFaces === 1;
+        numFaces >= 1;
       faceDetected.value = hasFace;
 
       if (hasFace && results.faceLandmarks) {
@@ -354,7 +349,6 @@ export const useFaceCapture = ({
     } catch {
       faceDetected.value = false;
       faceInBounds.value = false;
-      multipleFaces.value = false;
       faceProximity.value = 'good';
       currentMouthOpen.value = 0;
 
@@ -437,7 +431,6 @@ export const useFaceCapture = ({
     isPaused.value = true;
 
     if (
-      !multipleFaces.value &&
       faceDetected.value &&
       faceInBounds.value &&
       faceProximity.value === 'good'
@@ -454,11 +447,6 @@ export const useFaceCapture = ({
     captureTimerRef.current = setInterval(() => {
       if (capturesTaken.value >= totalCaptures.value) {
         stopCapture();
-        return;
-      }
-
-      if (multipleFaces.value) {
-        pauseCapture();
         return;
       }
 
@@ -494,8 +482,7 @@ export const useFaceCapture = ({
     if (
       faceDetected.value &&
       faceProximity.value === 'good' &&
-      faceInBounds.value &&
-      !multipleFaces.value
+      faceInBounds.value
     ) {
       const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
       if (isInSmileZone) {
@@ -587,7 +574,6 @@ export const useFaceCapture = ({
     faceDetected.value = false;
     faceInBounds.value = false;
     faceProximity.value = 'good';
-    multipleFaces.value = false;
     faceLandmarks.value = [];
     currentSmileScore.value = 0;
     currentFaceSize.value = 0;
@@ -608,7 +594,6 @@ export const useFaceCapture = ({
     faceDetected,
     faceInBounds,
     faceProximity,
-    multipleFaces,
     videoAspectRatio,
     faceLandmarks,
     currentSmileScore,

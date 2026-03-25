@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a 10-second fallback that enables the SmartSelfie capture button even when face detection conditions are not met (e.g. no face detected, poor lighting)
+  - Fallback timer starts after MediaPipe initialization (success or failure), so users are never permanently stuck
+  - Fallback state is reset on camera switch/retry so the 10-second window restarts fresh
+  - Added Cypress e2e tests covering the fallback button state
+
 ## [11.3.0] - 2026-02-26
 
 ### Added

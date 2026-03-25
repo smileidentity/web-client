@@ -51,6 +51,7 @@ export const useFaceCapture = ({
   const animationFrameRef = useRef<number | null>(null);
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
+  const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
@@ -64,6 +65,7 @@ export const useFaceCapture = ({
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
   const isInitializing = useSignal(true);
+  const captureButtonFallbackEnabled = useSignal(false);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -101,6 +103,19 @@ export const useFaceCapture = ({
     }, 600),
   ).current;
 
+  const CAPTURE_FALLBACK_TIMEOUT_MS = 10000;
+
+  const startFallbackTimer = () => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
+    fallbackTimerRef.current = setTimeout(() => {
+      if (!isReadyToCapture.value) {
+        captureButtonFallbackEnabled.value = true;
+      }
+    }, CAPTURE_FALLBACK_TIMEOUT_MS);
+  };
+
   const initializeFaceLandmarker = async () => {
     try {
       const isAlreadyLoaded =
@@ -114,10 +129,15 @@ export const useFaceCapture = ({
 
       faceLandmarkerRef.current = await getMediapipeInstance();
       isInitializing.value = false;
+      startFallbackTimer();
     } catch (error) {
       console.error('Failed to initialize MediaPipe:', error);
       isInitializing.value = false;
+      // MediaPipe failed — start the fallback timer so the button eventually
+      // enables and the user isn't permanently stuck.
+      startFallbackTimer();
     }
+    startFallbackTimer();
   };
 
   const setupCanvas = () => {
@@ -556,6 +576,9 @@ export const useFaceCapture = ({
     if (captureTimerRef.current) {
       clearInterval(captureTimerRef.current);
     }
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
     stopDetectionLoop();
     updateAlert.cancel();
   };
@@ -570,6 +593,11 @@ export const useFaceCapture = ({
     currentFaceSize.value = 0;
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
+    captureButtonFallbackEnabled.value = false;
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
 
     if (canvasRef.current) {
       clearCanvas(canvasRef.current);
@@ -590,6 +618,7 @@ export const useFaceCapture = ({
     alertTitle,
     isInitializing,
     isReadyToCapture,
+    captureButtonFallbackEnabled,
 
     isCapturing,
     isPaused,

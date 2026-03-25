@@ -23,7 +23,7 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
       <div
         className="video-wrapper"
         style={{
-      clipPath: 'url(#selfie-clip-path)',
+          clipPath: 'url(#selfie-clip-path)',
         }}
       >
         <div className="video-container">
@@ -41,10 +41,10 @@ export const CameraPreview: FunctionComponent<CameraPreviewProps> = ({
         </div>
       </div>
       <OvalProgress
-          progress={progress}
-          duration={interval}
-          themeColor={themeColor}
-        />
+        progress={progress}
+        duration={interval}
+        themeColor={themeColor}
+      />
     </div>
 
     <style>{`

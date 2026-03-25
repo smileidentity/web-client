@@ -337,7 +337,7 @@ export const useFaceCapture = ({
           }
         }
       } else {
-        // No face detected or multiple faces - reset values
+        // No face detected - reset values
         currentSmileScore.value = 0;
         currentFaceSize.value = 0;
         currentMouthOpen.value = 0;

@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
       - name: install dependencies
         run: npm ci
       - name: build application
@@ -46,9 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
       - name: build web-components dependency
         run: |
           cd ../web-components
@@ -88,7 +88,7 @@ jobs:
       SST_PROD_URL: ${{ steps.deploy_sst_app_prod.outputs.SST_PROD_URL }}
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -149,9 +149,9 @@ jobs:
     needs: [full-stack, embed]
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
       - name: install dependencies
         run: npm ci
       - name: configure aws credentials

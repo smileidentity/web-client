@@ -51,11 +51,11 @@ export const useFaceCapture = ({
   const animationFrameRef = useRef<number | null>(null);
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
+  const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
   const faceProximity = useSignal<'too-close' | 'too-far' | 'good'>('good');
-  const multipleFaces = useSignal(false);
   const videoAspectRatio = useSignal(16 / 9);
   const faceLandmarks = useSignal<any[]>([]);
   const currentSmileScore = useSignal(0);
@@ -64,6 +64,7 @@ export const useFaceCapture = ({
   const lastSmileTime = useSignal(0);
   const alertTitle = useSignal('');
   const isInitializing = useSignal(true);
+  const captureButtonFallbackEnabled = useSignal(false);
 
   const isCapturing = useSignal(false);
   const isPaused = useSignal(false);
@@ -83,8 +84,7 @@ export const useFaceCapture = ({
     () =>
       faceDetected.value &&
       faceInBounds.value &&
-      faceProximity.value === 'good' &&
-      !multipleFaces.value,
+      faceProximity.value === 'good',
   );
 
   const updateAlertImmediate = (messageKey: MessageKey | null) => {
@@ -101,6 +101,19 @@ export const useFaceCapture = ({
     }, 600),
   ).current;
 
+  const CAPTURE_FALLBACK_TIMEOUT_MS = 10000;
+
+  const startFallbackTimer = () => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
+    fallbackTimerRef.current = setTimeout(() => {
+      if (!isReadyToCapture.value) {
+        captureButtonFallbackEnabled.value = true;
+      }
+    }, CAPTURE_FALLBACK_TIMEOUT_MS);
+  };
+
   const initializeFaceLandmarker = async () => {
     try {
       const isAlreadyLoaded =
@@ -114,10 +127,15 @@ export const useFaceCapture = ({
 
       faceLandmarkerRef.current = await getMediapipeInstance();
       isInitializing.value = false;
+      startFallbackTimer();
     } catch (error) {
       console.error('Failed to initialize MediaPipe:', error);
       isInitializing.value = false;
+      // MediaPipe failed — start the fallback timer so the button eventually
+      // enables and the user isn't permanently stuck.
+      startFallbackTimer();
     }
+    startFallbackTimer();
   };
 
   const setupCanvas = () => {
@@ -165,8 +183,6 @@ export const useFaceCapture = ({
   const updateAlerts = () => {
     if (isInitializing.value) {
       updateAlertImmediate('initializing');
-    } else if (multipleFaces.value) {
-      updateAlert('multiple-faces');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
     } else if (faceProximity.value === 'too-close') {
@@ -260,13 +276,12 @@ export const useFaceCapture = ({
 
       // Check number of faces
       const numFaces = results.faceLandmarks ? results.faceLandmarks.length : 0;
-      multipleFaces.value = numFaces > 1;
 
       // Check if face is detected
       const hasFace =
         results.faceBlendshapes &&
         results.faceBlendshapes.length > 0 &&
-        numFaces === 1;
+        numFaces >= 1;
       faceDetected.value = hasFace;
 
       if (hasFace && results.faceLandmarks) {
@@ -322,7 +337,7 @@ export const useFaceCapture = ({
           }
         }
       } else {
-        // No face detected or multiple faces - reset values
+        // No face detected - reset values
         currentSmileScore.value = 0;
         currentFaceSize.value = 0;
         currentMouthOpen.value = 0;
@@ -334,7 +349,6 @@ export const useFaceCapture = ({
     } catch {
       faceDetected.value = false;
       faceInBounds.value = false;
-      multipleFaces.value = false;
       faceProximity.value = 'good';
       currentMouthOpen.value = 0;
 
@@ -417,7 +431,6 @@ export const useFaceCapture = ({
     isPaused.value = true;
 
     if (
-      !multipleFaces.value &&
       faceDetected.value &&
       faceInBounds.value &&
       faceProximity.value === 'good'
@@ -434,11 +447,6 @@ export const useFaceCapture = ({
     captureTimerRef.current = setInterval(() => {
       if (capturesTaken.value >= totalCaptures.value) {
         stopCapture();
-        return;
-      }
-
-      if (multipleFaces.value) {
-        pauseCapture();
         return;
       }
 
@@ -474,8 +482,7 @@ export const useFaceCapture = ({
     if (
       faceDetected.value &&
       faceProximity.value === 'good' &&
-      faceInBounds.value &&
-      !multipleFaces.value
+      faceInBounds.value
     ) {
       const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
       if (isInSmileZone) {
@@ -556,6 +563,9 @@ export const useFaceCapture = ({
     if (captureTimerRef.current) {
       clearInterval(captureTimerRef.current);
     }
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+    }
     stopDetectionLoop();
     updateAlert.cancel();
   };
@@ -564,12 +574,16 @@ export const useFaceCapture = ({
     faceDetected.value = false;
     faceInBounds.value = false;
     faceProximity.value = 'good';
-    multipleFaces.value = false;
     faceLandmarks.value = [];
     currentSmileScore.value = 0;
     currentFaceSize.value = 0;
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
+    captureButtonFallbackEnabled.value = false;
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
 
     if (canvasRef.current) {
       clearCanvas(canvasRef.current);
@@ -580,7 +594,6 @@ export const useFaceCapture = ({
     faceDetected,
     faceInBounds,
     faceProximity,
-    multipleFaces,
     videoAspectRatio,
     faceLandmarks,
     currentSmileScore,
@@ -590,6 +603,7 @@ export const useFaceCapture = ({
     alertTitle,
     isInitializing,
     isReadyToCapture,
+    captureButtonFallbackEnabled,
 
     isCapturing,
     isPaused,

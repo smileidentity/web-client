@@ -5,6 +5,7 @@ interface CaptureControlsProps {
   isCapturing: boolean;
   hasFinishedCapture: boolean;
   isReadyToCapture: boolean;
+  captureButtonFallbackEnabled: boolean;
   allowAgentMode: boolean;
   agentSupported: boolean;
   showAgentModeForTests: boolean;
@@ -18,6 +19,7 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
   isCapturing,
   hasFinishedCapture,
   isReadyToCapture,
+  captureButtonFallbackEnabled,
   allowAgentMode,
   agentSupported,
   showAgentModeForTests,
@@ -32,7 +34,11 @@ export const CaptureControls: FunctionComponent<CaptureControlsProps> = ({
         id="start-image-capture"
         class="btn-primary"
         onClick={onStartCapture}
-        disabled={isCapturing || hasFinishedCapture || !isReadyToCapture}
+        disabled={
+          isCapturing ||
+          hasFinishedCapture ||
+          (!isReadyToCapture && !captureButtonFallbackEnabled)
+        }
       >
         {t('selfie.capture.button.startCapture')}
       </button>

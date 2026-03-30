@@ -17,7 +17,11 @@ on:
 jobs:
   comment-on-pr:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -45,21 +49,23 @@ jobs:
           else
             BRANCH_NAME="${{ github.ref_name }}"
           fi
+          SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> $GITHUB_ENV
       - name: retrieve sst app url (sandbox)
         continue-on-error: true
         id: get_app_url
         working-directory: ./previews
         run: |
-          APP_URL=$(npm run sst -- shell node get_app_url.js -- --stage $BRANCH_NAME --print-logs)
+          APP_URL=$(npm run sst -- shell --stage "$SANITIZED_BRANCH_NAME" --print-logs node get_app_url.js)
           echo "PREVIEW_APP_URL=$APP_URL" >> $GITHUB_OUTPUT
       - name: retrieve sst app url (prod)
         continue-on-error: true
         id: get_app_url_prod
         working-directory: ./previews
         run: |
-          PROD_STAGE="$BRANCH_NAME-prod"
-          APP_PROD_URL=$(npm run sst -- shell node get_app_url.js -- --stage $PROD_STAGE --print-logs)
+          PROD_STAGE="$SANITIZED_BRANCH_NAME-prod"
+          APP_PROD_URL=$(npm run sst -- shell --stage "$PROD_STAGE" --print-logs node get_app_url.js)
           echo "PREVIEW_PROD_APP_URL=$APP_PROD_URL" >> $GITHUB_OUTPUT
       - name: get dest dir for web smart-camera-web
         id: get_dest_dir_smart_camera_web
@@ -72,26 +78,60 @@ jobs:
         working-directory: ./packages/embed
         run: echo "DEST_DIR_EMBED=inline/preview-$GITHUB_HEAD_REF" >> "$GITHUB_ENV"
       - name: share preview urls as PR comment
-        uses: unsplash/comment-on-pr@master
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        uses: actions/github-script@v7
         with:
-          msg: >
-            This branch has been deployed to s3 / cloudfront.
+          script: |
+            try {
+              const body = `This branch has been deployed to s3 / cloudfront.
 
+              ✅ Preview URL for Smart Camera Web:
 
-            ✅ Preview URL for Smart Camera Web:
+              https://cdn.smileidentity.com/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/smart-camera-web.js
 
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_SMART_CAMERA_WEB }}/smart-camera-web.js
+              ✅ Preview URL for Embed:
 
-            ✅ Preview URL for Embed:
+              https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
 
-            https://cdn.smileidentity.com/${{ env.DEST_DIR_EMBED }}/js/script.min.js
+              ✅ Preview URL for Web Client (Sandbox):
 
-            ✅ Preview URL for Web Client (Sandbox):
+              ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}
 
-            ${{ steps.get_app_url.outputs.PREVIEW_APP_URL }}
+              ✅ Preview URL for Web Client (Production):
 
-            ✅ Preview URL for Web Client (Production):
+              ${{ steps.get_app_url_prod.outputs.PREVIEW_PROD_APP_URL }}
+              `;
 
-            ${{ steps.get_app_url_prod.outputs.PREVIEW_PROD_APP_URL }}
+              const marker = '<!-- preview-urls -->';
+              const markedBody = marker + '\n' + body;
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const existingComment = comments.find(c => c.body.includes(marker));
+
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: markedBody,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: markedBody,
+                });
+              }
+            } catch (error) {
+              if (error && error.status === 403) {
+                core.warning('Skipping PR comment: GITHUB_TOKEN cannot write comments for this event context.');
+                return;
+              }
+              throw error;
+            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}

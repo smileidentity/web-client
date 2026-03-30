@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.0] - 2026-03-25
+
+### Added
+
+- Added a 10-second fallback for SmartSelfie capture button enablement
+  - If no face is detected for 10 seconds after SmartSelfie starts or after face tracking is lost, the capture button becomes enabled so the user can proceed
+  - The 10-second timer resets each time a face is successfully detected again
+- Added Adreno 9xx GPU to the MediaPipe exclusion list to prevent compatibility issues on devices with that GPU
+
+### Changed
+
+- Removed multi-face detection restriction from SmartSelfie capture; capture now proceeds with any number of faces present
+
 ## [11.3.0] - 2026-02-26
 
 ### Added

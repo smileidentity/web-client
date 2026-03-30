@@ -1,7 +1,6 @@
 import { t } from '../../../../../domain/localisation';
 
 export const MESSAGES = {
-  'multiple-faces': () => t('selfie.smart.alert.multipleFaces'),
   'no-face': () => t('selfie.smart.alert.noFace'),
   'out-of-bounds': () => t('selfie.smart.alert.outOfBounds'),
   'too-close': () => t('selfie.smart.alert.tooClose'),

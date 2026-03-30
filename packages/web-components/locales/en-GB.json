@@ -81,7 +81,6 @@
     },
     "smart": {
       "alert": {
-        "multipleFaces": "Ensure only one face is visible",
         "noFace": "Position your face in the oval",
         "outOfBounds": "Position your face in the oval",
         "tooClose": "Move farther away",

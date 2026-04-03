@@ -4,6 +4,7 @@ triggerPaths:
   - 'package.json'
   - 'package-lock.json'
   - 'packages/*/package.json'
+  - 'packages/*/package-lock.json'
 
 projectIgnorePaths:
   - 'docs'

@@ -7,7 +7,7 @@
   "scripts": {
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "preinstall": "[ \"$npm_config_global\" = \"true\" ] || [ \"$ALLOW_INSTALL\" = \"1\" ] || [ \"$CI\" = \"true\" ] || (echo \"Use npm ci\" && exit 1)"
+    "preinstall": "[ \"$npm_config_global\" = \"true\" ] || [ \"$ALLOW_INSTALL\" = \"1\" ] || [ \"$CI\" = \"true\" ] || [ \"$npm_command\" = \"ci\" ] || (echo \"Use npm ci\" && exit 1)"
   },
   "keywords": [
     "Web",

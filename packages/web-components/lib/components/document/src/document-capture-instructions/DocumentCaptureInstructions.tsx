@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
+import { getDirection, t } from '../../../../domain/localisation';
 
 // ── Visual assets ────────────────────────────────────────────────────────────
 const HERO_ID_CARD_LOTTIE_URL = new URL(
@@ -64,6 +65,14 @@ function getDocumentVariant(idType: string): DocumentVariant {
   }
 
   return 'id-card';
+}
+
+function getTextDirection(dir?: string): 'ltr' | 'rtl' | 'auto' {
+  if (dir === 'rtl' || dir === 'ltr' || dir === 'auto') {
+    return dir;
+  }
+
+  return getDirection() === 'rtl' ? 'rtl' : 'ltr';
 }
 
 interface HeroLottieProps {
@@ -430,13 +439,6 @@ interface GuidelineItem {
   cropped?: boolean;
 }
 
-const GUIDELINES: GuidelineItem[] = [
-  { label: 'Good', valid: true },
-  { label: 'Not cropped', valid: false, cropped: true },
-  { label: 'Not blurry', valid: false, blurred: true },
-  { label: 'Not reflective', valid: false, reflective: true },
-];
-
 // ── SmileID attribution SVG (inline to avoid external web component dep) ────
 function PoweredBySmileIdLogo() {
   return (
@@ -501,6 +503,7 @@ function PoweredBySmileIdLogo() {
 // ── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
+  dir?: string;
   'id-type'?: string;
   title?: string;
   'hide-attribution'?: string | boolean;
@@ -511,6 +514,7 @@ interface Props {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const DocumentCaptureInstructions: FunctionComponent<Props> = ({
+  dir,
   'id-type': idType = '',
   title = '',
   'hide-attribution': hideAttributionProp = false,
@@ -521,7 +525,26 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const hideBack = getBoolProp(hideBackProp) || getBoolProp(hideBackToHostProp);
   const displayDocumentType = idType || title;
   const documentVariant = getDocumentVariant(displayDocumentType);
+  const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
+  const guidelineItems: GuidelineItem[] = [
+    { label: t('document.instructions.guidelines.good'), valid: true },
+    {
+      label: t('document.instructions.guidelines.notCropped'),
+      valid: false,
+      cropped: true,
+    },
+    {
+      label: t('document.instructions.guidelines.notBlurry'),
+      valid: false,
+      blurred: true,
+    },
+    {
+      label: t('document.instructions.guidelines.notReflective'),
+      valid: false,
+      reflective: true,
+    },
+  ];
 
   const handleBack = () => {
     const host = document.querySelector('document-capture-instructions');
@@ -542,7 +565,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   };
 
   return (
-    <div class="dui-root">
+    <div class="dui-root" dir={direction}>
       {/* ── Back button ──────────────────────────────────────── */}
       {!hideBack && (
         <button
@@ -560,7 +583,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         {/* ── Title ─────────────────────────────────────────── */}
         <div class="dui-title-block">
           <h1 class="dui-title">
-            <span class="dui-title-regular">Get ready to capture your </span>
+            <span class="dui-title-regular">{t('document.instructions.captureTitlePrefix')} </span>
             <span class="dui-title-type">{displayDocumentType || '<ID Type>'}</span>
           </h1>
         </div>
@@ -578,11 +601,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         <div class="dui-guidelines">
           <div class="dui-guidelines-header">
             <GuidelinesIcon />
-            <span class="dui-guidelines-label">Capture Guidelines</span>
+            <span class="dui-guidelines-label">{t('document.instructions.captureGuidelines')}</span>
           </div>
 
           <div class="dui-guidelines-grid">
-            {GUIDELINES.map((item) => (
+            {guidelineItems.map((item) => (
               <div class="dui-guide-item" key={item.label}>
                 <div class="dui-guide-thumb-wrap">
                   <GuidelineThumbnail
@@ -611,7 +634,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           type="button"
           onClick={handleStartCapture}
         >
-          <span>Start Capture</span>
+          <span>{t('document.instructions.startCapture')}</span>
           <ArrowRightIcon />
         </button>
 
@@ -1189,6 +1212,7 @@ if (
   && !window.customElements.get('document-capture-instructions')
 ) {
   register(DocumentCaptureInstructions, 'document-capture-instructions', [
+    'dir',
     'id-type',
     'title',
     'hide-attribution',

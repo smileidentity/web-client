@@ -1,78 +1,125 @@
 import type { FunctionComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import register from 'preact-custom-element';
-import lottie from 'lottie-web';
-import type { AnimationItem } from 'lottie-web';
+import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
 
 // ── Visual assets ────────────────────────────────────────────────────────────
-// Local shared Lottie JSON location for this screen's hero animation.
-// We keep a poster image fallback until a Lottie renderer is wired in.
-const HERO_LOTTIE_URL = new URL(
-  '../assets/lottie/document-upload-hero.json',
+const HERO_ID_CARD_LOTTIE_URL = new URL(
+  '../assets/lottie/taking photo of ID.lottie',
+  import.meta.url,
+).href;
+
+const HERO_PASSPORT_LOTTIE_URL = new URL(
+  '../assets/lottie/taking photo of passport 2.lottie',
+  import.meta.url,
+).href;
+
+const HERO_GREENBOOK_LOTTIE_URL = new URL(
+  '../assets/lottie/taking photo of green book passport.lottie',
   import.meta.url,
 ).href;
 
 const HERO_IMAGE_FALLBACK_URL =
   'https://www.figma.com/api/mcp/asset/be898e16-cf3f-4c91-86ed-fbd2aa436e49';
 
+type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
+
+interface HeroAssetConfig {
+  animationSrc: string;
+  fallbackAlt: string;
+  fallbackSrc: string;
+}
+
+const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
+  'id-card': {
+    animationSrc: HERO_ID_CARD_LOTTIE_URL,
+    fallbackAlt: 'Phone capturing an ID card on a desk',
+    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
+  },
+  passport: {
+    animationSrc: HERO_PASSPORT_LOTTIE_URL,
+    fallbackAlt: 'Phone capturing a passport on a desk',
+    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
+  },
+  greenbook: {
+    animationSrc: HERO_GREENBOOK_LOTTIE_URL,
+    fallbackAlt: 'Phone capturing a green book passport on a desk',
+    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
+  },
+};
+
+function getDocumentVariant(idType: string): DocumentVariant {
+  const normalized = idType.trim().toLowerCase();
+
+  if (
+    normalized.includes('greenbook')
+    || (normalized.includes('green') && normalized.includes('book'))
+  ) {
+    return 'greenbook';
+  }
+
+  if (normalized.includes('passport')) {
+    return 'passport';
+  }
+
+  return 'id-card';
+}
+
 interface HeroLottieProps {
-  animationPath: string;
+  animationSrc: string;
   fallbackSrc: string;
   fallbackAlt: string;
 }
 
 function HeroLottie({
-  animationPath,
+  animationSrc,
   fallbackSrc,
   fallbackAlt,
 }: HeroLottieProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    let animation: AnimationItem | null = null;
+    setHasError(false);
+
+    if (!canvasRef.current) {
+      return undefined;
+    }
+
     let isMounted = true;
+    const animation = new DotLottie({
+      autoplay: true,
+      canvas: canvasRef.current,
+      loop: true,
+      layout: {
+        align: [0.5, 0.5],
+        fit: 'cover',
+      },
+      renderConfig: {
+        autoResize: true,
+        devicePixelRatio: window.devicePixelRatio || 1,
+      },
+      src: animationSrc,
+    });
 
-    const loadAnimation = async () => {
-      try {
-        const response = await fetch(animationPath);
-        if (!response.ok) {
-          throw new Error(
-            `Failed to load Lottie JSON (${response.status} ${response.statusText})`,
-          );
-        }
-
-        const animationData = await response.json();
-
-        if (!containerRef.current || !isMounted) {
-          return;
-        }
-
-        animation = lottie.loadAnimation({
-          container: containerRef.current,
-          renderer: 'svg',
-          loop: true,
-          autoplay: true,
-          animationData,
-          rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice',
-          },
-        });
-      } catch {
-        if (isMounted) {
-          setHasError(true);
-        }
+    animation.addEventListener('loadError', () => {
+      if (isMounted) {
+        setHasError(true);
       }
-    };
+    });
 
-    loadAnimation();
+    animation.addEventListener('renderError', () => {
+      if (isMounted) {
+        setHasError(true);
+      }
+    });
 
     return () => {
       isMounted = false;
-      animation?.destroy();
+      animation.destroy();
     };
-  }, [animationPath]);
+  }, [animationSrc]);
 
   return (
     <div class="dui-hero-media">
@@ -83,7 +130,13 @@ function HeroLottie({
         loading="eager"
         decoding="async"
       />
-      {!hasError && <div ref={containerRef} class="dui-hero-lottie" aria-hidden="true" />}
+      {!hasError && (
+        <canvas
+          ref={canvasRef}
+          class="dui-hero-canvas"
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }
@@ -249,6 +302,126 @@ function IdCardThumbnail({
   );
 }
 
+function BookletThumbnail({
+  blurred = false,
+  reflective = false,
+  cropped = false,
+}: {
+  blurred?: boolean;
+  reflective?: boolean;
+  cropped?: boolean;
+}) {
+  return (
+    <div
+      class="booklet-thumb"
+      style={{
+        overflow: cropped ? 'hidden' : 'visible',
+        filter: blurred ? 'blur(1.5px)' : 'none',
+      }}
+    >
+      <div
+        class="booklet-inner"
+        style={cropped ? { transform: 'scale(1.33)', transformOrigin: 'right center' } : undefined}
+      >
+        <div class="booklet-page booklet-page--left">
+          <div class="booklet-line long" />
+          <div class="booklet-line medium" />
+          <div class="booklet-line short" />
+        </div>
+        <div class="booklet-spine" />
+        <div class="booklet-page booklet-page--right">
+          <div class="booklet-photo" />
+          <div class="booklet-lines">
+            <div class="booklet-line long" />
+            <div class="booklet-line medium" />
+          </div>
+        </div>
+      </div>
+      {reflective && <div class="booklet-glare" />}
+    </div>
+  );
+}
+
+function GreenbookThumbnail({
+  blurred = false,
+  reflective = false,
+  cropped = false,
+}: {
+  blurred?: boolean;
+  reflective?: boolean;
+  cropped?: boolean;
+}) {
+  return (
+    <div
+      class="greenbook-thumb"
+      style={{
+        overflow: cropped ? 'hidden' : 'visible',
+        filter: blurred ? 'blur(1.5px)' : 'none',
+      }}
+    >
+      <div
+        class="greenbook-inner"
+        style={cropped ? { transform: 'scale(1.33)', transformOrigin: 'right center' } : undefined}
+      >
+        <div class="greenbook-cover">
+          <div class="greenbook-emblem" />
+          <div class="greenbook-cover-line" />
+        </div>
+        <div class="greenbook-spine" />
+        <div class="greenbook-page">
+          <div class="greenbook-photo" />
+          <div class="greenbook-lines">
+            <div class="greenbook-line long" />
+            <div class="greenbook-line medium" />
+            <div class="greenbook-line short" />
+          </div>
+        </div>
+      </div>
+      {reflective && <div class="greenbook-glare" />}
+    </div>
+  );
+}
+
+function GuidelineThumbnail({
+  variant,
+  blurred,
+  reflective,
+  cropped,
+}: {
+  variant: DocumentVariant;
+  blurred?: boolean;
+  reflective?: boolean;
+  cropped?: boolean;
+}) {
+  if (variant === 'id-card') {
+    return (
+      <IdCardThumbnail
+        blurred={blurred}
+        reflective={reflective}
+        cropped={cropped}
+      />
+    );
+  }
+
+  if (variant === 'greenbook') {
+    return (
+      <GreenbookThumbnail
+        blurred={blurred}
+        reflective={reflective}
+        cropped={cropped}
+      />
+    );
+  }
+
+  return (
+    <BookletThumbnail
+      blurred={blurred}
+      reflective={reflective}
+      cropped={cropped}
+    />
+  );
+}
+
 interface GuidelineItem {
   label: string;
   valid: boolean;
@@ -329,31 +502,42 @@ function PoweredBySmileIdLogo() {
 
 interface Props {
   'id-type'?: string;
+  title?: string;
   'hide-attribution'?: string | boolean;
   'hide-back'?: string | boolean;
+  'hide-back-to-host'?: string | boolean;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-const DocumentUploadInstructions: FunctionComponent<Props> = ({
+const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   'id-type': idType = '',
+  title = '',
   'hide-attribution': hideAttributionProp = false,
   'hide-back': hideBackProp = false,
+  'hide-back-to-host': hideBackToHostProp = false,
 }) => {
   const hideAttribution = getBoolProp(hideAttributionProp);
-  const hideBack = getBoolProp(hideBackProp);
+  const hideBack = getBoolProp(hideBackProp) || getBoolProp(hideBackToHostProp);
+  const displayDocumentType = idType || title;
+  const documentVariant = getDocumentVariant(displayDocumentType);
+  const heroAsset = HERO_ASSETS[documentVariant];
 
   const handleBack = () => {
-    const host = document.querySelector('document-upload-instructions');
+    const host = document.querySelector('document-capture-instructions');
     host?.dispatchEvent(
-      new CustomEvent('document-upload-instructions.back', { bubbles: true }),
+      new CustomEvent('document-capture-instructions.cancelled', {
+        bubbles: true,
+      }),
     );
   };
 
   const handleStartCapture = () => {
-    const host = document.querySelector('document-upload-instructions');
+    const host = document.querySelector('document-capture-instructions');
     host?.dispatchEvent(
-      new CustomEvent('document-upload-instructions.start', { bubbles: true }),
+      new CustomEvent('document-capture-instructions.capture', {
+        bubbles: true,
+      }),
     );
   };
 
@@ -377,16 +561,16 @@ const DocumentUploadInstructions: FunctionComponent<Props> = ({
         <div class="dui-title-block">
           <h1 class="dui-title">
             <span class="dui-title-regular">Get ready to capture your </span>
-            <span class="dui-title-type">{idType || '<ID Type>'}</span>
+            <span class="dui-title-type">{displayDocumentType || '<ID Type>'}</span>
           </h1>
         </div>
 
         {/* ── Hero illustration ─────────────────────────────── */}
         <div class="dui-hero-card" aria-hidden="true">
           <HeroLottie
-            animationPath={HERO_LOTTIE_URL}
-            fallbackSrc={HERO_IMAGE_FALLBACK_URL}
-            fallbackAlt="Phone capturing a document on a desk"
+            animationSrc={heroAsset.animationSrc}
+            fallbackSrc={heroAsset.fallbackSrc}
+            fallbackAlt={heroAsset.fallbackAlt}
           />
         </div>
 
@@ -401,7 +585,8 @@ const DocumentUploadInstructions: FunctionComponent<Props> = ({
             {GUIDELINES.map((item) => (
               <div class="dui-guide-item" key={item.label}>
                 <div class="dui-guide-thumb-wrap">
-                  <IdCardThumbnail
+                  <GuidelineThumbnail
+                    variant={documentVariant}
                     blurred={item.blurred}
                     reflective={item.reflective}
                     cropped={item.cropped}
@@ -554,7 +739,7 @@ const DocumentUploadInstructions: FunctionComponent<Props> = ({
           height: 100%;
         }
 
-        .dui-hero-lottie {
+        .dui-hero-canvas {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -659,6 +844,206 @@ const DocumentUploadInstructions: FunctionComponent<Props> = ({
         .id-card-line.short  { width: 50%; }
 
         .id-card-glare {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            ellipse at 35% 35%,
+            rgba(255, 255, 255, 0.97) 0%,
+            rgba(255, 255, 255, 0.8) 25%,
+            rgba(255, 255, 255, 0.35) 55%,
+            rgba(255, 255, 255, 0) 75%
+          );
+          pointer-events: none;
+        }
+
+        .booklet-thumb {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+          width: 100%;
+          aspect-ratio: 3 / 2;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .booklet-inner {
+          display: grid;
+          grid-template-columns: 1fr 4px 1fr;
+          width: 100%;
+          height: 100%;
+        }
+
+        .booklet-page {
+          padding: 6px 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          background: #ffffff;
+        }
+
+        .booklet-page--left {
+          background: #f8fafc;
+        }
+
+        .booklet-page--right {
+          flex-direction: row;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .booklet-spine {
+          background: linear-gradient(180deg, #d9e1ea 0%, #c7d1dc 100%);
+        }
+
+        .booklet-photo {
+          width: 14px;
+          height: 18px;
+          border-radius: 2px;
+          border: 0.5px solid #cbd5e1;
+          background: #d5e1ec;
+          flex-shrink: 0;
+        }
+
+        .booklet-lines {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .booklet-line {
+          height: 3px;
+          border-radius: 999px;
+          background: #e2e8f0;
+        }
+
+        .booklet-line.long {
+          width: 100%;
+        }
+
+        .booklet-line.medium {
+          width: 72%;
+        }
+
+        .booklet-line.short {
+          width: 54%;
+        }
+
+        .booklet-glare {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            ellipse at 35% 35%,
+            rgba(255, 255, 255, 0.97) 0%,
+            rgba(255, 255, 255, 0.8) 25%,
+            rgba(255, 255, 255, 0.35) 55%,
+            rgba(255, 255, 255, 0) 75%
+          );
+          pointer-events: none;
+        }
+
+        .greenbook-thumb {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+          width: 100%;
+          aspect-ratio: 3 / 2;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .greenbook-inner {
+          display: grid;
+          grid-template-columns: 1fr 4px 1fr;
+          width: 100%;
+          height: 100%;
+        }
+
+        .greenbook-cover {
+          background: linear-gradient(160deg, #2f7a4f 0%, #1f5a37 100%);
+          padding: 6px 4px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+
+        .greenbook-emblem {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.85);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+        }
+
+        .greenbook-cover-line {
+          width: 60%;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.75);
+        }
+
+        .greenbook-spine {
+          background: linear-gradient(180deg, #244f35 0%, #1a3e2a 100%);
+        }
+
+        .greenbook-page {
+          padding: 6px 4px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 4px;
+          background: #ffffff;
+        }
+
+        .greenbook-photo {
+          width: 14px;
+          height: 18px;
+          border-radius: 2px;
+          border: 0.5px solid #cbd5e1;
+          background: #d5e1ec;
+          flex-shrink: 0;
+        }
+
+        .greenbook-lines {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .greenbook-line {
+          height: 3px;
+          border-radius: 999px;
+          background: #d9e4ed;
+        }
+
+        .greenbook-line.long {
+          width: 100%;
+        }
+
+        .greenbook-line.medium {
+          width: 72%;
+        }
+
+        .greenbook-line.short {
+          width: 54%;
+        }
+
+        .greenbook-glare {
           position: absolute;
           inset: 0;
           background: radial-gradient(
@@ -801,13 +1186,15 @@ const DocumentUploadInstructions: FunctionComponent<Props> = ({
 
 if (
   window.customElements
-  && !window.customElements.get('document-upload-instructions')
+  && !window.customElements.get('document-capture-instructions')
 ) {
-  register(DocumentUploadInstructions, 'document-upload-instructions', [
+  register(DocumentCaptureInstructions, 'document-capture-instructions', [
     'id-type',
+    'title',
     'hide-attribution',
     'hide-back',
+    'hide-back-to-host',
   ]);
 }
 
-export default DocumentUploadInstructions;
+export default DocumentCaptureInstructions;

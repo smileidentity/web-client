@@ -1,97 +1,106 @@
 import './index';
-import { setCurrentLocale } from '../../../../domain/localisation';
 
 const meta = {
   args: {
-    language: 'en',
-    title: '',
-    'side-of-id': 'front',
-    'document-capture-modes': 'camera,upload',
     'hide-attribution': false,
-    'hide-back-to-host': false,
+    'hide-back': false,
+    'id-type': 'National ID',
   },
   argTypes: {
-    language: {
-      control: { type: 'select' },
-      options: ['en', 'ar'],
-    },
-    'side-of-id': {
-      control: { type: 'select' },
-      options: ['front', 'back'],
-    },
-    'document-capture-modes': {
-      control: { type: 'select' },
-      options: ['camera', 'upload', 'camera,upload'],
-    },
     'hide-attribution': { control: 'boolean' },
+    'hide-back': { control: 'boolean' },
     'hide-back-to-host': { control: 'boolean' },
+    'id-type': { control: 'text' },
+    title: { control: 'text' },
   },
   component: 'document-capture-instructions',
+  parameters: {
+    layout: 'centered',
+  },
+  title: 'Document/DocumentCaptureInstructions',
 };
 
 export default meta;
 
-const renderElement = (args) => {
-  setCurrentLocale(args.language);
+const renderComponent = (args) => {
+  const attrs = Object.entries(args)
+    .map(([key, val]) => {
+      if (val === false || val === '' || val == null) return '';
+      if (val === true) return key;
+      return `${key}="${val}"`;
+    })
+    .filter(Boolean)
+    .join(' ');
+
   return `
-    <document-capture-instructions
-      ${args.title ? `title="${args.title}"` : ''}
-      side-of-id="${args['side-of-id']}"
-      document-capture-modes="${args['document-capture-modes']}"
-      ${args['hide-attribution'] ? 'hide-attribution' : ''}
-      ${args['hide-back-to-host'] ? 'hide-back-to-host' : ''}
-    ></document-capture-instructions>
+    <div style="width:390px;height:780px;overflow:hidden;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+      <document-capture-instructions ${attrs} style="display:block;width:100%;height:100%;"></document-capture-instructions>
+    </div>
   `;
 };
 
-export const DocumentInstruction = {
-  render: renderElement,
+export const Default = {
+  render: renderComponent,
 };
 
-export const BackOfId = {
-  args: { 'side-of-id': 'back' },
-  render: renderElement,
+export const Passport = {
+  args: {
+    'id-type': 'Passport',
+  },
+  render: renderComponent,
+};
+
+export const Greenbook = {
+  args: {
+    'id-type': 'Greenbook',
+  },
+  render: renderComponent,
 };
 
 export const NoBack = {
-  args: { 'hide-back-to-host': true },
-  render: renderElement,
+  args: {
+    'hide-back': true,
+  },
+  render: renderComponent,
+};
+
+export const HideBackToHost = {
+  args: {
+    'hide-back-to-host': true,
+  },
+  render: renderComponent,
 };
 
 export const NoAttribution = {
-  args: { 'hide-attribution': true },
-  render: renderElement,
-};
-
-export const CameraOnly = {
-  args: { 'document-capture-modes': 'camera' },
-  render: renderElement,
-};
-
-export const UploadOnly = {
-  args: { 'document-capture-modes': 'upload' },
-  render: renderElement,
-};
-
-export const Desktop = {
-  parameters: {
-    viewport: { defaultViewport: 'desktop' },
+  args: {
+    'hide-attribution': true,
   },
-  render: renderElement,
+  render: renderComponent,
 };
 
-export const Arabic = {
-  args: { language: 'ar' },
+export const TitleFallback = {
+  args: {
+    'id-type': '',
+    title: 'Document (Front)',
+  },
+  render: renderComponent,
+};
+
+export const DesktopView = {
   render: (args) => {
-    setCurrentLocale(args.language);
+    const attrs = Object.entries(args)
+      .map(([key, val]) => {
+        if (val === false || val === '' || val == null) return '';
+        if (val === true) return key;
+        return `${key}="${val}"`;
+      })
+      .filter(Boolean)
+      .join(' ');
+
     return `
-      <document-capture-instructions
-        dir="rtl"
-        side-of-id="${args['side-of-id']}"
-        document-capture-modes="${args['document-capture-modes']}"
-        ${args['hide-attribution'] ? 'hide-attribution' : ''}
-        ${args['hide-back-to-host'] ? 'hide-back-to-host' : ''}
-      ></document-capture-instructions>
+      <div style="width:640px;height:720px;overflow:hidden;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+        <document-capture-instructions ${attrs} style="display:block;width:100%;height:100%;"></document-capture-instructions>
+      </div>
     `;
   },
 };

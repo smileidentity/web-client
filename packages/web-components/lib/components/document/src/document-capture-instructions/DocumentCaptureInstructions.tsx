@@ -54,8 +54,8 @@ function getDocumentVariant(idType: string): DocumentVariant {
   const normalized = idType.trim().toLowerCase();
 
   if (
-    normalized.includes('greenbook')
-    || (normalized.includes('green') && normalized.includes('book'))
+    normalized.includes('greenbook') ||
+    (normalized.includes('green') && normalized.includes('book'))
   ) {
     return 'greenbook';
   }
@@ -140,11 +140,7 @@ function HeroLottie({
         decoding="async"
       />
       {!hasError && (
-        <canvas
-          ref={canvasRef}
-          class="dui-hero-canvas"
-          aria-hidden="true"
-        />
+        <canvas ref={canvasRef} class="dui-hero-canvas" aria-hidden="true" />
       )}
     </div>
   );
@@ -277,7 +273,11 @@ function IdCardThumbnail({
       {/* Card body – scaled up when cropped so it overflows the clipped container */}
       <div
         class="id-card-body"
-        style={cropped ? { transform: 'scale(1.4)', transformOrigin: 'right center' } : undefined}
+        style={
+          cropped
+            ? { transform: 'scale(1.4)', transformOrigin: 'right center' }
+            : undefined
+        }
       >
         {/* Photo placeholder */}
         <div class="id-card-photo">
@@ -290,10 +290,7 @@ function IdCardThumbnail({
             xmlns="http://www.w3.org/2000/svg"
           >
             <ellipse cx="9" cy="8" rx="5" ry="6" fill="#c5d4e0" />
-            <path
-              d="M1 22c0-4 3.6-7 8-7s8 3 8 7"
-              fill="#c5d4e0"
-            />
+            <path d="M1 22c0-4 3.6-7 8-7s8 3 8 7" fill="#c5d4e0" />
           </svg>
         </div>
         {/* Text lines */}
@@ -304,9 +301,7 @@ function IdCardThumbnail({
         </div>
       </div>
       {/* Reflective glare overlay */}
-      {reflective && (
-        <div class="id-card-glare" />
-      )}
+      {reflective && <div class="id-card-glare" />}
     </div>
   );
 }
@@ -330,7 +325,11 @@ function BookletThumbnail({
     >
       <div
         class="booklet-inner"
-        style={cropped ? { transform: 'scale(1.33)', transformOrigin: 'right center' } : undefined}
+        style={
+          cropped
+            ? { transform: 'scale(1.33)', transformOrigin: 'right center' }
+            : undefined
+        }
       >
         <div class="booklet-page booklet-page--left">
           <div class="booklet-line long" />
@@ -370,7 +369,11 @@ function GreenbookThumbnail({
     >
       <div
         class="greenbook-inner"
-        style={cropped ? { transform: 'scale(1.33)', transformOrigin: 'right center' } : undefined}
+        style={
+          cropped
+            ? { transform: 'scale(1.33)', transformOrigin: 'right center' }
+            : undefined
+        }
       >
         <div class="greenbook-cover">
           <div class="greenbook-emblem" />
@@ -482,10 +485,7 @@ function PoweredBySmileIdLogo() {
           d="M89.9995 5.00535C89.9995 6.46434 89.1474 7.85475 87.3345 7.85475H84.3652V2.18167H87.3345C89.1479 2.18167 89.9995 3.54686 89.9995 5.00535ZM86.9376 6.5067C87.8401 6.5067 88.2364 5.99482 88.2364 5.00535C88.2364 4.01588 87.8226 3.52971 86.9376 3.52971H86.06V6.5067H86.9376Z"
           fill="#001096"
         />
-        <path
-          d="M52.2123 3.88737H48V7.86846H52.2123V3.88737Z"
-          fill="#001096"
-        />
+        <path d="M52.2123 3.88737H48V7.86846H52.2123V3.88737Z" fill="#001096" />
         <path
           d="M53.2359 0C53.2165 0 53.1975 0.00201727 53.1786 0.00252159C53.1591 0.00252159 53.1402 0 53.1207 0C52.0457 0 51.0869 0.708567 51.0869 2.27044V3.8888H55.2882V2.27044C55.2882 0.708567 54.3174 0 53.2359 0Z"
           fill="#FF9B00"
@@ -583,8 +583,12 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         {/* ── Title ─────────────────────────────────────────── */}
         <div class="dui-title-block">
           <h1 class="dui-title">
-            <span class="dui-title-regular">{t('document.instructions.captureTitlePrefix')} </span>
-            <span class="dui-title-type">{displayDocumentType || '<ID Type>'}</span>
+            <span class="dui-title-regular">
+              {t('document.instructions.captureTitlePrefix')}{' '}
+            </span>
+            <span class="dui-title-type">
+              {displayDocumentType || '<ID Type>'}
+            </span>
           </h1>
         </div>
 
@@ -601,7 +605,9 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         <div class="dui-guidelines">
           <div class="dui-guidelines-header">
             <GuidelinesIcon />
-            <span class="dui-guidelines-label">{t('document.instructions.captureGuidelines')}</span>
+            <span class="dui-guidelines-label">
+              {t('document.instructions.captureGuidelines')}
+            </span>
           </div>
 
           <div class="dui-guidelines-grid">
@@ -1208,8 +1214,8 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 // ── Register as custom element ───────────────────────────────────────────────
 
 if (
-  window.customElements
-  && !window.customElements.get('document-capture-instructions')
+  window.customElements &&
+  !window.customElements.get('document-capture-instructions')
 ) {
   register(DocumentCaptureInstructions, 'document-capture-instructions', [
     'dir',

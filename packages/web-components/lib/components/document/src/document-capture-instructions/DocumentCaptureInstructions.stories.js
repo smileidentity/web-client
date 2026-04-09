@@ -1,5 +1,8 @@
 import './index';
-import { getDirection, setCurrentLocale } from '../../../../domain/localisation';
+import {
+  getDirection,
+  setCurrentLocale,
+} from '../../../../domain/localisation';
 
 const meta = {
   args: {

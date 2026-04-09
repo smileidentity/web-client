@@ -81,6 +81,7 @@
     "@preact/signals": "^2.1.1",
     "@tabler/icons-preact": "^3.34.0",
     "lodash": "^4.17.23",
+    "lottie-web": "^5.13.0",
     "preact": "^10.27.3",
     "preact-custom-element": "^4.3.0",
     "preact-router": "^4.1.2",

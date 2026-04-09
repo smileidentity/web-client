@@ -1,0 +1,16 @@
+{
+  "v": "5.7.4",
+  "fr": 60,
+  "ip": 0,
+  "op": 180,
+  "w": 384,
+  "h": 288,
+  "nm": "document-upload-hero",
+  "ddd": 0,
+  "assets": [],
+  "layers": [],
+  "meta": {
+    "description": "Placeholder Lottie asset for document upload instruction hero animation.",
+    "posterImageUrl": "https://www.figma.com/api/mcp/asset/be898e16-cf3f-4c91-86ed-fbd2aa436e49"
+  }
+}

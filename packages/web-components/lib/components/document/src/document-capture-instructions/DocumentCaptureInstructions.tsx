@@ -131,16 +131,16 @@ function HeroLottie({
   }, [animationSrc]);
 
   return (
-    <div class="dui-hero-media">
+    <div class="doc-instr-hero-media">
       <img
-        class="dui-hero-img"
+        class="doc-instr-hero-img"
         src={fallbackSrc}
         alt={fallbackAlt}
         loading="eager"
         decoding="async"
       />
       {!hasError && (
-        <canvas ref={canvasRef} class="dui-hero-canvas" aria-hidden="true" />
+        <canvas ref={canvasRef} class="doc-instr-hero-canvas" aria-hidden="true" />
       )}
     </div>
   );
@@ -565,11 +565,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   };
 
   return (
-    <div class="dui-root" dir={direction}>
+    <div class="doc-instr-root" dir={direction}>
       {/* ── Back button ──────────────────────────────────────── */}
       {!hideBack && (
         <button
-          class="dui-back-btn"
+          class="back-button"
           type="button"
           aria-label="Go back"
           onClick={handleBack}
@@ -579,21 +579,21 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
       )}
 
       {/* ── Scrollable content ───────────────────────────────── */}
-      <div class="dui-scroll">
+      <div class="doc-instr-scroll">
         {/* ── Title ─────────────────────────────────────────── */}
-        <div class="dui-title-block">
-          <h1 class="dui-title">
-            <span class="dui-title-regular">
+        <div class="doc-instr-title-block">
+          <h1 class="doc-instr-title">
+            <span class="doc-instr-title-regular">
               {t('document.instructions.captureTitlePrefix')}{' '}
             </span>
-            <span class="dui-title-type">
+            <span class="doc-instr-title-type">
               {displayDocumentType || '<ID Type>'}
             </span>
           </h1>
         </div>
 
         {/* ── Hero illustration ─────────────────────────────── */}
-        <div class="dui-hero-card" aria-hidden="true">
+        <div class="doc-instr-hero-card" aria-hidden="true">
           <HeroLottie
             animationSrc={heroAsset.animationSrc}
             fallbackSrc={heroAsset.fallbackSrc}
@@ -602,18 +602,18 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         </div>
 
         {/* ── Capture guidelines ────────────────────────────── */}
-        <div class="dui-guidelines">
-          <div class="dui-guidelines-header">
+        <div class="doc-instr-guidelines">
+          <div class="doc-instr-guidelines-header">
             <GuidelinesIcon />
-            <span class="dui-guidelines-label">
+            <span class="doc-instr-guidelines-label">
               {t('document.instructions.captureGuidelines')}
             </span>
           </div>
 
-          <div class="dui-guidelines-grid">
+          <div class="doc-instr-guidelines-grid">
             {guidelineItems.map((item) => (
-              <div class="dui-guide-item" key={item.label}>
-                <div class="dui-guide-thumb-wrap">
+              <div class="doc-instr-guide-item" key={item.label}>
+                <div class="doc-instr-guide-thumb-wrap">
                   <GuidelineThumbnail
                     variant={documentVariant}
                     blurred={item.blurred}
@@ -621,12 +621,12 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
                     cropped={item.cropped}
                   />
                   <div
-                    class={`dui-guide-badge ${item.valid ? 'dui-guide-badge--valid' : 'dui-guide-badge--invalid'}`}
+                    class={`doc-instr-guide-badge ${item.valid ? 'doc-instr-guide-badge--valid' : 'doc-instr-guide-badge--invalid'}`}
                   >
                     {item.valid ? <CheckIcon /> : <XIcon />}
                   </div>
                 </div>
-                <p class="dui-guide-caption">{item.label}</p>
+                <p class="doc-instr-guide-caption">{item.label}</p>
               </div>
             ))}
           </div>
@@ -634,9 +634,9 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
       </div>
 
       {/* ── CTA button ───────────────────────────────────────── */}
-      <div class="dui-footer">
+      <div class="doc-instr-footer">
         <button
-          class="dui-start-btn"
+          class="doc-instr-start-btn"
           type="button"
           onClick={handleStartCapture}
         >
@@ -646,7 +646,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 
         {/* ── Attribution ───────────────────────────────────── */}
         {!hideAttribution && (
-          <div class="dui-attribution">
+          <div class="doc-instr-attribution">
             <PoweredBySmileIdLogo />
           </div>
         )}
@@ -668,7 +668,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           height: 100%;
         }
 
-        .dui-root {
+        .doc-instr-root {
           font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
           background: #ffffff;
           display: flex;
@@ -681,7 +681,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Back button ─────────────────────────────────────── */
-        .dui-back-btn {
+        .doc-instr-back-btn {
           position: absolute;
           top: 24px;
           left: 20px;
@@ -699,17 +699,17 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           transition: opacity 0.15s ease;
         }
 
-        .dui-back-btn:hover {
+        .doc-instr-back-btn:hover {
           opacity: 0.85;
         }
 
-        .dui-back-btn:focus-visible {
+        .doc-instr-back-btn:focus-visible {
           outline: 2px solid #151f72;
           outline-offset: 3px;
         }
 
         /* ── Scrollable area ──────────────────────────────────── */
-        .dui-scroll {
+        .doc-instr-scroll {
           flex: 1;
           overflow-y: auto;
           padding: 88px 20px 16px;
@@ -720,28 +720,28 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Title ───────────────────────────────────────────── */
-        .dui-title-block {
+        .doc-instr-title-block {
           width: 100%;
         }
 
-        .dui-title {
+        .doc-instr-title {
           font-size: clamp(20px, 5vw, 26px);
           font-weight: 800;
           line-height: 1.25;
           letter-spacing: -0.025em;
         }
 
-        .dui-title-regular {
+        .doc-instr-title-regular {
           color: #0f172b;
         }
 
-        .dui-title-type {
+        .doc-instr-title-type {
           display: block;
           color: #151f72;
         }
 
         /* ── Hero card ───────────────────────────────────────── */
-        .dui-hero-card {
+        .doc-instr-hero-card {
           width: 100%;
           background: #f9f0e7;
           border-radius: 24px;
@@ -754,7 +754,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           justify-content: center;
         }
 
-        .dui-hero-img {
+        .doc-instr-hero-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -762,13 +762,13 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           border-radius: inherit;
         }
 
-        .dui-hero-media {
+        .doc-instr-hero-media {
           position: relative;
           width: 100%;
           height: 100%;
         }
 
-        .dui-hero-canvas {
+        .doc-instr-hero-canvas {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -777,20 +777,20 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Guidelines ──────────────────────────────────────── */
-        .dui-guidelines {
+        .doc-instr-guidelines {
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
 
-        .dui-guidelines-header {
+        .doc-instr-guidelines-header {
           display: flex;
           align-items: center;
           gap: 8px;
           padding-left: 4px;
         }
 
-        .dui-guidelines-label {
+        .doc-instr-guidelines-label {
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.05em;
@@ -798,21 +798,21 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           color: #0f172b;
         }
 
-        .dui-guidelines-grid {
+        .doc-instr-guidelines-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 8px;
         }
 
         /* ── Guide item ──────────────────────────────────────── */
-        .dui-guide-item {
+        .doc-instr-guide-item {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 6px;
         }
 
-        .dui-guide-thumb-wrap {
+        .doc-instr-guide-thumb-wrap {
           position: relative;
           width: 100%;
         }
@@ -1086,7 +1086,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Guide badge ─────────────────────────────────────── */
-        .dui-guide-badge {
+        .doc-instr-guide-badge {
           position: absolute;
           top: -6px;
           right: -4px;
@@ -1101,11 +1101,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           justify-content: center;
         }
 
-        .dui-guide-badge--valid   { background: #00c950; }
-        .dui-guide-badge--invalid { background: #fb2c36; }
+        .doc-instr-guide-badge--valid   { background: #00c950; }
+        .doc-instr-guide-badge--invalid { background: #fb2c36; }
 
         /* ── Caption ─────────────────────────────────────────── */
-        .dui-guide-caption {
+        .doc-instr-guide-caption {
           font-size: 9px;
           font-weight: 500;
           color: #151f72;
@@ -1116,7 +1116,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Footer / CTA ────────────────────────────────────── */
-        .dui-footer {
+        .doc-instr-footer {
           padding: 16px 20px 24px;
           display: flex;
           flex-direction: column;
@@ -1125,7 +1125,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           flex-shrink: 0;
         }
 
-        .dui-start-btn {
+        .doc-instr-start-btn {
           width: 100%;
           max-width: 400px;
           height: 56px;
@@ -1145,21 +1145,21 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           letter-spacing: 0.01em;
         }
 
-        .dui-start-btn:hover {
+        .doc-instr-start-btn:hover {
           opacity: 0.9;
         }
 
-        .dui-start-btn:active {
+        .doc-instr-start-btn:active {
           transform: scale(0.98);
         }
 
-        .dui-start-btn:focus-visible {
+        .doc-instr-start-btn:focus-visible {
           outline: 2px solid #151f72;
           outline-offset: 3px;
         }
 
         /* ── Attribution ─────────────────────────────────────── */
-        .dui-attribution {
+        .doc-instr-attribution {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1167,42 +1167,42 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 
         /* ── Responsive – desktop breakpoint ─────────────────── */
         @media (min-width: 640px) {
-          .dui-scroll {
+          .doc-instr-scroll {
             padding-top: 96px;
             padding-left: 32px;
             padding-right: 32px;
           }
 
-          .dui-footer {
+          .doc-instr-footer {
             padding-left: 32px;
             padding-right: 32px;
           }
 
-          .dui-back-btn {
+          .doc-instr-back-btn {
             top: 28px;
             left: 28px;
           }
 
-          .dui-hero-card {
+          .doc-instr-hero-card {
             border-radius: 32px;
           }
 
-          .dui-guide-caption {
+          .doc-instr-guide-caption {
             font-size: 10px;
           }
         }
 
         /* ── Very small screens (< 360px) ────────────────────── */
         @media (max-width: 360px) {
-          .dui-guidelines-grid {
+          .doc-instr-guidelines-grid {
             gap: 4px;
           }
 
-          .dui-guide-caption {
+          .doc-instr-guide-caption {
             font-size: 8px;
           }
 
-          .dui-title {
+          .doc-instr-title {
             font-size: 18px;
           }
         }

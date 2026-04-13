@@ -25,6 +25,7 @@ const HERO_IMAGE_FALLBACK_URL =
   'https://www.figma.com/api/mcp/asset/be898e16-cf3f-4c91-86ed-fbd2aa436e49';
 
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
+type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 
 interface HeroAssetConfig {
   animationSrc: string;
@@ -47,6 +48,54 @@ const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
     animationSrc: HERO_GREENBOOK_LOTTIE_URL,
     fallbackAlt: 'Phone capturing a green book passport on a desk',
     fallbackSrc: HERO_IMAGE_FALLBACK_URL,
+  },
+};
+
+const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
+  'id-card': {
+    good: new URL('../assets/icons/guidelines/id-card/good.svg', import.meta.url).href,
+    'not-cropped': new URL(
+      '../assets/icons/guidelines/id-card/not-cropped.svg',
+      import.meta.url,
+    ).href,
+    'not-blurry': new URL(
+      '../assets/icons/guidelines/id-card/not-blurry.svg',
+      import.meta.url,
+    ).href,
+    'not-reflective': new URL(
+      '../assets/icons/guidelines/id-card/not-reflective.svg',
+      import.meta.url,
+    ).href,
+  },
+  passport: {
+    good: new URL('../assets/icons/guidelines/passport/good.svg', import.meta.url).href,
+    'not-cropped': new URL(
+      '../assets/icons/guidelines/passport/not-cropped.svg',
+      import.meta.url,
+    ).href,
+    'not-blurry': new URL(
+      '../assets/icons/guidelines/passport/not-blurry.svg',
+      import.meta.url,
+    ).href,
+    'not-reflective': new URL(
+      '../assets/icons/guidelines/passport/not-reflective.svg',
+      import.meta.url,
+    ).href,
+  },
+  greenbook: {
+    good: new URL('../assets/icons/guidelines/greenbook/good.svg', import.meta.url).href,
+    'not-cropped': new URL(
+      '../assets/icons/guidelines/greenbook/not-cropped.svg',
+      import.meta.url,
+    ).href,
+    'not-blurry': new URL(
+      '../assets/icons/guidelines/greenbook/not-blurry.svg',
+      import.meta.url,
+    ).href,
+    'not-reflective': new URL(
+      '../assets/icons/guidelines/greenbook/not-reflective.svg',
+      import.meta.url,
+    ).href,
   },
 };
 
@@ -211,235 +260,27 @@ function GuidelinesIcon() {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M2 5l2.25 2.5L8 3"
-        stroke="white"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  );
-}
-
-function XIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M2.5 2.5l5 5M7.5 2.5l-5 5"
-        stroke="white"
-        stroke-width="1.5"
-        stroke-linecap="round"
-      />
-    </svg>
-  );
-}
-
-// ── ID Card illustration used inside each guideline tile ────────────────────
-function IdCardThumbnail({
-  blurred = false,
-  reflective = false,
-  cropped = false,
-}: {
-  blurred?: boolean;
-  reflective?: boolean;
-  cropped?: boolean;
-}) {
-  return (
-    <div
-      class="id-card-thumb"
-      style={{
-        overflow: cropped ? 'hidden' : 'visible',
-        filter: blurred ? 'blur(1.5px)' : 'none',
-      }}
-    >
-      {/* Card body – scaled up when cropped so it overflows the clipped container */}
-      <div
-        class="id-card-body"
-        style={
-          cropped
-            ? { transform: 'scale(1.4)', transformOrigin: 'right center' }
-            : undefined
-        }
-      >
-        {/* Photo placeholder */}
-        <div class="id-card-photo">
-          {/* Simplified face silhouette */}
-          <svg
-            width="18"
-            height="22"
-            viewBox="0 0 18 22"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <ellipse cx="9" cy="8" rx="5" ry="6" fill="#c5d4e0" />
-            <path d="M1 22c0-4 3.6-7 8-7s8 3 8 7" fill="#c5d4e0" />
-          </svg>
-        </div>
-        {/* Text lines */}
-        <div class="id-card-lines">
-          <div class="id-card-line long" />
-          <div class="id-card-line medium" />
-          <div class="id-card-line short" />
-        </div>
-      </div>
-      {/* Reflective glare overlay */}
-      {reflective && <div class="id-card-glare" />}
-    </div>
-  );
-}
-
-function BookletThumbnail({
-  blurred = false,
-  reflective = false,
-  cropped = false,
-}: {
-  blurred?: boolean;
-  reflective?: boolean;
-  cropped?: boolean;
-}) {
-  return (
-    <div
-      class="booklet-thumb"
-      style={{
-        overflow: cropped ? 'hidden' : 'visible',
-        filter: blurred ? 'blur(1.5px)' : 'none',
-      }}
-    >
-      <div
-        class="booklet-inner"
-        style={
-          cropped
-            ? { transform: 'scale(1.33)', transformOrigin: 'right center' }
-            : undefined
-        }
-      >
-        <div class="booklet-page booklet-page--left">
-          <div class="booklet-line long" />
-          <div class="booklet-line medium" />
-          <div class="booklet-line short" />
-        </div>
-        <div class="booklet-spine" />
-        <div class="booklet-page booklet-page--right">
-          <div class="booklet-photo" />
-          <div class="booklet-lines">
-            <div class="booklet-line long" />
-            <div class="booklet-line medium" />
-          </div>
-        </div>
-      </div>
-      {reflective && <div class="booklet-glare" />}
-    </div>
-  );
-}
-
-function GreenbookThumbnail({
-  blurred = false,
-  reflective = false,
-  cropped = false,
-}: {
-  blurred?: boolean;
-  reflective?: boolean;
-  cropped?: boolean;
-}) {
-  return (
-    <div
-      class="greenbook-thumb"
-      style={{
-        overflow: cropped ? 'hidden' : 'visible',
-        filter: blurred ? 'blur(1.5px)' : 'none',
-      }}
-    >
-      <div
-        class="greenbook-inner"
-        style={
-          cropped
-            ? { transform: 'scale(1.33)', transformOrigin: 'right center' }
-            : undefined
-        }
-      >
-        <div class="greenbook-cover">
-          <div class="greenbook-emblem" />
-          <div class="greenbook-cover-line" />
-        </div>
-        <div class="greenbook-spine" />
-        <div class="greenbook-page">
-          <div class="greenbook-photo" />
-          <div class="greenbook-lines">
-            <div class="greenbook-line long" />
-            <div class="greenbook-line medium" />
-            <div class="greenbook-line short" />
-          </div>
-        </div>
-      </div>
-      {reflective && <div class="greenbook-glare" />}
-    </div>
-  );
-}
-
 function GuidelineThumbnail({
-  variant,
-  blurred,
-  reflective,
-  cropped,
+  src,
+  label,
 }: {
-  variant: DocumentVariant;
-  blurred?: boolean;
-  reflective?: boolean;
-  cropped?: boolean;
+  src: string;
+  label: string;
 }) {
-  if (variant === 'id-card') {
-    return (
-      <IdCardThumbnail
-        blurred={blurred}
-        reflective={reflective}
-        cropped={cropped}
-      />
-    );
-  }
-
-  if (variant === 'greenbook') {
-    return (
-      <GreenbookThumbnail
-        blurred={blurred}
-        reflective={reflective}
-        cropped={cropped}
-      />
-    );
-  }
-
   return (
-    <BookletThumbnail
-      blurred={blurred}
-      reflective={reflective}
-      cropped={cropped}
+    <img
+      class="doc-instr-guide-thumb"
+      src={src}
+      alt={label}
+      loading="lazy"
+      decoding="async"
     />
   );
 }
 
 interface GuidelineItem {
+  key: GuidelineKey;
   label: string;
-  valid: boolean;
-  blurred?: boolean;
-  reflective?: boolean;
-  cropped?: boolean;
 }
 
 // ── SmileID attribution SVG (inline to avoid external web component dep) ────
@@ -528,21 +369,18 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
   const guidelineItems: GuidelineItem[] = [
-    { label: t('document.instructions.guidelines.good'), valid: true },
+    { key: 'good', label: t('document.instructions.guidelines.good') },
     {
+      key: 'not-cropped',
       label: t('document.instructions.guidelines.notCropped'),
-      valid: false,
-      cropped: true,
     },
     {
+      key: 'not-blurry',
       label: t('document.instructions.guidelines.notBlurry'),
-      valid: false,
-      blurred: true,
     },
     {
+      key: 'not-reflective',
       label: t('document.instructions.guidelines.notReflective'),
-      valid: false,
-      reflective: true,
     },
   ];
 
@@ -615,16 +453,9 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
               <div class="doc-instr-guide-item" key={item.label}>
                 <div class="doc-instr-guide-thumb-wrap">
                   <GuidelineThumbnail
-                    variant={documentVariant}
-                    blurred={item.blurred}
-                    reflective={item.reflective}
-                    cropped={item.cropped}
+                    src={GUIDELINE_ICONS[documentVariant][item.key]}
+                    label={item.label}
                   />
-                  <div
-                    class={`doc-instr-guide-badge ${item.valid ? 'doc-instr-guide-badge--valid' : 'doc-instr-guide-badge--invalid'}`}
-                  >
-                    {item.valid ? <CheckIcon /> : <XIcon />}
-                  </div>
                 </div>
                 <p class="doc-instr-guide-caption">{item.label}</p>
               </div>
@@ -817,292 +648,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           width: 100%;
         }
 
-        /* ── ID card thumbnail ───────────────────────────────── */
-        .id-card-thumb {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 4px;
-          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
-            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+        .doc-instr-guide-thumb {
+          display: block;
           width: 100%;
-          aspect-ratio: 3 / 2;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          overflow: hidden;
+          height: auto;
         }
-
-        .id-card-body {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 4px 6px;
-          width: 100%;
-        }
-
-        .id-card-photo {
-          width: 28px;
-          height: 34px;
-          background: #f8fafc;
-          border: 0.5px solid #cbd5e1;
-          border-radius: 2px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          overflow: hidden;
-        }
-
-        .id-card-lines {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex: 1;
-          min-width: 0;
-        }
-
-        .id-card-line {
-          height: 3px;
-          background: #e2e8f0;
-          border-radius: 999px;
-        }
-
-        .id-card-line.long  { width: 100%; }
-        .id-card-line.medium { width: 75%; }
-        .id-card-line.short  { width: 50%; }
-
-        .id-card-glare {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(
-            ellipse at 35% 35%,
-            rgba(255, 255, 255, 0.97) 0%,
-            rgba(255, 255, 255, 0.8) 25%,
-            rgba(255, 255, 255, 0.35) 55%,
-            rgba(255, 255, 255, 0) 75%
-          );
-          pointer-events: none;
-        }
-
-        .booklet-thumb {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 4px;
-          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
-            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-          width: 100%;
-          aspect-ratio: 3 / 2;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .booklet-inner {
-          display: grid;
-          grid-template-columns: 1fr 4px 1fr;
-          width: 100%;
-          height: 100%;
-        }
-
-        .booklet-page {
-          padding: 6px 4px;
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          background: #ffffff;
-        }
-
-        .booklet-page--left {
-          background: #f8fafc;
-        }
-
-        .booklet-page--right {
-          flex-direction: row;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .booklet-spine {
-          background: linear-gradient(180deg, #d9e1ea 0%, #c7d1dc 100%);
-        }
-
-        .booklet-photo {
-          width: 14px;
-          height: 18px;
-          border-radius: 2px;
-          border: 0.5px solid #cbd5e1;
-          background: #d5e1ec;
-          flex-shrink: 0;
-        }
-
-        .booklet-lines {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex: 1;
-          min-width: 0;
-        }
-
-        .booklet-line {
-          height: 3px;
-          border-radius: 999px;
-          background: #e2e8f0;
-        }
-
-        .booklet-line.long {
-          width: 100%;
-        }
-
-        .booklet-line.medium {
-          width: 72%;
-        }
-
-        .booklet-line.short {
-          width: 54%;
-        }
-
-        .booklet-glare {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(
-            ellipse at 35% 35%,
-            rgba(255, 255, 255, 0.97) 0%,
-            rgba(255, 255, 255, 0.8) 25%,
-            rgba(255, 255, 255, 0.35) 55%,
-            rgba(255, 255, 255, 0) 75%
-          );
-          pointer-events: none;
-        }
-
-        .greenbook-thumb {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 4px;
-          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
-            0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-          width: 100%;
-          aspect-ratio: 3 / 2;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .greenbook-inner {
-          display: grid;
-          grid-template-columns: 1fr 4px 1fr;
-          width: 100%;
-          height: 100%;
-        }
-
-        .greenbook-cover {
-          background: linear-gradient(160deg, #2f7a4f 0%, #1f5a37 100%);
-          padding: 6px 4px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-        }
-
-        .greenbook-emblem {
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(255, 255, 255, 0.85);
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-        }
-
-        .greenbook-cover-line {
-          width: 60%;
-          height: 2px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.75);
-        }
-
-        .greenbook-spine {
-          background: linear-gradient(180deg, #244f35 0%, #1a3e2a 100%);
-        }
-
-        .greenbook-page {
-          padding: 6px 4px;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 4px;
-          background: #ffffff;
-        }
-
-        .greenbook-photo {
-          width: 14px;
-          height: 18px;
-          border-radius: 2px;
-          border: 0.5px solid #cbd5e1;
-          background: #d5e1ec;
-          flex-shrink: 0;
-        }
-
-        .greenbook-lines {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex: 1;
-          min-width: 0;
-        }
-
-        .greenbook-line {
-          height: 3px;
-          border-radius: 999px;
-          background: #d9e4ed;
-        }
-
-        .greenbook-line.long {
-          width: 100%;
-        }
-
-        .greenbook-line.medium {
-          width: 72%;
-        }
-
-        .greenbook-line.short {
-          width: 54%;
-        }
-
-        .greenbook-glare {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(
-            ellipse at 35% 35%,
-            rgba(255, 255, 255, 0.97) 0%,
-            rgba(255, 255, 255, 0.8) 25%,
-            rgba(255, 255, 255, 0.35) 55%,
-            rgba(255, 255, 255, 0) 75%
-          );
-          pointer-events: none;
-        }
-
-        /* ── Guide badge ─────────────────────────────────────── */
-        .doc-instr-guide-badge {
-          position: absolute;
-          top: -6px;
-          right: -4px;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          border: 1.5px solid #ffffff;
-          box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
-            0px 1px 2px 0px rgba(0, 0, 0, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .doc-instr-guide-badge--valid   { background: #00c950; }
-        .doc-instr-guide-badge--invalid { background: #fb2c36; }
 
         /* ── Caption ─────────────────────────────────────────── */
         .doc-instr-guide-caption {

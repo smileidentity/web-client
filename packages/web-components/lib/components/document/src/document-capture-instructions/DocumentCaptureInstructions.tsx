@@ -53,7 +53,10 @@ const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
 
 const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
   'id-card': {
-    good: new URL('../assets/icons/guidelines/id-card/good.svg', import.meta.url).href,
+    good: new URL(
+      '../assets/icons/guidelines/id-card/good.svg',
+      import.meta.url,
+    ).href,
     'not-cropped': new URL(
       '../assets/icons/guidelines/id-card/not-cropped.svg',
       import.meta.url,
@@ -68,7 +71,10 @@ const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
     ).href,
   },
   passport: {
-    good: new URL('../assets/icons/guidelines/passport/good.svg', import.meta.url).href,
+    good: new URL(
+      '../assets/icons/guidelines/passport/good.svg',
+      import.meta.url,
+    ).href,
     'not-cropped': new URL(
       '../assets/icons/guidelines/passport/not-cropped.svg',
       import.meta.url,
@@ -83,7 +89,10 @@ const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
     ).href,
   },
   greenbook: {
-    good: new URL('../assets/icons/guidelines/greenbook/good.svg', import.meta.url).href,
+    good: new URL(
+      '../assets/icons/guidelines/greenbook/good.svg',
+      import.meta.url,
+    ).href,
     'not-cropped': new URL(
       '../assets/icons/guidelines/greenbook/not-cropped.svg',
       import.meta.url,
@@ -189,7 +198,11 @@ function HeroLottie({
         decoding="async"
       />
       {!hasError && (
-        <canvas ref={canvasRef} class="doc-instr-hero-canvas" aria-hidden="true" />
+        <canvas
+          ref={canvasRef}
+          class="doc-instr-hero-canvas"
+          aria-hidden="true"
+        />
       )}
     </div>
   );
@@ -260,13 +273,7 @@ function GuidelinesIcon() {
   );
 }
 
-function GuidelineThumbnail({
-  src,
-  label,
-}: {
-  src: string;
-  label: string;
-}) {
+function GuidelineThumbnail({ src, label }: { src: string; label: string }) {
   return (
     <img
       class="doc-instr-guide-thumb"

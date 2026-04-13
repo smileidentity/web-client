@@ -227,6 +227,7 @@ jobs:
         working-directory: ./packages/embed
         run: echo "DEST_DIR_EMBED=inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >> "$GITHUB_ENV"
       - name: share preview urls as PR comment
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |

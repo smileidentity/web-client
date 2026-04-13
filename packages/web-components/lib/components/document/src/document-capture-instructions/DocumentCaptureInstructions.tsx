@@ -375,6 +375,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const documentVariant = getDocumentVariant(displayDocumentType);
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
+  const rootRef = useRef<HTMLDivElement>(null);
   const guidelineItems: GuidelineItem[] = [
     { key: 'good', label: t('document.instructions.guidelines.good') },
     {
@@ -392,8 +393,8 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   ];
 
   const handleBack = () => {
-    const host = document.querySelector('document-capture-instructions');
-    host?.dispatchEvent(
+    const host = rootRef.current?.getRootNode() as ShadowRoot | Document;
+    (host as ShadowRoot)?.host?.dispatchEvent(
       new CustomEvent('document-capture-instructions.cancelled', {
         bubbles: true,
       }),
@@ -401,8 +402,8 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   };
 
   const handleStartCapture = () => {
-    const host = document.querySelector('document-capture-instructions');
-    host?.dispatchEvent(
+    const host = rootRef.current?.getRootNode() as ShadowRoot | Document;
+    (host as ShadowRoot)?.host?.dispatchEvent(
       new CustomEvent('document-capture-instructions.capture', {
         bubbles: true,
       }),
@@ -410,7 +411,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   };
 
   return (
-    <div class="doc-instr-root" dir={direction}>
+    <div ref={rootRef} class="doc-instr-root" dir={direction}>
       {/* ── Back button ──────────────────────────────────────── */}
       {!hideBack && (
         <button

@@ -11,14 +11,18 @@ on:
     types:
       - opened
       - synchronize
-permissions: write-all
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  issues: write
 jobs:
   test:
     if: ${{ !inputs.skip_tests }}
     uses: ./.github/workflows/test.yml
   smart-camera-web:
     needs: [test]
-    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    if: ${{ !cancelled() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     defaults:
       run:
         working-directory: ./packages/web-components
@@ -104,9 +108,11 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: set sst stage
         id: get_branch_name
+        env:
+          BRANCH_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           echo "DEST_DIR_EMBED=inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >> "$GITHUB_ENV"
-          BRANCH_NAME=${{ github.event.pull_request.head.ref || github.ref_name }}
+          BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
@@ -175,8 +181,10 @@ jobs:
         working-directory: ./previews
         run: npm install
       - name: set branch name
+        env:
+          BRANCH_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
-          BRANCH_NAME=${{ github.event.pull_request.head.ref || github.ref_name }}
+          BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> "$GITHUB_ENV"
       - name: retrieve sst app url

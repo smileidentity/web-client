@@ -352,7 +352,7 @@ function PoweredBySmileIdLogo() {
 
 interface Props {
   dir?: string;
-  'id-type'?: string;
+  'document-type'?: string;
   title?: string;
   'hide-attribution'?: string | boolean;
   'hide-back'?: string | boolean;
@@ -363,7 +363,7 @@ interface Props {
 
 const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   dir,
-  'id-type': idType = '',
+  'document-type': documentType = '',
   title = '',
   'hide-attribution': hideAttributionProp = false,
   'hide-back': hideBackProp = false,
@@ -371,7 +371,8 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 }) => {
   const hideAttribution = getBoolProp(hideAttributionProp);
   const hideBack = getBoolProp(hideBackProp) || getBoolProp(hideBackToHostProp);
-  const displayDocumentType = idType || title;
+  const displayDocumentType =
+    (documentType || title)?.replace(/[_\s]+/g, ' ')?.trim() || '';
   const documentVariant = getDocumentVariant(displayDocumentType);
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
@@ -392,22 +393,25 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
     },
   ];
 
+  const dispatchInstructionEvent = (
+    eventName:
+      | 'document-capture-instructions.cancelled'
+      | 'document-capture-instructions.capture',
+  ) => {
+    const rootNode = rootRef.current?.getRootNode();
+    const shadowHost = (rootNode as ShadowRoot)?.host as HTMLElement | undefined;
+    const hostElement =
+      rootRef.current?.closest('document-capture-instructions') || shadowHost;
+
+    hostElement?.dispatchEvent(new CustomEvent(eventName));
+  };
+
   const handleBack = () => {
-    const host = rootRef.current?.getRootNode() as ShadowRoot | Document;
-    (host as ShadowRoot)?.host?.dispatchEvent(
-      new CustomEvent('document-capture-instructions.cancelled', {
-        bubbles: true,
-      }),
-    );
+    dispatchInstructionEvent('document-capture-instructions.cancelled');
   };
 
   const handleStartCapture = () => {
-    const host = rootRef.current?.getRootNode() as ShadowRoot | Document;
-    (host as ShadowRoot)?.host?.dispatchEvent(
-      new CustomEvent('document-capture-instructions.capture', {
-        bubbles: true,
-      }),
-    );
+    dispatchInstructionEvent('document-capture-instructions.capture');
   };
 
   return (
@@ -520,7 +524,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
         }
 
         /* ── Back button ─────────────────────────────────────── */
-        .doc-instr-back-btn {
+        .back-button {
           position: absolute;
           top: 24px;
           left: 20px;
@@ -538,11 +542,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           transition: opacity 0.15s ease;
         }
 
-        .doc-instr-back-btn:hover {
+        .back-button:hover {
           opacity: 0.85;
         }
 
-        .doc-instr-back-btn:focus-visible {
+        .back-button:focus-visible {
           outline: 2px solid #151f72;
           outline-offset: 3px;
         }
@@ -736,7 +740,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             padding-right: 32px;
           }
 
-          .doc-instr-back-btn {
+          .back-button {
             top: 28px;
             left: 28px;
           }
@@ -777,7 +781,7 @@ if (
 ) {
   register(DocumentCaptureInstructions, 'document-capture-instructions', [
     'dir',
-    'id-type',
+    'document-type',
     'title',
     'hide-attribution',
     'hide-back',

@@ -117,8 +117,16 @@
       "captureButton": "Capturez le document"
     },
     "instructions": {
+      "captureTitlePrefix": "Préparez-vous à capturer votre",
+      "captureGuidelines": "Consignes de capture",
       "description": "Nous l'utiliserons pour vérifier votre identité.",
       "followInstructions": "Veuillez suivre les instructions ci-dessous.",
+      "guidelines": {
+        "good": "Correct",
+        "notCropped": "Non recadré",
+        "notBlurry": "Non flou",
+        "notReflective": "Sans reflets"
+      },
       "goodLight": {
         "header": "Bonne lumière",
         "body": "Assurez-vous que l'image est prise dans un environnement bien éclairé où le document d'identité est facile à lire."
@@ -127,6 +135,7 @@
         "header": "Image Claire",
         "body": "Tenez votre appareil photo fermement pour que les mots sur la pièce d'identité ne soient pas flous."
       },
+      "startCapture": "Démarrer la capture",
       "takePhotoButton": "Prendre une photo",
       "uploadPhotoButton": "Télécharger une photo"
     },

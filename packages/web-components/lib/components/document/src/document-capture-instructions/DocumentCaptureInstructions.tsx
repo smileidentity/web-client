@@ -255,19 +255,25 @@ function ArrowRightIcon() {
 function GuidelinesIcon() {
   return (
     <svg
-      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
       width="16"
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="8" cy="8" r="7" stroke="#0f172b" stroke-width="1.4" />
       <path
-        d="M8 5v3.5M8 11v.5"
-        stroke="#0f172b"
-        stroke-width="1.4"
+        d="M8.00001 14.6668C11.6819 14.6668 14.6667 11.6821 14.6667 8.00016C14.6667 4.31826 11.6819 1.3335 8.00001 1.3335C4.31811 1.3335 1.33334 4.31826 1.33334 8.00016C1.33334 11.6821 4.31811 14.6668 8.00001 14.6668Z"
+        stroke="#151F72"
+        stroke-width="1.33333"
         stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M6 7.99984L7.33333 9.33317L10 6.6665"
+        stroke="#151F72"
+        stroke-width="1.33333"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
     </svg>
   );
@@ -399,7 +405,9 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
       | 'document-capture-instructions.capture',
   ) => {
     const rootNode = rootRef.current?.getRootNode();
-    const shadowHost = (rootNode as ShadowRoot)?.host as HTMLElement | undefined;
+    const shadowHost = (rootNode as ShadowRoot)?.host as
+      | HTMLElement
+      | undefined;
     const hostElement =
       rootRef.current?.closest('document-capture-instructions') || shadowHost;
 

@@ -117,7 +117,6 @@ class DocumentCaptureScreens extends HTMLElement {
     this.documentInstruction.addEventListener(
       'document-capture-instructions.cancelled',
       () => {
-        console.debug('cancelled document capture, go back to host');
         this.handleBackEvents();
       },
     );

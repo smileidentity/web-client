@@ -126,8 +126,6 @@ variants.forEach(({ name, suffix }) => {
           'document-capture-instructions#document-capture-instructions-front',
         )
         .shadow()
-        .find('smileid-navigation')
-        .shadow()
         .find('.back-button')
         .click();
 

@@ -1,3 +1,3 @@
-import DocumentCapture from './DocumentCapture';
+import DocumentCapture from './DocumentCapture.tsx';
 
 export default DocumentCapture;

@@ -1,103 +1,87 @@
+import SmartCamera from '../../../../domain/camera/src/SmartCamera';
+import { setCurrentLocale } from '../../../../domain/localisation';
 import './index';
 
 const meta = {
   args: {
-    'document-capture-modes': 'camera,upload',
-    'document-type': 'NATIONAL_ID',
-    'hide-attribution': false,
-    'hide-back-to-host': false,
-    'side-of-id': 'Front',
+    language: 'en',
     'theme-color': '#001096',
   },
   argTypes: {
-    'document-capture-modes': {
+    language: {
       control: { type: 'select' },
-      options: ['camera', 'upload', 'camera,upload'],
-    },
-    'document-type': {
-      control: { type: 'select' },
-      options: ['NATIONAL_ID', 'PASSPORT', 'GREEN_BOOK', 'DRIVERS_LICENSE'],
-    },
-    'hide-attribution': { control: 'boolean' },
-    'hide-back-to-host': { control: 'boolean' },
-    'side-of-id': {
-      control: { type: 'select' },
-      options: ['Front', 'Back'],
+      options: ['en', 'ar'],
     },
     'theme-color': { control: 'color' },
   },
   component: 'document-capture',
-  parameters: {
-    layout: 'centered',
+  render: (args) => {
+    setCurrentLocale(args.language);
+    return `
+    <document-capture
+        show-navigation
+        document-capture-modes="camera,upload"
+        document-name="Driver's License"
+        side-of-id="Front"
+        document-type="${args.documentType}"
+        theme-color='${args['theme-color']}'
+    >
+    </document-capture>
+`;
   },
-  title: 'Document/DocumentCapture',
 };
 
 export default meta;
 
-// Wrap in a phone-sized container so the landscape rotation is visible
-const renderComponent = (args) => {
-  const attrs = Object.entries(args)
-    .map(([key, val]) => {
-      if (val === false || val === '' || val == null) return '';
-      if (val === true) return key;
-      return `${key}="${val}"`;
-    })
-    .filter(Boolean)
-    .join(' ');
-
-  return `
-    <div style="width:390px;height:780px;overflow:hidden;border-radius:20px;
-                box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);background:#000;">
-      <document-capture ${attrs} style="display:block;width:100%;height:100%;"></document-capture>
-    </div>
-  `;
+export const DocumentCapture = {
+  loaders: [
+    async () => {
+      console.warn('attemp to get media');
+      try {
+        const result = await SmartCamera.getMedia({
+          audio: false,
+          video: SmartCamera.environmentOptions,
+        });
+        return {
+          'data-camera-ready': result,
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          'data-camera-error': SmartCamera.handleCameraError(error),
+        };
+      }
+    },
+  ],
 };
 
-export const IdCard = {
+export const DocumentCapturePortraitMode = {
   args: {
-    'document-type': 'NATIONAL_ID',
-    'side-of-id': 'Front',
+    documentType: 'GREEN_BOOK',
   },
-  render: renderComponent,
+  loaders: [
+    async () => {
+      try {
+        const result = await SmartCamera.getMedia({
+          audio: false,
+          video: SmartCamera.environmentOptions,
+        });
+        return {
+          'data-camera-ready': result,
+        };
+      } catch (error) {
+        return {
+          'data-camera-error': SmartCamera.handleCameraError(error),
+        };
+      }
+    },
+  ],
 };
 
-export const IdCardBack = {
-  args: {
-    'document-type': 'NATIONAL_ID',
-    'side-of-id': 'Back',
-  },
-  render: renderComponent,
-};
-
-export const Passport = {
-  args: {
-    'document-type': 'PASSPORT',
-    'side-of-id': 'Front',
-  },
-  render: renderComponent,
-};
-
-export const Greenbook = {
-  args: {
-    'document-type': 'GREEN_BOOK',
-    'side-of-id': 'Front',
-  },
-  render: renderComponent,
-};
-
-export const CameraOnly = {
-  args: {
-    'document-capture-modes': 'camera',
-    'document-type': 'NATIONAL_ID',
-  },
-  render: renderComponent,
-};
-
-export const HideAttribution = {
-  args: {
-    'document-type': 'NATIONAL_ID',
-    'hide-attribution': true,
-  },
-  render: renderComponent,
+export const DocumentCapturePendingPermission = {
+  loaders: [
+    async () => ({
+      'data-camera-ready': SmartCamera.stopMedia(),
+    }),
+  ],
 };

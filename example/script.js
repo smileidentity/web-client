@@ -106,7 +106,7 @@ export default function setupForm() {
         // },
         id_info: {
           GH: {
-            // IDENTITY_CARD: {},
+            GHANA_CARD: {},
           },
           NG: {
             // BVN: {},

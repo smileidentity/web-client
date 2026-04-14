@@ -487,6 +487,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
       {/* ── CTA button ───────────────────────────────────────── */}
       <div class="doc-instr-footer">
         <button
+          id="take-photo"
           class="doc-instr-start-btn"
           type="button"
           onClick={handleStartCapture}

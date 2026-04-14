@@ -1,6 +1,7 @@
 name: destroy-preview
 on:
   workflow_call:
+  workflow_dispatch:
   pull_request:
     types:
       - closed
@@ -26,8 +27,10 @@ jobs:
           curl -fsSL https://ion.sst.dev/install | VERSION=3.4.5 bash
       - name: set sst stage
         id: get_branch_name
+        env:
+          BRANCH_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
-          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
       - name: install dependencies

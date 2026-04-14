@@ -787,14 +787,19 @@ if (
   window.customElements &&
   !window.customElements.get('document-capture-instructions')
 ) {
-  register(DocumentCaptureInstructions, 'document-capture-instructions', [
-    'dir',
-    'document-type',
-    'title',
-    'hide-attribution',
-    'hide-back',
-    'hide-back-to-host',
-  ]);
+  register(
+    DocumentCaptureInstructions,
+    'document-capture-instructions',
+    [
+      'dir',
+      'document-type',
+      'title',
+      'hide-attribution',
+      'hide-back',
+      'hide-back-to-host',
+    ],
+    { shadow: true },
+  );
 }
 
 export default DocumentCaptureInstructions;

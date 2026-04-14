@@ -1,3 +1,3 @@
-import DocumentInstruction from './DocumentCaptureInstructions.tsx';
+import DocumentInstruction from './DocumentCaptureInstructions';
 
 export default DocumentInstruction;

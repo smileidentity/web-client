@@ -140,7 +140,7 @@ variants.forEach(({ name, suffix }) => {
           'document-capture-instructions#document-capture-instructions-front',
         )
         .shadow()
-        .find('.doc-instr-start-btn')
+        .find('#take-photo')
         .click();
 
       cy.get('smart-camera-web')

@@ -52,7 +52,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.innerHTML = `
       ${styles(this.themeColor)}
       <div style="height: 100%;">
-      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title} ${this.documentType}
+      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title}
       ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}
       ${this.hideAttribution}
       ></document-capture-instructions>
@@ -80,7 +80,7 @@ class DocumentCaptureScreens extends HTMLElement {
     };
 
     this.documentInstruction = this.querySelector(
-      '#document-capture-instructions-front',
+      'document-capture-instructions',
     );
     this.documentInstructionBack = this.querySelector(
       '#document-capture-instructions-back',

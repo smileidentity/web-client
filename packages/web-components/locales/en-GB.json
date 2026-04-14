@@ -117,8 +117,16 @@
       "captureButton": "Capture Document"
     },
     "instructions": {
+      "captureTitlePrefix": "Get ready to capture your",
+      "captureGuidelines": "Capture Guidelines",
       "description": "We'll use it to verify your identity.",
       "followInstructions": "Please follow the instructions below.",
+      "guidelines": {
+        "good": "Good",
+        "notCropped": "Not cropped",
+        "notBlurry": "Not blurry",
+        "notReflective": "Not reflective"
+      },
       "goodLight": {
         "header": "Good Light",
         "body": "Make sure the image is taken in a well-lit environment where the ID document is easy to read."
@@ -127,6 +135,7 @@
         "header": "Clear Image",
         "body": "Hold your device steady so the information on the ID are not blurry."
       },
+      "startCapture": "Start Capture",
       "takePhotoButton": "Take Photo",
       "uploadPhotoButton": "Upload Photo"
     },

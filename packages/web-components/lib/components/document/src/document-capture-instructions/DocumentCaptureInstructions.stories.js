@@ -6,16 +6,16 @@ import {
 
 const meta = {
   args: {
+    'document-type': 'National ID',
     'hide-attribution': false,
     'hide-back': false,
-    'id-type': 'National ID',
     language: 'en',
   },
   argTypes: {
+    'document-type': { control: 'text' },
     'hide-attribution': { control: 'boolean' },
     'hide-back': { control: 'boolean' },
     'hide-back-to-host': { control: 'boolean' },
-    'id-type': { control: 'text' },
     language: {
       control: { type: 'select' },
       options: ['en', 'fr', 'ar'],
@@ -57,14 +57,14 @@ export const Default = {
 
 export const Passport = {
   args: {
-    'id-type': 'Passport',
+    'document-type': 'Passport',
   },
   render: renderComponent,
 };
 
 export const Greenbook = {
   args: {
-    'id-type': 'Greenbook',
+    'document-type': 'Greenbook',
   },
   render: renderComponent,
 };
@@ -92,7 +92,7 @@ export const NoAttribution = {
 
 export const TitleFallback = {
   args: {
-    'id-type': '',
+    'document-type': '',
     title: 'Document (Front)',
   },
   render: renderComponent,

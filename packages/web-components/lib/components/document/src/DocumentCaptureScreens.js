@@ -12,34 +12,6 @@ const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
 
-async function getPermissions(captureScreen) {
-  try {
-    const stream = await SmartCamera.getMedia({
-      audio: false,
-      video: SmartCamera.environmentOptions,
-    });
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevice = devices.find(
-      (device) =>
-        device.kind === 'videoinput' &&
-        stream.getVideoTracks()[0].getSettings().deviceId === device.deviceId,
-    );
-    smartCameraWeb?.dispatchEvent(
-      new CustomEvent('metadata.camera-name', {
-        detail: { cameraName: videoDevice?.label },
-      }),
-    );
-    captureScreen.removeAttribute('data-camera-error');
-    captureScreen.setAttribute('data-camera-ready', true);
-  } catch (error) {
-    captureScreen.removeAttribute('data-camera-ready');
-    captureScreen.setAttribute(
-      'data-camera-error',
-      SmartCamera.handleCameraError(error),
-    );
-  }
-}
-
 class DocumentCaptureScreens extends HTMLElement {
   constructor() {
     super();
@@ -61,7 +33,7 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
       ></document-capture>
       <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
-       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
+       ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></document-capture-instructions>
       <document-capture id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
       ${this.documentCaptureModes} theme-color='${this.themeColor}' ${this.hideAttribution}
@@ -94,7 +66,6 @@ class DocumentCaptureScreens extends HTMLElement {
     this.thankYouScreen = this.querySelector('thank-you');
 
     if (this.hideInstructions) {
-      getPermissions(this.idCapture);
       this.setActiveScreen(this.idCapture);
     } else {
       this.setActiveScreen(this.documentInstruction);
@@ -123,7 +94,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.documentInstruction.addEventListener(
       'document-capture-instructions.capture',
-      async () => {
+      () => {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-start'),
         );
@@ -133,7 +104,6 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
       },
     );
     this.documentInstruction.addEventListener(
@@ -176,7 +146,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.idReview.addEventListener(
       'document-capture-review.rejected',
-      async () => {
+      () => {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-capture-retry'),
         );
@@ -184,7 +154,6 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
@@ -193,12 +162,11 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.idReview.addEventListener(
       'document-capture-review.accepted',
-      async () => {
+      () => {
         if (this.hideBackOfId) {
           this._publishSelectedImages();
         } else if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -207,7 +175,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.capture',
-      async () => {
+      () => {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-start'),
         );
@@ -217,18 +185,16 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
       },
     );
 
     this.documentInstructionBack.addEventListener(
       'document-capture-instructions.cancelled',
-      async () => {
+      () => {
         this.idReview.removeAttribute('data-image');
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
@@ -266,10 +232,9 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.idCaptureBack.addEventListener(
       'document-capture.cancelled',
-      async () => {
+      () => {
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -278,7 +243,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
     this.backOfIdReview.addEventListener(
       'document-capture-review.rejected',
-      async () => {
+      () => {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-capture-retry'),
         );
@@ -286,7 +251,6 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }

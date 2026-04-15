@@ -14,7 +14,7 @@ const meta = {
   component: 'smileid-navigation',
   decorators: [
     (story) => `
-      <div style="background: #f5f5f5; padding: 24px; min-height: 100px;">
+      <div style="background: #1a1a2e; padding: 24px; min-height: 100px;">
         ${story()}
       </div>
     `,

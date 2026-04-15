@@ -41,11 +41,11 @@ button {
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 button:hover {
-  filter: brightness(0.9);
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.15);
 }
 
 button:focus-visible {
@@ -89,8 +89,6 @@ button svg {
     backButton.innerHTML = `
       <svg
         aria-hidden="true"
-        width="${iconSize}"
-        height="${iconSize}"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -118,8 +116,6 @@ button svg {
     closeButton.innerHTML = `
       <svg
         aria-hidden="true"
-        width="${iconSize}"
-        height="${iconSize}"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

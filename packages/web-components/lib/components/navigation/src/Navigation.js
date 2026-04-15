@@ -6,10 +6,10 @@ class Navigation extends HTMLElement {
     const direction = getDirection();
     const hostPadding = '0px';
     const buttonSize = '40px';
-    const buttonBackground = this.hasThemeColor ? this.themeColor : '#848282';
+    const buttonBackground = 'rgba(132, 130, 130, 0.9)';
     const buttonBorder = '1px solid rgba(255, 255, 255, 0.1)';
     const iconSize = '20px';
-    const iconColor = '#FFFFFF';
+    const iconColor = this.hasThemeColor ? this.themeColor : '#FFFFFF';
     const focusColor = '#FFFFFF';
 
     const style = document.createElement('style');
@@ -29,6 +29,9 @@ class Navigation extends HTMLElement {
 }
 
 button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   width: ${buttonSize};
   height: ${buttonSize};
   border-radius: 50%;

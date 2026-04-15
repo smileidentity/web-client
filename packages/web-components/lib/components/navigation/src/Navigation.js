@@ -4,6 +4,12 @@ class Navigation extends HTMLElement {
   connectedCallback() {
     const shadow = this.attachShadow({ mode: 'open' });
     const direction = getDirection();
+    const hostPadding = '0px';
+    const buttonSize = '40px';
+    const buttonBackground = this.hasThemeColor ? this.themeColor : '#848282';
+    const buttonBorder = '1px solid rgba(255, 255, 255, 0.1)';
+    const iconSize = '20px';
+    const iconStroke = '#FFFFFF';
 
     const style = document.createElement('style');
     style.textContent = `
@@ -12,6 +18,8 @@ class Navigation extends HTMLElement {
   max-inline-size: 100%;
   justify-content: ${this.showBackButton ? 'space-between' : 'flex-end'};
   direction: ${direction};
+  padding: var(--smileid-navigation-padding, ${hostPadding});
+  gap: 1rem;
 }
 
 :host([dir="rtl"]) .back-button svg,
@@ -20,11 +28,11 @@ class Navigation extends HTMLElement {
 }
 
 button {
-  width: 40px;
-  height: 40px;
+  width: ${buttonSize};
+  height: ${buttonSize};
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.1);
-  border: none;
+  background: ${buttonBackground};
+  border: ${buttonBorder};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,7 +43,7 @@ button {
 }
 
 button:hover {
-  background: rgba(0, 0, 0, 0.15);
+  filter: brightness(0.9);
 }
 
 button:focus-visible {
@@ -44,8 +52,8 @@ button:focus-visible {
 }
 
 button svg {
-  width: 24px;
-  height: 24px;
+  width: ${iconSize};
+  height: ${iconSize};
 }
 
 :host::part(back-button) {
@@ -88,7 +96,7 @@ button svg {
       >
         <path
           d="M19 12H5M5 12L12 19M5 12L12 5"
-          stroke="white"
+          stroke="${iconStroke}"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -100,7 +108,10 @@ button svg {
     closeButton.setAttribute('class', 'close-button');
     closeButton.setAttribute('part', 'close-button');
     closeButton.setAttribute('type', 'button');
-    closeButton.setAttribute('aria-label', t('navigation.closeVerificationFrame'));
+    closeButton.setAttribute(
+      'aria-label',
+      t('navigation.closeVerificationFrame'),
+    );
     closeButton.innerHTML = `
       <svg
         aria-hidden="true"
@@ -112,7 +123,7 @@ button svg {
       >
         <path
           d="M18 6L6 18M6 6L18 18"
-          stroke="white"
+          stroke="${iconStroke}"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"

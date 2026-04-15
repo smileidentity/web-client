@@ -9,7 +9,8 @@ class Navigation extends HTMLElement {
     const buttonBackground = this.hasThemeColor ? this.themeColor : '#848282';
     const buttonBorder = '1px solid rgba(255, 255, 255, 0.1)';
     const iconSize = '20px';
-    const iconStroke = '#FFFFFF';
+    const iconColor = '#FFFFFF';
+    const focusColor = '#FFFFFF';
 
     const style = document.createElement('style');
     style.textContent = `
@@ -31,11 +32,12 @@ button {
   width: ${buttonSize};
   height: ${buttonSize};
   border-radius: 50%;
-  background: ${buttonBackground};
+  background: var(--smileid-navigation-button-bg, ${buttonBackground});
   border: ${buttonBorder};
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--smileid-navigation-icon-color, ${iconColor});
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
@@ -47,7 +49,7 @@ button:hover {
 }
 
 button:focus-visible {
-  outline: 2px solid #151f72;
+  outline: 2px solid var(--smileid-navigation-focus-color, ${focusColor});
   outline-offset: 3px;
 }
 
@@ -87,8 +89,8 @@ button svg {
     backButton.innerHTML = `
       <svg
         aria-hidden="true"
-        width="24"
-        height="24"
+        width="${iconSize}"
+        height="${iconSize}"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -96,12 +98,13 @@ button svg {
       >
         <path
           d="M19 12H5M5 12L12 19M5 12L12 5"
-          stroke="${iconStroke}"
+          stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
       </svg>
+      <span part="back-button-text" class="visually-hidden">${t('navigation.back')}</span>
     `;
 
     const closeButton = document.createElement('button');
@@ -115,15 +118,15 @@ button svg {
     closeButton.innerHTML = `
       <svg
         aria-hidden="true"
-        width="24"
-        height="24"
+        width="${iconSize}"
+        height="${iconSize}"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
           d="M18 6L6 18M6 6L18 18"
-          stroke="${iconStroke}"
+          stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"

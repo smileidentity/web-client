@@ -30,12 +30,13 @@ app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
     const environmentServer = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
+    const baseServer = `${SID_SERVER}/v1`
 
     const connection = new SIDWebAPI(
       PARTNER_ID,
       'https://webhook.site/0ffa8d44-160a-46f2-b2d1-497a16fd6d787',
       API_KEY,
-      SID_SERVER,
+      baseServer
     );
 
     const request_params = {

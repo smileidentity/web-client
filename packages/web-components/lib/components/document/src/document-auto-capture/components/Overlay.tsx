@@ -1,25 +1,39 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript.
 import { useRef, useEffect } from 'preact/hooks';
+import type { FunctionComponent } from 'preact';
 import { COMPLIANCE_STATES } from '../hooks/useCardDetection';
-import { getShimmerSvg } from '../assets/shimmers';
+import { getShimmerSvg, type ShimmerDocType } from '../assets/shimmers';
 
-export function Overlay({
-  feedback,
+type ComplianceState = (typeof COMPLIANCE_STATES)[keyof typeof COMPLIANCE_STATES];
+
+type DebugPathPoint = { x: number; y: number };
+type DebugPath = DebugPathPoint[] & { roiWidth?: number; roiHeight?: number };
+
+interface OverlayProps {
+  complianceState: ComplianceState;
+  debugPath?: DebugPath | null;
+  showDebug?: boolean;
+  guideAspectRatio?: number;
+  detectedDocType?: ShimmerDocType;
+  sideOfId?: string;
+}
+
+export const Overlay: FunctionComponent<OverlayProps> = ({
   complianceState,
   debugPath,
   showDebug = false,
   guideAspectRatio = 1.585,
   detectedDocType = null,
   sideOfId = 'Front',
-}) {
-  const canvasRef = useRef(null);
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const guideBoxRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Only draw the detected card polygon in debug mode
@@ -45,7 +59,6 @@ export function Overlay({
   }, [debugPath, showDebug]);
 
   // Resize debug canvas to match guide box
-  const guideBoxRef = useRef(null);
   useEffect(() => {
     const resizeCanvas = () => {
       if (canvasRef.current && guideBoxRef.current) {
@@ -66,9 +79,6 @@ export function Overlay({
     complianceState === COMPLIANCE_STATES.DETECTING;
   const shimmerSvg = getShimmerSvg(detectedDocType, sideOfId);
 
-  // Stroke color drives every path inside the shimmer SVG (via currentColor).
-  // Mirrors the previous guide-box border behaviour so users get the same
-  // idle / detecting / stable state feedback.
   const shimmerColor =
     complianceState === COMPLIANCE_STATES.STABLE ||
     complianceState === COMPLIANCE_STATES.SUCCESS ||
@@ -78,14 +88,15 @@ export function Overlay({
         ? '#F59E0B'
         : '#FFFFFF';
 
-  // Inject sizing + swap stroke="white" -> stroke="currentColor" so the
-  // wrapper's CSS `color` cascades into every stroked path.
+  // Inject sizing + swap ONLY the first stroke="white" to currentColor.
+  // The first <path> in each shimmer SVG is the outer card outline; later
+  // paths are interior decoration (face, text lines) and stay white.
   const shimmerHtml = shimmerSvg
     .replace(
       /<svg([^>]*)>/,
       '<svg$1 style="width:100%;height:100%;display:block;" preserveAspectRatio="xMidYMid meet">',
     )
-    .replace(/stroke="white"/g, 'stroke="currentColor"');
+    .replace('stroke="white"', 'stroke="currentColor"');
 
   return (
     <div style={{
@@ -141,4 +152,4 @@ export function Overlay({
       </div>
     </div>
   );
-}
+};

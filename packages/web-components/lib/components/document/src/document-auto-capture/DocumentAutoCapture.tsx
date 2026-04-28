@@ -627,7 +627,6 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
 
           {/* Detection overlay with guide box */}
           <Overlay
-            feedback={feedback}
             complianceState={complianceState}
             debugPath={debugPath}
             showDebug={showDebug}

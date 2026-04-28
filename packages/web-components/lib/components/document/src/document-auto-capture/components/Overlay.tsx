@@ -2,7 +2,6 @@
 // TODO(document-auto-capture): port to strict TypeScript.
 import { useRef, useEffect } from 'preact/hooks';
 import { COMPLIANCE_STATES } from '../hooks/useCardDetection';
-import { CornerBrackets } from './CornerBrackets';
 import { getShimmerSvg } from '../assets/shimmers';
 
 export function Overlay({
@@ -15,30 +14,6 @@ export function Overlay({
   sideOfId = 'Front',
 }) {
   const canvasRef = useRef(null);
-  
-  // Determine bracket color based on state
-  let bracketColor = 'rgba(255, 255, 255, 0.6)'; // Idle
-  if (complianceState === COMPLIANCE_STATES.DETECTING) {
-    bracketColor = '#FFA500'; // Orange
-  }
-  if (complianceState === COMPLIANCE_STATES.STABLE) {
-    bracketColor = '#12B76A'; // Green
-  }
-  if (complianceState === COMPLIANCE_STATES.SUCCESS) {
-    bracketColor = '#12B76A';
-  }
-  if (complianceState === COMPLIANCE_STATES.CAPTURING) {
-    bracketColor = '#34D399';
-  }
-
-  const frameBorderColor =
-    complianceState === COMPLIANCE_STATES.STABLE ||
-    complianceState === COMPLIANCE_STATES.SUCCESS ||
-    complianceState === COMPLIANCE_STATES.CAPTURING
-      ? '#2CC05C'
-      : complianceState === COMPLIANCE_STATES.DETECTING
-        ? '#F59E0B'
-        : 'rgba(255,255,255,0.4)';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,11 +34,11 @@ export function Overlay({
         ctx.lineTo(debugPath[i].x * scaleX, debugPath[i].y * scaleY);
       }
       ctx.closePath();
-      
+
       ctx.lineWidth = 2;
       ctx.strokeStyle = '#00FF00';
       ctx.stroke();
-      
+
       ctx.fillStyle = 'rgba(0, 255, 0, 0.15)';
       ctx.fill();
     }
@@ -85,6 +60,33 @@ export function Overlay({
     return () => observer.disconnect();
   }, []);
 
+  // Shimmer fades once a document is locked in so it doesn't fight the live frame.
+  const shimmerVisible =
+    complianceState === COMPLIANCE_STATES.IDLE ||
+    complianceState === COMPLIANCE_STATES.DETECTING;
+  const shimmerSvg = getShimmerSvg(detectedDocType, sideOfId);
+
+  // Stroke color drives every path inside the shimmer SVG (via currentColor).
+  // Mirrors the previous guide-box border behaviour so users get the same
+  // idle / detecting / stable state feedback.
+  const shimmerColor =
+    complianceState === COMPLIANCE_STATES.STABLE ||
+    complianceState === COMPLIANCE_STATES.SUCCESS ||
+    complianceState === COMPLIANCE_STATES.CAPTURING
+      ? '#2CC05C'
+      : complianceState === COMPLIANCE_STATES.DETECTING
+        ? '#F59E0B'
+        : '#FFFFFF';
+
+  // Inject sizing + swap stroke="white" -> stroke="currentColor" so the
+  // wrapper's CSS `color` cascades into every stroked path.
+  const shimmerHtml = shimmerSvg
+    .replace(
+      /<svg([^>]*)>/,
+      '<svg$1 style="width:100%;height:100%;display:block;" preserveAspectRatio="xMidYMid meet">',
+    )
+    .replace(/stroke="white"/g, 'stroke="currentColor"');
+
   return (
     <div style={{
       position: 'absolute',
@@ -98,54 +100,43 @@ export function Overlay({
       alignItems: 'center',
       justifyContent: 'center',
     }}>
+      {/* Shimmer SVG is the guide — replaces the bordered guide box entirely. */}
+      <div
+        ref={guideBoxRef}
+        className="guide-box"
+        style={{
+          width: '60%',
+          maxWidth: '600px',
+          aspectRatio: `${guideAspectRatio} / 1`,
+          position: 'relative',
+          opacity: shimmerVisible ? 1 : 0,
+          color: shimmerColor,
+          transition: 'opacity 0.3s ease, color 0.3s ease',
+        }}
+      >
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+          }}
+          dangerouslySetInnerHTML={{ __html: shimmerHtml }}
+        />
 
-      {/* Guide Box with corner brackets */}
-      <div ref={guideBoxRef} className="guide-box" style={{ 
-        width: '50%',
-        maxWidth: '600px',
-        aspectRatio: `${guideAspectRatio} / 1`, 
-        borderRadius: '20px', 
-        border: `4px solid ${frameBorderColor}`,
-        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.55)',
-        position: 'relative',
-        transition: 'all 0.3s ease',
-      }}>
-        {/* Corner brackets */}
-        <CornerBrackets color={bracketColor} size={32} thickness={4} />
-
-        {/* Document-type shimmer silhouette — hidden once document is detected. */}
-        {(() => {
-          const shimmerSvg = getShimmerSvg(detectedDocType, sideOfId);
-          if (!shimmerSvg) return null;
-          const shimmerVisible =
-            complianceState === COMPLIANCE_STATES.IDLE ||
-            complianceState === COMPLIANCE_STATES.DETECTING;
-          return (
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                inset: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                pointerEvents: 'none',
-                opacity: shimmerVisible ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }}
-              dangerouslySetInnerHTML={{
-                __html: shimmerSvg.replace(
-                  /<svg([^>]*)>/,
-                  '<svg$1 style="width:100%;height:100%;" preserveAspectRatio="xMidYMid meet">',
-                ),
-              }}
-            />
-          );
-        })()}
-
-        {/* Debug contour canvas — inside guide box, only visible in debug mode */}
+        {/* Debug contour canvas — only visible in debug mode */}
         {showDebug && (
-          <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', borderRadius: '12px' }} />
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          />
         )}
       </div>
     </div>

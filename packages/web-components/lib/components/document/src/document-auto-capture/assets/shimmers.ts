@@ -12,11 +12,10 @@ export type ShimmerSide = 'Front' | 'Back' | string | undefined;
 export function getShimmerSvg(
   docType: ShimmerDocType,
   side: ShimmerSide,
-): string | null {
+): string {
   if (docType === 'passport') return passportShimmer;
   if (docType === 'greenbook') return greenbookShimmer;
-  if (docType === 'id-card') {
-    return String(side).toLowerCase() === 'back' ? idBackShimmer : idFrontShimmer;
-  }
-  return null;
+  // Default (including null/unknown) to the ID-card silhouette so the guide
+  // is always visible before detection has classified the document.
+  return String(side).toLowerCase() === 'back' ? idBackShimmer : idFrontShimmer;
 }

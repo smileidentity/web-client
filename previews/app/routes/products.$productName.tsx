@@ -70,7 +70,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       product,
       apiUrl: Resource.GetToken.url,
       appStage: Resource.App.stage,
-      embedUrl: Resource.EmbedUrl.value || `preview-${Resource.App.stage}`,
+      embedUrl: Resource.EmbedUrl.value,
       partnerId: Resource.PartnerId.value,
     };
   }
@@ -228,11 +228,7 @@ export default function Product() {
             </fieldset>
           </form>
 
-          <script
-            src={`https://cdn.smileidentity.com/${
-              appStage === 'main' ? 'inline/v2' : embedUrl
-            }/js/script.min.js`}
-          ></script>
+          <script src={`${embedUrl}/js/script.min.js`}></script>
         </>
       ) : null}
     </>

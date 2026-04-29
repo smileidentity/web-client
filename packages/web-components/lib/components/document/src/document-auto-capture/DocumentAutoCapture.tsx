@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
@@ -13,8 +13,6 @@ import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
 import { theme } from './theme';
 
-import '../../../attribution/PoweredBySmileId';
-
 import { getBoolProp } from '../../../../utils/props';
 import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
@@ -25,7 +23,6 @@ interface Props {
   'side-of-id'?: 'Front' | 'Back' | string;
   'theme-color'?: string;
   'show-navigation'?: string | boolean;
-  'hide-attribution'?: string | boolean;
   'allow-gallery-upload'?: string | boolean;
   title?: string;
 }
@@ -140,20 +137,20 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
 }
 
 /**
- * `<document-auto-capture>` — auto-capture document scanner.
- *
- * Designed to be a drop-in replacement for the legacy `<document-capture>`
- * element used by `DocumentCaptureScreens`. Until cutover, both elements
- * ship in the bundle so consumers can opt in.
+ * Inner implementation that owns the camera + detection loop. Only mounted
+ * when the host element is actually visible (see `DocumentAutoCapture`
+ * wrapper below) so that two sibling instances — front + back — don't both
+ * fight for `getUserMedia` and run rAF/OpenCV detection while one is
+ * `hidden`. That collision was causing the page to freeze when the element
+ * was used inside `<document-capture-screens>`.
  */
-const DocumentAutoCapture: FunctionComponent<Props> = ({
+const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
   'capture-mode': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
   'theme-color': themeColor = '#001096',
   'show-navigation': showNavigationProp = false,
-  'hide-attribution': hideAttributionProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
   title: titleProp,
   // themeColor accepted for parity with legacy <document-capture>; styling
@@ -166,7 +163,6 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
   const captureFiredRef = useRef(false);
 
   const showNavigation = getBoolProp(showNavigationProp);
-  const hideAttribution = getBoolProp(hideAttributionProp);
   const allowGalleryUpload = getBoolProp(allowGalleryUploadProp, true);
 
   // Normalise capture-mode and timeout prop strings to runtime values.
@@ -192,9 +188,15 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
   })();
 
   const [settings, setSettings] = useState(getOptimalDefaults());
-  const [isTallViewport, setIsTallViewport] = useState(
-    typeof window !== 'undefined' ? window.innerHeight > window.innerWidth : false,
-  );
+  // Track the camera-viewport box (the absolute-positioned div that fills the
+  // host) rather than the page viewport, so the component fills its parent
+  // even when embedded inside another layout (e.g. <document-capture-screens>).
+  const cameraViewportRef = useRef<HTMLDivElement>(null);
+  const [viewportBox, setViewportBox] = useState<{ w: number; h: number }>({
+    w: 0,
+    h: 0,
+  });
+  const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
   const showDebug =
@@ -208,22 +210,19 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
     });
   }, []);
 
-  // Track viewport orientation changes to trigger UI rotation
+  // Observe the camera viewport's box for orientation + rotation sizing.
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
+    const el = cameraViewportRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
 
-    const updateViewportShape = () => {
-      setIsTallViewport(window.innerHeight > window.innerWidth);
+    const update = () => {
+      setViewportBox({ w: el.clientWidth, h: el.clientHeight });
     };
+    update();
 
-    window.addEventListener('resize', updateViewportShape);
-    window.addEventListener('orientationchange', updateViewportShape);
-    updateViewportShape();
-
-    return () => {
-      window.removeEventListener('resize', updateViewportShape);
-      window.removeEventListener('orientationchange', updateViewportShape);
-    };
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const isLandscapeDocumentType =
@@ -471,7 +470,12 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
   const useSideManualCapture = useLandscapeUi && showManualCaptureControl;
   const showSideGalleryButton = useLandscapeUi && allowGalleryUpload;
   const showBottomGalleryButton = allowGalleryUpload && !showSideGalleryButton;
-  const showSideSpinner = baseShowSideSpinner && !useSideManualCapture;
+  // Only show the side progress spinner when the UI is actually rotated
+  // (landscape doc type on a portrait viewport). In portrait/un-rotated UI
+  // the bottom CaptureButton already shows progress, so a second spinner on
+  // the right would just be a duplicate floating button.
+  const showSideSpinner =
+    baseShowSideSpinner && shouldRotateUi && !useSideManualCapture;
   const sideButtonProgress =
     complianceState === COMPLIANCE_STATES.STABLE
       ? Math.round(Number((feedback.match(/(\d+)%/) || [, 0])[1]))
@@ -498,7 +502,7 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
 
   const containerStyle = {
     width: '100%',
-    height: '100vh',
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: '#000',
@@ -510,7 +514,7 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
   // Inline styles for shadow-DOM host + global resets so the layout matches
   // the id-scanner viewport (where these come from index.css globally).
   const hostStyles = `
-    :host { display: block; width: 100%; height: 100vh; }
+    :host { display: block; width: 100%; height: 100%; }
     *, *::before, *::after { box-sizing: border-box; }
   `;
 
@@ -528,10 +532,12 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
         />
       )}
 
-      {/* Camera viewport — fills the host absolutely so the rotated overlay's
-          100vh/100vw dimensions always match the visible camera area
-          (independent of any sibling chrome like attribution). */}
+      {/* Camera viewport — fills the host absolutely. The rotated overlay
+          below uses the observed pixel dimensions of this box (via
+          ResizeObserver) so it matches the visible camera area regardless
+          of whether the host fills the page viewport or a smaller parent. */}
       <div
+        ref={cameraViewportRef}
         style={{
           position: 'absolute',
           inset: 0,
@@ -562,8 +568,10 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
             left: 0,
             ...(shouldRotateUi
               ? {
-                  width: '100vh',
-                  height: '100vw',
+                  // Rotated 90° CW — swap parent box dimensions so the
+                  // rotated rectangle covers the camera viewport exactly.
+                  width: viewportBox.h ? `${viewportBox.h}px` : '100%',
+                  height: viewportBox.w ? `${viewportBox.w}px` : '100%',
                   transformOrigin: '0 0',
                   transform: 'rotate(90deg) translateY(-100%)',
                 }
@@ -691,7 +699,7 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
             style={{
               position: 'absolute',
               left: '50%',
-              bottom: 24,
+              bottom: shouldRotateUi ? 24 : 184,
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(35,35,35,0.95)',
               borderRadius: 14,
@@ -718,7 +726,9 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
           </div>
         </div>
 
-        {/* Manual fallback button — only shown in portrait layout (not rotated) */}
+        {/* Manual fallback button — only shown in portrait layout (not rotated).
+            Matches the landscape side-button styling: bare CaptureButton with
+            no pill background. */}
         {!shouldRotateUi &&
           (showManualCaptureControl || showBottomGalleryButton) &&
           !useSideManualCapture && (
@@ -726,7 +736,7 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
               style={{
                 position: 'absolute',
                 left: '50%',
-                bottom: 102,
+                bottom: 60,
                 transform: 'translateX(-50%)',
                 zIndex: 12,
                 display: 'flex',
@@ -740,13 +750,12 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 14,
-                  padding: '8px 10px',
-                  borderRadius: 999,
-                  backgroundColor: 'rgba(15,23,42,0.28)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  gap: 24,
                 }}
               >
+                {showBottomGalleryButton && (
+                  <GalleryButton onClick={handlePickFromGallery} />
+                )}
                 {showManualCaptureControl && (
                   <CaptureButton
                     progress={
@@ -760,9 +769,6 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
                     appearance="light"
                     onClick={triggerManualCapture}
                   />
-                )}
-                {showBottomGalleryButton && (
-                  <GalleryButton onClick={handlePickFromGallery} />
                 )}
               </div>
               {captureMode === 'autoCaptureOnly' && cvLoadFailed && (
@@ -790,21 +796,50 @@ const DocumentAutoCapture: FunctionComponent<Props> = ({
         />
       )}
 
-      {!hideAttribution && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 20,
-            pointerEvents: 'auto',
-          }}
-        >
-          {/* @ts-expect-error preact-custom-element JSX type */}
-          <powered-by-smile-id />
-        </div>
-      )}
+    </div>
+  );
+};
+
+/**
+ * `<document-auto-capture>` — auto-capture document scanner.
+ *
+ * Drop-in replacement for the legacy `<document-capture>` element used by
+ * `DocumentCaptureScreens`. The orchestrator renders both front + back
+ * instances simultaneously and toggles their `hidden` attribute, so this
+ * wrapper observes the host's `hidden` attribute and only mounts the heavy
+ * inner component (camera + OpenCV detection loop) while it's visible.
+ */
+const DocumentAutoCapture: FunctionComponent<Props> = (props) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [isActive, setIsActive] = useState(false);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current?.getRootNode();
+    const host =
+      root && root instanceof ShadowRoot
+        ? (root.host as HTMLElement)
+        : null;
+
+    if (!host) {
+      // Not inside a shadow root (e.g. test harness) — always render.
+      setIsActive(true);
+      return undefined;
+    }
+
+    const update = () => setIsActive(!host.hasAttribute('hidden'));
+    update();
+
+    const obs = new MutationObserver(update);
+    obs.observe(host, { attributes: true, attributeFilter: ['hidden'] });
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={rootRef}
+      style={{ width: '100%', height: '100%', display: 'contents' }}
+    >
+      {isActive ? <DocumentAutoCaptureInner {...props} /> : null}
     </div>
   );
 };
@@ -820,7 +855,6 @@ if (typeof customElements !== 'undefined' && !customElements.get('document-auto-
       'side-of-id',
       'theme-color',
       'show-navigation',
-      'hide-attribution',
       'allow-gallery-upload',
       'title',
     ],

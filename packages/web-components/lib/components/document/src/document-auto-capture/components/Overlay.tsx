@@ -116,7 +116,7 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
         ref={guideBoxRef}
         className="guide-box"
         style={{
-          width: '60%',
+          width: 'calc(100% - 4rem)',
           maxWidth: '600px',
           aspectRatio: `${guideAspectRatio} / 1`,
           position: 'relative',

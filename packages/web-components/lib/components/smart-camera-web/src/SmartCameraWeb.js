@@ -22,7 +22,7 @@ function scwTemplateString() {
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
     ></selfie-capture-screens>
-    <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+    <document-capture-screens auto-capture ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;

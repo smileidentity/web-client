@@ -183,7 +183,7 @@ export default function Product() {
                             <option key={optionIdx} value={option.name}>
                               {option.label}
                             </option>
-                          ),
+                          )
                         )}
                       </select>
                     </>
@@ -228,9 +228,7 @@ export default function Product() {
             </fieldset>
           </form>
 
-          <script
-            src={`${embedUrl}/js/script.min.js`}
-          ></script>
+          <script src={`${embedUrl}/js/script.min.js`}></script>
         </>
       ) : null}
     </>

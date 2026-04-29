@@ -327,6 +327,21 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     };
   }, [sideOfId]);
 
+  // Resolve THIS instance's host element (not the first match in the
+  // document) by walking up from a node inside the shadow root. Using
+  // `document.querySelector('document-auto-capture')` here is wrong when
+  // there are sibling instances (front + back), because it always returns
+  // the front and the back's events would never reach its listener.
+  const getHost = (): Element | null => {
+    const node =
+      cameraViewportRef.current ||
+      videoRef.current ||
+      galleryInputRef.current;
+    const root = node?.getRootNode();
+    if (root && root instanceof ShadowRoot) return root.host;
+    return document.querySelector('document-auto-capture');
+  };
+
   // Re-encode at JPEG_QUALITY before publishing so output matches the legacy
   // `<document-capture>` element exactly. The detection hook captures at 0.95
   // quality for internal use; we round-trip via an Image to set the package's
@@ -345,7 +360,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       const finalImage = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 
       // Use the same event surface as the legacy element for drop-in parity.
-      const host = document.querySelector('document-auto-capture');
+      const host = getHost();
       const target = host || document;
       target.dispatchEvent(
         new CustomEvent('document-capture.publish', {
@@ -378,7 +393,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
   // Wire up navigation back/close events.
   const dispatchHostEvent = (name: string) => {
-    const host = document.querySelector('document-auto-capture');
+    const host = getHost();
     (host || document).dispatchEvent(
       new CustomEvent(name, { bubbles: true, composed: true }),
     );

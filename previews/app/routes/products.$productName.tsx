@@ -183,7 +183,7 @@ export default function Product() {
                             <option key={optionIdx} value={option.name}>
                               {option.label}
                             </option>
-                          )
+                          ),
                         )}
                       </select>
                     </>

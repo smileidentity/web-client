@@ -10,7 +10,7 @@ declare module 'sst' {
       value: string;
     };
     EmbedUrl: {
-      type: 'sst.sst.Secret';
+      type: 'sst.sst.Linkable';
       value: string;
     };
     GetToken: {

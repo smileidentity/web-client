@@ -488,8 +488,11 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     showManualButton ||
     (allowGalleryUpload && captureMode !== 'autoCaptureOnly');
 
-  const useSideManualCapture = useLandscapeUi && showManualCaptureControl;
-  const showSideGalleryButton = useLandscapeUi && allowGalleryUpload;
+  // Side-mounted controls are only used in the rotated UI. When the UI is
+  // not rotated (e.g. landscape doc type on desktop), buttons live in the
+  // bottom row alongside the portrait layout.
+  const useSideManualCapture = shouldRotateUi && showManualCaptureControl;
+  const showSideGalleryButton = shouldRotateUi && allowGalleryUpload;
   const showBottomGalleryButton = allowGalleryUpload && !showSideGalleryButton;
   // Only show the side progress spinner when the UI is actually rotated
   // (landscape doc type on a portrait viewport). In portrait/un-rotated UI

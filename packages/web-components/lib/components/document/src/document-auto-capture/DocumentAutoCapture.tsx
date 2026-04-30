@@ -184,7 +184,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     if (v === 'green_book' || v === 'greenbook') return 'greenbook';
     if (v === 'id_card' || v === 'id-card') return 'id-card';
     if (v === 'passport') return 'passport';
-    return null;
+    return 'id-card';
   })();
 
   const [settings, setSettings] = useState(getOptimalDefaults());
@@ -228,7 +228,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isLandscapeDocumentType =
     documentType === 'id-card' || documentType === 'passport';
   const useLandscapeUi = isLandscapeDocumentType;
-  const shouldRotateUi = useLandscapeUi && isTallViewport;
+  // Rotate the UI 90 degrees only on touch devices (mobile / tablet) where
+  // the user is expected to be holding the phone in portrait. On desktop /
+  // laptop with a portrait-shaped parent box (e.g. the dev playground
+  // 360px column) we keep the un-rotated layout because the user can't
+  // rotate their monitor.
+  const isMobileDevice = settings.deviceType === 'Mobile';
+  const shouldRotateUi = useLandscapeUi && isTallViewport && isMobileDevice;
   const effectiveCaptureOrientation = isLandscapeDocumentType
     ? 'landscape'
     : 'portrait';

@@ -12,6 +12,13 @@ const meta = {
     },
   },
   component: 'smileid-navigation',
+  decorators: [
+    (story) => `
+      <div style="background: #1a1a2e; padding: 24px; min-height: 100px;">
+        ${story()}
+      </div>
+    `,
+  ],
 };
 
 export default meta;

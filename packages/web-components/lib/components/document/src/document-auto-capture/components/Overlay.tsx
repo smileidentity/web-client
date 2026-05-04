@@ -15,6 +15,7 @@ interface OverlayProps {
   guideAspectRatio?: number;
   detectedDocType?: ShimmerDocType;
   sideOfId?: string;
+  isRotated?: boolean;
 }
 
 export const Overlay: FunctionComponent<OverlayProps> = ({
@@ -24,6 +25,7 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
   guideAspectRatio = 1.585,
   detectedDocType = null,
   sideOfId = 'Front',
+  isRotated = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const guideBoxRef = useRef<HTMLDivElement | null>(null);
@@ -116,7 +118,7 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
         ref={guideBoxRef}
         className="guide-box"
         style={{
-          width: 'calc(100% - 4rem)',
+          width: isRotated ? 'calc(100% - 16rem)' : 'calc(100% - 4rem)',
           maxWidth: '600px',
           aspectRatio: `${guideAspectRatio} / 1`,
           position: 'relative',

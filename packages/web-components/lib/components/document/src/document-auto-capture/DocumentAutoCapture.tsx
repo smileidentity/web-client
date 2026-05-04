@@ -24,6 +24,7 @@ interface Props {
   'theme-color'?: string;
   'show-navigation'?: string | boolean;
   'allow-gallery-upload'?: string | boolean;
+  'sync-roi-to-guide'?: string | boolean;
   title?: string;
 }
 
@@ -152,6 +153,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'theme-color': themeColor = '#001096',
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
+  'sync-roi-to-guide': syncRoiToGuideProp = false,
   title: titleProp,
   // themeColor accepted for parity with legacy <document-capture>; styling
   // currently uses fixed dark camera UI matching id-scanner.
@@ -164,6 +166,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
   const showNavigation = getBoolProp(showNavigationProp);
   const allowGalleryUpload = getBoolProp(allowGalleryUploadProp, true);
+  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, false);
 
   // Normalise capture-mode and timeout prop strings to runtime values.
   const captureMode: CaptureMode = CAPTURE_MODES.includes(
@@ -259,6 +262,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     autoCaptureTimeout,
     captureOrientation: effectiveCaptureOrientation,
     shouldRotateUi,
+    syncRoiToGuide,
   });
 
   const [visibleFeedback, setVisibleFeedback] = useState<string>(feedback);
@@ -665,6 +669,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             guideAspectRatio={guideAspectRatio}
             detectedDocType={detectedDocType}
             sideOfId={sideOfId}
+            isRotated={shouldRotateUi}
           />
 
           {/* Side capture-progress button */}
@@ -880,6 +885,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('document-auto-
       'theme-color',
       'show-navigation',
       'allow-gallery-upload',
+      'sync-roi-to-guide',
       'title',
     ],
     { shadow: true },

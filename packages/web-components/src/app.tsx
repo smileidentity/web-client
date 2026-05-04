@@ -173,6 +173,7 @@ const App = () => {
       key: `${component}-${themeColor}`,
       'show-navigation': true,
       'theme-color': themeColor,
+      'auto-capture': true,
     };
 
     switch (component) {

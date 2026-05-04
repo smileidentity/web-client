@@ -61,6 +61,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
     autoCaptureTimeout = 10000,
     captureOrientation = 'landscape',
     shouldRotateUi = false,
+    syncRoiToGuide = false,
   } = options;
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
   const autoCaptureTimeoutMs = Math.max(3000, Math.min(30000, autoCaptureTimeout));
@@ -210,7 +211,18 @@ export function useCardDetection(videoRef, settings, options = {}) {
                 : ASPECT_RATIOS['id-card']
             );
         const isCard = variant === 'card';
-        const guideWidthCSS  = isCard ? displayW : Math.min(displayW * 0.90, 600);
+        // A/B toggle: when sync-roi-to-guide is on, mirror the visual guide width
+        // (Overlay.tsx uses calc(100% - 16rem) on rotated UI, calc(100% - 4rem) otherwise).
+        // When off (default), keep the legacy 90% / 600px cap. The guide-box is
+        // otherwise purely visual and detection ignores it.
+        const insetPx = syncRoiToGuide
+          ? (shouldRotateUi ? 256 : 64) // 16rem : 4rem (assuming 1rem = 16px)
+          : 0;
+        const guideWidthCSS  = isCard
+          ? displayW
+          : syncRoiToGuide
+            ? Math.min(Math.max(0, displayW - insetPx), 600)
+            : Math.min(displayW * 0.90, 600);
         const guideHeightCSS = isCard ? displayH : guideWidthCSS / currentAspect;
         const guideXCSS = (displayW - guideWidthCSS) / 2;
         const guideYCSS = (displayH - guideHeightCSS) / 2;

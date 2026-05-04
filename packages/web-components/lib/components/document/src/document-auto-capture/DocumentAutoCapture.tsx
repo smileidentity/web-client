@@ -246,6 +246,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const {
     feedback,
     capturedImage,
+    previewImage,
     captureOrigin,
     complianceState,
     debugInfo,
@@ -356,47 +357,64 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // `<document-capture>` element exactly. The detection hook captures at 0.95
   // quality for internal use; we round-trip via an Image to set the package's
   // canonical JPEG_QUALITY.
-  const publishImage = (dataUrl: string, origin: string) => {
+  const reencodeJpeg = (dataUrl: string): Promise<{ data: string; width: number; height: number }> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.drawImage(img, 0, 0);
+        resolve({
+          data: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+          width: canvas.width,
+          height: canvas.height,
+        });
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+
+  const publishImage = (dataUrl: string, origin: string, preview: string | null) => {
     if (!dataUrl || captureFiredRef.current) return;
     captureFiredRef.current = true;
 
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.drawImage(img, 0, 0);
-      const finalImage = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+    const fullPromise = reencodeJpeg(dataUrl);
+    const previewPromise = preview ? reencodeJpeg(preview) : Promise.resolve(null);
 
-      // Use the same event surface as the legacy element for drop-in parity.
-      const host = getHost();
-      const target = host || document;
-      target.dispatchEvent(
-        new CustomEvent('document-capture.publish', {
-          bubbles: true,
-          composed: true,
-          detail: {
-            image: finalImage,
-            originalHeight: canvas.height,
-            originalWidth: canvas.width,
-            previewImage: finalImage,
-            side: sideOfId,
-            captureOrigin: origin,
-          },
-        }),
-      );
-    };
-    img.onerror = () => {
-      console.error('[document-auto-capture] failed to decode capture');
-    };
-    img.src = dataUrl;
+    Promise.all([fullPromise, previewPromise])
+      .then(([full, prev]) => {
+        const finalImage = full.data;
+        const previewOut = prev ? prev.data : finalImage;
+
+        // Use the same event surface as the legacy element for drop-in parity.
+        const host = getHost();
+        const target = host || document;
+        target.dispatchEvent(
+          new CustomEvent('document-capture.publish', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              image: finalImage,
+              originalHeight: full.height,
+              originalWidth: full.width,
+              previewImage: previewOut,
+              side: sideOfId,
+              captureOrigin: origin,
+            },
+          }),
+        );
+      })
+      .catch(() => {
+        console.error('[document-auto-capture] failed to decode capture');
+      });
   };
 
   // When auto-capture fires, publish image up
   useEffect(() => {
     if (capturedImage) {
-      publishImage(capturedImage, captureOrigin || 'auto');
+      publishImage(capturedImage, captureOrigin || 'auto', previewImage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capturedImage]);
@@ -522,7 +540,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     reader.onload = () => {
       const imageData =
         typeof reader.result === 'string' ? reader.result : null;
-      if (imageData) publishImage(imageData, 'gallery');
+      if (imageData) publishImage(imageData, 'gallery', null);
     };
     reader.readAsDataURL(file);
     if (target) target.value = '';

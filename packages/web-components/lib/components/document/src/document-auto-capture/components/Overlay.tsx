@@ -75,10 +75,10 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Shimmer fades once a document is locked in so it doesn't fight the live frame.
-  const shimmerVisible =
-    complianceState === COMPLIANCE_STATES.IDLE ||
-    complianceState === COMPLIANCE_STATES.DETECTING;
+  // Keep the guide visible across all states (including STABLE / CAPTURING /
+  // SUCCESS) so users see the green outline confirm the lock-in. Only hide
+  // it if compliance state is missing.
+  const shimmerVisible = Boolean(complianceState);
   const shimmerSvg = getShimmerSvg(detectedDocType, sideOfId);
 
   const shimmerColor =

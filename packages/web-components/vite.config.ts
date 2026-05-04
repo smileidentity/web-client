@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 import preact from '@preact/preset-vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import dts from 'vite-plugin-dts';
 import { visualizer } from 'rollup-plugin-visualizer';
 
@@ -22,6 +23,11 @@ export default defineConfig(({ mode }) => {
   const generateStats = process.env.GENERATE_STATS === 'true';
   const buildFormat = process.env.BUILD_FORMAT || 'esm';
   const port = parseInt(env.PORT || '3005', 10);
+  const enableHttps =
+    env.HTTPS === 'true' ||
+    env.HTTPS === '1' ||
+    process.env.HTTPS === 'true' ||
+    process.env.HTTPS === '1';
 
   const plugins = [
     preact({
@@ -48,6 +54,9 @@ export default defineConfig(({ mode }) => {
         brotliSize: true,
       }),
     );
+  }
+  if (enableHttps) {
+    plugins.push(basicSsl());
   }
 
   const esmBuildConfig = {
@@ -129,6 +138,8 @@ export default defineConfig(({ mode }) => {
 
     server: {
       port,
+      host: process.env.HOST || 'localhost',
+      https: enableHttps,
     },
 
     resolve: {

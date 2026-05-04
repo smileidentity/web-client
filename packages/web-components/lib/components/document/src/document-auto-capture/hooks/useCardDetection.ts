@@ -75,6 +75,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   const [feedback, setFeedback] = useState("Position your document in the frame");
   const [capturedImage, setCapturedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [complianceState, setComplianceState] = useState(COMPLIANCE_STATES.IDLE);
   const [debugPath, setDebugPath] = useState(null); // For drawing the green box on overlay
   const [debugInfo, setDebugInfo] = useState({}); // For tuning panel
@@ -84,7 +85,11 @@ export function useCardDetection(videoRef, settings, options = {}) {
   // Refs for loop management to avoid stale closures
   const settingsRef = useRef(settings);
   const stabilityRef = useRef({ count: 0, lastCenter: null });
-  const bestFrameRef = useRef({ dataUrl: null, score: 0 });
+  // Tracks the sharpest frame during the stability window. We keep both the
+  // full-frame submission image and an optional cropped preview so the review
+  // screen can show the cropped region while the API still receives the full
+  // frame.
+  const bestFrameRef = useRef({ image: null, preview: null, score: 0 });
   const isCapturingRef = useRef(false);
   const canvasRef = useRef(null);
   const detectionPhaseRef = useRef(initialPhase);
@@ -355,7 +360,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setFeedback(reason);
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
             setDebugPath(null);
             setDebugInfo({ blur: 0, glare: 0, edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore), quadrants: quadDensities.join('/') });
             return;
@@ -491,7 +496,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setFeedback("Move document closer");
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
             setDebugInfo({ docFill: Math.round(docFillPercent), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore) });
             return;
@@ -500,7 +505,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setFeedback("Move document further away");
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
             setDebugInfo({ docFill: Math.round(docFillPercent), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore) });
             return;
@@ -628,7 +633,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setFeedback(`Too Blurry (Var: ${Math.round(variance)})`);
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
             setDebugInfo({ blur: Math.round(variance), glare: 0 });
             return;
         }
@@ -646,7 +651,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setFeedback(`Glare Detected (${glarePercent.toFixed(1)}%)`);
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
             return;
         }
 
@@ -657,6 +662,13 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // Track the sharpest frame during the stability window
         if (variance > bestFrameRef.current.score) {
           bestFrameRef.current.score = variance;
+
+          // Capture the cropped card region as the submitted image so the
+          // backend receives a tightly-framed, high-quality scan. The full
+          // frame is preserved as a fallback when cropping is disabled or
+          // the rotated-UI mode prevents safe cropping.
+          const fullDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+          let croppedDataUrl = null;
 
           // In rotated-UI mode, keep the full frame and rotate it later.
           // Cropping the portrait source before rotation trims the card sides.
@@ -673,10 +685,13 @@ export function useCardDetection(videoRef, settings, options = {}) {
             cropCanvas.width = cw;
             cropCanvas.height = ch;
             cropCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-            bestFrameRef.current.dataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
-          } else {
-            bestFrameRef.current.dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            croppedDataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
           }
+
+          // Submitted image is the crop when we have one, otherwise the full
+          // frame. Preview mirrors the submitted image.
+          bestFrameRef.current.image = croppedDataUrl || fullDataUrl;
+          bestFrameRef.current.preview = croppedDataUrl;
         }
 
         setFeedback(`Hold Still... ${Math.round(progress)}%`);
@@ -696,24 +711,37 @@ export function useCardDetection(videoRef, settings, options = {}) {
              isCapturingRef.current = true;
              setCaptureOrigin('auto');
              // Use the sharpest frame captured during stability
-            let bestFrameUrl = bestFrameRef.current.dataUrl;
+            let bestFrameUrl = bestFrameRef.current.image;
+            let bestPreviewUrl = bestFrameRef.current.preview;
             // Rotate if UI was rotated during capture
             if (shouldRotateUi && bestFrameUrl) {
-              const img = new Image();
-              img.onload = () => {
-                const rotated = document.createElement('canvas');
-                rotated.width = img.height;   // Swap dimensions for 90° rotation
-                rotated.height = img.width;
-                const ctx = rotated.getContext('2d');
-                ctx.translate(rotated.width / 2, rotated.height / 2);
-                ctx.rotate(-Math.PI / 2);  // 90° counter-clockwise
-                ctx.drawImage(img, -img.width / 2, -img.height / 2);
-                setCapturedImage(rotated.toDataURL('image/jpeg', 0.95));
+              const rotateDataUrl = (srcUrl) => new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                  const rotated = document.createElement('canvas');
+                  rotated.width = img.height;
+                  rotated.height = img.width;
+                  const ctx = rotated.getContext('2d');
+                  ctx.translate(rotated.width / 2, rotated.height / 2);
+                  ctx.rotate(-Math.PI / 2);
+                  ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                  resolve(rotated.toDataURL('image/jpeg', 0.95));
+                };
+                img.onerror = reject;
+                img.src = srcUrl;
+              });
+
+              Promise.all([
+                rotateDataUrl(bestFrameUrl),
+                bestPreviewUrl ? rotateDataUrl(bestPreviewUrl) : Promise.resolve(null),
+              ]).then(([rotatedFull, rotatedPreview]) => {
+                setCapturedImage(rotatedFull);
+                setPreviewImage(rotatedPreview);
                 setComplianceState(COMPLIANCE_STATES.SUCCESS);
-              };
-              img.src = bestFrameUrl;
+              });
             } else {
               setCapturedImage(bestFrameUrl);
+              setPreviewImage(bestPreviewUrl);
               setComplianceState(COMPLIANCE_STATES.SUCCESS);
             }
            }
@@ -726,7 +754,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
         setFeedback(`Error: ${err.message || 'Processing failed'}`);
         setComplianceState(COMPLIANCE_STATES.IDLE);
         stabilityRef.current.count = 0;
-        bestFrameRef.current = { dataUrl: null, score: 0 };
+        bestFrameRef.current = { image: null, preview: null, score: 0 };
       } finally {
         // Clean Memory
         if (fullFrame && !fullFrame.isDeleted()) fullFrame.delete();
@@ -779,10 +807,14 @@ export function useCardDetection(videoRef, settings, options = {}) {
     if (!canvas || !coords) return;
     const { clampedX, clampedY, clampedW, clampedH } = coords;
     const s = settingsRef.current;
-    let captureCanvas = canvas;
-    let dataUrl;
-    // Skip cropping if UI is rotated — crop margins don't work well with 90° rotation.
-    // Instead, capture the full frame and rotate it to preserve the entire card.
+
+    // Submitted image is always the full frame so the API receives uncropped
+    // context. The cropped preview is produced separately for the review screen.
+    let fullCaptureCanvas = canvas;
+    let previewCaptureCanvas = null;
+
+    // Skip cropping if UI is rotated — crop margins don't work well with 90°
+    // rotation, so the preview falls back to the full frame in that case.
     if (s.cropToCard && !shouldRotateUi) {
       const pad = (s.cropPadding || 10) / 100;
       const padX = clampedW * pad;
@@ -795,16 +827,27 @@ export function useCardDetection(videoRef, settings, options = {}) {
       cropCanvas.width = cw;
       cropCanvas.height = ch;
       cropCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-      captureCanvas = cropCanvas;
+      previewCaptureCanvas = cropCanvas;
     }
-    // Rotate if UI was rotated during capture
+
+    // Rotate both outputs if UI was rotated during capture.
     if (shouldRotateUi) {
-      captureCanvas = rotateCanvas90CCW(captureCanvas);
+      fullCaptureCanvas = rotateCanvas90CCW(fullCaptureCanvas);
+      if (previewCaptureCanvas) {
+        previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
+      }
     }
-    dataUrl = captureCanvas.toDataURL('image/jpeg', 0.95);
+
+    const fullDataUrl = fullCaptureCanvas.toDataURL('image/jpeg', 0.95);
+    const previewDataUrl = previewCaptureCanvas
+      ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
+      : null;
+
     console.log('--- MANUAL CAPTURE TRIGGERED ---');
     setCaptureOrigin('manual');
-    setCapturedImage(dataUrl);
+    // Submitted image prefers the cropped card region when available.
+    setCapturedImage(previewDataUrl || fullDataUrl);
+    setPreviewImage(previewDataUrl);
     setComplianceState(COMPLIANCE_STATES.SUCCESS);
     setFeedback('Captured!');
     isCapturingRef.current = true;
@@ -812,6 +855,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   const resetCapture = () => {
     setCapturedImage(null);
+    setPreviewImage(null);
     setCaptureOrigin(null);
     setComplianceState(COMPLIANCE_STATES.IDLE);
     setFeedback("Position your document in the frame");
@@ -819,7 +863,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
     isCapturingRef.current = false;
     stabilityRef.current.count = 0;
     stabilityRef.current.lastCenter = null;
-    bestFrameRef.current = { dataUrl: null, score: 0 };
+    bestFrameRef.current = { image: null, preview: null, score: 0 };
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);
@@ -837,6 +881,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
   return {
     feedback,
     capturedImage,
+    previewImage,
     captureOrigin,
     complianceState,
     debugPath,

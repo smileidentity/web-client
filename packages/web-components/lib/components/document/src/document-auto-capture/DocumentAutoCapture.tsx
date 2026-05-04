@@ -54,7 +54,9 @@ const getOptimalDefaults = () => {
         glareThreshold: 5.0,
         stabilityThreshold: 5,
         cropToCard: true,
+        cropToContour: true,
         cropPadding: 10,
+        previewCropPadding: 2,
       }
     : {
         deviceType: 'Desktop',
@@ -65,7 +67,9 @@ const getOptimalDefaults = () => {
         glareThreshold: 18.0,
         stabilityThreshold: 3,
         cropToCard: true,
+        cropToContour: true,
         cropPadding: 10,
+        previewCropPadding: 2,
       };
 };
 

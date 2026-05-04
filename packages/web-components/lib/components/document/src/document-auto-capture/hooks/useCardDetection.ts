@@ -108,6 +108,10 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   // Stores the most recent ROI coordinates so triggerManualCapture can crop on demand.
   const latestCropCoordsRef = useRef(null);
+  // Last detected card bounding rect in CANVAS coords. Updated whenever the
+  // contour-detection pass produces a 4-point card. Sticky across frames so
+  // intermittent contour misses don't fall back to the looser guide rect.
+  const latestCardRectRef = useRef(null);
   // Mirror of captureMode for access inside the processFrame closure.
   const captureModeRef = useRef(captureMode);
   useEffect(() => { captureModeRef.current = captureMode; }, [captureMode]);
@@ -515,6 +519,19 @@ export function useCardDetection(videoRef, settings, options = {}) {
             // Reset consecutive miss counter on successful detection
             if (isDiscovery) discoveryRef.current.consecutiveMisses = 0;
 
+            // Cache the card's bounding rect in canvas coords for tight
+            // crop-to-contour at capture time. Contour points are ROI-relative,
+            // so translate by the ROI origin.
+            {
+              const cardRect = cv.boundingRect(bestContour);
+              latestCardRectRef.current = {
+                x: clampedX + cardRect.x,
+                y: clampedY + cardRect.y,
+                w: cardRect.width,
+                h: cardRect.height,
+              };
+            }
+
             // Store points relative to the ROI for overlay drawing (only if dynamic border is on)
             if (settingsRef.current.useDynamicBorder) {
               const points = [];
@@ -663,23 +680,46 @@ export function useCardDetection(videoRef, settings, options = {}) {
         if (variance > bestFrameRef.current.score) {
           bestFrameRef.current.score = variance;
 
-          // Capture the cropped card region as the submitted image so the
-          // backend receives a tightly-framed, high-quality scan. The full
-          // frame is preserved as a fallback when cropping is disabled or
-          // the rotated-UI mode prevents safe cropping.
+          // Submitted image: full frame, or guide-rect crop when cropToCard
+          // is enabled (original behavior). Padded by `cropPadding` (default 10%).
           const fullDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-          let croppedDataUrl = null;
-
-          // In rotated-UI mode, keep the full frame and rotate it later.
-          // Cropping the portrait source before rotation trims the card sides.
+          let submittedDataUrl = fullDataUrl;
           if (settingsRef.current.cropToCard && !shouldRotateUi) {
-            const pad = (settingsRef.current.cropPadding || 10) / 100;
-            const padX = clampedW * pad;
-            const padY = clampedH * pad;
-            const cx = Math.max(0, Math.floor(clampedX - padX));
-            const cy = Math.max(0, Math.floor(clampedY - padY));
-            const cw = Math.min(canvas.width - cx, Math.ceil(clampedW + padX * 2));
-            const ch = Math.min(canvas.height - cy, Math.ceil(clampedH + padY * 2));
+            const submitPad = (settingsRef.current.cropPadding == null
+              ? 10
+              : settingsRef.current.cropPadding) / 100;
+            const sPadX = clampedW * submitPad;
+            const sPadY = clampedH * submitPad;
+            const scx = Math.max(0, Math.floor(clampedX - sPadX));
+            const scy = Math.max(0, Math.floor(clampedY - sPadY));
+            const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
+            const sch = Math.min(canvas.height - scy, Math.ceil(clampedH + sPadY * 2));
+            const submitCanvas = document.createElement('canvas');
+            submitCanvas.width = scw;
+            submitCanvas.height = sch;
+            submitCanvas.getContext('2d').drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+            submittedDataUrl = submitCanvas.toDataURL('image/jpeg', 0.95);
+          }
+
+          // Preview: tighter crop using the detected card's contour when
+          // available. Padded by `previewCropPadding` (default 2%).
+          let croppedDataUrl = null;
+          if (settingsRef.current.cropToCard && !shouldRotateUi) {
+            const useContour =
+              settingsRef.current.cropToContour !== false &&
+              latestCardRectRef.current;
+            const sourceX = useContour ? latestCardRectRef.current.x : clampedX;
+            const sourceY = useContour ? latestCardRectRef.current.y : clampedY;
+            const sourceW = useContour ? latestCardRectRef.current.w : clampedW;
+            const sourceH = useContour ? latestCardRectRef.current.h : clampedH;
+            const padPct = settingsRef.current.previewCropPadding;
+            const pad = (padPct == null ? 2 : padPct) / 100;
+            const padX = sourceW * pad;
+            const padY = sourceH * pad;
+            const cx = Math.max(0, Math.floor(sourceX - padX));
+            const cy = Math.max(0, Math.floor(sourceY - padY));
+            const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
+            const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
 
             const cropCanvas = document.createElement('canvas');
             cropCanvas.width = cw;
@@ -688,9 +728,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             croppedDataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
           }
 
-          // Submitted image is the crop when we have one, otherwise the full
-          // frame. Preview mirrors the submitted image.
-          bestFrameRef.current.image = croppedDataUrl || fullDataUrl;
+          bestFrameRef.current.image = submittedDataUrl;
           bestFrameRef.current.preview = croppedDataUrl;
         }
 
@@ -808,21 +846,42 @@ export function useCardDetection(videoRef, settings, options = {}) {
     const { clampedX, clampedY, clampedW, clampedH } = coords;
     const s = settingsRef.current;
 
-    // Submitted image is always the full frame so the API receives uncropped
-    // context. The cropped preview is produced separately for the review screen.
-    let fullCaptureCanvas = canvas;
+    // Submitted image: full frame, or guide-rect crop when cropToCard is on
+    // (original behavior, padded by `cropPadding`).
+    let submitCaptureCanvas = canvas;
     let previewCaptureCanvas = null;
 
     // Skip cropping if UI is rotated — crop margins don't work well with 90°
-    // rotation, so the preview falls back to the full frame in that case.
+    // rotation, so we fall back to the full frame in that case.
     if (s.cropToCard && !shouldRotateUi) {
-      const pad = (s.cropPadding || 10) / 100;
-      const padX = clampedW * pad;
-      const padY = clampedH * pad;
-      const cx = Math.max(0, Math.floor(clampedX - padX));
-      const cy = Math.max(0, Math.floor(clampedY - padY));
-      const cw = Math.min(canvas.width - cx, Math.ceil(clampedW + padX * 2));
-      const ch = Math.min(canvas.height - cy, Math.ceil(clampedH + padY * 2));
+      // Submitted: guide-rect crop with cropPadding.
+      const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
+      const sPadX = clampedW * submitPad;
+      const sPadY = clampedH * submitPad;
+      const scx = Math.max(0, Math.floor(clampedX - sPadX));
+      const scy = Math.max(0, Math.floor(clampedY - sPadY));
+      const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
+      const sch = Math.min(canvas.height - scy, Math.ceil(clampedH + sPadY * 2));
+      const submitCanvas = document.createElement('canvas');
+      submitCanvas.width = scw;
+      submitCanvas.height = sch;
+      submitCanvas.getContext('2d').drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+      submitCaptureCanvas = submitCanvas;
+
+      // Preview: tighter contour crop with previewCropPadding.
+      const useContour = s.cropToContour !== false && latestCardRectRef.current;
+      const sourceX = useContour ? latestCardRectRef.current.x : clampedX;
+      const sourceY = useContour ? latestCardRectRef.current.y : clampedY;
+      const sourceW = useContour ? latestCardRectRef.current.w : clampedW;
+      const sourceH = useContour ? latestCardRectRef.current.h : clampedH;
+      const padPct = s.previewCropPadding;
+      const pad = (padPct == null ? 2 : padPct) / 100;
+      const padX = sourceW * pad;
+      const padY = sourceH * pad;
+      const cx = Math.max(0, Math.floor(sourceX - padX));
+      const cy = Math.max(0, Math.floor(sourceY - padY));
+      const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
+      const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
       const cropCanvas = document.createElement('canvas');
       cropCanvas.width = cw;
       cropCanvas.height = ch;
@@ -832,21 +891,20 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
     // Rotate both outputs if UI was rotated during capture.
     if (shouldRotateUi) {
-      fullCaptureCanvas = rotateCanvas90CCW(fullCaptureCanvas);
+      submitCaptureCanvas = rotateCanvas90CCW(submitCaptureCanvas);
       if (previewCaptureCanvas) {
         previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
       }
     }
 
-    const fullDataUrl = fullCaptureCanvas.toDataURL('image/jpeg', 0.95);
+    const fullDataUrl = submitCaptureCanvas.toDataURL('image/jpeg', 0.95);
     const previewDataUrl = previewCaptureCanvas
       ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
       : null;
 
     console.log('--- MANUAL CAPTURE TRIGGERED ---');
     setCaptureOrigin('manual');
-    // Submitted image prefers the cropped card region when available.
-    setCapturedImage(previewDataUrl || fullDataUrl);
+    setCapturedImage(fullDataUrl);
     setPreviewImage(previewDataUrl);
     setComplianceState(COMPLIANCE_STATES.SUCCESS);
     setFeedback('Captured!');
@@ -864,6 +922,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
     stabilityRef.current.count = 0;
     stabilityRef.current.lastCenter = null;
     bestFrameRef.current = { image: null, preview: null, score: 0 };
+    latestCardRectRef.current = null;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);

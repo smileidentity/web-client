@@ -68,10 +68,10 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
       ></${captureTag}>
       <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
-       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
+       ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></document-capture-instructions>
       <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
-      ${this.documentCaptureModes} theme-color='${this.themeColor}' ${this.hideAttribution}
+      ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden 
       ></${captureTag}>
       <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>

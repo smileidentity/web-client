@@ -230,8 +230,8 @@ export function useCardDetection(videoRef, settings, options = {}) {
         const guideWidthCSS  = isCard
           ? displayW
           : syncRoiToGuide
-            ? Math.min(Math.max(0, displayW - insetPx), 600)
-            : Math.min(displayW * 0.90, 600);
+            ? Math.min(Math.max(0, displayW - insetPx), 480)
+            : Math.min(displayW * 0.90, 480);
         const guideHeightCSS = isCard ? displayH : guideWidthCSS / currentAspect;
         const guideXCSS = (displayW - guideWidthCSS) / 2;
         const guideYCSS = (displayH - guideHeightCSS) / 2;

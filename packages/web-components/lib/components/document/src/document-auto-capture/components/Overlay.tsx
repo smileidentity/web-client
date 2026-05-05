@@ -119,7 +119,7 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
         className="guide-box"
         style={{
           width: isRotated ? 'calc(100% - 16rem)' : 'calc(100% - 4rem)',
-          maxWidth: '600px',
+          maxWidth: '480px',
           aspectRatio: `${guideAspectRatio} / 1`,
           position: 'relative',
           opacity: shimmerVisible ? 1 : 0,

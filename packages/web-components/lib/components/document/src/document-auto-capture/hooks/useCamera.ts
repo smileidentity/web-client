@@ -19,6 +19,14 @@ export function useCamera() {
     const startCamera = async () => {
       try {
         const constraintsList = [
+          // {
+          //   audio: false,
+          //   video: {
+          //     facingMode: 'environment',
+          //     width: { ideal: 3840 },
+          //     height: { ideal: 2160 },
+          //   },
+          // },
           {
             audio: false,
             video: {
@@ -54,6 +62,18 @@ export function useCamera() {
         console.log(
           `Camera active: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`,
         );
+
+        // Best-effort continuous autofocus / exposure / white balance.
+        // Laptop webcams in particular benefit from this — many ship with
+        // continuous AF available but not enabled by default. Each constraint
+        // is applied independently so an unsupported one doesn't kill the
+        // others.
+        const tryApply = async (constraint: MediaTrackConstraints) => {
+          try { await track.applyConstraints(constraint); } catch (_) { /* unsupported, ignore */ }
+        };
+        await tryApply({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] });
+        // await tryApply({ advanced: [{ exposureMode: 'continuous' } as MediaTrackConstraintSet] });
+        // await tryApply({ advanced: [{ whiteBalanceMode: 'continuous' } as MediaTrackConstraintSet] });
 
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;

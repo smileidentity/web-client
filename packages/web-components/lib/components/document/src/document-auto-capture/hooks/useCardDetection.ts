@@ -53,6 +53,99 @@ const MIN_CONTOUR_AREA_PERCENT = 0.05;
 // Less strict than full allQuadrantsPass (9/9) but still filters empty scenes.
 const MIN_DISCOVERY_GRID_CELLS = 3;
 
+// --- Distance metric source ---
+// When true, compute docFillPercent from the presence edge map (independent of
+// RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
+const USE_PRESENCE_FILL_METRIC = true;
+
+// --- Off-guide detection (desktop / wide layouts) ---
+const OFF_GUIDE_CHECK_INTERVAL = 5;
+const OFF_GUIDE_DOWNSCALE_WIDTH = 320;
+const OFF_GUIDE_MIN_MARGIN_X_CSS = 120;
+const OFF_GUIDE_MIN_MARGIN_Y_CSS = 80;
+
+function detectCardOutsideGuide(
+  video: HTMLVideoElement,
+  guideRectVideo: { x: number; y: number; w: number; h: number },
+  expectedAspect: number | null,
+  scratchCanvas: HTMLCanvasElement,
+): boolean {
+  if (typeof cv === 'undefined' || !cv.Mat) return false;
+  const sw = OFF_GUIDE_DOWNSCALE_WIDTH;
+  const sh = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * sw));
+  if (scratchCanvas.width !== sw) scratchCanvas.width = sw;
+  if (scratchCanvas.height !== sh) scratchCanvas.height = sh;
+  const sctx = scratchCanvas.getContext('2d', { willReadFrequently: true });
+  if (!sctx) return false;
+  sctx.drawImage(video, 0, 0, sw, sh);
+
+  const scaleX = video.videoWidth / sw;
+  const scaleY = video.videoHeight / sh;
+
+  let mat = null, gray = null, blurred = null, edges = null;
+  let contours = null, hierarchy = null;
+  let foundOutside = false;
+  try {
+    mat = cv.imread(scratchCanvas);
+    gray = new cv.Mat();
+    cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);
+    blurred = new cv.Mat();
+    cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
+    edges = new cv.Mat();
+    cv.Canny(blurred, edges, 50, 150);
+    contours = new cv.MatVector();
+    hierarchy = new cv.Mat();
+    cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    const minArea = sw * sh * 0.03;
+    let bestArea = 0;
+    let bestBR = null;
+    for (let i = 0; i < contours.size(); i++) {
+      const cnt = contours.get(i);
+      const area = cv.contourArea(cnt);
+      if (area > minArea && area > bestArea) {
+        const peri = cv.arcLength(cnt, true);
+        const approx = new cv.Mat();
+        cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
+        if (approx.rows === 4) {
+          const br = cv.boundingRect(approx);
+          const aspect = Math.max(br.width / br.height, br.height / br.width);
+          const aspectOk = expectedAspect
+            ? Math.abs(aspect - expectedAspect) / expectedAspect < 0.25
+            : (aspect >= 1.15 && aspect <= 2.00);
+          if (aspectOk) {
+            bestArea = area;
+            bestBR = br;
+          }
+        }
+        approx.delete();
+      }
+      cnt.delete();
+    }
+
+    if (bestBR) {
+      const cxVideo = (bestBR.x + bestBR.width / 2) * scaleX;
+      const cyVideo = (bestBR.y + bestBR.height / 2) * scaleY;
+      if (
+        cxVideo < guideRectVideo.x || cxVideo > guideRectVideo.x + guideRectVideo.w ||
+        cyVideo < guideRectVideo.y || cyVideo > guideRectVideo.y + guideRectVideo.h
+      ) {
+        foundOutside = true;
+      }
+    }
+  } catch (_e) {
+    // best-effort
+  } finally {
+    if (mat) mat.delete();
+    if (gray) gray.delete();
+    if (blurred) blurred.delete();
+    if (edges) edges.delete();
+    if (contours) contours.delete();
+    if (hierarchy) hierarchy.delete();
+  }
+  return foundOutside;
+}
+
 export function useCardDetection(videoRef, settings, options = {}) {
   const {
     variant = 'fullscreen',
@@ -108,6 +201,11 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   // Stores the most recent ROI coordinates so triggerManualCapture can crop on demand.
   const latestCropCoordsRef = useRef(null);
+  // Off-guide detection (desktop only): low-res scratch canvas + frame counter +
+  // last-known in-guide state to skip the scan once a card is locked in.
+  const offGuideCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const offGuideFrameCounterRef = useRef(0);
+  const inGuideDetectedRef = useRef(false);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -263,6 +361,39 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // Store current ROI coords for on-demand manual capture (zero cost — no canvas ops).
         latestCropCoordsRef.current = { clampedX, clampedY, clampedW, clampedH };
 
+        // --- Off-guide detection (desktop / wide layouts only) ---
+        const isCardVariant = variant === 'card';
+        const hasMargin =
+          (displayW - guideWidthCSS) > OFF_GUIDE_MIN_MARGIN_X_CSS ||
+          (displayH - guideHeightCSS) > OFF_GUIDE_MIN_MARGIN_Y_CSS;
+        offGuideFrameCounterRef.current = (offGuideFrameCounterRef.current + 1) % OFF_GUIDE_CHECK_INTERVAL;
+        const shouldRunOffGuide =
+          !isCardVariant &&
+          hasMargin &&
+          !inGuideDetectedRef.current &&
+          offGuideFrameCounterRef.current === 0;
+
+        if (shouldRunOffGuide) {
+          if (!offGuideCanvasRef.current) {
+            offGuideCanvasRef.current = document.createElement('canvas');
+          }
+          const lockedDocType = discoveryRef.current.docType;
+          const expectedAspect = lockedDocType ? ASPECT_RATIOS[lockedDocType] : null;
+          const cardOutside = detectCardOutsideGuide(
+            video,
+            { x: clampedX, y: clampedY, w: clampedW, h: clampedH },
+            expectedAspect,
+            offGuideCanvasRef.current,
+          );
+          if (cardOutside) {
+            setFeedback('Align document in frame');
+            setComplianceState(COMPLIANCE_STATES.IDLE);
+            stabilityRef.current.count = 0;
+            bestFrameRef.current = { dataUrl: null, score: 0 };
+            return;
+          }
+        }
+
         // Crop ROI
         fullFrame = cv.imread(canvas);
         let rect = new cv.Rect(clampedX, clampedY, clampedW, clampedH);
@@ -400,7 +531,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
           contours = new cv.MatVector();
           hierarchy = new cv.Mat();
-          cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+          cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
           let maxArea = 0;
           let bestContour = null;
@@ -446,6 +577,19 @@ export function useCardDetection(videoRef, settings, options = {}) {
                 const bRect = cv.boundingRect(approx);
                 const fillRatio = area / (bRect.width * bRect.height);
 
+                // --- Aspect-ratio gate ---
+                // Reject candidates whose shape doesn't match a document.
+                // During discovery, allow anything in the union of passport
+                // (1.42) and ID (1.585) ranges with ±20% slack. After the
+                // doc type is locked, gate tightly against the expected ratio.
+                const detectedAspect = bRect.width / bRect.height;
+                const normalizedAspect = Math.max(detectedAspect, 1 / detectedAspect);
+                const lockedDocType = discoveryRef.current.docType;
+                const expectedAspect = lockedDocType ? ASPECT_RATIOS[lockedDocType] : null;
+                const aspectOk = expectedAspect
+                  ? Math.abs(normalizedAspect - expectedAspect) / expectedAspect < 0.20
+                  : (normalizedAspect >= 1.18 && normalizedAspect <= 1.95);
+
                 let anglesOk = true;
                 for (let j = 0; j < 4; j++) {
                   const p0x = approx.data32S[j * 2];
@@ -465,7 +609,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
                   if (angle < 60 || angle > 120) { anglesOk = false; break; }
                 }
 
-                if (fillRatio > 0.65 && anglesOk && area > maxArea) {
+                if (fillRatio > 0.65 && anglesOk && aspectOk && area > maxArea) {
                   maxArea = area;
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
@@ -486,17 +630,34 @@ export function useCardDetection(videoRef, settings, options = {}) {
           // contours (wall, desk, etc.) inflate the bbox to ~100% always.
           const roiArea = clampedW * clampedH;
           let docFillPercent = 0;
-          if (hasSignificantContour) {
+
+          if (USE_PRESENCE_FILL_METRIC) {
+            let nz = null;
+            try {
+              nz = new cv.Mat();
+              cv.findNonZero(presenceEdges, nz);
+              if (nz.rows > 0) {
+                const br = cv.boundingRect(nz);
+                docFillPercent = ((br.width * br.height) / roiArea) * 100;
+              }
+            } catch (_e) {
+              // fall through with docFillPercent = 0
+            } finally {
+              if (nz) nz.delete();
+            }
+          } else if (hasSignificantContour) {
             const combinedW = combinedMaxX - combinedMinX;
             const combinedH = combinedMaxY - combinedMinY;
             const combinedArea = combinedW * combinedH;
             docFillPercent = (combinedArea / roiArea) * 100;
           }
 
+          const fillCheckActive = USE_PRESENCE_FILL_METRIC ? hasDocument : hasSignificantContour;
+
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
           // checks would block voting with misleading feedback.
-          if (!isCard && !isDiscovery && hasSignificantContour && docFillPercent < MIN_FILL_PERCENT) {
+          if (!isCard && !isDiscovery && fillCheckActive && docFillPercent < MIN_FILL_PERCENT) {
             setFeedback("Move document closer");
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
@@ -505,7 +666,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             setDebugInfo({ docFill: Math.round(docFillPercent), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore) });
             return;
           }
-          if (!isCard && !isDiscovery && hasSignificantContour && docFillPercent > MAX_FILL_PERCENT) {
+          if (!isCard && !isDiscovery && fillCheckActive && docFillPercent > MAX_FILL_PERCENT) {
             setFeedback("Move document further away");
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
@@ -518,6 +679,9 @@ export function useCardDetection(videoRef, settings, options = {}) {
           if (bestContour) {
             // Reset consecutive miss counter on successful detection
             if (isDiscovery) discoveryRef.current.consecutiveMisses = 0;
+            // Mark in-guide hit so the off-guide scan stays paused while
+            // a card is locked in.
+            inGuideDetectedRef.current = true;
 
             // Cache the card's bounding rect in canvas coords for tight
             // crop-to-contour at capture time. Contour points are ROI-relative,
@@ -615,6 +779,8 @@ export function useCardDetection(videoRef, settings, options = {}) {
             bestContour.delete();
           } else {
             setDebugPath(null);
+            // No card inside the guide → re-enable off-guide scanning.
+            inGuideDetectedRef.current = false;
             // During discovery, no contour found — keep waiting
             if (isDiscovery) {
               setFeedback("Position your document in the frame");

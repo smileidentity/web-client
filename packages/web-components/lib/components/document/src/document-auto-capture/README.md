@@ -41,6 +41,7 @@ document
 | `show-navigation` | `false` | Embed the shared `<smileid-navigation>` header. |
 | `hide-attribution` | `false` | Hide the "Powered by Smile ID" footer. |
 | `allow-gallery-upload` | `true` | Show a gallery-pick button alongside the capture controls. |
+| `sync-roi-to-guide` | `false` | When `true`, the detection ROI matches the visible guide-box width (`100% − 16rem` rotated, `100% − 4rem` otherwise, capped at 600px). When `false` (default), ROI uses the legacy `min(displayW × 0.90, 600px)` and is wider than the visible guide. Provided as an A/B switch — see [AGENTS.md](./AGENTS.md). |
 | `title` | _(none)_ | Optional title overlay rendered at the top of the camera viewport. |
 
 ## Events

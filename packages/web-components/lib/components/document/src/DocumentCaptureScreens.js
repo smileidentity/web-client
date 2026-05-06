@@ -65,13 +65,13 @@ class DocumentCaptureScreens extends HTMLElement {
       ></document-capture-instructions>
       <${captureTag} id='document-capture-front' side-of-id='Front'
       ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
-      ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}'
       ></${captureTag}>
       <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
        ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></document-capture-instructions>
       <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
-      ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}' ${this.hideAttribution}
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden 
       ></${captureTag}>
       <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
@@ -169,6 +169,13 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
+      if (this.autoCapture) {
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.document-front-origin', {
+            detail: { imageOrigin: event.detail.captureOrigin },
+          }),
+        );
+      }
       this.idReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -267,6 +274,13 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-end'),
       );
+      if (this.autoCapture) {
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.document-back-origin', {
+            detail: { imageOrigin: event.detail.captureOrigin },
+          }),
+        );
+      }
       this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -343,6 +357,22 @@ class DocumentCaptureScreens extends HTMLElement {
   get autoCapture() {
     return this.hasAttribute('auto-capture');
   }
+  
+  get autoCaptureMode() {
+    if (!this.hasAttribute('auto-capture-mode')) {
+      return '';
+    }
+
+    const value = this.getAttribute('auto-capture-mode');
+    const normalizedValue = value === '' ? 'autoCapture' : value;
+    const allowedValues = ['autoCapture', 'autoCaptureOnly', 'manualCaptureOnly'];
+
+    if (allowedValues.includes(normalizedValue)) {
+      return `auto-capture-mode='${normalizedValue}'`;
+    }
+
+    return `auto-capture-mode='autoCapture'`;
+  }
 
   get hideBackOfId() {
     return this.hasAttribute('hide-back-of-id');
@@ -400,6 +430,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'show-navigation',
       'hide-back-of-id',
       'auto-capture',
+      'auto-capture-mode',
     ];
   }
 
@@ -411,6 +442,7 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'hide-back-to-host':
       case 'show-navigation':
       case 'auto-capture':
+      case 'auto-capture-mode':
         this.connectedCallback();
         break;
       default:

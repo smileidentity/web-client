@@ -280,6 +280,12 @@ import {
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
     }
+    if (config.auto_capture) {
+      SmartCameraWeb.setAttribute('auto-capture', true);
+    }
+    if (config.auto_capture_mode) {
+      SmartCameraWeb.setAttribute('auto-capture-mode', config.auto_capture_mode);
+    }
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

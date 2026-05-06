@@ -18,7 +18,7 @@ import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
 interface Props {
   'document-type'?: string;
-  'capture-mode'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
+  'auto-capture-mode'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
   'auto-capture-timeout'?: string | number;
   'side-of-id'?: 'Front' | 'Back' | string;
   'theme-color'?: string;
@@ -151,7 +151,7 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
  */
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
-  'capture-mode': captureModeProp = 'autoCapture',
+  'auto-capture-mode': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
   'theme-color': themeColor = '#001096',
@@ -159,9 +159,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'allow-gallery-upload': allowGalleryUploadProp = true,
   'sync-roi-to-guide': syncRoiToGuideProp = false,
   title: titleProp,
-  // themeColor accepted for parity with legacy <document-capture>; styling
-  // currently uses fixed dark camera UI matching id-scanner.
-  // 'theme-color' destructured above to keep the attribute on the API surface.
 }) => {
   void themeColor;
   void titleProp;
@@ -172,7 +169,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const allowGalleryUpload = getBoolProp(allowGalleryUploadProp, true);
   const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, false);
 
-  // Normalise capture-mode and timeout prop strings to runtime values.
   const captureMode: CaptureMode = CAPTURE_MODES.includes(
     captureModeProp as CaptureMode,
   )
@@ -418,7 +414,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // When auto-capture fires, publish image up
   useEffect(() => {
     if (capturedImage) {
-      publishImage(capturedImage, captureOrigin || 'auto', previewImage);
+      publishImage(capturedImage, captureOrigin || 'camera_auto_capture', previewImage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capturedImage]);
@@ -901,7 +897,7 @@ if (typeof customElements !== 'undefined' && !customElements.get('document-auto-
     'document-auto-capture',
     [
       'document-type',
-      'capture-mode',
+      'auto-capture-mode',
       'auto-capture-timeout',
       'side-of-id',
       'theme-color',

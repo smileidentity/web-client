@@ -192,11 +192,8 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
-  // Capture origin tracks whether the image was taken automatically or manually.
-  const [captureOrigin, setCaptureOrigin] = useState(null); // 'auto' | 'manual'
-  // manualFallbackActive: true after the 10s timer fires (autoCapture mode only).
+  const [captureOrigin, setCaptureOrigin] = useState(null); // 'camera_auto_capture' | 'camera_manual_capture'
   const [manualFallbackActive, setManualFallbackActive] = useState(false);
-  // cvLoadFailed: true if OpenCV is not ready after 20 seconds.
   const [cvLoadFailed, setCvLoadFailed] = useState(false);
 
   // Stores the most recent ROI coordinates so triggerManualCapture can crop on demand.
@@ -913,7 +910,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
              setFeedback("Capturing document...");
              setComplianceState(COMPLIANCE_STATES.CAPTURING);
              isCapturingRef.current = true;
-             setCaptureOrigin('auto');
+             setCaptureOrigin('camera_auto_capture');
              // Use the sharpest frame captured during stability
             let bestFrameUrl = bestFrameRef.current.image;
             let bestPreviewUrl = bestFrameRef.current.preview;
@@ -1069,7 +1066,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
       : null;
 
     console.log('--- MANUAL CAPTURE TRIGGERED ---');
-    setCaptureOrigin('manual');
+    setCaptureOrigin('camera_manual_capture');
     setCapturedImage(fullDataUrl);
     setPreviewImage(previewDataUrl);
     setComplianceState(COMPLIANCE_STATES.SUCCESS);

@@ -117,8 +117,16 @@
       "captureButton": "التقاط وثيقة"
     },
     "instructions": {
+      "captureTitlePrefix": "استعد لالتقاط",
+      "captureGuidelines": "إرشادات الالتقاط",
       "description": "سنستخدمه للتحقق من هويتك.",
       "followInstructions": "يرجى اتباع التعليمات أدناه.",
+      "guidelines": {
+        "good": "جيد",
+        "notCropped": "غير مقصوص",
+        "notBlurry": "غير ضبابي",
+        "notReflective": "بدون انعكاس"
+      },
       "goodLight": {
         "header": "إضاءة جيدة",
         "body": "تأكد من التقاط الصورة في بيئة مضاءة جيداً حيث يسهل قراءة وثيقة الهوية."
@@ -127,6 +135,7 @@
         "header": "صورة واضحة",
         "body": "اجعل الكاميرا ثابتة حتى لا تكون الكلمات الموجودة على الهوية ضبابية."
       },
+      "startCapture": "بدء الالتقاط",
       "takePhotoButton": "التقط صورة",
       "uploadPhotoButton": "تحميل صورة"
     },

@@ -1,5 +1,4 @@
 // Local theme palette/tokens used by the auto-capture screen.
-// Mirrors id-scanner/src/theme.js so styles port verbatim. The web-components
 // `theme-color` attribute can override `colors.primary` at runtime.
 export const theme = {
   colors: {

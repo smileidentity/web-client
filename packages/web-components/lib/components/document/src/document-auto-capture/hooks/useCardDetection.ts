@@ -3,27 +3,28 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 declare const cv: any;
 
 export const COMPLIANCE_STATES = {
-  IDLE: 'idle',           // Searching for a card
+  IDLE: 'idle', // Searching for a card
   DETECTING: 'detecting', // Found a candidate, checking quality
-  STABLE: 'stable',       // Quality passes, checking stability
+  STABLE: 'stable', // Quality passes, checking stability
   CAPTURING: 'capturing', // Stability passed, capturing
-  SUCCESS: 'success',     // Captured
+  SUCCESS: 'success', // Captured
 };
 
 // Phase 1 → Phase 2 detection states
 const DETECTION_PHASE = {
   DISCOVERY: 'discovery', // Phase 1: identify document type via aspect ratio, when documentType prop is not provided
-  CAPTURE: 'capture',     // Phase 2: quality gating with locked guide box
+  CAPTURE: 'capture', // Phase 2: quality gating with locked guide box
 };
 
 const ASPECT_RATIOS = {
-  'id-card': 1.585,   // CR80 / ID-1
-  'passport': 1.42,   // ID-3 bio-data page
-  'greenbook': 1.42,  // Greenbook uses passport-like landscape aspect
+  'id-card': 1.585, // CR80 / ID-1
+  passport: 1.42, // ID-3 bio-data page
+  greenbook: 1.42, // Greenbook uses passport-like landscape aspect
 };
 
 // Midpoint for classifying detected aspect ratio
-const ASPECT_RATIO_MIDPOINT = (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS.passport) / 2; // ~1.50
+const ASPECT_RATIO_MIDPOINT =
+  (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS.passport) / 2; // ~1.50
 
 // Number of agreeing frames required to lock document type.
 // Lowered from 10 → 6: laminated/hand-held cards produce intermittent detections
@@ -70,7 +71,10 @@ function detectCardOutsideGuide(
 ): boolean {
   if (typeof cv === 'undefined' || !cv.Mat) return false;
   const sw = OFF_GUIDE_DOWNSCALE_WIDTH;
-  const sh = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * sw));
+  const sh = Math.max(
+    1,
+    Math.round((video.videoHeight / video.videoWidth) * sw),
+  );
   if (scratchCanvas.width !== sw) scratchCanvas.width = sw;
   if (scratchCanvas.height !== sh) scratchCanvas.height = sh;
   const sctx = scratchCanvas.getContext('2d', { willReadFrequently: true });
@@ -80,8 +84,12 @@ function detectCardOutsideGuide(
   const scaleX = video.videoWidth / sw;
   const scaleY = video.videoHeight / sh;
 
-  let mat = null; let gray = null; let blurred = null; let edges = null;
-  let contours = null; let hierarchy = null;
+  let mat = null;
+  let gray = null;
+  let blurred = null;
+  let edges = null;
+  let contours = null;
+  let hierarchy = null;
   let foundOutside = false;
   try {
     mat = cv.imread(scratchCanvas);
@@ -93,7 +101,13 @@ function detectCardOutsideGuide(
     cv.Canny(blurred, edges, 50, 150);
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
-    cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.findContours(
+      edges,
+      contours,
+      hierarchy,
+      cv.RETR_EXTERNAL,
+      cv.CHAIN_APPROX_SIMPLE,
+    );
 
     const minArea = sw * sh * 0.03;
     let bestArea = 0;
@@ -110,7 +124,7 @@ function detectCardOutsideGuide(
           const aspect = Math.max(br.width / br.height, br.height / br.width);
           const aspectOk = expectedAspect
             ? Math.abs(aspect - expectedAspect) / expectedAspect < 0.25
-            : (aspect >= 1.15 && aspect <= 2.00);
+            : aspect >= 1.15 && aspect <= 2.0;
           if (aspectOk) {
             bestArea = area;
             bestBR = br;
@@ -125,8 +139,10 @@ function detectCardOutsideGuide(
       const cxVideo = (bestBR.x + bestBR.width / 2) * scaleX;
       const cyVideo = (bestBR.y + bestBR.height / 2) * scaleY;
       if (
-        cxVideo < guideRectVideo.x || cxVideo > guideRectVideo.x + guideRectVideo.w ||
-        cyVideo < guideRectVideo.y || cyVideo > guideRectVideo.y + guideRectVideo.h
+        cxVideo < guideRectVideo.x ||
+        cxVideo > guideRectVideo.x + guideRectVideo.w ||
+        cyVideo < guideRectVideo.y ||
+        cyVideo > guideRectVideo.y + guideRectVideo.h
       ) {
         foundOutside = true;
       }
@@ -159,20 +175,34 @@ export function useCardDetection(
     syncRoiToGuide = false,
   } = options;
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
-  const autoCaptureTimeoutMs = Math.max(3000, Math.min(30000, autoCaptureTimeout));
-  const orientation = captureOrientation === 'portrait' ? 'portrait' : 'landscape';
-  const orientAspect = (ratio: number) => (orientation === 'portrait' ? (1 / ratio) : ratio);
+  const autoCaptureTimeoutMs = Math.max(
+    3000,
+    Math.min(30000, autoCaptureTimeout),
+  );
+  const orientation =
+    captureOrientation === 'portrait' ? 'portrait' : 'landscape';
+  const orientAspect = (ratio: number) =>
+    orientation === 'portrait' ? 1 / ratio : ratio;
 
   // If documentType is provided and valid, skip discovery entirely.
-  const providedDocType = documentType && ASPECT_RATIOS[documentType] ? documentType : null;
-  const initialPhase = providedDocType ? DETECTION_PHASE.CAPTURE : DETECTION_PHASE.DISCOVERY;
-  const initialAspect = orientAspect(providedDocType ? ASPECT_RATIOS[providedDocType] : ASPECT_RATIOS.passport);
+  const providedDocType =
+    documentType && ASPECT_RATIOS[documentType] ? documentType : null;
+  const initialPhase = providedDocType
+    ? DETECTION_PHASE.CAPTURE
+    : DETECTION_PHASE.DISCOVERY;
+  const initialAspect = orientAspect(
+    providedDocType ? ASPECT_RATIOS[providedDocType] : ASPECT_RATIOS.passport,
+  );
 
-  const [feedback, setFeedback] = useState("Position your document in the frame");
+  const [feedback, setFeedback] = useState(
+    'Position your document in the frame',
+  );
   const [captureProgress, setCaptureProgress] = useState(0);
   const [capturedImage, setCapturedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [complianceState, setComplianceState] = useState(COMPLIANCE_STATES.IDLE);
+  const [complianceState, setComplianceState] = useState(
+    COMPLIANCE_STATES.IDLE,
+  );
   const [debugPath, setDebugPath] = useState(null); // For drawing the green box on overlay
   const [debugInfo, setDebugInfo] = useState({}); // For tuning panel
   const [detectedDocType, setDetectedDocType] = useState(providedDocType); // null = not yet classified
@@ -190,10 +220,15 @@ export function useCardDetection(
   const canvasRef = useRef(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef({
-    votes: [], docType: providedDocType, frameCount: 0, consecutiveMisses: 0
+    votes: [],
+    docType: providedDocType,
+    frameCount: 0,
+    consecutiveMisses: 0,
   });
 
-  useEffect(() => { settingsRef.current = settings; }, [settings]);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   const [captureOrigin, setCaptureOrigin] = useState(null); // 'camera_auto_capture' | 'camera_manual_capture'
   const [manualFallbackActive, setManualFallbackActive] = useState(false);
@@ -212,13 +247,18 @@ export function useCardDetection(
   const latestCardRectRef = useRef(null);
   // Mirror of captureMode for access inside the processFrame closure.
   const captureModeRef = useRef(captureMode);
-  useEffect(() => { captureModeRef.current = captureMode; }, [captureMode]);
+  useEffect(() => {
+    captureModeRef.current = captureMode;
+  }, [captureMode]);
 
   // Configurable fallback: surface manual button if auto-capture hasn't fired yet.
   useEffect(() => {
     setManualFallbackActive(false);
     if (captureMode !== 'autoCapture') return undefined;
-    const timer = setTimeout(() => setManualFallbackActive(true), autoCaptureTimeoutMs);
+    const timer = setTimeout(
+      () => setManualFallbackActive(true),
+      autoCaptureTimeoutMs,
+    );
     return () => clearTimeout(timer);
   }, [captureMode, autoCaptureTimeoutMs]);
 
@@ -232,7 +272,7 @@ export function useCardDetection(
 
   useEffect(() => {
     let animationFrameId;
-    
+
     const processFrame = () => {
       // 0. Stop if capturing or video not ready
       if (isCapturingRef.current) return;
@@ -248,10 +288,19 @@ export function useCardDetection(
       }
 
       // 1. Setup CV structs
-      let fullFrame = null; let src = null; let gray = null; let blurred = null; let edges = null;
-      let presenceEdges = null; let presenceBlurred = null;
-      let contours = null; let hierarchy = null;
-      let laplacian = null; let mean = null; let stdDev = null; let glareMask = null;
+      let fullFrame = null;
+      let src = null;
+      let gray = null;
+      let blurred = null;
+      let edges = null;
+      let presenceEdges = null;
+      let presenceBlurred = null;
+      let contours = null;
+      let hierarchy = null;
+      let laplacian = null;
+      let mean = null;
+      let stdDev = null;
+      let glareMask = null;
 
       // Inner function so each early `return` inside the detection pipeline
       // exits only this helper (then falls through to the shared finally
@@ -260,15 +309,16 @@ export function useCardDetection(
       // `no-useless-return` ESLint rule does not exceed Node's call stack.
       const runDetection = () => {
         if (!canvasRef.current) {
-             canvasRef.current = document.createElement('canvas');
+          canvasRef.current = document.createElement('canvas');
         }
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        
+
         // Sync canvas size
         if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-        
+        if (canvas.height !== video.videoHeight)
+          canvas.height = video.videoHeight;
+
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         // 2. Define ROI (Region of Interest)
@@ -282,21 +332,24 @@ export function useCardDetection(
         // for absolutely-positioned elements, especially on mobile where layout
         // may not be settled when the detection loop first starts.
         const videoRect = video.getBoundingClientRect();
-        const displayW = videoRect.width  > 0 ? videoRect.width  : canvas.width;
-        const displayH = videoRect.height > 0 ? videoRect.height : canvas.height;
+        const displayW = videoRect.width > 0 ? videoRect.width : canvas.width;
+        const displayH =
+          videoRect.height > 0 ? videoRect.height : canvas.height;
 
         // Skip frame if display dimensions aren't available yet (layout not settled)
         if (videoRect.width === 0 || videoRect.height === 0) {
           animationFrameId = requestAnimationFrame(processFrame);
           return;
         }
-        const videoW = canvas.width;   // native video width
-        const videoH = canvas.height;  // native video height
+        const videoW = canvas.width; // native video width
+        const videoH = canvas.height; // native video height
 
         // objectFit: cover scaling — video scales to fill, excess clipped
-        const videoAspect   = videoW / videoH;
+        const videoAspect = videoW / videoH;
         const displayAspect = displayW / displayH;
-        let coverScale; let offsetX; let offsetY;
+        let coverScale;
+        let offsetX;
+        let offsetY;
 
         if (videoAspect > displayAspect) {
           // Video wider than display → height fills, sides cropped
@@ -315,13 +368,15 @@ export function useCardDetection(
         // Card: the entire video container IS the detection area (100%)
         // In discovery phase, use the wider passport ratio to fit both doc types.
         // After classification, lock to the detected document's aspect ratio.
-        const currentAspect = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY
-          ? orientAspect(ASPECT_RATIOS.passport) // Wider — accommodates both ID and passport
-          : orientAspect(
-              discoveryRef.current.docType === 'passport' || discoveryRef.current.docType === 'greenbook'
-                ? ASPECT_RATIOS.passport
-                : ASPECT_RATIOS['id-card']
-            );
+        const currentAspect =
+          detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY
+            ? orientAspect(ASPECT_RATIOS.passport) // Wider — accommodates both ID and passport
+            : orientAspect(
+                discoveryRef.current.docType === 'passport' ||
+                  discoveryRef.current.docType === 'greenbook'
+                  ? ASPECT_RATIOS.passport
+                  : ASPECT_RATIOS['id-card'],
+              );
         const isCard = variant === 'card';
         // A/B toggle: when sync-roi-to-guide is on, mirror the visual guide width
         // (Overlay.tsx uses calc(100% - 16rem) on rotated UI, calc(100% - 4rem) otherwise).
@@ -337,14 +392,16 @@ export function useCardDetection(
         } else if (syncRoiToGuide) {
           guideWidthCSS = Math.min(Math.max(0, displayW - insetPx), 480);
         } else {
-          guideWidthCSS = Math.min(displayW * 0.90, 480);
+          guideWidthCSS = Math.min(displayW * 0.9, 480);
         }
-        const guideHeightCSS = isCard ? displayH : guideWidthCSS / currentAspect;
+        const guideHeightCSS = isCard
+          ? displayH
+          : guideWidthCSS / currentAspect;
         const guideXCSS = (displayW - guideWidthCSS) / 2;
         const guideYCSS = (displayH - guideHeightCSS) / 2;
 
         // Map CSS → video native coordinates
-        const guideWidth  = Math.round(guideWidthCSS  / coverScale);
+        const guideWidth = Math.round(guideWidthCSS / coverScale);
         const guideHeight = Math.round(guideHeightCSS / coverScale);
         const startX = Math.round(guideXCSS / coverScale + offsetX);
         const startY = Math.round(guideYCSS / coverScale + offsetY);
@@ -357,25 +414,41 @@ export function useCardDetection(
         // Log ROI mapping once for diagnostics
         if (!canvasRef.current._roiLogged) {
           canvasRef.current._roiLogged = true;
-          console.info('[ROI] display:', `${displayW  }x${  displayH}`,
-            '| video:', `${videoW  }x${  videoH}`,
-            '| scale:', coverScale.toFixed(3),
-            '| offset:', `${Math.round(offsetX)  },${  Math.round(offsetY)}`,
-            '| guideCSS:', `${Math.round(guideWidthCSS)  }x${  Math.round(guideHeightCSS)}`,
-            'at', `${Math.round(guideXCSS)  },${  Math.round(guideYCSS)}`,
-            '| ROI:', `${clampedX  },${  clampedY}`, `${clampedW  }x${  Math.min(guideHeight, videoH - clampedY)}`);
+          console.info(
+            '[ROI] display:',
+            `${displayW}x${displayH}`,
+            '| video:',
+            `${videoW}x${videoH}`,
+            '| scale:',
+            coverScale.toFixed(3),
+            '| offset:',
+            `${Math.round(offsetX)},${Math.round(offsetY)}`,
+            '| guideCSS:',
+            `${Math.round(guideWidthCSS)}x${Math.round(guideHeightCSS)}`,
+            'at',
+            `${Math.round(guideXCSS)},${Math.round(guideYCSS)}`,
+            '| ROI:',
+            `${clampedX},${clampedY}`,
+            `${clampedW}x${Math.min(guideHeight, videoH - clampedY)}`,
+          );
         }
         const clampedH = Math.min(guideHeight, videoH - clampedY);
 
         // Store current ROI coords for on-demand manual capture (zero cost — no canvas ops).
-        latestCropCoordsRef.current = { clampedX, clampedY, clampedW, clampedH };
+        latestCropCoordsRef.current = {
+          clampedX,
+          clampedY,
+          clampedW,
+          clampedH,
+        };
 
         // --- Off-guide detection (desktop / wide layouts only) ---
         const isCardVariant = variant === 'card';
         const hasMargin =
-          (displayW - guideWidthCSS) > OFF_GUIDE_MIN_MARGIN_X_CSS ||
-          (displayH - guideHeightCSS) > OFF_GUIDE_MIN_MARGIN_Y_CSS;
-        offGuideFrameCounterRef.current = (offGuideFrameCounterRef.current + 1) % OFF_GUIDE_CHECK_INTERVAL;
+          displayW - guideWidthCSS > OFF_GUIDE_MIN_MARGIN_X_CSS ||
+          displayH - guideHeightCSS > OFF_GUIDE_MIN_MARGIN_Y_CSS;
+        offGuideFrameCounterRef.current =
+          (offGuideFrameCounterRef.current + 1) % OFF_GUIDE_CHECK_INTERVAL;
         const shouldRunOffGuide =
           !isCardVariant &&
           hasMargin &&
@@ -387,7 +460,9 @@ export function useCardDetection(
             offGuideCanvasRef.current = document.createElement('canvas');
           }
           const lockedDocType = discoveryRef.current.docType;
-          const expectedAspect = lockedDocType ? ASPECT_RATIOS[lockedDocType] : null;
+          const expectedAspect = lockedDocType
+            ? ASPECT_RATIOS[lockedDocType]
+            : null;
           const cardOutside = detectCardOutsideGuide(
             video,
             { x: clampedX, y: clampedY, w: clampedW, h: clampedH },
@@ -409,7 +484,7 @@ export function useCardDetection(
         src = fullFrame.roi(rect);
         fullFrame.delete();
         fullFrame = null;
-        
+
         // 3. Pre-processing
         gray = new cv.Mat();
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
@@ -420,7 +495,14 @@ export function useCardDetection(
         // that need lower Canny thresholds to detect.
         // A bare desk/surface has very few edges AND low texture variance.
         presenceBlurred = new cv.Mat();
-        cv.GaussianBlur(gray, presenceBlurred, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
+        cv.GaussianBlur(
+          gray,
+          presenceBlurred,
+          new cv.Size(5, 5),
+          0,
+          0,
+          cv.BORDER_DEFAULT,
+        );
         presenceEdges = new cv.Mat();
         cv.Canny(presenceBlurred, presenceEdges, 20, 80); // Low thresholds to catch subtle patterns
 
@@ -446,12 +528,13 @@ export function useCardDetection(
         // Coverage grid: check the inner 80% of the ROI (inset by 10% on each side)
         // so edge cells aren't penalized for containing desk/background margin.
         // The 3x3 grid over this inner region catches occlusion (hand covering 1/3).
-        const insetFrac = 0.10; // 10% inset on each side
+        const insetFrac = 0.1; // 10% inset on each side
         const insetX = Math.floor(presenceEdges.cols * insetFrac);
         const insetY = Math.floor(presenceEdges.rows * insetFrac);
         const innerW = presenceEdges.cols - insetX * 2;
         const innerH = presenceEdges.rows - insetY * 2;
-        const cols3 = 3; const rows3 = 3;
+        const cols3 = 3;
+        const rows3 = 3;
         const cellW = Math.floor(innerW / cols3);
         const cellH = Math.floor(innerH / rows3);
         const cellPixels = cellW * cellH;
@@ -465,7 +548,12 @@ export function useCardDetection(
         let passingCells = 0;
         for (let row = 0; row < rows3; row++) {
           for (let col = 0; col < cols3; col++) {
-            const cRect = new cv.Rect(insetX + col * cellW, insetY + row * cellH, cellW, cellH);
+            const cRect = new cv.Rect(
+              insetX + col * cellW,
+              insetY + row * cellH,
+              cellW,
+              cellH,
+            );
             const cRoi = presenceEdges.roi(cRect);
             const cDensity = (cv.countNonZero(cRoi) / cellPixels) * 100;
             quadDensities.push(cDensity.toFixed(1));
@@ -485,7 +573,8 @@ export function useCardDetection(
         //   but it should fill at least some. This filters empty textured scenes.
         // - Capture phase (fullscreen): strict — require all cells to pass.
         //   Guide box matches detected doc type, grid check catches partial occlusion.
-        const isDiscoveryPhase = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
+        const isDiscoveryPhase =
+          detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         let gridCheckFails;
         if (isCard) {
           gridCheckFails = false; // Skip grid check entirely for card variant
@@ -496,25 +585,33 @@ export function useCardDetection(
         }
 
         if (!hasDocument || gridCheckFails) {
-            const totalCells = rows3 * cols3; // 9
-            const noDocumentPresent = !hasDocument || passingCells < Math.ceil(totalCells * 0.45);
-            const reason = noDocumentPresent
-              ? "Place document in frame" 
-              : "Ensure document is fully visible";
-            setFeedback(reason);
-            setComplianceState(COMPLIANCE_STATES.IDLE);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
-            setDebugPath(null);
-            setDebugInfo({ blur: 0, glare: 0, edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore), quadrants: quadDensities.join('/') });
-            return;
+          const totalCells = rows3 * cols3; // 9
+          const noDocumentPresent =
+            !hasDocument || passingCells < Math.ceil(totalCells * 0.45);
+          const reason = noDocumentPresent
+            ? 'Place document in frame'
+            : 'Ensure document is fully visible';
+          setFeedback(reason);
+          setComplianceState(COMPLIANCE_STATES.IDLE);
+          stabilityRef.current.count = 0;
+          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          setDebugPath(null);
+          setDebugInfo({
+            blur: 0,
+            glare: 0,
+            edgeDensity: edgeDensity.toFixed(1),
+            texture: Math.round(textureScore),
+            quadrants: quadDensities.join('/'),
+          });
+          return;
         }
 
         // --- Phase 1 / Dynamic Border Detection ---
         // During discovery phase: ALWAYS run contour detection to classify document type.
         // During capture phase: ALWAYS run contour detection for distance guidance.
         // The useDynamicBorder setting only controls whether the green overlay is drawn.
-        const isDiscovery = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
+        const isDiscovery =
+          detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         const shouldRunContour = true;
 
         // Discovery timeout: moved AFTER contour detection (see below).
@@ -523,32 +620,57 @@ export function useCardDetection(
 
         if (shouldRunContour) {
           blurred = new cv.Mat();
-          cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
-          
+          cv.GaussianBlur(
+            gray,
+            blurred,
+            new cv.Size(5, 5),
+            0,
+            0,
+            cv.BORDER_DEFAULT,
+          );
+
           edges = new cv.Mat();
           cv.Canny(blurred, edges, 50, 150);
 
           // Bridge gaps in the card border caused by lamination glare or finger occlusion.
           // A 3×3 closing kernel run twice fills edge breaks up to ~5px without merging
           // unrelated edges or creating false rectangles.
-          const closingKernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
+          const closingKernel = cv.getStructuringElement(
+            cv.MORPH_RECT,
+            new cv.Size(3, 3),
+          );
           const closedEdges = new cv.Mat();
-          cv.morphologyEx(edges, closedEdges, cv.MORPH_CLOSE, closingKernel, new cv.Point(-1, -1), 2);
+          cv.morphologyEx(
+            edges,
+            closedEdges,
+            cv.MORPH_CLOSE,
+            closingKernel,
+            new cv.Point(-1, -1),
+            2,
+          );
           closingKernel.delete();
           edges.delete();
           edges = closedEdges;
 
           contours = new cv.MatVector();
           hierarchy = new cv.Mat();
-          cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+          cv.findContours(
+            edges,
+            contours,
+            hierarchy,
+            cv.RETR_EXTERNAL,
+            cv.CHAIN_APPROX_SIMPLE,
+          );
 
           let maxArea = 0;
           let bestContour = null;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
-          let combinedMinX = Infinity; let combinedMinY = Infinity;
-          let combinedMaxX = -Infinity; let combinedMaxY = -Infinity;
+          let combinedMinX = Infinity;
+          let combinedMinY = Infinity;
+          let combinedMaxX = -Infinity;
+          let combinedMaxY = -Infinity;
           let hasSignificantContour = false;
           const minContourPixels = guideWidth * guideHeight * 0.005; // 0.5% — catches small text fragments
 
@@ -566,7 +688,7 @@ export function useCardDetection(
               combinedMaxY = Math.max(combinedMaxY, br.y + br.height);
             }
 
-            if (area > (guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT)) {
+            if (area > guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT) {
               const peri = cv.arcLength(cnt, true);
               let approx = new cv.Mat();
               cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
@@ -579,7 +701,7 @@ export function useCardDetection(
                 approx = new cv.Mat();
                 cv.approxPolyDP(cnt, approx, 0.07 * peri, true);
               }
-              
+
               if (approx.rows === 4 && area > maxArea) {
                 // --- Rectangularity check ---
                 // Reject contours that aren't proper rectangles (e.g. faces).
@@ -592,12 +714,19 @@ export function useCardDetection(
                 // (1.42) and ID (1.585) ranges with ±20% slack. After the
                 // doc type is locked, gate tightly against the expected ratio.
                 const detectedAspect = bRect.width / bRect.height;
-                const normalizedAspect = Math.max(detectedAspect, 1 / detectedAspect);
+                const normalizedAspect = Math.max(
+                  detectedAspect,
+                  1 / detectedAspect,
+                );
                 const lockedDocType = discoveryRef.current.docType;
-                const expectedAspect = lockedDocType ? ASPECT_RATIOS[lockedDocType] : null;
+                const expectedAspect = lockedDocType
+                  ? ASPECT_RATIOS[lockedDocType]
+                  : null;
                 const aspectOk = expectedAspect
-                  ? Math.abs(normalizedAspect - expectedAspect) / expectedAspect < 0.20
-                  : (normalizedAspect >= 1.18 && normalizedAspect <= 1.95);
+                  ? Math.abs(normalizedAspect - expectedAspect) /
+                      expectedAspect <
+                    0.2
+                  : normalizedAspect >= 1.18 && normalizedAspect <= 1.95;
 
                 let anglesOk = true;
                 for (let j = 0; j < 4; j++) {
@@ -607,18 +736,33 @@ export function useCardDetection(
                   const p1y = approx.data32S[((j + 1) % 4) * 2 + 1];
                   const p2x = approx.data32S[((j + 2) % 4) * 2];
                   const p2y = approx.data32S[((j + 2) % 4) * 2 + 1];
-                  const v1x = p0x - p1x; const v1y = p0y - p1y;
-                  const v2x = p2x - p1x; const v2y = p2y - p1y;
+                  const v1x = p0x - p1x;
+                  const v1y = p0y - p1y;
+                  const v2x = p2x - p1x;
+                  const v2y = p2y - p1y;
                   const dot = v1x * v2x + v1y * v2y;
                   const mag1 = Math.sqrt(v1x * v1x + v1y * v1y);
                   const mag2 = Math.sqrt(v2x * v2x + v2y * v2y);
-                  if (mag1 === 0 || mag2 === 0) { anglesOk = false; break; }
+                  if (mag1 === 0 || mag2 === 0) {
+                    anglesOk = false;
+                    break;
+                  }
                   const cosAngle = dot / (mag1 * mag2);
-                  const angle = Math.acos(Math.max(-1, Math.min(1, cosAngle))) * (180 / Math.PI);
-                  if (angle < 60 || angle > 120) { anglesOk = false; break; }
+                  const angle =
+                    Math.acos(Math.max(-1, Math.min(1, cosAngle))) *
+                    (180 / Math.PI);
+                  if (angle < 60 || angle > 120) {
+                    anglesOk = false;
+                    break;
+                  }
                 }
 
-                if (fillRatio > 0.65 && anglesOk && aspectOk && area > maxArea) {
+                if (
+                  fillRatio > 0.65 &&
+                  anglesOk &&
+                  aspectOk &&
+                  area > maxArea
+                ) {
                   maxArea = area;
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
@@ -661,27 +805,47 @@ export function useCardDetection(
             docFillPercent = (combinedArea / roiArea) * 100;
           }
 
-          const fillCheckActive = USE_PRESENCE_FILL_METRIC ? hasDocument : hasSignificantContour;
+          const fillCheckActive = USE_PRESENCE_FILL_METRIC
+            ? hasDocument
+            : hasSignificantContour;
 
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
           // checks would block voting with misleading feedback.
-          if (!isCard && !isDiscovery && fillCheckActive && docFillPercent < MIN_FILL_PERCENT) {
-            setFeedback("Move document closer");
+          if (
+            !isCard &&
+            !isDiscovery &&
+            fillCheckActive &&
+            docFillPercent < MIN_FILL_PERCENT
+          ) {
+            setFeedback('Move document closer');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({ docFill: Math.round(docFillPercent), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore) });
+            setDebugInfo({
+              docFill: Math.round(docFillPercent),
+              edgeDensity: edgeDensity.toFixed(1),
+              texture: Math.round(textureScore),
+            });
             return;
           }
-          if (!isCard && !isDiscovery && fillCheckActive && docFillPercent > MAX_FILL_PERCENT) {
-            setFeedback("Move document further away");
+          if (
+            !isCard &&
+            !isDiscovery &&
+            fillCheckActive &&
+            docFillPercent > MAX_FILL_PERCENT
+          ) {
+            setFeedback('Move document further away');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({ docFill: Math.round(docFillPercent), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore) });
+            setDebugInfo({
+              docFill: Math.round(docFillPercent),
+              edgeDensity: edgeDensity.toFixed(1),
+              texture: Math.round(textureScore),
+            });
             return;
           }
 
@@ -734,7 +898,9 @@ export function useCardDetection(
                 detectionPhaseRef.current = DETECTION_PHASE.CAPTURE;
                 setDetectedDocType(fallbackType);
                 setGuideAspectRatio(orientAspect(ASPECT_RATIOS[fallbackType]));
-                console.info(`[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`);
+                console.info(
+                  `[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`,
+                );
                 setFeedback('ID Card assumed — hold steady');
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
@@ -743,29 +909,46 @@ export function useCardDetection(
 
               const detectedRatio = bRect.width / bRect.height;
               // Normalize orientation so portrait-held docs still classify correctly.
-              const normalizedRatio = Math.max(detectedRatio, 1 / detectedRatio);
-              const vote = normalizedRatio >= ASPECT_RATIO_MIDPOINT ? 'id-card' : 'passport';
+              const normalizedRatio = Math.max(
+                detectedRatio,
+                1 / detectedRatio,
+              );
+              const vote =
+                normalizedRatio >= ASPECT_RATIO_MIDPOINT
+                  ? 'id-card'
+                  : 'passport';
 
               discoveryRef.current.votes.push(vote);
 
               // Keep only the last N votes to prevent stale history
-              if (discoveryRef.current.votes.length > DISCOVERY_CONSENSUS_THRESHOLD * 2) {
-                discoveryRef.current.votes = discoveryRef.current.votes.slice(-DISCOVERY_CONSENSUS_THRESHOLD);
+              if (
+                discoveryRef.current.votes.length >
+                DISCOVERY_CONSENSUS_THRESHOLD * 2
+              ) {
+                discoveryRef.current.votes = discoveryRef.current.votes.slice(
+                  -DISCOVERY_CONSENSUS_THRESHOLD,
+                );
               }
 
               // Check for consensus: last N votes must all agree
-              const recentVotes = discoveryRef.current.votes.slice(-DISCOVERY_CONSENSUS_THRESHOLD);
-              const allAgree = recentVotes.length >= DISCOVERY_CONSENSUS_THRESHOLD &&
-                recentVotes.every(v => v === recentVotes[0]);
+              const recentVotes = discoveryRef.current.votes.slice(
+                -DISCOVERY_CONSENSUS_THRESHOLD,
+              );
+              const allAgree =
+                recentVotes.length >= DISCOVERY_CONSENSUS_THRESHOLD &&
+                recentVotes.every((v) => v === recentVotes[0]);
 
-              setFeedback(`Detecting document type... (${normalizedRatio.toFixed(2)})`);
+              setFeedback(
+                `Detecting document type... (${normalizedRatio.toFixed(2)})`,
+              );
               setDebugInfo({
-                blur: 0, glare: 0,
+                blur: 0,
+                glare: 0,
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
                 detectedRatio: normalizedRatio.toFixed(3),
-                votes: `${recentVotes.filter(v => v === 'id-card').length}id / ${recentVotes.filter(v => v === 'passport').length}pp`,
+                votes: `${recentVotes.filter((v) => v === 'id-card').length}id / ${recentVotes.filter((v) => v === 'passport').length}pp`,
               });
 
               if (allAgree) {
@@ -773,9 +956,15 @@ export function useCardDetection(
                 discoveryRef.current.docType = classifiedType;
                 detectionPhaseRef.current = DETECTION_PHASE.CAPTURE;
                 setDetectedDocType(classifiedType);
-                setGuideAspectRatio(orientAspect(ASPECT_RATIOS[classifiedType]));
-                console.info(`[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`);
-                setFeedback(`${classifiedType === 'passport' ? 'Passport' : 'ID Card'} detected — hold steady`);
+                setGuideAspectRatio(
+                  orientAspect(ASPECT_RATIOS[classifiedType]),
+                );
+                console.info(
+                  `[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`,
+                );
+                setFeedback(
+                  `${classifiedType === 'passport' ? 'Passport' : 'ID Card'} detected — hold steady`,
+                );
                 // Force ROI recalculation on next frame by clearing the log flag
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
               }
@@ -792,13 +981,16 @@ export function useCardDetection(
             inGuideDetectedRef.current = false;
             // During discovery, no contour found — keep waiting
             if (isDiscovery) {
-              setFeedback("Position your document in the frame");
+              setFeedback('Position your document in the frame');
               // Tolerate a few consecutive misses before resetting votes.
               // Mobile cameras drop detections for 1-2 frames due to motion blur,
               // auto-exposure changes, etc. Hard-resetting on every miss prevents
               // consensus from ever being reached.
               discoveryRef.current.consecutiveMisses++;
-              if (discoveryRef.current.consecutiveMisses >= DISCOVERY_MISS_TOLERANCE) {
+              if (
+                discoveryRef.current.consecutiveMisses >=
+                DISCOVERY_MISS_TOLERANCE
+              ) {
                 discoveryRef.current.votes = [];
               }
               setDebugInfo({
@@ -806,7 +998,7 @@ export function useCardDetection(
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
                 misses: discoveryRef.current.consecutiveMisses,
-                votes: `${discoveryRef.current.votes.filter(v => v === 'id-card').length}id / ${discoveryRef.current.votes.filter(v => v === 'passport').length}pp`,
+                votes: `${discoveryRef.current.votes.filter((v) => v === 'id-card').length}id / ${discoveryRef.current.votes.filter((v) => v === 'passport').length}pp`,
               });
               return;
             }
@@ -819,15 +1011,15 @@ export function useCardDetection(
         mean = new cv.Mat();
         stdDev = new cv.Mat();
         cv.meanStdDev(laplacian, mean, stdDev);
-        const variance = stdDev.doubleAt(0, 0)**2;
+        const variance = stdDev.doubleAt(0, 0) ** 2;
 
         if (variance < settingsRef.current.blurThreshold) {
-            setFeedback('Too Blurry');
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
-            setDebugInfo({ blur: Math.round(variance), glare: 0 });
-            return;
+          setFeedback('Too Blurry');
+          setComplianceState(COMPLIANCE_STATES.DETECTING);
+          stabilityRef.current.count = 0;
+          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          setDebugInfo({ blur: Math.round(variance), glare: 0 });
+          return;
         }
 
         // --- Gate 2: Glare ---
@@ -837,19 +1029,30 @@ export function useCardDetection(
         const totalPixels = gray.rows * gray.cols;
         const glarePercent = (glarePixels / totalPixels) * 100;
 
-        setDebugInfo({ blur: Math.round(variance), glare: glarePercent.toFixed(1), edgeDensity: edgeDensity.toFixed(1), texture: Math.round(textureScore), quadrants: quadDensities.join('/') });
+        setDebugInfo({
+          blur: Math.round(variance),
+          glare: glarePercent.toFixed(1),
+          edgeDensity: edgeDensity.toFixed(1),
+          texture: Math.round(textureScore),
+          quadrants: quadDensities.join('/'),
+        });
 
         if (glarePercent > settingsRef.current.glareThreshold) {
-            setFeedback(`Glare Detected (${glarePercent.toFixed(1)}%)`);
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
-            return;
+          setFeedback(`Glare Detected (${glarePercent.toFixed(1)}%)`);
+          setComplianceState(COMPLIANCE_STATES.DETECTING);
+          stabilityRef.current.count = 0;
+          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          return;
         }
 
         // --- Gate 3: Stability (track best frame) ---
         stabilityRef.current.count++;
-        const progress = Math.min(100, (stabilityRef.current.count / settingsRef.current.stabilityThreshold) * 100);
+        const progress = Math.min(
+          100,
+          (stabilityRef.current.count /
+            settingsRef.current.stabilityThreshold) *
+            100,
+        );
 
         // Track the sharpest frame during the stability window
         if (variance > bestFrameRef.current.score) {
@@ -860,19 +1063,28 @@ export function useCardDetection(
           const fullDataUrl = canvas.toDataURL('image/jpeg', 0.95);
           let submittedDataUrl = fullDataUrl;
           if (settingsRef.current.cropToCard && !shouldRotateUi) {
-            const submitPad = (settingsRef.current.cropPadding == null
-              ? 10
-              : settingsRef.current.cropPadding) / 100;
+            const submitPad =
+              (settingsRef.current.cropPadding == null
+                ? 10
+                : settingsRef.current.cropPadding) / 100;
             const sPadX = clampedW * submitPad;
             const sPadY = clampedH * submitPad;
             const scx = Math.max(0, Math.floor(clampedX - sPadX));
             const scy = Math.max(0, Math.floor(clampedY - sPadY));
-            const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
-            const sch = Math.min(canvas.height - scy, Math.ceil(clampedH + sPadY * 2));
+            const scw = Math.min(
+              canvas.width - scx,
+              Math.ceil(clampedW + sPadX * 2),
+            );
+            const sch = Math.min(
+              canvas.height - scy,
+              Math.ceil(clampedH + sPadY * 2),
+            );
             const submitCanvas = document.createElement('canvas');
             submitCanvas.width = scw;
             submitCanvas.height = sch;
-            submitCanvas.getContext('2d').drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+            submitCanvas
+              .getContext('2d')
+              .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
             submittedDataUrl = submitCanvas.toDataURL('image/jpeg', 0.95);
           }
 
@@ -893,13 +1105,21 @@ export function useCardDetection(
             const padY = sourceH * pad;
             const cx = Math.max(0, Math.floor(sourceX - padX));
             const cy = Math.max(0, Math.floor(sourceY - padY));
-            const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
-            const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
+            const cw = Math.min(
+              canvas.width - cx,
+              Math.ceil(sourceW + padX * 2),
+            );
+            const ch = Math.min(
+              canvas.height - cy,
+              Math.ceil(sourceH + padY * 2),
+            );
 
             const cropCanvas = document.createElement('canvas');
             cropCanvas.width = cw;
             cropCanvas.height = ch;
-            cropCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+            cropCanvas
+              .getContext('2d')
+              .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
             croppedDataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
           }
 
@@ -911,43 +1131,74 @@ export function useCardDetection(
         setCaptureProgress(Math.round(progress));
         setComplianceState(COMPLIANCE_STATES.STABLE);
 
-        if (stabilityRef.current.count >= settingsRef.current.stabilityThreshold) {
-           if (captureModeRef.current !== 'manualCaptureOnly') {
-             console.info('--- AUTO CAPTURE TRIGGERED ---');
-             console.info('Document Type:', discoveryRef.current.docType || 'unknown');
-             console.info('Edge Density:', `${edgeDensity.toFixed(1)  }%`, '| Quadrants:', quadDensities.join('/'));
-             console.info('Blur Variance:', Math.round(variance), '(threshold:', `${settingsRef.current.blurThreshold  })`);
-             console.info('Glare:', `${glarePercent.toFixed(1)  }%`, '(threshold:', `${settingsRef.current.glareThreshold  }%)`);
-             console.info('Stability Frames:', stabilityRef.current.count, '/', settingsRef.current.stabilityThreshold);
-             console.info('Best Frame Score:', Math.round(bestFrameRef.current.score));
-             setFeedback("Capturing document...");
-             setComplianceState(COMPLIANCE_STATES.CAPTURING);
-             isCapturingRef.current = true;
-             setCaptureOrigin('camera_auto_capture');
-             // Use the sharpest frame captured during stability
+        if (
+          stabilityRef.current.count >= settingsRef.current.stabilityThreshold
+        ) {
+          if (captureModeRef.current !== 'manualCaptureOnly') {
+            console.info('--- AUTO CAPTURE TRIGGERED ---');
+            console.info(
+              'Document Type:',
+              discoveryRef.current.docType || 'unknown',
+            );
+            console.info(
+              'Edge Density:',
+              `${edgeDensity.toFixed(1)}%`,
+              '| Quadrants:',
+              quadDensities.join('/'),
+            );
+            console.info(
+              'Blur Variance:',
+              Math.round(variance),
+              '(threshold:',
+              `${settingsRef.current.blurThreshold})`,
+            );
+            console.info(
+              'Glare:',
+              `${glarePercent.toFixed(1)}%`,
+              '(threshold:',
+              `${settingsRef.current.glareThreshold}%)`,
+            );
+            console.info(
+              'Stability Frames:',
+              stabilityRef.current.count,
+              '/',
+              settingsRef.current.stabilityThreshold,
+            );
+            console.info(
+              'Best Frame Score:',
+              Math.round(bestFrameRef.current.score),
+            );
+            setFeedback('Capturing document...');
+            setComplianceState(COMPLIANCE_STATES.CAPTURING);
+            isCapturingRef.current = true;
+            setCaptureOrigin('camera_auto_capture');
+            // Use the sharpest frame captured during stability
             const bestFrameUrl = bestFrameRef.current.image;
             const bestPreviewUrl = bestFrameRef.current.preview;
             // Rotate if UI was rotated during capture
             if (shouldRotateUi && bestFrameUrl) {
-              const rotateDataUrl = (srcUrl) => new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                  const rotated = document.createElement('canvas');
-                  rotated.width = img.height;
-                  rotated.height = img.width;
-                  const rctx = rotated.getContext('2d');
-                  rctx.translate(rotated.width / 2, rotated.height / 2);
-                  rctx.rotate(-Math.PI / 2);
-                  rctx.drawImage(img, -img.width / 2, -img.height / 2);
-                  resolve(rotated.toDataURL('image/jpeg', 0.95));
-                };
-                img.onerror = reject;
-                img.src = srcUrl;
-              });
+              const rotateDataUrl = (srcUrl) =>
+                new Promise((resolve, reject) => {
+                  const img = new Image();
+                  img.onload = () => {
+                    const rotated = document.createElement('canvas');
+                    rotated.width = img.height;
+                    rotated.height = img.width;
+                    const rctx = rotated.getContext('2d');
+                    rctx.translate(rotated.width / 2, rotated.height / 2);
+                    rctx.rotate(-Math.PI / 2);
+                    rctx.drawImage(img, -img.width / 2, -img.height / 2);
+                    resolve(rotated.toDataURL('image/jpeg', 0.95));
+                  };
+                  img.onerror = reject;
+                  img.src = srcUrl;
+                });
 
               Promise.all([
                 rotateDataUrl(bestFrameUrl),
-                bestPreviewUrl ? rotateDataUrl(bestPreviewUrl) : Promise.resolve(null),
+                bestPreviewUrl
+                  ? rotateDataUrl(bestPreviewUrl)
+                  : Promise.resolve(null),
               ]).then(([rotatedFull, rotatedPreview]) => {
                 setCapturedImage(rotatedFull);
                 setPreviewImage(rotatedPreview);
@@ -958,16 +1209,16 @@ export function useCardDetection(
               setPreviewImage(bestPreviewUrl);
               setComplianceState(COMPLIANCE_STATES.SUCCESS);
             }
-           }
-           // manualCaptureOnly: quality threshold met — leave state as STABLE so
-           // the green indicator persists until the user taps the capture button.
+          }
+          // manualCaptureOnly: quality threshold met — leave state as STABLE so
+          // the green indicator persists until the user taps the capture button.
         }
       };
 
       try {
         runDetection();
       } catch (err) {
-        console.error("CV Error:", err);
+        console.error('CV Error:', err);
         setFeedback(`Error: ${err.message || 'Processing failed'}`);
         setComplianceState(COMPLIANCE_STATES.IDLE);
         stabilityRef.current.count = 0;
@@ -976,7 +1227,8 @@ export function useCardDetection(
         // Clean Memory
         if (fullFrame && !fullFrame.isDeleted()) fullFrame.delete();
         if (src && !src.isDeleted()) src.delete();
-        if (presenceBlurred && !presenceBlurred.isDeleted()) presenceBlurred.delete();
+        if (presenceBlurred && !presenceBlurred.isDeleted())
+          presenceBlurred.delete();
         if (presenceEdges && !presenceEdges.isDeleted()) presenceEdges.delete();
         if (gray && !gray.isDeleted()) gray.delete();
         if (blurred && !blurred.isDeleted()) blurred.delete();
@@ -987,10 +1239,10 @@ export function useCardDetection(
         if (mean && !mean.isDeleted()) mean.delete();
         if (stdDev && !stdDev.isDeleted()) stdDev.delete();
         if (glareMask && !glareMask.isDeleted()) glareMask.delete();
-        
+
         // Loop
         if (!isCapturingRef.current && !capturedImage) {
-             animationFrameId = requestAnimationFrame(processFrame);
+          animationFrameId = requestAnimationFrame(processFrame);
         }
       }
     };
@@ -1001,19 +1253,19 @@ export function useCardDetection(
       clearTimeout(timeoutId);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [videoRef, capturedImage, variant, shouldRotateUi]); 
+  }, [videoRef, capturedImage, variant, shouldRotateUi]);
 
   // Helper to rotate a canvas 90° counter-clockwise with dimension swap.
   // In rotated-UI mode, captured frames are portrait-oriented but need to be
   // rotated to landscape to match the rotated UI and actual document orientation.
   const rotateCanvas90CCW = (canvas) => {
     const rotated = document.createElement('canvas');
-    rotated.width = canvas.height;   // Swap dimensions
+    rotated.width = canvas.height; // Swap dimensions
     rotated.height = canvas.width;
     const ctx = rotated.getContext('2d');
-    ctx.translate(rotated.width, 0);  // Move to top-right corner
-    ctx.rotate(Math.PI / 2);           // 90° clockwise (equivalent to 90° CCW with translate)
-    ctx.drawImage(canvas, 0, 0);       // Draw at origin
+    ctx.translate(rotated.width, 0); // Move to top-right corner
+    ctx.rotate(Math.PI / 2); // 90° clockwise (equivalent to 90° CCW with translate)
+    ctx.drawImage(canvas, 0, 0); // Draw at origin
     return rotated;
   };
 
@@ -1040,11 +1292,16 @@ export function useCardDetection(
       const scx = Math.max(0, Math.floor(clampedX - sPadX));
       const scy = Math.max(0, Math.floor(clampedY - sPadY));
       const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
-      const sch = Math.min(canvas.height - scy, Math.ceil(clampedH + sPadY * 2));
+      const sch = Math.min(
+        canvas.height - scy,
+        Math.ceil(clampedH + sPadY * 2),
+      );
       const submitCanvas = document.createElement('canvas');
       submitCanvas.width = scw;
       submitCanvas.height = sch;
-      submitCanvas.getContext('2d').drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+      submitCanvas
+        .getContext('2d')
+        .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
       submitCaptureCanvas = submitCanvas;
 
       // Preview: tighter contour crop with previewCropPadding.
@@ -1064,7 +1321,9 @@ export function useCardDetection(
       const cropCanvas = document.createElement('canvas');
       cropCanvas.width = cw;
       cropCanvas.height = ch;
-      cropCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+      cropCanvas
+        .getContext('2d')
+        .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
       previewCaptureCanvas = cropCanvas;
     }
 
@@ -1095,7 +1354,7 @@ export function useCardDetection(
     setPreviewImage(null);
     setCaptureOrigin(null);
     setComplianceState(COMPLIANCE_STATES.IDLE);
-    setFeedback("Position your document in the frame");
+    setFeedback('Position your document in the frame');
     setDebugPath(null);
     isCapturingRef.current = false;
     stabilityRef.current.count = 0;
@@ -1107,12 +1366,22 @@ export function useCardDetection(
       setDetectedDocType(providedDocType);
       setGuideAspectRatio(orientAspect(ASPECT_RATIOS[providedDocType]));
       detectionPhaseRef.current = DETECTION_PHASE.CAPTURE;
-      discoveryRef.current = { votes: [], docType: providedDocType, frameCount: 0, consecutiveMisses: 0 };
+      discoveryRef.current = {
+        votes: [],
+        docType: providedDocType,
+        frameCount: 0,
+        consecutiveMisses: 0,
+      };
     } else {
       setDetectedDocType(null);
       setGuideAspectRatio(orientAspect(ASPECT_RATIOS.passport));
       detectionPhaseRef.current = DETECTION_PHASE.DISCOVERY;
-      discoveryRef.current = { votes: [], docType: null, frameCount: 0, consecutiveMisses: 0 };
+      discoveryRef.current = {
+        votes: [],
+        docType: null,
+        frameCount: 0,
+        consecutiveMisses: 0,
+      };
     }
   };
 

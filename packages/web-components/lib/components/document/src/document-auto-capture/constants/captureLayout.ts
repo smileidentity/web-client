@@ -29,13 +29,13 @@ export function getFullscreenGuideSize({
 
   const availableGuideHeight = Math.max(
     height - reservedVerticalPx,
-    height * FULLSCREEN_CAPTURE_LAYOUT.minHeightRatio
+    height * FULLSCREEN_CAPTURE_LAYOUT.minHeightRatio,
   );
 
   const maxWidthFromHeight = availableGuideHeight * ratio;
   const maxWidthFromInsets = Math.max(
     FULLSCREEN_CAPTURE_LAYOUT.minGuideWidthPx,
-    width - (horizontalInsetPx * 2)
+    width - horizontalInsetPx * 2,
   );
 
   const guideWidth = Math.max(
@@ -44,8 +44,8 @@ export function getFullscreenGuideSize({
       width * FULLSCREEN_CAPTURE_LAYOUT.widthRatio,
       FULLSCREEN_CAPTURE_LAYOUT.maxGuideWidthPx,
       maxWidthFromHeight,
-      maxWidthFromInsets
-    )
+      maxWidthFromInsets,
+    ),
   );
 
   const guideHeight = guideWidth / ratio;

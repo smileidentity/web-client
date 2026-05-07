@@ -7,7 +7,12 @@ import { theme } from '../theme';
  * @param {function} onClick — manual capture trigger
  * @param {'dark'|'light'} appearance
  */
-export function CaptureButton({ progress = 0, disabled = false, onClick, appearance = 'dark' }) {
+export function CaptureButton({
+  progress = 0,
+  disabled = false,
+  onClick,
+  appearance = 'dark',
+}) {
   const size = 72;
   const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
@@ -17,7 +22,9 @@ export function CaptureButton({ progress = 0, disabled = false, onClick, appeara
   const isActive = progress > 0 && progress < 100;
   const isLight = appearance === 'light';
 
-  const backgroundRingColor = isLight ? 'rgba(255,255,255,0.7)' : theme.colors.border;
+  const backgroundRingColor = isLight
+    ? 'rgba(255,255,255,0.7)'
+    : theme.colors.border;
   let innerColor;
   if (isActive) {
     innerColor = theme.colors.success;
@@ -79,18 +86,20 @@ export function CaptureButton({ progress = 0, disabled = false, onClick, appeara
         )}
       </svg>
       {/* Inner circle */}
-      <div style={{
-        position: 'absolute',
-        top: '8px',
-        left: '8px',
-        width: `${size - 16}px`,
-        height: `${size - 16}px`,
-        borderRadius: '50%',
-        backgroundColor: innerColor,
-        border: isLight ? '1px solid rgba(15,23,42,0.18)' : 'none',
-        transition: 'background-color 0.3s ease, transform 0.15s ease',
-        transform: disabled ? 'scale(1)' : 'scale(1)',
-      }} />
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          width: `${size - 16}px`,
+          height: `${size - 16}px`,
+          borderRadius: '50%',
+          backgroundColor: innerColor,
+          border: isLight ? '1px solid rgba(15,23,42,0.18)' : 'none',
+          transition: 'background-color 0.3s ease, transform 0.15s ease',
+          transform: disabled ? 'scale(1)' : 'scale(1)',
+        }}
+      />
     </button>
   );
 }

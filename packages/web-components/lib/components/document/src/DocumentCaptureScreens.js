@@ -357,7 +357,7 @@ class DocumentCaptureScreens extends HTMLElement {
   get autoCapture() {
     return this.hasAttribute('auto-capture');
   }
-  
+
   get autoCaptureMode() {
     if (!this.hasAttribute('auto-capture-mode')) {
       return '';
@@ -365,7 +365,11 @@ class DocumentCaptureScreens extends HTMLElement {
 
     const value = this.getAttribute('auto-capture-mode');
     const normalizedValue = value === '' ? 'autoCapture' : value;
-    const allowedValues = ['autoCapture', 'autoCaptureOnly', 'manualCaptureOnly'];
+    const allowedValues = [
+      'autoCapture',
+      'autoCaptureOnly',
+      'manualCaptureOnly',
+    ];
 
     if (allowedValues.includes(normalizedValue)) {
       return `auto-capture-mode='${normalizedValue}'`;

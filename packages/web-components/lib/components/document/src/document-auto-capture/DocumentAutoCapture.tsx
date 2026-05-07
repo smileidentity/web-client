@@ -3,10 +3,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { useCamera } from './hooks/useCamera';
-import {
-  useCardDetection,
-  COMPLIANCE_STATES,
-} from './hooks/useCardDetection';
+import { useCardDetection, COMPLIANCE_STATES } from './hooks/useCardDetection';
 import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
@@ -119,10 +116,30 @@ const FEEDBACK_MIN_DISPLAY_MS = 500;
 
 function GalleryIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="4" y="5" width="16" height="14" rx="2.5" stroke="white" strokeWidth="2" />
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="4"
+        y="5"
+        width="16"
+        height="14"
+        rx="2.5"
+        stroke="white"
+        strokeWidth="2"
+      />
       <circle cx="9" cy="10" r="1.4" fill="white" />
-      <path d="M6.5 16l4.2-4.2 2.8 2.8 1.9-1.9 2.1 2.1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6.5 16l4.2-4.2 2.8 2.8 1.9-1.9 2.1 2.1"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -342,9 +359,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // the front and the back's events would never reach its listener.
   const getHost = (): Element | null => {
     const node =
-      cameraViewportRef.current ||
-      videoRef.current ||
-      galleryInputRef.current;
+      cameraViewportRef.current || videoRef.current || galleryInputRef.current;
     const root = node?.getRootNode();
     if (root && root instanceof ShadowRoot) return root.host;
     return document.querySelector('document-auto-capture');
@@ -354,7 +369,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // `<document-capture>` element exactly. The detection hook captures at 0.95
   // quality for internal use; we round-trip via an Image to set the package's
   // canonical JPEG_QUALITY.
-  const reencodeJpeg = (dataUrl: string): Promise<{ data: string; width: number; height: number }> =>
+  const reencodeJpeg = (
+    dataUrl: string,
+  ): Promise<{ data: string; width: number; height: number }> =>
     new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -373,12 +390,18 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       img.src = dataUrl;
     });
 
-  const publishImage = (dataUrl: string, origin: string, preview: string | null) => {
+  const publishImage = (
+    dataUrl: string,
+    origin: string,
+    preview: string | null,
+  ) => {
     if (!dataUrl || captureFiredRef.current) return;
     captureFiredRef.current = true;
 
     const fullPromise = reencodeJpeg(dataUrl);
-    const previewPromise = preview ? reencodeJpeg(preview) : Promise.resolve(null);
+    const previewPromise = preview
+      ? reencodeJpeg(preview)
+      : Promise.resolve(null);
 
     Promise.all([fullPromise, previewPromise])
       .then(([full, prev]) => {
@@ -410,7 +433,11 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (capturedImage) {
-      publishImage(capturedImage, captureOrigin || 'camera_auto_capture', previewImage);
+      publishImage(
+        capturedImage,
+        captureOrigin || 'camera_auto_capture',
+        previewImage,
+      );
     }
   }, [capturedImage]);
 
@@ -443,7 +470,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const showManualButton =
     captureMode === 'manualCaptureOnly' ||
     (captureMode === 'autoCapture' && (manualFallbackActive || cvLoadFailed));
-
 
   if (error) {
     return (
@@ -643,7 +669,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 }}
                 aria-label="Back"
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
                   <path
                     d="M15 6l-6 6 6 6"
                     stroke="white"
@@ -666,9 +698,31 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 }}
                 aria-label="Close camera"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <line x1="3" y1="3" x2="17" y2="17" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                  <line x1="17" y1="3" x2="3" y2="17" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <line
+                    x1="3"
+                    y1="3"
+                    x2="17"
+                    y2="17"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="17"
+                    y1="3"
+                    x2="3"
+                    y2="17"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             </>
@@ -820,7 +874,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                     margin: `${theme.spacing.sm} 0 0`,
                   }}
                 >
-                  Auto-detection unavailable. Please reload or try another browser.
+                  Auto-detection unavailable. Please reload or try another
+                  browser.
                 </p>
               )}
             </div>
@@ -835,7 +890,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           debugInfo={debugInfo}
         />
       )}
-
     </div>
   );
 };
@@ -856,9 +910,7 @@ const DocumentAutoCapture: FunctionComponent<Props> = (props) => {
   useLayoutEffect(() => {
     const root = rootRef.current?.getRootNode();
     const host =
-      root && root instanceof ShadowRoot
-        ? (root.host as HTMLElement)
-        : null;
+      root && root instanceof ShadowRoot ? (root.host as HTMLElement) : null;
 
     if (!host) {
       // Not inside a shadow root (e.g. test harness) — always render.
@@ -884,7 +936,10 @@ const DocumentAutoCapture: FunctionComponent<Props> = (props) => {
   );
 };
 
-if (typeof customElements !== 'undefined' && !customElements.get('document-auto-capture')) {
+if (
+  typeof customElements !== 'undefined' &&
+  !customElements.get('document-auto-capture')
+) {
   register(
     DocumentAutoCapture,
     'document-auto-capture',

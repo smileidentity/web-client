@@ -40,10 +40,12 @@ export function useCamera() {
         // chain so we avoid `for...of` + `await-in-loop` lint rules.
         const INITIAL = new Error('__initial__');
         const mediaStream = await constraintsList.reduce<Promise<MediaStream>>(
-          (prev, constraints) => prev.catch((e: Error) => {
-            if (e !== INITIAL) console.warn('Constraint failed, trying next:', e.message);
-            return navigator.mediaDevices.getUserMedia(constraints);
-          }),
+          (prev, constraints) =>
+            prev.catch((e: Error) => {
+              if (e !== INITIAL)
+                console.warn('Constraint failed, trying next:', e.message);
+              return navigator.mediaDevices.getUserMedia(constraints);
+            }),
           Promise.reject(INITIAL),
         );
 
@@ -57,9 +59,15 @@ export function useCamera() {
         // is applied independently so an unsupported one doesn't kill the
         // others.
         const tryApply = async (constraint: MediaTrackConstraints) => {
-          try { await track.applyConstraints(constraint); } catch { /* unsupported, ignore */ }
+          try {
+            await track.applyConstraints(constraint);
+          } catch {
+            /* unsupported, ignore */
+          }
         };
-        await tryApply({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] });
+        await tryApply({
+          advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet],
+        });
         // await tryApply({ advanced: [{ exposureMode: 'continuous' } as MediaTrackConstraintSet] });
         // await tryApply({ advanced: [{ whiteBalanceMode: 'continuous' } as MediaTrackConstraintSet] });
 

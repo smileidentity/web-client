@@ -3,7 +3,8 @@ import type { FunctionComponent } from 'preact';
 import { COMPLIANCE_STATES } from '../hooks/useCardDetection';
 import { getShimmerSvg, type ShimmerDocType } from '../assets/shimmers';
 
-type ComplianceState = (typeof COMPLIANCE_STATES)[keyof typeof COMPLIANCE_STATES];
+type ComplianceState =
+  (typeof COMPLIANCE_STATES)[keyof typeof COMPLIANCE_STATES];
 
 type DebugPathPoint = { x: number; y: number };
 type DebugPath = DebugPathPoint[] & { roiWidth?: number; roiHeight?: number };
@@ -105,18 +106,20 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
     .replace('stroke="white"', 'stroke="currentColor"');
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      pointerEvents: 'none',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        pointerEvents: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       {/* Shimmer SVG is the guide — replaces the bordered guide box entirely. */}
       <div
         ref={guideBoxRef}

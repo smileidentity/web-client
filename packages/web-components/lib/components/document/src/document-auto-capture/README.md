@@ -31,28 +31,28 @@ document
 
 ## Attributes
 
-| Attribute | Default | Description |
-|---|---|---|
-| `document-type` | _(auto-detect)_ | `id-card`, `passport`, or `greenbook`. When omitted the element auto-classifies from contour aspect ratio. |
-| `capture-mode` | `autoCapture` | `autoCapture` (auto with manual fallback after timeout), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger). |
-| `auto-capture-timeout` | `10000` | Milliseconds before the manual fallback button is surfaced in `autoCapture` mode. Clamped to the 3000–30000ms range. |
-| `side-of-id` | `Front` | Echoed into the publish event so consumers can wire front/back flows. |
-| `theme-color` | `#001096` | Primary accent colour. |
-| `show-navigation` | `false` | Embed the shared `<smileid-navigation>` header. |
-| `hide-attribution` | `false` | Hide the "Powered by Smile ID" footer. |
-| `allow-gallery-upload` | `true` | Show a gallery-pick button alongside the capture controls. |
-| `sync-roi-to-guide` | `false` | When `true`, the detection ROI matches the visible guide-box width (`100% − 16rem` rotated, `100% − 4rem` otherwise, capped at 600px). When `false` (default), ROI uses the legacy `min(displayW × 0.90, 600px)` and is wider than the visible guide. Provided as an A/B switch — see [AGENTS.md](./AGENTS.md). |
-| `title` | _(none)_ | Optional title overlay rendered at the top of the camera viewport. |
+| Attribute              | Default         | Description                                                                                                                                                                                                                                                                                                     |
+| ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `document-type`        | _(auto-detect)_ | `id-card`, `passport`, or `greenbook`. When omitted the element auto-classifies from contour aspect ratio.                                                                                                                                                                                                      |
+| `capture-mode`         | `autoCapture`   | `autoCapture` (auto with manual fallback after timeout), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger).                                                                                                                                                                           |
+| `auto-capture-timeout` | `10000`         | Milliseconds before the manual fallback button is surfaced in `autoCapture` mode. Clamped to the 3000–30000ms range.                                                                                                                                                                                            |
+| `side-of-id`           | `Front`         | Echoed into the publish event so consumers can wire front/back flows.                                                                                                                                                                                                                                           |
+| `theme-color`          | `#001096`       | Primary accent colour.                                                                                                                                                                                                                                                                                          |
+| `show-navigation`      | `false`         | Embed the shared `<smileid-navigation>` header.                                                                                                                                                                                                                                                                 |
+| `hide-attribution`     | `false`         | Hide the "Powered by Smile ID" footer.                                                                                                                                                                                                                                                                          |
+| `allow-gallery-upload` | `true`          | Show a gallery-pick button alongside the capture controls.                                                                                                                                                                                                                                                      |
+| `sync-roi-to-guide`    | `false`         | When `true`, the detection ROI matches the visible guide-box width (`100% − 16rem` rotated, `100% − 4rem` otherwise, capped at 600px). When `false` (default), ROI uses the legacy `min(displayW × 0.90, 600px)` and is wider than the visible guide. Provided as an A/B switch — see [AGENTS.md](./AGENTS.md). |
+| `title`                | _(none)_        | Optional title overlay rendered at the top of the camera viewport.                                                                                                                                                                                                                                              |
 
 ## Events
 
 Dispatched by the element (bubbling, composed):
 
-| Event | Detail | Notes |
-|---|---|---|
-| `document-capture.publish` | `{ image, previewImage, originalWidth, originalHeight, side, captureOrigin }` | Fired once per session when an image is captured. Payload is JPEG base64 encoded at the package's `JPEG_QUALITY`. |
-| `document-capture.cancelled` | — | Forwarded from `<smileid-navigation>`'s back button when `show-navigation` is set. |
-| `document-capture.close` | — | Forwarded from `<smileid-navigation>`'s close button or the in-camera close icon. |
+| Event                        | Detail                                                                        | Notes                                                                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `document-capture.publish`   | `{ image, previewImage, originalWidth, originalHeight, side, captureOrigin }` | Fired once per session when an image is captured. Payload is JPEG base64 encoded at the package's `JPEG_QUALITY`. |
+| `document-capture.cancelled` | —                                                                             | Forwarded from `<smileid-navigation>`'s back button when `show-navigation` is set.                                |
+| `document-capture.close`     | —                                                                             | Forwarded from `<smileid-navigation>`'s close button or the in-camera close icon.                                 |
 
 Dispatched on `<smart-camera-web>` (matching `SmartSelfieCapture`):
 

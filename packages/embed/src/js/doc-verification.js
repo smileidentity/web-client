@@ -284,7 +284,10 @@ import {
       SmartCameraWeb.setAttribute('auto-capture', true);
     }
     if (config.auto_capture_mode) {
-      SmartCameraWeb.setAttribute('auto-capture-mode', config.auto_capture_mode);
+      SmartCameraWeb.setAttribute(
+        'auto-capture-mode',
+        config.auto_capture_mode,
+      );
     }
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(

@@ -449,8 +449,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     );
   };
 
-  const onBack = () => dispatchHostEvent('document-capture.cancelled');
-  const onClose = () => dispatchHostEvent('document-capture.close');
+  const onBack = () => dispatchHostEvent('document-auto-capture.cancelled');
+  const onClose = () => dispatchHostEvent('document-auto-capture.close');
 
   // Calculate progress for the capture button ring
   const progress =

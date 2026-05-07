@@ -6,7 +6,7 @@ import { t } from '../../../domain/localisation';
 import './document-capture';
 import './document-capture-review';
 import './document-capture-instructions';
-import './document-auto-capture';
+import './document-auto-capture/index.ts';
 import packageJson from '../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;

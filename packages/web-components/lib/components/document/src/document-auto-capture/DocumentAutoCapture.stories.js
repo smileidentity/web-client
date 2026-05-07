@@ -1,5 +1,5 @@
 import { setCurrentLocale } from '../../../../domain/localisation';
-import './index';
+import './index.ts';
 
 const meta = {
   args: {

@@ -81,14 +81,18 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
   const shimmerVisible = Boolean(complianceState);
   const shimmerSvg = getShimmerSvg(detectedDocType, sideOfId);
 
-  const shimmerColor =
+  let shimmerColor: string;
+  if (
     complianceState === COMPLIANCE_STATES.STABLE ||
     complianceState === COMPLIANCE_STATES.SUCCESS ||
     complianceState === COMPLIANCE_STATES.CAPTURING
-      ? '#2CC05C'
-      : complianceState === COMPLIANCE_STATES.DETECTING
-        ? '#F59E0B'
-        : '#FFFFFF';
+  ) {
+    shimmerColor = '#2CC05C';
+  } else if (complianceState === COMPLIANCE_STATES.DETECTING) {
+    shimmerColor = '#F59E0B';
+  } else {
+    shimmerColor = '#FFFFFF';
+  }
 
   // Inject sizing + swap ONLY the first stroke="white" to currentColor.
   // The first <path> in each shimmer SVG is the outer card outline; later

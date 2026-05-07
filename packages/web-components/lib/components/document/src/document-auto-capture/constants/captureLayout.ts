@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript.
 export const FULLSCREEN_CAPTURE_LAYOUT = {
   reservedVerticalPx: 90,
   maxGuideWidthPx: 600,
@@ -10,13 +8,21 @@ export const FULLSCREEN_CAPTURE_LAYOUT = {
   sideControlsInsetPx: 132,
 };
 
+export interface FullscreenGuideSizeParams {
+  aspectRatio?: number;
+  displayHeight?: number;
+  displayWidth?: number;
+  horizontalInsetPx?: number;
+  reservedVerticalPx?: number;
+}
+
 export function getFullscreenGuideSize({
-  displayWidth,
-  displayHeight,
   aspectRatio,
+  displayHeight,
+  displayWidth,
   horizontalInsetPx = FULLSCREEN_CAPTURE_LAYOUT.defaultHorizontalInsetPx,
   reservedVerticalPx = FULLSCREEN_CAPTURE_LAYOUT.reservedVerticalPx,
-}) {
+}: FullscreenGuideSizeParams) {
   const width = Math.max(1, displayWidth || 0);
   const height = Math.max(1, displayHeight || 0);
   const ratio = Math.max(0.2, aspectRatio || 1.585);

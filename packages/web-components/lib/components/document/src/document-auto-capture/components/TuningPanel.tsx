@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript. Debug-only panel.
 import { useState } from 'preact/hooks';
 
 export function TuningPanel({ settings, updateSetting, debugInfo }) {

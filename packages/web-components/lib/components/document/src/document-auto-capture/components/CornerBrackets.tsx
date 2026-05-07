@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript.
 /**
  * CornerBrackets — Four L-shaped corner markers around an element.
  * Use as an overlay on the image preview area.
@@ -8,7 +6,7 @@
  * @param {number} thickness — bracket stroke width in px (default 3)
  */
 export function CornerBrackets({ color = '#fff', size = 24, thickness = 3 }) {
-  const style = (top, right, bottom, left, borderProps) => ({
+  const style = (top: number | undefined, right: number | undefined, bottom: number | undefined, left: number | undefined, borderProps: Record<string, string>) => ({
     position: 'absolute',
     width: `${size}px`,
     height: `${size}px`,

@@ -1,8 +1,6 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript. This is a verbatim
-// port of the id-scanner OpenCV detection pipeline (834 LOC). Typing the
-// `cv` namespace and the internal state machine is tracked separately.
 import { useState, useEffect, useRef } from 'preact/hooks';
+
+declare const cv: any;
 
 export const COMPLIANCE_STATES = {
   IDLE: 'idle',           // Searching for a card
@@ -14,7 +12,7 @@ export const COMPLIANCE_STATES = {
 
 // Phase 1 → Phase 2 detection states
 const DETECTION_PHASE = {
-  DISCOVERY: 'discovery', // Phase 1: identify document type via aspect ratio
+  DISCOVERY: 'discovery', // Phase 1: identify document type via aspect ratio, when documentType prop is not provided
   CAPTURE: 'capture',     // Phase 2: quality gating with locked guide box
 };
 
@@ -25,7 +23,7 @@ const ASPECT_RATIOS = {
 };
 
 // Midpoint for classifying detected aspect ratio
-const ASPECT_RATIO_MIDPOINT = (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS['passport']) / 2; // ~1.50
+const ASPECT_RATIO_MIDPOINT = (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS.passport) / 2; // ~1.50
 
 // Number of agreeing frames required to lock document type.
 // Lowered from 10 → 6: laminated/hand-held cards produce intermittent detections
@@ -82,8 +80,8 @@ function detectCardOutsideGuide(
   const scaleX = video.videoWidth / sw;
   const scaleY = video.videoHeight / sh;
 
-  let mat = null, gray = null, blurred = null, edges = null;
-  let contours = null, hierarchy = null;
+  let mat = null; let gray = null; let blurred = null; let edges = null;
+  let contours = null; let hierarchy = null;
   let foundOutside = false;
   try {
     mat = cv.imread(scratchCanvas);
@@ -133,7 +131,7 @@ function detectCardOutsideGuide(
         foundOutside = true;
       }
     }
-  } catch (_e) {
+  } catch {
     // best-effort
   } finally {
     if (mat) mat.delete();
@@ -146,7 +144,11 @@ function detectCardOutsideGuide(
   return foundOutside;
 }
 
-export function useCardDetection(videoRef, settings, options = {}) {
+export function useCardDetection(
+  videoRef: { current: HTMLVideoElement | null },
+  settings: Record<string, any>,
+  options: Record<string, any> = {},
+) {
   const {
     variant = 'fullscreen',
     documentType = null,
@@ -159,14 +161,15 @@ export function useCardDetection(videoRef, settings, options = {}) {
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
   const autoCaptureTimeoutMs = Math.max(3000, Math.min(30000, autoCaptureTimeout));
   const orientation = captureOrientation === 'portrait' ? 'portrait' : 'landscape';
-  const orientAspect = (ratio) => (orientation === 'portrait' ? (1 / ratio) : ratio);
+  const orientAspect = (ratio: number) => (orientation === 'portrait' ? (1 / ratio) : ratio);
 
   // If documentType is provided and valid, skip discovery entirely.
   const providedDocType = documentType && ASPECT_RATIOS[documentType] ? documentType : null;
   const initialPhase = providedDocType ? DETECTION_PHASE.CAPTURE : DETECTION_PHASE.DISCOVERY;
-  const initialAspect = orientAspect(providedDocType ? ASPECT_RATIOS[providedDocType] : ASPECT_RATIOS['passport']);
+  const initialAspect = orientAspect(providedDocType ? ASPECT_RATIOS[providedDocType] : ASPECT_RATIOS.passport);
 
   const [feedback, setFeedback] = useState("Position your document in the frame");
+  const [captureProgress, setCaptureProgress] = useState(0);
   const [capturedImage, setCapturedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [complianceState, setComplianceState] = useState(COMPLIANCE_STATES.IDLE);
@@ -214,7 +217,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
   // Configurable fallback: surface manual button if auto-capture hasn't fired yet.
   useEffect(() => {
     setManualFallbackActive(false);
-    if (captureMode !== 'autoCapture') return;
+    if (captureMode !== 'autoCapture') return undefined;
     const timer = setTimeout(() => setManualFallbackActive(true), autoCaptureTimeoutMs);
     return () => clearTimeout(timer);
   }, [captureMode, autoCaptureTimeoutMs]);
@@ -245,12 +248,17 @@ export function useCardDetection(videoRef, settings, options = {}) {
       }
 
       // 1. Setup CV structs
-      let fullFrame = null, src = null, gray = null, blurred = null, edges = null;
-      let presenceEdges = null, presenceBlurred = null;
-      let contours = null, hierarchy = null;
-      let laplacian = null, mean = null, stdDev = null, glareMask = null;
+      let fullFrame = null; let src = null; let gray = null; let blurred = null; let edges = null;
+      let presenceEdges = null; let presenceBlurred = null;
+      let contours = null; let hierarchy = null;
+      let laplacian = null; let mean = null; let stdDev = null; let glareMask = null;
 
-      try {
+      // Inner function so each early `return` inside the detection pipeline
+      // exits only this helper (then falls through to the shared finally
+      // cleanup below). Splitting the body out of the surrounding try keeps
+      // the per-function code-path graph small enough that the
+      // `no-useless-return` ESLint rule does not exceed Node's call stack.
+      const runDetection = () => {
         if (!canvasRef.current) {
              canvasRef.current = document.createElement('canvas');
         }
@@ -288,7 +296,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // objectFit: cover scaling — video scales to fill, excess clipped
         const videoAspect   = videoW / videoH;
         const displayAspect = displayW / displayH;
-        let coverScale, offsetX, offsetY;
+        let coverScale; let offsetX; let offsetY;
 
         if (videoAspect > displayAspect) {
           // Video wider than display → height fills, sides cropped
@@ -308,10 +316,10 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // In discovery phase, use the wider passport ratio to fit both doc types.
         // After classification, lock to the detected document's aspect ratio.
         const currentAspect = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY
-          ? orientAspect(ASPECT_RATIOS['passport']) // Wider — accommodates both ID and passport
+          ? orientAspect(ASPECT_RATIOS.passport) // Wider — accommodates both ID and passport
           : orientAspect(
               discoveryRef.current.docType === 'passport' || discoveryRef.current.docType === 'greenbook'
-                ? ASPECT_RATIOS['passport']
+                ? ASPECT_RATIOS.passport
                 : ASPECT_RATIOS['id-card']
             );
         const isCard = variant === 'card';
@@ -319,14 +327,18 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // (Overlay.tsx uses calc(100% - 16rem) on rotated UI, calc(100% - 4rem) otherwise).
         // When off (default), keep the legacy 90% / 600px cap. The guide-box is
         // otherwise purely visual and detection ignores it.
-        const insetPx = syncRoiToGuide
-          ? (shouldRotateUi ? 256 : 64) // 16rem : 4rem (assuming 1rem = 16px)
-          : 0;
-        const guideWidthCSS  = isCard
-          ? displayW
-          : syncRoiToGuide
-            ? Math.min(Math.max(0, displayW - insetPx), 480)
-            : Math.min(displayW * 0.90, 480);
+        let insetPx = 0;
+        if (syncRoiToGuide) {
+          insetPx = shouldRotateUi ? 256 : 64; // 16rem : 4rem (assuming 1rem = 16px)
+        }
+        let guideWidthCSS;
+        if (isCard) {
+          guideWidthCSS = displayW;
+        } else if (syncRoiToGuide) {
+          guideWidthCSS = Math.min(Math.max(0, displayW - insetPx), 480);
+        } else {
+          guideWidthCSS = Math.min(displayW * 0.90, 480);
+        }
         const guideHeightCSS = isCard ? displayH : guideWidthCSS / currentAspect;
         const guideXCSS = (displayW - guideWidthCSS) / 2;
         const guideYCSS = (displayH - guideHeightCSS) / 2;
@@ -345,13 +357,13 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // Log ROI mapping once for diagnostics
         if (!canvasRef.current._roiLogged) {
           canvasRef.current._roiLogged = true;
-          console.log('[ROI] display:', displayW + 'x' + displayH,
-            '| video:', videoW + 'x' + videoH,
+          console.info('[ROI] display:', `${displayW  }x${  displayH}`,
+            '| video:', `${videoW  }x${  videoH}`,
             '| scale:', coverScale.toFixed(3),
-            '| offset:', Math.round(offsetX) + ',' + Math.round(offsetY),
-            '| guideCSS:', Math.round(guideWidthCSS) + 'x' + Math.round(guideHeightCSS),
-            'at', Math.round(guideXCSS) + ',' + Math.round(guideYCSS),
-            '| ROI:', clampedX + ',' + clampedY, clampedW + 'x' + (Math.min(guideHeight, videoH - clampedY)));
+            '| offset:', `${Math.round(offsetX)  },${  Math.round(offsetY)}`,
+            '| guideCSS:', `${Math.round(guideWidthCSS)  }x${  Math.round(guideHeightCSS)}`,
+            'at', `${Math.round(guideXCSS)  },${  Math.round(guideYCSS)}`,
+            '| ROI:', `${clampedX  },${  clampedY}`, `${clampedW  }x${  Math.min(guideHeight, videoH - clampedY)}`);
         }
         const clampedH = Math.min(guideHeight, videoH - clampedY);
 
@@ -393,7 +405,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
         // Crop ROI
         fullFrame = cv.imread(canvas);
-        let rect = new cv.Rect(clampedX, clampedY, clampedW, clampedH);
+        const rect = new cv.Rect(clampedX, clampedY, clampedW, clampedH);
         src = fullFrame.roi(rect);
         fullFrame.delete();
         fullFrame = null;
@@ -439,7 +451,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
         const insetY = Math.floor(presenceEdges.rows * insetFrac);
         const innerW = presenceEdges.cols - insetX * 2;
         const innerH = presenceEdges.rows - insetY * 2;
-        const cols3 = 3, rows3 = 3;
+        const cols3 = 3; const rows3 = 3;
         const cellW = Math.floor(innerW / cols3);
         const cellH = Math.floor(innerH / rows3);
         const cellPixels = cellW * cellH;
@@ -448,7 +460,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // Desktop uses 70% to prevent capturing far-away cards.
         const cellRatio = settingsRef.current.gridCellRatio || 0.5;
         const cellMin = edgeThreshold * cellRatio;
-        let quadDensities = [];
+        const quadDensities = [];
         let allQuadrantsPass = true;
         let passingCells = 0;
         for (let row = 0; row < rows3; row++) {
@@ -502,7 +514,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
         // During discovery phase: ALWAYS run contour detection to classify document type.
         // During capture phase: ALWAYS run contour detection for distance guidance.
         // The useDynamicBorder setting only controls whether the green overlay is drawn.
-        let isDiscovery = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
+        const isDiscovery = detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         const shouldRunContour = true;
 
         // Discovery timeout: moved AFTER contour detection (see below).
@@ -535,14 +547,14 @@ export function useCardDetection(videoRef, settings, options = {}) {
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
-          let combinedMinX = Infinity, combinedMinY = Infinity;
-          let combinedMaxX = -Infinity, combinedMaxY = -Infinity;
+          let combinedMinX = Infinity; let combinedMinY = Infinity;
+          let combinedMaxX = -Infinity; let combinedMaxY = -Infinity;
           let hasSignificantContour = false;
           const minContourPixels = guideWidth * guideHeight * 0.005; // 0.5% — catches small text fragments
 
           for (let i = 0; i < contours.size(); ++i) {
-            let cnt = contours.get(i);
-            let area = cv.contourArea(cnt);
+            const cnt = contours.get(i);
+            const area = cv.contourArea(cnt);
 
             // Expand combined bounding box with any non-trivial contour
             if (area > minContourPixels) {
@@ -555,7 +567,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
             }
 
             if (area > (guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT)) {
-              let peri = cv.arcLength(cnt, true);
+              const peri = cv.arcLength(cnt, true);
               let approx = new cv.Mat();
               cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
 
@@ -595,8 +607,8 @@ export function useCardDetection(videoRef, settings, options = {}) {
                   const p1y = approx.data32S[((j + 1) % 4) * 2 + 1];
                   const p2x = approx.data32S[((j + 2) % 4) * 2];
                   const p2y = approx.data32S[((j + 2) % 4) * 2 + 1];
-                  const v1x = p0x - p1x, v1y = p0y - p1y;
-                  const v2x = p2x - p1x, v2y = p2y - p1y;
+                  const v1x = p0x - p1x; const v1y = p0y - p1y;
+                  const v2x = p2x - p1x; const v2y = p2y - p1y;
                   const dot = v1x * v2x + v1y * v2y;
                   const mag1 = Math.sqrt(v1x * v1x + v1y * v1y);
                   const mag2 = Math.sqrt(v2x * v2x + v2y * v2y);
@@ -637,7 +649,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
                 const br = cv.boundingRect(nz);
                 docFillPercent = ((br.width * br.height) / roiArea) * 100;
               }
-            } catch (_e) {
+            } catch {
               // fall through with docFillPercent = 0
             } finally {
               if (nz) nz.delete();
@@ -722,7 +734,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
                 detectionPhaseRef.current = DETECTION_PHASE.CAPTURE;
                 setDetectedDocType(fallbackType);
                 setGuideAspectRatio(orientAspect(ASPECT_RATIOS[fallbackType]));
-                console.log(`[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`);
+                console.info(`[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`);
                 setFeedback('ID Card assumed — hold steady');
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
@@ -762,7 +774,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
                 detectionPhaseRef.current = DETECTION_PHASE.CAPTURE;
                 setDetectedDocType(classifiedType);
                 setGuideAspectRatio(orientAspect(ASPECT_RATIOS[classifiedType]));
-                console.log(`[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`);
+                console.info(`[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`);
                 setFeedback(`${classifiedType === 'passport' ? 'Passport' : 'ID Card'} detected — hold steady`);
                 // Force ROI recalculation on next frame by clearing the log flag
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
@@ -807,10 +819,10 @@ export function useCardDetection(videoRef, settings, options = {}) {
         mean = new cv.Mat();
         stdDev = new cv.Mat();
         cv.meanStdDev(laplacian, mean, stdDev);
-        const variance = Math.pow(stdDev.doubleAt(0, 0), 2);
+        const variance = stdDev.doubleAt(0, 0)**2;
 
         if (variance < settingsRef.current.blurThreshold) {
-            setFeedback(`Too Blurry (Var: ${Math.round(variance)})`);
+            setFeedback('Too Blurry');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
@@ -895,25 +907,26 @@ export function useCardDetection(videoRef, settings, options = {}) {
           bestFrameRef.current.preview = croppedDataUrl;
         }
 
-        setFeedback(`Hold Still... ${Math.round(progress)}%`);
+        setFeedback('Hold Still...');
+        setCaptureProgress(Math.round(progress));
         setComplianceState(COMPLIANCE_STATES.STABLE);
 
         if (stabilityRef.current.count >= settingsRef.current.stabilityThreshold) {
            if (captureModeRef.current !== 'manualCaptureOnly') {
-             console.log('--- AUTO CAPTURE TRIGGERED ---');
-             console.log('Document Type:', discoveryRef.current.docType || 'unknown');
-             console.log('Edge Density:', edgeDensity.toFixed(1) + '%', '| Quadrants:', quadDensities.join('/'));
-             console.log('Blur Variance:', Math.round(variance), '(threshold:', settingsRef.current.blurThreshold + ')');
-             console.log('Glare:', glarePercent.toFixed(1) + '%', '(threshold:', settingsRef.current.glareThreshold + '%)');
-             console.log('Stability Frames:', stabilityRef.current.count, '/', settingsRef.current.stabilityThreshold);
-             console.log('Best Frame Score:', Math.round(bestFrameRef.current.score));
+             console.info('--- AUTO CAPTURE TRIGGERED ---');
+             console.info('Document Type:', discoveryRef.current.docType || 'unknown');
+             console.info('Edge Density:', `${edgeDensity.toFixed(1)  }%`, '| Quadrants:', quadDensities.join('/'));
+             console.info('Blur Variance:', Math.round(variance), '(threshold:', `${settingsRef.current.blurThreshold  })`);
+             console.info('Glare:', `${glarePercent.toFixed(1)  }%`, '(threshold:', `${settingsRef.current.glareThreshold  }%)`);
+             console.info('Stability Frames:', stabilityRef.current.count, '/', settingsRef.current.stabilityThreshold);
+             console.info('Best Frame Score:', Math.round(bestFrameRef.current.score));
              setFeedback("Capturing document...");
              setComplianceState(COMPLIANCE_STATES.CAPTURING);
              isCapturingRef.current = true;
              setCaptureOrigin('camera_auto_capture');
              // Use the sharpest frame captured during stability
-            let bestFrameUrl = bestFrameRef.current.image;
-            let bestPreviewUrl = bestFrameRef.current.preview;
+            const bestFrameUrl = bestFrameRef.current.image;
+            const bestPreviewUrl = bestFrameRef.current.preview;
             // Rotate if UI was rotated during capture
             if (shouldRotateUi && bestFrameUrl) {
               const rotateDataUrl = (srcUrl) => new Promise((resolve, reject) => {
@@ -922,10 +935,10 @@ export function useCardDetection(videoRef, settings, options = {}) {
                   const rotated = document.createElement('canvas');
                   rotated.width = img.height;
                   rotated.height = img.width;
-                  const ctx = rotated.getContext('2d');
-                  ctx.translate(rotated.width / 2, rotated.height / 2);
-                  ctx.rotate(-Math.PI / 2);
-                  ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                  const rctx = rotated.getContext('2d');
+                  rctx.translate(rotated.width / 2, rotated.height / 2);
+                  rctx.rotate(-Math.PI / 2);
+                  rctx.drawImage(img, -img.width / 2, -img.height / 2);
                   resolve(rotated.toDataURL('image/jpeg', 0.95));
                 };
                 img.onerror = reject;
@@ -949,7 +962,10 @@ export function useCardDetection(videoRef, settings, options = {}) {
            // manualCaptureOnly: quality threshold met — leave state as STABLE so
            // the green indicator persists until the user taps the capture button.
         }
+      };
 
+      try {
+        runDetection();
       } catch (err) {
         console.error("CV Error:", err);
         setFeedback(`Error: ${err.message || 'Processing failed'}`);
@@ -1065,7 +1081,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
       ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
       : null;
 
-    console.log('--- MANUAL CAPTURE TRIGGERED ---');
+    console.info('--- MANUAL CAPTURE TRIGGERED ---');
     setCaptureOrigin('camera_manual_capture');
     setCapturedImage(fullDataUrl);
     setPreviewImage(previewDataUrl);
@@ -1094,7 +1110,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
       discoveryRef.current = { votes: [], docType: providedDocType, frameCount: 0, consecutiveMisses: 0 };
     } else {
       setDetectedDocType(null);
-      setGuideAspectRatio(orientAspect(ASPECT_RATIOS['passport']));
+      setGuideAspectRatio(orientAspect(ASPECT_RATIOS.passport));
       detectionPhaseRef.current = DETECTION_PHASE.DISCOVERY;
       discoveryRef.current = { votes: [], docType: null, frameCount: 0, consecutiveMisses: 0 };
     }
@@ -1102,6 +1118,7 @@ export function useCardDetection(videoRef, settings, options = {}) {
 
   return {
     feedback,
+    captureProgress,
     capturedImage,
     previewImage,
     captureOrigin,

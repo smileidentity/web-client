@@ -154,14 +154,10 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'auto-capture-mode': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
-  'theme-color': themeColor = '#001096',
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
   'sync-roi-to-guide': syncRoiToGuideProp = false,
-  title: titleProp,
 }) => {
-  void themeColor;
-  void titleProp;
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const captureFiredRef = useRef(false);
 
@@ -245,6 +241,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const { videoRef, error } = useCamera();
   const {
     feedback,
+    captureProgress,
     capturedImage,
     previewImage,
     captureOrigin,
@@ -411,12 +408,10 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       });
   };
 
-  // When auto-capture fires, publish image up
   useEffect(() => {
     if (capturedImage) {
       publishImage(capturedImage, captureOrigin || 'camera_auto_capture', previewImage);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capturedImage]);
 
   // Wire up navigation back/close events.
@@ -499,12 +494,14 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     COMPLIANCE_STATES.CAPTURING,
   ].includes(complianceState);
 
-  const spinnerProgress =
-    complianceState === COMPLIANCE_STATES.STABLE
-      ? Math.max(15, progress)
-      : complianceState === COMPLIANCE_STATES.CAPTURING
-        ? 99
-        : 25;
+  let spinnerProgress: number;
+  if (complianceState === COMPLIANCE_STATES.STABLE) {
+    spinnerProgress = Math.max(15, progress);
+  } else if (complianceState === COMPLIANCE_STATES.CAPTURING) {
+    spinnerProgress = 99;
+  } else {
+    spinnerProgress = 25;
+  }
 
   const showManualCaptureControl =
     showManualButton ||
@@ -523,9 +520,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const showSideSpinner =
     baseShowSideSpinner && shouldRotateUi && !useSideManualCapture;
   const sideButtonProgress =
-    complianceState === COMPLIANCE_STATES.STABLE
-      ? Math.round(Number((feedback.match(/(\d+)%/) || [, 0])[1]))
-      : 0;
+    complianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
   const handlePickFromGallery = () => {
     if (!allowGalleryUpload) return;
@@ -807,9 +802,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                   <CaptureButton
                     progress={
                       complianceState === COMPLIANCE_STATES.STABLE
-                        ? Math.round(
-                            Number((feedback.match(/(\d+)%/) || [, 0])[1]),
-                          )
+                        ? captureProgress
                         : 0
                     }
                     disabled={complianceState === COMPLIANCE_STATES.SUCCESS}

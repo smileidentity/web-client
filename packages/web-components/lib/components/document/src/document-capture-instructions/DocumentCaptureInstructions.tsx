@@ -21,8 +21,7 @@ const HERO_GREENBOOK_LOTTIE_URL = new URL(
   import.meta.url,
 ).href;
 
-const HERO_IMAGE_FALLBACK_URL =
-  'https://www.figma.com/api/mcp/asset/be898e16-cf3f-4c91-86ed-fbd2aa436e49';
+const HERO_IMAGE_FALLBACK_URL = HERO_ID_CARD_LOTTIE_URL;
 
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';

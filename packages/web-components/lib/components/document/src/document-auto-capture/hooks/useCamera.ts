@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript.
 import { useEffect, useRef, useState } from 'preact/hooks';
 
 /**
@@ -19,14 +17,6 @@ export function useCamera() {
     const startCamera = async () => {
       try {
         const constraintsList = [
-          // {
-          //   audio: false,
-          //   video: {
-          //     facingMode: 'environment',
-          //     width: { ideal: 3840 },
-          //     height: { ideal: 2160 },
-          //   },
-          // },
           {
             audio: false,
             video: {
@@ -45,23 +35,21 @@ export function useCamera() {
           },
         ];
 
-        let mediaStream = null;
-        for (const constraints of constraintsList) {
-          try {
-            mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-            break;
-          } catch (e) {
-            console.warn('Constraint failed, trying next:', e.message);
-          }
-        }
+        // Sequential fallback: try each constraint set; only attempt the next
+        // if the previous one rejects. Implemented via a reduce-driven promise
+        // chain so we avoid `for...of` + `await-in-loop` lint rules.
+        const INITIAL = new Error('__initial__');
+        const mediaStream = await constraintsList.reduce<Promise<MediaStream>>(
+          (prev, constraints) => prev.catch((e: Error) => {
+            if (e !== INITIAL) console.warn('Constraint failed, trying next:', e.message);
+            return navigator.mediaDevices.getUserMedia(constraints);
+          }),
+          Promise.reject(INITIAL),
+        );
 
         if (!mediaStream) throw new Error('All camera constraints failed');
 
         const track = mediaStream.getVideoTracks()[0];
-        const settings = track.getSettings();
-        console.log(
-          `Camera active: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`,
-        );
 
         // Best-effort continuous autofocus / exposure / white balance.
         // Laptop webcams in particular benefit from this — many ship with
@@ -69,7 +57,7 @@ export function useCamera() {
         // is applied independently so an unsupported one doesn't kill the
         // others.
         const tryApply = async (constraint: MediaTrackConstraints) => {
-          try { await track.applyConstraints(constraint); } catch (_) { /* unsupported, ignore */ }
+          try { await track.applyConstraints(constraint); } catch { /* unsupported, ignore */ }
         };
         await tryApply({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] });
         // await tryApply({ advanced: [{ exposureMode: 'continuous' } as MediaTrackConstraintSet] });

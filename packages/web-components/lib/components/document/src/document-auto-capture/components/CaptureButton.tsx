@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(document-auto-capture): port to strict TypeScript.
 import { theme } from '../theme';
 
 /**
@@ -20,9 +18,14 @@ export function CaptureButton({ progress = 0, disabled = false, onClick, appeara
   const isLight = appearance === 'light';
 
   const backgroundRingColor = isLight ? 'rgba(255,255,255,0.7)' : theme.colors.border;
-  const innerColor = isActive
-    ? theme.colors.success
-    : (isLight ? '#f8fafc' : theme.colors.text);
+  let innerColor;
+  if (isActive) {
+    innerColor = theme.colors.success;
+  } else if (isLight) {
+    innerColor = '#f8fafc';
+  } else {
+    innerColor = theme.colors.text;
+  }
 
   return (
     <button

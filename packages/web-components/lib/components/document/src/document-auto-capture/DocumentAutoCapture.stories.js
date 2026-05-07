@@ -3,33 +3,33 @@ import './index';
 
 const meta = {
   args: {
-    language: 'en',
-    'theme-color': '#001096',
-    'document-type': 'id-card',
-    'capture-mode': 'autoCapture',
     'auto-capture-timeout': 10000,
+    'capture-mode': 'autoCapture',
+    'document-type': 'id-card',
+    language: 'en',
     'side-of-id': 'Front',
+    'theme-color': '#001096',
     title: 'Submit Front of ID',
   },
   argTypes: {
-    language: {
-      control: { type: 'select' },
-      options: ['en', 'ar'],
-    },
-    'theme-color': { control: 'color' },
-    'document-type': {
-      control: { type: 'select' },
-      options: ['id-card', 'passport', 'greenbook'],
-    },
+    'auto-capture-timeout': { control: { type: 'number' } },
     'capture-mode': {
       control: { type: 'select' },
       options: ['autoCapture', 'autoCaptureOnly', 'manualCaptureOnly'],
     },
-    'auto-capture-timeout': { control: { type: 'number' } },
+    'document-type': {
+      control: { type: 'select' },
+      options: ['id-card', 'passport', 'greenbook'],
+    },
+    language: {
+      control: { type: 'select' },
+      options: ['en', 'ar'],
+    },
     'side-of-id': {
       control: { type: 'select' },
       options: ['Front', 'Back'],
     },
+    'theme-color': { control: 'color' },
     title: { control: 'text' },
   },
   component: 'document-auto-capture',

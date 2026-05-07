@@ -97,14 +97,18 @@ Cypress.Commands.add('navigateDocumentFrontCaptureWithInstructions', () => {
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions-v2#document-capture-instructions-front')
+    .find(
+      'document-capture-instructions-v2#document-capture-instructions-front',
+    )
     .shadow()
     .find('.doc-instr-start-btn')
     .click();
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions-v2#document-capture-instructions-front')
+    .find(
+      'document-capture-instructions-v2#document-capture-instructions-front',
+    )
     .should('not.be.visible');
 
   cy.get('smart-camera-web')

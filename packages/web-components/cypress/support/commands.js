@@ -92,19 +92,19 @@ Cypress.Commands.add('navigateFaceCaptureScreens', () => {
 Cypress.Commands.add('navigateDocumentFrontCaptureWithInstructions', () => {
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions')
+    .find('document-capture-instructions-v2')
     .should('be.visible');
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions#document-capture-instructions-front')
+    .find('document-capture-instructions-v2#document-capture-instructions-front')
     .shadow()
     .find('.doc-instr-start-btn')
     .click();
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions#document-capture-instructions-front')
+    .find('document-capture-instructions-v2#document-capture-instructions-front')
     .should('not.be.visible');
 
   cy.get('smart-camera-web')
@@ -143,6 +143,6 @@ Cypress.Commands.add('navigateDocumentFrontCaptureWithInstructions', () => {
 
   cy.get('smart-camera-web')
     .shadow()
-    .find('document-capture-instructions#document-capture-instructions-back')
+    .find('document-capture-instructions-v2#document-capture-instructions-back')
     .should('be.visible');
 });

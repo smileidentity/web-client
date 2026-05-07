@@ -8,7 +8,7 @@ variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb [${name}]`, () => {
     beforeEach(() => {
       cy.visit(
-        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
+        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&new-instructions=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
       );
     });
 
@@ -94,13 +94,13 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-instructions')
+        .find('document-capture-instructions-v2')
         .should('be.visible');
 
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-front',
+          'document-capture-instructions-v2#document-capture-instructions-front',
         )
         .invoke('attr', 'theme-color')
         .should('equal', themeColor);
@@ -137,7 +137,7 @@ variants.forEach(({ name, suffix }) => {
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-front',
+          'document-capture-instructions-v2#document-capture-instructions-front',
         )
         .shadow()
         .find('.doc-instr-start-btn')
@@ -166,7 +166,7 @@ variants.forEach(({ name, suffix }) => {
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-back',
+          'document-capture-instructions-v2#document-capture-instructions-back',
         )
         .shadow()
         .find('#select-id-image')

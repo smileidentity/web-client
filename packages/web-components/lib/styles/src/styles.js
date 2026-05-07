@@ -290,7 +290,7 @@ ${typography}
     padding-bottom: 2rem;
   }
 
-  smart-camera-web, selfie-capture-screens, selfie-capture-instructions, document-capture-screens, document-capture-instructions {
+  smart-camera-web, selfie-capture-screens, selfie-capture-instructions, document-capture-screens, document-capture-instructions, document-capture-instructions-v2 {
     height: 100%;
     display: block;
   }

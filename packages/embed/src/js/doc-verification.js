@@ -298,6 +298,10 @@ import {
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
 
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
+    }
+
     // id_info takes precedence over id_selection
     const useIdInfo = hasIdInfo(config);
     const effectiveIdSelection = useIdInfo

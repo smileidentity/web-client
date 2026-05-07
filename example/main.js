@@ -24,6 +24,10 @@ document.querySelector('#app').innerHTML = `
         <option value="false" selected>Legacy Selfie Fallback: Disabled</option>
         <option value="true">Legacy Selfie Fallback: Enabled</option>
       </select>
+      <select id="newInstructions">
+        <option value="false" selected>New Document Instructions: Disabled</option>
+        <option value="true">New Document Instructions: Enabled</option>
+      </select>
       <button data-type="primary" id="submitForm">
         Verify with Smile Identity
       </button>

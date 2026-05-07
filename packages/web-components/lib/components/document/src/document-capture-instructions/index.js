@@ -1,4 +1,4 @@
-import DocumentInstruction from './DocumentCaptureInstructions.js';
+import DocumentInstruction from './DocumentCaptureInstructions';
 import './DocumentCaptureInstructions.tsx';
 
 export default DocumentInstruction;

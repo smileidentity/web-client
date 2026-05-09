@@ -92,6 +92,9 @@ export default function Product() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
+  const [autoCapture, setAutoCapture] = useState<boolean>(false);
+  const [autoCaptureMode, setAutoCaptureMode] =
+    useState<string>('autoCapture');
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -99,6 +102,8 @@ export default function Product() {
         ...config,
         allow_agent_mode: true,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
+        auto_capture: autoCapture,
+        auto_capture_mode: autoCaptureMode,
         document_ids: [config.document_id],
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''
@@ -220,6 +225,35 @@ export default function Product() {
                 >
                   <option value="false">Disabled</option>
                   <option value="true">Enabled</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="auto-capture-select">Auto Capture</label>
+                <select
+                  id="auto-capture-select"
+                  value={autoCapture ? 'true' : 'false'}
+                  onChange={(e) => setAutoCapture(e.target.value === 'true')}
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled (legacy capture)</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="auto-capture-mode-select">
+                  Auto Capture Mode
+                </label>
+                <select
+                  id="auto-capture-mode-select"
+                  value={autoCaptureMode}
+                  onChange={(e) => setAutoCaptureMode(e.target.value)}
+                  disabled={isGettingToken}
+                >
+                  <option value="autoCapture">autoCapture</option>
+                  <option value="autoCaptureOnly">autoCaptureOnly</option>
+                  <option value="manualCaptureOnly">manualCaptureOnly</option>
                 </select>
               </div>
 

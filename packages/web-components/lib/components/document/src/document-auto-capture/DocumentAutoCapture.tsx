@@ -21,6 +21,7 @@ interface Props {
   'theme-color'?: string;
   'show-navigation'?: string | boolean;
   'allow-gallery-upload'?: string | boolean;
+  'document-capture-modes'?: string;
   'sync-roi-to-guide'?: string | boolean;
   title?: string;
 }
@@ -173,14 +174,33 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'side-of-id': sideOfId = 'Front',
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
-  'sync-roi-to-guide': syncRoiToGuideProp = false,
+  'document-capture-modes': documentCaptureModesProp,
+  'sync-roi-to-guide': syncRoiToGuideProp = true,
 }) => {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const captureFiredRef = useRef(false);
 
   const showNavigation = getBoolProp(showNavigationProp);
-  const allowGalleryUpload = getBoolProp(allowGalleryUploadProp, true);
-  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, false);
+  // Honour `document-capture-modes`: when explicitly set to a value that
+  // does not include `upload` (e.g. just `camera`), the gallery upload
+  // affordance must be hidden regardless of the `allow-gallery-upload`
+  // default. This mirrors how <document-capture-instructions> gates its
+  // upload button on the same attribute.
+  const captureModesAllowUpload = (() => {
+    if (documentCaptureModesProp === undefined || documentCaptureModesProp === null) {
+      return true;
+    }
+    const modes = String(documentCaptureModesProp)
+      .toLowerCase()
+      .split(',')
+      .map((m) => m.trim())
+      .filter(Boolean);
+    if (modes.length === 0) return true;
+    return modes.includes('upload');
+  })();
+  const allowGalleryUpload =
+    getBoolProp(allowGalleryUploadProp, true) && captureModesAllowUpload;
+  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, true);
 
   const captureMode: CaptureMode = CAPTURE_MODES.includes(
     captureModeProp as CaptureMode,
@@ -951,6 +971,7 @@ if (
       'theme-color',
       'show-navigation',
       'allow-gallery-upload',
+      'document-capture-modes',
       'sync-roi-to-guide',
       'title',
     ],

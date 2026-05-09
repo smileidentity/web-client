@@ -378,27 +378,46 @@ export function useCardDetection(
                   : ASPECT_RATIOS['id-card'],
               );
         const isCard = variant === 'card';
-        // A/B toggle: when sync-roi-to-guide is on, mirror the visual guide width
-        // (Overlay.tsx uses calc(100% - 16rem) on rotated UI, calc(100% - 4rem) otherwise).
-        // When off (default), keep the legacy 90% / 600px cap. The guide-box is
-        // otherwise purely visual and detection ignores it.
-        let insetPx = 0;
-        if (syncRoiToGuide) {
-          insetPx = shouldRotateUi ? 256 : 64; // 16rem : 4rem (assuming 1rem = 16px)
-        }
+        // When the UI overlay is rotated 90° CW (portrait phone, landscape doc),
+        // the visible guide-box lives in the rotated overlay's local coords.
+        // The video element underneath is NOT rotated, so its CSS axes are
+        // swapped relative to the overlay. We compute the guide in the
+        // overlay's frame, then map back to video-CSS via the inverse rotation.
         let guideWidthCSS;
+        let guideHeightCSS;
+        let guideXCSS;
+        let guideYCSS;
         if (isCard) {
           guideWidthCSS = displayW;
-        } else if (syncRoiToGuide) {
-          guideWidthCSS = Math.min(Math.max(0, displayW - insetPx), 480);
+          guideHeightCSS = displayH;
+          guideXCSS = 0;
+          guideYCSS = 0;
+        } else if (shouldRotateUi) {
+          // Overlay-local dimensions are swapped: ovW = displayH, ovH = displayW.
+          // Inset = 16rem (256px) when rotated.
+          const ovW = displayH;
+          const ovH = displayW;
+          const inset = syncRoiToGuide ? 256 : Math.max(0, ovW * 0.1);
+          const guideOvW = Math.min(Math.max(0, ovW - inset), 480);
+          const guideOvH = guideOvW / currentAspect;
+          const ovX = (ovW - guideOvW) / 2;
+          const ovY = (ovH - guideOvH) / 2;
+          // Map (xL, yL) overlay-local → video-CSS (W - yL, xL) where W = ovH = displayW.
+          // The rotated guide-rect's video-CSS bbox:
+          guideXCSS = ovH - ovY - guideOvH; // = (displayW - guideOvH) / 2
+          guideYCSS = ovX; // = (displayH - guideOvW) / 2
+          guideWidthCSS = guideOvH; // narrow in unrotated video
+          guideHeightCSS = guideOvW; // tall in unrotated video
         } else {
-          guideWidthCSS = Math.min(displayW * 0.9, 480);
+          // Unrotated: original behaviour.
+          const insetPx = syncRoiToGuide ? 64 : 0;
+          guideWidthCSS = syncRoiToGuide
+            ? Math.min(Math.max(0, displayW - insetPx), 480)
+            : Math.min(displayW * 0.9, 480);
+          guideHeightCSS = guideWidthCSS / currentAspect;
+          guideXCSS = (displayW - guideWidthCSS) / 2;
+          guideYCSS = (displayH - guideHeightCSS) / 2;
         }
-        const guideHeightCSS = isCard
-          ? displayH
-          : guideWidthCSS / currentAspect;
-        const guideXCSS = (displayW - guideWidthCSS) / 2;
-        const guideYCSS = (displayH - guideHeightCSS) / 2;
 
         // Map CSS → video native coordinates
         const guideWidth = Math.round(guideWidthCSS / coverScale);
@@ -442,17 +461,25 @@ export function useCardDetection(
           clampedH,
         };
 
-        // --- Off-guide detection (desktop / wide layouts only) ---
+        // --- Off-guide detection ---
+        // Active on every layout that has spare margin around the visible
+        // guide. In CAPTURE phase the gate runs unconditionally on the 5-frame
+        // interval — a stale `inGuideDetectedRef` from a prior frame must not
+        // suppress an authoritative "card outside the guide" signal. In
+        // DISCOVERY phase we still skip while a card is locked in to avoid
+        // contending with the per-frame contour pass.
         const isCardVariant = variant === 'card';
         const hasMargin =
           displayW - guideWidthCSS > OFF_GUIDE_MIN_MARGIN_X_CSS ||
           displayH - guideHeightCSS > OFF_GUIDE_MIN_MARGIN_Y_CSS;
         offGuideFrameCounterRef.current =
           (offGuideFrameCounterRef.current + 1) % OFF_GUIDE_CHECK_INTERVAL;
+        const isCapturePhase =
+          detectionPhaseRef.current === DETECTION_PHASE.CAPTURE;
         const shouldRunOffGuide =
           !isCardVariant &&
           hasMargin &&
-          !inGuideDetectedRef.current &&
+          (isCapturePhase || !inGuideDetectedRef.current) &&
           offGuideFrameCounterRef.current === 0;
 
         if (shouldRunOffGuide) {
@@ -473,7 +500,8 @@ export function useCardDetection(
             setFeedback('Align document in frame');
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
-            bestFrameRef.current = { dataUrl: null, score: 0 };
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            inGuideDetectedRef.current = false;
             return;
           }
         }
@@ -569,10 +597,9 @@ export function useCardDetection(
         // Grid coverage gating:
         // - Card variant: skip entirely — ROI is the full video frame, card can't fill 100%
         // - Discovery phase: relaxed — require MIN_DISCOVERY_GRID_CELLS (3/9) cells.
-        //   The guide box uses wider passport ratio so a real document won't fill all cells,
-        //   but it should fill at least some. This filters empty textured scenes.
-        // - Capture phase (fullscreen): strict — require all cells to pass.
-        //   Guide box matches detected doc type, grid check catches partial occlusion.
+        // - Capture phase (fullscreen): require 7/9 cells. Allows up to ~2 cells
+        //   of background (face, hand, etc.) peeking into the guide without
+        //   blocking capture. 9/9 was too strict for hand-held framing.
         const isDiscoveryPhase =
           detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         let gridCheckFails;
@@ -581,7 +608,7 @@ export function useCardDetection(
         } else if (isDiscoveryPhase) {
           gridCheckFails = passingCells < MIN_DISCOVERY_GRID_CELLS; // Relaxed: 3/9 cells
         } else {
-          gridCheckFails = !allQuadrantsPass; // Strict: all 9/9 cells
+          gridCheckFails = passingCells < 7; // Capture: 7/9
         }
 
         if (!hasDocument || gridCheckFails) {
@@ -784,7 +811,14 @@ export function useCardDetection(
           const roiArea = clampedW * clampedH;
           let docFillPercent = 0;
 
-          if (USE_PRESENCE_FILL_METRIC) {
+          if (bestContour) {
+            // Use the validated 4-corner card's bounding box. The aspect-ratio
+            // gate above ensures bestContour is actually card-shaped, so this
+            // is a clean "how much of the ROI does the card occupy" signal.
+            const cardRect = cv.boundingRect(bestContour);
+            docFillPercent =
+              ((cardRect.width * cardRect.height) / roiArea) * 100;
+          } else if (USE_PRESENCE_FILL_METRIC) {
             let nz = null;
             try {
               nz = new cv.Mat();
@@ -805,9 +839,8 @@ export function useCardDetection(
             docFillPercent = (combinedArea / roiArea) * 100;
           }
 
-          const fillCheckActive = USE_PRESENCE_FILL_METRIC
-            ? hasDocument
-            : hasSignificantContour;
+          // Active whenever we have a real contour to measure against.
+          const fillCheckActive = !!bestContour;
 
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
@@ -1002,6 +1035,21 @@ export function useCardDetection(
               });
               return;
             }
+            // CAPTURE phase: no validated card-shaped contour inside the
+            // ROI. The downstream blur/glare/stability gates would otherwise
+            // happily fire on whatever fragment of background is in the
+            // guide, which is the root cause of off-guide auto-captures on
+            // rotated mobile UI. Bail out and prompt the user to align.
+            setFeedback('Align document in frame');
+            setComplianceState(COMPLIANCE_STATES.IDLE);
+            stabilityRef.current.count = 0;
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            setDebugInfo({
+              edgeDensity: edgeDensity.toFixed(1),
+              texture: Math.round(textureScore),
+              quadrants: quadDensities.join('/'),
+            });
+            return;
           }
         }
 

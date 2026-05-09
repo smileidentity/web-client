@@ -1304,16 +1304,16 @@ export function useCardDetection(
   }, [videoRef, capturedImage, variant, shouldRotateUi]);
 
   // Helper to rotate a canvas 90° counter-clockwise with dimension swap.
-  // In rotated-UI mode, captured frames are portrait-oriented but need to be
-  // rotated to landscape to match the rotated UI and actual document orientation.
+  // Must match the auto-capture rotation direction (-π/2) so manual and auto
+  // captures produce identically-oriented previews.
   const rotateCanvas90CCW = (canvas) => {
     const rotated = document.createElement('canvas');
-    rotated.width = canvas.height; // Swap dimensions
+    rotated.width = canvas.height;
     rotated.height = canvas.width;
     const ctx = rotated.getContext('2d');
-    ctx.translate(rotated.width, 0); // Move to top-right corner
-    ctx.rotate(Math.PI / 2); // 90° clockwise (equivalent to 90° CCW with translate)
-    ctx.drawImage(canvas, 0, 0); // Draw at origin
+    ctx.translate(0, rotated.height);
+    ctx.rotate(-Math.PI / 2);
+    ctx.drawImage(canvas, 0, 0);
     return rotated;
   };
 

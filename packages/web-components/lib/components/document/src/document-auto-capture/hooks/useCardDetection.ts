@@ -23,7 +23,8 @@ const ASPECT_RATIOS = {
 };
 type AspectKey = keyof typeof ASPECT_RATIOS;
 const isAspectKey = (v: unknown): v is AspectKey =>
-  typeof v === 'string' && Object.prototype.hasOwnProperty.call(ASPECT_RATIOS, v);
+  typeof v === 'string' &&
+  Object.prototype.hasOwnProperty.call(ASPECT_RATIOS, v);
 
 // Midpoint for classifying detected aspect ratio
 const ASPECT_RATIO_MIDPOINT =
@@ -230,7 +231,9 @@ export function useCardDetection(
     score: number;
   }>({ image: null, preview: null, score: 0 });
   const isCapturingRef = useRef(false);
-  const canvasRef = useRef<(HTMLCanvasElement & { _roiLogged?: boolean }) | null>(null);
+  const canvasRef = useRef<
+    (HTMLCanvasElement & { _roiLogged?: boolean }) | null
+  >(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef<{
     votes: AspectKey[];
@@ -1136,9 +1139,11 @@ export function useCardDetection(
 
           // Submitted image: full frame, or guide-rect crop when cropToCard
           // is enabled (original behavior). Padded by `cropPadding` (default 10%).
+          // Crop in unrotated native-pixel space; any UI rotation is applied
+          // to the cropped output below.
           const fullDataUrl = canvas.toDataURL('image/jpeg', 0.95);
           let submittedDataUrl = fullDataUrl;
-          if (settingsRef.current.cropToCard && !shouldRotateUi) {
+          if (settingsRef.current.cropToCard) {
             const submitPad =
               (settingsRef.current.cropPadding == null
                 ? 10
@@ -1165,16 +1170,25 @@ export function useCardDetection(
           }
 
           // Preview: tighter crop using the detected card's contour when
-          // available. Padded by `previewCropPadding` (default 2%).
+          // available. Padded by `previewCropPadding` (default 2%). Crop runs in
+          // unrotated native-pixel space; rotation is applied to the result below.
           let croppedDataUrl = null;
-          if (settingsRef.current.cropToCard && !shouldRotateUi) {
+          if (settingsRef.current.cropToCard) {
             const useContour =
               settingsRef.current.cropToContour !== false &&
               latestCardRectRef.current;
-            const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
-            const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
-            const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
-            const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
+            const sourceX = useContour
+              ? latestCardRectRef.current!.x
+              : clampedX;
+            const sourceY = useContour
+              ? latestCardRectRef.current!.y
+              : clampedY;
+            const sourceW = useContour
+              ? latestCardRectRef.current!.w
+              : clampedW;
+            const sourceH = useContour
+              ? latestCardRectRef.current!.h
+              : clampedH;
             const padPct = settingsRef.current.previewCropPadding;
             const pad = (padPct == null ? 2 : padPct) / 100;
             const padX = sourceW * pad;
@@ -1362,9 +1376,9 @@ export function useCardDetection(
     let submitCaptureCanvas: HTMLCanvasElement = canvas;
     let previewCaptureCanvas: HTMLCanvasElement | null = null;
 
-    // Skip cropping if UI is rotated — crop margins don't work well with 90°
-    // rotation, so we fall back to the full frame in that case.
-    if (s.cropToCard && !shouldRotateUi) {
+    // Crop in unrotated native-pixel space. If the UI is rotated, the
+    // cropped canvas is rotated CCW below to match the on-screen orientation.
+    if (s.cropToCard) {
       // Submitted: guide-rect crop with cropPadding.
       const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
       const sPadX = clampedW * submitPad;

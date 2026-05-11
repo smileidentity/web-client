@@ -21,6 +21,9 @@ const ASPECT_RATIOS = {
   passport: 1.42, // ID-3 bio-data page
   greenbook: 1.42, // Greenbook uses passport-like landscape aspect
 };
+type AspectKey = keyof typeof ASPECT_RATIOS;
+const isAspectKey = (v: unknown): v is AspectKey =>
+  typeof v === 'string' && Object.prototype.hasOwnProperty.call(ASPECT_RATIOS, v);
 
 // Midpoint for classifying detected aspect ratio
 const ASPECT_RATIO_MIDPOINT =
@@ -185,8 +188,9 @@ export function useCardDetection(
     orientation === 'portrait' ? 1 / ratio : ratio;
 
   // If documentType is provided and valid, skip discovery entirely.
-  const providedDocType =
-    documentType && ASPECT_RATIOS[documentType] ? documentType : null;
+  const providedDocType: AspectKey | null = isAspectKey(documentType)
+    ? documentType
+    : null;
   const initialPhase = providedDocType
     ? DETECTION_PHASE.CAPTURE
     : DETECTION_PHASE.DISCOVERY;
@@ -198,28 +202,42 @@ export function useCardDetection(
     'Position your document in the frame',
   );
   const [captureProgress, setCaptureProgress] = useState(0);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [complianceState, setComplianceState] = useState(
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [complianceState, setComplianceState] = useState<string>(
     COMPLIANCE_STATES.IDLE,
   );
-  const [debugPath, setDebugPath] = useState(null); // For drawing the green box on overlay
-  const [debugInfo, setDebugInfo] = useState({}); // For tuning panel
-  const [detectedDocType, setDetectedDocType] = useState(providedDocType); // null = not yet classified
+  const [debugPath, setDebugPath] = useState<any>(null); // For drawing the green box on overlay
+  const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
+    providedDocType,
+  ); // null = not yet classified
   const [guideAspectRatio, setGuideAspectRatio] = useState(initialAspect);
 
   // Refs for loop management to avoid stale closures
   const settingsRef = useRef(settings);
-  const stabilityRef = useRef({ count: 0, lastCenter: null });
+  const stabilityRef = useRef<{
+    count: number;
+    lastCenter: { x: number; y: number } | null;
+  }>({ count: 0, lastCenter: null });
   // Tracks the sharpest frame during the stability window. We keep both the
   // full-frame submission image and an optional cropped preview so the review
   // screen can show the cropped region while the API still receives the full
   // frame.
-  const bestFrameRef = useRef({ image: null, preview: null, score: 0 });
+  const bestFrameRef = useRef<{
+    image: string | null;
+    preview: string | null;
+    score: number;
+  }>({ image: null, preview: null, score: 0 });
   const isCapturingRef = useRef(false);
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<(HTMLCanvasElement & { _roiLogged?: boolean }) | null>(null);
   const detectionPhaseRef = useRef(initialPhase);
-  const discoveryRef = useRef({
+  const discoveryRef = useRef<{
+    votes: AspectKey[];
+    docType: AspectKey | null;
+    frameCount: number;
+    consecutiveMisses: number;
+  }>({
     votes: [],
     docType: providedDocType,
     frameCount: 0,
@@ -230,12 +248,17 @@ export function useCardDetection(
     settingsRef.current = settings;
   }, [settings]);
 
-  const [captureOrigin, setCaptureOrigin] = useState(null); // 'camera_auto_capture' | 'camera_manual_capture'
+  const [captureOrigin, setCaptureOrigin] = useState<string | null>(null); // 'camera_auto_capture' | 'camera_manual_capture'
   const [manualFallbackActive, setManualFallbackActive] = useState(false);
   const [cvLoadFailed, setCvLoadFailed] = useState(false);
 
   // Stores the most recent ROI coordinates so triggerManualCapture can crop on demand.
-  const latestCropCoordsRef = useRef(null);
+  const latestCropCoordsRef = useRef<{
+    clampedX: number;
+    clampedY: number;
+    clampedW: number;
+    clampedH: number;
+  } | null>(null);
   // Off-guide detection (desktop only): low-res scratch canvas + frame counter +
   // last-known in-guide state to skip the scan once a card is locked in.
   const offGuideCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -244,7 +267,12 @@ export function useCardDetection(
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
-  const latestCardRectRef = useRef(null);
+  const latestCardRectRef = useRef<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
   // Mirror of captureMode for access inside the processFrame closure.
   const captureModeRef = useRef(captureMode);
   useEffect(() => {
@@ -271,7 +299,7 @@ export function useCardDetection(
   }, []);
 
   useEffect(() => {
-    let animationFrameId;
+    let animationFrameId: number;
 
     const processFrame = () => {
       // 0. Stop if capturing or video not ready
@@ -288,19 +316,19 @@ export function useCardDetection(
       }
 
       // 1. Setup CV structs
-      let fullFrame = null;
-      let src = null;
-      let gray = null;
-      let blurred = null;
-      let edges = null;
-      let presenceEdges = null;
-      let presenceBlurred = null;
-      let contours = null;
-      let hierarchy = null;
-      let laplacian = null;
-      let mean = null;
-      let stdDev = null;
-      let glareMask = null;
+      let fullFrame: any = null;
+      let src: any = null;
+      let gray: any = null;
+      let blurred: any = null;
+      let edges: any = null;
+      let presenceEdges: any = null;
+      let presenceBlurred: any = null;
+      let contours: any = null;
+      let hierarchy: any = null;
+      let laplacian: any = null;
+      let mean: any = null;
+      let stdDev: any = null;
+      let glareMask: any = null;
 
       // Inner function so each early `return` inside the detection pipeline
       // exits only this helper (then falls through to the shared finally
@@ -312,7 +340,7 @@ export function useCardDetection(
           canvasRef.current = document.createElement('canvas');
         }
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
         // Sync canvas size
         if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
@@ -572,7 +600,6 @@ export function useCardDetection(
         const cellRatio = settingsRef.current.gridCellRatio || 0.5;
         const cellMin = edgeThreshold * cellRatio;
         const quadDensities = [];
-        let allQuadrantsPass = true;
         let passingCells = 0;
         for (let row = 0; row < rows3; row++) {
           for (let col = 0; col < cols3; col++) {
@@ -585,9 +612,7 @@ export function useCardDetection(
             const cRoi = presenceEdges.roi(cRect);
             const cDensity = (cv.countNonZero(cRoi) / cellPixels) * 100;
             quadDensities.push(cDensity.toFixed(1));
-            if (cDensity < cellMin) {
-              allQuadrantsPass = false;
-            } else {
+            if (cDensity >= cellMin) {
               passingCells++;
             }
             cRoi.delete();
@@ -904,7 +929,10 @@ export function useCardDetection(
 
             // Store points relative to the ROI for overlay drawing (only if dynamic border is on)
             if (settingsRef.current.useDynamicBorder) {
-              const points = [];
+              const points: Array<{ x: number; y: number }> & {
+                roiWidth?: number;
+                roiHeight?: number;
+              } = [];
               for (let i = 0; i < 4; i++) {
                 points.push({
                   x: bestContour.data32S[i * 2],
@@ -1131,7 +1159,7 @@ export function useCardDetection(
             submitCanvas.width = scw;
             submitCanvas.height = sch;
             submitCanvas
-              .getContext('2d')
+              .getContext('2d')!
               .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
             submittedDataUrl = submitCanvas.toDataURL('image/jpeg', 0.95);
           }
@@ -1143,10 +1171,10 @@ export function useCardDetection(
             const useContour =
               settingsRef.current.cropToContour !== false &&
               latestCardRectRef.current;
-            const sourceX = useContour ? latestCardRectRef.current.x : clampedX;
-            const sourceY = useContour ? latestCardRectRef.current.y : clampedY;
-            const sourceW = useContour ? latestCardRectRef.current.w : clampedW;
-            const sourceH = useContour ? latestCardRectRef.current.h : clampedH;
+            const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
+            const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
+            const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
+            const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
             const padPct = settingsRef.current.previewCropPadding;
             const pad = (padPct == null ? 2 : padPct) / 100;
             const padX = sourceW * pad;
@@ -1166,7 +1194,7 @@ export function useCardDetection(
             cropCanvas.width = cw;
             cropCanvas.height = ch;
             cropCanvas
-              .getContext('2d')
+              .getContext('2d')!
               .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
             croppedDataUrl = cropCanvas.toDataURL('image/jpeg', 0.95);
           }
@@ -1225,14 +1253,18 @@ export function useCardDetection(
             const bestPreviewUrl = bestFrameRef.current.preview;
             // Rotate if UI was rotated during capture
             if (shouldRotateUi && bestFrameUrl) {
-              const rotateDataUrl = (srcUrl) =>
-                new Promise((resolve, reject) => {
+              const rotateDataUrl = (srcUrl: string) =>
+                new Promise<string>((resolve, reject) => {
                   const img = new Image();
                   img.onload = () => {
                     const rotated = document.createElement('canvas');
                     rotated.width = img.height;
                     rotated.height = img.width;
                     const rctx = rotated.getContext('2d');
+                    if (!rctx) {
+                      reject(new Error('2d context unavailable'));
+                      return;
+                    }
                     rctx.translate(rotated.width / 2, rotated.height / 2);
                     rctx.rotate(-Math.PI / 2);
                     rctx.drawImage(img, -img.width / 2, -img.height / 2);
@@ -1246,7 +1278,7 @@ export function useCardDetection(
                 rotateDataUrl(bestFrameUrl),
                 bestPreviewUrl
                   ? rotateDataUrl(bestPreviewUrl)
-                  : Promise.resolve(null),
+                  : Promise.resolve<string | null>(null),
               ]).then(([rotatedFull, rotatedPreview]) => {
                 setCapturedImage(rotatedFull);
                 setPreviewImage(rotatedPreview);
@@ -1265,9 +1297,9 @@ export function useCardDetection(
 
       try {
         runDetection();
-      } catch (err) {
+      } catch (err: any) {
         console.error('CV Error:', err);
-        setFeedback(`Error: ${err.message || 'Processing failed'}`);
+        setFeedback(`Error: ${err?.message || 'Processing failed'}`);
         setComplianceState(COMPLIANCE_STATES.IDLE);
         stabilityRef.current.count = 0;
         bestFrameRef.current = { image: null, preview: null, score: 0 };
@@ -1306,11 +1338,11 @@ export function useCardDetection(
   // Helper to rotate a canvas 90° counter-clockwise with dimension swap.
   // Must match the auto-capture rotation direction (-π/2) so manual and auto
   // captures produce identically-oriented previews.
-  const rotateCanvas90CCW = (canvas) => {
+  const rotateCanvas90CCW = (canvas: HTMLCanvasElement) => {
     const rotated = document.createElement('canvas');
     rotated.width = canvas.height;
     rotated.height = canvas.width;
-    const ctx = rotated.getContext('2d');
+    const ctx = rotated.getContext('2d')!;
     ctx.translate(0, rotated.height);
     ctx.rotate(-Math.PI / 2);
     ctx.drawImage(canvas, 0, 0);
@@ -1327,8 +1359,8 @@ export function useCardDetection(
 
     // Submitted image: full frame, or guide-rect crop when cropToCard is on
     // (original behavior, padded by `cropPadding`).
-    let submitCaptureCanvas = canvas;
-    let previewCaptureCanvas = null;
+    let submitCaptureCanvas: HTMLCanvasElement = canvas;
+    let previewCaptureCanvas: HTMLCanvasElement | null = null;
 
     // Skip cropping if UI is rotated — crop margins don't work well with 90°
     // rotation, so we fall back to the full frame in that case.
@@ -1348,16 +1380,16 @@ export function useCardDetection(
       submitCanvas.width = scw;
       submitCanvas.height = sch;
       submitCanvas
-        .getContext('2d')
+        .getContext('2d')!
         .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
       submitCaptureCanvas = submitCanvas;
 
       // Preview: tighter contour crop with previewCropPadding.
       const useContour = s.cropToContour !== false && latestCardRectRef.current;
-      const sourceX = useContour ? latestCardRectRef.current.x : clampedX;
-      const sourceY = useContour ? latestCardRectRef.current.y : clampedY;
-      const sourceW = useContour ? latestCardRectRef.current.w : clampedW;
-      const sourceH = useContour ? latestCardRectRef.current.h : clampedH;
+      const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
+      const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
+      const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
+      const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
       const padPct = s.previewCropPadding;
       const pad = (padPct == null ? 2 : padPct) / 100;
       const padX = sourceW * pad;
@@ -1370,7 +1402,7 @@ export function useCardDetection(
       cropCanvas.width = cw;
       cropCanvas.height = ch;
       cropCanvas
-        .getContext('2d')
+        .getContext('2d')!
         .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
       previewCaptureCanvas = cropCanvas;
     }

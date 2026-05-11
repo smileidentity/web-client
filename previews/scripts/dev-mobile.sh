@@ -20,6 +20,7 @@ set -euo pipefail
 PREVIEWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$PREVIEWS_DIR/.." && pwd)"
 EMBED_DIR="$REPO_ROOT/packages/embed"
+WEB_COMPONENTS_DIR="$REPO_ROOT/packages/web-components"
 
 if ! command -v cloudflared >/dev/null 2>&1; then
   echo "❌ cloudflared not found. Install it first:"
@@ -29,6 +30,11 @@ fi
 
 if [ ! -d "$EMBED_DIR" ]; then
   echo "❌ Embed package not found at $EMBED_DIR"
+  exit 1
+fi
+
+if [ ! -d "$WEB_COMPONENTS_DIR" ]; then
+  echo "❌ web-components package not found at $WEB_COMPONENTS_DIR"
   exit 1
 fi
 
@@ -65,6 +71,21 @@ wait_for_tunnel_url() {
   done
   echo "❌ Timed out waiting for $label tunnel URL. Logs: $log_file" >&2
   return 1
+}
+
+echo "📦 Building @smileid/web-components (embed depends on its dist/ output)..."
+# Workspace deps live at $REPO_ROOT/node_modules; only run an install if the
+# root install hasn't happened yet. Stream build output to the terminal so
+# failures are immediately visible.
+(
+  cd "$REPO_ROOT"
+  if [ ! -d node_modules ]; then
+    npm ci
+  fi
+  npm run build --workspace=@smileid/web-components
+) || {
+  echo "❌ web-components build failed; aborting." >&2
+  exit 1
 }
 
 echo "📦 Starting embed dev server (port 8000)..."

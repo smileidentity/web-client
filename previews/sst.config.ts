@@ -14,8 +14,17 @@ export default $config({
     const CALLBACK_URL = new sst.Secret('CallbackUrl');
     const SMILEID_API_KEY = new sst.Secret('SmileIdApiKey');
     const SMILE_ID_ENVIRONMENT = new sst.Secret('SmileIdEnvironment');
-    const EmbedUrl = new sst.Secret('EmbedUrl');
-    const WafWebAclArn = new sst.Secret('WafWebAclArn');
+
+    // Use a Linkable with a localhost default during `sst dev` so the embed
+    // can be served from the local embed dev server. CI/deployed stages use
+    // a Secret set to a full CDN URL (e.g. https://cdn.smileidentity.com/...)
+    const EmbedUrl = $dev
+      ? new sst.Linkable('EmbedUrl', {
+          properties: {
+            value: process.env.EmbedUrl ?? 'http://localhost:8000',
+          },
+        })
+      : new sst.Secret('EmbedUrl');
 
     const api = new sst.aws.Function('GetToken', {
       handler: 'api/lambda.handler',
@@ -23,13 +32,18 @@ export default $config({
       link: [PARTNER_ID, CALLBACK_URL, SMILEID_API_KEY, SMILE_ID_ENVIRONMENT],
     });
 
+    // Only add WAF configuration for deployed stages (skip local `sst dev`)
+    const WafWebAclArn = $dev ? undefined : new sst.Secret('WafWebAclArn');
+
     const site = new sst.aws.Remix('PreviewApp', {
       link: [api, EmbedUrl, PARTNER_ID],
       transform: {
         cdn: {
           transform: {
             distribution: (args) => {
-              args.webAclId = WafWebAclArn.value;
+              if (WafWebAclArn) {
+                args.webAclId = WafWebAclArn.value;
+              }
             },
           },
         },

@@ -73,16 +73,23 @@ wait_for_tunnel_url() {
   return 1
 }
 
-echo "📦 Starting embed dev server (port 8000)..."
-echo "   Building @smileid/web-components first (embed depends on its dist/ output)..."
+echo "� Building @smileid/web-components (embed depends on its dist/ output)..."
+# Workspace deps live at $REPO_ROOT/node_modules; only run an install if the
+# root install hasn't happened yet. Stream build output to the terminal so
+# failures are immediately visible.
 (
-  cd "$WEB_COMPONENTS_DIR"
+  cd "$REPO_ROOT"
   if [ ! -d node_modules ]; then
     npm ci
   fi
-  npm run build
-) > "$EMBED_LOG" 2>&1
-(cd "$EMBED_DIR" && npm start) >> "$EMBED_LOG" 2>&1 &
+  npm run build --workspace=@smileid/web-components
+) || {
+  echo "❌ web-components build failed; aborting." >&2
+  exit 1
+}
+
+echo "📦 Starting embed dev server (port 8000)..."
+(cd "$EMBED_DIR" && npm start) > "$EMBED_LOG" 2>&1 &
 PIDS+=($!)
 
 echo "🌩  Opening Cloudflare tunnel for embed (port 8000)..."

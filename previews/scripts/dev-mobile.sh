@@ -73,7 +73,7 @@ wait_for_tunnel_url() {
   return 1
 }
 
-echo "� Building @smileid/web-components (embed depends on its dist/ output)..."
+echo "📦 Building @smileid/web-components (embed depends on its dist/ output)..."
 # Workspace deps live at $REPO_ROOT/node_modules; only run an install if the
 # root install hasn't happened yet. Stream build output to the terminal so
 # failures are immediately visible.

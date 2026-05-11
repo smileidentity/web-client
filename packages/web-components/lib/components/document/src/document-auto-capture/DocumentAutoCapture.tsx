@@ -101,41 +101,47 @@ const galleryButtonStyle = {
   padding: 0,
 };
 
-const galleryButtonInnerStyle = {
-  width: 56,
-  height: 56,
-  borderRadius: '50%',
-  border: '1px solid rgba(255,255,255,0.15)',
-  backgroundColor: '#1d2f9d',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-};
-
 const FEEDBACK_MIN_DISPLAY_MS = 500;
 
 function GalleryIcon() {
   return (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
+      width="56"
+      height="56"
+      viewBox="0 0 56 56"
       fill="none"
+      xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect
-        x="4"
-        y="5"
-        width="16"
-        height="14"
-        rx="2.5"
+      <mask id="gallery-btn-inside" fill="white">
+        <path d="M0 28C0 12.536 12.536 0 28 0C43.464 0 56 12.536 56 28C56 43.464 43.464 56 28 56C12.536 56 0 43.464 0 28Z" />
+      </mask>
+      <path
+        d="M0 28C0 12.536 12.536 0 28 0C43.464 0 56 12.536 56 28C56 43.464 43.464 56 28 56C12.536 56 0 43.464 0 28Z"
+        fill="#151F72"
+      />
+      <path
+        d="M0 28M56 28M56 28M0 28M28 0M56 28M28 56M0 28M28 56V55C13.0883 55 1 42.9117 1 28H0H-1C-1 44.0163 11.9837 57 28 57V56ZM56 28H55C55 42.9117 42.9117 55 28 55V56V57C44.0163 57 57 44.0163 57 28H56ZM28 0V1C42.9117 1 55 13.0883 55 28H56H57C57 11.9837 44.0163 -1 28 -1V0ZM28 0V-1C11.9837 -1 -1 11.9837 -1 28H0H1C1 13.0883 13.0883 1 28 1V0Z"
+        fill="white"
+        fillOpacity="0.1"
+        mask="url(#gallery-btn-inside)"
+      />
+      <path
+        d="M35 19H21C19.8954 19 19 19.8954 19 21V35C19 36.1046 19.8954 37 21 37H35C36.1046 37 37 36.1046 37 35V21C37 19.8954 36.1046 19 35 19Z"
         stroke="white"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <circle cx="9" cy="10" r="1.4" fill="white" />
       <path
-        d="M6.5 16l4.2-4.2 2.8 2.8 1.9-1.9 2.1 2.1"
+        d="M25 27C26.1046 27 27 26.1046 27 25C27 23.8954 26.1046 23 25 23C23.8954 23 23 23.8954 23 25C23 26.1046 23.8954 27 25 27Z"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M37 30.9999L33.914 27.9139C33.5389 27.539 33.0303 27.3284 32.5 27.3284C31.9697 27.3284 31.4611 27.539 31.086 27.9139L22 36.9999"
         stroke="white"
         strokeWidth="2"
         strokeLinecap="round"
@@ -152,9 +158,7 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
       style={galleryButtonStyle}
       aria-label="Select image from gallery"
     >
-      <span style={galleryButtonInnerStyle}>
-        <GalleryIcon />
-      </span>
+      <GalleryIcon />
     </button>
   );
 }
@@ -783,14 +787,15 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             </div>
           )}
 
-          {/* Side manual capture button */}
+          {/* Side manual capture button — anchor the CaptureButton (72px) at
+              the vertical center so the gallery button stacks below without
+              shifting the shutter off-center. */}
           {(useSideManualCapture || showSideGalleryButton) && (
             <div
               style={{
                 position: 'absolute',
                 right: 34,
-                top: '50%',
-                transform: 'translateY(-50%)',
+                top: 'calc(50% - 36px)',
                 zIndex: 12,
                 display: 'flex',
                 flexDirection: 'column',
@@ -847,35 +852,23 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
         {/* Manual fallback button — only shown in portrait layout (not rotated).
             Matches the landscape side-button styling: bare CaptureButton with
-            no pill background. */}
+            no pill background. The CaptureButton is centered absolutely; the
+            gallery button is anchored to its right so the shutter stays on
+            the horizontal centerline regardless of which controls are shown. */}
         {!shouldRotateUi &&
           (showManualCaptureControl || showBottomGalleryButton) &&
           !useSideManualCapture && (
-            <div
-              style={{
-                position: 'absolute',
-                left: '50%',
-                bottom: 60,
-                transform: 'translateX(-50%)',
-                zIndex: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 24,
-                }}
-              >
-                {showBottomGalleryButton && (
-                  <GalleryButton onClick={handlePickFromGallery} />
-                )}
-                {showManualCaptureControl && (
+            <>
+              {showManualCaptureControl && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: 60,
+                    transform: 'translateX(-50%)',
+                    zIndex: 12,
+                  }}
+                >
                   <CaptureButton
                     progress={
                       complianceState === COMPLIANCE_STATES.STABLE
@@ -886,22 +879,47 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                     appearance="light"
                     onClick={triggerManualCapture}
                   />
-                )}
-              </div>
+                </div>
+              )}
+              {showBottomGalleryButton && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    // Shutter is 72 px wide and centered; gallery sits to its
+                    // left at 36 px half-width + 24 px gap so the shutter
+                    // stays exactly on the centerline.
+                    left: showManualCaptureControl
+                      ? 'calc(50% - 36px - 24px)'
+                      : '50%',
+                    bottom: 60,
+                    transform: showManualCaptureControl
+                      ? 'translateX(-100%)'
+                      : 'translateX(-50%)',
+                    zIndex: 12,
+                  }}
+                >
+                  <GalleryButton onClick={handlePickFromGallery} />
+                </div>
+              )}
               {captureMode === 'autoCaptureOnly' && cvLoadFailed && (
                 <p
                   style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: 28,
+                    transform: 'translateX(-50%)',
+                    zIndex: 12,
                     color: theme.colors.error,
                     fontSize: '0.8rem',
                     textAlign: 'center',
-                    margin: `${theme.spacing.sm} 0 0`,
+                    margin: 0,
                   }}
                 >
                   Auto-detection unavailable. Please reload or try another
                   browser.
                 </p>
               )}
-            </div>
+            </>
           )}
       </div>
 

@@ -20,6 +20,7 @@ set -euo pipefail
 PREVIEWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$PREVIEWS_DIR/.." && pwd)"
 EMBED_DIR="$REPO_ROOT/packages/embed"
+WEB_COMPONENTS_DIR="$REPO_ROOT/packages/web-components"
 
 if ! command -v cloudflared >/dev/null 2>&1; then
   echo "❌ cloudflared not found. Install it first:"
@@ -29,6 +30,11 @@ fi
 
 if [ ! -d "$EMBED_DIR" ]; then
   echo "❌ Embed package not found at $EMBED_DIR"
+  exit 1
+fi
+
+if [ ! -d "$WEB_COMPONENTS_DIR" ]; then
+  echo "❌ web-components package not found at $WEB_COMPONENTS_DIR"
   exit 1
 fi
 
@@ -68,7 +74,15 @@ wait_for_tunnel_url() {
 }
 
 echo "📦 Starting embed dev server (port 8000)..."
-(cd "$EMBED_DIR" && npm start) > "$EMBED_LOG" 2>&1 &
+echo "   Building @smileid/web-components first (embed depends on its dist/ output)..."
+(
+  cd "$WEB_COMPONENTS_DIR"
+  if [ ! -d node_modules ]; then
+    npm ci
+  fi
+  npm run build
+) > "$EMBED_LOG" 2>&1
+(cd "$EMBED_DIR" && npm start) >> "$EMBED_LOG" 2>&1 &
 PIDS+=($!)
 
 echo "🌩  Opening Cloudflare tunnel for embed (port 8000)..."

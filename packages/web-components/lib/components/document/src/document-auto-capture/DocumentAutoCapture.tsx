@@ -187,7 +187,10 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // default. This mirrors how <document-capture-instructions> gates its
   // upload button on the same attribute.
   const captureModesAllowUpload = (() => {
-    if (documentCaptureModesProp === undefined || documentCaptureModesProp === null) {
+    if (
+      documentCaptureModesProp === undefined ||
+      documentCaptureModesProp === null
+    ) {
       return true;
     }
     const modes = String(documentCaptureModesProp)

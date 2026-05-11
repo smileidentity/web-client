@@ -93,8 +93,7 @@ export default function Product() {
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
   const [autoCapture, setAutoCapture] = useState<boolean>(false);
-  const [autoCaptureMode, setAutoCaptureMode] =
-    useState<string>('autoCapture');
+  const [autoCaptureMode, setAutoCaptureMode] = useState<string>('autoCapture');
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {

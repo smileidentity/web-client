@@ -79,6 +79,7 @@ class ComboboxTrigger extends HTMLElement {
 
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleInput = this.handleInput.bind(this);
     this.handleSelection = this.handleSelection.bind(this);
 
     this.toggleExpansionState = this.toggleExpansionState.bind(this);
@@ -139,6 +140,7 @@ class ComboboxTrigger extends HTMLElement {
 
       this.inputTrigger.addEventListener('keydown', this.handleKeyDown);
       this.inputTrigger.addEventListener('keyup', this.handleKeyUp);
+      this.inputTrigger.addEventListener('input', this.handleInput);
       this.inputTrigger.addEventListener('change', (e) => e.stopPropagation());
     }
 
@@ -159,6 +161,7 @@ class ComboboxTrigger extends HTMLElement {
     if (this.inputTrigger) {
       this.inputTrigger.removeEventListener('keydown', this.handleKeyDown);
       this.inputTrigger.removeEventListener('keyup', this.handleKeyUp);
+      this.inputTrigger.removeEventListener('input', this.handleInput);
       this.inputTrigger.removeEventListener('change', (e) =>
         e.stopPropagation(),
       );
@@ -245,10 +248,6 @@ class ComboboxTrigger extends HTMLElement {
   }
 
   handleKeyUp(event) {
-    const { key } = event;
-
-    const isPrintableCharacter = (str) => str.length === 1 && str.match(/\S| /);
-
     if (event.key === 'Escape' || event.key === 'Esc') {
       event.preventDefault();
       if (this.getAttribute('expanded') === 'true') {
@@ -261,11 +260,11 @@ class ComboboxTrigger extends HTMLElement {
         );
       }
     }
+  }
 
-    if (isPrintableCharacter(key) || key === 'Backspace') {
-      this.resetListbox();
-      this.filterListbox(event.target.value);
-    }
+  handleInput(event) {
+    this.resetListbox();
+    this.filterListbox(event.target.value);
   }
 
   toggleExpansionState() {

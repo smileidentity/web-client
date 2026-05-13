@@ -267,6 +267,11 @@ export function useCardDetection(
   const offGuideCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const offGuideFrameCounterRef = useRef(0);
   const inGuideDetectedRef = useRef(false);
+  // Consecutive frames in CAPTURE phase with no valid in-guide contour.
+  // Used to absorb intermittent detection misses (especially on book-style
+  // documents whose spine/page edges can momentarily break) before flipping
+  // the user-facing prompt to "Align document in frame".
+  const captureMissCounterRef = useRef(0);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -500,6 +505,14 @@ export function useCardDetection(
         // DISCOVERY phase we still skip while a card is locked in to avoid
         // contending with the per-frame contour pass.
         const isCardVariant = variant === 'card';
+        // Book-style documents (passport, greenbook) open to two pages: the
+        // off-page legitimately sits outside the guide while the bio-data
+        // page is aligned, so the off-guide detector would produce false
+        // "Align document in frame" prompts. Skip it for these doc types.
+        const lockedDocTypeForGate = discoveryRef.current.docType;
+        const isBookDoc =
+          lockedDocTypeForGate === 'passport' ||
+          lockedDocTypeForGate === 'greenbook';
         const hasMargin =
           displayW - guideWidthCSS > OFF_GUIDE_MIN_MARGIN_X_CSS ||
           displayH - guideHeightCSS > OFF_GUIDE_MIN_MARGIN_Y_CSS;
@@ -509,6 +522,7 @@ export function useCardDetection(
           detectionPhaseRef.current === DETECTION_PHASE.CAPTURE;
         const shouldRunOffGuide =
           !isCardVariant &&
+          !isBookDoc &&
           hasMargin &&
           (isCapturePhase || !inGuideDetectedRef.current) &&
           offGuideFrameCounterRef.current === 0;
@@ -718,7 +732,11 @@ export function useCardDetection(
           );
 
           let maxArea = 0;
-          let bestContour = null;
+          let bestContour: any = null;
+          // True when bestContour is the synthesized book-doc fallback rect.
+          // Its bbox covers inner content (photo/text/MRZ), not the full page,
+          // so distance gates that compare bbox/ROI are unreliable for it.
+          let bestContourIsSynthetic = false;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -777,10 +795,18 @@ export function useCardDetection(
                 const expectedAspect = lockedDocType
                   ? ASPECT_RATIOS[lockedDocType]
                   : null;
+                // Book-style documents (passport, greenbook) have a low-
+                // contrast spine fold and facing page, so the detected
+                // contour is inherently noisier than a card. Allow a wider
+                // aspect tolerance for those types.
+                const isBookDocAspect =
+                  lockedDocType === 'passport' ||
+                  lockedDocType === 'greenbook';
+                const aspectTolerance = isBookDocAspect ? 0.35 : 0.2;
                 const aspectOk = expectedAspect
                   ? Math.abs(normalizedAspect - expectedAspect) /
                       expectedAspect <
-                    0.2
+                    aspectTolerance
                   : normalizedAspect >= 1.18 && normalizedAspect <= 1.95;
 
                 let anglesOk = true;
@@ -831,6 +857,45 @@ export function useCardDetection(
             cnt.delete();
           }
 
+          // --- Book-doc fallback ---
+          // Passport/greenbook frequently fail the strict 4-vertex check
+          // because the binding seam at the top is low-contrast and breaks
+          // the outer contour. When no 4-corner card is found in CAPTURE
+          // phase for a book doc, synthesize an axis-aligned rect from the
+          // combined bbox of all significant contours (photo, text, MRZ,
+          // page edges) if the aspect roughly matches the locked doc type.
+          if (!bestContour && hasSignificantContour && !isDiscovery) {
+            const lockedDocTypeForFallback = discoveryRef.current.docType;
+            const isBookDocFallback =
+              lockedDocTypeForFallback === 'passport' ||
+              lockedDocTypeForFallback === 'greenbook';
+            if (isBookDocFallback) {
+              const bw = combinedMaxX - combinedMinX;
+              const bh = combinedMaxY - combinedMinY;
+              if (bw > 0 && bh > 0) {
+                const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
+                const rawAspect = bw / bh;
+                const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
+                const aspectOk =
+                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect < 0.35;
+                const minArea = guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
+                if (aspectOk && bw * bh > minArea) {
+                  const synth = new cv.Mat(4, 1, cv.CV_32SC2);
+                  synth.data32S[0] = combinedMinX;
+                  synth.data32S[1] = combinedMinY;
+                  synth.data32S[2] = combinedMaxX;
+                  synth.data32S[3] = combinedMinY;
+                  synth.data32S[4] = combinedMaxX;
+                  synth.data32S[5] = combinedMaxY;
+                  synth.data32S[6] = combinedMinX;
+                  synth.data32S[7] = combinedMaxY;
+                  bestContour = synth;
+                  bestContourIsSynthetic = true;
+                }
+              }
+            }
+          }
+
           // --- Distance guidance (combined bounding box of all contours) ---
           // The combined bbox captures the document's full extent even when edges
           // are broken into many fragments by fingers, glare, etc.
@@ -868,7 +933,19 @@ export function useCardDetection(
           }
 
           // Active whenever we have a real contour to measure against.
-          const fillCheckActive = !!bestContour;
+          // Skip distance gating when the contour is the synthetic book-doc
+          // fallback: its bbox reflects inner content, not the full page,
+          // so fill% is structurally low and would block capture forever.
+          const fillCheckActive = !!bestContour && !bestContourIsSynthetic;
+
+          // Book-style docs (passport/greenbook) frequently yield a contour
+          // covering only the bio-data page rather than the full guide rect,
+          // so we relax the minimum fill threshold for them.
+          const lockedDocTypeForFill = discoveryRef.current.docType;
+          const isBookDocFill =
+            lockedDocTypeForFill === 'passport' ||
+            lockedDocTypeForFill === 'greenbook';
+          const minFillPercent = isBookDocFill ? 20 : MIN_FILL_PERCENT;
 
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
@@ -877,7 +954,7 @@ export function useCardDetection(
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent < MIN_FILL_PERCENT
+            docFillPercent < minFillPercent
           ) {
             setFeedback('Move document closer');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
@@ -913,6 +990,7 @@ export function useCardDetection(
           if (bestContour) {
             // Reset consecutive miss counter on successful detection
             if (isDiscovery) discoveryRef.current.consecutiveMisses = 0;
+            captureMissCounterRef.current = 0;
             // Mark in-guide hit so the off-guide scan stays paused while
             // a card is locked in.
             inGuideDetectedRef.current = true;
@@ -1067,10 +1145,22 @@ export function useCardDetection(
               return;
             }
             // CAPTURE phase: no validated card-shaped contour inside the
-            // ROI. The downstream blur/glare/stability gates would otherwise
-            // happily fire on whatever fragment of background is in the
-            // guide, which is the root cause of off-guide auto-captures on
-            // rotated mobile UI. Bail out and prompt the user to align.
+            // ROI. Tolerate a few consecutive misses before changing the
+            // prompt — book-style documents (passport, greenbook) frequently
+            // drop the contour for 1–3 frames as the spine flexes or fingers
+            // cross the edge, and flipping between "Move closer" and "Align
+            // document" on every miss is jarring.
+            captureMissCounterRef.current += 1;
+            const CAPTURE_MISS_TOLERANCE = 8;
+            if (captureMissCounterRef.current < CAPTURE_MISS_TOLERANCE) {
+              setDebugInfo({
+                edgeDensity: edgeDensity.toFixed(1),
+                texture: Math.round(textureScore),
+                quadrants: quadDensities.join('/'),
+                missStreak: captureMissCounterRef.current,
+              });
+              return;
+            }
             setFeedback('Align document in frame');
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
@@ -1079,6 +1169,7 @@ export function useCardDetection(
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
               quadrants: quadDensities.join('/'),
+              missStreak: captureMissCounterRef.current,
             });
             return;
           }
@@ -1455,6 +1546,7 @@ export function useCardDetection(
     stabilityRef.current.lastCenter = null;
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
+    captureMissCounterRef.current = 0;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);

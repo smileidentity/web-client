@@ -402,6 +402,7 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'hide-back-to-host':
       case 'show-navigation':
       case 'new-instructions':
+        this.innerHTML = '';
         this.connectedCallback();
         break;
       default:

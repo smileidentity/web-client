@@ -1252,6 +1252,14 @@ class SmartCameraWeb extends HTMLElement {
     ) {
       this.setUpEventListeners();
     } else {
+      // Report to Sentry so we can see which browsers/devices are landing here.
+      // Sentry is initialized by the parent @smileid/embed bundle on the same
+      // window; the optional-chain makes this a no-op in dev/test where Sentry
+      // isn't loaded.
+      window.Sentry?.captureException(
+        new Error('getUserMedia not available'),
+        { tags: { area: 'camera_init', failure: 'no_getUserMedia' } },
+      );
       const heading = document.createElement('h1');
       heading.classList.add('error-message');
       heading.textContent = 'Your browser does not support this integration';
@@ -1586,6 +1594,15 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   handleError(e) {
+    // Report every camera/getUserMedia failure to Sentry. The switch below
+    // still drives the user-facing message; this captureException only adds
+    // observability so we can see how often (and on which browsers) the
+    // various e.name buckets fire. Sentry is provided by the parent
+    // @smileid/embed bundle; the optional-chain makes this a no-op when
+    // Sentry isn't loaded.
+    window.Sentry?.captureException(e, {
+      tags: { area: 'camera', errorName: e.name || 'unknown' },
+    });
     switch (e.name) {
       case 'NotAllowedError':
       case 'SecurityError':

@@ -170,6 +170,9 @@ function applyPageTranslations() {
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
+    }
     // this is to mimic the behavior of the old hosted web integration
     SmartCameraWeb.setAttribute('hide-back-of-id', true);
     const supportedCountries = Object.keys(constraints)

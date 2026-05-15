@@ -114,10 +114,26 @@ window.Sentry = Sentry;
 
     try {
       const response = await fetch(url.toString(), fetchConfig);
+      // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
+      // an HTTP failure here would parse JSON of an error body and silently
+      // return undefined without a Sentry event. Explicitly throw so the
+      // catch tags the request and the status before re-throwing.
+      if (!response.ok) {
+        const err = new Error('Failed to get supported ID types');
+        err.httpStatus = response.status;
+        throw err;
+      }
       const json = await response.json();
 
       return json.valid_documents;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          area: 'init_api',
+          failedRequest: 'valid_documents',
+          ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+        },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -141,10 +157,22 @@ window.Sentry = Sentry;
 
     try {
       const response = await fetch(url.toString(), fetchConfig);
+      if (!response.ok) {
+        const err = new Error('Failed to get supported ID types');
+        err.httpStatus = response.status;
+        throw err;
+      }
       const json = await response.json();
 
       return json.hosted_web.doc_verification;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          area: 'init_api',
+          failedRequest: 'services',
+          ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+        },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -158,6 +186,16 @@ window.Sentry = Sentry;
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        // Tag every Sentry event from this iframe context with partner_id and
+        // environment. The parent script.js tags the parent window's Sentry
+        // hub, but this iframe runs in its own JS context with its own hub —
+        // without these tags, errors from this page are unattributable.
+        if (config.partner_details?.partner_id) {
+          Sentry.setTag('partner_id', config.partner_details.partner_id);
+        }
+        if (config.environment) {
+          Sentry.setTag('environment', config.environment);
+        }
         try {
           const language = config.translation?.language || 'en-GB';
           await setCurrentLocale(language, {

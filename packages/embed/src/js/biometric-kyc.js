@@ -20,6 +20,10 @@ import {
   idInfoToIdSelection,
   applyIdInfoPrefill,
 } from './id-info-utils.js';
+import {
+  buildInitApiFailure,
+  captureInitApiFailure,
+} from './init-api-sentry.js';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -87,6 +91,11 @@ window.Sentry = Sentry;
   }
 
   async function getProductConstraints() {
+    // Captured at the point we know which response.ok was false so the catch
+    // below can attach response-level detail to the Sentry event. Null when
+    // the failure is a promise rejection (network drop, abort, etc.) rather
+    // than a non-OK HTTP response.
+    let initApiFailure = null;
     try {
       const productsConfigPayload = {
         partner_id: config.partner_details.partner_id,
@@ -139,8 +148,13 @@ window.Sentry = Sentry;
           generalConstraints: generalConstraints.hosted_web.biometric_kyc,
         };
       }
+      initApiFailure = buildInitApiFailure(
+        productsConfigResponse,
+        servicesResponse,
+      );
       throw new Error('Failed to get supported ID types');
     } catch (e) {
+      captureInitApiFailure(e, initApiFailure);
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -167,6 +181,16 @@ window.Sentry = Sentry;
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        // Tag every Sentry event from this iframe context with partner_id and
+        // environment. The parent script.js tags the parent window's Sentry
+        // hub, but this iframe runs in its own JS context with its own hub —
+        // without these tags, errors from this page are unattributable.
+        if (config.partner_details?.partner_id) {
+          Sentry.setTag('partner_id', config.partner_details.partner_id);
+        }
+        if (config.environment) {
+          Sentry.setTag('environment', config.environment);
+        }
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });

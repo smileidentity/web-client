@@ -223,7 +223,7 @@ When loading the SmileID Web Components via CDN script tag, you can configure lo
 Include the script and set the locale before your components render:
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -328,7 +328,7 @@ To add a completely new language, use `registerLocale` before setting it as the 
 Here's a complete example showing language selection with custom overrides:
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -460,7 +460,7 @@ const consentMessage = tHtml('consent.accessRequest', {
 Here's a complete example using web components with locale configuration:
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />

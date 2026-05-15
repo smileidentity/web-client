@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
 import validate from 'validate.js';
 import '@smileid/web-components/end-user-consent';
@@ -19,6 +20,11 @@ import {
   idInfoToIdSelection,
   applyIdInfoPrefill,
 } from './id-info-utils.js';
+
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
 
 (function biometricKyc() {
   'use strict';

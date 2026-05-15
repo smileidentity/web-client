@@ -8,7 +8,7 @@ variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb [${name}]`, () => {
     beforeEach(() => {
       cy.visit(
-        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
+        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&new-instructions=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
       );
     });
 
@@ -94,16 +94,59 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-instructions')
+        .find('document-capture-instructions-v2')
         .should('be.visible');
 
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-front',
+          'document-capture-instructions-v2#document-capture-instructions-front',
         )
         .invoke('attr', 'theme-color')
         .should('equal', themeColor);
+    });
+
+    it('renders legacy document-capture-instructions when new-instructions is not set', () => {
+      cy.visit(
+        `/?component=smart-camera-web&direct=true&capture-id=true&disable-image-tests=true&theme-color=${encodeURIComponent(themeColor)}${suffix}`,
+      );
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-instructions')
+        .shadow()
+        .find('#allow')
+        .click();
+
+      cy.wait(2000);
+      cy.clock();
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-wrapper')
+        .shadow()
+        .find('selfie-capture')
+        .shadow()
+        .find('#start-image-capture')
+        .click();
+
+      cy.tick(8000);
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('selfie-capture-review')
+        .shadow()
+        .find('#select-id-image')
+        .click();
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('document-capture-instructions')
+        .should('be.visible');
+
+      cy.get('smart-camera-web')
+        .shadow()
+        .find('document-capture-instructions-v2')
+        .should('not.exist');
     });
 
     it.skip('should complete the full document capture flow', () => {
@@ -137,7 +180,7 @@ variants.forEach(({ name, suffix }) => {
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-front',
+          'document-capture-instructions-v2#document-capture-instructions-front',
         )
         .shadow()
         .find('.doc-instr-start-btn')
@@ -166,7 +209,7 @@ variants.forEach(({ name, suffix }) => {
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-back',
+          'document-capture-instructions-v2#document-capture-instructions-back',
         )
         .shadow()
         .find('#select-id-image')

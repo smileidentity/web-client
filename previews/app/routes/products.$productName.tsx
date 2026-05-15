@@ -92,6 +92,7 @@ export default function Product() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
+  const [newInstructions, setNewInstructions] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -99,6 +100,7 @@ export default function Product() {
         ...config,
         allow_agent_mode: true,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
+        new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''
@@ -214,6 +216,23 @@ export default function Product() {
                   value={allowLegacySelfieFallback ? 'true' : 'false'}
                   onChange={(e) =>
                     setAllowLegacySelfieFallback(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="new-instructions-select">
+                  New Document Instructions
+                </label>
+                <select
+                  id="new-instructions-select"
+                  value={newInstructions ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setNewInstructions(e.target.value === 'true')
                   }
                   disabled={isGettingToken}
                 >

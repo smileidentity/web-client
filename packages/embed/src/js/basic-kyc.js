@@ -18,6 +18,10 @@ import {
   idInfoToIdSelection,
   applyIdInfoPrefill,
 } from './id-info-utils.js';
+import {
+  buildInitApiFailure,
+  captureInitApiFailure,
+} from './init-api-sentry.js';
 
 (function basicKyc() {
   'use strict';
@@ -130,32 +134,13 @@ import {
           generalConstraints: generalConstraints.hosted_web.basic_kyc,
         };
       }
-      const failedRequests = [];
-      if (!productsConfigResponse.ok) failedRequests.push('products_config');
-      if (!servicesResponse.ok) failedRequests.push('services');
-      initApiFailure = {
-        failedRequests,
-        productsConfigStatus: productsConfigResponse.status,
-        servicesStatus: servicesResponse.status,
-      };
+      initApiFailure = buildInitApiFailure(
+        productsConfigResponse,
+        servicesResponse,
+      );
       throw new Error('Failed to get supported ID types');
     } catch (e) {
-      Sentry.captureException(e, {
-        tags: {
-          area: 'init_api',
-          failedRequest: initApiFailure
-            ? initApiFailure.failedRequests.join(',')
-            : 'rejection',
-          ...(initApiFailure
-            ? {
-                productsConfigStatus: String(
-                  initApiFailure.productsConfigStatus,
-                ),
-                servicesStatus: String(initApiFailure.servicesStatus),
-              }
-            : {}),
-        },
-      });
+      captureInitApiFailure(e, initApiFailure);
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }

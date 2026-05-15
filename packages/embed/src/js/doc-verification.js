@@ -109,12 +109,25 @@ import {
 
     try {
       const response = await fetch(url.toString(), fetchConfig);
+      // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
+      // an HTTP failure here would parse JSON of an error body and silently
+      // return undefined without a Sentry event. Explicitly throw so the
+      // catch tags the request and the status before re-throwing.
+      if (!response.ok) {
+        const err = new Error('Failed to get supported ID types');
+        err.httpStatus = response.status;
+        throw err;
+      }
       const json = await response.json();
 
       return json.valid_documents;
     } catch (e) {
       Sentry.captureException(e, {
-        tags: { area: 'init_api', failedRequest: 'valid_documents' },
+        tags: {
+          area: 'init_api',
+          failedRequest: 'valid_documents',
+          ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+        },
       });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
@@ -139,12 +152,21 @@ import {
 
     try {
       const response = await fetch(url.toString(), fetchConfig);
+      if (!response.ok) {
+        const err = new Error('Failed to get supported ID types');
+        err.httpStatus = response.status;
+        throw err;
+      }
       const json = await response.json();
 
       return json.hosted_web.doc_verification;
     } catch (e) {
       Sentry.captureException(e, {
-        tags: { area: 'init_api', failedRequest: 'services' },
+        tags: {
+          area: 'init_api',
+          failedRequest: 'services',
+          ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+        },
       });
       throw new Error('Failed to get supported ID types', { cause: e });
     }

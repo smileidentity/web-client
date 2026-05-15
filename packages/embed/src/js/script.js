@@ -10,27 +10,45 @@ Sentry.init({
     // rejections, fetch internals), which is exactly the cohort we need to
     // see to investigate customer-reported "camera UI loads, nothing
     // happens" failures.
-    if (event.exception?.values) {
-      const hasLibFrame = event.exception.values.some((exception) =>
-        exception.stacktrace?.frames?.some((frame) =>
-          frame.filename?.includes('inline/src'),
-        ),
-      );
-      event.tags = {
-        ...event.tags,
-        source: hasLibFrame ? 'library' : 'third-party-frame',
-      };
-      if (!hasLibFrame && Math.random() > 0.05) {
-        return null;
-      }
+
+    // Events without an exception (Sentry.captureMessage, breadcrumbs-only)
+    // are explicit library calls — always treat as library so they reach
+    // Sentry rather than being silently dropped by the third-party sampler.
+    if (!event.exception?.values) {
+      event.tags = { ...event.tags, source: 'library' };
+      return event;
+    }
+
+    // WASM init failures (tagged in request.js) typically originate in
+    // browser internals and would otherwise be classified as third-party
+    // and sampled at 5% — but they're the exact cohort we instrumented
+    // for, so always let them through and tag as library.
+    const isWasmInit = event.tags?.area === 'wasm_init';
+    const hasLibFrame = event.exception.values.some((exception) =>
+      exception.stacktrace?.frames?.some((frame) =>
+        frame.filename?.includes('inline/src'),
+      ),
+    );
+    const treatAsLibrary = hasLibFrame || isWasmInit;
+    event.tags = {
+      ...event.tags,
+      source: treatAsLibrary ? 'library' : 'third-party-frame',
+    };
+    if (!treatAsLibrary && Math.random() > 0.05) {
+      return null;
     }
     return event;
   },
   dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
   integrations: [
+    // `apply-tag-if-contains-third-party-frames` (not the previous
+    // `drop-error-if-contains-third-party-frames`) — the drop variant
+    // discards events before our beforeSend gets a chance, which would
+    // negate the 5% third-party sampling above. We tag instead and rely
+    // on beforeSend for the final keep/drop decision.
     Sentry.thirdPartyErrorFilterIntegration({
       filterKeys: ['smileid-web-client'],
-      behaviour: 'drop-error-if-contains-third-party-frames',
+      behaviour: 'apply-tag-if-contains-third-party-frames',
     }),
   ],
   tracesSampleRate: 0.01,

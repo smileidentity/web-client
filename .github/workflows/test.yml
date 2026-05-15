@@ -9,15 +9,15 @@ jobs:
         working-directory: ./packages/smart-camera-web
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       - name: install dependencies
         run: npm ci
       - name: build application
         run: npm run build
       - name: run tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         with:
           install: false
           start: npm start
@@ -31,9 +31,9 @@ jobs:
         working-directory: ./packages/embed
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       - name: build web-components dependency
         run: |
           cd ../web-components
@@ -42,14 +42,14 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: run tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         with:
           install: false
           start: npm start
           working-directory: ./packages/embed
           wait-on: 'http://localhost:8000'
       - name: upload test failure artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: cypress-screenshots
@@ -61,22 +61,22 @@ jobs:
         working-directory: ./packages/web-components
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       - name: install dependencies
         run: npm ci
       - name: build application
         run: npm run build
       - name: run tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         with:
           install: false
           start: npm run dev
           working-directory: ./packages/web-components
           wait-on: 'http://localhost:3005'
       - name: upload test failure artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: cypress-screenshots

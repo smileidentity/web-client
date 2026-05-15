@@ -1256,10 +1256,9 @@ class SmartCameraWeb extends HTMLElement {
       // Sentry is initialized by the parent @smileid/embed bundle on the same
       // window; the optional-chain makes this a no-op in dev/test where Sentry
       // isn't loaded.
-      window.Sentry?.captureException(
-        new Error('getUserMedia not available'),
-        { tags: { area: 'camera_init', failure: 'no_getUserMedia' } },
-      );
+      window.Sentry?.captureException(new Error('getUserMedia not available'), {
+        tags: { area: 'camera_init', failure: 'no_getUserMedia' },
+      });
       const heading = document.createElement('h1');
       heading.classList.add('error-message');
       heading.textContent = 'Your browser does not support this integration';

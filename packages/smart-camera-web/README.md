@@ -60,7 +60,6 @@ For instance:
 After installation and necessary imports:
 
 1. Add the desired markup to your page/component:
-
    - **For Selfie Capture / Liveness Images**:
 
      ```html

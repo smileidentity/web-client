@@ -238,7 +238,6 @@ setCurrentLocale('es');
 1. **Default Locale**: Components should render with English strings on page load.
 
 2. **Locale Switching**: Call `setCurrentLocale('ar')` in browser console; verify:
-
    - UI text changes to Arabic
    - `document.documentElement.dir` becomes `"rtl"`
    - CSS responds to `:dir(rtl)` pseudo-class if used

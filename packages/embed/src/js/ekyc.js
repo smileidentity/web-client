@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import validate from 'validate.js';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
@@ -70,6 +71,11 @@ import {
   }
 
   async function getProductConstraints() {
+    // Captured at the point we know which response.ok was false so the catch
+    // below can attach response-level detail to the Sentry event. Null when
+    // the failure is a promise rejection (network drop, abort, etc.) rather
+    // than a non-OK HTTP response.
+    let initApiFailure = null;
     try {
       const productsConfigPayload = {
         partner_id: config.partner_details.partner_id,
@@ -123,8 +129,32 @@ import {
           generalConstraints: generalConstraints.hosted_web.enhanced_kyc,
         };
       }
+      const failedRequests = [];
+      if (!productsConfigResponse.ok) failedRequests.push('products_config');
+      if (!servicesResponse.ok) failedRequests.push('services');
+      initApiFailure = {
+        failedRequests,
+        productsConfigStatus: productsConfigResponse.status,
+        servicesStatus: servicesResponse.status,
+      };
       throw new Error('Failed to get supported ID types');
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          area: 'init_api',
+          failedRequest: initApiFailure
+            ? initApiFailure.failedRequests.join(',')
+            : 'rejection',
+          ...(initApiFailure
+            ? {
+                productsConfigStatus: String(
+                  initApiFailure.productsConfigStatus,
+                ),
+                servicesStatus: String(initApiFailure.servicesStatus),
+              }
+            : {}),
+        },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -151,6 +181,16 @@ import {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        // Tag every Sentry event from this iframe context with partner_id and
+        // environment. The parent script.js tags the parent window's Sentry
+        // hub, but this iframe runs in its own JS context with its own hub —
+        // without these tags, errors from this page are unattributable.
+        if (config.partner_details?.partner_id) {
+          Sentry.setTag('partner_id', config.partner_details.partner_id);
+        }
+        if (config.environment) {
+          Sentry.setTag('environment', config.environment);
+        }
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });

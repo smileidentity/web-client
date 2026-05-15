@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/browser';
+
 (function productSelection() {
   'use strict';
 
@@ -78,6 +80,9 @@
 
       return json.valid_documents;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: { area: 'init_api', failedRequest: 'valid_documents' },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -107,6 +112,9 @@
 
       return json.hosted_web;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: { area: 'init_api', failedRequest: 'services' },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -355,6 +363,17 @@
       ) {
         if (event.data.includes('SmileIdentity::Configuration')) {
           config = JSON.parse(event.data);
+          // Tag every Sentry event from this iframe context with partner_id
+          // and environment. The parent script.js tags the parent window's
+          // Sentry hub, but this iframe runs in its own JS context with its
+          // own hub — without these tags, errors from this page are
+          // unattributable.
+          if (config.partner_details?.partner_id) {
+            Sentry.setTag('partner_id', config.partner_details.partner_id);
+          }
+          if (config.environment) {
+            Sentry.setTag('environment', config.environment);
+          }
 
           LoadingScreen.querySelector('.credits').hidden =
             config.hide_attribution;

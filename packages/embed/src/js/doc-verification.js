@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -112,6 +113,9 @@ import {
 
       return json.valid_documents;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: { area: 'init_api', failedRequest: 'valid_documents' },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -139,6 +143,9 @@ import {
 
       return json.hosted_web.doc_verification;
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: { area: 'init_api', failedRequest: 'services' },
+      });
       throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
@@ -152,6 +159,16 @@ import {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        // Tag every Sentry event from this iframe context with partner_id and
+        // environment. The parent script.js tags the parent window's Sentry
+        // hub, but this iframe runs in its own JS context with its own hub —
+        // without these tags, errors from this page are unattributable.
+        if (config.partner_details?.partner_id) {
+          Sentry.setTag('partner_id', config.partner_details.partner_id);
+        }
+        if (config.environment) {
+          Sentry.setTag('environment', config.environment);
+        }
         try {
           const language = config.translation?.language || 'en-GB';
           await setCurrentLocale(language, {

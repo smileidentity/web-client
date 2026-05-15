@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -16,6 +17,11 @@ import {
   shouldSkipSelection,
   idInfoToIdSelection,
 } from './id-info-utils.js';
+
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
 
 (function documentVerification() {
   'use strict';
@@ -296,6 +302,10 @@ import {
 
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
     }
 
     // id_info takes precedence over id_selection

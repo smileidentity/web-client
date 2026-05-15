@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -14,6 +15,11 @@ import {
   shouldSkipSelection,
   idInfoToIdSelection,
 } from './id-info-utils.js';
+
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
 
 /**
  * Apply translations to all elements with data-i18n attribute
@@ -142,6 +148,9 @@ function applyPageTranslations() {
     }
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
     }
     // this is to mimic the behavior of the old hosted web integration
     SmartCameraWeb.setAttribute('hide-back-of-id', true);

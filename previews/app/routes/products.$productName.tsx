@@ -94,6 +94,7 @@ export default function Product() {
     useState<boolean>(false);
   const [autoCapture, setAutoCapture] = useState<boolean>(false);
   const [autoCaptureMode, setAutoCaptureMode] = useState<string>('autoCapture');
+  const [newInstructions, setNewInstructions] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -103,6 +104,7 @@ export default function Product() {
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
         auto_capture: autoCapture,
         auto_capture_mode: autoCaptureMode,
+        new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''
@@ -253,6 +255,23 @@ export default function Product() {
                   <option value="autoCapture">autoCapture</option>
                   <option value="autoCaptureOnly">autoCaptureOnly</option>
                   <option value="manualCaptureOnly">manualCaptureOnly</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="new-instructions-select">
+                  New Document Instructions
+                </label>
+                <select
+                  id="new-instructions-select"
+                  value={newInstructions ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setNewInstructions(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
                 </select>
               </div>
 

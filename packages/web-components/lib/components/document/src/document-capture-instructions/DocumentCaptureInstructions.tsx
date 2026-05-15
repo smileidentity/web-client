@@ -408,7 +408,9 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
       | HTMLElement
       | undefined;
     const hostElement =
-      rootRef.current?.closest('document-capture-instructions') || shadowHost;
+      rootRef.current?.closest('document-capture-instructions-v2') ||
+      rootRef.current?.closest('document-capture-instructions') ||
+      shadowHost;
 
     hostElement?.dispatchEvent(new CustomEvent(eventName));
   };
@@ -785,11 +787,11 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 
 if (
   window.customElements &&
-  !window.customElements.get('document-capture-instructions')
+  !window.customElements.get('document-capture-instructions-v2')
 ) {
   register(
     DocumentCaptureInstructions,
-    'document-capture-instructions',
+    'document-capture-instructions-v2',
     [
       'dir',
       'document-type',

@@ -23,7 +23,7 @@ function scwTemplateString() {
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
     ></selfie-capture-screens>
     <document-capture-screens ${this.autoCapture} ${this.autoCaptureMode} ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
-     ${this.hideBackOfId} ${this.applyComponentThemeColor} hidden></document-capture-screens>
+     ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;
 }
@@ -80,6 +80,7 @@ class SmartCameraWeb extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'theme-color',
+      'new-instructions',
     ];
   }
 
@@ -97,6 +98,7 @@ class SmartCameraWeb extends HTMLElement {
       case 'hide-back-to-host':
       case 'show-navigation':
       case 'theme-color':
+      case 'new-instructions':
         this.disconnectedCallback();
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
@@ -229,6 +231,10 @@ class SmartCameraWeb extends HTMLElement {
 
   get hideBackOfId() {
     return this.hasAttribute('hide-back-of-id') ? 'hide-back-of-id' : '';
+  }
+
+  get newInstructions() {
+    return this.hasAttribute('new-instructions') ? 'new-instructions' : '';
   }
 
   get showNavigation() {

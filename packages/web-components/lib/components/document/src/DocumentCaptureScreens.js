@@ -56,20 +56,23 @@ class DocumentCaptureScreens extends HTMLElement {
     const captureTag = this.autoCapture
       ? 'document-auto-capture'
       : 'document-capture';
+    const instructionsTag = this.newInstructions
+      ? 'document-capture-instructions-v2'
+      : 'document-capture-instructions';
     this.innerHTML = `
       ${styles(this.themeColor)}
       <div style="height: 100%;">
-      <document-capture-instructions theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title} ${this.documentType}
+      <${instructionsTag} theme-color='${this.themeColor}' id='document-capture-instructions-front' ${this.title} ${this.documentType}
       ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}
       ${this.hideAttribution}
-      ></document-capture-instructions>
+      ></${instructionsTag}>
       <${captureTag} id='document-capture-front' side-of-id='Front'
       ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
       ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}'
       ></${captureTag}>
-      <document-capture-instructions id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
+      <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
        ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
-       ></document-capture-instructions>
+       ></${instructionsTag}>
       <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
       ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden 
@@ -408,6 +411,10 @@ class DocumentCaptureScreens extends HTMLElement {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
   }
 
+  get newInstructions() {
+    return this.hasAttribute('new-instructions');
+  }
+
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
   }
@@ -435,6 +442,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'hide-back-of-id',
       'auto-capture',
       'auto-capture-mode',
+      'new-instructions',
     ];
   }
 
@@ -447,6 +455,8 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'show-navigation':
       case 'auto-capture':
       case 'auto-capture-mode':
+      case 'new-instructions':
+        this.innerHTML = '';
         this.connectedCallback();
         break;
       default:

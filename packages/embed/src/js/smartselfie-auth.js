@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -8,6 +9,11 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
+
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
 
 (function SmartSelfie() {
   'use strict';

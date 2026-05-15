@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/browser';
+
 const WASM_PATH = 'https://secure.smileidentity.com/web_client_guard_bg.wasm';
 const JS_PATH = 'https://secure.smileidentity.com/web_client_guard.js';
 const INTEGRITY_PATH = 'https://secure.smileidentity.com/integrity.json';
@@ -19,6 +21,10 @@ async function initWasm(forceRefetch = false) {
 
   if (!wasmModule || isStale() || forceRefetch) {
     wasmInitPromise = (async () => {
+      // Track which step we're in so the Sentry tag below points at the
+      // specific failure mode (fetch failure vs integrity mismatch vs
+      // instantiate / compile error).
+      let step = 'fetch';
       try {
         const cacheBuster = `?v=${now}`;
 
@@ -33,6 +39,7 @@ async function initWasm(forceRefetch = false) {
           );
         }
 
+        step = 'integrity';
         const { hash: expectedHash } = await integrityResponse.json();
         const wasmBuffer = await wasmResponse.arrayBuffer();
 
@@ -46,12 +53,21 @@ async function initWasm(forceRefetch = false) {
           throw new Error('WASM integrity check failed');
         }
 
+        step = 'instantiate';
         const newModule = await import(`${JS_PATH}${cacheBuster}`);
 
         await newModule.default(wasmBuffer);
 
         wasmModule = newModule;
         lastFetchTime = now;
+      } catch (e) {
+        // Report WASM init failures so we can attribute them. Without this,
+        // every signed API call downstream fails opaquely and the user-facing
+        // error is something generic like "Failed to get supported ID types".
+        Sentry.captureException(e, {
+          tags: { area: 'wasm_init', wasmStep: step },
+        });
+        throw e;
       } finally {
         wasmInitPromise = null;
       }

@@ -2,21 +2,29 @@ import * as Sentry from '@sentry/browser';
 
 Sentry.init({
   beforeSend(event) {
-    // Check if the error originates from the library's source files
-    if (event.exception && event.exception.values) {
-      const isLibraryError = event.exception.values.some((exception) => {
-        return exception.stacktrace?.frames?.some((frame) =>
-          frame.filename.includes('inline/src'),
-        );
-      });
-
-      // If the error is from the library, send it to Sentry
-      if (isLibraryError) {
-        return event;
+    // Tag every event with its origin (library vs third-party frame) so we
+    // can slice in Sentry. Library events go through unchanged. Third-party
+    // events are now SAMPLED at 5% rather than dropped outright — without
+    // some sample we have no signal on silent failures whose stacktraces
+    // originate in browser internals (WASM compile errors, getUserMedia
+    // rejections, fetch internals), which is exactly the cohort we need to
+    // see to investigate customer-reported "camera UI loads, nothing
+    // happens" failures.
+    if (event.exception?.values) {
+      const hasLibFrame = event.exception.values.some((exception) =>
+        exception.stacktrace?.frames?.some((frame) =>
+          frame.filename?.includes('inline/src'),
+        ),
+      );
+      event.tags = {
+        ...event.tags,
+        source: hasLibFrame ? 'library' : 'third-party-frame',
+      };
+      if (!hasLibFrame && Math.random() > 0.05) {
+        return null;
       }
     }
-    // Otherwise, do not send the error
-    return null;
+    return event;
   },
   dsn: 'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224',
   integrations: [

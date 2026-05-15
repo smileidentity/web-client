@@ -256,6 +256,10 @@ window.Sentry = Sentry;
       SmartCameraWeb.setAttribute('hide-attribution', true);
     }
 
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
+    }
+
     const supportedCountries = Object.keys(generalConstraints)
       .map((countryCode) => ({
         code: countryCode,

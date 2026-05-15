@@ -18,6 +18,7 @@ export default function setupForm() {
   const allowLegacySelfieFallback = document.querySelector(
     '#allowLegacySelfieFallback',
   );
+  const newInstructions = document.querySelector('#newInstructions');
 
   const resetButton = () => {
     button.textContent = 'Verify with Smile Identity';
@@ -79,6 +80,7 @@ export default function setupForm() {
         previewBVNMFA: true,
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
+        new_instructions: newInstructions.value === 'true',
         hide_attribution: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,

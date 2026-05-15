@@ -25,6 +25,11 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
+
 (function biometricKyc() {
   'use strict';
 

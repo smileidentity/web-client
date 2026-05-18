@@ -32,12 +32,12 @@ jobs:
           exit 1
 
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: verify tag matches package version
         run: |
@@ -64,9 +64,9 @@ jobs:
         working-directory: ./packages/web-components
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
       - name: install dependencies
         run: npm ci
       - name: build application
@@ -110,9 +110,9 @@ jobs:
         working-directory: ./packages/embed
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: set node version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
       - name: build web-components dependency
         run: |
           cd ../web-components

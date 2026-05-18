@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.1] - 2026-05-18
+
+### Added
+
+- Improve error reporting
+- Add new document capture instructions with an opt-in option to use the new design
+
+### Fixed
+
+- Fixed combobox filtering on Huawei devices by using the `input` event
+
 ## [11.4.0] - 2026-03-25
 
 ### Added

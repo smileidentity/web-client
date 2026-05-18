@@ -89,6 +89,16 @@ window.Sentry = Sentry;
     });
   }
 
+  // Wraps fetch with a per-attempt AbortController timeout.
+  // Rejects with an AbortError if the timeout elapses.
+  function fetchWithTimeout(url, options, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timerId = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+      clearTimeout(timerId),
+    );
+  }
+
   async function getProductConstraints() {
     const payload = {
       token: config.token,
@@ -112,29 +122,49 @@ window.Sentry = Sentry;
       url.searchParams.append('locale', locale);
     }
 
-    try {
-      const response = await fetch(url.toString(), fetchConfig);
-      // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
-      // an HTTP failure here would parse JSON of an error body and silently
-      // return undefined without a Sentry event. Explicitly throw so the
-      // catch tags the request and the status before re-throwing.
-      if (!response.ok) {
-        const err = new Error('Failed to get supported ID types');
-        err.httpStatus = response.status;
-        throw err;
-      }
-      const json = await response.json();
+    // iOS Safari (especially iOS 18+) intermittently fails with
+    // "TypeError: Load failed" — a transient network-level error that almost
+    // always succeeds on retry. Retry up to 2 times (3 total attempts) with
+    // exponential backoff. Only network errors (TypeError / AbortError from
+    // the timeout) are retried; HTTP errors are deterministic and are not.
+    const MAX_ATTEMPTS = 3;
 
-      return json.valid_documents;
-    } catch (e) {
-      Sentry.captureException(e, {
-        tags: {
-          area: 'init_api',
-          failedRequest: 'valid_documents',
-          ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
-        },
-      });
-      throw new Error('Failed to get supported ID types', { cause: e });
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetchWithTimeout(
+          url.toString(),
+          fetchConfig,
+          10000,
+        );
+        // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
+        // an HTTP failure here would parse JSON of an error body and silently
+        // return undefined without a Sentry event. Explicitly throw so the
+        // catch tags the request and the status before re-throwing.
+        if (!response.ok) {
+          const err = new Error('Failed to get supported ID types');
+          err.httpStatus = response.status;
+          throw err;
+        }
+        const json = await response.json();
+        return json.valid_documents;
+      } catch (e) {
+        // HTTP errors are not transient — fail immediately without retrying.
+        const isNetworkError =
+          e instanceof TypeError || e.name === 'AbortError';
+        if (!isNetworkError || attempt === MAX_ATTEMPTS) {
+          Sentry.captureException(e, {
+            tags: {
+              area: 'init_api',
+              failedRequest: 'valid_documents',
+              ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+              ...(attempt > 1 ? { retryAttempt: String(attempt) } : {}),
+            },
+          });
+          throw new Error('Failed to get supported ID types', { cause: e });
+        }
+        // Exponential backoff: 1 s, then 2 s before the third attempt.
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
     }
   }
 
@@ -221,9 +251,19 @@ window.Sentry = Sentry;
 
         activeScreen = LoadingScreen;
 
-        const productConstraints = await getProductConstraints();
-        initializeSession(productConstraints);
-        getPartnerParams();
+        try {
+          const productConstraints = await getProductConstraints();
+          initializeSession(productConstraints);
+          getPartnerParams();
+        } catch (e) {
+          // After all retry attempts are exhausted, signal the parent frame so
+          // the SDK calls config.onError rather than leaving the user on an
+          // infinite loading spinner.
+          (referenceWindow.parent || referenceWindow).postMessage(
+            'SmileIdentity::Error',
+            '*',
+          );
+        }
       }
     },
     false,

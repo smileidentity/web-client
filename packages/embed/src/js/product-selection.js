@@ -49,6 +49,16 @@ import * as Sentry from '@sentry/browser';
     activeScreen = element;
   }
 
+  // Wraps fetch with a per-attempt AbortController timeout.
+  // Rejects with an AbortError if the timeout elapses.
+  function fetchWithTimeout(url, options, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timerId = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+      clearTimeout(timerId),
+    );
+  }
+
   async function getProductConstraints() {
     const payload = {
       token: config.token,
@@ -75,7 +85,7 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetch(url.toString(), fetchConfig);
+      const response = await fetchWithTimeout(url.toString(), fetchConfig, 10000);
       // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
       // an HTTP failure here would parse JSON of an error body and silently
       // return undefined without a Sentry event. Explicitly throw so the
@@ -120,7 +130,7 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetch(url.toString(), fetchConfig);
+      const response = await fetchWithTimeout(url.toString(), fetchConfig, 10000);
       if (!response.ok) {
         const err = new Error('Failed to get supported ID types');
         err.httpStatus = response.status;
@@ -406,18 +416,23 @@ import * as Sentry from '@sentry/browser';
 
           activeScreen = LoadingScreen;
 
-          const constraintsPromises = [
-            getProductConstraints(),
-            getLegacyProductConstraints(),
-          ];
-          const [productConstraints, legacyConstraints] =
-            await Promise.all(constraintsPromises);
-          verificationMethodMap = transformIdTypesToVerificationMethodMap(
-            config.id_types,
-            productConstraints,
-            legacyConstraints,
-          );
-          initializeForm(SelectIdType, verificationMethodMap);
+          try {
+            const [productConstraints, legacyConstraints] = await Promise.all([
+              getProductConstraints(),
+              getLegacyProductConstraints(),
+            ]);
+            verificationMethodMap = transformIdTypesToVerificationMethodMap(
+              config.id_types,
+              productConstraints,
+              legacyConstraints,
+            );
+            initializeForm(SelectIdType, verificationMethodMap);
+          } catch (e) {
+            (referenceWindow.parent || referenceWindow).postMessage(
+              'SmileIdentity::Error',
+              '*',
+            );
+          }
         } else if (event.data.includes('SmileIdentity::ChildPageReady')) {
           publishMessage(config);
         }

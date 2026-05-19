@@ -10,6 +10,36 @@ const GRACE_PERIOD = 5 * 60 * 1000; // 5 mins
 
 const isStale = () => Date.now() - lastFetchTime > CACHE_DURATION;
 
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY = 500;
+
+const wait = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+async function withRetry(fn, label) {
+  let lastError;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      if (attempt === MAX_RETRIES) break;
+      // eslint-disable-next-line no-await-in-loop
+      await wait(RETRY_BASE_DELAY * 2 ** attempt);
+    }
+  }
+  const wrapped = new Error(
+    `${label} failed after ${MAX_RETRIES + 1} attempts: ${
+      lastError && lastError.message ? lastError.message : lastError
+    }`,
+  );
+  wrapped.cause = lastError;
+  throw wrapped;
+}
+
 let wasmInitPromise = null;
 
 async function initWasm(forceRefetch = false) {
@@ -28,10 +58,14 @@ async function initWasm(forceRefetch = false) {
       try {
         const cacheBuster = `?v=${now}`;
 
-        const [wasmResponse, integrityResponse] = await Promise.all([
-          fetch(`${WASM_PATH}${cacheBuster}`),
-          fetch(`${INTEGRITY_PATH}${cacheBuster}`),
-        ]);
+        const [wasmResponse, integrityResponse] = await withRetry(
+          () =>
+            Promise.all([
+              fetch(`${WASM_PATH}${cacheBuster}`),
+              fetch(`${INTEGRITY_PATH}${cacheBuster}`),
+            ]),
+          'wasm/integrity fetch',
+        );
 
         if (!wasmResponse.ok || !integrityResponse.ok) {
           throw new Error(
@@ -54,7 +88,10 @@ async function initWasm(forceRefetch = false) {
         }
 
         step = 'instantiate';
-        const newModule = await import(`${JS_PATH}${cacheBuster}`);
+        const newModule = await withRetry(
+          () => import(`${JS_PATH}${cacheBuster}`),
+          'web_client_guard.js dynamic import',
+        );
 
         await newModule.default(wasmBuffer);
 

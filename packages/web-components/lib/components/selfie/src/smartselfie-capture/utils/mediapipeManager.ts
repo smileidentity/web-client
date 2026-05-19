@@ -67,7 +67,47 @@ declare global {
       instance: FaceLandmarker | null;
       loading: Promise<FaceLandmarker> | null;
       loaded: boolean;
+      supportsWasmReftypes?: boolean;
     };
+  }
+}
+
+/**
+ * @description Detects whether the current runtime supports the WebAssembly
+ * reference-types proposal (the `externref` value type). MediaPipe Tasks
+ * Vision ships a .wasm that uses `externref`; on older engines (e.g. Chrome
+ * < 96, Safari < 15, Firefox < 79) `WebAssembly.instantiate` throws
+ * `CompileError: invalid value type 'externref'`. We probe support once with
+ * `WebAssembly.validate` against a tiny module whose only feature is an
+ * `externref`-typed global so callers can short-circuit and fall back to the
+ * legacy selfie capture flow instead of triggering an unhandled rejection.
+ * @returns {boolean} True if the runtime accepts reftypes / externref.
+ */
+const supportsWasmReftypes = (): boolean => {
+  if (typeof WebAssembly === 'undefined' || !WebAssembly.validate) {
+    return false;
+  }
+
+  try {
+    // Minimal module: magic + version + global section with one externref
+    // global (value type 0x6f) initialized to ref.null extern (0xd0 0x6f 0x0b).
+    const bytes = new Uint8Array([
+      0x00, 0x61, 0x73, 0x6d, // \0asm magic
+      0x01, 0x00, 0x00, 0x00, // version 1
+      0x06, 0x06, 0x01, // global section, 6 bytes, 1 global
+      0x6f, 0x00, // externref, immutable
+      0xd0, 0x6f, 0x0b, // ref.null extern; end
+    ]);
+    return WebAssembly.validate(bytes);
+  } catch {
+    return false;
+  }
+};
+
+export class UnsupportedMediapipeEnvironmentError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UnsupportedMediapipeEnvironmentError';
   }
 }
 
@@ -175,6 +215,21 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
     return mediapipeGlobal.loading;
   }
 
+  // Fail fast on engines that don't support WebAssembly reftypes/externref.
+  // The MediaPipe Tasks Vision .wasm uses externref globals; instantiating it
+  // on older browsers throws an unhandled `CompileError`. We detect once and
+  // cache the result so callers fall back to the legacy capture flow.
+  if (mediapipeGlobal.supportsWasmReftypes === undefined) {
+    mediapipeGlobal.supportsWasmReftypes = supportsWasmReftypes();
+  }
+  if (!mediapipeGlobal.supportsWasmReftypes) {
+    return Promise.reject(
+      new UnsupportedMediapipeEnvironmentError(
+        'WebAssembly reference types (externref) are not supported in this browser; MediaPipe Tasks Vision cannot be loaded.',
+      ),
+    );
+  }
+
   mediapipeGlobal.loading = (async () => {
     try {
       const vision = await FilesetResolver.forVisionTasks(
@@ -212,4 +267,5 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
 export const __testUtils = {
   matchesExcludedGpu,
   getDelegateFromGpuDetection,
+  supportsWasmReftypes,
 };

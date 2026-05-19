@@ -22,6 +22,7 @@ import {
   buildInitApiFailure,
   captureInitApiFailure,
 } from './init-api-sentry.js';
+import { fetchWithTimeout } from './fetch-with-retry.js';
 
 (function basicKyc() {
   'use strict';
@@ -59,27 +60,21 @@ import {
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
 
   async function postData(url = '', data = {}, shouldSignPayload = false) {
-    return fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        ...(shouldSignPayload &&
-          (await getHeaders(data, config.partner_details.partner_id))),
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+    return fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          ...(shouldSignPayload &&
+            (await getHeaders(data, config.partner_details.partner_id))),
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       },
-      body: JSON.stringify(data),
-    });
-  }
-
-  // Wraps fetch with a per-attempt AbortController timeout.
-  // Rejects with an AbortError if the timeout elapses.
-  function fetchWithTimeout(url, options, timeoutMs = 10000) {
-    const controller = new AbortController();
-    const timerId = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-      clearTimeout(timerId),
+      10000,
     );
   }
 
@@ -87,9 +82,13 @@ import {
     // iOS Safari (especially iOS 18+) intermittently fails with
     // "TypeError: Load failed" — a transient network-level error that almost
     // always succeeds on retry. Retry up to 2 times (3 total attempts) with
-    // exponential backoff. HTTP failures (initApiFailure !== null) are
+    // linear backoff (1 s, 2 s). HTTP failures (initApiFailure !== null) are
     // deterministic and are never retried.
     const MAX_ATTEMPTS = 3;
+    // Reason: cache the parsed products_config across attempts so a transient
+    // /services failure doesn't re-issue the (possibly side-effecting)
+    // /products_config POST that already succeeded.
+    let cachedPartnerConstraints = null;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       // Captured at the point we know which response.ok was false so the catch
       // below can attach response-level detail to the Sentry event. Null when
@@ -106,10 +105,6 @@ import {
         const productsConfigUrl = `${getEndpoint(
           config.environment,
         )}/v1/products_config`;
-        const productsConfigPromise = postData(
-          productsConfigUrl,
-          productsConfigPayload,
-        );
         const locale = getCurrentLocale();
         const servicesUrl = new URL(
           `${getEndpoint(config.environment)}/v1/services`,
@@ -117,59 +112,85 @@ import {
         if (locale) {
           servicesUrl.searchParams.append('locale', locale);
         }
-        const servicesPromise = fetchWithTimeout(
-          servicesUrl.toString(),
-          {},
-          10000,
-        );
-        const [productsConfigResponse, servicesResponse] = await Promise.all([
-          productsConfigPromise,
-          servicesPromise,
-        ]);
 
-        if (productsConfigResponse.ok && servicesResponse.ok) {
-          const partnerConstraints = await productsConfigResponse.json();
-          const generalConstraints = await servicesResponse.json();
-          ngBankCodes = generalConstraints.bank_codes;
-
-          const previewBvnMfa = config.previewBVNMFA;
-          if (previewBvnMfa) {
-            generalConstraints.hosted_web.basic_kyc.NG.id_types.BVN_MFA = {
-              id_number_regex: '^[0-9]{11}$',
-              label: 'Bank Verification Number (with OTP)',
-              required_fields: [
-                'country',
-                'id_type',
-                'session_id',
-                'user_id',
-                'job_id',
-                'first_name',
-                'last_name',
-              ],
-              test_data: '00000000000',
+        let partnerConstraints;
+        let servicesResponse;
+        if (cachedPartnerConstraints) {
+          partnerConstraints = cachedPartnerConstraints;
+          servicesResponse = await fetchWithTimeout(
+            servicesUrl.toString(),
+            {},
+            10000,
+          );
+          if (!servicesResponse.ok) {
+            initApiFailure = {
+              failedRequests: ['services'],
+              productsConfigStatus: 200,
+              servicesStatus: servicesResponse.status,
             };
+            throw new Error('Failed to get supported ID types');
           }
+        } else {
+          const productsConfigPromise = postData(
+            productsConfigUrl,
+            productsConfigPayload,
+          );
+          const servicesPromise = fetchWithTimeout(
+            servicesUrl.toString(),
+            {},
+            10000,
+          );
+          const [productsConfigResponse, servicesResp] = await Promise.all([
+            productsConfigPromise,
+            servicesPromise,
+          ]);
+          servicesResponse = servicesResp;
+          if (!productsConfigResponse.ok || !servicesResponse.ok) {
+            initApiFailure = buildInitApiFailure(
+              productsConfigResponse,
+              servicesResponse,
+            );
+            throw new Error('Failed to get supported ID types');
+          }
+          partnerConstraints = await productsConfigResponse.json();
+          cachedPartnerConstraints = partnerConstraints;
+        }
+        const generalConstraints = await servicesResponse.json();
+        ngBankCodes = generalConstraints.bank_codes;
 
-          return {
-            partnerConstraints,
-            generalConstraints: generalConstraints.hosted_web.basic_kyc,
+        const previewBvnMfa = config.previewBVNMFA;
+        if (previewBvnMfa) {
+          generalConstraints.hosted_web.basic_kyc.NG.id_types.BVN_MFA = {
+            id_number_regex: '^[0-9]{11}$',
+            label: 'Bank Verification Number (with OTP)',
+            required_fields: [
+              'country',
+              'id_type',
+              'session_id',
+              'user_id',
+              'job_id',
+              'first_name',
+              'last_name',
+            ],
+            test_data: '00000000000',
           };
         }
-        initApiFailure = buildInitApiFailure(
-          productsConfigResponse,
-          servicesResponse,
-        );
-        throw new Error('Failed to get supported ID types');
+
+        return {
+          partnerConstraints,
+          generalConstraints: generalConstraints.hosted_web.basic_kyc,
+        };
       } catch (e) {
-        // HTTP failures have initApiFailure !== null — deterministic, never retry.
+        // HTTP failures have initApiFailure !== null — deterministic, never
+        // retry. Network-level failures are tagged by `fetchWithTimeout` with
+        // `.isNetworkError = true`.
         const isNetworkError =
-          initApiFailure === null &&
-          (e instanceof TypeError || e.name === 'AbortError');
+          initApiFailure === null && e && e.isNetworkError === true;
         if (!isNetworkError || attempt === MAX_ATTEMPTS) {
           captureInitApiFailure(e, initApiFailure);
           throw new Error('Failed to get supported ID types', { cause: e });
         }
-        // Exponential backoff: 1 s, then 2 s before the third attempt.
+        // Linear backoff: 1 s, then 2 s before the third attempt.
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }

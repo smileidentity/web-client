@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/browser';
+import { fetchWithTimeout, withNetworkRetry } from './fetch-with-retry.js';
 
 (function productSelection() {
   'use strict';
@@ -50,14 +51,7 @@ import * as Sentry from '@sentry/browser';
   }
 
   // Wraps fetch with a per-attempt AbortController timeout.
-  // Rejects with an AbortError if the timeout elapses.
-  function fetchWithTimeout(url, options, timeoutMs = 10000) {
-    const controller = new AbortController();
-    const timerId = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-      clearTimeout(timerId),
-    );
-  }
+  // Imported from `./fetch-with-retry.js`.
 
   async function getProductConstraints() {
     const payload = {
@@ -425,10 +419,36 @@ import * as Sentry from '@sentry/browser';
           activeScreen = LoadingScreen;
 
           try {
-            const [productConstraints, legacyConstraints] = await Promise.all([
-              getProductConstraints(),
-              getLegacyProductConstraints(),
-            ]);
+            // iOS Safari (especially iOS 18+) intermittently fails with
+            // "TypeError: Load failed" — a transient network-level error that
+            // almost always succeeds on retry. Wrap the two init-API calls in
+            // `withNetworkRetry` so a transient fetch failure is retried with
+            // linear backoff (1 s, 2 s). HTTP failures bubble up immediately
+            // — they're already captured by `getProductConstraints` /
+            // `getLegacyProductConstraints` with Sentry tagging.
+            const [productConstraints, legacyConstraints] =
+              await withNetworkRetry(
+                () =>
+                  Promise.all([
+                    getProductConstraints(),
+                    getLegacyProductConstraints(),
+                  ]),
+                {
+                  // `getProductConstraints` / `getLegacyProductConstraints`
+                  // wrap fetch failures in `new Error('Failed to get supported
+                  // ID types', { cause: e })`, so the `.isNetworkError` flag
+                  // sits on `error.cause` rather than `error` itself. Walk the
+                  // cause chain when deciding whether to retry.
+                  shouldRetry: (e) => {
+                    let cur = e;
+                    while (cur) {
+                      if (cur.isNetworkError === true) return true;
+                      cur = cur.cause;
+                    }
+                    return false;
+                  },
+                },
+              );
             verificationMethodMap = transformIdTypesToVerificationMethodMap(
               config.id_types,
               productConstraints,
@@ -436,6 +456,15 @@ import * as Sentry from '@sentry/browser';
             );
             initializeForm(SelectIdType, verificationMethodMap);
           } catch (e) {
+            // After all retry attempts are exhausted, signal the parent frame
+            // so the SDK calls config.onError rather than leaving the user on
+            // an infinite loading spinner. The inner `getProductConstraints` /
+            // `getLegacyProductConstraints` already capture to Sentry; capture
+            // here too so the outer failure (and its retry status) is
+            // observable rather than silently swallowed.
+            Sentry.captureException(e, {
+              tags: { area: 'init_api', failedRequest: 'product_selection' },
+            });
             (referenceWindow.parent || referenceWindow).postMessage(
               'SmileIdentity::Error',
               '*',

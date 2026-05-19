@@ -17,6 +17,7 @@ import {
   shouldSkipSelection,
   idInfoToIdSelection,
 } from './id-info-utils.js';
+import { fetchWithTimeout } from './fetch-with-retry.js';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -90,14 +91,8 @@ window.Sentry = Sentry;
   }
 
   // Wraps fetch with a per-attempt AbortController timeout.
-  // Rejects with an AbortError if the timeout elapses.
-  function fetchWithTimeout(url, options, timeoutMs = 10000) {
-    const controller = new AbortController();
-    const timerId = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-      clearTimeout(timerId),
-    );
-  }
+  // Imported from `./fetch-with-retry.js` so the timeout/tagging logic stays
+  // in sync across all iframe entry points.
 
   async function getProductConstraints() {
     const payload = {
@@ -125,8 +120,9 @@ window.Sentry = Sentry;
     // iOS Safari (especially iOS 18+) intermittently fails with
     // "TypeError: Load failed" — a transient network-level error that almost
     // always succeeds on retry. Retry up to 2 times (3 total attempts) with
-    // exponential backoff. Only network errors (TypeError / AbortError from
-    // the timeout) are retried; HTTP errors are deterministic and are not.
+    // linear backoff (1 s, 2 s). Only fetch-level network errors (tagged by
+    // `fetchWithTimeout` with `.isNetworkError = true`) are retried; HTTP
+    // errors and downstream parse failures are deterministic.
     const MAX_ATTEMPTS = 3;
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -149,8 +145,7 @@ window.Sentry = Sentry;
         return json.valid_documents;
       } catch (e) {
         // HTTP errors are not transient — fail immediately without retrying.
-        const isNetworkError =
-          e instanceof TypeError || e.name === 'AbortError';
+        const isNetworkError = e && e.isNetworkError === true;
         if (!isNetworkError || attempt === MAX_ATTEMPTS) {
           Sentry.captureException(e, {
             tags: {
@@ -162,7 +157,7 @@ window.Sentry = Sentry;
           });
           throw new Error('Failed to get supported ID types', { cause: e });
         }
-        // Exponential backoff: 1 s, then 2 s before the third attempt.
+        // Linear backoff: 1 s, then 2 s before the third attempt.
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }

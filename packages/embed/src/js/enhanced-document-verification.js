@@ -15,6 +15,7 @@ import {
   shouldSkipSelection,
   idInfoToIdSelection,
 } from './id-info-utils.js';
+import { fetchWithTimeout } from './fetch-with-retry.js';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -79,15 +80,8 @@ function applyPageTranslations() {
   let fileToUpload;
   let uploadURL;
 
-  // Wraps fetch with a per-attempt AbortController timeout.
-  // Rejects with an AbortError if the timeout elapses.
-  function fetchWithTimeout(url, options, timeoutMs = 10000) {
-    const controller = new AbortController();
-    const timerId = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-      clearTimeout(timerId),
-    );
-  }
+  // `fetchWithTimeout` is imported from `./fetch-with-retry.js` so the
+  // timeout/tagging logic stays in sync across all iframe entry points.
 
   async function getProductConstraints() {
     const locale = getCurrentLocale();
@@ -99,8 +93,8 @@ function applyPageTranslations() {
     // iOS Safari (especially iOS 18+) intermittently fails with
     // "TypeError: Load failed" — a transient network-level error that almost
     // always succeeds on retry. Retry up to 2 times (3 total attempts) with
-    // exponential backoff. HTTP errors (e.httpStatus) are deterministic and
-    // are never retried.
+    // linear backoff (1 s, 2 s). HTTP errors (e.httpStatus) are deterministic
+    // and are never retried.
     const MAX_ATTEMPTS = 3;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
@@ -118,8 +112,9 @@ function applyPageTranslations() {
 
         return json.hosted_web.enhanced_document_verification;
       } catch (e) {
-        const isNetworkError =
-          e instanceof TypeError || e.name === 'AbortError';
+        // Only fetch-level network errors (tagged by `fetchWithTimeout`) are
+        // retried; downstream JSON parse or property access TypeErrors are not.
+        const isNetworkError = e && e.isNetworkError === true;
         if (!isNetworkError || attempt === MAX_ATTEMPTS) {
           Sentry.captureException(e, {
             tags: {
@@ -131,7 +126,7 @@ function applyPageTranslations() {
           });
           throw new Error('Failed to get supported ID types', { cause: e });
         }
-        // Exponential backoff: 1 s, then 2 s before the third attempt.
+        // Linear backoff: 1 s, then 2 s before the third attempt.
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }

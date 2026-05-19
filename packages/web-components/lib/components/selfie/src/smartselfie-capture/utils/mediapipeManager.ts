@@ -234,10 +234,8 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
     mediapipeGlobal.supportsWasmReftypes = supportsWasmReftypes();
   }
   if (!mediapipeGlobal.supportsWasmReftypes) {
-    return Promise.reject(
-      new UnsupportedMediapipeEnvironmentError(
-        'WebAssembly reference types (externref) are not supported in this browser; MediaPipe Tasks Vision cannot be loaded.',
-      ),
+    throw new UnsupportedMediapipeEnvironmentError(
+      'WebAssembly reference types (externref) are not supported in this browser; MediaPipe Tasks Vision cannot be loaded.',
     );
   }
 

@@ -85,7 +85,11 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetchWithTimeout(url.toString(), fetchConfig, 10000);
+      const response = await fetchWithTimeout(
+        url.toString(),
+        fetchConfig,
+        10000,
+      );
       // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
       // an HTTP failure here would parse JSON of an error body and silently
       // return undefined without a Sentry event. Explicitly throw so the
@@ -130,7 +134,11 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetchWithTimeout(url.toString(), fetchConfig, 10000);
+      const response = await fetchWithTimeout(
+        url.toString(),
+        fetchConfig,
+        10000,
+      );
       if (!response.ok) {
         const err = new Error('Failed to get supported ID types');
         err.httpStatus = response.status;

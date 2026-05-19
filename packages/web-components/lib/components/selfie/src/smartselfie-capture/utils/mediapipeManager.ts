@@ -92,11 +92,22 @@ const supportsWasmReftypes = (): boolean => {
     // Minimal module: magic + version + global section with one externref
     // global (value type 0x6f) initialized to ref.null extern (0xd0 0x6f 0x0b).
     const bytes = new Uint8Array([
-      0x00, 0x61, 0x73, 0x6d, // \0asm magic
-      0x01, 0x00, 0x00, 0x00, // version 1
-      0x06, 0x06, 0x01, // global section, 6 bytes, 1 global
-      0x6f, 0x00, // externref, immutable
-      0xd0, 0x6f, 0x0b, // ref.null extern; end
+      0x00,
+      0x61,
+      0x73,
+      0x6d, // \0asm magic
+      0x01,
+      0x00,
+      0x00,
+      0x00, // version 1
+      0x06,
+      0x06,
+      0x01, // global section, 6 bytes, 1 global
+      0x6f,
+      0x00, // externref, immutable
+      0xd0,
+      0x6f,
+      0x0b, // ref.null extern; end
     ]);
     return WebAssembly.validate(bytes);
   } catch {

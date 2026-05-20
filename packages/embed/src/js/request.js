@@ -18,25 +18,21 @@ const wait = (ms) =>
     setTimeout(resolve, ms);
   });
 
-async function withRetry(fn, label) {
-  let lastError;
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      return await fn();
-    } catch (e) {
-      lastError = e;
-      if (attempt === MAX_RETRIES) break;
-      // eslint-disable-next-line no-await-in-loop
-      await wait(RETRY_BASE_DELAY * 2 ** attempt);
+async function withRetry(fn, label, attempt = 0) {
+  try {
+    return await fn(attempt);
+  } catch (e) {
+    if (attempt >= MAX_RETRIES) {
+      throw new Error(
+        `${label} failed after ${MAX_RETRIES + 1} attempts: ${
+          e && e.message ? e.message : e
+        }`,
+        { cause: e },
+      );
     }
+    await wait(RETRY_BASE_DELAY * 2 ** attempt);
+    return withRetry(fn, label, attempt + 1);
   }
-  throw new Error(
-    `${label} failed after ${MAX_RETRIES + 1} attempts: ${
-      lastError && lastError.message ? lastError.message : lastError
-    }`,
-    { cause: lastError },
-  );
 }
 
 let wasmInitPromise = null;

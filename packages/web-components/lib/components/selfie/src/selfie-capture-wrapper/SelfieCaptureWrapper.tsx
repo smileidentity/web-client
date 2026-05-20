@@ -9,7 +9,10 @@ import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';
 // Mediapipe loader/manager used by SmartSelfieCapture
-import { getMediapipeInstance } from '../smartselfie-capture/utils/mediapipeManager';
+import {
+  getMediapipeInstance,
+  UnsupportedMediapipeEnvironmentError,
+} from '../smartselfie-capture/utils/mediapipeManager';
 
 interface Props {
   timeout?: number;
@@ -90,6 +93,23 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         // Loading failed; we'll fall back to the legacy selfie-capture component
         // after the loadingProgress reaches 100%.
         console.error('Failed to load Mediapipe:', error);
+        // Report to Sentry (when the host page has exposed it on window) so we
+        // can observe how often users land on the fallback path and which
+        // environments are affected.
+        (window as any).Sentry?.captureException(error, {
+          tags: {
+            area: 'mediapipe_init',
+            mediapipe_unsupported_environment:
+              error instanceof UnsupportedMediapipeEnvironmentError,
+          },
+        });
+        // When the environment definitively cannot run MediaPipe (e.g. no
+        // WebAssembly reftypes support), there is no point keeping the user
+        // staring at the loading spinner for the full countdown — short
+        // circuit to the fallback decision immediately.
+        if (error instanceof UnsupportedMediapipeEnvironmentError) {
+          setLoadingProgress(100);
+        }
       }
       setMediapipeLoading(false);
     };

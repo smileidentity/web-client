@@ -9,7 +9,25 @@ import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';
 // Mediapipe loader/manager used by SmartSelfieCapture
-import { getMediapipeInstance } from '../smartselfie-capture/utils/mediapipeManager';
+import {
+  getMediapipeInstance,
+  UnsupportedMediapipeEnvironmentError,
+} from '../smartselfie-capture/utils/mediapipeManager';
+
+// Minimal typing for the optional Sentry SDK that host pages may expose on
+// `window`. We only depend on `captureException`, so keep the surface tight.
+// Sentry tag values are expected to be strings, so the type enforces that.
+type SentryTags = Record<string, string>;
+declare global {
+  interface Window {
+    Sentry?: {
+      captureException: (
+        error: unknown,
+        context?: { tags?: SentryTags },
+      ) => void;
+    };
+  }
+}
 
 interface Props {
   timeout?: number;
@@ -29,6 +47,12 @@ interface Props {
 
 const DEFAULT_MEDIAPIPE_WAIT_MS = 90 * 1000; // For when legacy fallback is NOT allowed, we wait the full 90s for mediapipe to load before showing an error.
 const DEFAULT_WAIT_MS = 20 * 1000; // default for when legacy fallback is allowed we wait for 20s
+// Cap retries on transient init failures so we don't spin forever, while still
+// allowing recovery from short-lived issues (e.g. CDN hiccups while the
+// wrapper is preloading in a hidden state). Retries are spaced with
+// exponential backoff (base * 2^(attempt-1)) so we don't hammer the CDN.
+const MAX_MEDIAPIPE_INIT_ATTEMPTS = 3;
+const MEDIAPIPE_RETRY_BASE_DELAY_MS = 500;
 
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
@@ -73,29 +97,110 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
+  // `unsupportedEnvironment` is a permanent, one-shot signal: we know
+  // MediaPipe cannot run here, so stop trying.
+  const [unsupportedEnvironment, setUnsupportedEnvironment] = useState(false);
+  // Bounded retry counter for transient init failures.
+  const [mediapipeInitAttempts, setMediapipeInitAttempts] = useState(0);
+  // Dedup flag so we only report a given init failure to Sentry once per
+  // wrapper instance, even if we end up retrying.
+  const [mediapipeInitReported, setMediapipeInitReported] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
-  // Attempt to load Mediapipe (once). If Mediapipe is already ready, loading,
-  // or running under Cypress, skip the attempt. This side-effect flips
-  // mediapipeReady/mediapipeLoading flags which control which component is used.
+  // Attempt to load Mediapipe (with a small bounded retry budget). If
+  // Mediapipe is already ready, currently loading, the environment is
+  // definitively unsupported, we've exhausted our retry budget, or we're
+  // running under Cypress, skip the attempt. On transient failure we wait
+  // (exponential backoff) before allowing the effect to re-run.
   useEffect(() => {
-    if (mediapipeReady || mediapipeLoading || isCypress) return;
+    if (
+      mediapipeReady ||
+      mediapipeLoading ||
+      unsupportedEnvironment ||
+      mediapipeInitAttempts >= MAX_MEDIAPIPE_INIT_ATTEMPTS ||
+      isCypress
+    )
+      return undefined;
+
+    let cancelled = false;
+    let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const loadMediapipe = async () => {
       setMediapipeLoading(true);
+      const attemptNumber = mediapipeInitAttempts + 1;
+      setMediapipeInitAttempts(attemptNumber);
       try {
         await getMediapipeInstance();
+        if (cancelled) return;
         setMediapipeReady(true);
+        setMediapipeLoading(false);
       } catch (error) {
+        if (cancelled) return;
         // Loading failed; we'll fall back to the legacy selfie-capture component
-        // after the loadingProgress reaches 100%.
+        // after the loadingProgress reaches 100% (or sooner for definitively
+        // unsupported environments — see below).
         console.error('Failed to load Mediapipe:', error);
+        const isUnsupportedEnvironment =
+          error instanceof UnsupportedMediapipeEnvironmentError;
+        // Report to Sentry (when the host page has exposed it on window) so we
+        // can observe how often users land on the fallback path and which
+        // environments are affected. Dedup so retries don't flood Sentry.
+        if (!mediapipeInitReported) {
+          setMediapipeInitReported(true);
+          window.Sentry?.captureException(error, {
+            tags: {
+              area: 'mediapipe_init',
+              mediapipe_unsupported_environment: isUnsupportedEnvironment
+                ? 'true'
+                : 'false',
+            },
+          });
+        }
+        // When the environment definitively cannot run MediaPipe (e.g. no
+        // WebAssembly reftypes support), there is no point retrying or keeping
+        // the user staring at the loading spinner for the full countdown —
+        // mark as unsupported and short-circuit to the fallback decision
+        // immediately.
+        if (isUnsupportedEnvironment) {
+          setUnsupportedEnvironment(true);
+          setLoadingProgress(100);
+          setMediapipeLoading(false);
+          return;
+        }
+        // Transient failure: wait with exponential backoff before allowing the
+        // effect to re-run by flipping mediapipeLoading back to false. If
+        // we've exhausted our retry budget, just release the loading flag so
+        // the countdown / fallback UI can proceed.
+        const hasRetriesLeft = attemptNumber < MAX_MEDIAPIPE_INIT_ATTEMPTS;
+        if (!hasRetriesLeft) {
+          setMediapipeLoading(false);
+          return;
+        }
+        const backoffMs =
+          MEDIAPIPE_RETRY_BASE_DELAY_MS * 2 ** (attemptNumber - 1);
+        retryTimeoutId = setTimeout(() => {
+          retryTimeoutId = null;
+          if (cancelled) return;
+          setMediapipeLoading(false);
+        }, backoffMs);
       }
-      setMediapipeLoading(false);
     };
 
     loadMediapipe();
-  }, [mediapipeReady, mediapipeLoading]);
+
+    return () => {
+      cancelled = true;
+      if (retryTimeoutId !== null) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
+  }, [
+    mediapipeReady,
+    mediapipeLoading,
+    unsupportedEnvironment,
+    mediapipeInitAttempts,
+    mediapipeInitReported,
+  ]);
 
   // When using the loading countdown (startCountdown), increment the
   // visible loading progress. This is only used while mediapipe hasn't

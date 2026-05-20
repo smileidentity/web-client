@@ -49,8 +49,10 @@ const DEFAULT_MEDIAPIPE_WAIT_MS = 90 * 1000; // For when legacy fallback is NOT 
 const DEFAULT_WAIT_MS = 20 * 1000; // default for when legacy fallback is allowed we wait for 20s
 // Cap retries on transient init failures so we don't spin forever, while still
 // allowing recovery from short-lived issues (e.g. CDN hiccups while the
-// wrapper is preloading in a hidden state).
+// wrapper is preloading in a hidden state). Retries are spaced with
+// exponential backoff (base * 2^(attempt-1)) so we don't hammer the CDN.
 const MAX_MEDIAPIPE_INIT_ATTEMPTS = 3;
+const MEDIAPIPE_RETRY_BASE_DELAY_MS = 500;
 
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
@@ -108,9 +110,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // Attempt to load Mediapipe (with a small bounded retry budget). If
   // Mediapipe is already ready, currently loading, the environment is
   // definitively unsupported, we've exhausted our retry budget, or we're
-  // running under Cypress, skip the attempt. This side-effect flips
-  // mediapipeReady/mediapipeLoading flags which control which component is
-  // used.
+  // running under Cypress, skip the attempt. On transient failure we wait
+  // (exponential backoff) before allowing the effect to re-run.
   useEffect(() => {
     if (
       mediapipeReady ||
@@ -119,15 +120,22 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
       mediapipeInitAttempts >= MAX_MEDIAPIPE_INIT_ATTEMPTS ||
       isCypress
     )
-      return;
+      return undefined;
+
+    let cancelled = false;
+    let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const loadMediapipe = async () => {
       setMediapipeLoading(true);
-      setMediapipeInitAttempts((prev) => prev + 1);
+      const attemptNumber = mediapipeInitAttempts + 1;
+      setMediapipeInitAttempts(attemptNumber);
       try {
         await getMediapipeInstance();
+        if (cancelled) return;
         setMediapipeReady(true);
+        setMediapipeLoading(false);
       } catch (error) {
+        if (cancelled) return;
         // Loading failed; we'll fall back to the legacy selfie-capture component
         // after the loadingProgress reaches 100% (or sooner for definitively
         // unsupported environments — see below).
@@ -156,12 +164,36 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         if (isUnsupportedEnvironment) {
           setUnsupportedEnvironment(true);
           setLoadingProgress(100);
+          setMediapipeLoading(false);
+          return;
         }
+        // Transient failure: wait with exponential backoff before allowing the
+        // effect to re-run by flipping mediapipeLoading back to false. If
+        // we've exhausted our retry budget, just release the loading flag so
+        // the countdown / fallback UI can proceed.
+        const hasRetriesLeft = attemptNumber < MAX_MEDIAPIPE_INIT_ATTEMPTS;
+        if (!hasRetriesLeft) {
+          setMediapipeLoading(false);
+          return;
+        }
+        const backoffMs =
+          MEDIAPIPE_RETRY_BASE_DELAY_MS * 2 ** (attemptNumber - 1);
+        retryTimeoutId = setTimeout(() => {
+          retryTimeoutId = null;
+          if (cancelled) return;
+          setMediapipeLoading(false);
+        }, backoffMs);
       }
-      setMediapipeLoading(false);
     };
 
     loadMediapipe();
+
+    return () => {
+      cancelled = true;
+      if (retryTimeoutId !== null) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
   }, [
     mediapipeReady,
     mediapipeLoading,

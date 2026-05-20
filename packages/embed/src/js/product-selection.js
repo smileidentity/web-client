@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/browser';
+import { fetchWithTimeout, withNetworkRetry } from './fetch-with-retry.js';
 
 (function productSelection() {
   'use strict';
@@ -49,6 +50,9 @@ import * as Sentry from '@sentry/browser';
     activeScreen = element;
   }
 
+  // Wraps fetch with a per-attempt AbortController timeout.
+  // Imported from `./fetch-with-retry.js`.
+
   async function getProductConstraints() {
     const payload = {
       token: config.token,
@@ -75,7 +79,11 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetch(url.toString(), fetchConfig);
+      const response = await fetchWithTimeout(
+        url.toString(),
+        fetchConfig,
+        10000,
+      );
       // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
       // an HTTP failure here would parse JSON of an error body and silently
       // return undefined without a Sentry event. Explicitly throw so the
@@ -120,7 +128,11 @@ import * as Sentry from '@sentry/browser';
     }
 
     try {
-      const response = await fetch(url.toString(), fetchConfig);
+      const response = await fetchWithTimeout(
+        url.toString(),
+        fetchConfig,
+        10000,
+      );
       if (!response.ok) {
         const err = new Error('Failed to get supported ID types');
         err.httpStatus = response.status;
@@ -406,18 +418,58 @@ import * as Sentry from '@sentry/browser';
 
           activeScreen = LoadingScreen;
 
-          const constraintsPromises = [
-            getProductConstraints(),
-            getLegacyProductConstraints(),
-          ];
-          const [productConstraints, legacyConstraints] =
-            await Promise.all(constraintsPromises);
-          verificationMethodMap = transformIdTypesToVerificationMethodMap(
-            config.id_types,
-            productConstraints,
-            legacyConstraints,
-          );
-          initializeForm(SelectIdType, verificationMethodMap);
+          try {
+            // iOS Safari (especially iOS 18+) intermittently fails with
+            // "TypeError: Load failed" — a transient network-level error that
+            // almost always succeeds on retry. Wrap the two init-API calls in
+            // `withNetworkRetry` so a transient fetch failure is retried with
+            // linear backoff (1 s, 2 s). HTTP failures bubble up immediately
+            // — they're already captured by `getProductConstraints` /
+            // `getLegacyProductConstraints` with Sentry tagging.
+            const [productConstraints, legacyConstraints] =
+              await withNetworkRetry(
+                () =>
+                  Promise.all([
+                    getProductConstraints(),
+                    getLegacyProductConstraints(),
+                  ]),
+                {
+                  // `getProductConstraints` / `getLegacyProductConstraints`
+                  // wrap fetch failures in `new Error('Failed to get supported
+                  // ID types', { cause: e })`, so the `.isNetworkError` flag
+                  // sits on `error.cause` rather than `error` itself. Walk the
+                  // cause chain when deciding whether to retry.
+                  shouldRetry: (e) => {
+                    let cur = e;
+                    while (cur) {
+                      if (cur.isNetworkError === true) return true;
+                      cur = cur.cause;
+                    }
+                    return false;
+                  },
+                },
+              );
+            verificationMethodMap = transformIdTypesToVerificationMethodMap(
+              config.id_types,
+              productConstraints,
+              legacyConstraints,
+            );
+            initializeForm(SelectIdType, verificationMethodMap);
+          } catch (e) {
+            // After all retry attempts are exhausted, signal the parent frame
+            // so the SDK calls config.onError rather than leaving the user on
+            // an infinite loading spinner. The inner `getProductConstraints` /
+            // `getLegacyProductConstraints` already capture to Sentry; capture
+            // here too so the outer failure (and its retry status) is
+            // observable rather than silently swallowed.
+            Sentry.captureException(e, {
+              tags: { area: 'init_api', failedRequest: 'product_selection' },
+            });
+            (referenceWindow.parent || referenceWindow).postMessage(
+              'SmileIdentity::Error',
+              '*',
+            );
+          }
         } else if (event.data.includes('SmileIdentity::ChildPageReady')) {
           publishMessage(config);
         }

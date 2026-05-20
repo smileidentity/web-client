@@ -24,6 +24,7 @@ import {
   buildInitApiFailure,
   captureInitApiFailure,
 } from './init-api-sentry.js';
+import { fetchWithTimeout } from './fetch-with-retry.js';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -76,55 +77,103 @@ window.Sentry = Sentry;
   let skipInputScreen = false;
 
   async function postData(url = '', data = {}, shouldSignPayload = false) {
-    return fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        ...(shouldSignPayload &&
-          (await getHeaders(data, config.partner_details.partner_id))),
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+    return fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          ...(shouldSignPayload &&
+            (await getHeaders(data, config.partner_details.partner_id))),
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       },
-      body: JSON.stringify(data),
-    });
+      10000,
+    );
   }
 
   async function getProductConstraints() {
-    // Captured at the point we know which response.ok was false so the catch
-    // below can attach response-level detail to the Sentry event. Null when
-    // the failure is a promise rejection (network drop, abort, etc.) rather
-    // than a non-OK HTTP response.
-    let initApiFailure = null;
-    try {
-      const productsConfigPayload = {
-        partner_id: config.partner_details.partner_id,
-        token: config.token,
-        partner_params,
-      };
+    // iOS Safari (especially iOS 18+) intermittently fails with
+    // "TypeError: Load failed" — a transient network-level error that almost
+    // always succeeds on retry. Retry up to 2 times (3 total attempts) with
+    // linear backoff (1 s, 2 s). HTTP failures (initApiFailure !== null) are
+    // deterministic and are never retried.
+    const MAX_ATTEMPTS = 3;
+    // Reason: cache the parsed products_config across attempts so a transient
+    // /services failure doesn't re-issue the (possibly side-effecting)
+    // /products_config POST that already succeeded.
+    let cachedPartnerConstraints = null;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      // Captured at the point we know which response.ok was false so the catch
+      // below can attach response-level detail to the Sentry event. Null when
+      // the failure is a promise rejection (network drop, abort, etc.) rather
+      // than a non-OK HTTP response.
+      let initApiFailure = null;
+      try {
+        const productsConfigPayload = {
+          partner_id: config.partner_details.partner_id,
+          token: config.token,
+          partner_params,
+        };
 
-      const productsConfigUrl = `${getEndpoint(
-        config.environment,
-      )}/products_config`;
-      const productsConfigPromise = postData(
-        productsConfigUrl,
-        productsConfigPayload,
-      );
-      const locale = getCurrentLocale();
-      const servicesUrl = new URL(
-        `${getEndpoint(config.environment)}/services`,
-      );
-      if (locale) {
-        servicesUrl.searchParams.append('locale', locale);
-      }
-      const servicesPromise = fetch(servicesUrl.toString());
-      const [productsConfigResponse, servicesResponse] = await Promise.all([
-        productsConfigPromise,
-        servicesPromise,
-      ]);
+        const productsConfigUrl = `${getEndpoint(
+          config.environment,
+        )}/products_config`;
+        const locale = getCurrentLocale();
+        const servicesUrl = new URL(
+          `${getEndpoint(config.environment)}/services`,
+        );
+        if (locale) {
+          servicesUrl.searchParams.append('locale', locale);
+        }
 
-      if (productsConfigResponse.ok && servicesResponse.ok) {
-        const partnerConstraints = await productsConfigResponse.json();
+        let partnerConstraints;
+        let servicesResponse;
+        if (cachedPartnerConstraints) {
+          // products_config already succeeded on a prior attempt; only retry
+          // the /services leg.
+          partnerConstraints = cachedPartnerConstraints;
+          servicesResponse = await fetchWithTimeout(
+            servicesUrl.toString(),
+            {},
+            10000,
+          );
+          if (!servicesResponse.ok) {
+            initApiFailure = {
+              failedRequests: ['services'],
+              productsConfigStatus: 200,
+              servicesStatus: servicesResponse.status,
+            };
+            throw new Error('Failed to get supported ID types');
+          }
+        } else {
+          const productsConfigPromise = postData(
+            productsConfigUrl,
+            productsConfigPayload,
+          );
+          const servicesPromise = fetchWithTimeout(
+            servicesUrl.toString(),
+            {},
+            10000,
+          );
+          const [productsConfigResponse, servicesResp] = await Promise.all([
+            productsConfigPromise,
+            servicesPromise,
+          ]);
+          servicesResponse = servicesResp;
+          if (!productsConfigResponse.ok || !servicesResponse.ok) {
+            initApiFailure = buildInitApiFailure(
+              productsConfigResponse,
+              servicesResponse,
+            );
+            throw new Error('Failed to get supported ID types');
+          }
+          partnerConstraints = await productsConfigResponse.json();
+          cachedPartnerConstraints = partnerConstraints;
+        }
         const generalConstraints = await servicesResponse.json();
 
         const previewBvnMfa = config.previewBVNMFA;
@@ -147,15 +196,21 @@ window.Sentry = Sentry;
           partnerConstraints,
           generalConstraints: generalConstraints.hosted_web.biometric_kyc,
         };
+      } catch (e) {
+        // HTTP failures have initApiFailure !== null — deterministic, never
+        // retry. Network-level failures are tagged by `fetchWithTimeout` with
+        // `.isNetworkError = true`; downstream errors (JSON parse TypeError,
+        // property access on undefined, etc.) are not flagged and are
+        // surfaced immediately.
+        const isNetworkError =
+          initApiFailure === null && e && e.isNetworkError === true;
+        if (!isNetworkError || attempt === MAX_ATTEMPTS) {
+          captureInitApiFailure(e, initApiFailure);
+          throw new Error('Failed to get supported ID types', { cause: e });
+        }
+        // Linear backoff: 1 s, then 2 s before the third attempt.
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
-      initApiFailure = buildInitApiFailure(
-        productsConfigResponse,
-        servicesResponse,
-      );
-      throw new Error('Failed to get supported ID types');
-    } catch (e) {
-      captureInitApiFailure(e, initApiFailure);
-      throw new Error('Failed to get supported ID types', { cause: e });
     }
   }
 
@@ -208,10 +263,17 @@ window.Sentry = Sentry;
         activeScreen = LoadingScreen;
 
         getPartnerParams();
-        const { partnerConstraints, generalConstraints } =
-          await getProductConstraints();
-        productConstraints = generalConstraints;
-        initializeSession(generalConstraints, partnerConstraints);
+        try {
+          const { partnerConstraints, generalConstraints } =
+            await getProductConstraints();
+          productConstraints = generalConstraints;
+          initializeSession(generalConstraints, partnerConstraints);
+        } catch (e) {
+          (referenceWindow.parent || referenceWindow).postMessage(
+            'SmileIdentity::Error',
+            '*',
+          );
+        }
       }
     },
     false,

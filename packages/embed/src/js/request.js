@@ -31,13 +31,12 @@ async function withRetry(fn, label) {
       await wait(RETRY_BASE_DELAY * 2 ** attempt);
     }
   }
-  const wrapped = new Error(
+  throw new Error(
     `${label} failed after ${MAX_RETRIES + 1} attempts: ${
       lastError && lastError.message ? lastError.message : lastError
     }`,
+    { cause: lastError },
   );
-  wrapped.cause = lastError;
-  throw wrapped;
 }
 
 let wasmInitPromise = null;
@@ -58,20 +57,22 @@ async function initWasm(forceRefetch = false) {
       try {
         const cacheBuster = `?v=${now}`;
 
-        const [wasmResponse, integrityResponse] = await withRetry(
-          () =>
-            Promise.all([
-              fetch(`${WASM_PATH}${cacheBuster}`),
-              fetch(`${INTEGRITY_PATH}${cacheBuster}`),
-            ]),
-          'wasm/integrity fetch',
-        );
-
-        if (!wasmResponse.ok || !integrityResponse.ok) {
-          throw new Error(
-            'Failed to fetch required wasm and integrity resources',
-          );
-        }
+        const [wasmResponse, integrityResponse] = await withRetry(async () => {
+          const responses = await Promise.all([
+            fetch(`${WASM_PATH}${cacheBuster}`),
+            fetch(`${INTEGRITY_PATH}${cacheBuster}`),
+          ]);
+          const [wasm, integrity] = responses;
+          if (!wasm.ok || !integrity.ok) {
+            // Throw so transient HTTP errors (e.g. 5xx) get retried;
+            // fetch() resolves on non-2xx, so this is the only place we
+            // can convert them into retryable failures.
+            throw new Error(
+              `Failed to fetch required wasm and integrity resources (wasm=${wasm.status}, integrity=${integrity.status})`,
+            );
+          }
+          return responses;
+        }, 'wasm/integrity fetch');
 
         step = 'integrity';
         const { hash: expectedHash } = await integrityResponse.json();

@@ -57,22 +57,28 @@ async function initWasm(forceRefetch = false) {
       try {
         const cacheBuster = `?v=${now}`;
 
-        const [wasmResponse, integrityResponse] = await withRetry(async () => {
-          const responses = await Promise.all([
-            fetch(`${WASM_PATH}${cacheBuster}`),
-            fetch(`${INTEGRITY_PATH}${cacheBuster}`),
-          ]);
-          const [wasm, integrity] = responses;
-          if (!wasm.ok || !integrity.ok) {
-            // Throw so transient HTTP errors (e.g. 5xx) get retried;
-            // fetch() resolves on non-2xx, so this is the only place we
-            // can convert them into retryable failures.
-            throw new Error(
-              `Failed to fetch required wasm and integrity resources (wasm=${wasm.status}, integrity=${integrity.status})`,
-            );
-          }
-          return responses;
-        }, 'wasm/integrity fetch');
+        // Retry each fetch independently so a transient failure on one
+        // resource doesn't force a re-download of the other (WASM can be
+        // a large payload). fetch() resolves on non-2xx, so check .ok
+        // and throw so withRetry can treat HTTP errors as retryable.
+        const [wasmResponse, integrityResponse] = await Promise.all([
+          withRetry(async () => {
+            const wasm = await fetch(`${WASM_PATH}${cacheBuster}`);
+            if (!wasm.ok) {
+              throw new Error(`WASM fetch failed (status=${wasm.status})`);
+            }
+            return wasm;
+          }, 'wasm fetch'),
+          withRetry(async () => {
+            const integrity = await fetch(`${INTEGRITY_PATH}${cacheBuster}`);
+            if (!integrity.ok) {
+              throw new Error(
+                `Integrity fetch failed (status=${integrity.status})`,
+              );
+            }
+            return integrity;
+          }, 'integrity fetch'),
+        ]);
 
         step = 'integrity';
         const { hash: expectedHash } = await integrityResponse.json();
@@ -90,7 +96,11 @@ async function initWasm(forceRefetch = false) {
 
         step = 'instantiate';
         const newModule = await withRetry(
-          () => import(`${JS_PATH}${cacheBuster}`),
+          // Use Date.now() on each call so every retry gets a distinct URL.
+          // ES module loaders memoize failures by specifier, so reusing the
+          // same URL would cause retries to reject from the module map cache
+          // rather than issuing a new network request.
+          () => import(`${JS_PATH}?v=${Date.now()}`),
           'web_client_guard.js dynamic import',
         );
 

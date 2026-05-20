@@ -14,6 +14,20 @@ import {
   UnsupportedMediapipeEnvironmentError,
 } from '../smartselfie-capture/utils/mediapipeManager';
 
+// Minimal typing for the optional Sentry SDK that host pages may expose on
+// `window`. We only depend on `captureException`, so keep the surface tight.
+type SentryTags = Record<string, string | number | boolean | null | undefined>;
+declare global {
+  interface Window {
+    Sentry?: {
+      captureException: (
+        error: unknown,
+        context?: { tags?: SentryTags },
+      ) => void;
+    };
+  }
+}
+
 interface Props {
   timeout?: number;
   interval?: number;
@@ -76,13 +90,16 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
+  const [mediapipeInitFailed, setMediapipeInitFailed] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
   // Attempt to load Mediapipe (once). If Mediapipe is already ready, loading,
-  // or running under Cypress, skip the attempt. This side-effect flips
-  // mediapipeReady/mediapipeLoading flags which control which component is used.
+  // has previously failed to initialise, or we're running under Cypress, skip
+  // the attempt. This side-effect flips mediapipeReady/mediapipeLoading flags
+  // which control which component is used.
   useEffect(() => {
-    if (mediapipeReady || mediapipeLoading || isCypress) return;
+    if (mediapipeReady || mediapipeLoading || mediapipeInitFailed || isCypress)
+      return;
 
     const loadMediapipe = async () => {
       setMediapipeLoading(true);
@@ -91,23 +108,30 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         setMediapipeReady(true);
       } catch (error) {
         // Loading failed; we'll fall back to the legacy selfie-capture component
-        // after the loadingProgress reaches 100%.
+        // after the loadingProgress reaches 100%. Mark init as failed so the
+        // load effect doesn't re-run (and re-report to Sentry) on subsequent
+        // state changes.
+        setMediapipeInitFailed(true);
         console.error('Failed to load Mediapipe:', error);
         // Report to Sentry (when the host page has exposed it on window) so we
         // can observe how often users land on the fallback path and which
-        // environments are affected.
-        (window as any).Sentry?.captureException(error, {
+        // environments are affected. Sentry tag values are expected to be
+        // strings, so stringify the boolean flag.
+        const isUnsupportedEnvironment =
+          error instanceof UnsupportedMediapipeEnvironmentError;
+        window.Sentry?.captureException(error, {
           tags: {
             area: 'mediapipe_init',
-            mediapipe_unsupported_environment:
-              error instanceof UnsupportedMediapipeEnvironmentError,
+            mediapipe_unsupported_environment: isUnsupportedEnvironment
+              ? 'true'
+              : 'false',
           },
         });
         // When the environment definitively cannot run MediaPipe (e.g. no
         // WebAssembly reftypes support), there is no point keeping the user
         // staring at the loading spinner for the full countdown — short
         // circuit to the fallback decision immediately.
-        if (error instanceof UnsupportedMediapipeEnvironmentError) {
+        if (isUnsupportedEnvironment) {
           setLoadingProgress(100);
         }
       }
@@ -115,7 +139,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     };
 
     loadMediapipe();
-  }, [mediapipeReady, mediapipeLoading]);
+  }, [mediapipeReady, mediapipeLoading, mediapipeInitFailed]);
 
   // When using the loading countdown (startCountdown), increment the
   // visible loading progress. This is only used while mediapipe hasn't

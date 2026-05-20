@@ -997,8 +997,18 @@ export function useCardDetection(
 
             // Cache the card's bounding rect in canvas coords for tight
             // crop-to-contour at capture time. Contour points are ROI-relative,
-            // so translate by the ROI origin.
-            {
+            // so translate by the ROI origin. For the synthetic book-doc
+            // fallback the contour bbox covers only inner content (photo,
+            // text, MRZ) — expand it to the guide rect so the preview shows
+            // the whole bio page rather than just the inner cluster.
+            if (bestContourIsSynthetic) {
+              latestCardRectRef.current = {
+                x: clampedX,
+                y: clampedY,
+                w: clampedW,
+                h: clampedH,
+              };
+            } else {
               const cardRect = cv.boundingRect(bestContour);
               latestCardRectRef.current = {
                 x: clampedX + cardRect.x,

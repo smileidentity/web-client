@@ -39,15 +39,38 @@ jobs:
           fi
           echo "Version verified: $PKG_VERSION"
 
-  publish:
+  test:
     needs: [validate]
+    if: ${{ inputs.skip_tests == false }}
+    uses: ./.github/workflows/test.yml
+
+  publish:
+    needs: [validate, test]
+    if: ${{ always() && !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       id-token: write
       contents: read
-    uses: ./.github/workflows/publish-web-components.yml
-    with:
-      skip_tests: ${{ inputs.skip_tests }}
-      skip_validation: true
+    defaults:
+      run:
+        working-directory: ./packages/web-components
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v6
+
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: publish to npm with provenance
+        run: npm publish --provenance --access public
 
   deploy:
     needs: [validate]

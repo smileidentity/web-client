@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect } from 'preact/hooks';
+import SmartCamera from '../../../../../domain/camera/src/SmartCamera';
 
 export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState(initialFacingMode);
   const [agentSupported, setAgentSupported] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const onCameraSwitchCallbackRef = useRef<(() => void) | null>(null);
   const isSwitchingCameraRef = useRef(false);
   const timeoutIdsRef = useRef<Set<NodeJS.Timeout>>(new Set());
@@ -63,6 +65,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         video: { facingMode: targetFacingMode || facingMode },
       });
       streamRef.current = stream;
+      setCameraError(null);
 
       const track = stream.getVideoTracks()[0];
       const settings = track.getSettings();
@@ -94,6 +97,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
       }
     } catch (error) {
       console.error('Failed to start camera:', error);
+      setCameraError(SmartCamera.handleCameraError(error));
     }
   };
 
@@ -118,6 +122,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         await startCamera(previousFacingMode);
       } catch (restoreError) {
         console.error('Failed to restore previous camera:', restoreError);
+        setCameraError(SmartCamera.handleCameraError(restoreError));
       }
     }
   };
@@ -229,6 +234,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
     streamRef,
     facingMode,
     agentSupported,
+    cameraError,
     startCamera,
     switchCamera,
     checkAgentSupport,

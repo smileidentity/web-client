@@ -1,13 +1,26 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-const fpPromise = FingerprintJS.load();
+const fpPromise = Promise.resolve()
+  .then(() => FingerprintJS.load({ monitoring: false }))
+  .catch((error) => {
+    console.warn('FingerprintJS failed to load:', error);
+    return null;
+  });
 
 /**
  * Retrieves a unique identifier for the user's browser, using FingerprintJS.
- * @returns {Promise<string>} A promise that resolves with the visitor ID.
+ * Returns null if fingerprinting fails (e.g., blocked by browser security settings).
+ * @returns {Promise<string|null>} A promise that resolves with the visitor ID, or null on failure.
  */
 export const getFingerprint = async () => {
-  const fp = await fpPromise;
-  const result = await fp.get();
-  return result.visitorId;
+  try {
+    const fp = await fpPromise;
+    if (!fp) return null;
+
+    const result = await fp.get();
+    return result.visitorId;
+  } catch (error) {
+    console.warn('Failed to get fingerprint:', error);
+    return null;
+  }
 };

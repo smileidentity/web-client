@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -14,6 +15,12 @@ import {
   shouldSkipSelection,
   idInfoToIdSelection,
 } from './id-info-utils.js';
+import { fetchWithTimeout } from './fetch-with-retry.js';
+
+// Expose Sentry on the iframe window so the standalone `smart-camera-web`
+// web component (which has no @sentry/browser dep of its own) can report
+// camera-init failures via `window.Sentry?.captureException`.
+window.Sentry = Sentry;
 
 /**
  * Apply translations to all elements with data-i18n attribute
@@ -73,6 +80,9 @@ function applyPageTranslations() {
   let fileToUpload;
   let uploadURL;
 
+  // `fetchWithTimeout` is imported from `./fetch-with-retry.js` so the
+  // timeout/tagging logic stays in sync across all iframe entry points.
+
   async function getProductConstraints() {
     const locale = getCurrentLocale();
     const url = new URL(`${getEndpoint(config.environment)}/services`);
@@ -80,13 +90,45 @@ function applyPageTranslations() {
       url.searchParams.append('locale', locale);
     }
 
-    try {
-      const response = await fetch(url.toString());
-      const json = await response.json();
+    // iOS Safari (especially iOS 18+) intermittently fails with
+    // "TypeError: Load failed" — a transient network-level error that almost
+    // always succeeds on retry. Retry up to 2 times (3 total attempts) with
+    // linear backoff (1 s, 2 s). HTTP errors (e.httpStatus) are deterministic
+    // and are never retried.
+    const MAX_ATTEMPTS = 3;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetchWithTimeout(url.toString(), {}, 10000);
+        // `fetch` only rejects on network errors — 4xx/5xx still resolve, so
+        // an HTTP failure here would parse JSON of an error body and silently
+        // return undefined without a Sentry event. Explicitly throw so the
+        // catch tags the request and the status before re-throwing.
+        if (!response.ok) {
+          const err = new Error('Failed to get supported ID types');
+          err.httpStatus = response.status;
+          throw err;
+        }
+        const json = await response.json();
 
-      return json.hosted_web.enhanced_document_verification;
-    } catch (e) {
-      throw new Error('Failed to get supported ID types', { cause: e });
+        return json.hosted_web.enhanced_document_verification;
+      } catch (e) {
+        // Only fetch-level network errors (tagged by `fetchWithTimeout`) are
+        // retried; downstream JSON parse or property access TypeErrors are not.
+        const isNetworkError = e && e.isNetworkError === true;
+        if (!isNetworkError || attempt === MAX_ATTEMPTS) {
+          Sentry.captureException(e, {
+            tags: {
+              area: 'init_api',
+              failedRequest: 'services',
+              ...(e.httpStatus ? { httpStatus: String(e.httpStatus) } : {}),
+              ...(attempt > 1 ? { retryAttempt: String(attempt) } : {}),
+            },
+          });
+          throw new Error('Failed to get supported ID types', { cause: e });
+        }
+        // Linear backoff: 1 s, then 2 s before the third attempt.
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
     }
   }
 
@@ -99,6 +141,16 @@ function applyPageTranslations() {
         event.data.includes('SmileIdentity::Configuration')
       ) {
         config = JSON.parse(event.data);
+        // Tag every Sentry event from this iframe context with partner_id and
+        // environment. The parent script.js tags the parent window's Sentry
+        // hub, but this iframe runs in its own JS context with its own hub —
+        // without these tags, errors from this page are unattributable.
+        if (config.partner_details?.partner_id) {
+          Sentry.setTag('partner_id', config.partner_details.partner_id);
+        }
+        if (config.environment) {
+          Sentry.setTag('environment', config.environment);
+        }
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });
@@ -114,9 +166,16 @@ function applyPageTranslations() {
         });
         activeScreen = LoadingScreen;
 
-        productConstraints = await getProductConstraints();
-        initializeSession(productConstraints);
-        getPartnerParams();
+        try {
+          productConstraints = await getProductConstraints();
+          initializeSession(productConstraints);
+          getPartnerParams();
+        } catch (e) {
+          (referenceWindow.parent || referenceWindow).postMessage(
+            'SmileIdentity::Error',
+            '*',
+          );
+        }
       }
     },
     false,
@@ -142,6 +201,9 @@ function applyPageTranslations() {
     }
     if (config.hide_attribution) {
       SmartCameraWeb.setAttribute('hide-attribution', true);
+    }
+    if (config.new_instructions) {
+      SmartCameraWeb.setAttribute('new-instructions', true);
     }
     // this is to mimic the behavior of the old hosted web integration
     SmartCameraWeb.setAttribute('hide-back-of-id', true);

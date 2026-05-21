@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.2] - 2026-05-20
+
+### Changed
+
+- Embed: handle device meta collection failures gracefully so init no longer aborts when device meta errors out
+- Embed: retry the `web_client_guard` dynamic import on transient network failures
+- Embed: add fetch retry and timeout to the init-API request to recover from intermittent iOS Safari failures
+- Selfie: short-circuit to the legacy capture flow when the MediaPipe environment is unsupported
+- Selfie: fall back to legacy capture when the browser does not support WebAssembly reftypes
+
+## [11.4.1] - 2026-05-18
+
+### Added
+
+- Improve error reporting
+- Add new document capture instructions with an opt-in option to use the new design
+
+### Changed
+
+- Fixed combobox filtering on Huawei devices by using the `input` event
+
 ## [11.4.0] - 2026-03-25
 
 ### Added

@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/browser';
+
 const WASM_PATH = 'https://secure.smileidentity.com/web_client_guard_bg.wasm';
 const JS_PATH = 'https://secure.smileidentity.com/web_client_guard.js';
 const INTEGRITY_PATH = 'https://secure.smileidentity.com/integrity.json';
@@ -7,6 +9,31 @@ const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 const GRACE_PERIOD = 5 * 60 * 1000; // 5 mins
 
 const isStale = () => Date.now() - lastFetchTime > CACHE_DURATION;
+
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY = 500;
+
+const wait = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+async function withRetry(fn, label, attempt = 0) {
+  try {
+    return await fn(attempt);
+  } catch (e) {
+    if (attempt >= MAX_RETRIES) {
+      throw new Error(
+        `${label} failed after ${MAX_RETRIES + 1} attempts: ${
+          e && e.message ? e.message : e
+        }`,
+        { cause: e },
+      );
+    }
+    await wait(RETRY_BASE_DELAY * 2 ** attempt);
+    return withRetry(fn, label, attempt + 1);
+  }
+}
 
 let wasmInitPromise = null;
 
@@ -19,20 +46,37 @@ async function initWasm(forceRefetch = false) {
 
   if (!wasmModule || isStale() || forceRefetch) {
     wasmInitPromise = (async () => {
+      // Track which step we're in so the Sentry tag below points at the
+      // specific failure mode (fetch failure vs integrity mismatch vs
+      // instantiate / compile error).
+      let step = 'fetch';
       try {
         const cacheBuster = `?v=${now}`;
 
+        // Retry each fetch independently so a transient failure on one
+        // resource doesn't force a re-download of the other (WASM can be
+        // a large payload). fetch() resolves on non-2xx, so check .ok
+        // and throw so withRetry can treat HTTP errors as retryable.
         const [wasmResponse, integrityResponse] = await Promise.all([
-          fetch(`${WASM_PATH}${cacheBuster}`),
-          fetch(`${INTEGRITY_PATH}${cacheBuster}`),
+          withRetry(async () => {
+            const wasm = await fetch(`${WASM_PATH}${cacheBuster}`);
+            if (!wasm.ok) {
+              throw new Error(`WASM fetch failed (status=${wasm.status})`);
+            }
+            return wasm;
+          }, 'wasm fetch'),
+          withRetry(async () => {
+            const integrity = await fetch(`${INTEGRITY_PATH}${cacheBuster}`);
+            if (!integrity.ok) {
+              throw new Error(
+                `Integrity fetch failed (status=${integrity.status})`,
+              );
+            }
+            return integrity;
+          }, 'integrity fetch'),
         ]);
 
-        if (!wasmResponse.ok || !integrityResponse.ok) {
-          throw new Error(
-            'Failed to fetch required wasm and integrity resources',
-          );
-        }
-
+        step = 'integrity';
         const { hash: expectedHash } = await integrityResponse.json();
         const wasmBuffer = await wasmResponse.arrayBuffer();
 
@@ -46,12 +90,28 @@ async function initWasm(forceRefetch = false) {
           throw new Error('WASM integrity check failed');
         }
 
-        const newModule = await import(`${JS_PATH}${cacheBuster}`);
+        step = 'instantiate';
+        const newModule = await withRetry(
+          // Use Date.now() on each call so every retry gets a distinct URL.
+          // ES module loaders memoize failures by specifier, so reusing the
+          // same URL would cause retries to reject from the module map cache
+          // rather than issuing a new network request.
+          () => import(`${JS_PATH}?v=${Date.now()}`),
+          'web_client_guard.js dynamic import',
+        );
 
         await newModule.default(wasmBuffer);
 
         wasmModule = newModule;
         lastFetchTime = now;
+      } catch (e) {
+        // Report WASM init failures so we can attribute them. Without this,
+        // every signed API call downstream fails opaquely and the user-facing
+        // error is something generic like "Failed to get supported ID types".
+        Sentry.captureException(e, {
+          tags: { area: 'wasm_init', wasmStep: step },
+        });
+        throw e;
       } finally {
         wasmInitPromise = null;
       }

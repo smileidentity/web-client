@@ -1393,6 +1393,18 @@ class SmartCameraWeb extends HTMLElement {
     ) {
       this.setUpEventListeners();
     } else {
+      // Report to Sentry so we can see which browsers/devices are landing here.
+      // Sentry is initialized by the parent @smileid/embed bundle on the same
+      // window; the optional-chain makes this a no-op in dev/test where Sentry
+      // isn't loaded. Extras capture iframe state + UA because the primary
+      // signal we're investigating is iOS Safari inside a 3rd-party iframe.
+      window.Sentry?.captureException(new Error('getUserMedia not available'), {
+        extras: {
+          inIframe: window.self !== window.top,
+          userAgent: navigator.userAgent,
+        },
+        tags: { area: 'camera_init', failure: 'no_getUserMedia' },
+      });
       const heading = document.createElement('h1');
       heading.classList.add('error-message');
       heading.textContent = 'Your browser does not support this integration';
@@ -1797,6 +1809,21 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   handleError(e) {
+    // Report camera/getUserMedia failures to Sentry once per element lifecycle.
+    // Retries within the same instance would otherwise emit duplicate events
+    // (Sentry's built-in dedup helps but isn't guaranteed across distinct
+    // Error objects with the same name). The switch below still drives the
+    // user-facing message; this captureException only adds observability.
+    if (!this._cameraErrorReported) {
+      this._cameraErrorReported = true;
+      window.Sentry?.captureException(e, {
+        extras: {
+          inIframe: window.self !== window.top,
+          userAgent: navigator.userAgent,
+        },
+        tags: { area: 'camera', errorName: e.name || 'unknown' },
+      });
+    }
     switch (e.name) {
       case 'NotAllowedError':
       case 'SecurityError':

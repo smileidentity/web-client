@@ -1,6 +1,8 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-const fpPromise = FingerprintJS.load().catch((error) => {
+const fpPromise = FingerprintJS.load({
+  monitoring: false,
+}).catch((error) => {
   console.warn('FingerprintJS failed to load:', error);
   return null;
 });

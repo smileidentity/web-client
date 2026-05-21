@@ -23,7 +23,7 @@
       "requestButton": "Request Camera Access"
     },
     "error": {
-      "notAllowed": "Camera access not granted or blocked by a browser/extensions.  Enable access in your browser/extension to continue. You may need to refresh.",
+      "notAllowed": "Camera permission not granted for this service. Enable access to your camera in your device or browser/extension to continue. You may need to refresh.",
       "abort": "Something happened, and we lost access to your camera. Please refresh.",
       "notReadable": "There seems to be a problem with your camera connection. Please check and try again or try using device.",
       "notFound": "We are unable to find your camera. Please refresh.",

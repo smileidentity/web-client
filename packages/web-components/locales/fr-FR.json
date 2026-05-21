@@ -23,7 +23,7 @@
       "requestButton": "Demander l'accès à la caméra"
     },
     "error": {
-      "notAllowed": "L'accès à la caméra est refusé ou bloqué par votre navigateur/vos extensions. Pour continuer, autorisez l'accès dans votre navigateur/vos extensions. Il se peut que vous deviez actualiser la page.",
+      "notAllowed": "L'autorisation d'accès à la caméra n'a pas été accordée pour ce service. Activez l'accès à votre caméra dans votre appareil ou navigateur/extension pour continuer. Il se peut que vous deviez actualiser la page.",
       "abort": "Un problème est survenu et nous avons perdu l'accès à votre caméra. Veuillez actualiser.",
       "notReadable": "Il semble y avoir un problème avec la connexion de votre caméra. Veuillez vérifier et réessayer, ou essayez d'utiliser un autre appareil.",
       "notFound": "Nous ne parvenons pas à trouver votre caméra. Veuillez actualiser.",

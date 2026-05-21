@@ -13,7 +13,9 @@ export const handler = async (event: { body: string }) => {
     const environmentServer =
       SID_SERVER_MAPPING[Resource.SmileIdEnvironment.value] ||
       Resource.SmileIdEnvironment.value;
-    const baseServer = `${Resource.SmileIdEnvironment.value}/v1`;
+    const baseServer = Resource.SmileIdEnvironment.value.startsWith('https://')
+      ? `${Resource.SmileIdEnvironment.value.slice(8)}/v1`
+      : Resource.SmileIdEnvironment.value;
 
     const connection = new SIDWebAPI(
       Resource.PartnerId.value,

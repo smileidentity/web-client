@@ -30,7 +30,9 @@ app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
     const environmentServer = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
-    const baseServer = `${SID_SERVER}/v1`;
+    const baseServer = SID_SERVER.startsWith('https://')
+      ? `${SID_SERVER.slice(8)}/v1`
+      : SID_SERVER;
 
     const connection = new SIDWebAPI(
       PARTNER_ID,

@@ -25,6 +25,9 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import { initIframeSentry } from './sentry-iframe-init.js';
+
+initIframeSentry('biometric-kyc');
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report

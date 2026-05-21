@@ -8,6 +8,9 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
+import { initIframeSentry } from './sentry-iframe-init.js';
+
+initIframeSentry('e-signature');
 
 const fieldTranslationKeys = {
   name: 'pages.eSignature.fullName',

@@ -35,6 +35,47 @@ async function withRetry(fn, label, attempt = 0) {
   }
 }
 
+// Probe whether secure.smileidentity.com is reachable at all from this
+// client, independent of the wasm path that just failed. Helps distinguish
+// "origin unreachable" (DNS / Private Relay / content blocker) from
+// "specific asset / connection-level failure".
+async function collectFailureDiagnostics() {
+  const connection =
+    typeof navigator !== 'undefined' &&
+    (navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection);
+
+  let secureOriginReachable = 'unknown';
+  let probeError = null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
+    // HEAD on integrity.json: smallest known-good asset on the same origin.
+    // no-store + a fresh query param to bypass any pinned/poisoned cache entry.
+    const probe = await fetch(`${INTEGRITY_PATH}?probe=${Date.now()}`, {
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    secureOriginReachable = probe.ok ? 'yes' : `status_${probe.status}`;
+  } catch (err) {
+    secureOriginReachable = 'no';
+    probeError = err && err.message ? err.message : String(err);
+  }
+
+  return {
+    secureOriginReachable,
+    probeError,
+    effectiveType: connection?.effectiveType ?? 'unknown',
+    downlink: connection?.downlink ?? null,
+    rtt: connection?.rtt ?? null,
+    saveData: connection?.saveData ?? null,
+    online: typeof navigator !== 'undefined' ? navigator.onLine : null,
+  };
+}
+
 let wasmInitPromise = null;
 
 async function initWasm(forceRefetch = false) {
@@ -108,8 +149,15 @@ async function initWasm(forceRefetch = false) {
         // Report WASM init failures so we can attribute them. Without this,
         // every signed API call downstream fails opaquely and the user-facing
         // error is something generic like "Failed to get supported ID types".
+        const diagnostics = await collectFailureDiagnostics();
         Sentry.captureException(e, {
-          tags: { area: 'wasm_init', wasmStep: step },
+          tags: {
+            area: 'wasm_init',
+            wasmStep: step,
+            effectiveType: diagnostics.effectiveType,
+            secureOriginReachable: diagnostics.secureOriginReachable,
+          },
+          extra: diagnostics,
         });
         throw e;
       } finally {

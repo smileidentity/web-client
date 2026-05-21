@@ -27,7 +27,8 @@
       "abort": "Un problème est survenu et nous avons perdu l'accès à votre caméra. Veuillez actualiser.",
       "notReadable": "Il semble y avoir un problème avec la connexion de votre caméra. Veuillez vérifier et réessayer, ou essayez d'utiliser un autre appareil.",
       "notFound": "Nous ne parvenons pas à trouver votre caméra. Veuillez actualiser.",
-      "insecure": "Connexion sécurisée requise. L'accès à la caméra est désactivé sur les sites non sécurisés. Veuillez vous rendre sur la page sécurisée ou contacter le propriétaire de l'application."
+      "insecure": "Connexion sécurisée requise. L'accès à la caméra est désactivé sur les sites non sécurisés. Veuillez vous rendre sur la page sécurisée ou contacter le propriétaire de l'application.",
+      "retry": "Réessayer"
     }
   },
   "selfie": {

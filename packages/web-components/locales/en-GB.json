@@ -27,7 +27,8 @@
       "abort": "Something happened, and we lost access to your camera. Please refresh.",
       "notReadable": "There seems to be a problem with your camera connection. Please check and try again or try using device.",
       "notFound": "We are unable to find your camera. Please refresh.",
-      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner."
+      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner.",
+      "retry": "Try again"
     }
   },
   "selfie": {

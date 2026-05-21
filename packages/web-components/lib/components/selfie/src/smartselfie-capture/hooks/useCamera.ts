@@ -97,8 +97,13 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
       }
     } catch (error) {
       console.error('Failed to start camera:', error);
-      setCameraError(SmartCamera.handleCameraError(error));
+      setCameraError(SmartCamera.handleCameraError(error as Error));
+      throw error;
     }
+  };
+
+  const retryCamera = async () => {
+    await startCamera(facingMode);
   };
 
   const switchCamera = async () => {
@@ -122,7 +127,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
         await startCamera(previousFacingMode);
       } catch (restoreError) {
         console.error('Failed to restore previous camera:', restoreError);
-        setCameraError(SmartCamera.handleCameraError(restoreError));
+        setCameraError(SmartCamera.handleCameraError(restoreError as Error));
       }
     }
   };
@@ -236,6 +241,7 @@ export const useCamera = (initialFacingMode: CameraFacingMode = 'user') => {
     agentSupported,
     cameraError,
     startCamera,
+    retryCamera,
     switchCamera,
     checkAgentSupport,
     stopCamera,

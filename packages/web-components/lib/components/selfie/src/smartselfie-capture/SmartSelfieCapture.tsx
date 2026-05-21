@@ -3,6 +3,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { translate } from '../../../../domain/localisation';
 import { useFaceCapture, useCamera } from './hooks';
 import { CameraPreview } from './components/CameraPreview';
 import { AlertDisplay } from './components/AlertDisplay';
@@ -61,8 +62,8 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     getFacingMode: () => camera.facingMode,
   });
 
-  useEffect(() => {
-    const initializeCamera = async () => {
+  const initializeCamera = async () => {
+    try {
       await camera.startCamera(initialFacingMode, (cameraName) => {
         const smartCameraWeb = document.querySelector('smart-camera-web');
         smartCameraWeb?.dispatchEvent(
@@ -71,15 +72,20 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           }),
         );
       });
-      await camera.checkAgentSupport();
-      await faceCapture.initializeFaceLandmarker();
+    } catch {
+      // startCamera already set cameraError; surface UI and skip downstream init
+      return;
+    }
+    await camera.checkAgentSupport();
+    await faceCapture.initializeFaceLandmarker();
 
-      setTimeout(() => {
-        faceCapture.setupCanvas();
-        faceCapture.startDetectionLoop();
-      }, 500);
-    };
+    setTimeout(() => {
+      faceCapture.setupCanvas();
+      faceCapture.startDetectionLoop();
+    }, 500);
+  };
 
+  useEffect(() => {
     camera.registerCameraSwitchCallback(() => {
       try {
         faceCapture.resetFaceDetectionState();
@@ -145,6 +151,15 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
       {camera.cameraError ? (
         <div className="camera-error" role="alert">
           <p>{camera.cameraError}</p>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              initializeCamera();
+            }}
+          >
+            {translate('camera.error.retry')}
+          </button>
         </div>
       ) : (
         <>

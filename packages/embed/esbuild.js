@@ -131,7 +131,12 @@ files.forEach((file) => {
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'smile-identity',
           project: 'web-client',
-          release: { name: SENTRY_RELEASE },
+          release: {
+            name: SENTRY_RELEASE,
+            ...(process.env.SENTRY_ENVIRONMENT
+              ? { deploy: { env: process.env.SENTRY_ENVIRONMENT } }
+              : {}),
+          },
           errorHandler: (err) => {
             // eslint-disable-next-line no-console
             console.warn('Sentry plugin error:', err);

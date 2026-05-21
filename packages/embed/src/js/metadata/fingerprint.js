@@ -1,11 +1,11 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-const fpPromise = FingerprintJS.load({
-  monitoring: false,
-}).catch((error) => {
-  console.warn('FingerprintJS failed to load:', error);
-  return null;
-});
+const fpPromise = Promise.resolve()
+  .then(() => FingerprintJS.load({ monitoring: false }))
+  .catch((error) => {
+    console.warn('FingerprintJS failed to load:', error);
+    return null;
+  });
 
 /**
  * Retrieves a unique identifier for the user's browser, using FingerprintJS.

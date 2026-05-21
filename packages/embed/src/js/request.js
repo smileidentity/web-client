@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/browser';
+import { fetchWithTimeout } from './fetch-with-retry.js';
 
 const WASM_PATH = 'https://secure.smileidentity.com/web_client_guard_bg.wasm';
 const JS_PATH = 'https://secure.smileidentity.com/web_client_guard.js';
@@ -48,21 +49,36 @@ async function collectFailureDiagnostics() {
 
   let secureOriginReachable = 'unknown';
   let probeError = null;
+  // HEAD on integrity.json: smallest known-good asset on the same origin.
+  // no-store + a fresh query param to bypass any pinned/poisoned cache entry.
+  const probeUrl = `${INTEGRITY_PATH}?probe=${Date.now()}`;
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3000);
-    // HEAD on integrity.json: smallest known-good asset on the same origin.
-    // no-store + a fresh query param to bypass any pinned/poisoned cache entry.
-    const probe = await fetch(`${INTEGRITY_PATH}?probe=${Date.now()}`, {
-      method: 'HEAD',
-      cache: 'no-store',
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
+    const probe = await fetchWithTimeout(
+      probeUrl,
+      { method: 'HEAD', cache: 'no-store' },
+      1500,
+    );
     secureOriginReachable = probe.ok ? 'yes' : `status_${probe.status}`;
   } catch (err) {
-    secureOriginReachable = 'no';
     probeError = err && err.message ? err.message : String(err);
+    // Fall back to a no-cors probe. A CORS-stripped WAF 403 rejects the
+    // first probe with TypeError (same shape as a true network failure),
+    // which would falsely tag the origin as unreachable. With no-cors, an
+    // opaque response (status 0) proves the server responded — so we can
+    // distinguish "reachable but CORS/WAF blocking" from "truly unreachable".
+    try {
+      const opaque = await fetchWithTimeout(
+        probeUrl,
+        { method: 'HEAD', cache: 'no-store', mode: 'no-cors' },
+        1500,
+      );
+      secureOriginReachable =
+        opaque.type === 'opaque' || opaque.status === 0
+          ? 'reachable_no_cors'
+          : `status_${opaque.status}`;
+    } catch {
+      secureOriginReachable = 'no';
+    }
   }
 
   return {
@@ -149,7 +165,17 @@ async function initWasm(forceRefetch = false) {
         // Report WASM init failures so we can attribute them. Without this,
         // every signed API call downstream fails opaquely and the user-facing
         // error is something generic like "Failed to get supported ID types".
-        const diagnostics = await collectFailureDiagnostics();
+        // Guard the diagnostics call: if it throws unexpectedly we must
+        // still report the original WASM error rather than swallowing it.
+        let diagnostics = {};
+        try {
+          diagnostics = await collectFailureDiagnostics();
+        } catch (diagErr) {
+          diagnostics = {
+            diagnosticsError:
+              diagErr && diagErr.message ? diagErr.message : String(diagErr),
+          };
+        }
         Sentry.captureException(e, {
           tags: {
             area: 'wasm_init',

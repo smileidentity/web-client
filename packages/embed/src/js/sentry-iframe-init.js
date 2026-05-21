@@ -6,23 +6,34 @@ import * as Sentry from '@sentry/browser';
 // captureException calls from the iframe JS bundles target the same hub
 // that ships events — without this, tags like `partner_id` set in the
 // bundle never reached Sentry because the bundled SDK had no client.
-const DSN =
+const FALLBACK_DSN =
   'https://82cc89f6d5a076c26d3a3cdc03a8d954@o1154186.ingest.us.sentry.io/4507143981236224';
+/* eslint-disable no-undef */
+const DSN =
+  (typeof __SENTRY_DSN__ !== 'undefined' && __SENTRY_DSN__) || FALLBACK_DSN;
+/* eslint-enable no-undef */
+
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export function initIframeSentry(pageName) {
+  if (Sentry.getClient()) return;
+
+  const pageUrlPattern = new RegExp(escapeRegExp(pageName));
+
   Sentry.init({
     dsn: DSN,
     beforeSend(event) {
       const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
-      // Drop events where any frame originates outside the library's
-      // source files. Preserves the historical filter behaviour from the
-      // per-page CDN loader configs.
-      for (const frame of frames) {
-        if (!frame.filename?.match(/inline\/src/g)) {
-          return null;
-        }
+      // Keep the event if at least one frame is from the library's source
+      // files. Previously any non-matching frame (e.g. a browser-internal
+      // or polyfill frame in the chain) would drop the entire event.
+      if (
+        frames.length > 0 &&
+        !frames.some((frame) => frame.filename?.match(/inline\/src/))
+      ) {
+        return null;
       }
-      if (!event.request?.url?.match(new RegExp(pageName))) {
+      if (!event.request?.url?.match(pageUrlPattern)) {
         return null;
       }
       return event;

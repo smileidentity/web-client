@@ -2,11 +2,11 @@
 
 Repo-level helper scripts. Most are wired into CI via [`.github/workflows/lint.yml`](../.github/workflows/lint.yml). All assume the repository root as the working directory.
 
-| Script | Purpose | Run locally |
-|---|---|---|
+| Script                  | Purpose                                                                                                                                                                                                                                                                                              | Run locally                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
 | `versionConsistency.js` | Verifies every `package.json` under `packages/` shares the same `version`. The root and all three workspaces (`@smileid/web-components`, `@smileid/embed`, `@smile_identity/smart-camera-web`) must be in lockstep — releases are tag-driven and the publish workflow refuses to ship if they drift. | `node scripts/versionConsistency.js` |
-| `checkLocaleParity.js` | Verifies that every locale file in `packages/web-components/locales/` contains the same set of translation keys as the reference locale (`en-GB.json`). Fails CI if any locale is missing keys or introduces extras. | `node scripts/checkLocaleParity.js` |
-| `update.sh` | Convenience script for bumping all workspace dependencies with `npm-check-updates` (skips `eslint` and `signature_pad`). Not run in CI — intended for ad-hoc maintenance. Installs `npm-check-updates` globally if missing. | `bash scripts/update.sh` |
+| `checkLocaleParity.js`  | Verifies that every locale file in `packages/web-components/locales/` contains the same set of translation keys as the reference locale (`en-GB.json`). Fails CI if any locale is missing keys or introduces extras.                                                                                 | `node scripts/checkLocaleParity.js`  |
+| `update.sh`             | Convenience script for bumping all workspace dependencies with `npm-check-updates` (skips `eslint` and `signature_pad`). Not run in CI — intended for ad-hoc maintenance. Installs `npm-check-updates` globally if missing.                                                                          | `bash scripts/update.sh`             |
 
 ## Conventions for scripts in this directory
 

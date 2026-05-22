@@ -10,11 +10,11 @@ This file is the **single source of truth** for agent instructions. `CLAUDE.md` 
 
 `smileidentity/web-client` is the SmileID web monorepo. It produces three artefacts:
 
-| Package directory | npm name | Published? | What it is |
-|---|---|---|---|
-| `packages/web-components` | `@smileid/web-components` | **Yes** (npm, public) | Preact-based web component library (selfie/document/consent flows, signature pad, etc.) |
-| `packages/embed` | `@smileid/embed` | No (private) | Self-hosted iframe integration that wraps the components into ready-made product recipes |
-| `packages/smart-camera-web` | `@smile_identity/smart-camera-web` | No (private) | Legacy single-file WebRTC capture component (vanilla JS) |
+| Package directory           | npm name                           | Published?            | What it is                                                                               |
+| --------------------------- | ---------------------------------- | --------------------- | ---------------------------------------------------------------------------------------- |
+| `packages/web-components`   | `@smileid/web-components`          | **Yes** (npm, public) | Preact-based web component library (selfie/document/consent flows, signature pad, etc.)  |
+| `packages/embed`            | `@smileid/embed`                   | No (private)          | Self-hosted iframe integration that wraps the components into ready-made product recipes |
+| `packages/smart-camera-web` | `@smile_identity/smart-camera-web` | No (private)          | Legacy single-file WebRTC capture component (vanilla JS)                                 |
 
 Top-level package `@smileid/web` is private and exists only to wire up the workspace.
 
@@ -70,6 +70,7 @@ Install everything from the root: `npm install`. This hydrates all workspace pac
 Always run package-specific commands from inside that package (or with `npm -w <pkg> run <script>` from the root).
 
 ### Root
+
 ```sh
 npm install                            # install all workspaces
 npm run storybook                      # Storybook on http://localhost:6006
@@ -79,6 +80,7 @@ node scripts/checkLocaleParity.js      # CI guard — verify locale keys match
 ```
 
 ### `packages/web-components`
+
 ```sh
 npm run dev                 # Vite dev server (port 3005)
 npm run build               # builds both ESM and IIFE outputs
@@ -93,6 +95,7 @@ npm test                    # Cypress headless
 ```
 
 ### `packages/embed`
+
 ```sh
 npm run build               # esbuild, NODE_ENV=development → ./build
 npm run build:dist          # esbuild, NODE_ENV=production  → ./dist
@@ -105,6 +108,7 @@ npm test                    # Cypress headless
 > **Embed depends on a built `@smileid/web-components`.** The dep is `file:../web-components`, so after any change to web-components you must rebuild it before re-testing embed. CI does this automatically (`test` job order in `.github/workflows/test.yml`).
 
 ### `packages/smart-camera-web`
+
 ```sh
 npm run build               # nyc instrument → cypress/pages/instrumented
 npm start                   # serve cypress/pages on :8000
@@ -113,6 +117,7 @@ npm test
 ```
 
 ### `example/`
+
 ```sh
 cp sample.env .env          # fill in PARTNER_ID, API_KEY, SID_SERVER, CALLBACK_URL
 npm install
@@ -126,6 +131,7 @@ Remember to rebuild embed (or its deps) when you change them — the example doe
 ## 5. Working effectively in this codebase
 
 ### Where things live
+
 - **New UI / capture flows / consent UI** → `packages/web-components/lib/components/`.
 - **Shared domain logic** → `packages/web-components/lib/domain/`.
 - **Styles** → `packages/web-components/lib/styles/` (CSS, not CSS-in-JS).
@@ -135,12 +141,14 @@ Remember to rebuild embed (or its deps) when you change them — the example doe
 - **Cypress specs** → each package's `cypress/e2e/*.cy.js`.
 
 ### Things to do first when starting a task
+
 1. `nvm use` → `npm install` from the root.
 2. If touching web-components UI, `npm run dev` (or `npm run storybook` from root).
 3. If touching embed end-to-end, also `npm run build` in `packages/web-components` first.
 4. Before committing: `npm run lint` in any package you touched, `npx prettier --check .` from the root, and `npm run type-check` if you touched TS in web-components.
 
 ### Things to avoid
+
 - **Do not bump versions ad-hoc.** All three publishable packages and the root must share the same version. Releases are tagged; do not edit `version` fields unless you are doing a release commit (and then keep them in sync).
 - **Do not add new package managers, monorepo tools (lerna, nx, turborepo), or runtime frameworks (React, Vue, Svelte).** The stack is Preact + vanilla ESM.
 - **Do not introduce new test frameworks.** Use Cypress.
@@ -219,16 +227,16 @@ If a CI job fails, read its log and fix the root cause locally — do not disabl
 
 ## 11. Quick map for common tasks
 
-| You want to… | Start here |
-|---|---|
-| Tweak a capture screen's UI/copy | `packages/web-components/lib/components/<flow>/` + `locales/*.json` |
-| Add a new web component / subpath export | `packages/web-components/lib/components/` + add an entry to `exports` in `packages/web-components/package.json` and the build config |
-| Change how the iframe wires a product flow | `packages/embed/src/` |
-| Add an e2e regression test | `packages/<pkg>/cypress/e2e/<name>.cy.js` |
-| View a component in isolation | `npm run storybook` at the root |
-| Bump a dependency | Bump it in every workspace that uses it (CI's dependency-consistency check will catch mismatches) |
-| Add a translation key | Add it to **every** file in `packages/web-components/locales/` |
-| Diagnose a CI failure | Read the failing workflow file in `.github/workflows/` and run that step locally |
+| You want to…                               | Start here                                                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Tweak a capture screen's UI/copy           | `packages/web-components/lib/components/<flow>/` + `locales/*.json`                                                                  |
+| Add a new web component / subpath export   | `packages/web-components/lib/components/` + add an entry to `exports` in `packages/web-components/package.json` and the build config |
+| Change how the iframe wires a product flow | `packages/embed/src/`                                                                                                                |
+| Add an e2e regression test                 | `packages/<pkg>/cypress/e2e/<name>.cy.js`                                                                                            |
+| View a component in isolation              | `npm run storybook` at the root                                                                                                      |
+| Bump a dependency                          | Bump it in every workspace that uses it (CI's dependency-consistency check will catch mismatches)                                    |
+| Add a translation key                      | Add it to **every** file in `packages/web-components/locales/`                                                                       |
+| Diagnose a CI failure                      | Read the failing workflow file in `.github/workflows/` and run that step locally                                                     |
 
 ---
 

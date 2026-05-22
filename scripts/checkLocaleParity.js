@@ -34,11 +34,7 @@ function flattenKeys(obj, prefix = '') {
   const keys = [];
   for (const [key, value] of Object.entries(obj)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (
-      value !== null &&
-      typeof value === 'object' &&
-      !Array.isArray(value)
-    ) {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       keys.push(...flattenKeys(value, fullKey));
     } else {
       keys.push(fullKey);
@@ -64,9 +60,7 @@ function main() {
     process.exit(1);
   }
 
-  const files = fs
-    .readdirSync(LOCALES_DIR)
-    .filter((f) => f.endsWith('.json'));
+  const files = fs.readdirSync(LOCALES_DIR).filter((f) => f.endsWith('.json'));
 
   if (!files.includes(REFERENCE_LOCALE)) {
     console.error(
@@ -118,7 +112,9 @@ function main() {
       for (const k of missing) console.error(`      - ${k}`);
     }
     if (extra.length) {
-      console.error(`    Extra keys (${extra.length}, not in ${REFERENCE_LOCALE}):`);
+      console.error(
+        `    Extra keys (${extra.length}, not in ${REFERENCE_LOCALE}):`,
+      );
       for (const k of extra) console.error(`      + ${k}`);
     }
     console.error('');

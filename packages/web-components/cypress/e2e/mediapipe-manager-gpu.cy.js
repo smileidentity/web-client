@@ -83,4 +83,36 @@ describe('MediaPipe Manager GPU detection', () => {
       }
     });
   });
+
+  it('uses CPU on Firefox regardless of GPU capabilities', () => {
+    cy.visit('/');
+
+    cy.window().then(async (win) => {
+      const mod = await importManager(win);
+      const userAgentDescriptor = Object.getOwnPropertyDescriptor(
+        win.navigator,
+        'userAgent',
+      );
+
+      try {
+        Object.defineProperty(win.navigator, 'userAgent', {
+          configurable: true,
+          value:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:128.0) Gecko/20100101 Firefox/128.0',
+        });
+
+        expect(mod.__testUtils.isFirefox()).to.equal(true);
+        const delegate = await mod.__testUtils.getDelegateFromGpuDetection();
+        expect(delegate).to.equal('CPU');
+      } finally {
+        if (userAgentDescriptor) {
+          Object.defineProperty(
+            win.navigator,
+            'userAgent',
+            userAgentDescriptor,
+          );
+        }
+      }
+    });
+  });
 });

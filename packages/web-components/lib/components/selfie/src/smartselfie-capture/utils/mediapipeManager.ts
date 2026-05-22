@@ -123,6 +123,25 @@ export class UnsupportedMediapipeEnvironmentError extends Error {
 }
 
 /**
+ * @description Detects Firefox via user agent. MediaPipe's ml_drift gl30
+ * WebGL inference backend trips a kernel-argument mismatch on Firefox
+ * (e.g. `No float with name - src_tensor_sub_tex_width` from
+ * `gl_arguments_obfuscated.cc`), causing the FaceLandmarker graph to fail on
+ * every frame. Firefox also masks `WEBGL_debug_renderer_info` and does not
+ * implement `navigator.userAgentData`, so neither of the existing detection
+ * paths can identify the broken environment. Forcing the CPU delegate moves
+ * inference to XNNPACK and avoids the crash. See google-ai-edge/mediapipe
+ * issues #5666 and #5879.
+ * @returns {boolean} True when the runtime is Firefox.
+ */
+const isFirefox = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  // Match Firefox desktop, Firefox iOS (FxiOS) and Firefox Android (Fennec).
+  return /firefox|fxios/i.test(ua);
+};
+
+/**
  * @description Reads system architecture hints from User-Agent Client Hints.
  * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
  */
@@ -153,6 +172,13 @@ const getSystemArchitectureHints = async (): Promise<string | null> => {
  * @returns {Promise<'CPU' | 'GPU'>} CPU when excluded GPU is detected; otherwise GPU.
  */
 const getDelegateFromGpuDetection = async (): Promise<'CPU' | 'GPU'> => {
+  // Firefox: ml_drift WebGL backend crashes on every frame regardless of GPU.
+  // Force CPU before any other detection so we never reach the GPU delegate.
+  if (isFirefox()) {
+    console.info('[SmileID] Firefox detected. Using CPU delegate.');
+    return 'CPU';
+  }
+
   const renderer = getGpuRenderer();
   const hasWebGlRendererInfo = !!renderer;
 
@@ -277,4 +303,5 @@ export const __testUtils = {
   matchesExcludedGpu,
   getDelegateFromGpuDetection,
   supportsWasmReftypes,
+  isFirefox,
 };

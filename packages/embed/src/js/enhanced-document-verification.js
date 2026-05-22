@@ -16,7 +16,7 @@ import {
   idInfoToIdSelection,
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
-import { initIframeSentry } from './sentry-iframe-init.js';
+import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('enhanced-document-verification');
 

@@ -43,8 +43,7 @@ All three published versions are kept in lockstep — see [Versioning](#7-versio
 ├── CHANGELOG.md             # Keep-a-Changelog format, hand-maintained
 ├── CONTRIBUTING.md          # contributor + LLM-author guide
 ├── docs/
-│   ├── README.md
-│   └── archive/             # superseded notes (historical context only)
+│   └── README.md            # index of canonical guides
 └── packages/web-components/LOCALIZATION.md   # canonical localisation guide
 ```
 
@@ -175,15 +174,13 @@ When you add a string: add the key to **every** file in `packages/web-components
 node scripts/checkLocaleParity.js
 ```
 
-A historical implementation note from the initial rollout lives at `docs/archive/localisation-initial-rollout.md` — it is **not** load-bearing; prefer the canonical guide above.
-
 ---
 
 ## 7. Versioning and releases
 
 - All `package.json` files must share the same `version`. `scripts/versionConsistency.js` enforces this in CI (`.github/workflows/lint.yml`).
 - Releases are driven by git tags of the form `v<semver>` (see `.github/workflows/tag.yml` and `release.yml`).
-- Only `@smileid/web-components` is published to npm — with provenance via OIDC (`.github/workflows/publish-web-components.yml`).
+- Only `@smileid/web-components` is published to npm — with provenance via OIDC (`.github/workflows/release.yml`).
 - `CHANGELOG.md` is hand-maintained in Keep-a-Changelog format. Add an entry to the `Unreleased` section when you ship a user-visible change.
 
 **Agents should not run `npm publish`, create release tags, or push to `main` directly.** Open a PR.
@@ -196,7 +193,8 @@ Workflows in `.github/workflows/`:
 
 - `lint.yml` — Prettier check, version-consistency, locale-parity, per-package ESLint. Also runs `check-dependency-version-consistency` but with `|| true` — that step is **informational only** (does not fail CI) and `main` currently has some known drifts.
 - `test.yml` — Builds web-components, then runs Cypress for web-components, embed (depends on web-components build), and smart-camera-web.
-- `release.yml`, `publish-web-components.yml`, `tag.yml` — Tag-driven release pipeline; publishes to npm via OIDC.
+- `release.yml`, `tag.yml` — Tag-driven release pipeline; `release.yml` publishes `@smileid/web-components` to npm with OIDC provenance.
+- `publish-web-components.yml` — Standalone manual / callable publish workflow. Not the default release path; kept for manual dispatches.
 - `deploy.yml`, `deploy-staging.yml`, `deploy-preview.yml`, `destroy-preview.yml`, `share-preview-url.yml` — Preview / staging / production deploys (SST-based).
 - `semgrep.yml` — Static security scanning.
 - `auto-author-assign.yml`, `stale.yml` — Repo hygiene.

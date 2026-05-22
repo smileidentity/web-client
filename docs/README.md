@@ -14,9 +14,3 @@ These live next to the code they document — keep them there.
 - [`AGENTS.md`](../AGENTS.md) — instructions for LLM coding agents (toolchain pins, what not to do, package map).
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) — human contributor guide.
 - [`CHANGELOG.md`](../CHANGELOG.md) — release notes.
-
-## Archive
-
-Historical notes preserved for context. Not load-bearing for ongoing work — consult the canonical guides above instead.
-
-- [`archive/localisation-initial-rollout.md`](./archive/localisation-initial-rollout.md) — implementation note from the original i18n rollout.

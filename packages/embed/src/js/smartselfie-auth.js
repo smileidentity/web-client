@@ -9,7 +9,7 @@ import {
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { getHeaders, getZipSignature } from './request';
-import { initIframeSentry } from './sentry-iframe-init.js';
+import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('smartselfie-auth');
 

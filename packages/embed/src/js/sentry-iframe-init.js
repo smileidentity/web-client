@@ -15,7 +15,7 @@ const DSN =
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export function initIframeSentry(pageName) {
+export default function initIframeSentry(pageName) {
   if (Sentry.getClient()) return;
 
   const pageUrlPattern = new RegExp(escapeRegExp(pageName));

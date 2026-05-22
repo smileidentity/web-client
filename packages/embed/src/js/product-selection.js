@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import { fetchWithTimeout, withNetworkRetry } from './fetch-with-retry.js';
-import { initIframeSentry } from './sentry-iframe-init.js';
+import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('product-selection');
 

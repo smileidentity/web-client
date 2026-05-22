@@ -23,7 +23,7 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
-import { initIframeSentry } from './sentry-iframe-init.js';
+import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('ekyc');
 

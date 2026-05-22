@@ -61,7 +61,7 @@ Keep the subject under ~70 characters. Put detail in the body.
 - Fill in [the PR template](.github/PULL_REQUEST_TEMPLATE.md): summary, test plan, changelog entry.
 - Add a line under `Unreleased` in [`CHANGELOG.md`](./CHANGELOG.md) for any user-visible change.
 - Do not bump any `package.json` `version` field in a feature PR — releases are tag-driven and all versions must stay in lockstep (see [Releases](#releases)).
-- CI runs lint, version-consistency, dependency-version-consistency, semgrep, and Cypress across all three packages. Fix the root cause locally — do not disable a check or use `--no-verify` to bypass hooks.
+- CI runs lint, version-consistency, locale-parity, semgrep, and Cypress across all three packages — these are blocking. `check-dependency-version-consistency` also runs but is currently informational only (it is wired with `|| true` and `main` has some known drifts). Fix the root cause of any failing blocking check locally — do not disable a check or use `--no-verify` to bypass hooks.
 
 ### LLM-authored PRs
 

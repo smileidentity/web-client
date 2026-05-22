@@ -12,7 +12,7 @@ Repo-level helper scripts. Most are wired into CI via [`.github/workflows/lint.y
 
 - Plain Node (CommonJS) or POSIX bash — no TypeScript build step.
 - Exit `0` on success, non-zero on failure. Print a human-readable diff on failure so CI logs are useful.
-- No external runtime dependencies — these run on a stock CI image with `npm ci` only.
+- **Scripts wired into CI** must have no external runtime dependencies — they run on a stock CI image with `npm ci` only. (Opt-in maintenance scripts like `update.sh` are exempt; they may install their own tooling.)
 - If you add a new script, also:
   1. Add a row to the table above.
   2. Add a step to the `main` job in `.github/workflows/lint.yml` if it should run in CI.

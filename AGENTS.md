@@ -161,7 +161,7 @@ Remember to rebuild embed (or its deps) when you change them — the example doe
 
 ## 6. Localisation
 
-Strings used by web-components ship as runtime-loaded JSON in `packages/web-components/locales/`. Three locales are bundled today: `en-GB.json` (reference / fallback), `fr-FR.json`, `ar-EG.json` (RTL). The runtime helper lives in `packages/web-components/lib/i18n.js` and is exported via the `./localisation` subpath of `@smileid/web-components`.
+Strings used by web-components ship as runtime-loaded JSON in `packages/web-components/locales/`. Three locales are bundled today: `en-GB.json` (reference / fallback), `fr-FR.json`, `ar-EG.json` (RTL). The runtime helper lives in `packages/web-components/lib/domain/localisation/` (entry: `index.js`) and is exported via the `./localisation` subpath of `@smileid/web-components`.
 
 - Use dot-notation keys (`selfie.instructions.tips.goodLight.header`).
 - 3-level fallback chain: current locale → `en-GB` → raw key (logged as a console warning).
@@ -194,7 +194,7 @@ A historical implementation note from the initial rollout lives at `docs/archive
 
 Workflows in `.github/workflows/`:
 
-- `lint.yml` — Prettier check, version-consistency, dependency-version-consistency, per-package ESLint.
+- `lint.yml` — Prettier check, version-consistency, locale-parity, per-package ESLint. Also runs `check-dependency-version-consistency` but with `|| true` — that step is **informational only** (does not fail CI) and `main` currently has some known drifts.
 - `test.yml` — Builds web-components, then runs Cypress for web-components, embed (depends on web-components build), and smart-camera-web.
 - `release.yml`, `publish-web-components.yml`, `tag.yml` — Tag-driven release pipeline; publishes to npm via OIDC.
 - `deploy.yml`, `deploy-staging.yml`, `deploy-preview.yml`, `destroy-preview.yml`, `share-preview-url.yml` — Preview / staging / production deploys (SST-based).

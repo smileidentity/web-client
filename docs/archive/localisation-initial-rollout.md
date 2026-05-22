@@ -1,3 +1,17 @@
+> **Archived.** This file is the implementation note from the initial i18n
+> rollout. It is preserved for historical context only — some details (e.g.
+> the original `en.json` / `ar.json` filenames) no longer match the current
+> code, which uses `en-GB.json`, `fr-FR.json`, and `ar-EG.json` and adds a
+> 3-level fallback chain.
+>
+> For the **current, canonical localisation guide**, see
+> [`packages/web-components/LOCALIZATION.md`](../../packages/web-components/LOCALIZATION.md).
+>
+> For the locale-parity CI guard, see
+> [`scripts/checkLocaleParity.js`](../../scripts/checkLocaleParity.js).
+
+---
+
 # Localisation Implementation Documentation
 
 ## Overview

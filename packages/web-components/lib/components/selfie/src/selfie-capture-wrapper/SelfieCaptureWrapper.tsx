@@ -104,11 +104,12 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     typeof parsedTimeout === 'number' &&
     Number.isFinite(parsedTimeout) &&
     parsedTimeout > 0;
+  const defaultLoadingTime = allowLegacySelfieFallback
+    ? DEFAULT_WAIT_MS
+    : DEFAULT_MEDIAPIPE_WAIT_MS;
   const loadingTime = hasExplicitTimeout
     ? (parsedTimeout as number)
-    : allowLegacySelfieFallback
-      ? DEFAULT_WAIT_MS
-      : DEFAULT_MEDIAPIPE_WAIT_MS;
+    : defaultLoadingTime;
 
   // Component state:
   // - mediapipeReady: whether the mediapipe instance has successfully loaded

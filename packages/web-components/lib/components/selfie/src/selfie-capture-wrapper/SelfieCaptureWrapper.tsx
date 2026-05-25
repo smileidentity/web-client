@@ -99,8 +99,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   //      attributes arrive as strings).
   //   2. With legacy fallback allowed: DEFAULT_WAIT_MS (20s).
   //   3. Otherwise: DEFAULT_MEDIAPIPE_WAIT_MS (90s).
-  const parsedTimeout =
-    typeof timeout === 'string' ? Number(timeout) : timeout;
+  const parsedTimeout = typeof timeout === 'string' ? Number(timeout) : timeout;
   const hasExplicitTimeout =
     typeof parsedTimeout === 'number' &&
     Number.isFinite(parsedTimeout) &&
@@ -227,23 +226,14 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         clearTimeout(retryTimeoutId);
       }
     };
-  }, [
-    mediapipeReady,
-    mediapipeLoading,
-    unsupportedEnvironment,
-  ]);
+  }, [mediapipeReady, mediapipeLoading, unsupportedEnvironment]);
 
   // Cosmetic loading progress: ticks 0→100 over `loadingTime` so the UI can
   // show "slow connection" copy past the SLOW_CONNECTION_THRESHOLD. This is
   // purely visual — it does NOT decide when we fall back. The decision is
   // driven by `loadDeadlineExceeded` below.
   useEffect(() => {
-    if (
-      hidden ||
-      !startCountdown ||
-      mediapipeReady ||
-      loadingProgress >= 100
-    )
+    if (hidden || !startCountdown || mediapipeReady || loadingProgress >= 100)
       return undefined;
 
     const timer = setInterval(() => {

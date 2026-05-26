@@ -102,6 +102,7 @@ export default function Product() {
         allow_agent_mode: true,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
         use_strict_mode: allowStrictMode,
+        show_navigation: true,
         new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (

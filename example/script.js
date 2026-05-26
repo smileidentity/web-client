@@ -123,7 +123,8 @@ export default function setupForm() {
           signature,
           timestamp,
           name: 'Demo Account',
-          logo_url: 'https://placeholderimage.co/200x80/0f172a/22c55e/?text=Solo%27s+Bank',
+          logo_url:
+            'https://placeholderimage.co/200x80/0f172a/22c55e/?text=Solo%27s+Bank',
           policy_url: 'https://smileidentity.com/privacy-privacy',
           theme_color: '#151F72',
         },

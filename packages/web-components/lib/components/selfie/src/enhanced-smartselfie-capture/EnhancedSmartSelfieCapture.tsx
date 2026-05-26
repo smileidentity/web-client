@@ -359,14 +359,11 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
     if (forcedFailureRef.current) return;
     const current = viewSignal.value;
     const isPostConfirm =
-      current === 'submitting' ||
-      current === 'success' ||
-      current === 'error';
+      current === 'submitting' || current === 'success' || current === 'error';
     if (!isPostConfirm) return;
     if (submissionState === 'success') viewSignal.value = 'success';
     else if (submissionState === 'error') viewSignal.value = 'error';
-    else if (submissionState === 'submitting')
-      viewSignal.value = 'submitting';
+    else if (submissionState === 'submitting') viewSignal.value = 'submitting';
   }, [submissionState]);
 
   // Allow the host page to drive the submission flow via a window event
@@ -596,8 +593,7 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   // re-evaluated since the head is already locked in.
   const isIdle =
     !faceCapture.isCapturing.value && !faceCapture.hasFinishedCapture.value;
-  const isHoldingStill =
-    faceCapture.isCapturing.value && !holdStillElapsed;
+  const isHoldingStill = faceCapture.isCapturing.value && !holdStillElapsed;
 
   const isFaceCentered =
     faceCapture.faceDetected.value &&
@@ -651,9 +647,12 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
       // capture so the user re-frames before we evaluate pose prompts.
       const dir = faceCapture.faceOffsetDirection.value;
       if (dir === 'top') alertTitle = t('selfie.ess.alert.moveDeviceUp');
-      else if (dir === 'bottom') alertTitle = t('selfie.ess.alert.moveDeviceDown');
-      else if (dir === 'left') alertTitle = t('selfie.ess.alert.moveDeviceLeft');
-      else if (dir === 'right') alertTitle = t('selfie.ess.alert.moveDeviceRight');
+      else if (dir === 'bottom')
+        alertTitle = t('selfie.ess.alert.moveDeviceDown');
+      else if (dir === 'left')
+        alertTitle = t('selfie.ess.alert.moveDeviceLeft');
+      else if (dir === 'right')
+        alertTitle = t('selfie.ess.alert.moveDeviceRight');
       errorSide = dir;
       captureCheckFailing = true;
     } else {
@@ -662,7 +661,8 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
       const pose =
         faceCapture.poseSequence.value[faceCapture.currentPoseIndex.value];
       if (pose === 'left') alertTitle = t('selfie.ess.alert.turnHeadLeft');
-      else if (pose === 'right') alertTitle = t('selfie.ess.alert.turnHeadRight');
+      else if (pose === 'right')
+        alertTitle = t('selfie.ess.alert.turnHeadRight');
       else if (pose === 'up') alertTitle = t('selfie.ess.alert.tiltHeadUp');
     }
   }
@@ -676,7 +676,16 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
           aria-label={t('selfie.ess.back')}
           onClick={handleBack}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
@@ -705,14 +714,14 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
             // even before active capture starts, so the user gets visual
             // guidance matching the alert text.
             return (
-              <ActiveLivenessOverlay
-                pose={null}
-                currentPose={null}
-                isTooDark
-              />
+              <ActiveLivenessOverlay pose={null} currentPose={null} isTooDark />
             );
           }
-          if (faceCapture.isCapturing.value && holdStillElapsed && !captureCheckFailing) {
+          if (
+            faceCapture.isCapturing.value &&
+            holdStillElapsed &&
+            !captureCheckFailing
+          ) {
             return (
               <ActiveLivenessOverlay
                 pose={

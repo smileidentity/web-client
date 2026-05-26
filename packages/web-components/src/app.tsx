@@ -107,10 +107,7 @@ const App = () => {
         });
         break;
       case 'enhanced-smartselfie-capture':
-        componentElement = createElement(
-          'enhanced-smartselfie-capture',
-          props,
-        );
+        componentElement = createElement('enhanced-smartselfie-capture', props);
         break;
       case 'smart-camera-web':
       default:

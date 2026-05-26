@@ -92,6 +92,7 @@ export default function Product() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
+  const [allowStrictMode, setAllowStrictMode] = useState<boolean>(true);
   const [newInstructions, setNewInstructions] = useState<boolean>(false);
 
   function initializeSdk(config: TokenResults) {
@@ -100,6 +101,7 @@ export default function Product() {
         ...config,
         allow_agent_mode: true,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
+        use_strict_mode: allowStrictMode,
         new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (
@@ -223,7 +225,20 @@ export default function Product() {
                   <option value="true">Enabled</option>
                 </select>
               </div>
-
+              <div>
+                <label htmlFor="strict-mode-select">Strict Mode</label>
+                <select
+                  id="strict-mode-select"
+                  value={allowStrictMode ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setAllowStrictMode(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
               <div>
                 <label htmlFor="new-instructions-select">
                   New Document Instructions

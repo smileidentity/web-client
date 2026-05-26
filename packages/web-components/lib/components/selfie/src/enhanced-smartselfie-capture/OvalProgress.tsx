@@ -85,4 +85,3 @@ const OvalProgress: FunctionComponent<OvalProgressProps> = ({
 );
 
 export default OvalProgress;
-

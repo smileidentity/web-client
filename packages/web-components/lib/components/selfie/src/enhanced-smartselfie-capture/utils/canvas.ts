@@ -1,6 +1,8 @@
 /**
  * Create a cropped square canvas from video for face detection
  */
+import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision';
+
 export const createCroppedVideoFrame = (
   videoElement: HTMLVideoElement,
 ): HTMLCanvasElement | null => {
@@ -32,8 +34,6 @@ export const createCroppedVideoFrame = (
 
   return canvas;
 };
-
-import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision';
 
 /**
  * Draw face mesh overlay on canvas

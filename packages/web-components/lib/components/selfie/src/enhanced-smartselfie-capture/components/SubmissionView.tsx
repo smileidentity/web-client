@@ -102,7 +102,13 @@ export const SubmissionView: FunctionComponent<SubmissionViewProps> = ({
               fill="none"
             >
               <g clip-path="url(#ess-submit-loader-clip)">
-                <foreignObject x="-1031.25" y="-1031.25" width="2062.5" height="2062.5" transform="matrix(0.032 0 0 0.032 32 32)">
+                <foreignObject
+                  x="-1031.25"
+                  y="-1031.25"
+                  width="2062.5"
+                  height="2062.5"
+                  transform="matrix(0.032 0 0 0.032 32 32)"
+                >
                   <div
                     {...{ xmlns: 'http://www.w3.org/1999/xhtml' }}
                     style="background:conic-gradient(from 90deg,rgba(39,174,96,0) 0deg,rgba(58,225,128,0) 0.036deg,rgba(58,225,128,1) 360deg);height:100%;width:100%;opacity:1"
@@ -128,7 +134,9 @@ export const SubmissionView: FunctionComponent<SubmissionViewProps> = ({
           </div>
         )}
         {(isSuccess || isError) && (
-          <div className={`badge ${isSuccess ? 'badge-success' : 'badge-error'}`}>
+          <div
+            className={`badge ${isSuccess ? 'badge-success' : 'badge-error'}`}
+          >
             {isSuccess ? <TickIcon /> : <CrossIcon />}
           </div>
         )}
@@ -153,17 +161,54 @@ export const SubmissionView: FunctionComponent<SubmissionViewProps> = ({
 
         {isReview && (
           <div className="actions">
-            <button type="button" className="retake" onClick={onRetake} aria-label={t('selfie.ess.submission.review.retake')}>
+            <button
+              type="button"
+              className="retake"
+              onClick={onRetake}
+              aria-label={t('selfie.ess.submission.review.retake')}
+            >
               <span className="icon">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#90A1B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#90A1B9"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="1 4 1 10 7 10" />
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                </svg>
               </span>
-              <span className="label">{t('selfie.ess.submission.review.retake')}</span>
+              <span className="label">
+                {t('selfie.ess.submission.review.retake')}
+              </span>
             </button>
-            <button type="button" className="confirm" onClick={onConfirm} aria-label={t('selfie.ess.submission.review.confirm')}>
+            <button
+              type="button"
+              className="confirm"
+              onClick={onConfirm}
+              aria-label={t('selfie.ess.submission.review.confirm')}
+            >
               <span className="icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#12B76A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#12B76A"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </span>
-              <span className="label confirm-label">{t('selfie.ess.submission.review.confirm')}</span>
+              <span className="label confirm-label">
+                {t('selfie.ess.submission.review.confirm')}
+              </span>
             </button>
           </div>
         )}

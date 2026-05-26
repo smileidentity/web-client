@@ -16,7 +16,11 @@ import {
   PoorLightingIllustration,
 } from '../assets/illustrations';
 
-type IllustrationKind = 'good' | 'accessories' | 'multipleFaces' | 'poorLighting';
+type IllustrationKind =
+  | 'good'
+  | 'accessories'
+  | 'multipleFaces'
+  | 'poorLighting';
 
 interface Guideline {
   status: 'good' | 'bad';
@@ -25,10 +29,26 @@ interface Guideline {
 }
 
 const GUIDELINES: Guideline[] = [
-  { status: 'good', label: 'selfie.ess.instructions.tile.good', illustration: 'good' },
-  { status: 'bad', label: 'selfie.ess.instructions.tile.accessories', illustration: 'accessories' },
-  { status: 'bad', label: 'selfie.ess.instructions.tile.multipleFaces', illustration: 'multipleFaces' },
-  { status: 'bad', label: 'selfie.ess.instructions.tile.poorLighting', illustration: 'poorLighting' },
+  {
+    status: 'good',
+    label: 'selfie.ess.instructions.tile.good',
+    illustration: 'good',
+  },
+  {
+    status: 'bad',
+    label: 'selfie.ess.instructions.tile.accessories',
+    illustration: 'accessories',
+  },
+  {
+    status: 'bad',
+    label: 'selfie.ess.instructions.tile.multipleFaces',
+    illustration: 'multipleFaces',
+  },
+  {
+    status: 'bad',
+    label: 'selfie.ess.instructions.tile.poorLighting',
+    illustration: 'poorLighting',
+  },
 ];
 
 const ILLUSTRATION_COMPONENTS: Record<
@@ -104,88 +124,111 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
   }, []);
 
   return (
-  <div className="enhanced-instructions">
-    {onBack && (
-      <button
-        type="button"
-        className="back-button"
-        aria-label={t('selfie.ess.back')}
-        onClick={onBack}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-      </button>
-    )}
+    <div className="enhanced-instructions">
+      {onBack && (
+        <button
+          type="button"
+          className="back-button"
+          aria-label={t('selfie.ess.back')}
+          onClick={onBack}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 12H5" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </button>
+      )}
 
-    <h1 className="instructions-title">
-      {t('selfie.ess.instructions.titlePrefix')}{' '}
-      <span style={{ color: themeColor }}>{t('selfie.ess.instructions.titleAccent')}</span>
-    </h1>
+      <h1 className="instructions-title">
+        {t('selfie.ess.instructions.titlePrefix')}{' '}
+        <span style={{ color: themeColor }}>
+          {t('selfie.ess.instructions.titleAccent')}
+        </span>
+      </h1>
 
-    <div className="hero-wrapper">
-      <div className="hero-oval">
-        <HeroAnimation />
+      <div className="hero-wrapper">
+        <div className="hero-oval">
+          <HeroAnimation />
+        </div>
       </div>
-    </div>
 
-    <div className="guidelines-header">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={themeColor} stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="9 12 11 14 15 10"/>
-      </svg>
-      <span>{t('selfie.ess.instructions.guidelinesHeader')}</span>
-    </div>
+      <div className="guidelines-header">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={themeColor}
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="9 12 11 14 15 10" />
+        </svg>
+        <span>{t('selfie.ess.instructions.guidelinesHeader')}</span>
+      </div>
 
-    <div className="guidelines-grid">
-      {GUIDELINES.map((g) => {
-        const Illustration = ILLUSTRATION_COMPONENTS[g.illustration];
-        return (
-          <div className="guideline-tile" key={g.label}>
-            <div className="tile-illustration">
-              <div className="tile-svg">
-                <Illustration themeColor={themeColor} />
+      <div className="guidelines-grid">
+        {GUIDELINES.map((g) => {
+          const Illustration = ILLUSTRATION_COMPONENTS[g.illustration];
+          return (
+            <div className="guideline-tile" key={g.label}>
+              <div className="tile-illustration">
+                <div className="tile-svg">
+                  <Illustration themeColor={themeColor} />
+                </div>
+                <span
+                  className={`tile-badge ${g.status === 'good' ? 'badge-good' : 'badge-bad'}`}
+                  aria-hidden="true"
+                >
+                  {g.status === 'good' ? '✓' : '✕'}
+                </span>
               </div>
-              <span
-                className={`tile-badge ${g.status === 'good' ? 'badge-good' : 'badge-bad'}`}
-                aria-hidden="true"
-              >
-                {g.status === 'good' ? '✓' : '✕'}
+              {/* Label sits below the artwork in HTML so it can be themed and translated. */}
+              <span className="tile-label" style={{ color: themeColor }}>
+                {t(g.label)}
               </span>
             </div>
-            {/* Label sits below the artwork in HTML so it can be themed and translated. */}
-            <span className="tile-label" style={{ color: themeColor }}>
-              {t(g.label)}
+          );
+        })}
+      </div>
+
+      <div className="instructions-footer">
+        <button
+          type="button"
+          className="continue-button"
+          style={{ background: themeColor, opacity: isReady ? 1 : 0.85 }}
+          onClick={onContinue}
+          disabled={!isReady}
+          aria-busy={!isReady}
+        >
+          {isReady ? (
+            t('selfie.ess.instructions.continue')
+          ) : (
+            <span className="continue-loading">
+              <IconLoader2 size={20} stroke={2.5} color="white" />
+              <span>{t('selfie.ess.instructions.settingUpCamera')}</span>
             </span>
-          </div>
-        );
-      })}
-    </div>
+          )}
+        </button>
+      </div>
 
-    <div className="instructions-footer">
-      <button
-        type="button"
-        className="continue-button"
-        style={{ background: themeColor, opacity: isReady ? 1 : 0.85 }}
-        onClick={onContinue}
-        disabled={!isReady}
-        aria-busy={!isReady}
-      >
-        {isReady ? (
-          t('selfie.ess.instructions.continue')
-        ) : (
-          <span className="continue-loading">
-            <IconLoader2 size={20} stroke={2.5} color="white" />
-            <span>{t('selfie.ess.instructions.settingUpCamera')}</span>
-          </span>
-        )}
-      </button>
-    </div>
+      {!hideAttribution && (
+        // @ts-expect-error preact-custom-element types
+        <powered-by-smile-id />
+      )}
 
-    {!hideAttribution && (
-      // @ts-expect-error preact-custom-element types
-      <powered-by-smile-id />
-    )}
-
-    <style>{`
+      <style>{`
       :host { display: block; height: 100%; }
       .enhanced-instructions {
         position: relative;
@@ -364,7 +407,7 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
         to { transform: rotate(360deg); }
       }
     `}</style>
-  </div>
+    </div>
   );
 };
 

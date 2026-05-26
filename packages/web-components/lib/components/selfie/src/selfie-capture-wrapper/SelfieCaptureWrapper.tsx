@@ -30,7 +30,7 @@ declare global {
 }
 
 interface Props {
-  timeout?: number;
+  timeout?: string | number;
   interval?: number;
   duration?: number;
   'theme-color'?: string;

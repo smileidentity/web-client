@@ -6,8 +6,20 @@ import throttle from 'lodash/throttle';
 import {
   calculateFaceSize,
   isFaceInBounds,
+  computeFaceClippingOval,
+  computeFaceClippingSide,
   calculateMouthOpening,
+  calculateHeadPose,
+  classifyHeadPose,
+  buildRandomPoseSequence,
+  type HeadPoseDirection,
 } from '../utils/faceDetection';
+import {
+  calculateLuminance,
+  calculateBlurScore,
+  DEFAULT_LUMINANCE_MIN,
+  DEFAULT_BLUR_MIN,
+} from '../utils/imageQuality';
 import {
   createCroppedVideoFrame,
   drawFaceMesh,
@@ -33,6 +45,26 @@ interface UseFaceCaptureProps {
   maxFaceSize: number;
   smileCooldown: number;
   getFacingMode: () => CameraFacingMode;
+  /**
+   * Enhanced SmartSelfie / Active Liveness mode. When enabled, the smile-based
+   * capture flow is replaced with a randomised head-pose sequence and stricter
+   * frame-quality checks (lighting/blur/centering).
+   */
+  useStrictMode?: boolean;
+  /**
+   * Optional callback invoked when capture completes. When provided, the hook
+   * will NOT broadcast the legacy `selfie-capture.publish` window event — the
+   * caller takes full ownership of the payload (e.g. to show its own review
+   * screen and re-emit the event only on user confirmation).
+   */
+  onCaptureComplete?: (detail: {
+    images: { image: string; image_type_id: number }[];
+    referenceImage: string;
+    previewImage: string;
+    facingMode: CameraFacingMode;
+    forceFailureReason?: string;
+    meta: { libraryVersion: string };
+  }) => void;
 }
 
 export const useFaceCapture = ({
@@ -46,6 +78,8 @@ export const useFaceCapture = ({
   maxFaceSize,
   smileCooldown,
   getFacingMode,
+  useStrictMode = false,
+  onCaptureComplete,
 }: UseFaceCaptureProps) => {
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -55,6 +89,12 @@ export const useFaceCapture = ({
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
+  // True when any landmark falls outside the visible egg-shaped clip mask.
+  // Computed from runtime DOM rects so it always matches what the user sees,
+  // independent of the camera's intrinsic resolution. Only used as a gating
+  // edge case when idle — during the active-liveness pose phase head turns
+  // legitimately push landmarks past the oval edge.
+  const faceClippingOval = useSignal(false);
   const faceProximity = useSignal<'too-close' | 'too-far' | 'good'>('good');
   const videoAspectRatio = useSignal(16 / 9);
   const faceLandmarks = useSignal<any[]>([]);
@@ -74,6 +114,21 @@ export const useFaceCapture = ({
   const totalCaptures = useSignal(1);
   const capturesTaken = useSignal(0);
   const hasFinishedCapture = useSignal(false);
+
+  // Active-liveness (Enhanced SmartSelfie) signals — only meaningful when
+  // useStrictMode is true.
+  const poseSequence = useSignal<HeadPoseDirection[]>([]);
+  const currentPoseIndex = useSignal(0);
+  const currentPose = useSignal<HeadPoseDirection | null>(null);
+  const isTooDark = useSignal(false);
+  const isTooBlurry = useSignal(false);
+  // Direction the face is offset from the oval centre when out of bounds.
+  // Used by the UI to colour the offending side of the oval and pick a
+  // directional prompt ("Move your device higher/lower/left/right").
+  const faceOffsetDirection = useSignal<
+    'top' | 'bottom' | 'left' | 'right' | null
+  >(null);
+  let qualityFrameCounter = 0;
 
   const smileCheckpoint = useComputed(() =>
     Math.floor(totalCaptures.value * 0.4),
@@ -156,6 +211,24 @@ export const useFaceCapture = ({
   };
 
   const updateCaptureAlerts = () => {
+    if (useStrictMode) {
+      // Strict-mode capture alerts are driven by head-pose prompts. The active
+      // pose label is derived from the randomised sequence; we don't fall back
+      // to the smile-zone messaging at all.
+      const pose = poseSequence.value[currentPoseIndex.value];
+      if (!pose) {
+        alertTitle.value = t('selfie.smart.status.capturing');
+        return;
+      }
+      const poseToMessage: Record<typeof pose, MessageKey> = {
+        left: 'turn-head-left',
+        right: 'turn-head-right',
+        up: 'tilt-head-up',
+      };
+      updateAlert(poseToMessage[pose]);
+      return;
+    }
+
     const isInNeutralZone = capturesTaken.value < neutralZone.value;
     const isInSmileZone = capturesTaken.value >= smileCheckpoint.value;
 
@@ -185,12 +258,16 @@ export const useFaceCapture = ({
       updateAlertImmediate('initializing');
     } else if (!faceDetected.value) {
       updateAlert('no-face');
+    } else if (useStrictMode && isTooDark.value) {
+      updateAlert('too-dark');
+    } else if (useStrictMode && isTooBlurry.value) {
+      updateAlert('too-blurry');
     } else if (faceProximity.value === 'too-close') {
       updateAlert('too-close');
     } else if (faceProximity.value === 'too-far') {
       updateAlert('too-far');
     } else if (!faceInBounds.value) {
-      updateAlert('out-of-bounds');
+      updateAlert(useStrictMode ? 'face-not-centered' : 'out-of-bounds');
     } else if (isCapturing.value) {
       updateCaptureAlerts();
     } else {
@@ -261,6 +338,7 @@ export const useFaceCapture = ({
             adjustedLandmarks,
             capturesTaken.value,
             smileCheckpoint.value,
+            useStrictMode,
           );
         } else {
           drawFaceMesh(
@@ -268,6 +346,7 @@ export const useFaceCapture = ({
             results.faceLandmarks,
             capturesTaken.value,
             smileCheckpoint.value,
+            useStrictMode,
           );
         }
       } else if (canvasRef.current) {
@@ -286,22 +365,59 @@ export const useFaceCapture = ({
 
       if (hasFace && results.faceLandmarks) {
         // Calculate face size and position
-        const faceSize = calculateFaceSize(results.faceLandmarks);
+        const faceSize = calculateFaceSize(results.faceLandmarks, {
+          rotationStable: useStrictMode,
+        });
         currentFaceSize.value = faceSize;
 
-        // Check face proximity
-        if (faceSize > maxFaceSize) {
-          faceProximity.value = 'too-close';
-        } else if (faceSize < minFaceSize) {
-          faceProximity.value = 'too-far';
-        } else {
-          faceProximity.value = 'good';
+        // Proximity check with hysteresis: once the face is in the "good"
+        // band, the reading has to drift past the threshold before we flip
+        // back to too-close/too-far. Keep the margin small so legitimate
+        // edge cases are caught quickly.
+        const proximityMargin = 0.02;
+        const min = minFaceSize;
+        const max = maxFaceSize;
+        const current = faceProximity.value;
+        if (current === 'good') {
+          if (faceSize > max + proximityMargin) {
+            faceProximity.value = 'too-close';
+          } else if (faceSize < min - proximityMargin) {
+            faceProximity.value = 'too-far';
+          }
+        } else if (current === 'too-close') {
+          if (faceSize <= max) faceProximity.value = 'good';
+        } else if (current === 'too-far') {
+          if (faceSize >= min) faceProximity.value = 'good';
         }
 
-        // Check face position
+        // Check face position. In strict mode the head will rotate, which
+        // legitimately widens the bounding box, so only the face centre is
+        // required to stay inside the oval.
         faceInBounds.value = isFaceInBounds(
           results.faceLandmarks,
           videoAspectRatio.value,
+          { centerOnly: useStrictMode },
+        );
+
+        // Independent clipping check: project every landmark into the
+        // visible wrapper using runtime element rects, then test against
+        // the visible egg (approximated as a centred ellipse). If any
+        // landmark falls outside, the oval boundary is clipping the face.
+        // Used as an idle-only gating signal so head turns during capture
+        // don't trip it.
+        faceClippingOval.value = computeFaceClippingOval(
+          results.faceLandmarks[0],
+          videoRef.current,
+        );
+
+        // Directional nudge: only fire when the face is actually clipping
+        // (touching/crossing) the visible oval edge. The clipping side is
+        // derived from the single most-clipped landmark and its dominant
+        // axis. A face fully inside the oval gets `null` here — no nudge.
+        // (Mirror correction is handled inside computeFaceClippingSide.)
+        faceOffsetDirection.value = computeFaceClippingSide(
+          results.faceLandmarks[0],
+          videoRef.current,
         );
 
         // Get smile and mouth open data
@@ -317,6 +433,15 @@ export const useFaceCapture = ({
 
         currentSmileScore.value = smileScore;
         currentMouthOpen.value = mouthOpen;
+
+        if (useStrictMode) {
+          // Pose detection requires landmarks, so it stays gated on face
+          // detection. Lighting/blur are now sampled outside this block —
+          // they need to keep running when the face is undetected (e.g.
+          // because the scene is too dark / motion-blurred to find a face).
+          const pose = calculateHeadPose(results.faceLandmarks);
+          currentPose.value = classifyHeadPose(pose);
+        }
 
         if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
           lastSmileTime.value = Date.now();
@@ -337,18 +462,41 @@ export const useFaceCapture = ({
           }
         }
       } else {
-        // No face detected - reset values
+        // No face detected - reset face-derived values. Lighting/blur are
+        // intentionally NOT reset here: those checks are useful precisely
+        // when the face has gone undetected (dark room / motion blur) and
+        // are sampled separately below from the raw video frame.
         currentSmileScore.value = 0;
         currentFaceSize.value = 0;
         currentMouthOpen.value = 0;
         faceInBounds.value = false;
+        faceClippingOval.value = false;
         faceProximity.value = 'good';
+        faceOffsetDirection.value = null;
+        if (useStrictMode) {
+          currentPose.value = null;
+        }
+      }
+
+      // Lighting/blur sampling — runs every frame regardless of face
+      // detection so the alert can fire even when the scene is too dark or
+      // shaky for the landmarker to find a face. Throttled with a frame
+      // counter so the canvas readback stays cheap.
+      if (useStrictMode && videoRef.current) {
+        qualityFrameCounter += 1;
+        if (qualityFrameCounter % 6 === 0) {
+          const luma = calculateLuminance(videoRef.current);
+          isTooDark.value = luma > 0 && luma < DEFAULT_LUMINANCE_MIN;
+          const blur = calculateBlurScore(videoRef.current);
+          isTooBlurry.value = blur > 0 && blur < DEFAULT_BLUR_MIN;
+        }
       }
 
       updateAlerts();
     } catch {
       faceDetected.value = false;
       faceInBounds.value = false;
+      faceClippingOval.value = false;
       faceProximity.value = 'good';
       currentMouthOpen.value = 0;
 
@@ -367,10 +515,23 @@ export const useFaceCapture = ({
     animationFrameRef.current = requestAnimationFrame(detectFace);
   };
 
+  // Notify hosted-web inactivity timeout that the user is making progress.
+  // Fired on every successful capture so the 120s timer resets continuously
+  // as long as frames are being collected.
+  const dispatchProgress = () => {
+    document
+      .querySelector('smart-camera-web')
+      ?.dispatchEvent(new CustomEvent('metadata.active-liveness-progress'));
+  };
+
   const captureImage = () => {
     if (!videoRef.current) return;
 
-    const isReference = capturesTaken.value === totalCaptures.value - 1;
+    // In strict (Active Liveness) mode the reference selfie is captured up-front
+    // in startCapture() while the user is still neutral. The per-pose captures
+    // here only ever populate the liveness array.
+    const isReference =
+      !useStrictMode && capturesTaken.value === totalCaptures.value - 1;
     const imageData = captureImageFromVideo(videoRef.current, isReference);
 
     if (!imageData) return;
@@ -413,9 +574,14 @@ export const useFaceCapture = ({
         meta: { libraryVersion: COMPONENTS_VERSION },
       };
 
-      window.dispatchEvent(
-        new CustomEvent('selfie-capture.publish', { detail: eventDetail }),
-      );
+      if (onCaptureComplete) {
+        // Caller owns the payload — defer publish until they decide to emit.
+        onCaptureComplete(eventDetail);
+      } else {
+        window.dispatchEvent(
+          new CustomEvent('selfie-capture.publish', { detail: eventDetail }),
+        );
+      }
 
       hasFinishedCapture.value = true;
     }
@@ -453,12 +619,84 @@ export const useFaceCapture = ({
       }
 
       if (!faceInBounds.value) {
+        // Strict mode has no smile-based resume path — calling pauseCapture
+        // here would clear the interval and leave the user stuck even after
+        // they recentre. Just skip this tick instead so the next frame
+        // re-evaluates once they're back in bounds.
+        if (useStrictMode) return;
         pauseCapture();
         return;
       }
 
       if (faceProximity.value !== 'good') {
+        if (useStrictMode) return;
         pauseCapture();
+        return;
+      }
+
+      if (useStrictMode) {
+        // Strict mode: gate captures on (a) sufficient lighting/sharpness and
+        // (b) the user matching the currently-required head pose. The pose
+        // sequence advances once enough frames per pose have been collected.
+        if (isTooDark.value || isTooBlurry.value) {
+          // Same reason as above — skip rather than pause so the loop keeps
+          // ticking and resumes automatically once lighting/blur clears.
+          return;
+        }
+
+        // Distribute the capture window evenly across the pose sequence:
+        // each pose gets `framesPerPose = floor(totalCaptures / poseCount)`
+        // frames. Any leftover frames (e.g. 8 captures across 3 poses → 2
+        // leftover) are taken silently up-front while the user is still
+        // neutral, giving the backend forward-facing liveness samples
+        // without burdening the user with an extra "look straight" prompt.
+        const poseCount = poseSequence.value.length;
+        const framesPerPose = Math.max(
+          1,
+          Math.floor(totalCaptures.value / poseCount),
+        );
+        const silentNeutralFrames = Math.max(
+          0,
+          totalCaptures.value - framesPerPose * poseCount,
+        );
+
+        if (capturesTaken.value < silentNeutralFrames) {
+          // Pre-pose neutral phase: snap whatever the user is showing now
+          // (they're already centred from the hold-still period). No pose
+          // gate, no prompt change — these frames feed liveness silently.
+          captureImage();
+          dispatchProgress();
+          return;
+        }
+
+        const requiredPose = poseSequence.value[currentPoseIndex.value];
+        if (!requiredPose) {
+          stopCapture();
+          return;
+        }
+        if (currentPose.value !== requiredPose) {
+          // Don't pause — we want the prompt to stay visible while the user
+          // adjusts. Just skip this tick.
+          return;
+        }
+
+        captureImage();
+        // Any successful capture counts as activity for the hosted-web
+        // inactivity timeout — even if the user is still on pose 1 and
+        // hasn't advanced the index yet.
+        dispatchProgress();
+
+        // Frames captured *within* the pose phase only (the leading neutral
+        // frames don't belong to any pose). Advance once we've collected
+        // enough for the current pose.
+        const poseFramesTaken = capturesTaken.value - silentNeutralFrames;
+        if (
+          poseFramesTaken > 0 &&
+          poseFramesTaken % framesPerPose === 0 &&
+          currentPoseIndex.value < poseCount - 1
+        ) {
+          currentPoseIndex.value += 1;
+        }
         return;
       }
 
@@ -506,9 +744,29 @@ export const useFaceCapture = ({
     capturesTaken.value = 0;
     countdown.value = totalCaptures.value;
 
+    if (useStrictMode) {
+      poseSequence.value = buildRandomPoseSequence();
+      currentPoseIndex.value = 0;
+
+      // Snap the neutral selfie up-front so the result preview shows the
+      // user facing the camera, not whichever direction the last pose
+      // prompted them to turn.
+      if (videoRef.current) {
+        const neutralReference = captureImageFromVideo(videoRef.current, true);
+        if (neutralReference) {
+          referencePhoto.value = neutralReference;
+        }
+      }
+    }
+
     const smartCameraWeb = document.querySelector('smart-camera-web');
     smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.selfie-capture-start'),
+    );
+    smartCameraWeb?.dispatchEvent(
+      new CustomEvent('metadata.active-liveness-type', {
+        detail: { type: useStrictMode ? 'head_pose' : 'smile_detection' },
+      }),
     );
     smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.selfie-origin', {
@@ -537,6 +795,63 @@ export const useFaceCapture = ({
         detail: { meta: { libraryVersion: COMPONENTS_VERSION } },
       }),
     );
+  };
+
+  /**
+   * Force-finalise the capture session with a failure reason. Used by the
+   * hosted-web active-liveness inactivity timer (and any other host-driven
+   * fail-fast path) to submit whatever frames have been captured so far
+   * tagged with a reason the backend can use to record the failure.
+   *
+   * The payload mirrors the normal completion shape so the existing publish
+   * path doesn't need to special-case it; the only extra field is
+   * `forceFailureReason`, which downstream submission handlers forward as
+   * a structured `failure_reason` metadata entry (e.g.
+   * `{ mobile_active_liveness_timed_out: true }`).
+   */
+  const forceFailCapture = (reason: string) => {
+    // Stop the capture interval and detection loop; we're not going to take
+    // any more frames after this point.
+    if (captureTimerRef.current) {
+      clearInterval(captureTimerRef.current);
+      captureTimerRef.current = null;
+    }
+    isCapturing.value = false;
+    isPaused.value = false;
+
+    const livenessImages = capturedImages.value.map((img) => ({
+      image: img.split(',')[1],
+      image_type_id: ImageType.LIVENESS_IMAGE_BASE64,
+    }));
+
+    const reference = referencePhoto.value;
+    const referenceImage = reference
+      ? {
+          image: reference.split(',')[1],
+          image_type_id: ImageType.SELFIE_IMAGE_BASE64,
+        }
+      : null;
+
+    const eventDetail = {
+      images: referenceImage
+        ? [...livenessImages, referenceImage]
+        : livenessImages,
+      referenceImage: reference ?? '',
+      previewImage: reference ?? '',
+      facingMode: getFacingMode(),
+      forceFailureReason: reason,
+      meta: { libraryVersion: COMPONENTS_VERSION },
+    };
+
+    if (onCaptureComplete) {
+      onCaptureComplete(eventDetail);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('selfie-capture.publish', { detail: eventDetail }),
+      );
+    }
+
+    hasFinishedCapture.value = true;
   };
 
   const handleClose = () => {
@@ -570,6 +885,7 @@ export const useFaceCapture = ({
   const resetFaceDetectionState = () => {
     faceDetected.value = false;
     faceInBounds.value = false;
+    faceClippingOval.value = false;
     faceProximity.value = 'good';
     faceLandmarks.value = [];
     currentSmileScore.value = 0;
@@ -577,6 +893,10 @@ export const useFaceCapture = ({
     currentMouthOpen.value = 0;
     lastSmileTime.value = 0;
     captureButtonFallbackEnabled.value = false;
+    currentPose.value = null;
+    isTooDark.value = false;
+    isTooBlurry.value = false;
+    qualityFrameCounter = 0;
     if (fallbackTimerRef.current) {
       clearTimeout(fallbackTimerRef.current);
       fallbackTimerRef.current = null;
@@ -590,6 +910,7 @@ export const useFaceCapture = ({
   return {
     faceDetected,
     faceInBounds,
+    faceClippingOval,
     faceProximity,
     videoAspectRatio,
     faceLandmarks,
@@ -612,6 +933,12 @@ export const useFaceCapture = ({
     hasFinishedCapture,
     smileCheckpoint,
     neutralZone,
+    poseSequence,
+    currentPoseIndex,
+    currentPose,
+    isTooDark,
+    isTooBlurry,
+    faceOffsetDirection,
 
     initializeFaceLandmarker,
     setupCanvas,
@@ -623,6 +950,7 @@ export const useFaceCapture = ({
     pauseCapture,
     resumeCapture,
     handleCancel,
+    forceFailCapture,
     handleClose,
     cleanup,
     resetFaceDetectionState,

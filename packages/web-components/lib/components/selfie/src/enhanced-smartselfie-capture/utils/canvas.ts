@@ -43,6 +43,7 @@ export const drawFaceMesh = (
   landmarks: any[],
   capturesTaken: number,
   smileCheckpoint: number,
+  useStrictMode = false,
 ): void => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -51,6 +52,10 @@ export const drawFaceMesh = (
   const canvasHeight = canvas.height;
 
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // In strict (Active Liveness) mode we render a Lottie overlay instead of the
+  // landmark/connector mesh, so leave the canvas cleared and bail.
+  if (useStrictMode) return;
 
   const drawingUtils = new DrawingUtils(ctx);
 

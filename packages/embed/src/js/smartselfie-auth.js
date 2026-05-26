@@ -8,6 +8,7 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
@@ -97,15 +98,42 @@ window.Sentry = Sentry;
 
         SmartCameraWeb.setAttribute(
           'allow-agent-mode',
-          config.allow_agent_mode,
+          config.use_strict_mode ? false : config.allow_agent_mode,
         );
         SmartCameraWeb.setAttribute(
           'theme-color',
           config.partner_details.theme_color,
         );
 
+        if (config.partner_details.name) {
+          SmartCameraWeb.setAttribute(
+            'partner-name',
+            config.partner_details.name,
+          );
+        }
+        if (config.partner_details.logo_url) {
+          SmartCameraWeb.setAttribute(
+            'partner-logo',
+            config.partner_details.logo_url,
+          );
+        }
+        if (config.partner_details.policy_url) {
+          SmartCameraWeb.setAttribute(
+            'policy-url',
+            config.partner_details.policy_url,
+          );
+        }
+
         if (config.allow_legacy_selfie_fallback) {
           SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
+        }
+
+        if (config.use_strict_mode) {
+          SmartCameraWeb.setAttribute('use-strict-mode', 'true');
+        }
+
+        if (config.show_navigation) {
+          SmartCameraWeb.setAttribute('show-navigation', '');
         }
 
         if (config.hide_attribution) {
@@ -115,6 +143,9 @@ window.Sentry = Sentry;
           });
           SmartCameraWeb.setAttribute('hide-attribution', true);
         }
+        installActiveLivenessTimeout(SmartCameraWeb, {
+          enabled: !!config.use_strict_mode,
+        });
         setActiveScreen(SmartCameraWeb);
       }
     },
@@ -128,7 +159,19 @@ window.Sentry = Sentry;
       const title = document.querySelector('#uploadTitle');
       const jobType = partner_params.job_type;
       title.textContent = translate(labelKeys[jobType].upload);
-      setActiveScreen(UploadProgressScreen);
+      // In strict mode the Enhanced SmartSelfie component renders its own
+      // submitting / success / error screens, so we must NOT switch to the
+      // legacy `Registering User` upload screen — the host just signals
+      // submission progress via a window event the ESS listens for.
+      if (!config.use_strict_mode) {
+        setActiveScreen(UploadProgressScreen);
+      } else {
+        window.dispatchEvent(
+          new CustomEvent('enhanced-smartselfie.submission-state', {
+            detail: { state: 'submitting' },
+          }),
+        );
+      }
       handleFormSubmit();
     },
     false,
@@ -165,6 +208,16 @@ window.Sentry = Sentry;
     },
     false,
   );
+
+  // Strict-mode (Enhanced SmartSelfie) end-of-flow signals: ESS shows its own
+  // success / error screens and dispatches these window events when the user
+  // taps Continue / Exit. We mirror the legacy behaviour: close the iframe.
+  window.addEventListener('enhanced-smartselfie.continue', () => {
+    closeWindow(true);
+  });
+  window.addEventListener('enhanced-smartselfie.exit', () => {
+    closeWindow(true);
+  });
 
   function parseJWT(token) {
     /**
@@ -217,7 +270,22 @@ window.Sentry = Sentry;
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      if (config.use_strict_mode) {
+        // ESS owns the post-submit UI. Surface the failure via the same
+        // submission-state event the upload XHR uses so the user lands on
+        // the proper "Submission Failed" screen instead of getting a stray
+        // "Something went wrong" banner above the still-spinning view.
+        window.dispatchEvent(
+          new CustomEvent('enhanced-smartselfie.submission-state', {
+            detail: {
+              state: 'error',
+              message: translate('pages.error.generic'),
+            },
+          }),
+        );
+      } else {
+        displayErrorMessage(translate('pages.error.generic'));
+      }
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -312,7 +380,15 @@ window.Sentry = Sentry;
     });
 
     request.upload.addEventListener('error', function (e) {
-      setActiveScreen(UploadFailureScreen);
+      if (config.use_strict_mode) {
+        window.dispatchEvent(
+          new CustomEvent('enhanced-smartselfie.submission-state', {
+            detail: { state: 'error' },
+          }),
+        );
+      } else {
+        setActiveScreen(UploadFailureScreen);
+      }
       throw new Error('uploadZip failed', { cause: e });
     });
 
@@ -321,15 +397,33 @@ window.Sentry = Sentry;
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen);
+        if (config.use_strict_mode) {
+          window.dispatchEvent(
+            new CustomEvent('enhanced-smartselfie.submission-state', {
+              detail: { state: 'success' },
+            }),
+          );
+        } else {
+          setActiveScreen(CompleteScreen);
+        }
         handleSuccess();
-        window.setTimeout(closeWindow, 2000);
+        if (!config.use_strict_mode) {
+          window.setTimeout(closeWindow, 2000);
+        }
       }
       if (
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
-        setActiveScreen(UploadFailureScreen);
+        if (config.use_strict_mode) {
+          window.dispatchEvent(
+            new CustomEvent('enhanced-smartselfie.submission-state', {
+              detail: { state: 'error' },
+            }),
+          );
+        } else {
+          setActiveScreen(UploadFailureScreen);
+        }
         throw new Error('uploadZip failed', { cause: request });
       }
     };

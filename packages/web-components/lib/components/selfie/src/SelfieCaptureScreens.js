@@ -84,7 +84,7 @@ class SelfieCaptureScreens extends HTMLElement {
             ${styles(this.themeColor)}
             <div style="height: 100%;">
               <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
+              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
               <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
@@ -101,7 +101,11 @@ class SelfieCaptureScreens extends HTMLElement {
 
     if (
       this.getAttribute('initial-screen') === 'selfie-capture' ||
-      this.hideInstructions
+      this.hideInstructions ||
+      // In strict mode the modern `enhanced-smartselfie-capture` element
+      // renders its own consent + instructions screens, so we skip the
+      // legacy `selfie-capture-instructions` element entirely.
+      this.isStrictMode
     ) {
       this.setActiveScreen(this.selfieCapture);
     } else {
@@ -346,7 +350,7 @@ class SelfieCaptureScreens extends HTMLElement {
       // Force remount of selfie-capture-wrapper for clean state on next visit
       await this.forceWrapperRemount();
 
-      if (this.hideInstructions) {
+      if (this.hideInstructions || this.isStrictMode) {
         this.handleBackEvents();
         return;
       }
@@ -367,6 +371,18 @@ class SelfieCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
+      this._data.images = event.detail.images;
+      SmartCamera.stopMedia();
+
+      // In strict mode (Enhanced SmartSelfie), the ESS component already
+      // shows its own review screen and only re-dispatches `publish` after
+      // the user confirms. Skip the legacy `selfie-capture-review` step and
+      // publish straight up to the host page.
+      if (this.isStrictMode) {
+        this._publishSelectedImages();
+        return;
+      }
+
       this.selfieReview.setAttribute(
         'data-image',
         await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
@@ -376,8 +392,6 @@ class SelfieCaptureScreens extends HTMLElement {
         'mirror-image',
         shouldMirror ? 'true' : 'false',
       );
-      this._data.images = event.detail.images;
-      SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
     };
 
@@ -454,6 +468,43 @@ class SelfieCaptureScreens extends HTMLElement {
       : '';
   }
 
+  get useStrictMode() {
+    return this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+      ? 'use-strict-mode="true"'
+      : '';
+  }
+
+  /** Boolean form of `use-strict-mode` for runtime checks. */
+  get isStrictMode() {
+    return (
+      this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+    );
+  }
+
+  get hideConsent() {
+    return this.hasAttribute('hide-consent') ? 'hide-consent=""' : '';
+  }
+
+  get partnerName() {
+    return this.hasAttribute('partner-name')
+      ? `partner-name='${this.getAttribute('partner-name')}'`
+      : '';
+  }
+
+  get partnerLogo() {
+    return this.hasAttribute('partner-logo')
+      ? `partner-logo='${this.getAttribute('partner-logo')}'`
+      : '';
+  }
+
+  get policyUrl() {
+    return this.hasAttribute('policy-url')
+      ? `policy-url='${this.getAttribute('policy-url')}'`
+      : '';
+  }
+
   get themeColor() {
     return this.getAttribute('theme-color') || '#001096';
   }
@@ -477,6 +528,11 @@ class SelfieCaptureScreens extends HTMLElement {
       'allow-legacy-selfie-fallback',
       'show-agent-mode-for-tests',
       'disable-image-tests',
+      'use-strict-mode',
+      'hide-consent',
+      'partner-name',
+      'partner-logo',
+      'policy-url',
     ];
   }
 
@@ -489,6 +545,11 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'allow-legacy-selfie-fallback':
       case 'show-agent-mode-for-tests':
       case 'disable-image-tests':
+      case 'use-strict-mode':
+      case 'hide-consent':
+      case 'partner-name':
+      case 'partner-logo':
+      case 'policy-url':
         this.connectedCallback();
         break;
       default:

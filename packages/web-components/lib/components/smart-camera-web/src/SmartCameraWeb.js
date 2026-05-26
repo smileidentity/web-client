@@ -19,8 +19,8 @@ function scwTemplateString() {
   ${styles(this.themeColor)}
   <div style="height: 100%;">
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
-    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
+    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} hidden
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode}
     ></selfie-capture-screens>
     <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
@@ -76,9 +76,14 @@ class SmartCameraWeb extends HTMLElement {
       'hide-attribution',
       'hide-back-of-id',
       'hide-back-to-host',
+      'hide-consent',
+      'partner-name',
+      'partner-logo',
+      'policy-url',
       'show-navigation',
       'theme-color',
       'new-instructions',
+      'use-strict-mode',
     ];
   }
 
@@ -92,9 +97,14 @@ class SmartCameraWeb extends HTMLElement {
       case 'hide-attribution':
       case 'hide-back-of-id':
       case 'hide-back-to-host':
+      case 'hide-consent':
+      case 'partner-name':
+      case 'partner-logo':
+      case 'policy-url':
       case 'show-navigation':
       case 'theme-color':
       case 'new-instructions':
+      case 'use-strict-mode':
         this.disconnectedCallback();
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
@@ -282,8 +292,37 @@ class SmartCameraWeb extends HTMLElement {
       : '';
   }
 
+  get useStrictMode() {
+    return this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+      ? 'use-strict-mode="true"'
+      : '';
+  }
+
   get hideAttribution() {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+  }
+
+  get hideConsent() {
+    return this.hasAttribute('hide-consent') ? 'hide-consent' : '';
+  }
+
+  get partnerName() {
+    return this.hasAttribute('partner-name')
+      ? `partner-name='${this.getAttribute('partner-name')}'`
+      : '';
+  }
+
+  get partnerLogo() {
+    return this.hasAttribute('partner-logo')
+      ? `partner-logo='${this.getAttribute('partner-logo')}'`
+      : '';
+  }
+
+  get policyUrl() {
+    return this.hasAttribute('policy-url')
+      ? `policy-url='${this.getAttribute('policy-url')}'`
+      : '';
   }
 
   get hasThemeColor() {

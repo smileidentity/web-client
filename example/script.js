@@ -81,7 +81,6 @@ export default function setupForm() {
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
         new_instructions: newInstructions.value === 'true',
-        hide_attribution: true,
         hide_attribution: false,
         show_navigation: true,
         document_capture_modes: ['camera', 'upload'],

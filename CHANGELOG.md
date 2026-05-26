@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.4] - 2026-05-26
+
+### Changed
+
+- Selfie: separate the cosmetic countdown from the load deadline so the capture flow no longer races against the visible timer
+- Web-components: add repository metadata to the published package for npm provenance
+- Dependencies: bump the npm_and_yarn group across 2 directories
+
 ## [11.4.3] - 2026-05-22
 
 ### Changed

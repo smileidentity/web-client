@@ -493,13 +493,17 @@ export const classifyHeadPose = (
 /**
  * Build the pose sequence for an active-liveness session.
  *
- * Fixed order: left, right, up. (A previous version randomised this to mirror
- * the mobile SDKs, but UX wanted a predictable progression.) Any leftover
+ * Randomised order across {left, right, up} to mirror the mobile SDKs and
+ * make the active-liveness challenge harder to pre-record. Any leftover
  * frames in the capture window are taken silently while the user is neutral
  * before the first pose prompt — see `useFaceCapture` for that logic.
  */
-export const buildRandomPoseSequence = (): HeadPoseDirection[] => [
-  'left',
-  'right',
-  'up',
-];
+export const buildRandomPoseSequence = (): HeadPoseDirection[] => {
+  const poses: HeadPoseDirection[] = ['left', 'right', 'up'];
+  // Fisher–Yates shuffle.
+  for (let i = poses.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [poses[i], poses[j]] = [poses[j], poses[i]];
+  }
+  return poses;
+};

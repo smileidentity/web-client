@@ -106,6 +106,12 @@ const App = () => {
           'start-countdown': true,
         });
         break;
+      case 'enhanced-smartselfie-capture':
+        componentElement = createElement(
+          'enhanced-smartselfie-capture',
+          props,
+        );
+        break;
       case 'smart-camera-web':
       default:
         componentElement = createElement('smart-camera-web', props);

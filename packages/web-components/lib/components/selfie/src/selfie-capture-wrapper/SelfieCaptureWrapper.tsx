@@ -234,17 +234,22 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // purely visual — it does NOT decide when we fall back. The decision is
   // driven by `loadDeadlineExceeded` below.
   useEffect(() => {
-    if (hidden || !startCountdown || mediapipeReady || loadingProgress >= 100)
-      return undefined;
+    if (hidden || !startCountdown || mediapipeReady) return undefined;
 
     const timer = setInterval(() => {
-      setLoadingProgress((prev: number) => Math.min(prev + 1, 100));
+      setLoadingProgress((prev: number) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          return 100;
+        }
+        return prev + 1;
+      });
     }, loadingTime / 100);
 
     return () => {
       clearInterval(timer);
     };
-  }, [hidden, startCountdown, loadingTime, mediapipeReady, loadingProgress]);
+  }, [hidden, startCountdown, loadingTime, mediapipeReady]);
 
   // Hard deadline: a single setTimeout that flips `loadDeadlineExceeded`
   // exactly once. This is the signal the render path uses to commit to the

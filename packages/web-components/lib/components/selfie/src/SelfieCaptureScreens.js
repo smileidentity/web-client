@@ -11,6 +11,15 @@ const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
 
+/**
+ * Minimum-correct HTML attribute escape. `&` must be replaced first so the
+ * subsequent `"` -> `&quot;` substitution isn't double-encoded. Used by every
+ * getter that interpolates a partner-supplied value into the `innerHTML`
+ * template in `connectedCallback` — without this, a value containing `"`
+ * (or `&`) would break out of the attribute and inject markup.
+ */
+const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
 const cropImageFromDataUri = (dataUri, cropPercentX = 0, cropPercentY = 0) =>
   new Promise((resolve, reject) => {
     if (!dataUri || typeof dataUri !== 'string') {
@@ -83,9 +92,9 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles(this.themeColor)}
             <div style="height: 100%;">
-              <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
-              <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture-wrapper theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
+              <selfie-capture-review theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -464,7 +473,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get allowLegacySelfieFallback() {
     return this.hasAttribute('allow-legacy-selfie-fallback')
-      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      ? `allow-legacy-selfie-fallback="${escAttr(this.getAttribute('allow-legacy-selfie-fallback'))}"`
       : '';
   }
 
@@ -489,19 +498,19 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get partnerName() {
     return this.hasAttribute('partner-name')
-      ? `partner-name='${this.getAttribute('partner-name')}'`
+      ? `partner-name="${escAttr(this.getAttribute('partner-name'))}"`
       : '';
   }
 
   get partnerLogo() {
     return this.hasAttribute('partner-logo')
-      ? `partner-logo='${this.getAttribute('partner-logo')}'`
+      ? `partner-logo="${escAttr(this.getAttribute('partner-logo'))}"`
       : '';
   }
 
   get policyUrl() {
     return this.hasAttribute('policy-url')
-      ? `policy-url='${this.getAttribute('policy-url')}'`
+      ? `policy-url="${escAttr(this.getAttribute('policy-url'))}"`
       : '';
   }
 

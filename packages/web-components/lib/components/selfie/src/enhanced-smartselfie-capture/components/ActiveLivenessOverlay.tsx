@@ -30,26 +30,6 @@ interface ActiveLivenessOverlayProps {
 }
 
 /**
- * Frame ranges in the bundled Lottie file. Each "Null N" parent group covers
- * one prompt animation; the static head + circle-mask layers (15-17) play for
- * the full duration regardless of which segment we scrub to.
- *
- * Source: layer in/out frames inspected from the JSON.
- *
- * NOTE: If the apparent direction in the rendered animation doesn't match the
- * pose label, swap the values here — that is the only place mapping lives.
- */
-/**
- * Frame ranges in the bundled Lottie file. Each "Null N" parent group covers
- * one prompt animation; the static head + circle-mask layers (15-17) play for
- * the full duration regardless of which segment we scrub to.
- *
- * Source: layer in/out frames inspected from the JSON.
- *
- * NOTE: If the apparent direction in the rendered animation doesn't match the
- * pose label, swap the values here — that is the only place mapping lives.
- */
-/**
  * Per-pose frame ranges split by match state. The bundled .lottie was
  * authored with two sibling layers for each direction — `arrow N` (gray)
  * and `arrow - green N` — staggered so the green takes over later in the

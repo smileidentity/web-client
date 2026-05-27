@@ -73,42 +73,58 @@ describe('ESS localisation (selfie.ess.*)', () => {
     });
   });
 
-  it('interpolates the partner name through tHtml without escaping <strong>', () => {
+  it('exposes the consent body as plain-text fragments (no HTML)', () => {
     cy.window().then(async (win) => {
       await win.localisation.setCurrentLocale('en');
-      const html = win.localisation.tHtml('selfie.ess.consent.body', {
-        partnerName: 'Acme Bank',
+      const { t } = win.localisation;
+      const prefix = t('selfie.ess.consent.bodyPrefix');
+      const middle = t('selfie.ess.consent.bodyMiddle');
+      const suffix = t('selfie.ess.consent.bodySuffix');
+      [prefix, middle, suffix].forEach((fragment) => {
+        expect(fragment).to.be.a('string').and.not.equal('');
+        // Body fragments must not carry markup — the component renders
+        // <strong>Smile ID</strong> / <strong>{partnerName}</strong> via JSX.
+        expect(fragment).to.not.match(/<\/?[a-z][\s\S]*>/i);
+        expect(fragment).to.not.include('{{');
       });
-      expect(html).to.include('<strong>Smile ID</strong>');
-      expect(html).to.include('<strong>Acme Bank</strong>');
-      expect(html).to.not.include('&lt;strong&gt;');
+      expect(prefix + middle + suffix).to.include('processing');
     });
   });
 
-  it('escapes unsafe partner names inside tHtml', () => {
+  it('does not interpolate the partner name into body fragments', () => {
     cy.window().then(async (win) => {
       await win.localisation.setCurrentLocale('en');
-      const html = win.localisation.tHtml('selfie.ess.consent.body', {
-        partnerName: '<script>alert(1)</script>',
+      const { t } = win.localisation;
+      // The partner name is now rendered via JSX (<strong>{partner}</strong>),
+      // never substituted into a translation string, so an attacker-controlled
+      // partner name cannot smuggle markup into the consent copy.
+      [
+        'selfie.ess.consent.bodyPrefix',
+        'selfie.ess.consent.bodyMiddle',
+        'selfie.ess.consent.bodySuffix',
+        'selfie.ess.consent.learnMoreBodyPrefix',
+        'selfie.ess.consent.learnMoreBodyAnd',
+        'selfie.ess.consent.learnMoreBodySuffix',
+      ].forEach((key) => {
+        expect(t(key)).to.not.include('partnerName');
       });
-      // Static <strong> markup from the locale file is preserved …
-      expect(html).to.include('<strong>Smile ID</strong>');
-      // … but the injected param is HTML-escaped.
-      expect(html).to.not.include('<script>alert(1)</script>');
-      expect(html).to.include('&lt;script&gt;');
     });
   });
 
-  it('keeps "Smile ID" and the partner name untranslated in fr-FR', () => {
+  it('keeps learn-more fragments as plain text in fr-FR', () => {
     cy.window().then(async (win) => {
       await win.localisation.setCurrentLocale('fr');
-      const html = win.localisation.tHtml('selfie.ess.consent.learnMoreBody', {
-        partnerName: 'Acme Bank',
+      const { t } = win.localisation;
+      const fragments = [
+        t('selfie.ess.consent.learnMoreBodyPrefix'),
+        t('selfie.ess.consent.learnMoreBodyAnd'),
+        t('selfie.ess.consent.learnMoreBodySuffix'),
+      ];
+      fragments.forEach((fragment) => {
+        expect(fragment).to.be.a('string');
+        expect(fragment).to.not.match(/<\/?[a-z][\s\S]*>/i);
       });
-      expect(html).to.include('<strong>Smile ID</strong>');
-      expect(html).to.include('<strong>Acme Bank</strong>');
-      // Sanity-check that this is actually the French copy.
-      expect(html.toLowerCase()).to.match(/donn[ée]es/);
+      expect(fragments.join('').toLowerCase()).to.match(/donn[ée]es/);
     });
   });
 
@@ -116,11 +132,16 @@ describe('ESS localisation (selfie.ess.*)', () => {
     cy.window().then(async (win) => {
       await win.localisation.setCurrentLocale('ar');
       expect(win.localisation.getDirection()).to.equal('rtl');
-      const html = win.localisation.tHtml('selfie.ess.consent.learnMoreBody', {
-        partnerName: 'Acme Bank',
+      const { t } = win.localisation;
+      [
+        'selfie.ess.consent.learnMoreBodyPrefix',
+        'selfie.ess.consent.learnMoreBodyAnd',
+        'selfie.ess.consent.learnMoreBodySuffix',
+      ].forEach((key) => {
+        expect(t(key))
+          .to.be.a('string')
+          .and.not.match(/<\/?[a-z][\s\S]*>/i);
       });
-      expect(html).to.include('<strong>Smile ID</strong>');
-      expect(html).to.include('<strong>Acme Bank</strong>');
     });
   });
 

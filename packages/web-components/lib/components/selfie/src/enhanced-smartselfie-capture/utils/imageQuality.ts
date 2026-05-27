@@ -7,6 +7,45 @@
 const SAMPLE_STEP = 4; // Sample every 4th pixel — keeps work to ~6% of full ROI.
 
 /**
+ * Module-scoped scratch canvases reused across frames. Allocating a fresh
+ * `<canvas>` per call during the capture loop (~10 fps × 2 routines) creates
+ * meaningful GC churn and re-enters the `willReadFrequently` software path on
+ * every frame. We keep one canvas per routine and only resize when the
+ * computed downsample target changes — assigning `width`/`height` also clears
+ * the bitmap, so no manual clear is required.
+ */
+let luminanceCanvas: HTMLCanvasElement | null = null;
+let luminanceCtx: CanvasRenderingContext2D | null = null;
+let blurCanvas: HTMLCanvasElement | null = null;
+let blurCtx: CanvasRenderingContext2D | null = null;
+
+const getScratchContext = (
+  which: 'luminance' | 'blur',
+  dw: number,
+  dh: number,
+): CanvasRenderingContext2D | null => {
+  let canvas = which === 'luminance' ? luminanceCanvas : blurCanvas;
+  let ctx = which === 'luminance' ? luminanceCtx : blurCtx;
+
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (which === 'luminance') {
+      luminanceCanvas = canvas;
+      luminanceCtx = ctx;
+    } else {
+      blurCanvas = canvas;
+      blurCtx = ctx;
+    }
+  }
+  if (!ctx) return null;
+
+  if (canvas.width !== dw) canvas.width = dw;
+  if (canvas.height !== dh) canvas.height = dh;
+  return ctx;
+};
+
+/**
  * Average BT.601 luma (0–255) over a region of the video frame.
  *
  * @param video        live video element
@@ -34,10 +73,7 @@ export const calculateLuminance = (
   const dw = Math.max(1, Math.round(sw * scale));
   const dh = Math.max(1, Math.round(sh * scale));
 
-  const canvas = document.createElement('canvas');
-  canvas.width = dw;
-  canvas.height = dh;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = getScratchContext('luminance', dw, dh);
   if (!ctx) return 0;
 
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, dw, dh);
@@ -79,10 +115,7 @@ export const calculateBlurScore = (
   const dw = Math.max(3, Math.round(sw * scale));
   const dh = Math.max(3, Math.round(sh * scale));
 
-  const canvas = document.createElement('canvas');
-  canvas.width = dw;
-  canvas.height = dh;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = getScratchContext('blur', dw, dh);
   if (!ctx) return 0;
 
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, dw, dh);

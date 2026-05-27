@@ -1,6 +1,11 @@
 import type { FunctionComponent } from 'preact';
 import { useState } from 'preact/hooks';
-import { t, tHtml } from '../../../../../domain/localisation';
+import { t } from '../../../../../domain/localisation';
+import {
+  SmileIdLogo,
+  CheckIcon,
+  ChevronDownIcon,
+} from '../assets/illustrations';
 
 // Icon URLs — Vite resolves these to URL strings via the `*.svg` ambient
 // module declaration in lib/types.d.ts.
@@ -31,6 +36,26 @@ const ITEMS: { icon: string; key: string }[] = [
 ];
 
 /**
+ * Returns the input only if it is a syntactically valid absolute URL whose
+ * protocol is `http:` or `https:`. Anything else (including `javascript:`,
+ * `data:`, malformed strings, or non-strings) is rejected. This prevents a
+ * malicious partner config from injecting an XSS vector through props that
+ * are rendered as `href`/`src`.
+ */
+const safeHttpUrl = (value?: string): string | undefined => {
+  if (typeof value !== 'string' || value.length === 0) return undefined;
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      return parsed.toString();
+    }
+  } catch {
+    /* fall through */
+  }
+  return undefined;
+};
+
+/**
  * Strict-mode consent screen rendered as the first step of the Enhanced
  * SmartSelfie flow. Purpose-built for ESS and intentionally separate from the
  * legacy `<end-user-consent>` element used by KYC products — modifying that
@@ -48,31 +73,17 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
   const [accepted, setAccepted] = useState(false);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const partner = partnerName;
+  const safePolicyUrl = safeHttpUrl(policyUrl);
+  const safePartnerLogo = safeHttpUrl(partnerLogo);
 
   return (
     <div className="ess-consent">
       <div className="logos">
-        {partnerLogo && (
-          <img className="partner-logo" src={partnerLogo} alt={partner} />
+        {safePartnerLogo && (
+          <img className="partner-logo" src={safePartnerLogo} alt={partner} />
         )}
         <div className="smile-logo" aria-hidden="true">
-          {/* Official Smile ID brand mark — blue square with orange accent. */}
-          <svg
-            viewBox="48 0 8 8"
-            width="40"
-            height="40"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M52.2123 3.88737H48V7.86846H52.2123V3.88737Z"
-              fill="#001096"
-            />
-            <path
-              d="M53.2359 0C53.2165 0 53.1975 0.00201727 53.1786 0.00252159C53.1591 0.00252159 53.1402 0 53.1207 0C52.0457 0 51.0869 0.708567 51.0869 2.27044V3.8888H55.2882V2.27044C55.2882 0.708567 54.3174 0 53.2359 0Z"
-              fill="#FF9B00"
-            />
-          </svg>
+          <SmileIdLogo />
         </div>
       </div>
 
@@ -81,14 +92,13 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
         <span style={{ whiteSpace: 'nowrap' }}>Smile ID.</span>
       </h1>
 
-      <p
-        className="body"
-        dangerouslySetInnerHTML={{
-          __html: tHtml('selfie.ess.consent.body', {
-            partnerName: partner ?? '',
-          }),
-        }}
-      />
+      <p className="body">
+        {t('selfie.ess.consent.bodyPrefix')}
+        <strong>Smile ID</strong>
+        {t('selfie.ess.consent.bodyMiddle')}
+        <strong>{partner}</strong>
+        {t('selfie.ess.consent.bodySuffix')}
+      </p>
 
       <ul className="items">
         {ITEMS.map((it) => (
@@ -106,15 +116,7 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
           onChange={(e) => setAccepted((e.target as HTMLInputElement).checked)}
         />
         <span className="box" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <polyline
-              points="20 6 9 17 4 12"
-              stroke="#F9F0E7"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <CheckIcon />
         </span>
         <span className="copy">{t('selfie.ess.consent.consentCheckbox')}</span>
       </label>
@@ -126,28 +128,18 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
         aria-expanded={learnMoreOpen}
       >
         <span className="chevron" data-open={learnMoreOpen} aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <polyline
-              points="6 9 12 15 18 9"
-              stroke="#F9F0E7"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronDownIcon />
         </span>
         <span>{t('selfie.ess.consent.learnMore')}</span>
       </button>
 
       {learnMoreOpen && (
         <p className="learn-more-copy">
-          <span
-            dangerouslySetInnerHTML={{
-              __html: tHtml('selfie.ess.consent.learnMoreBody', {
-                partnerName: partner ?? '',
-              }),
-            }}
-          />
+          {t('selfie.ess.consent.learnMoreBodyPrefix')}
+          <strong>Smile ID</strong>
+          {t('selfie.ess.consent.learnMoreBodyAnd')}
+          <strong>{partner}</strong>
+          {t('selfie.ess.consent.learnMoreBodySuffix')}
           <br />
           {t('selfie.ess.consent.learnMoreShare')}
           <br />
@@ -169,12 +161,12 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
           >
             Smile ID
           </a>
-          {policyUrl ? (
+          {safePolicyUrl ? (
             <>
               {' '}
               {t('selfie.ess.consent.partnerPrivacyTailLinked')}{' '}
               <a
-                href={policyUrl}
+                href={safePolicyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: themeColor }}

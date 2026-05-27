@@ -212,12 +212,23 @@ window.Sentry = Sentry;
   // Strict-mode (Enhanced SmartSelfie) end-of-flow signals: ESS shows its own
   // success / error screens and dispatches these window events when the user
   // taps Continue / Exit. We mirror the legacy behaviour: close the iframe.
-  window.addEventListener('enhanced-smartselfie.continue', () => {
-    closeWindow(true);
-  });
-  window.addEventListener('enhanced-smartselfie.exit', () => {
-    closeWindow(true);
-  });
+  // `once: true` guards against an accidental double-dispatch from ESS — by
+  // contract exactly one of continue/exit fires per session, and a duplicate
+  // would post a second `SmileIdentity::Close` to the parent.
+  window.addEventListener(
+    'enhanced-smartselfie.continue',
+    () => {
+      closeWindow(true);
+    },
+    { once: true },
+  );
+  window.addEventListener(
+    'enhanced-smartselfie.exit',
+    () => {
+      closeWindow(true);
+    },
+    { once: true },
+  );
 
   function parseJWT(token) {
     /**

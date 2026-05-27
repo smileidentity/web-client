@@ -784,3 +784,69 @@ export const PoorLightingIllustration: FunctionComponent<
     </svg>
   );
 };
+
+// ─── Inline glyphs used by ConsentView ────────────────────────────────────
+//
+// Kept here (rather than as separate `.svg` URL imports) because they need
+// to live inside Preact's reconciliation tree — the parent wrapper handles
+// state-driven styling (checked tick, rotated chevron) and we want a single
+// place to audit any branded artwork.
+
+/**
+ * Official Smile ID brand mark — blue square with the orange accent.
+ * Static; size matches the 40×40 logo lockup used in the consent header.
+ */
+export const SmileIdLogo: FunctionComponent = () => (
+  <svg
+    viewBox="48 0 8 8"
+    width="40"
+    height="40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path d="M52.2123 3.88737H48V7.86846H52.2123V3.88737Z" fill="#001096" />
+    <path
+      d="M53.2359 0C53.2165 0 53.1975 0.00201727 53.1786 0.00252159C53.1591 0.00252159 53.1402 0 53.1207 0C52.0457 0 51.0869 0.708567 51.0869 2.27044V3.8888H55.2882V2.27044C55.2882 0.708567 54.3174 0 53.2359 0Z"
+      fill="#FF9B00"
+    />
+  </svg>
+);
+
+/** Checkbox tick. Wrapper supplies the background/colour transitions. */
+export const CheckIcon: FunctionComponent = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <polyline
+      points="20 6 9 17 4 12"
+      stroke="#F9F0E7"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+);
+
+/** Downward chevron. Rotation is applied by the parent's `data-open`. */
+export const ChevronDownIcon: FunctionComponent = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <polyline
+      points="6 9 12 15 18 9"
+      stroke="#F9F0E7"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+);

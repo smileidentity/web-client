@@ -124,7 +124,9 @@
       "back": "Back",
       "consent": {
         "titleSuffix": "would like to verify your identity using",
-        "body": "By selecting Allow, you consent to <strong>Smile ID</strong> collecting and processing your personal data for the purpose of providing identity verification and fraud prevention services, and securely sharing the results with <strong>{{partnerName}}</strong>. This may include processing:",
+        "bodyPrefix": "By selecting Allow, you consent to ",
+        "bodyMiddle": " collecting and processing your personal data for the purpose of providing identity verification and fraud prevention services, and securely sharing the results with ",
+        "bodySuffix": ". This may include processing:",
         "items": {
           "contact": "Contact Information",
           "personal": "Personal Information",
@@ -133,7 +135,9 @@
         },
         "consentCheckbox": "I consent to my identity information and related data being shared with service providers to prevent fraud and securely process this transaction.",
         "learnMore": "Learn more",
-        "learnMoreBody": "<strong>Smile ID</strong> and <strong>{{partnerName}}</strong> process your personal and biometric data to verify your identity and prevent fraud. We retain your data for 5 years to meet legal obligations.",
+        "learnMoreBodyPrefix": "",
+        "learnMoreBodyAnd": " and ",
+        "learnMoreBodySuffix": " process your personal and biometric data to verify your identity and prevent fraud. We retain your data for 5 years to meet legal obligations.",
         "learnMoreShare": "We may share data with specific partners to complete this check.",
         "learnMoreRightsPrefix": "You can withdraw consent, access your data, or exercise your rights at our",
         "dsarLink": "DSAR",

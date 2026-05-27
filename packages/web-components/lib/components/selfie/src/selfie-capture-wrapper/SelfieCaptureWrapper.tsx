@@ -491,17 +491,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   // on retakes, prefer SmartSelfieCapture if Mediapipe is ready
   if (initialSessionCompleted && mediapipeReady && !usingSelfieCapture) {
-    if (useStrictMode) {
-      return <EnhancedSmartSelfieCapture {...(props as any)} />;
-    }
     return <SmartSelfieCapture {...props} />;
   }
 
   // use SmartSelfieCapture if mediapipe loads
   if (!initialSessionCompleted && mediapipeReady && !usingSelfieCapture) {
-    if (useStrictMode) {
-      return <EnhancedSmartSelfieCapture {...(props as any)} />;
-    }
     return <SmartSelfieCapture {...props} />;
   }
 
@@ -596,61 +590,6 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   // Midpoint threshold (40s out of 90s ≈ 44%)
   const SLOW_CONNECTION_THRESHOLD = 44;
-
-  // In strict mode (Enhanced SmartSelfie) we use the branded "Setting up"
-  // loader that matches the KYC flow rather than the bare spinner.
-  if (useStrictMode) {
-    return (
-      <div className="ess-setup">
-        <p className="spinner" aria-hidden="true">
-          <IconLoader2
-            size={48}
-            style={{ animation: 'spin 1s linear infinite' }}
-          />
-        </p>
-        <h1 className="setup-title">{translate('pages.loading.title')}</h1>
-        <p className="setup-body">
-          <span>{translate('pages.loading.subtitle')}</span>
-          <br />
-          <span>{translate('pages.loading.description')}</span>
-        </p>
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          .ess-setup {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem 1.25rem;
-            font-family: "DM Sans", system-ui, sans-serif;
-            background: #F5F7FA;
-            color: #1A1A1A;
-            text-align: center;
-          }
-          .ess-setup .spinner {
-            display: flex;
-            justify-content: center;
-            margin: 0 0 2rem;
-          }
-          .ess-setup .setup-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 0.75rem;
-          }
-          .ess-setup .setup-body {
-            font-size: 0.95rem;
-            color: #5E646E;
-            line-height: 1.5;
-            margin: 0;
-          }
-        `}</style>
-      </div>
-    );
-  }
 
   return (
     <div style={{ textAlign: 'center', marginTop: '20%' }}>

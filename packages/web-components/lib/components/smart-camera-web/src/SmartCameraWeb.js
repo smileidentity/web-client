@@ -8,6 +8,14 @@ import packageJson from '../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
 
+// Minimal HTML-attribute escaper for values interpolated into the innerHTML
+// template below. Order matters: encode `&` first so we don't double-encode
+// the `&` we introduce when escaping `"`. Used because partner-supplied
+// attributes (partner-name, partner-logo, policy-url, theme-color, ...) flow
+// straight into the template string and an unescaped quote would otherwise
+// allow attribute injection / XSS.
+const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
 function scwTemplateString() {
   return `
   <style>
@@ -258,7 +266,7 @@ class SmartCameraWeb extends HTMLElement {
 
   get allowAgentMode() {
     return this.hasAttribute('allow-agent-mode')
-      ? `allow-agent-mode=${this.getAttribute('allow-agent-mode')}`
+      ? `allow-agent-mode="${escAttr(this.getAttribute('allow-agent-mode'))}"`
       : '';
   }
 
@@ -270,13 +278,13 @@ class SmartCameraWeb extends HTMLElement {
 
   get title() {
     return this.hasAttribute('title')
-      ? `title=${this.getAttribute('title')}`
+      ? `title="${escAttr(this.getAttribute('title'))}"`
       : '';
   }
 
   get documentCaptureModes() {
     return this.hasAttribute('document-capture-modes')
-      ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
+      ? `document-capture-modes="${escAttr(this.getAttribute('document-capture-modes'))}"`
       : '';
   }
 
@@ -288,7 +296,7 @@ class SmartCameraWeb extends HTMLElement {
 
   get allowLegacySelfieFallback() {
     return this.hasAttribute('allow-legacy-selfie-fallback')
-      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      ? `allow-legacy-selfie-fallback="${escAttr(this.getAttribute('allow-legacy-selfie-fallback'))}"`
       : '';
   }
 
@@ -309,19 +317,19 @@ class SmartCameraWeb extends HTMLElement {
 
   get partnerName() {
     return this.hasAttribute('partner-name')
-      ? `partner-name='${this.getAttribute('partner-name')}'`
+      ? `partner-name="${escAttr(this.getAttribute('partner-name'))}"`
       : '';
   }
 
   get partnerLogo() {
     return this.hasAttribute('partner-logo')
-      ? `partner-logo='${this.getAttribute('partner-logo')}'`
+      ? `partner-logo="${escAttr(this.getAttribute('partner-logo'))}"`
       : '';
   }
 
   get policyUrl() {
     return this.hasAttribute('policy-url')
-      ? `policy-url='${this.getAttribute('policy-url')}'`
+      ? `policy-url="${escAttr(this.getAttribute('policy-url'))}"`
       : '';
   }
 
@@ -339,7 +347,9 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get applyComponentThemeColor() {
-    return this.hasThemeColor ? `theme-color='${this.themeColor}'` : '';
+    return this.hasThemeColor
+      ? `theme-color="${escAttr(this.themeColor)}"`
+      : '';
   }
 
   setActiveScreen(screen) {

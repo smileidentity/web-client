@@ -124,7 +124,9 @@
       "back": "Retour",
       "consent": {
         "titleSuffix": "souhaite vérifier votre identité avec",
-        "body": "En sélectionnant Autoriser, vous consentez à ce que <strong>Smile ID</strong> collecte et traite vos données personnelles afin de fournir des services de vérification d'identité et de prévention de la fraude, et partage les résultats en toute sécurité avec <strong>{{partnerName}}</strong>. Cela peut inclure le traitement des :",
+        "bodyPrefix": "En sélectionnant Autoriser, vous consentez à ce que ",
+        "bodyMiddle": " collecte et traite vos données personnelles afin de fournir des services de vérification d'identité et de prévention de la fraude, et partage les résultats en toute sécurité avec ",
+        "bodySuffix": ". Cela peut inclure le traitement des :",
         "items": {
           "contact": "Informations de contact",
           "personal": "Informations personnelles",
@@ -133,7 +135,9 @@
         },
         "consentCheckbox": "Je consens au partage de mes informations d'identité et données associées avec les prestataires afin de prévenir la fraude et de traiter cette transaction en toute sécurité.",
         "learnMore": "En savoir plus",
-        "learnMoreBody": "<strong>Smile ID</strong> et <strong>{{partnerName}}</strong> traitent vos données personnelles et biométriques pour vérifier votre identité et prévenir la fraude. Nous conservons vos données pendant 5 ans afin de respecter nos obligations légales.",
+        "learnMoreBodyPrefix": "",
+        "learnMoreBodyAnd": " et ",
+        "learnMoreBodySuffix": " traitent vos données personnelles et biométriques pour vérifier votre identité et prévenir la fraude. Nous conservons vos données pendant 5 ans afin de respecter nos obligations légales.",
         "learnMoreShare": "Nous pouvons partager des données avec certains partenaires pour réaliser cette vérification.",
         "learnMoreRightsPrefix": "Vous pouvez retirer votre consentement, accéder à vos données ou exercer vos droits sur notre page",
         "dsarLink": "DSAR",

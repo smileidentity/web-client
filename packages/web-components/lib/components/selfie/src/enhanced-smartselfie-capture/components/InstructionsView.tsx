@@ -155,10 +155,8 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
         </span>
       </h1>
 
-      <div className="hero-wrapper">
-        <div className="hero-oval">
-          <HeroAnimation />
-        </div>
+      <div className="hero-oval">
+        <HeroAnimation />
       </div>
 
       <div className="guidelines-header">
@@ -275,21 +273,11 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
       .back-button + .instructions-title {
         margin-top: 4rem;
       }
-      .hero-wrapper {
-        width: clamp(160px, 26dvh, 230px);
-        height: clamp(160px, 26dvh, 230px);
-        max-width: 100%;
-        margin: clamp(0.5rem, 1.5dvh, 1rem) auto 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 1;
-        min-height: 0;
-      }
       .hero-oval {
         width: clamp(135px, 22dvh, 195px);
         height: clamp(160px, 26dvh, 230px);
         max-width: 100%;
+        margin: clamp(0.5rem, 1.5dvh, 1rem) 0 0;
         border: 2px solid #C4C4C4;
         border-radius: 50%;
         overflow: hidden;
@@ -297,6 +285,7 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
         align-items: center;
         justify-content: center;
         background: #F5F7FA;
+        flex-shrink: 0;
       }
       .guidelines-header {
         display: flex;

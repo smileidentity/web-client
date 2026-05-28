@@ -1,6 +1,6 @@
 {
   "name": "@smileid/web-components",
-  "version": "11.4.2",
+  "version": "11.4.4",
   "private": false,
   "main": "dist/esm/main.js",
   "module": "dist/esm/main.js",
@@ -76,6 +76,15 @@
   ],
   "type": "module",
   "author": "SmileID <support@usesmileid.com> (https://usesmileid.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smileidentity/web-client.git",
+    "directory": "packages/web-components"
+  },
+  "bugs": {
+    "url": "https://github.com/smileidentity/web-client/issues"
+  },
+  "homepage": "https://github.com/smileidentity/web-client#readme",
   "dependencies": {
     "@lottiefiles/dotlottie-web": "^0.71.0",
     "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",

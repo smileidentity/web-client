@@ -134,6 +134,7 @@ jobs:
       - name: build application
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
+          SENTRY_ENVIRONMENT: production
         run: npm run build && npm run build:dist
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4

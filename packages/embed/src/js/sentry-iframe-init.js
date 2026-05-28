@@ -46,6 +46,6 @@ export default function initIframeSentry(pageName) {
       }
       return event;
     },
-    tracesSampleRate: 0.01,
+    tracesSampleRate: 1.0, // TEMP: set 100% trace sampling for diagnostic purposes — adjust as needed
   });
 }

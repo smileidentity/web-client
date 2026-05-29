@@ -431,13 +431,23 @@ export const calculateHeadPose = (landmarks: any): HeadPoseAngles | null => {
   }
 
   const toDeg = (rad: number) => (rad * 180) / Math.PI;
+  const clamp = (v: number, lo: number, hi: number) =>
+    Math.max(lo, Math.min(hi, v));
 
-  // Yaw: relative depth of cheeks. When facing forward, both cheeks have
-  // similar z; turning right pushes the right cheek away (more positive z in
-  // MediaPipe's coordinate system) while the left cheek comes forward.
-  const yaw = toDeg(
-    Math.atan2(rightCheek.z - leftCheek.z, rightCheek.x - leftCheek.x),
-  );
+  // Yaw: signed cheek-depth component projected onto the physical 3D
+  // distance between the two cheek landmarks. asin is symmetric and has
+  // no singularity, unlike atan2(dz, dx) which inflates and jitters when
+  // the inter-cheek x-gap collapses on a left turn. The 3D cheek span is
+  // approximately constant across head rotation (the cheeks don't move
+  // relative to each other on the skull), so dz / cheekSpan3D is a clean
+  // sin(yaw) signal. Positive = turning the head's right (subject's
+  // right cheek goes back), negative = turning left.
+  const dx = rightCheek.x - leftCheek.x;
+  const dy = rightCheek.y - leftCheek.y;
+  const dz = rightCheek.z - leftCheek.z;
+  const cheekSpan3D = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  const yaw =
+    cheekSpan3D > 0 ? toDeg(Math.asin(clamp(dz / cheekSpan3D, -1, 1))) : 0;
 
   // Pitch: where the nose sits vertically between the forehead (top) and chin
   // (bottom). Neutral ≈ 0.5; tilting up pushes the nose toward the forehead
@@ -475,19 +485,45 @@ export const classifyHeadPose = (
 ): HeadPoseDirection | null => {
   if (!pose) return null;
 
-  const yawSide = thresholds.yawSide ?? 25;
-  const yawNeutral = thresholds.yawNeutral ?? 20;
-  // Raised from 3 → 7 so the "up" match requires a deliberate tilt rather
-  // than the ~3% nose-shift that resting posture/breathing produces. At 3
-  // the prompt was registering as matched almost instantly, making the
-  // gesture feel abrupt; 7 lines its perceived effort up with the yaw side
-  // turns (which require a clearly intentional movement).
+  // Yaw is now an asin-based signed sin(yaw) value (degrees), so it's
+  // symmetric around 0 and bounded to ±90°. In theory one threshold would
+  // work for both directions, but MediaPipe landmarks 207 / 426 aren't
+  // true mirror counterparts — dz/cheekSpan grows faster for one rotation
+  // direction than the other, so the same physical turn produces
+  // unequal yaw magnitudes. Compensate with a slightly lower threshold
+  // on the positive (screen-left) side so both prompts feel like the
+  // same amount of head movement.
+  const yawSide = thresholds.yawSide ?? 18;
+  const yawSidePositive = thresholds.yawSide ?? 13;
+  const yawNeutral = thresholds.yawNeutral ?? 12;
+  // Pitch threshold corresponds to ~7% nose shift toward the forehead —
+  // a deliberate tilt rather than the resting-posture drift produced at
+  // smaller values.
   const pitchUp = thresholds.pitchUp ?? 7;
 
   if (pose.yaw <= -yawSide) return 'right';
-  if (pose.yaw >= yawSide) return 'left';
+  if (pose.yaw >= yawSidePositive) return 'left';
   if (Math.abs(pose.yaw) <= yawNeutral && pose.pitch >= pitchUp) return 'up';
   return null;
+};
+
+/*
+ * With only 3 poses there are 6 possible permutations, so adjacent sessions
+ * will repeat orders fairly often by chance — that's expected, not a bug.
+ * Swap indices are drawn from `crypto.getRandomValues` so the sequence is
+ * unpredictable to an attacker who has observed previous sessions.
+ */
+const randomInt = (maxExclusive: number): number => {
+  if (maxExclusive <= 1) return 0;
+  // Rejection-sample to avoid modulo bias: discard draws in the unused
+  // tail of the uint32 range so the remaining values divide evenly by
+  // `maxExclusive`.
+  const limit = Math.floor(0x100000000 / maxExclusive) * maxExclusive;
+  const buf = new Uint32Array(1);
+  do {
+    crypto.getRandomValues(buf);
+  } while (buf[0] >= limit);
+  return buf[0] % maxExclusive;
 };
 
 /**
@@ -502,7 +538,7 @@ export const buildRandomPoseSequence = (): HeadPoseDirection[] => {
   const poses: HeadPoseDirection[] = ['left', 'right', 'up'];
   // Fisher–Yates shuffle.
   for (let i = poses.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = randomInt(i + 1);
     [poses[i], poses[j]] = [poses[j], poses[i]];
   }
   return poses;

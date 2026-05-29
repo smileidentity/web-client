@@ -109,6 +109,18 @@ const App = () => {
       case 'enhanced-smartselfie-capture':
         componentElement = createElement('enhanced-smartselfie-capture', props);
         break;
+      case 'enhanced-smart-selfie-consent':
+        componentElement = createElement(
+          'enhanced-smart-selfie-consent',
+          props,
+        );
+        break;
+      case 'enhanced-smart-selfie-submission':
+        componentElement = createElement(
+          'enhanced-smart-selfie-submission',
+          props,
+        );
+        break;
       case 'smart-camera-web':
       default:
         componentElement = createElement('smart-camera-web', props);

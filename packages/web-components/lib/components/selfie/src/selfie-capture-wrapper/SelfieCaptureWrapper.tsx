@@ -42,10 +42,7 @@ interface Props {
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
   'use-strict-mode'?: string | boolean;
-  'hide-consent'?: string | boolean;
-  'partner-name'?: string;
-  'partner-logo'?: string;
-  'policy-url'?: string;
+  'show-back-on-guidelines'?: string | boolean;
   key?: string;
   'start-countdown'?: string | boolean;
   hidden?: string | boolean;
@@ -475,11 +472,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   }
 
   // Strict mode (Enhanced SmartSelfie) owns its own loading UX. Mount it
-  // immediately \u2014 the consent and instructions screens don't need Mediapipe,
-  // and by the time the user reaches the capture screen the background load
-  // started by `useFaceCapture.initializeFaceLandmarker()` will normally have
-  // resolved. This skips the standalone "Setting up" splash that used to show
-  // before the consent page rendered.
+  // immediately — the guidelines screen doesn't need Mediapipe, and by the
+  // time the user reaches the capture screen the background load started by
+  // `useFaceCapture.initializeFaceLandmarker()` will normally have resolved.
   if (useStrictMode) {
     return (
       <>
@@ -640,10 +635,7 @@ if (!customElements.get('selfie-capture-wrapper')) {
       'hide-attribution',
       'disable-image-tests',
       'use-strict-mode',
-      'hide-consent',
-      'partner-name',
-      'partner-logo',
-      'policy-url',
+      'show-back-on-guidelines',
       'key',
       'start-countdown',
       'hidden',

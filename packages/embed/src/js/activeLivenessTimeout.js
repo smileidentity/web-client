@@ -27,13 +27,13 @@ export const ACTIVE_LIVENESS_TIMEOUT_REASON = 'active_liveness_timed_out';
 
 const dispatchTimeout = (smartCameraWeb) => {
   addMetadataEntry('failure_reason', ACTIVE_LIVENESS_TIMEOUT_REASON);
-  // ESS owns the post-timeout UX: it packages whatever frames have been
-  // captured so far, dispatches them through the normal publish pipeline so
-  // the host posts the job to the backend (tagged with the failure reason
-  // via metadata above), and immediately switches the user to the
-  // submitting / error view. The host script then dispatches
-  // `enhanced-smartselfie.submission-state: error` once the backend
-  // responds.
+  // ESS packages whatever frames have been captured so far and publishes
+  // them through the normal `selfie-capture.publish` pipeline (skipping
+  // review). The host product script owns the post-publish UX from there:
+  // SmartSelfie Auth mounts the standalone <enhanced-smart-selfie-submission>
+  // element; KYC / DocV / EDV swap to their upload-progress / upload-failure
+  // screens once the backend responds. Submission is tagged with the
+  // failure reason via the metadata entry above.
   window.dispatchEvent(
     new CustomEvent('enhanced-smartselfie.force-fail', {
       detail: { reason: ACTIVE_LIVENESS_TIMEOUT_REASON },

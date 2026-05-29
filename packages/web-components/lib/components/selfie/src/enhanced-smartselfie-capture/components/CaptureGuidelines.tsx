@@ -61,7 +61,7 @@ const ILLUSTRATION_COMPONENTS: Record<
   poorLighting: PoorLightingIllustration,
 };
 
-interface InstructionsViewProps {
+interface CaptureGuidelinesProps {
   themeColor: string;
   hideAttribution: boolean;
   /**
@@ -106,14 +106,14 @@ const HeroAnimation: FunctionComponent = () => {
   );
 };
 
-export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
+export const CaptureGuidelines: FunctionComponent<CaptureGuidelinesProps> = ({
   themeColor,
   hideAttribution,
   isReady = true,
   onContinue,
   onBack,
 }) => {
-  // Defensive scroll reset: ensures the instructions screen always starts
+  // Defensive scroll reset: ensures the guidelines screen always starts
   // at the top, even if the parent page was scrolled by a previous view.
   useEffect(() => {
     try {
@@ -400,4 +400,4 @@ export const InstructionsView: FunctionComponent<InstructionsViewProps> = ({
   );
 };
 
-export default InstructionsView;
+export default CaptureGuidelines;

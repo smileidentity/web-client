@@ -70,6 +70,8 @@ declare namespace JSX {
     'smileid-combobox-listbox': any;
     'smileid-combobox-option': any;
     'end-user-consent': any;
+    'enhanced-smart-selfie-consent': any;
+    'enhanced-smart-selfie-submission': any;
     'totp-consent': any;
     'signature-pad': any;
     'smart-camera-web': any;

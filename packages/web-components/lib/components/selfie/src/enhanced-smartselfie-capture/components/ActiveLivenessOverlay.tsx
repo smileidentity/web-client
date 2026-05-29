@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { FunctionComponent } from 'preact';
 // dotLottie-web renders .lottie packages onto a <canvas>. The animation
 // payloads are base64-inlined at build time (see vite.config.ts) so the
@@ -75,6 +75,23 @@ export const ActiveLivenessOverlay: FunctionComponent<
   const loadedVariantRef = useRef<'pose' | 'too-dark' | 'orientation' | null>(
     null,
   );
+  // Lottie pose arrows were authored at a snappy pace; played at native
+  // speed they feel hectic and the segment cuts on pose change read as
+  // hard jumps. A small slowdown calms both.
+  const PLAYBACK_SPEED = 0.6;
+  // Brief fade applied to the canvas around a segment swap so the playhead
+  // jump (setSegment is instantaneous) reads as a crossfade rather than a
+  // hard cut. Matched should keep the user's attention, so the fade is
+  // short.
+  const SEGMENT_FADE_MS = 180;
+  const [fading, setFading] = useState(false);
+  // Tracks the segment inputs we last applied so we can skip the fade on
+  // the initial mount (the player is already showing the right segment)
+  // and on no-op re-renders where neither pose nor matched changed.
+  const lastAppliedRef = useRef<{
+    pose: HeadPoseDirection | null;
+    matched: boolean;
+  } | null>(null);
 
   // Green tint applies only when the user's live head pose matches the
   // required prompt — reserved for an actual successful turn, not for the
@@ -116,11 +133,16 @@ export const ActiveLivenessOverlay: FunctionComponent<
       src,
       loop: true,
       autoplay: true,
+      speed: PLAYBACK_SPEED,
       ...(initialSegment ? { segment: initialSegment } : {}),
       renderConfig: { autoResize: true },
     });
     animRef.current = anim;
     loadedVariantRef.current = variant;
+    // Player just rebuilt with its initial segment — clear the applied
+    // record so the segment-change effect treats the next dep evaluation
+    // as the first one and doesn't trigger a redundant fade.
+    lastAppliedRef.current = null;
 
     return () => {
       anim.destroy();
@@ -131,26 +153,46 @@ export const ActiveLivenessOverlay: FunctionComponent<
 
   useEffect(() => {
     const anim = animRef.current;
-    if (!anim || isTooDark || isLandscape) return;
+    if (!anim || isTooDark || isLandscape) return undefined;
 
-    if (pose) {
-      const ranges = POSE_FRAME_RANGES[pose];
-      const [start, end] = matched ? ranges.matched : ranges.pending;
-      // setSegment scopes playback to the new range; play() ensures the
-      // animation resumes if it had completed/stopped between transitions.
-      anim.setSegment(start, end);
-      anim.play();
-    } else {
-      anim.resetSegment();
-      anim.play();
+    const prev = lastAppliedRef.current;
+    const isFirst = prev === null;
+    const unchanged =
+      !isFirst && prev.pose === pose && prev.matched === matched;
+    if (unchanged) return undefined;
+
+    // First time we see this player: it was built with the right initial
+    // segment already, so just record state and don't trigger a fade.
+    if (isFirst) {
+      lastAppliedRef.current = { pose, matched };
+      return undefined;
     }
-  }, [pose, matched, isTooDark]);
+
+    // Real transition — fade out, swap segment at the bottom of the
+    // fade, then fade back in. This hides the playhead jump that
+    // setSegment causes.
+    setFading(true);
+    const t = window.setTimeout(() => {
+      if (pose) {
+        const ranges = POSE_FRAME_RANGES[pose];
+        const [start, end] = matched ? ranges.matched : ranges.pending;
+        anim.setSegment(start, end);
+        anim.play();
+      } else {
+        anim.resetSegment();
+        anim.play();
+      }
+      lastAppliedRef.current = { pose, matched };
+      setFading(false);
+    }, SEGMENT_FADE_MS);
+    return () => window.clearTimeout(t);
+  }, [pose, matched, isTooDark, isLandscape]);
 
   return (
     <>
       <canvas
         ref={canvasRef}
-        className="active-liveness-overlay"
+        className={`active-liveness-overlay${fading ? ' is-fading' : ''}`}
         aria-hidden="true"
       />
       <style>{`
@@ -167,10 +209,14 @@ export const ActiveLivenessOverlay: FunctionComponent<
           /* Canvas elements default to inline; force block so width/height
              driven by CSS apply cleanly. */
           display: block;
+          transition: opacity ${SEGMENT_FADE_MS}ms ease;
           /* No colour filters: the lottie asset already paints arrows in
              their correct colours (gray during the pending sub-range,
              green during the matched sub-range). The face/circle base art
              keeps its native palette. */
+        }
+        .active-liveness-overlay.is-fading {
+          opacity: 0;
         }
       `}</style>
     </>

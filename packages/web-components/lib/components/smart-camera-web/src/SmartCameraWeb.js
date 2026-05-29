@@ -28,7 +28,7 @@ function scwTemplateString() {
   <div style="height: 100%;">
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} hidden
-      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode}
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.showBackOnGuidelines}
     ></selfie-capture-screens>
     <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
@@ -89,6 +89,7 @@ class SmartCameraWeb extends HTMLElement {
       'partner-logo',
       'policy-url',
       'show-navigation',
+      'show-back-on-guidelines',
       'theme-color',
       'new-instructions',
       'use-strict-mode',
@@ -110,6 +111,7 @@ class SmartCameraWeb extends HTMLElement {
       case 'partner-logo':
       case 'policy-url':
       case 'show-navigation':
+      case 'show-back-on-guidelines':
       case 'theme-color':
       case 'new-instructions':
       case 'use-strict-mode':
@@ -255,6 +257,12 @@ class SmartCameraWeb extends HTMLElement {
 
   get showNavigation() {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
+  }
+
+  get showBackOnGuidelines() {
+    return this.hasAttribute('show-back-on-guidelines')
+      ? 'show-back-on-guidelines'
+      : '';
   }
 
   get hideBackToHost() {

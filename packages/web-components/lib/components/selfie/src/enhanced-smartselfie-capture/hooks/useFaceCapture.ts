@@ -86,6 +86,19 @@ export const useFaceCapture = ({
   const captureTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resumeCaptureRef = useRef<(() => void) | null>(null);
   const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Ring buffer of the last few raw pose classifications. The capture gate
+  // and the displayed pose flip only when a direction wins ≥2 of the last
+  // 3 ticks, which kills single-frame noise from atan2 jitter without
+  // adding any perceptible lag.
+  const poseHistoryRef = useRef<(HeadPoseDirection | null)[]>([]);
+  // Timestamp of the most recent tick where the smoothed pose matched the
+  // currently-required pose. Used as a short latch so a capture-interval
+  // tick that fires moments after the user nails the pose still counts.
+  const lastPoseMatchAtRef = useRef<number>(0);
+  // How long after a confirmed pose match the capture tick will still
+  // accept the pose as held. Sized to comfortably span one capture
+  // interval (~330ms at the default rate) plus a little headroom.
+  const POSE_MATCH_LATCH_MS = 500;
 
   const faceDetected = useSignal(false);
   const faceInBounds = useSignal(false);
@@ -439,7 +452,66 @@ export const useFaceCapture = ({
           // they need to keep running when the face is undetected (e.g.
           // because the scene is too dark / motion-blurred to find a face).
           const pose = calculateHeadPose(results.faceLandmarks);
-          currentPose.value = classifyHeadPose(pose);
+          const rawPose = classifyHeadPose(pose);
+
+          // 2-of-3 majority smoothing. atan2 noise (especially on left
+          // turns where x_diff approaches zero) causes single-tick drops
+          // below threshold; without smoothing those ticks dissolve a
+          // held pose and the capture interval keeps missing the window.
+          const history = poseHistoryRef.current;
+          history.push(rawPose);
+          if (history.length > 3) history.shift();
+          let smoothed: HeadPoseDirection | null = rawPose;
+          if (history.length === 3) {
+            const counts = new Map<HeadPoseDirection | null, number>();
+            for (let i = 0; i < history.length; i += 1) {
+              counts.set(history[i], (counts.get(history[i]) ?? 0) + 1);
+            }
+            let winner: HeadPoseDirection | null = null;
+            let winnerCount = 0;
+            counts.forEach((c, k) => {
+              if (c > winnerCount) {
+                winner = k;
+                winnerCount = c;
+              }
+            });
+            if (winnerCount >= 2) smoothed = winner;
+          }
+          currentPose.value = smoothed;
+
+          // Refresh the latch only when the smoothed pose matches the
+          // requested one *and* all the other capture gates are currently
+          // passing. Refreshing on pose alone lets the latch carry the
+          // user through a failing proximity/bounds/lighting check — they
+          // see the failure alert, but a moment later the capture tick
+          // fires off the residual latch and the pose silently passes.
+          // The latch should only represent "this is a moment we could
+          // have captured", not "the head was once turned correctly".
+          const requiredPose =
+            poseSequence.value[currentPoseIndex.value] ?? null;
+          const captureGatePasses =
+            isCapturing.value &&
+            !isPaused.value &&
+            faceInBounds.value &&
+            faceProximity.value === 'good' &&
+            !isTooDark.value &&
+            !isTooBlurry.value &&
+            faceOffsetDirection.value === null &&
+            !faceClippingOval.value;
+          if (
+            smoothed &&
+            requiredPose &&
+            smoothed === requiredPose &&
+            captureGatePasses
+          ) {
+            lastPoseMatchAtRef.current = Date.now();
+          } else if (!captureGatePasses) {
+            // Any failing quality check immediately invalidates the latch
+            // so a pass→fail→pass blip between capture ticks can't fire
+            // off a residual "recent match" while the user is still being
+            // told to move the device.
+            lastPoseMatchAtRef.current = 0;
+          }
         }
 
         if (smileScore >= smileThreshold && mouthOpen >= mouthOpenThreshold) {
@@ -643,6 +715,17 @@ export const useFaceCapture = ({
           return;
         }
 
+        // The UI surfaces faceOffsetDirection as a "Move device left/right"
+        // alert. The capture path has to honour the same gate, otherwise
+        // the user sees the alert but the pose silently passes anyway.
+        // Also gate on faceClippingOval — it flags any landmark past the
+        // visible egg edge without depending on axis-dominance, so it
+        // catches cases where the face is crossing the border but the
+        // bbox centre hasn't moved enough to pin a direction yet.
+        if (faceOffsetDirection.value !== null || faceClippingOval.value) {
+          return;
+        }
+
         // Distribute the capture window evenly across the pose sequence:
         // each pose gets `framesPerPose = floor(totalCaptures / poseCount)`
         // frames. Any leftover frames (e.g. 8 captures across 3 poses → 2
@@ -673,7 +756,14 @@ export const useFaceCapture = ({
           stopCapture();
           return;
         }
-        if (currentPose.value !== requiredPose) {
+        // Accept either an instantaneous match or a very recent one. The
+        // latch covers the case where the user held the pose between
+        // capture ticks but the smoothed reading drifted by the time this
+        // tick fired (e.g. they started relaxing back to neutral).
+        const poseMatched =
+          currentPose.value === requiredPose ||
+          Date.now() - lastPoseMatchAtRef.current <= POSE_MATCH_LATCH_MS;
+        if (!poseMatched) {
           // Don't pause — we want the prompt to stay visible while the user
           // adjusts. Just skip this tick.
           return;
@@ -695,6 +785,10 @@ export const useFaceCapture = ({
           currentPoseIndex.value < poseCount - 1
         ) {
           currentPoseIndex.value += 1;
+          // Clear smoothing + latch so the previous pose can't satisfy
+          // the next one — each pose must be re-confirmed from scratch.
+          poseHistoryRef.current = [];
+          lastPoseMatchAtRef.current = 0;
         }
         return;
       }
@@ -746,6 +840,8 @@ export const useFaceCapture = ({
     if (useStrictMode) {
       poseSequence.value = buildRandomPoseSequence();
       currentPoseIndex.value = 0;
+      poseHistoryRef.current = [];
+      lastPoseMatchAtRef.current = 0;
 
       // Snap the neutral selfie up-front so the result preview shows the
       // user facing the camera, not whichever direction the last pose
@@ -817,6 +913,28 @@ export const useFaceCapture = ({
     }
     isCapturing.value = false;
     isPaused.value = false;
+
+    // Top up the liveness buffer to the full expected count by grabbing
+    // whatever the camera currently shows. The backend rejects partial
+    // submissions, so on timeout we'd rather submit `totalCaptures` "random"
+    // frames tagged with `forceFailureReason` than discard the session.
+    // The frames are captured back-to-back from the live <video> element,
+    // which gives us slight motion between them in practice.
+    if (videoRef.current) {
+      const target = totalCaptures.value;
+      while (capturedImages.value.length < target) {
+        const frame = captureImageFromVideo(videoRef.current, false);
+        if (!frame) break;
+        capturedImages.value = [...capturedImages.value, frame];
+      }
+      // Reference selfie may not have been snapped yet (e.g. timeout fired
+      // before startCapture's up-front grab). Fall back to a live frame so
+      // the payload always carries a reference image.
+      if (!referencePhoto.value) {
+        const ref = captureImageFromVideo(videoRef.current, true);
+        if (ref) referencePhoto.value = ref;
+      }
+    }
 
     const livenessImages = capturedImages.value.map((img) => ({
       image: img.split(',')[1],

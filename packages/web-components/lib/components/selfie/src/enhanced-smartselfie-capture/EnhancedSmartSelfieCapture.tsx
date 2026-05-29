@@ -11,38 +11,25 @@ import { CameraPreview } from './components/CameraPreview';
 import { AlertDisplay } from './components/AlertDisplay';
 import { CaptureControls } from './components/CaptureControls';
 import { ActiveLivenessOverlay } from './components/ActiveLivenessOverlay';
-import { ConsentView } from './components/ConsentView';
-import { InstructionsView } from './components/InstructionsView';
+import { CaptureGuidelines } from './components/CaptureGuidelines';
 import { SubmissionView } from './components/SubmissionView';
 
 import '../../../navigation/src';
 import '../../../attribution/PoweredBySmileId';
+// Side-effect imports: register the standalone consent and submission
+// custom elements so partners can mount them independently of ESS
+// (`<enhanced-smart-selfie-consent>` / `<enhanced-smart-selfie-submission>`).
+import './EnhancedSmartSelfieConsent';
+import './EnhancedSmartSelfieSubmission';
 
-type View =
-  | 'consent'
-  | 'instructions'
-  | 'capture'
-  | 'review'
-  | 'submitting'
-  | 'success'
-  | 'error';
-
-/**
- * Convert an internal forced-failure reason code into the message we
- * render under the "Submission Failed" title. Returns `undefined` for
- * unknown / absent reasons so callers can fall back to whatever the host
- * supplied.
- */
-const forcedFailureReasonToMessage = (
-  reason: string | null,
-): string | undefined => {
-  switch (reason) {
-    case 'active_liveness_timed_out':
-      return t('selfie.ess.failure.sessionTimedOut');
-    default:
-      return undefined;
-  }
-};
+// ESS owns the in-flow capture experience: a pre-capture guidelines screen
+// (the "Capture Guidelines" tiles + active-liveness hero animation), the
+// active-liveness capture itself, and the post-capture review screen. Consent
+// and post-confirm submission UI are deliberately not part of this element —
+// they're shipped as separate custom elements (`<enhanced-smart-selfie-
+// consent>`, `<enhanced-smart-selfie-submission>`) that callers mount
+// around ESS as their product flow requires.
+type View = 'guidelines' | 'capture' | 'review';
 
 interface Props {
   interval?: number;
@@ -53,25 +40,17 @@ interface Props {
   'show-agent-mode-for-tests'?: string | boolean;
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
+  /** When true, skip the guidelines screen and go straight to capture. */
   'hide-instructions'?: string | boolean;
-  /** When true, skip the consent screen entirely. */
-  'hide-consent'?: string | boolean;
-  /** Partner name shown on the consent screen (defaults to "Smile ID"). */
-  'partner-name'?: string;
-  /** URL of the partner logo shown on the consent screen. */
-  'partner-logo'?: string;
-  /** Privacy policy URL shown in the consent body. */
-  'policy-url'?: string;
   /**
-   * Drives the post-confirm view. Set by the host page once it knows whether
-   * the submission succeeded or failed:
-   *   - 'submitting' (default after Confirm)
-   *   - 'success'    → renders the "Submission Complete" screen
-   *   - 'error'      → renders the "Submission Failed" screen
+   * Render the back button on the guidelines screen. Off by default because
+   * guidelines is the first ESS view, so there is nothing within ESS to
+   * navigate back to. Hosts that mount ESS after their own prior screen
+   * (e.g. a consent step in a KYC / DocV flow) opt in by setting this so
+   * the back button surfaces and `selfie-capture.cancelled` fires for the
+   * host to handle navigation back to the previous view.
    */
-  'submission-state'?: 'submitting' | 'success' | 'error';
-  /** Optional message shown under the title on the success/error screens. */
-  'submission-message'?: string;
+  'show-back-on-guidelines'?: string | boolean;
 }
 
 const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
@@ -83,12 +62,7 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   'show-agent-mode-for-tests': showAgentModeForTestsProp = false,
   'hide-attribution': hideAttributionProp = false,
   'hide-instructions': hideInstructionsProp = false,
-  'hide-consent': hideConsentProp = false,
-  'partner-name': partnerName,
-  'partner-logo': partnerLogo,
-  'policy-url': policyUrl,
-  'submission-state': submissionState,
-  'submission-message': submissionMessage,
+  'show-back-on-guidelines': showBackOnGuidelinesProp = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -97,7 +71,7 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   const showAgentModeForTests = getBoolProp(showAgentModeForTestsProp);
   const hideAttribution = getBoolProp(hideAttributionProp);
   const hideInstructions = getBoolProp(hideInstructionsProp);
-  const hideConsent = getBoolProp(hideConsentProp);
+  const showBackOnGuidelines = getBoolProp(showBackOnGuidelinesProp);
 
   // This component is always strict-mode (Active Liveness).
   const useStrictMode = true;
@@ -120,24 +94,14 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   const initialFacingMode = 'user';
   const camera = useCamera(initialFacingMode);
 
-  // Four-view state machine: consent → instructions → capture → review.
-  // Either of the first two steps can be skipped by setting `hide-consent` /
-  // `hide-instructions`. We capture the publish detail in `pendingPayload` so
-  // we can show the review screen before re-emitting it to the host page.
-  const initialView: View = (() => {
-    if (!hideConsent) return 'consent';
-    if (!hideInstructions) return 'instructions';
-    return 'capture';
-  })();
-
+  // Three-view flow: guidelines → capture → review. `hide-instructions`
+  // skips the guidelines screen and jumps straight to capture. On confirm,
+  // ESS emits `selfie-capture.publish` and hands off to the caller — the
+  // screens router (`<selfie-capture-screens>`) or, in the SmartSelfie Auth
+  // case, the host product script — which decides what to render next.
+  const initialView: View = hideInstructions ? 'capture' : 'guidelines';
   const viewSignal = useRef(signal<View>(initialView)).current;
   const pendingPayload = useRef<any>(null);
-  // Set when a forced-failure completion has fired (e.g. the 120s
-  // active-liveness inactivity timeout). Used to short-circuit any later
-  // `submission-state` events from the host so the user lands on — and stays
-  // on — the failure card regardless of what the backend ultimately returned
-  // for the partial upload.
-  const forcedFailureRef = useRef<string | null>(null);
 
   const faceCapture = useFaceCapture({
     videoRef: camera.videoRef,
@@ -152,25 +116,38 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
     getFacingMode: () => camera.facingMode,
     useStrictMode,
     onCaptureComplete: (detail) => {
-      // ESS owns the post-capture flow: stash the payload, show our review
-      // screen, and only re-emit `selfie-capture.publish` once the user
-      // confirms. This keeps ESS independent of SelfieCaptureScreens.
+      // Stash the payload and show the review screen. The user can retake
+      // or confirm; only on confirm do we emit `selfie-capture.publish`.
       //
-      // Exception: forced-failure completions (e.g. the 120s active-liveness
-      // inactivity timeout) skip review entirely. We still publish so the
-      // host can submit the partial frames tagged with the failure reason
-      // in metadata, but the user lands directly on the error card —
-      // bypassing the submitting view — because the outcome is known
-      // upfront. Any `submission-state` event the host dispatches after the
-      // upload completes is ignored so the success card can't replace the
-      // failure card.
+      // Forced-failure completions (e.g. the 120s active-liveness
+      // inactivity timeout from the hosted-web page) publish immediately
+      // with `detail.forceFailureReason` set so the caller can route to
+      // its own failure UI without going through review.
       pendingPayload.current = detail;
       if (detail.forceFailureReason) {
-        forcedFailureRef.current = detail.forceFailureReason;
+        // Tear down the camera + detection loop explicitly. We're skipping
+        // review, so the view stays on 'capture' and the mount effect's
+        // cleanup never runs on its own — without this, MediaPipe and the
+        // camera stream would keep running silently while the host shows
+        // its post-publish UI.
+        faceCapture.stopDetectionLoop();
+        camera.stopCamera();
+        faceCapture.cleanup();
+        // Dedicated forced-failure signal for the host. The intermediate
+        // `<selfie-capture-screens>` / `<smart-camera-web>` chain only
+        // forwards `images` in their re-dispatched `*.publish` events, so
+        // `forceFailureReason` would otherwise be invisible at the host
+        // layer. We fire this synchronously *before* `selfie-capture.publish`
+        // so any host listener can flip its "this is a forced failure" flag
+        // in time for the publish handler that follows.
+        window.dispatchEvent(
+          new CustomEvent('enhanced-smartselfie.force-fail-published', {
+            detail: { reason: detail.forceFailureReason },
+          }),
+        );
         window.dispatchEvent(
           new CustomEvent('selfie-capture.publish', { detail }),
         );
-        viewSignal.value = 'error';
         return;
       }
       viewSignal.value = 'review';
@@ -246,8 +223,9 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   const HOLD_STILL_MS = 1800;
   const [holdStillElapsed, setHoldStillElapsed] = useState(false);
   // Tracks whether the Mediapipe model itself has finished downloading. We
-  // pre-warm it as soon as ESS mounts so by the time the user finishes the
-  // consent + instructions flow the heavy network work is already done.
+  // pre-warm it as soon as ESS mounts so by the time the user finishes
+  // reading the guidelines the heavy network work is already done and
+  // Continue can be enabled immediately.
   const [isMediapipeReady, setIsMediapipeReady] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -350,61 +328,12 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
     }
   }, [isLandscape, faceCapture.isCapturing.value]);
 
-  // React to submission-state changes driven by the host page. Once we are
-  // in the post-confirm flow (submitting / success / error), the host can
-  // flip this attribute to navigate to the result screens. Forced-failure
-  // sessions (e.g. liveness timeout) opt out — their outcome is decided
-  // locally and must not be overwritten by whatever the backend returns.
-  useEffect(() => {
-    if (forcedFailureRef.current) return;
-    const current = viewSignal.value;
-    const isPostConfirm =
-      current === 'submitting' || current === 'success' || current === 'error';
-    if (!isPostConfirm) return;
-    if (submissionState === 'success') viewSignal.value = 'success';
-    else if (submissionState === 'error') viewSignal.value = 'error';
-    else if (submissionState === 'submitting') viewSignal.value = 'submitting';
-  }, [submissionState]);
-
-  // Allow the host page to drive the submission flow via a window event
-  // (easier than threading attributes through nested shadow DOMs). Detail:
-  //   { state: 'submitting' | 'success' | 'error', message?: string }
-  const [eventMessage, setEventMessage] = useState<string | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const ce = e as CustomEvent<{
-        state: 'submitting' | 'success' | 'error';
-        message?: string;
-      }>;
-      // Forced-failure sessions stay on the error card regardless of what
-      // the host dispatches — the outcome is already decided.
-      if (forcedFailureRef.current) return;
-      const current = viewSignal.value;
-      const isPostConfirm =
-        current === 'submitting' ||
-        current === 'success' ||
-        current === 'error';
-      if (!isPostConfirm) return;
-      if (ce.detail?.state) viewSignal.value = ce.detail.state;
-      if (ce.detail?.message !== undefined) setEventMessage(ce.detail.message);
-    };
-    window.addEventListener('enhanced-smartselfie.submission-state', handler);
-    return () => {
-      window.removeEventListener(
-        'enhanced-smartselfie.submission-state',
-        handler,
-      );
-    };
-  }, []);
-
   // Host-driven forced-failure path (e.g. the hosted-web 120s active-liveness
   // inactivity timer). The host dispatches `enhanced-smartselfie.force-fail`
   // with a `{ reason }` detail; the hook packages whatever frames have been
-  // captured so far, fires `onCaptureComplete` with `forceFailureReason`
-  // set, which routes the payload through the normal publish pipeline and
-  // jumps straight to the submitting view (skipping review).
+  // captured so far and fires `onCaptureComplete` with `forceFailureReason`
+  // set, which publishes immediately so the caller can surface its own
+  // failure UI.
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<{ reason?: string }>;
@@ -423,10 +352,9 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   const handleConfirm = () => {
     const payload = pendingPayload.current;
     if (payload) {
-      // Switch to the "Submitting…" view first so the user gets immediate
-      // feedback while the host page processes the upload. Keep the payload
-      // around so SubmittingView can keep showing the captured selfie.
-      viewSignal.value = 'submitting';
+      // Publish and stay on the review screen. The caller — the screens
+      // router for KYC/DV/EDV flows, or the SmartSelfie Auth host page —
+      // decides what to render next (next form, submitting card, etc.).
       window.dispatchEvent(
         new CustomEvent('selfie-capture.publish', { detail: payload }),
       );
@@ -440,75 +368,51 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
     viewSignal.value = 'capture';
   };
 
-  // Back-button navigation: step back one view at a time through the
-  // capture flow (review → capture → instructions → consent). Only when the
-  // user is already on the first available view do we fall through to
-  // `handleCancel` so the host page receives `selfie-capture.cancelled`.
+  // Back-button navigation: review → retake; capture → guidelines (or
+  // cancel when guidelines are hidden); guidelines → cancel. "Cancel"
+  // surfaces `selfie-capture.cancelled` so the caller can decide what to do.
   const handleBack = () => {
     const current = viewSignal.value;
     if (current === 'review') {
-      // Going back from review = retake (drops the pending payload and
-      // re-enters capture). Mirrors the explicit Retake button.
       handleRetake();
       return;
     }
     if (current === 'capture') {
-      // Stop the camera/detection loop before leaving so we don't leak
-      // resources while sitting on instructions/consent.
+      // Stop the camera/detection loop before leaving the capture view so
+      // we don't leak resources while sitting on the guidelines screen.
       faceCapture.stopDetectionLoop();
       camera.stopCamera();
       faceCapture.resetFaceDetectionState();
+      // Wipe the in-flight capture session so re-entering capture starts
+      // fresh (new pose sequence, prompt 1, empty image buffer).
+      faceCapture.stopCapture();
+      faceCapture.capturedImages.value = [];
+      faceCapture.referencePhoto.value = '';
+      faceCapture.poseSequence.value = [];
+      faceCapture.currentPoseIndex.value = 0;
+      faceCapture.hasFinishedCapture.value = false;
       faceCapture.capturesTaken.value = 0;
       if (!hideInstructions) {
-        viewSignal.value = 'instructions';
-        return;
-      }
-      if (!hideConsent) {
-        viewSignal.value = 'consent';
+        viewSignal.value = 'guidelines';
         return;
       }
       faceCapture.handleCancel();
       return;
     }
-    if (current === 'instructions') {
-      if (!hideConsent) {
-        viewSignal.value = 'consent';
-        return;
-      }
-      faceCapture.handleCancel();
-      return;
-    }
-    // Consent / submitting / success / error: nothing to navigate back to
-    // within ESS, so emit cancel and let the host decide what to do.
+    // Guidelines or anything else: cancel.
     faceCapture.handleCancel();
   };
 
-  if (viewSignal.value === 'consent') {
+  if (viewSignal.value === 'guidelines') {
     return (
-      <ConsentView
-        themeColor={themeColor}
-        hideAttribution={hideAttribution}
-        partnerName={partnerName}
-        partnerLogo={partnerLogo}
-        policyUrl={policyUrl}
-        onGranted={() => {
-          viewSignal.value = hideInstructions ? 'capture' : 'instructions';
-        }}
-        onDenied={() => faceCapture.handleCancel()}
-      />
-    );
-  }
-
-  if (viewSignal.value === 'instructions') {
-    return (
-      <InstructionsView
+      <CaptureGuidelines
         themeColor={themeColor}
         hideAttribution={hideAttribution}
         isReady={isMediapipeReady}
         onContinue={() => {
           viewSignal.value = 'capture';
         }}
-        onBack={showNavigation ? handleBack : undefined}
+        onBack={showNavigation && showBackOnGuidelines ? handleBack : undefined}
       />
     );
   }
@@ -527,60 +431,6 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
         onConfirm={handleConfirm}
         onRetake={handleRetake}
         onBack={showNavigation ? handleBack : undefined}
-      />
-    );
-  }
-
-  if (viewSignal.value === 'submitting') {
-    const detail = pendingPayload.current;
-    const src = detail?.referenceImage || '';
-    const mirror = detail?.facingMode === 'user';
-    return (
-      <SubmissionView
-        imageSrc={src}
-        mirror={mirror}
-        themeColor={themeColor}
-        hideAttribution={hideAttribution}
-        mode="submitting"
-      />
-    );
-  }
-
-  if (viewSignal.value === 'success' || viewSignal.value === 'error') {
-    const detail = pendingPayload.current;
-    const src = detail?.referenceImage || '';
-    const mirror = detail?.facingMode === 'user';
-    const success = viewSignal.value === 'success';
-    // When the failure was forced locally (e.g. liveness inactivity
-    // timeout), surface a clear reason on the Submission Failed card
-    // instead of relying on whatever generic copy the host backend sent.
-    const forcedMessage = !success
-      ? forcedFailureReasonToMessage(forcedFailureRef.current)
-      : undefined;
-    return (
-      <SubmissionView
-        imageSrc={src}
-        mirror={mirror}
-        themeColor={themeColor}
-        hideAttribution={hideAttribution}
-        mode={success ? 'success' : 'error'}
-        message={forcedMessage ?? eventMessage ?? submissionMessage}
-        onContinue={() => {
-          window.dispatchEvent(
-            new CustomEvent('enhanced-smartselfie.continue', {
-              detail: { success },
-            }),
-          );
-        }}
-        onExit={
-          success
-            ? undefined
-            : () => {
-                window.dispatchEvent(
-                  new CustomEvent('enhanced-smartselfie.exit'),
-                );
-              }
-        }
       />
     );
   }
@@ -853,12 +703,7 @@ if (!customElements.get('enhanced-smartselfie-capture')) {
       'hide-attribution',
       'disable-image-tests',
       'hide-instructions',
-      'hide-consent',
-      'partner-name',
-      'partner-logo',
-      'policy-url',
-      'submission-state',
-      'submission-message',
+      'show-back-on-guidelines',
     ],
     { shadow: true },
   );

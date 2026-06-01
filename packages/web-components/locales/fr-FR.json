@@ -137,13 +137,33 @@
       },
       "startCapture": "Démarrer la capture",
       "takePhotoButton": "Prendre une photo",
-      "uploadPhotoButton": "Télécharger une photo"
+      "uploadPhotoButton": "Télécharger une photo",
+      "flipTitlePrefix": "Retournez votre",
+      "captureBackButton": "Capturer le verso",
+      "skipButton": "Ignorer"
     },
     "review": {
       "question": "Le document est-il clair et lisible ?",
       "description": "Assurez-vous que tous les coins du document sont visibles et qu'il n'y a pas de reflet.",
       "acceptButton": "Oui, ma pièce d'identité est lisible",
-      "retakeButton": "Non, reprendre la photo"
+      "retakeButton": "Non, reprendre la photo",
+      "confirmTitle": "Vérifiez la qualité de l'image",
+      "confirmBody": "Assurez-vous que toutes les informations sont lisibles.",
+      "retake": "Reprendre",
+      "confirm": "Confirmer"
+    },
+    "submission": {
+      "imageAlt": "Document capturé",
+      "submitting": {
+        "title": "Envoi en cours…",
+        "body": "Cela peut prendre un moment…\nNe fermez pas et n'actualisez pas cette page"
+      },
+      "success": {
+        "title": "Envoi terminé"
+      },
+      "error": {
+        "title": "Échec de l'envoi"
+      }
     }
   },
   "fileUpload": {

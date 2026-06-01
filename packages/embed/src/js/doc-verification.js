@@ -55,6 +55,7 @@ window.Sentry = Sentry;
   );
   const UploadFailureScreen = document.querySelector('#upload-failure-screen');
   const CompleteScreen = document.querySelector('#complete-screen');
+  const DocSubmission = document.querySelector('#doc-submission');
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
   const RetryUploadButton = document.querySelector('#retry-upload');
@@ -677,6 +678,7 @@ window.Sentry = Sentry;
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
+      showDocSubmission(images);
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit(event);
     },
@@ -698,6 +700,11 @@ window.Sentry = Sentry;
     },
     false,
   );
+
+  // Close affordance on the submission screen (mirrors the iframe close).
+  window.addEventListener('document-capture-submission.close', () => {
+    closeWindow(true);
+  });
 
   RetryUploadButton.addEventListener(
     'click',
@@ -757,6 +764,46 @@ window.Sentry = Sentry;
     activeScreen = node;
   }
 
+  // Reconstruct a data URI from the most recent captured image (back if
+  // present, otherwise front) so the submission screen can show it behind the
+  // status card. Publish images carry raw base64 without the data: prefix.
+  function getDocPreviewDataUri(capturedImages) {
+    const last = capturedImages?.[capturedImages.length - 1];
+    if (!last?.image) return '';
+    return `data:image/jpeg;base64,${last.image}`;
+  }
+
+  // Prime the <document-capture-submission> element with the captured image,
+  // partner theme/attribution, and the initial "submitting" state.
+  function showDocSubmission(capturedImages) {
+    if (!DocSubmission) return;
+    const previewSrc = getDocPreviewDataUri(capturedImages);
+    if (previewSrc) DocSubmission.setAttribute('image-src', previewSrc);
+    if (config.partner_details?.theme_color) {
+      DocSubmission.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+    }
+    if (config.hide_attribution) {
+      DocSubmission.setAttribute('hide-attribution', 'true');
+    }
+    DocSubmission.setAttribute('show-navigation', '');
+    DocSubmission.setAttribute('submission-state', 'submitting');
+  }
+
+  // Flip the submission card between submitting → success / error. Driven by
+  // the upload lifecycle below (mirrors the Enhanced SmartSelfie host pattern).
+  // Falls back to the legacy static screens if the element isn't present.
+  function setDocSubmissionState(state, message) {
+    if (!DocSubmission) {
+      setActiveScreen(state === 'success' ? CompleteScreen : UploadFailureScreen);
+      return;
+    }
+    DocSubmission.setAttribute('submission-state', state);
+    if (message) DocSubmission.setAttribute('submission-message', message);
+  }
+
   async function handleFormSubmit(event) {
     event.preventDefault();
     const errorMessage = document.querySelector('.validation-message');
@@ -773,7 +820,7 @@ window.Sentry = Sentry;
       event.target.disabled = false;
     } catch (error) {
       event.target.disabled = false;
-      displayErrorMessage(t('pages.error.generic'));
+      setDocSubmissionState('error', t('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -875,7 +922,7 @@ window.Sentry = Sentry;
     });
 
     request.upload.addEventListener('error', function (e) {
-      setActiveScreen(UploadFailureScreen);
+      setDocSubmissionState('error', t('pages.error.generic'));
       throw new Error('uploadZip failed', { cause: e });
     });
 
@@ -884,15 +931,15 @@ window.Sentry = Sentry;
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen);
+        setDocSubmissionState('success');
         handleSuccess();
-        window.setTimeout(closeWindow, 2000);
+        window.setTimeout(closeWindow, 2500);
       }
       if (
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
-        setActiveScreen(UploadFailureScreen);
+        setDocSubmissionState('error', t('pages.error.generic'));
         throw new Error('uploadZip failed', { cause: request });
       }
     };

@@ -25,8 +25,8 @@ document.querySelector('#app').innerHTML = `
         <option value="true">Legacy Selfie Fallback: Enabled</option>
       </select>
       <select id="autoCapture">
-        <option value="false" selected>Auto Capture: Disabled (legacy capture)</option>
-        <option value="true">Auto Capture: Enabled</option>
+        <option value="false">Auto Capture: Disabled (legacy capture)</option>
+        <option value="true" selected>Auto Capture: Enabled</option>
       </select>
       <select id="autoCaptureMode">
         <option value="autoCapture" selected>Auto Capture Mode: autoCapture</option>

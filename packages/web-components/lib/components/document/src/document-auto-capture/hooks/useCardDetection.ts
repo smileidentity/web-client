@@ -48,8 +48,8 @@ const DISCOVERY_MISS_TOLERANCE = 20;
 // Below MIN_FILL → too far (card is tiny). Above MAX_FILL → too close (edges clipped).
 // Min 65% ensures the document occupies ≥65-70% of the final captured image,
 // satisfying the product requirement of a clear, readable scan.
-const MIN_FILL_PERCENT = 65;
-const MAX_FILL_PERCENT = 90;
+const MIN_FILL_PERCENT = 75;
+const MAX_FILL_PERCENT = 95;
 // Minimum contour area to even consider (5% — catches far-away documents)
 const MIN_CONTOUR_AREA_PERCENT = 0.05;
 // During discovery, require at least this many grid cells to pass (out of 9).
@@ -177,6 +177,7 @@ export function useCardDetection(
     captureOrientation = 'landscape',
     shouldRotateUi = false,
     syncRoiToGuide = false,
+    skipGridCheck = false,
   } = options;
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
   const autoCaptureTimeoutMs = Math.max(
@@ -444,6 +445,20 @@ export function useCardDetection(
           guideYCSS = ovX; // = (displayH - guideOvW) / 2
           guideWidthCSS = guideOvH; // narrow in unrotated video
           guideHeightCSS = guideOvW; // tall in unrotated video
+        } else if (skipGridCheck) {
+          // Desktop: the video container IS the visible guide (it's already
+          // sized to the card aspect ratio and bordered). Use almost the whole
+          // displayed box as the ROI — only a small 4% margin so the card's
+          // corners aren't clipped at the edge — so "card fills the on-screen
+          // box" == "card fills the detection region". The fixed 64px inset
+          // below is for the mobile overlay; on a ≤480px desktop box it shrank
+          // the (invisible) ROI to ~75% of the box and made a full-looking card
+          // read as too far away.
+          const marginFrac = 0.04;
+          guideWidthCSS = displayW * (1 - marginFrac * 2);
+          guideHeightCSS = displayH * (1 - marginFrac * 2);
+          guideXCSS = (displayW - guideWidthCSS) / 2;
+          guideYCSS = (displayH - guideHeightCSS) / 2;
         } else {
           // Unrotated: original behaviour.
           const insetPx = syncRoiToGuide ? 64 : 0;
@@ -522,6 +537,7 @@ export function useCardDetection(
           detectionPhaseRef.current === DETECTION_PHASE.CAPTURE;
         const shouldRunOffGuide =
           !isCardVariant &&
+          !skipGridCheck &&
           !isBookDoc &&
           hasMargin &&
           (isCapturePhase || !inGuideDetectedRef.current) &&
@@ -645,8 +661,8 @@ export function useCardDetection(
         const isDiscoveryPhase =
           detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         let gridCheckFails;
-        if (isCard) {
-          gridCheckFails = false; // Skip grid check entirely for card variant
+        if (isCard || skipGridCheck) {
+          gridCheckFails = false; // Skip grid check (card variant or desktop fullscreen)
         } else if (isDiscoveryPhase) {
           gridCheckFails = passingCells < MIN_DISCOVERY_GRID_CELLS; // Relaxed: 3/9 cells
         } else {
@@ -839,7 +855,7 @@ export function useCardDetection(
                 }
 
                 if (
-                  fillRatio > 0.65 &&
+                  fillRatio > 0.75 &&
                   anglesOk &&
                   aspectOk &&
                   area > maxArea
@@ -869,26 +885,49 @@ export function useCardDetection(
             const isBookDocFallback =
               lockedDocTypeForFallback === 'passport' ||
               lockedDocTypeForFallback === 'greenbook';
-            if (isBookDocFallback) {
+            const isIdCardFallback =
+              skipGridCheck && lockedDocTypeForFallback === 'id-card';
+            if (isBookDocFallback || isIdCardFallback) {
               const bw = combinedMaxX - combinedMinX;
               const bh = combinedMaxY - combinedMinY;
               if (bw > 0 && bh > 0) {
                 const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
                 const rawAspect = bw / bh;
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
+                const aspectTol = isBookDocFallback ? 0.35 : 0.25;
                 const aspectOk =
-                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect < 0.35;
+                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect < aspectTol;
                 const minArea = guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
+                  // For id-card synthetics, the combined bbox covers only the
+                  // inner printed content (text, photo, header band). Real cards
+                  // have a ~10-15% margin from card edge to first element, so
+                  // the raw bbox understates the true card extent. Expand from
+                  // the bbox center by a card-margin factor and clamp to ROI.
+                  let minX = combinedMinX;
+                  let minY = combinedMinY;
+                  let maxX = combinedMaxX;
+                  let maxY = combinedMaxY;
+                  if (isIdCardFallback) {
+                    const SYNTH_EXPAND = 1.15;
+                    const cx = (combinedMinX + combinedMaxX) / 2;
+                    const cy = (combinedMinY + combinedMaxY) / 2;
+                    const halfW = (bw * SYNTH_EXPAND) / 2;
+                    const halfH = (bh * SYNTH_EXPAND) / 2;
+                    minX = Math.max(0, Math.round(cx - halfW));
+                    minY = Math.max(0, Math.round(cy - halfH));
+                    maxX = Math.min(clampedW, Math.round(cx + halfW));
+                    maxY = Math.min(clampedH, Math.round(cy + halfH));
+                  }
                   const synth = new cv.Mat(4, 1, cv.CV_32SC2);
-                  synth.data32S[0] = combinedMinX;
-                  synth.data32S[1] = combinedMinY;
-                  synth.data32S[2] = combinedMaxX;
-                  synth.data32S[3] = combinedMinY;
-                  synth.data32S[4] = combinedMaxX;
-                  synth.data32S[5] = combinedMaxY;
-                  synth.data32S[6] = combinedMinX;
-                  synth.data32S[7] = combinedMaxY;
+                  synth.data32S[0] = minX;
+                  synth.data32S[1] = minY;
+                  synth.data32S[2] = maxX;
+                  synth.data32S[3] = minY;
+                  synth.data32S[4] = maxX;
+                  synth.data32S[5] = maxY;
+                  synth.data32S[6] = minX;
+                  synth.data32S[7] = maxY;
                   bestContour = synth;
                   bestContourIsSynthetic = true;
                 }
@@ -896,21 +935,24 @@ export function useCardDetection(
             }
           }
 
-          // --- Distance guidance (combined bounding box of all contours) ---
-          // The combined bbox captures the document's full extent even when edges
-          // are broken into many fragments by fingers, glare, etc.
-          // Skip in card variant: the ROI is the full video frame, so background
-          // contours (wall, desk, etc.) inflate the bbox to ~100% always.
+          // --- Distance guidance ---
+          // Prefer the validated 4-corner card outline: its bounding box is the
+          // cleanest "how much of the ROI does the card occupy" signal, and now
+          // that the ROI == the visible box (desktop), a card filling the box
+          // produces a near-full outline. Fall back to the combined bbox of all
+          // significant contours, then the presence-edge bbox, only when no
+          // outline is found (glossy / occluded edges).
           const roiArea = clampedW * clampedH;
           let docFillPercent = 0;
 
           if (bestContour) {
-            // Use the validated 4-corner card's bounding box. The aspect-ratio
-            // gate above ensures bestContour is actually card-shaped, so this
-            // is a clean "how much of the ROI does the card occupy" signal.
             const cardRect = cv.boundingRect(bestContour);
             docFillPercent =
               ((cardRect.width * cardRect.height) / roiArea) * 100;
+          } else if (hasSignificantContour) {
+            const cbw = combinedMaxX - combinedMinX;
+            const cbh = combinedMaxY - combinedMinY;
+            docFillPercent = ((cbw * cbh) / roiArea) * 100;
           } else if (USE_PRESENCE_FILL_METRIC) {
             let nz = null;
             try {
@@ -925,27 +967,37 @@ export function useCardDetection(
             } finally {
               if (nz) nz.delete();
             }
-          } else if (hasSignificantContour) {
-            const combinedW = combinedMaxX - combinedMinX;
-            const combinedH = combinedMaxY - combinedMinY;
-            const combinedArea = combinedW * combinedH;
-            docFillPercent = (combinedArea / roiArea) * 100;
           }
 
           // Active whenever we have a real contour to measure against.
           // Skip distance gating when the contour is the synthetic book-doc
           // fallback: its bbox reflects inner content, not the full page,
           // so fill% is structurally low and would block capture forever.
-          const fillCheckActive = !!bestContour && !bestContourIsSynthetic;
+          // ID-card synthetics still enforce fill — the combined bbox reflects
+          // the card's actual extent so the distance signal is meaningful.
+          const isIdCardSynthetic =
+            bestContourIsSynthetic &&
+            discoveryRef.current.docType === 'id-card';
+          const fillCheckActive =
+            !!bestContour && (!bestContourIsSynthetic || isIdCardSynthetic);
 
           // Book-style docs (passport/greenbook) frequently yield a contour
           // covering only the bio-data page rather than the full guide rect,
           // so we relax the minimum fill threshold for them.
+          // ID-card synthetics use the standard floor — their bbox has been
+          // pre-expanded above to approximate the true card edge.
+          // Per-device overrides can be supplied via settings (minFillPercent /
+          // maxFillPercent). Desktop uses 85 / 99 to require the card to fill
+          // most of the guide before quality checks run; mobile keeps 75 / 95.
           const lockedDocTypeForFill = discoveryRef.current.docType;
           const isBookDocFill =
             lockedDocTypeForFill === 'passport' ||
             lockedDocTypeForFill === 'greenbook';
-          const minFillPercent = isBookDocFill ? 20 : MIN_FILL_PERCENT;
+          const minFillPercent = isBookDocFill
+            ? 20
+            : (settingsRef.current.minFillPercent ?? MIN_FILL_PERCENT);
+          const maxFillPercent =
+            settingsRef.current.maxFillPercent ?? MAX_FILL_PERCENT;
 
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
@@ -972,7 +1024,7 @@ export function useCardDetection(
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent > MAX_FILL_PERCENT
+            docFillPercent > maxFillPercent
           ) {
             setFeedback('Move document further away');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
@@ -1161,7 +1213,7 @@ export function useCardDetection(
             // cross the edge, and flipping between "Move closer" and "Align
             // document" on every miss is jarring.
             captureMissCounterRef.current += 1;
-            const CAPTURE_MISS_TOLERANCE = 8;
+            const CAPTURE_MISS_TOLERANCE = 20;
             if (captureMissCounterRef.current < CAPTURE_MISS_TOLERANCE) {
               setDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),

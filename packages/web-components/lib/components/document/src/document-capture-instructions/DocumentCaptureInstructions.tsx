@@ -4,22 +4,26 @@ import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
 import { getDirection, t } from '../../../../domain/localisation';
+import idCardLottie from '../assets/lottie/id-card.lottie?inline';
+import passportLottie from '../assets/lottie/passport.lottie?inline';
+import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
+import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
+import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
+import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
+import idCardNotReflective from '../assets/icons/guidelines/id-card/not-reflective.svg?inline';
+import passportGood from '../assets/icons/guidelines/passport/good.svg?inline';
+import passportNotCropped from '../assets/icons/guidelines/passport/not-cropped.svg?inline';
+import passportNotBlurry from '../assets/icons/guidelines/passport/not-blurry.svg?inline';
+import passportNotReflective from '../assets/icons/guidelines/passport/not-reflective.svg?inline';
+import greenbookGood from '../assets/icons/guidelines/greenbook/good.svg?inline';
+import greenbookNotCropped from '../assets/icons/guidelines/greenbook/not-cropped.svg?inline';
+import greenbookNotBlurry from '../assets/icons/guidelines/greenbook/not-blurry.svg?inline';
+import greenbookNotReflective from '../assets/icons/guidelines/greenbook/not-reflective.svg?inline';
 
 // ── Visual assets ────────────────────────────────────────────────────────────
-const HERO_ID_CARD_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of ID.lottie',
-  import.meta.url,
-).href;
-
-const HERO_PASSPORT_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of passport 2.lottie',
-  import.meta.url,
-).href;
-
-const HERO_GREENBOOK_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of green book passport.lottie',
-  import.meta.url,
-).href;
+const HERO_ID_CARD_LOTTIE_URL = idCardLottie;
+const HERO_PASSPORT_LOTTIE_URL = passportLottie;
+const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 
 const HERO_IMAGE_FALLBACK_URL = HERO_ID_CARD_LOTTIE_URL;
 
@@ -52,58 +56,22 @@ const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
 
 const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
   'id-card': {
-    good: new URL(
-      '../assets/icons/guidelines/id-card/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/id-card/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/id-card/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/id-card/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: idCardGood,
+    'not-cropped': idCardNotCropped,
+    'not-blurry': idCardNotBlurry,
+    'not-reflective': idCardNotReflective,
   },
   passport: {
-    good: new URL(
-      '../assets/icons/guidelines/passport/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/passport/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/passport/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/passport/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: passportGood,
+    'not-cropped': passportNotCropped,
+    'not-blurry': passportNotBlurry,
+    'not-reflective': passportNotReflective,
   },
   greenbook: {
-    good: new URL(
-      '../assets/icons/guidelines/greenbook/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/greenbook/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/greenbook/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/greenbook/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: greenbookGood,
+    'not-cropped': greenbookNotCropped,
+    'not-blurry': greenbookNotBlurry,
+    'not-reflective': greenbookNotReflective,
   },
 };
 

@@ -32,24 +32,20 @@ type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 
 interface HeroAssetConfig {
   animationSrc: string;
-  fallbackAlt: string;
   fallbackSrc: string;
 }
 
 const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
   'id-card': {
     animationSrc: HERO_ID_CARD_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing an ID card on a desk',
     fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
   passport: {
     animationSrc: HERO_PASSPORT_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing a passport on a desk',
     fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
   greenbook: {
     animationSrc: HERO_GREENBOOK_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing a green book passport on a desk',
     fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
 };
@@ -103,14 +99,9 @@ function getTextDirection(dir?: string): 'ltr' | 'rtl' | 'auto' {
 interface HeroLottieProps {
   animationSrc: string;
   fallbackSrc: string;
-  fallbackAlt: string;
 }
 
-function HeroLottie({
-  animationSrc,
-  fallbackSrc,
-  fallbackAlt,
-}: HeroLottieProps) {
+function HeroLottie({ animationSrc, fallbackSrc }: HeroLottieProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -160,7 +151,7 @@ function HeroLottie({
       <img
         class="doc-instr-hero-img"
         src={fallbackSrc}
-        alt={fallbackAlt}
+        alt=""
         loading="eager"
         decoding="async"
       />
@@ -424,7 +415,6 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           <HeroLottie
             animationSrc={heroAsset.animationSrc}
             fallbackSrc={heroAsset.fallbackSrc}
-            fallbackAlt={heroAsset.fallbackAlt}
           />
         </div>
 

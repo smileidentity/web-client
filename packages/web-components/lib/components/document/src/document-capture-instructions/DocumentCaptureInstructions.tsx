@@ -498,7 +498,11 @@ function BackInstructionsLayout({
   onSkip,
 }: BackLayoutProps) {
   return (
-    <div ref={rootRef} class="doc-instr-root doc-instr-root--back" dir={direction}>
+    <div
+      ref={rootRef}
+      class="doc-instr-root doc-instr-root--back"
+      dir={direction}
+    >
       {/* ── Content: centered title + flip animation ─────────── */}
       <div class="doc-instr-back-content">
         <h1 class="doc-instr-flip-title">

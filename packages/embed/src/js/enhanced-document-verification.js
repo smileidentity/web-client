@@ -553,7 +553,9 @@ function applyPageTranslations() {
   // Falls back to the legacy static screens if the element isn't present.
   function setDocSubmissionState(state, message) {
     if (!DocSubmission) {
-      setActiveScreen(state === 'success' ? CompleteScreen : UploadFailureScreen);
+      setActiveScreen(
+        state === 'success' ? CompleteScreen : UploadFailureScreen,
+      );
       return;
     }
     DocSubmission.setAttribute('submission-state', state);

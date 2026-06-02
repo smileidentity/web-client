@@ -37,7 +37,13 @@ function Spinner() {
         fill="none"
       >
         <g clip-path="url(#doc-submit-loader-clip)">
-          <foreignObject x="-1031.25" y="-1031.25" width="2062.5" height="2062.5" transform="matrix(0.032 0 0 0.032 32 32)">
+          <foreignObject
+            x="-1031.25"
+            y="-1031.25"
+            width="2062.5"
+            height="2062.5"
+            transform="matrix(0.032 0 0 0.032 32 32)"
+          >
             <div
               {...{ xmlns: 'http://www.w3.org/1999/xhtml' }}
               style="background:conic-gradient(from 90deg,rgba(39,174,96,0) 0deg,rgba(58,225,128,0) 0.036deg,rgba(58,225,128,1) 360deg);height:100%;width:100%;opacity:1"
@@ -67,7 +73,13 @@ function Spinner() {
 function TickBadge() {
   return (
     <div class="doc-submit-overlay" aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="64"
+        height="64"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
         <rect width="64" height="64" rx="32" fill="#2CC05C" />
         <path
           d="M27.1566 42.6663C26.4724 42.6663 25.7882 42.4088 25.2481 41.8568L19.4503 35.9324C18.9481 35.4131 18.6664 34.7123 18.6664 33.9821C18.6664 33.252 18.9481 32.5512 19.4503 32.0319C20.4946 30.9647 22.2232 30.9647 23.2675 32.0319L27.1566 36.006L40.7327 22.1334C41.777 21.0662 43.5055 21.0662 44.5498 22.1334C45.5941 23.2005 45.5941 24.9668 44.5498 26.0339L29.0652 41.8568C28.525 42.4088 27.8408 42.6663 27.1566 42.6663Z"
@@ -81,7 +93,13 @@ function TickBadge() {
 function CrossBadge() {
   return (
     <div class="doc-submit-overlay" aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="64"
+        height="64"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
         <rect width="64" height="64" rx="32" fill="#EC221F" />
         <path
           d="M36.1146 31.9953L45.0425 22.6828C46.1682 21.5086 46.1682 19.5651 45.0425 18.3909C44.4947 17.8261 43.7555 17.5094 42.9852 17.5094C42.215 17.5094 41.4758 17.8261 40.9279 18.3909L32 27.7035L23.0721 18.3909C22.5242 17.8261 21.785 17.5094 21.0148 17.5094C20.2445 17.5094 19.5053 17.8261 18.9575 18.3909C17.8318 19.5651 17.8318 21.5086 18.9575 22.6828L27.8854 31.9953L18.9575 41.3079C17.8318 42.4821 17.8318 44.4256 18.9575 45.5998C19.5397 46.2071 20.2773 46.4906 21.0148 46.4906C21.7523 46.4906 22.4898 46.2071 23.0721 45.5998L32 36.2872L40.9279 45.5998C41.5102 46.2071 42.2477 46.4906 42.9852 46.4906C43.7227 46.4906 44.4603 46.2071 45.0425 45.5998C46.1682 44.4256 46.1682 42.4821 45.0425 41.3079L36.1146 31.9953Z"

@@ -124,6 +124,10 @@ export default defineConfig(({ mode }) => {
   return {
     plugins,
 
+    // Treat .lottie animations as static assets so they can be imported and
+    // inlined (via ?inline) rather than left to fail asset resolution.
+    assetsInclude: ['**/*.lottie'],
+
     esbuild: {
       jsx: 'automatic',
       jsxImportSource: 'preact',

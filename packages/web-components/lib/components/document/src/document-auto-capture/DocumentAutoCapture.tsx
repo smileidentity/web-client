@@ -781,8 +781,18 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
               padding: '0.75rem 1rem 0',
             }}
           >
-            <button onClick={onBack} style={desktopNavBtnStyle} aria-label="Back">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <button
+              onClick={onBack}
+              style={desktopNavBtnStyle}
+              aria-label="Back"
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
                 <path
                   d="M15 6l-6 6 6 6"
                   stroke="rgba(0,0,0,0.7)"
@@ -792,10 +802,36 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 />
               </svg>
             </button>
-            <button onClick={onClose} style={desktopNavBtnStyle} aria-label="Close">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <line x1="3" y1="3" x2="17" y2="17" stroke="rgba(0,0,0,0.7)" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1="17" y1="3" x2="3" y2="17" stroke="rgba(0,0,0,0.7)" strokeWidth="2.5" strokeLinecap="round" />
+            <button
+              onClick={onClose}
+              style={desktopNavBtnStyle}
+              aria-label="Close"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <line
+                  x1="3"
+                  y1="3"
+                  x2="17"
+                  y2="17"
+                  stroke="rgba(0,0,0,0.7)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="17"
+                  y1="3"
+                  x2="3"
+                  y2="17"
+                  stroke="rgba(0,0,0,0.7)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
           </div>

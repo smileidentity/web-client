@@ -816,8 +816,7 @@ export function useCardDetection(
                 // contour is inherently noisier than a card. Allow a wider
                 // aspect tolerance for those types.
                 const isBookDocAspect =
-                  lockedDocType === 'passport' ||
-                  lockedDocType === 'greenbook';
+                  lockedDocType === 'passport' || lockedDocType === 'greenbook';
                 const aspectTolerance = isBookDocAspect ? 0.35 : 0.2;
                 const aspectOk = expectedAspect
                   ? Math.abs(normalizedAspect - expectedAspect) /
@@ -896,8 +895,10 @@ export function useCardDetection(
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
                 const aspectTol = isBookDocFallback ? 0.35 : 0.25;
                 const aspectOk =
-                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect < aspectTol;
-                const minArea = guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
+                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
+                  aspectTol;
+                const minArea =
+                  guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
                   // For id-card synthetics, the combined bbox covers only the
                   // inner printed content (text, photo, header band). Real cards

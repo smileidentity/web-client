@@ -7,6 +7,7 @@ import { getDirection, t } from '../../../../domain/localisation';
 import idCardLottie from '../assets/lottie/id-card.lottie?inline';
 import passportLottie from '../assets/lottie/passport.lottie?inline';
 import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
+import idCardFlipLottie from '../assets/lottie/id-card-flip.lottie?inline';
 import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
 import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
 import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
@@ -26,10 +27,7 @@ const HERO_PASSPORT_LOTTIE_URL = passportLottie;
 const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 
 // Card-flip animation shown on the back-of-ID instruction screen.
-const FLIP_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of ID FLIP 2D.lottie',
-  import.meta.url,
-).href;
+const FLIP_LOTTIE_URL = idCardFlipLottie;
 
 const HERO_IMAGE_FALLBACK_URL = HERO_ID_CARD_LOTTIE_URL;
 

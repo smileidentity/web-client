@@ -800,8 +800,7 @@ export function useCardDetection(
                 // contour is inherently noisier than a card. Allow a wider
                 // aspect tolerance for those types.
                 const isBookDocAspect =
-                  lockedDocType === 'passport' ||
-                  lockedDocType === 'greenbook';
+                  lockedDocType === 'passport' || lockedDocType === 'greenbook';
                 const aspectTolerance = isBookDocAspect ? 0.35 : 0.2;
                 const aspectOk = expectedAspect
                   ? Math.abs(normalizedAspect - expectedAspect) /
@@ -877,8 +876,10 @@ export function useCardDetection(
                 const rawAspect = bw / bh;
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
                 const aspectOk =
-                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect < 0.35;
-                const minArea = guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
+                  Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
+                  0.35;
+                const minArea =
+                  guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
                   const synth = new cv.Mat(4, 1, cv.CV_32SC2);
                   synth.data32S[0] = combinedMinX;

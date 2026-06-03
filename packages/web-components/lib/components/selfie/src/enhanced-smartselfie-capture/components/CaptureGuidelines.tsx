@@ -126,9 +126,7 @@ export const CaptureGuidelines: FunctionComponent<CaptureGuidelinesProps> = ({
 
   return (
     <div className="enhanced-instructions">
-      {onBack && (
-        <BackNavigation onBack={onBack} themeColor={themeColor} />
-      )}
+      {onBack && <BackNavigation onBack={onBack} themeColor={themeColor} />}
 
       <h1 className="instructions-title">
         {t('selfie.ess.instructions.titlePrefix')}{' '}

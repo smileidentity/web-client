@@ -465,19 +465,13 @@ window.Sentry = Sentry;
         request.status === 200
       ) {
         // Forced-failure sessions (e.g. active-liveness inactivity timeout)
-        // are submitted to the backend so analytics + metadata stay correct,
-        // but the user-facing outcome must be the error card regardless of
-        // HTTP status.
+        // are still submitted to the backend so analytics + metadata stay
+        // correct. Once the upload itself returns 200, the submission is
+        // complete from the user's perspective — show the success card
+        // regardless of the original capture reason.
         if (config.use_strict_mode) {
-          if (forcedFailureReason) {
-            dispatchSubmissionState({
-              state: 'error',
-              failureReason: forcedFailureReason,
-            });
-          } else {
-            dispatchSubmissionState({ state: 'success' });
-            handleSuccess();
-          }
+          dispatchSubmissionState({ state: 'success' });
+          handleSuccess();
         } else {
           setActiveScreen(CompleteScreen);
           handleSuccess();

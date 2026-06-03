@@ -13,6 +13,7 @@ import { CaptureControls } from './components/CaptureControls';
 import { ActiveLivenessOverlay } from './components/ActiveLivenessOverlay';
 import { CaptureGuidelines } from './components/CaptureGuidelines';
 import { SubmissionView } from './components/SubmissionView';
+import { BackNavigation } from './components/BackNavigation';
 
 import '../../../navigation/src';
 import '../../../attribution/PoweredBySmileId';
@@ -520,26 +521,7 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   return (
     <div className="smartselfie-capture">
       {showNavigation && (
-        <button
-          type="button"
-          className="back-button"
-          aria-label={t('selfie.ess.back')}
-          onClick={handleBack}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M19 12H5" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
+        <BackNavigation onBack={handleBack} themeColor={themeColor} />
       )}
 
       <CameraPreview
@@ -636,20 +618,10 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
           background: #F5F7FA;
           overflow: hidden;
         }
-        .smartselfie-capture > .back-button {
+        .smartselfie-capture > .ess-back-navigation {
           position: absolute;
-          top: 2rem;
+          top: 1.5rem;
           left: 1rem;
-          background: #1f1f1f;
-          border: none;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          padding: 0;
           z-index: 2;
         }
         .smartselfie-capture > powered-by-smile-id {

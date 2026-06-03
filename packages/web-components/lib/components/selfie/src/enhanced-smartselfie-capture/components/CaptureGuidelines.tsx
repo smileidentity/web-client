@@ -15,6 +15,7 @@ import {
   MultipleFacesIllustration,
   PoorLightingIllustration,
 } from '../assets/illustrations';
+import { BackNavigation } from './BackNavigation';
 
 type IllustrationKind =
   | 'good'
@@ -126,26 +127,7 @@ export const CaptureGuidelines: FunctionComponent<CaptureGuidelinesProps> = ({
   return (
     <div className="enhanced-instructions">
       {onBack && (
-        <button
-          type="button"
-          className="back-button"
-          aria-label={t('selfie.ess.back')}
-          onClick={onBack}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M19 12H5" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
+        <BackNavigation onBack={onBack} themeColor={themeColor} />
       )}
 
       <h1 className="instructions-title">
@@ -240,19 +222,10 @@ export const CaptureGuidelines: FunctionComponent<CaptureGuidelinesProps> = ({
         background: #F5F7FA;
         box-sizing: border-box;
       }
-      .back-button {
+      .ess-back-navigation {
         position: absolute;
-        top: 2rem;
+        top: 1.5rem;
         left: 1rem;
-        background: #1f1f1f;
-        border: none;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
       }
       .instructions-title {
         font-family: "DM Sans", system-ui, sans-serif;
@@ -267,10 +240,10 @@ export const CaptureGuidelines: FunctionComponent<CaptureGuidelinesProps> = ({
         color: #0F172B;
         flex-shrink: 0;
       }
-      /* Back button (absolute, top:1rem, 36px tall) ends at ~52px. The title
+      /* Back nav (absolute, top:1.5rem, 40px tall) ends at ~62px. The title
          starts after the container's top padding plus this margin, leaving
          roughly a 24px gap between the button's bottom edge and the title. */
-      .back-button + .instructions-title {
+      .ess-back-navigation + .instructions-title {
         margin-top: 4rem;
       }
       .hero-oval {

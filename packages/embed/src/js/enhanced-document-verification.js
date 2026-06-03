@@ -520,13 +520,27 @@ function applyPageTranslations() {
     activeScreen = node;
   }
 
-  // Reconstruct a data URI from the most recent captured image (back if
-  // present, otherwise front) so the submission screen can show it behind the
-  // status card. Publish images carry raw base64 without the data: prefix.
+  // Reconstruct a data URI for the captured document so the submission screen
+  // can show it behind the status card. Publish images carry raw base64 with
+  // the data: prefix stripped, so we re-add it.
+  //
+  // Pick the most recent ID-card image by type id (front=3, back=7) rather than
+  // blindly taking the last array entry — enhanced flows also publish selfie
+  // (2) / liveness (6) frames, and relying on append order would risk showing a
+  // face behind the document card. Sniff PNG vs JPEG from the base64 signature
+  // so gallery-uploaded PNGs aren't mislabelled.
   function getDocPreviewDataUri(capturedImages) {
-    const last = capturedImages?.[capturedImages.length - 1];
-    if (!last?.image) return '';
-    return `data:image/jpeg;base64,${last.image}`;
+    if (!Array.isArray(capturedImages)) return '';
+    const ID_CARD_TYPE_IDS = [3, 7];
+    const docImages = capturedImages.filter(
+      (img) => img?.image && ID_CARD_TYPE_IDS.includes(img.image_type_id),
+    );
+    const chosen =
+      docImages[docImages.length - 1] ||
+      capturedImages[capturedImages.length - 1];
+    if (!chosen?.image) return '';
+    const mime = chosen.image.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
+    return `data:${mime};base64,${chosen.image}`;
   }
 
   // Prime the <document-capture-submission> element with the captured image,
@@ -573,7 +587,7 @@ function applyPageTranslations() {
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      setDocSubmissionState('error', translate('pages.error.generic'));
+      displayErrorMessage(translate('pages.error.generic'));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -675,7 +689,10 @@ function applyPageTranslations() {
     });
 
     request.upload.addEventListener('error', function (e) {
-      setDocSubmissionState('error', translate('pages.error.generic'));
+      // Errors keep the legacy failure screen so the user retains the
+      // "Retry" affordance (#retry-upload); only success uses the new
+      // in-place submission card.
+      setActiveScreen(UploadFailureScreen);
       throw new Error('uploadZip failed', { cause: e });
     });
 
@@ -692,7 +709,7 @@ function applyPageTranslations() {
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
-        setDocSubmissionState('error', translate('pages.error.generic'));
+        setActiveScreen(UploadFailureScreen);
         throw new Error('uploadZip failed', { cause: request });
       }
     };

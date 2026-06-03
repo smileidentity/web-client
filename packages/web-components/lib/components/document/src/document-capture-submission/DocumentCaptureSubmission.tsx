@@ -187,8 +187,17 @@ const DocumentCaptureSubmission: FunctionComponent<Props> = ({
   }, []);
 
   // Emit a resolution event when submission settles so hosts can navigate on.
+  // Skip the initial mount so a host that renders the element already in a
+  // resolved state (e.g. submission-state="success") doesn't get a spurious
+  // `.continue` before any real upload — only transitions into a resolved
+  // state should fire it.
   const isResolved = state === 'success' || state === 'error';
+  const didMountRef = useRef(false);
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     if (!isResolved) return;
     window.dispatchEvent(
       new CustomEvent('document-capture-submission.continue', {
@@ -207,8 +216,10 @@ const DocumentCaptureSubmission: FunctionComponent<Props> = ({
     title = t('document.submission.submitting.title');
     body = t('document.submission.submitting.body');
   } else if (isSuccess) {
+    // Success shows only the title (matches the design). Never surface a
+    // leftover `submission-message` from a prior error state.
     title = t('document.submission.success.title');
-    body = message || '';
+    body = '';
   } else {
     title = t('document.submission.error.title');
     body = message || '';

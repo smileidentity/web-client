@@ -69,14 +69,14 @@ class DocumentCaptureScreens extends HTMLElement {
       ></${instructionsTag}>
       <${captureTag} id='document-capture-front' side-of-id='Front'
       ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
-      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}'
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} ${this.autoCaptureTimeout} theme-color='${this.themeColor}'
       ></${captureTag}>
       <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
        ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></${instructionsTag}>
       <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
-      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} theme-color='${this.themeColor}' ${this.hideAttribution}
-      hidden 
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
+      hidden
       ></${captureTag}>
       <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
       <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
@@ -391,6 +391,12 @@ class DocumentCaptureScreens extends HTMLElement {
     return `auto-capture-mode='autoCapture'`;
   }
 
+  get autoCaptureTimeout() {
+    return this.hasAttribute('auto-capture-timeout')
+      ? `auto-capture-timeout='${this.getAttribute('auto-capture-timeout')}'`
+      : '';
+  }
+
   get hideBackOfId() {
     return this.hasAttribute('hide-back-of-id');
   }
@@ -452,6 +458,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'hide-back-of-id',
       'auto-capture',
       'auto-capture-mode',
+      'auto-capture-timeout',
       'new-instructions',
     ];
   }
@@ -465,6 +472,7 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'show-navigation':
       case 'auto-capture':
       case 'auto-capture-mode':
+      case 'auto-capture-timeout':
       case 'new-instructions':
         this.innerHTML = '';
         this.connectedCallback();

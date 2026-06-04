@@ -369,6 +369,12 @@ window.Sentry = Sentry;
         config.auto_capture_mode,
       );
     }
+    if (config.auto_capture_timeout) {
+      SmartCameraWeb.setAttribute(
+        'auto-capture-timeout',
+        config.auto_capture_timeout,
+      );
+    }
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

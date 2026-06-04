@@ -184,7 +184,7 @@ function templateString() {
     }
 
     <div class='review-image-area'>
-      ${this.imageSrc ? `<img class='review-image' alt='${t('document.submission.imageAlt')}' id='document-capture-review-image' src='${this.imageSrc}' />` : ''}
+      ${this.imageSrc ? `<img class='review-image' alt='${t('document.submission.imageAlt')}' id='document-capture-review-image' src='${this.imageSrc.replace(/'/g, '&#39;').replace(/</g, '&lt;')}' />` : ''}
     </div>
 
     <div class='review-footer'>

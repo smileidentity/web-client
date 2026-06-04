@@ -559,6 +559,8 @@ function applyPageTranslations() {
       DocSubmission.setAttribute('hide-attribution', 'true');
     }
     DocSubmission.setAttribute('show-navigation', '');
+    // Clear any message left over from a prior attempt before re-submitting.
+    DocSubmission.removeAttribute('submission-message');
     DocSubmission.setAttribute('submission-state', 'submitting');
   }
 
@@ -573,7 +575,11 @@ function applyPageTranslations() {
       return;
     }
     DocSubmission.setAttribute('submission-state', state);
-    if (message) DocSubmission.setAttribute('submission-message', message);
+    if (message) {
+      DocSubmission.setAttribute('submission-message', message);
+    } else {
+      DocSubmission.removeAttribute('submission-message');
+    }
   }
 
   async function handleFormSubmit(event) {
@@ -691,9 +697,10 @@ function applyPageTranslations() {
     request.upload.addEventListener('error', function (e) {
       // Errors keep the legacy failure screen so the user retains the
       // "Retry" affordance (#retry-upload); only success uses the new
-      // in-place submission card.
+      // in-place submission card. Report rather than throw — a throw inside
+      // this listener is unhandled (no caller to catch it).
       setActiveScreen(UploadFailureScreen);
-      throw new Error('uploadZip failed', { cause: e });
+      console.error('SmileIdentity - uploadZip failed', e);
     });
 
     request.onreadystatechange = function () {
@@ -710,7 +717,7 @@ function applyPageTranslations() {
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error('uploadZip failed', { cause: request });
+        console.error('SmileIdentity - uploadZip failed', request.status);
       }
     };
 

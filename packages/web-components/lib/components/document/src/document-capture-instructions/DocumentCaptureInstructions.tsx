@@ -166,6 +166,8 @@ function HeroLottie({
         <img
           class="doc-instr-hero-img"
           src={fallbackSrc}
+          alt=""
+          aria-hidden="true"
           loading="eager"
           decoding="async"
         />

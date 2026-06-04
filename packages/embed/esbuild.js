@@ -84,6 +84,8 @@ const files = fs
   .readdirSync('src/js/', { recursive: true })
   .filter((file) => file.endsWith('.js'));
 
+const isWatch = process.env.WATCH === 'true';
+
 if (process.env.NODE_ENV === 'development') {
   prebuild();
 } else {
@@ -100,36 +102,79 @@ const prodOptions = {
   minify: true,
 };
 
-files.forEach((file) => {
-  const baseName = path.basename(file, '.js');
-  const dir = path.dirname(file);
+// Watch + serve mode: a single esbuild context that rebuilds on change and
+// hosts ./build with esbuild's live-reload SSE endpoint (/esbuild).
+if (isWatch) {
+  // Map each entry to its existing `*.min.js` output name so the HTML <script>
+  // src attributes keep working (esbuild appends `.js` to the `out` value).
+  const entryPoints = files.map((file) => {
+    const baseName = path.basename(file, '.js');
+    const dir = path.dirname(file);
+    const outDir = dir === '.' ? 'js' : `js/${dir}`;
+    return { in: `src/js/${file}`, out: `${outDir}/${baseName}.min` };
+  });
 
-  if (process.env.NODE_ENV === 'development') {
-    esbuild.build({
-      ...devOptions,
-      entryPoints: [`src/js/${file}`],
-      outfile: `build/js/${dir}/${baseName}.min.js`,
-    });
-  } else {
-    esbuild.build({
-      ...prodOptions,
-      entryPoints: [`src/js/${file}`],
-      outfile: `dist/js/${dir}/${baseName}.min.js`,
-      sourcemap: true, // Source map generation must be turned on
-      plugins: [
-        // Put the Sentry esbuild plugin after all other plugins
-        sentry.sentryEsbuildPlugin({
-          applicationKey: 'smileid-web-client',
-          authToken: process.env.SENTRY_AUTH_TOKEN,
-          org: 'smile-identity',
-          project: 'web-client',
-          errorHandler: (err) => {
-            // eslint-disable-next-line no-console
-            console.warn('Sentry plugin error:', err);
-            return true;
-          },
-        }),
-      ],
-    });
-  }
-});
+  const ctx = await esbuild.context({
+    ...devOptions,
+    entryPoints,
+    outdir: 'build',
+    // Subscribe every bundle to esbuild's live-reload stream (dev only).
+    banner: {
+      js: "if (typeof EventSource !== 'undefined') { new EventSource('/esbuild').addEventListener('change', () => location.reload()); }",
+    },
+  });
+
+  await ctx.watch();
+
+  // Recopy static assets (HTML/CSS/etc.) into ./build when they change, then
+  // trigger a rebuild so connected browsers reload.
+  fs.watch('src', { recursive: true }, (_event, filename) => {
+    if (!filename || filename.endsWith('.js')) return;
+    const srcPath = path.join('src', filename);
+    if (!fs.existsSync(srcPath) || fs.statSync(srcPath).isDirectory()) return;
+    const destPath = path.join('build', filename);
+    ensureDirSync(path.dirname(destPath));
+    fs.copyFileSync(srcPath, destPath);
+    ctx.rebuild().catch(() => {});
+  });
+
+  const { hosts, port } = await ctx.serve({ servedir: 'build', port: 8000 });
+  // eslint-disable-next-line no-console
+  console.log(
+    `Embed dev server (watch + live reload) on http://${hosts[0]}:${port}`,
+  );
+} else {
+  files.forEach((file) => {
+    const baseName = path.basename(file, '.js');
+    const dir = path.dirname(file);
+
+    if (process.env.NODE_ENV === 'development') {
+      esbuild.build({
+        ...devOptions,
+        entryPoints: [`src/js/${file}`],
+        outfile: `build/js/${dir}/${baseName}.min.js`,
+      });
+    } else {
+      esbuild.build({
+        ...prodOptions,
+        entryPoints: [`src/js/${file}`],
+        outfile: `dist/js/${dir}/${baseName}.min.js`,
+        sourcemap: true, // Source map generation must be turned on
+        plugins: [
+          // Put the Sentry esbuild plugin after all other plugins
+          sentry.sentryEsbuildPlugin({
+            applicationKey: 'smileid-web-client',
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: 'smile-identity',
+            project: 'web-client',
+            errorHandler: (err) => {
+              // eslint-disable-next-line no-console
+              console.warn('Sentry plugin error:', err);
+              return true;
+            },
+          }),
+        ],
+      });
+    }
+  });
+}

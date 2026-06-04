@@ -7,6 +7,7 @@
   "scripts": {
     "build:dist": "cross-env NODE_ENV=production node esbuild.js",
     "build": "cross-env NODE_ENV=development node esbuild.js",
+    "watch": "cross-env NODE_ENV=development WATCH=true node esbuild.js",
     "clean": "rm -rf build dist",
     "instrument": "nyc instrument src build",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",

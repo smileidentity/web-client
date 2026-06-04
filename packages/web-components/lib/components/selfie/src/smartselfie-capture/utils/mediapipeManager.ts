@@ -139,12 +139,13 @@ export class MediapipeInitTimeoutError extends Error {
   }
 }
 
-// How long we allow the on-device init (WASM compile + graph setup) to run
-// before treating it as a stall. A healthy init completes in a few seconds;
-// this leaves generous headroom while still recovering from driver-level
-// hangs. Two attempts (GPU then CPU) stay well under the wrapper's 90s
-// no-fallback hard deadline.
-const MEDIAPIPE_INIT_TIMEOUT_MS = 15000;
+// Last-resort hang guard for `createFromOptions`. This call also downloads the
+// ~3MB model, so the budget must cover a slow/uncached fetch as well as the
+// on-device init — hence it is deliberately generous. It exists only so a truly
+// wedged init eventually rejects (letting the wrapper's bounded retry / hard
+// deadline take over) rather than hanging forever; it is NOT used to decide the
+// GPU→CPU fallback (that keys off real init errors — see getMediapipeInstance).
+const MEDIAPIPE_INIT_TIMEOUT_MS = 45000;
 
 /**
  * @description Races a promise against a timeout. On timeout, rejects with a
@@ -326,11 +327,14 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const delegate =
         gpuDelegate === 'CPU' || !hasFP16Support() ? 'CPU' : 'GPU';
 
-      // Bound the on-device init with a timeout. A GPU-delegate init can stall
-      // OR throw on some drivers (WebGL context/shader failures) even though
-      // the WASM/model already downloaded — so any GPU-delegate failure, not
-      // just a timeout, triggers a one-shot CPU retry before we give up. This
-      // is not a network problem, so retrying on CPU is the right recovery.
+      // A GPU-delegate init can throw on some drivers (WebGL context/shader
+      // failures) even though the model already downloaded; on a genuine GPU
+      // *error* we retry once on CPU before giving up. We deliberately do NOT
+      // fall back on a timeout: the timeout also covers the model download, so
+      // a slow fetch could trip it while a healthy GPU init is still in
+      // progress — abandoning it to start a redundant CPU init only makes
+      // things worse. A timeout therefore propagates as a transient failure for
+      // the wrapper's bounded retry / hard deadline to handle.
       let faceLandmarker: FaceLandmarker;
       try {
         faceLandmarker = await withTimeout(
@@ -339,11 +343,10 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
           `MediaPipe initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms (delegate: ${delegate}).`,
         );
       } catch (error) {
-        if (delegate === 'GPU') {
-          const reason =
-            error instanceof MediapipeInitTimeoutError ? 'stalled' : 'failed';
+        const isTimeout = error instanceof MediapipeInitTimeoutError;
+        if (delegate === 'GPU' && !isTimeout) {
           console.warn(
-            `[SmileID] GPU MediaPipe init ${reason}; retrying with CPU delegate.`,
+            '[SmileID] GPU MediaPipe init failed; retrying with CPU delegate.',
             error,
           );
           faceLandmarker = await withTimeout(

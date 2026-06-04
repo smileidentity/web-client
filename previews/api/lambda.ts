@@ -24,7 +24,7 @@ export const handler = async (event: { body: string }) => {
       Resource.PartnerId.value,
       callback_url || Resource.CallbackUrl.value,
       Resource.SmileIdApiKey.value,
-      baseServer
+      baseServer,
     );
 
     const request_params = {

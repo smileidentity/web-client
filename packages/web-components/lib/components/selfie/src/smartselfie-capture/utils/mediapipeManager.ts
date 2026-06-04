@@ -123,6 +123,61 @@ export class UnsupportedMediapipeEnvironmentError extends Error {
 }
 
 /**
+ * @description Thrown when `FaceLandmarker.createFromOptions` does not settle
+ * within {@link MEDIAPIPE_INIT_TIMEOUT_MS}. The WASM and model assets download
+ * over the network, but the subsequent WASM compile + GPU/CPU graph
+ * initialization runs on-device and can stall indefinitely on some drivers.
+ * Without a timeout the cached `loading` promise never resolves nor rejects,
+ * which (a) keeps the loading UI spinning until the wrapper's hard deadline and
+ * (b) poisons the singleton so retries/remounts await the same stuck promise.
+ * Treated as a transient failure by callers so the bounded retry can re-run.
+ */
+export class MediapipeInitTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MediapipeInitTimeoutError';
+  }
+}
+
+// How long we allow the on-device init (WASM compile + graph setup) to run
+// before treating it as a stall. A healthy init completes in a few seconds;
+// this leaves generous headroom while still recovering from driver-level
+// hangs. Two attempts (GPU then CPU) stay well under the wrapper's 90s
+// no-fallback hard deadline.
+const MEDIAPIPE_INIT_TIMEOUT_MS = 15000;
+
+/**
+ * @description Races a promise against a timeout. On timeout, rejects with a
+ * {@link MediapipeInitTimeoutError}. The underlying promise is not (and cannot
+ * be) aborted — we just stop awaiting it so callers can recover.
+ * @param {Promise<T>} promise The work to bound.
+ * @param {number} ms Timeout in milliseconds.
+ * @param {string} message Message for the timeout error.
+ * @returns {Promise<T>} Resolves/rejects with the promise, or rejects on timeout.
+ */
+const withTimeout = <T>(
+  promise: Promise<T>,
+  ms: number,
+  message: string,
+): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new MediapipeInitTimeoutError(message));
+    }, ms);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
+
+/**
  * @description Reads system architecture hints from User-Agent Client Hints.
  * @returns {Promise<string | null>} Lower-cased hint string or null when hints are unavailable.
  */
@@ -207,6 +262,28 @@ const hasFP16Support = () => {
   return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
 };
 
+/**
+ * @description Creates a FaceLandmarker with the given compute delegate.
+ * Extracted so the init can be retried with a different delegate without
+ * duplicating the options.
+ * @param {Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>} vision Resolved WASM fileset.
+ * @param {'CPU' | 'GPU'} delegate Compute delegate to use.
+ * @returns {Promise<FaceLandmarker>} The created FaceLandmarker.
+ */
+const createLandmarker = (
+  vision: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>,
+  delegate: 'CPU' | 'GPU',
+): Promise<FaceLandmarker> =>
+  FaceLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
+      delegate,
+    },
+    outputFaceBlendshapes: true,
+    runningMode: 'VIDEO',
+    numFaces: 2,
+  });
+
 export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
   if (!window.__smileIdentityMediapipe) {
     window.__smileIdentityMediapipe = {
@@ -249,15 +326,34 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const delegate =
         gpuDelegate === 'CPU' || !hasFP16Support() ? 'CPU' : 'GPU';
 
-      const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
-          delegate,
-        },
-        outputFaceBlendshapes: true,
-        runningMode: 'VIDEO',
-        numFaces: 2,
-      });
+      // Bound the on-device init with a timeout. If a GPU-delegate init stalls
+      // (the WASM/model are already downloaded, so this is not a network
+      // problem), retry once on CPU before giving up — some mobile GPU drivers
+      // hang during WebGL graph setup but succeed on CPU.
+      let faceLandmarker: FaceLandmarker;
+      try {
+        faceLandmarker = await withTimeout(
+          createLandmarker(vision, delegate),
+          MEDIAPIPE_INIT_TIMEOUT_MS,
+          `MediaPipe initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms (delegate: ${delegate}).`,
+        );
+      } catch (error) {
+        if (
+          delegate === 'GPU' &&
+          error instanceof MediapipeInitTimeoutError
+        ) {
+          console.warn(
+            '[SmileID] GPU MediaPipe init stalled; retrying with CPU delegate.',
+          );
+          faceLandmarker = await withTimeout(
+            createLandmarker(vision, 'CPU'),
+            MEDIAPIPE_INIT_TIMEOUT_MS,
+            `MediaPipe CPU initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms.`,
+          );
+        } else {
+          throw error;
+        }
+      }
 
       mediapipeGlobal.instance = faceLandmarker;
       mediapipeGlobal.loaded = true;
@@ -265,6 +361,8 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
 
       return faceLandmarker;
     } catch (error) {
+      // Always clear the poisoned promise so the wrapper's bounded retry — and
+      // any later remount — can re-attempt instead of awaiting a dead promise.
       mediapipeGlobal.loading = null;
       throw error;
     }
@@ -277,4 +375,6 @@ export const __testUtils = {
   matchesExcludedGpu,
   getDelegateFromGpuDetection,
   supportsWasmReftypes,
+  withTimeout,
+  MEDIAPIPE_INIT_TIMEOUT_MS,
 };

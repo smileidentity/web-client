@@ -122,8 +122,19 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // - initialSessionCompleted: set when the legacy component emits publish/cancel/close
   // - mediapipeLoading: true while attempting to load mediapipe
   // - usingSelfieCapture: whether we've mounted the legacy `selfie-capture` element
-  const [mediapipeReady, setMediapipeReady] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
+  // If MediaPipe already loaded earlier in this session (e.g. we're remounting
+  // after returning from document capture), reuse the cached singleton instance
+  // immediately instead of showing the loading spinner again. The model and
+  // WASM are already in memory, so no network call is needed.
+  const mediapipeAlreadyLoaded = !!(
+    window.__smileIdentityMediapipe?.loaded &&
+    window.__smileIdentityMediapipe?.instance
+  );
+
+  const [mediapipeReady, setMediapipeReady] = useState(mediapipeAlreadyLoaded);
+  const [loadingProgress, setLoadingProgress] = useState(
+    isCypress || mediapipeAlreadyLoaded ? 100 : 0,
+  );
   const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(isCypress);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);

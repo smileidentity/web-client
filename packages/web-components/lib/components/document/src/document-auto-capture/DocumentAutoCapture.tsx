@@ -794,7 +794,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             <div
               style={{
                 position: 'absolute',
-                right: 34,
+                right: 22,
                 top: 'calc(50% - 36px)',
                 zIndex: 12,
                 display: 'flex',
@@ -823,7 +823,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             style={{
               position: 'absolute',
               left: '50%',
-              bottom: shouldRotateUi ? 24 : 184,
+              bottom: shouldRotateUi ? 7 : 184,
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(35,35,35,0.95)',
               borderRadius: 14,

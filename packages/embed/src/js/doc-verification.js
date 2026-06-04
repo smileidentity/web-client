@@ -356,7 +356,10 @@ window.Sentry = Sentry;
     let selectedIdType;
     let selectedIdName;
 
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    SmartCameraWeb.setAttribute(
+      'allow-agent-mode',
+      config.use_strict_mode ? false : config.allow_agent_mode,
+    );
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
     }

@@ -92,9 +92,9 @@ export default function Product() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
-  const [autoCapture, setAutoCapture] = useState<boolean>(false);
+  const [autoCapture, setAutoCapture] = useState<boolean>(true);
   const [autoCaptureMode, setAutoCaptureMode] = useState<string>('autoCapture');
-  const [newInstructions, setNewInstructions] = useState<boolean>(false);
+  const [newInstructions, setNewInstructions] = useState<boolean>(true);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -270,7 +270,9 @@ export default function Product() {
                   disabled={isGettingToken}
                 >
                   <option value="false">Disabled</option>
-                  <option value="true">Enabled</option>
+                  <option value="true" selected>
+                    Enabled
+                  </option>
                 </select>
               </div>
 

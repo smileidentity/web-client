@@ -138,6 +138,19 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(isCypress);
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
+  // Concurrency guard for the load effect. Kept in a ref — NOT in
+  // `mediapipeLoading` state — so the effect's guard does not depend on a value
+  // the effect itself sets. If it did (as it used to), calling
+  // `setMediapipeLoading(true)` would re-run the effect, whose cleanup flips
+  // `cancelled` true, and a slow `getMediapipeInstance()` would then resolve
+  // into a cancelled closure — never calling `setMediapipeReady(true)`. That
+  // left the UI stuck on the loading spinner even though MediaPipe loaded
+  // successfully (intermittent: only when the load lost the race to the
+  // re-render).
+  const mediapipeLoadingRef = useRef(false);
+  // Bumped to re-trigger the load effect for a bounded retry after a transient
+  // failure (replaces re-using `mediapipeLoading` as the re-trigger signal).
+  const [mediapipeRetryTick, setMediapipeRetryTick] = useState(0);
   // `unsupportedEnvironment` is a permanent, one-shot signal: we know
   // MediaPipe cannot run here, so stop trying.
   const [unsupportedEnvironment, setUnsupportedEnvironment] = useState(false);
@@ -158,7 +171,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   useEffect(() => {
     if (
       mediapipeReady ||
-      mediapipeLoading ||
+      mediapipeLoadingRef.current ||
       unsupportedEnvironment ||
       mediapipeInitAttemptsRef.current >= MAX_MEDIAPIPE_INIT_ATTEMPTS ||
       isCypress
@@ -168,17 +181,23 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     let cancelled = false;
     let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+    // Mark loading via the ref (effect guard) and the state (UI). The state is
+    // intentionally NOT in this effect's deps — see `mediapipeLoadingRef`.
+    mediapipeLoadingRef.current = true;
+    setMediapipeLoading(true);
+
     const loadMediapipe = async () => {
-      setMediapipeLoading(true);
       const attemptNumber = mediapipeInitAttemptsRef.current + 1;
       mediapipeInitAttemptsRef.current = attemptNumber;
       try {
         await getMediapipeInstance();
         if (cancelled) return;
+        mediapipeLoadingRef.current = false;
         setMediapipeReady(true);
         setMediapipeLoading(false);
       } catch (error) {
         if (cancelled) return;
+        mediapipeLoadingRef.current = false;
         // Loading failed; we'll fall back to the legacy selfie-capture component
         // after the loadingProgress reaches 100% (or sooner for definitively
         // unsupported environments — see below).
@@ -226,6 +245,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
           retryTimeoutId = null;
           if (cancelled) return;
           setMediapipeLoading(false);
+          // Re-trigger the effect for the next attempt via a dedicated counter
+          // rather than toggling `mediapipeLoading` (which is no longer a dep).
+          setMediapipeRetryTick((tick) => tick + 1);
         }, backoffMs);
       }
     };
@@ -234,11 +256,14 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
     return () => {
       cancelled = true;
+      mediapipeLoadingRef.current = false;
       if (retryTimeoutId !== null) {
         clearTimeout(retryTimeoutId);
       }
     };
-  }, [mediapipeReady, mediapipeLoading, unsupportedEnvironment]);
+    // `mediapipeLoading` is deliberately excluded: it is set inside this effect,
+    // so depending on it would re-run the effect and cancel the in-flight load.
+  }, [mediapipeReady, unsupportedEnvironment, mediapipeRetryTick]);
 
   // Cosmetic loading progress: ticks 0→100 over `loadingTime` so the UI can
   // show "slow connection" copy past the SLOW_CONNECTION_THRESHOLD. This is

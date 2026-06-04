@@ -285,7 +285,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return () => {
       clearInterval(timer);
     };
-  }, [hidden, startCountdown, loadingTime, mediapipeReady]);
+    // `mediapipeRetryTick` restarts the cosmetic progress when the user taps
+    // Retry (which resets `loadingProgress` to 0).
+  }, [hidden, startCountdown, loadingTime, mediapipeReady, mediapipeRetryTick]);
 
   // Hard deadline: a single setTimeout that flips `loadDeadlineExceeded`
   // exactly once. This is the signal the render path uses to commit to the
@@ -403,6 +405,21 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     );
   }, [usingSelfieCapture, hidden, mediapipeLoading]);
 
+  // Retry from the failure screen: clear the give-up state and re-arm the load
+  // effect, deadline, and cosmetic progress so we make a fresh attempt. We reset
+  // `unsupportedEnvironment` so a genuinely unsupported device fails fast again
+  // (rather than spinning for the full deadline) instead of being permanently
+  // latched off.
+  const handleRetry = () => {
+    mediapipeInitAttemptsRef.current = 0;
+    mediapipeInitReportedRef.current = false;
+    mediapipeLoadingRef.current = false;
+    setUnsupportedEnvironment(false);
+    setLoadDeadlineExceeded(false);
+    setLoadingProgress(0);
+    setMediapipeRetryTick((tick) => tick + 1);
+  };
+
   if (hidden) {
     return null;
   }
@@ -463,14 +480,40 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     );
   }
 
-  // Hard deadline elapsed and legacy fallback isn't allowed: show the
-  // connection error.
+  // Hard deadline elapsed and legacy fallback isn't allowed: show an actionable
+  // error. The network is usually fine here (the hold-up is on-device setup), so
+  // only blame the connection when the browser actually reports being offline —
+  // otherwise frame it as a setup problem. Always offer a Retry control.
   if (loadDeadlineExceeded && !(allowLegacySelfieFallback || isCypress)) {
+    const isOffline =
+      typeof navigator !== 'undefined' && navigator.onLine === false;
+    const errorKey = isOffline
+      ? 'selfie.capture.loading.offlineError'
+      : 'selfie.capture.loading.setupError';
+    const themeColor = (props as Record<string, string>)['theme-color'];
+
     return (
       <div style={{ textAlign: 'center', marginTop: '20%', padding: '0 20px' }}>
         <p style={{ fontSize: '1.2rem', color: '#333' }}>
-          {translate('selfie.capture.loading.connectionError')}
+          {translate(errorKey)}
         </p>
+        <button
+          type="button"
+          onClick={handleRetry}
+          style={{
+            marginTop: '16px',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '2.5rem',
+            border: 'none',
+            backgroundColor: themeColor || '#001096',
+            color: '#fff',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {translate('selfie.capture.loading.retry')}
+        </button>
       </div>
     );
   }

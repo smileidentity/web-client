@@ -25,7 +25,7 @@ document
     const { image, side, captureOrigin } = e.detail;
     // image — base64 JPEG (encoded at JPEG_QUALITY)
     // side — 'Front' | 'Back'
-    // captureOrigin — 'auto' | 'manual' | 'gallery'
+    // captureOrigin — 'camera_auto_capture' | 'camera_manual_capture' | 'gallery'
   });
 ```
 

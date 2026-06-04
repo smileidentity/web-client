@@ -238,7 +238,7 @@ export default function Product() {
                   disabled={isGettingToken}
                 >
                   <option value="false">Disabled (legacy capture)</option>
-                  <option value="true">Enabled</option>
+                  <option value="true" selected>Enabled</option>
                 </select>
               </div>
 
@@ -271,7 +271,7 @@ export default function Product() {
                   disabled={isGettingToken}
                 >
                   <option value="false">Disabled</option>
-                  <option value="true">Enabled</option>
+                  <option value="true" selected>Enabled</option>
                 </select>
               </div>
 

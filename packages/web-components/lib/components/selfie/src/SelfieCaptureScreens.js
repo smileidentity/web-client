@@ -240,6 +240,45 @@ class SelfieCaptureScreens extends HTMLElement {
     });
   }
 
+  // Return to a clean selfie capture screen. Used when navigating back from the
+  // document flow. Previously this was driven by toggling the `initial-screen`
+  // attribute on this element, which re-fired a full `connectedCallback()`
+  // rebuild every time (even when the value was unchanged). We now swap in a
+  // fresh `selfie-capture-wrapper` synchronously and navigate explicitly, so we
+  // land on a clean capture screen — not the stale review — without rebuilding
+  // the whole screen tree or depending on timers.
+  restartSelfieCapture() {
+    SmartCamera.stopMedia();
+
+    const container = this.querySelector('div');
+    const oldWrapper = this.selfieCapture;
+
+    if (oldWrapper && container) {
+      this._remountKey++;
+
+      const newWrapper = document.createElement('selfie-capture-wrapper');
+      Array.from(oldWrapper.attributes).forEach((attr) => {
+        newWrapper.setAttribute(attr.name, attr.value);
+      });
+      newWrapper.setAttribute('key', this._remountKey.toString());
+      newWrapper.setAttribute('start-countdown', 'false');
+      newWrapper.setAttribute('hidden', '');
+
+      const reviewElement = container.querySelector('selfie-capture-review');
+      oldWrapper.remove();
+      if (reviewElement) {
+        container.insertBefore(newWrapper, reviewElement);
+      } else {
+        container.appendChild(newWrapper);
+      }
+
+      this.selfieCapture = newWrapper;
+      this.setupSelfieWrapperEventListeners();
+    }
+
+    this.setActiveScreen(this.selfieCapture);
+  }
+
   // Override setActiveScreen to enable countdown when selfie-capture is active
   setActiveScreen(screen) {
     if (this.activeScreen === screen) {

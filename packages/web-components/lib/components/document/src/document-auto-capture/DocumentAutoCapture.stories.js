@@ -3,8 +3,8 @@ import './index.ts';
 
 const meta = {
   args: {
+    'auto-capture-mode': 'autoCapture',
     'auto-capture-timeout': 10000,
-    'capture-mode': 'autoCapture',
     'document-type': 'id-card',
     language: 'en',
     'side-of-id': 'Front',
@@ -12,11 +12,11 @@ const meta = {
     title: 'Submit Front of ID',
   },
   argTypes: {
-    'auto-capture-timeout': { control: { type: 'number' } },
-    'capture-mode': {
+    'auto-capture-mode': {
       control: { type: 'select' },
       options: ['autoCapture', 'autoCaptureOnly', 'manualCaptureOnly'],
     },
+    'auto-capture-timeout': { control: { type: 'number' } },
     'document-type': {
       control: { type: 'select' },
       options: ['id-card', 'passport', 'greenbook'],
@@ -39,7 +39,7 @@ const meta = {
     <document-auto-capture
         show-navigation
         document-type="${args['document-type']}"
-        capture-mode="${args['capture-mode']}"
+        auto-capture-mode="${args['auto-capture-mode']}"
         auto-capture-timeout="${args['auto-capture-timeout']}"
         side-of-id="${args['side-of-id']}"
         theme-color='${args['theme-color']}'
@@ -70,6 +70,6 @@ export const Greenbook = {
 
 export const ManualOnly = {
   args: {
-    'capture-mode': 'manualCaptureOnly',
+    'auto-capture-mode': 'manualCaptureOnly',
   },
 };

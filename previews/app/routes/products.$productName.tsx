@@ -109,7 +109,6 @@ export default function Product() {
         document_capture_modes: (
           (config.document_capture_modes as string) ?? ''
         ).split(','),
-        capture_mode: 'autoCaptureOnly',
         partner_details: {
           partner_id: config.partner_id,
           name: 'Demo Account',

@@ -9,7 +9,7 @@ until cutover (the same staged rollout used for `SmartSelfieCapture`).
 ```html
 <document-auto-capture
   document-type="id-card"
-  capture-mode="autoCapture"
+  auto-capture-mode="autoCapture"
   side-of-id="Front"
   theme-color="#001096"
   show-navigation
@@ -34,7 +34,7 @@ document
 | Attribute              | Default         | Description                                                                                                                                                                                                                                                                                                     |
 | ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `document-type`        | _(auto-detect)_ | `id-card`, `passport`, or `greenbook`. When omitted the element auto-classifies from contour aspect ratio.                                                                                                                                                                                                      |
-| `capture-mode`         | `autoCapture`   | `autoCapture` (auto with manual fallback after timeout), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger).                                                                                                                                                                           |
+| `auto-capture-mode`    | `autoCapture`   | Matches the mobile SDKs: `autoCapture` (auto with a manual-capture fallback button after the `auto-capture-timeout`, default 10s), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger).                                                                                                 |
 | `auto-capture-timeout` | `10000`         | Milliseconds before the manual fallback button is surfaced in `autoCapture` mode. Clamped to the 3000–30000ms range.                                                                                                                                                                                            |
 | `side-of-id`           | `Front`         | Echoed into the publish event so consumers can wire front/back flows.                                                                                                                                                                                                                                           |
 | `theme-color`          | `#001096`       | Primary accent colour.                                                                                                                                                                                                                                                                                          |

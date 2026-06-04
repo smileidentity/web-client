@@ -326,10 +326,11 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const delegate =
         gpuDelegate === 'CPU' || !hasFP16Support() ? 'CPU' : 'GPU';
 
-      // Bound the on-device init with a timeout. If a GPU-delegate init stalls
-      // (the WASM/model are already downloaded, so this is not a network
-      // problem), retry once on CPU before giving up — some mobile GPU drivers
-      // hang during WebGL graph setup but succeed on CPU.
+      // Bound the on-device init with a timeout. A GPU-delegate init can stall
+      // OR throw on some drivers (WebGL context/shader failures) even though
+      // the WASM/model already downloaded — so any GPU-delegate failure, not
+      // just a timeout, triggers a one-shot CPU retry before we give up. This
+      // is not a network problem, so retrying on CPU is the right recovery.
       let faceLandmarker: FaceLandmarker;
       try {
         faceLandmarker = await withTimeout(
@@ -338,12 +339,12 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
           `MediaPipe initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms (delegate: ${delegate}).`,
         );
       } catch (error) {
-        if (
-          delegate === 'GPU' &&
-          error instanceof MediapipeInitTimeoutError
-        ) {
+        if (delegate === 'GPU') {
+          const reason =
+            error instanceof MediapipeInitTimeoutError ? 'stalled' : 'failed';
           console.warn(
-            '[SmileID] GPU MediaPipe init stalled; retrying with CPU delegate.',
+            `[SmileID] GPU MediaPipe init ${reason}; retrying with CPU delegate.`,
+            error,
           );
           faceLandmarker = await withTimeout(
             createLandmarker(vision, 'CPU'),

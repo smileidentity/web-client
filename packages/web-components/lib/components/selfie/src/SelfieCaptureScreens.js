@@ -1,6 +1,7 @@
 import './selfie-capture-instructions';
 import './selfie-capture-review';
 import './selfie-capture-wrapper/index.ts';
+import { getMediapipeInstance } from './smartselfie-capture/utils/mediapipeManager.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import packageJson from '../../../../package.json';
@@ -108,6 +109,15 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     this.setUpEventListeners();
+
+    // Pre-warm MediaPipe as soon as the selfie flow starts so the heavy WASM +
+    // model download (and on-device init) happens while the user reads the
+    // instructions — not behind a blocking spinner on the capture screen. This
+    // is fire-and-forget and idempotent: getMediapipeInstance() caches a single
+    // in-flight promise / instance, so the wrapper (and any remount) reuses the
+    // same load instead of starting a new one. Errors are handled by the
+    // wrapper's own retry/fallback path, so swallow them here.
+    getMediapipeInstance().catch(() => {});
   }
 
   getAgentMode() {

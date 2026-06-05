@@ -29,29 +29,17 @@ const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 // Card-flip animation shown on the back-of-ID instruction screen.
 const FLIP_LOTTIE_URL = idCardFlipLottie;
 
-const HERO_IMAGE_FALLBACK_URL = HERO_ID_CARD_LOTTIE_URL;
-
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 
 interface HeroAssetConfig {
   animationSrc: string;
-  fallbackSrc: string;
 }
 
 const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
-  'id-card': {
-    animationSrc: HERO_ID_CARD_LOTTIE_URL,
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
-  },
-  passport: {
-    animationSrc: HERO_PASSPORT_LOTTIE_URL,
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
-  },
-  greenbook: {
-    animationSrc: HERO_GREENBOOK_LOTTIE_URL,
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
-  },
+  'id-card': { animationSrc: HERO_ID_CARD_LOTTIE_URL },
+  passport: { animationSrc: HERO_PASSPORT_LOTTIE_URL },
+  greenbook: { animationSrc: HERO_GREENBOOK_LOTTIE_URL },
 };
 
 const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
@@ -102,20 +90,13 @@ function getTextDirection(dir?: string): 'ltr' | 'rtl' | 'auto' {
 
 interface HeroLottieProps {
   animationSrc: string;
-  // Optional static fallback image shown while/if the animation can't render.
-  // The flip screen has no static fallback, so it's omitted there.
-  fallbackSrc?: string;
   // How the animation is scaled within the canvas. 'cover' fills and crops
   // (front hero card); 'contain' fits the whole frame without cropping
   // (flip card, which must stay fully visible).
   fit?: 'cover' | 'contain';
 }
 
-function HeroLottie({
-  animationSrc,
-  fallbackSrc,
-  fit = 'cover',
-}: HeroLottieProps) {
+function HeroLottie({ animationSrc, fit = 'cover' }: HeroLottieProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -162,16 +143,6 @@ function HeroLottie({
 
   return (
     <div class="doc-instr-hero-media">
-      {fallbackSrc && (
-        <img
-          class="doc-instr-hero-img"
-          src={fallbackSrc}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          decoding="async"
-        />
-      )}
       {!hasError && (
         <canvas
           ref={canvasRef}
@@ -385,10 +356,7 @@ function FrontInstructionsLayout({
 
         {/* ── Hero illustration ─────────────────────────────── */}
         <div class="doc-instr-hero-card" aria-hidden="true">
-          <HeroLottie
-            animationSrc={heroAsset.animationSrc}
-            fallbackSrc={heroAsset.fallbackSrc}
-          />
+          <HeroLottie animationSrc={heroAsset.animationSrc} />
         </div>
 
         {/* ── Capture guidelines ────────────────────────────── */}
@@ -717,14 +685,6 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .doc-instr-hero-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          border-radius: inherit;
         }
 
         .doc-instr-hero-media {

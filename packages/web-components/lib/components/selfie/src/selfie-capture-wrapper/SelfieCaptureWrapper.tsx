@@ -89,6 +89,15 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     (window.navigator.userAgent.includes('Electron') &&
       (window as any).__Cypress);
 
+  // Test-only seam: the `isCypress` short-circuit below skips the whole
+  // MediaPipe load path (so most specs run fast against the legacy fallback).
+  // A spec that wants to exercise the real load/spinner/error/Retry path sets
+  // `window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__ = true` to opt out of that
+  // short-circuit. When the flag is unset, `skipMediapipeForTests === isCypress`,
+  // so production and existing-test behaviour are unchanged.
+  const forceMediapipeLoad = !!(window as any).__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+  const skipMediapipeForTests = isCypress && !forceMediapipeLoad;
+
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
   const allowLegacySelfieFallback = getBoolProp(allowLegacySelfieFallbackProp);
@@ -133,9 +142,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   const [mediapipeReady, setMediapipeReady] = useState(mediapipeAlreadyLoaded);
   const [loadingProgress, setLoadingProgress] = useState(
-    isCypress || mediapipeAlreadyLoaded ? 100 : 0,
+    skipMediapipeForTests || mediapipeAlreadyLoaded ? 100 : 0,
   );
-  const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(isCypress);
+  const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(
+    skipMediapipeForTests,
+  );
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
   // Concurrency guard for the load effect. Kept in a ref — NOT in
@@ -174,7 +185,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
       mediapipeLoadingRef.current ||
       unsupportedEnvironment ||
       mediapipeInitAttemptsRef.current >= MAX_MEDIAPIPE_INIT_ATTEMPTS ||
-      isCypress
+      skipMediapipeForTests
     )
       return undefined;
 
@@ -294,7 +305,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // fallback. Skipped when hidden, when Mediapipe is already ready, or under
   // Cypress (where the flag is pre-seeded to true).
   useEffect(() => {
-    if (hidden || mediapipeReady || loadDeadlineExceeded || isCypress)
+    if (hidden || mediapipeReady || loadDeadlineExceeded || skipMediapipeForTests)
       return undefined;
 
     const id = setTimeout(() => {
@@ -302,7 +313,13 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     }, loadingTime);
 
     return () => clearTimeout(id);
-  }, [hidden, mediapipeReady, loadDeadlineExceeded, loadingTime, isCypress]);
+  }, [
+    hidden,
+    mediapipeReady,
+    loadDeadlineExceeded,
+    loadingTime,
+    skipMediapipeForTests,
+  ]);
 
   // Latch the legacy fallback decision in an effect rather than during
   // render. Effects only run after commit, so by the time this runs, any
@@ -312,7 +329,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   useEffect(() => {
     if (hidden || usingSelfieCapture || mediapipeReady) return;
     if (!loadDeadlineExceeded) return;
-    const legacyFallbackAllowed = allowLegacySelfieFallback || isCypress;
+    const legacyFallbackAllowed =
+      allowLegacySelfieFallback || skipMediapipeForTests;
     if (!legacyFallbackAllowed) return;
     setUsingSelfieCapture(true);
   }, [
@@ -321,7 +339,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     mediapipeReady,
     loadDeadlineExceeded,
     allowLegacySelfieFallback,
-    isCypress,
+    skipMediapipeForTests,
   ]);
 
   useEffect(() => {
@@ -484,7 +502,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // error. The network is usually fine here (the hold-up is on-device setup), so
   // only blame the connection when the browser actually reports being offline —
   // otherwise frame it as a setup problem. Always offer a Retry control.
-  if (loadDeadlineExceeded && !(allowLegacySelfieFallback || isCypress)) {
+  if (
+    loadDeadlineExceeded &&
+    !(allowLegacySelfieFallback || skipMediapipeForTests)
+  ) {
     const isOffline =
       typeof navigator !== 'undefined' && navigator.onLine === false;
     const errorKey = isOffline

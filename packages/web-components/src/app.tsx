@@ -98,6 +98,14 @@ const App = () => {
       case 'smartselfie-capture':
         componentElement = createElement('smartselfie-capture', props);
         break;
+      case 'selfie-capture-wrapper':
+        // Dev/test harness only: mount the wrapper directly (visible) so specs
+        // can exercise its MediaPipe load / spinner / error / Retry states.
+        componentElement = createElement('selfie-capture-wrapper', {
+          ...props,
+          'start-countdown': true,
+        });
+        break;
       case 'smart-camera-web':
       default:
         componentElement = createElement('smart-camera-web', props);

@@ -214,12 +214,14 @@ const getHostApplication = () => {
   // strict-origin-when-cross-origin policy), which is what we want.
   if (document.referrer) {
     try {
-      return new URL(document.referrer).origin;
+      const { origin } = new URL(document.referrer);
+      // Reason: opaque origins (about:blank, sandboxed iframes, data:) serialize as "null"
+      if (origin && origin !== 'null') return origin;
     } catch {
       // fall through to self-origin fallback
     }
   }
-  return `${window.location.protocol}//${window.location.hostname}`;
+  return window.location.origin;
 };
 
 export const initializeMetadata = async () => {

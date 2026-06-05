@@ -72,7 +72,10 @@ export const makeFaceResult = (scenario = 'smiling') => {
  * `detectForVideo` and returns the result, so a spec can change the scenario
  * over time. Defaults to a steady smiling face.
  */
-export const seedFakeMediapipe = (win, scriptFn = () => makeFaceResult('smiling')) => {
+export const seedFakeMediapipe = (
+  win,
+  scriptFn = () => makeFaceResult('smiling'),
+) => {
   const instance = {
     close: () => {},
     detectForVideo: () => scriptFn(),

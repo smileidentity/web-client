@@ -95,7 +95,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // `window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__ = true` to opt out of that
   // short-circuit. When the flag is unset, `skipMediapipeForTests === isCypress`,
   // so production and existing-test behaviour are unchanged.
-  const forceMediapipeLoad = !!(window as any).__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+  const forceMediapipeLoad = !!(window as any)
+    .__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
   const skipMediapipeForTests = isCypress && !forceMediapipeLoad;
 
   const hidden = getBoolProp(hiddenProp);
@@ -305,7 +306,12 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // fallback. Skipped when hidden, when Mediapipe is already ready, or under
   // Cypress (where the flag is pre-seeded to true).
   useEffect(() => {
-    if (hidden || mediapipeReady || loadDeadlineExceeded || skipMediapipeForTests)
+    if (
+      hidden ||
+      mediapipeReady ||
+      loadDeadlineExceeded ||
+      skipMediapipeForTests
+    )
       return undefined;
 
     const id = setTimeout(() => {

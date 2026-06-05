@@ -79,7 +79,9 @@ describe('SelfieCaptureWrapper MediaPipe states (stubbed)', () => {
     wrapper().find('button').should('contain.text', 'Try again');
 
     // Make the next attempt succeed, then click Retry → smart capture renders.
-    cy.window().then((win) => seedFakeMediapipe(win, () => makeFaceResult('smiling')));
+    cy.window().then((win) =>
+      seedFakeMediapipe(win, () => makeFaceResult('smiling')),
+    );
     wrapper().find('button').contains('Try again').click();
     smartCapture({ timeout: 15000 }).should('exist');
   });

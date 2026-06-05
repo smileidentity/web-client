@@ -24,7 +24,7 @@ export function ensureOpenCv(): Promise<void> {
   if (isReady()) return Promise.resolve();
   if (inflight) return inflight;
 
-  inflight = new Promise<void>((resolve, reject) => {
+  const pending = new Promise<void>((resolve, reject) => {
     const existing = document.querySelector(
       `script[data-opencv-loader], script[src="${OPENCV_SRC}"]`,
     );
@@ -42,8 +42,12 @@ export function ensureOpenCv(): Promise<void> {
           resolve();
           return;
         }
-        if (Date.now() - start > 30_000) {
-          reject(new Error('OpenCV runtime did not initialise within 30s'));
+        // Matches the 20s readiness window in useCardDetection (cvLoadFailed)
+        // and the documented behaviour — past this point the component has
+        // already surfaced the manual-capture fallback, so waiting longer is
+        // pointless.
+        if (Date.now() - start > 20_000) {
+          reject(new Error('OpenCV runtime did not initialise within 20s'));
           return;
         }
         setTimeout(poll, 100);
@@ -65,5 +69,12 @@ export function ensureOpenCv(): Promise<void> {
     document.head.appendChild(script);
   });
 
-  return inflight;
+  // Clear the cached promise on failure (load error / init timeout) so a later
+  // call can retry instead of getting the same rejected promise forever.
+  pending.catch(() => {
+    if (inflight === pending) inflight = null;
+  });
+
+  inflight = pending;
+  return pending;
 }

@@ -572,19 +572,26 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     );
   };
 
-  const onBack = () => dispatchHostEvent('document-auto-capture.cancelled');
-  const onClose = () => dispatchHostEvent('document-auto-capture.close');
+  // `document-capture.*` is the canonical event name: it matches the legacy
+  // <document-capture> element (so this stays a drop-in replacement), the
+  // README, and the listener DocumentCaptureScreens binds for "cancelled".
+  // The `document-auto-capture.*` variant is also emitted so the screens
+  // wrapper's dynamic `${nodeName}.close` listener still fires.
+  const onBack = () => {
+    dispatchHostEvent('document-capture.cancelled');
+    dispatchHostEvent('document-auto-capture.cancelled');
+  };
+  const onClose = () => {
+    dispatchHostEvent('document-capture.close');
+    dispatchHostEvent('document-auto-capture.close');
+  };
 
-  // Calculate progress for the capture button ring
+  // Capture-button ring progress. `captureProgress` (0–100) already reflects
+  // the stability count vs the threshold; the previous `debugInfo.stability`
+  // lookup was always undefined (the hook never sets that field), so the ring
+  // stayed at 0.
   const progress =
-    complianceState === COMPLIANCE_STATES.STABLE
-      ? Math.min(
-          100,
-          (((debugInfo as { stability?: number })?.stability || 0) /
-            settings.stabilityThreshold) *
-            100,
-        )
-      : 0;
+    complianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
   // Whether to show the manual capture button.
   //   manualCaptureOnly  — always show
@@ -1171,12 +1178,12 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             style={{
               position: 'absolute',
               left: '50%',
-              bottom: shouldRotateUi ? 7 : 184,
+              bottom: shouldRotateUi ? 5 : 184,
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(35,35,35,0.95)',
               borderRadius: 14,
               border: '1px solid rgba(255,255,255,0.08)',
-              padding: '14px 20px',
+              padding: '9px 20px',
               minWidth: 220,
               maxWidth: 'calc(100% - 32px)',
               textAlign: 'center',

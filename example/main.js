@@ -34,8 +34,8 @@ document.querySelector('#app').innerHTML = `
         <option value="manualCaptureOnly">Auto Capture Mode: manualCaptureOnly</option>
       </select>
       <select id="newInstructions">
-        <option value="false" selected>New Document Instructions: Disabled</option>
-        <option value="true">New Document Instructions: Enabled</option>
+        <option value="false">New Document Instructions: Disabled</option>
+        <option value="true" selected>New Document Instructions: Enabled</option>
       </select>
       <button data-type="primary" id="submitForm">
         Verify with Smile Identity

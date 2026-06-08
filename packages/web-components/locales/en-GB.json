@@ -75,9 +75,12 @@
         "webcamCapture": "Unable to capture webcam images - Please try another device"
       },
       "loading": {
-        "progress": "Loading... {{progress}}%",
-        "slowConnection": "Internet is too slow, wait a little more...",
-        "connectionError": "Internet connection error, check your connection and retry"
+        "progress": "Setting up the camera... {{progress}}%",
+        "slowConnection": "Still setting things up — this can take a moment the first time.",
+        "connectionError": "Internet connection error, check your connection and retry",
+        "setupError": "We couldn’t finish setting up face capture on this device. Please try again.",
+        "offlineError": "You appear to be offline. Check your connection and try again.",
+        "retry": "Try again"
       }
     },
     "smart": {

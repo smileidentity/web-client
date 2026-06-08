@@ -60,6 +60,11 @@ const DEFAULT_WAIT_MS = 20 * 1000;
 // exponential backoff (base * 2^(attempt-1)) so we don't hammer the CDN.
 const MAX_MEDIAPIPE_INIT_ATTEMPTS = 3;
 const MEDIAPIPE_RETRY_BASE_DELAY_MS = 500;
+// Cap user-initiated retries from the failure screen. Each tap resets the
+// per-attempt counter (granting another `MAX_MEDIAPIPE_INIT_ATTEMPTS` round of
+// internal retries), so without this cap a frustrated or malicious user could
+// hammer Retry indefinitely and generate unbounded requests to the model CDN.
+const MAX_USER_RETRIES = 3;
 
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
@@ -88,6 +93,16 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     !!(window as any).Cypress ||
     (window.navigator.userAgent.includes('Electron') &&
       (window as any).__Cypress);
+
+  // Test-only seam: the `isCypress` short-circuit below skips the whole
+  // MediaPipe load path (so most specs run fast against the legacy fallback).
+  // A spec that wants to exercise the real load/spinner/error/Retry path sets
+  // `window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__ = true` to opt out of that
+  // short-circuit. When the flag is unset, `skipMediapipeForTests === isCypress`,
+  // so production and existing-test behaviour are unchanged.
+  const forceMediapipeLoad = !!(window as any)
+    .__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+  const skipMediapipeForTests = isCypress && !forceMediapipeLoad;
 
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
@@ -122,11 +137,37 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // - initialSessionCompleted: set when the legacy component emits publish/cancel/close
   // - mediapipeLoading: true while attempting to load mediapipe
   // - usingSelfieCapture: whether we've mounted the legacy `selfie-capture` element
-  const [mediapipeReady, setMediapipeReady] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(isCypress ? 100 : 0);
-  const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(isCypress);
+  // If MediaPipe already loaded earlier in this session (e.g. we're remounting
+  // after returning from document capture), reuse the cached singleton instance
+  // immediately instead of showing the loading spinner again. The model and
+  // WASM are already in memory, so no network call is needed.
+  const mediapipeAlreadyLoaded = !!(
+    window.__smileIdentityMediapipe?.loaded &&
+    window.__smileIdentityMediapipe?.instance
+  );
+
+  const [mediapipeReady, setMediapipeReady] = useState(mediapipeAlreadyLoaded);
+  const [loadingProgress, setLoadingProgress] = useState(
+    skipMediapipeForTests || mediapipeAlreadyLoaded ? 100 : 0,
+  );
+  const [loadDeadlineExceeded, setLoadDeadlineExceeded] = useState(
+    skipMediapipeForTests,
+  );
   const [initialSessionCompleted, setInitialSessionCompleted] = useState(false);
   const [mediapipeLoading, setMediapipeLoading] = useState(false);
+  // Concurrency guard for the load effect. Kept in a ref — NOT in
+  // `mediapipeLoading` state — so the effect's guard does not depend on a value
+  // the effect itself sets. If it did (as it used to), calling
+  // `setMediapipeLoading(true)` would re-run the effect, whose cleanup flips
+  // `cancelled` true, and a slow `getMediapipeInstance()` would then resolve
+  // into a cancelled closure — never calling `setMediapipeReady(true)`. That
+  // left the UI stuck on the loading spinner even though MediaPipe loaded
+  // successfully (intermittent: only when the load lost the race to the
+  // re-render).
+  const mediapipeLoadingRef = useRef(false);
+  // Bumped to re-trigger the load effect for a bounded retry after a transient
+  // failure (replaces re-using `mediapipeLoading` as the re-trigger signal).
+  const [mediapipeRetryTick, setMediapipeRetryTick] = useState(0);
   // `unsupportedEnvironment` is a permanent, one-shot signal: we know
   // MediaPipe cannot run here, so stop trying.
   const [unsupportedEnvironment, setUnsupportedEnvironment] = useState(false);
@@ -137,6 +178,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // Dedup flag so we only report a given init failure to Sentry once per
   // wrapper instance, even if we end up retrying. Ref for the same reason.
   const mediapipeInitReportedRef = useRef(false);
+  // User-initiated Retry presses are also bounded — see `MAX_USER_RETRIES`.
+  const userRetryCountRef = useRef(0);
+  const [retriesExhausted, setRetriesExhausted] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
   // Attempt to load Mediapipe (with a small bounded retry budget). If
@@ -147,27 +191,33 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   useEffect(() => {
     if (
       mediapipeReady ||
-      mediapipeLoading ||
+      mediapipeLoadingRef.current ||
       unsupportedEnvironment ||
       mediapipeInitAttemptsRef.current >= MAX_MEDIAPIPE_INIT_ATTEMPTS ||
-      isCypress
+      skipMediapipeForTests
     )
       return undefined;
 
     let cancelled = false;
     let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+    // Mark loading via the ref (effect guard) and the state (UI). The state is
+    // intentionally NOT in this effect's deps — see `mediapipeLoadingRef`.
+    mediapipeLoadingRef.current = true;
+    setMediapipeLoading(true);
+
     const loadMediapipe = async () => {
-      setMediapipeLoading(true);
       const attemptNumber = mediapipeInitAttemptsRef.current + 1;
       mediapipeInitAttemptsRef.current = attemptNumber;
       try {
         await getMediapipeInstance();
         if (cancelled) return;
+        mediapipeLoadingRef.current = false;
         setMediapipeReady(true);
         setMediapipeLoading(false);
       } catch (error) {
         if (cancelled) return;
+        mediapipeLoadingRef.current = false;
         // Loading failed; we'll fall back to the legacy selfie-capture component
         // after the loadingProgress reaches 100% (or sooner for definitively
         // unsupported environments — see below).
@@ -215,6 +265,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
           retryTimeoutId = null;
           if (cancelled) return;
           setMediapipeLoading(false);
+          // Re-trigger the effect for the next attempt via a dedicated counter
+          // rather than toggling `mediapipeLoading` (which is no longer a dep).
+          setMediapipeRetryTick((tick) => tick + 1);
         }, backoffMs);
       }
     };
@@ -223,11 +276,14 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
     return () => {
       cancelled = true;
+      mediapipeLoadingRef.current = false;
       if (retryTimeoutId !== null) {
         clearTimeout(retryTimeoutId);
       }
     };
-  }, [mediapipeReady, mediapipeLoading, unsupportedEnvironment]);
+    // `mediapipeLoading` is deliberately excluded: it is set inside this effect,
+    // so depending on it would re-run the effect and cancel the in-flight load.
+  }, [mediapipeReady, unsupportedEnvironment, mediapipeRetryTick]);
 
   // Cosmetic loading progress: ticks 0→100 over `loadingTime` so the UI can
   // show "slow connection" copy past the SLOW_CONNECTION_THRESHOLD. This is
@@ -249,14 +305,21 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return () => {
       clearInterval(timer);
     };
-  }, [hidden, startCountdown, loadingTime, mediapipeReady]);
+    // `mediapipeRetryTick` restarts the cosmetic progress when the user taps
+    // Retry (which resets `loadingProgress` to 0).
+  }, [hidden, startCountdown, loadingTime, mediapipeReady, mediapipeRetryTick]);
 
   // Hard deadline: a single setTimeout that flips `loadDeadlineExceeded`
   // exactly once. This is the signal the render path uses to commit to the
   // fallback. Skipped when hidden, when Mediapipe is already ready, or under
   // Cypress (where the flag is pre-seeded to true).
   useEffect(() => {
-    if (hidden || mediapipeReady || loadDeadlineExceeded || isCypress)
+    if (
+      hidden ||
+      mediapipeReady ||
+      loadDeadlineExceeded ||
+      skipMediapipeForTests
+    )
       return undefined;
 
     const id = setTimeout(() => {
@@ -264,7 +327,13 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     }, loadingTime);
 
     return () => clearTimeout(id);
-  }, [hidden, mediapipeReady, loadDeadlineExceeded, loadingTime, isCypress]);
+  }, [
+    hidden,
+    mediapipeReady,
+    loadDeadlineExceeded,
+    loadingTime,
+    skipMediapipeForTests,
+  ]);
 
   // Latch the legacy fallback decision in an effect rather than during
   // render. Effects only run after commit, so by the time this runs, any
@@ -274,7 +343,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   useEffect(() => {
     if (hidden || usingSelfieCapture || mediapipeReady) return;
     if (!loadDeadlineExceeded) return;
-    const legacyFallbackAllowed = allowLegacySelfieFallback || isCypress;
+    const legacyFallbackAllowed =
+      allowLegacySelfieFallback || skipMediapipeForTests;
     if (!legacyFallbackAllowed) return;
     setUsingSelfieCapture(true);
   }, [
@@ -283,7 +353,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     mediapipeReady,
     loadDeadlineExceeded,
     allowLegacySelfieFallback,
-    isCypress,
+    skipMediapipeForTests,
   ]);
 
   useEffect(() => {
@@ -367,6 +437,28 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     );
   }, [usingSelfieCapture, hidden, mediapipeLoading]);
 
+  // Retry from the failure screen: clear the give-up state and re-arm the load
+  // effect, deadline, and cosmetic progress so we make a fresh attempt. We reset
+  // `unsupportedEnvironment` so a genuinely unsupported device fails fast again
+  // (rather than spinning for the full deadline) instead of being permanently
+  // latched off. User taps are capped by `MAX_USER_RETRIES` so a frustrated or
+  // malicious user can't hammer Retry indefinitely and generate unbounded
+  // requests to the model CDN.
+  const handleRetry = () => {
+    if (userRetryCountRef.current >= MAX_USER_RETRIES) {
+      setRetriesExhausted(true);
+      return;
+    }
+    userRetryCountRef.current += 1;
+    mediapipeInitAttemptsRef.current = 0;
+    mediapipeInitReportedRef.current = false;
+    mediapipeLoadingRef.current = false;
+    setUnsupportedEnvironment(false);
+    setLoadDeadlineExceeded(false);
+    setLoadingProgress(0);
+    setMediapipeRetryTick((tick) => tick + 1);
+  };
+
   if (hidden) {
     return null;
   }
@@ -427,14 +519,45 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     );
   }
 
-  // Hard deadline elapsed and legacy fallback isn't allowed: show the
-  // connection error.
-  if (loadDeadlineExceeded && !(allowLegacySelfieFallback || isCypress)) {
+  // Hard deadline elapsed and legacy fallback isn't allowed: show an actionable
+  // error. The network is usually fine here (the hold-up is on-device setup), so
+  // only blame the connection when the browser actually reports being offline —
+  // otherwise frame it as a setup problem. Always offer a Retry control.
+  if (
+    loadDeadlineExceeded &&
+    !(allowLegacySelfieFallback || skipMediapipeForTests)
+  ) {
+    const isOffline =
+      typeof navigator !== 'undefined' && navigator.onLine === false;
+    const errorKey = isOffline
+      ? 'selfie.capture.loading.offlineError'
+      : 'selfie.capture.loading.setupError';
+    const themeColor = (props as Record<string, string>)['theme-color'];
+
     return (
       <div style={{ textAlign: 'center', marginTop: '20%', padding: '0 20px' }}>
         <p style={{ fontSize: '1.2rem', color: '#333' }}>
-          {translate('selfie.capture.loading.connectionError')}
+          {translate(errorKey)}
         </p>
+        <button
+          type="button"
+          onClick={handleRetry}
+          disabled={retriesExhausted}
+          style={{
+            marginTop: '16px',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '2.5rem',
+            border: 'none',
+            backgroundColor: themeColor || '#001096',
+            color: '#fff',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: retriesExhausted ? 'not-allowed' : 'pointer',
+            opacity: retriesExhausted ? 0.6 : 1,
+          }}
+        >
+          {translate('selfie.capture.loading.retry')}
+        </button>
       </div>
     );
   }

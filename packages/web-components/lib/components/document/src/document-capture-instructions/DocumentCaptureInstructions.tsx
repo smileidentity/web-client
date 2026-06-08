@@ -29,7 +29,6 @@ const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 // Card-flip animation shown on the back-of-ID instruction screen.
 const FLIP_LOTTIE_URL = idCardFlipLottie;
 
-
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 

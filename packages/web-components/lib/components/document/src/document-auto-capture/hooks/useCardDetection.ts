@@ -988,8 +988,9 @@ export function useCardDetection(
           // ID-card synthetics use the standard floor — their bbox has been
           // pre-expanded above to approximate the true card edge.
           // Per-device overrides can be supplied via settings (minFillPercent /
-          // maxFillPercent). Desktop uses 85 / 99 to require the card to fill
-          // most of the guide before quality checks run; mobile keeps 75 / 95.
+          // maxFillPercent). Desktop uses 78 / 98 to require the card to fill
+          // most of the visible box before quality checks run; mobile keeps
+          // 75 / 95 (see getOptimalDefaults in DocumentAutoCapture.tsx).
           const lockedDocTypeForFill = discoveryRef.current.docType;
           const isBookDocFill =
             lockedDocTypeForFill === 'passport' ||

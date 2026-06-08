@@ -278,33 +278,12 @@
       <smart-camera-web show-navigation capture-id hidden document-type="">
       </smart-camera-web>
 
-      <section hidden id="upload-progress-screen" class="flow center">
-        <br />
-        <p class="spinner"></p>
-
-        <h1 style="--flow-space: 4rem" data-i18n="pages.upload.title">
-          Uploading
-        </h1>
-
-        <p>
-          <span data-i18n="pages.upload.subtitle">Just a few more seconds</span>
-          <br />
-          <span data-i18n="pages.upload.description"
-            >We are processing your request</span
-          >
-        </p>
-
-        <p class="center credits">
-          <span class="visually-hidden">Powered by SmileID</span>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 90 9"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <use href="#attribution" />
-          </svg>
-        </p>
+      <section hidden id="upload-progress-screen">
+        <document-capture-submission
+          id="doc-submission"
+          submission-state="submitting"
+          style="display: block; width: 100%; min-height: 100vh"
+        ></document-capture-submission>
       </section>
 
       <section hidden id="upload-failure-screen" class="flow center">

@@ -141,13 +141,33 @@
       },
       "startCapture": "Start Capture",
       "takePhotoButton": "Take Photo",
-      "uploadPhotoButton": "Upload Photo"
+      "uploadPhotoButton": "Upload Photo",
+      "flipTitlePrefix": "Flip your",
+      "captureBackButton": "Capture Back of ID",
+      "skipButton": "Skip"
     },
     "review": {
       "question": "Is the document clear and readable?",
       "description": "Make sure all corners of the document are visible and there is no glare",
       "acceptButton": "Yes, my ID is readable",
-      "retakeButton": "No, retake photo"
+      "retakeButton": "No, retake photo",
+      "confirmTitle": "Confirm image quality",
+      "confirmBody": "Make sure that all the information is readable.",
+      "retake": "Retake",
+      "confirm": "Confirm"
+    },
+    "submission": {
+      "imageAlt": "Captured document",
+      "submitting": {
+        "title": "Submitting…",
+        "body": "This might take a moment…\nDo not close or refresh this page"
+      },
+      "success": {
+        "title": "Submission Complete"
+      },
+      "error": {
+        "title": "Submission Failed"
+      }
     }
   },
   "fileUpload": {

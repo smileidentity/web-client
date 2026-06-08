@@ -73,6 +73,7 @@ function applyPageTranslations() {
   );
   const UploadFailureScreen = document.querySelector('#upload-failure-screen');
   const CompleteScreen = document.querySelector('#complete-screen');
+  const DocSubmission = document.querySelector('#doc-submission');
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
   const RetryUploadButton = document.querySelector('#retry-upload');
@@ -433,6 +434,7 @@ function applyPageTranslations() {
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
+      showDocSubmission(images);
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit(event);
     },
@@ -454,6 +456,11 @@ function applyPageTranslations() {
     },
     false,
   );
+
+  // Close affordance on the submission screen (mirrors the iframe close).
+  window.addEventListener('document-capture-submission.close', () => {
+    closeWindow(true);
+  });
 
   RetryUploadButton.addEventListener(
     'click',
@@ -511,6 +518,68 @@ function applyPageTranslations() {
     activeScreen.hidden = true;
     node.hidden = false;
     activeScreen = node;
+  }
+
+  // Reconstruct a data URI for the captured document so the submission screen
+  // can show it behind the status card. Publish images carry raw base64 with
+  // the data: prefix stripped, so we re-add it.
+  //
+  // Pick the most recent ID-card image by type id (front=3, back=7) rather than
+  // blindly taking the last array entry — enhanced flows also publish selfie
+  // (2) / liveness (6) frames, and relying on append order would risk showing a
+  // face behind the document card. Sniff PNG vs JPEG from the base64 signature
+  // so gallery-uploaded PNGs aren't mislabelled.
+  function getDocPreviewDataUri(capturedImages) {
+    if (!Array.isArray(capturedImages)) return '';
+    const ID_CARD_TYPE_IDS = [3, 7];
+    const docImages = capturedImages.filter(
+      (img) => img?.image && ID_CARD_TYPE_IDS.includes(img.image_type_id),
+    );
+    const chosen =
+      docImages[docImages.length - 1] ||
+      capturedImages[capturedImages.length - 1];
+    if (!chosen?.image) return '';
+    const mime = chosen.image.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
+    return `data:${mime};base64,${chosen.image}`;
+  }
+
+  // Prime the <document-capture-submission> element with the captured image,
+  // partner theme/attribution, and the initial "submitting" state.
+  function showDocSubmission(capturedImages) {
+    if (!DocSubmission) return;
+    const previewSrc = getDocPreviewDataUri(capturedImages);
+    if (previewSrc) DocSubmission.setAttribute('image-src', previewSrc);
+    if (config.partner_details?.theme_color) {
+      DocSubmission.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+    }
+    if (config.hide_attribution) {
+      DocSubmission.setAttribute('hide-attribution', 'true');
+    }
+    DocSubmission.setAttribute('show-navigation', '');
+    // Clear any message left over from a prior attempt before re-submitting.
+    DocSubmission.removeAttribute('submission-message');
+    DocSubmission.setAttribute('submission-state', 'submitting');
+  }
+
+  // Flip the submission card between submitting → success / error. Driven by
+  // the upload lifecycle below (mirrors the Enhanced SmartSelfie host pattern).
+  // Falls back to the legacy static screens if the element isn't present.
+  function setDocSubmissionState(state, message) {
+    if (!DocSubmission) {
+      setActiveScreen(
+        state === 'success' ? CompleteScreen : UploadFailureScreen,
+      );
+      return;
+    }
+    DocSubmission.setAttribute('submission-state', state);
+    if (message) {
+      DocSubmission.setAttribute('submission-message', message);
+    } else {
+      DocSubmission.removeAttribute('submission-message');
+    }
   }
 
   async function handleFormSubmit(event) {
@@ -626,8 +695,12 @@ function applyPageTranslations() {
     });
 
     request.upload.addEventListener('error', function (e) {
+      // Errors keep the legacy failure screen so the user retains the
+      // "Retry" affordance (#retry-upload); only success uses the new
+      // in-place submission card. Report rather than throw — a throw inside
+      // this listener is unhandled (no caller to catch it).
       setActiveScreen(UploadFailureScreen);
-      throw new Error('uploadZip failed', { cause: e });
+      console.error('SmileIdentity - uploadZip failed', e);
     });
 
     request.onreadystatechange = function () {
@@ -635,16 +708,16 @@ function applyPageTranslations() {
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen);
+        setDocSubmissionState('success');
         handleSuccess();
-        window.setTimeout(closeWindow, 2000);
+        window.setTimeout(closeWindow, 2500);
       }
       if (
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error('uploadZip failed', { cause: request });
+        console.error('SmileIdentity - uploadZip failed', request.status);
       }
     };
 

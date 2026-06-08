@@ -1,6 +1,7 @@
 import './selfie-capture-instructions';
 import './selfie-capture-review';
 import './selfie-capture-wrapper/index.ts';
+import { getMediapipeInstance } from './smartselfie-capture/utils/mediapipeManager.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import packageJson from '../../../../package.json';
@@ -108,6 +109,37 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     this.setUpEventListeners();
+
+    // Pre-warm MediaPipe as soon as the selfie flow starts so the heavy WASM +
+    // model download (and on-device init) happens while the user reads the
+    // instructions — not behind a blocking spinner on the capture screen. This
+    // is fire-and-forget and idempotent: getMediapipeInstance() caches a single
+    // in-flight promise / instance, so the wrapper (and any remount) reuses the
+    // same load instead of starting a new one. Errors are handled by the
+    // wrapper's own retry/fallback path, so swallow them here.
+    //
+    // Skipped under Cypress to match `SelfieCaptureWrapper`'s existing test
+    // seam (`skipMediapipeForTests`). Specs rely on the wrapper short-circuiting
+    // to the legacy `selfie-capture` fallback; pre-warming here would race with
+    // that seam and (intermittently) flip the wrapper into the SmartSelfie path
+    // by populating `window.__smileIdentityMediapipe` before the wrapper mounts.
+    //
+    // The parent check covers the embed Cypress context where this element runs
+    // inside an iframe and window.Cypress is only set on the parent frame.
+    const isCypress =
+      !!window.Cypress ||
+      (() => {
+        try {
+          return !!window.parent.Cypress;
+        } catch {
+          return false;
+        }
+      })() ||
+      (window.navigator.userAgent.includes('Electron') && window.__Cypress);
+    const forceMediapipeLoad = !!window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+    if (!isCypress || forceMediapipeLoad) {
+      getMediapipeInstance().catch(() => {});
+    }
   }
 
   getAgentMode() {
@@ -230,6 +262,45 @@ class SelfieCaptureScreens extends HTMLElement {
     });
   }
 
+  // Return to a clean selfie capture screen. Used when navigating back from the
+  // document flow. Previously this was driven by toggling the `initial-screen`
+  // attribute on this element, which re-fired a full `connectedCallback()`
+  // rebuild every time (even when the value was unchanged). We now swap in a
+  // fresh `selfie-capture-wrapper` synchronously and navigate explicitly, so we
+  // land on a clean capture screen — not the stale review — without rebuilding
+  // the whole screen tree or depending on timers.
+  restartSelfieCapture() {
+    SmartCamera.stopMedia();
+
+    const container = this.querySelector('div');
+    const oldWrapper = this.selfieCapture;
+
+    if (oldWrapper && container) {
+      this._remountKey++;
+
+      const newWrapper = document.createElement('selfie-capture-wrapper');
+      Array.from(oldWrapper.attributes).forEach((attr) => {
+        newWrapper.setAttribute(attr.name, attr.value);
+      });
+      newWrapper.setAttribute('key', this._remountKey.toString());
+      newWrapper.setAttribute('start-countdown', 'false');
+      newWrapper.setAttribute('hidden', '');
+
+      const reviewElement = container.querySelector('selfie-capture-review');
+      oldWrapper.remove();
+      if (reviewElement) {
+        container.insertBefore(newWrapper, reviewElement);
+      } else {
+        container.appendChild(newWrapper);
+      }
+
+      this.selfieCapture = newWrapper;
+      this.setupSelfieWrapperEventListeners();
+    }
+
+    this.setActiveScreen(this.selfieCapture);
+  }
+
   // Override setActiveScreen to enable countdown when selfie-capture is active
   setActiveScreen(screen) {
     if (this.activeScreen === screen) {
@@ -255,6 +326,17 @@ class SelfieCaptureScreens extends HTMLElement {
       this._selfieWrapperListeners.forEach(({ event, handler }) => {
         window.removeEventListener(event, handler);
       });
+    }
+    // Also remove the previously-attached element-level publish handler so we
+    // don't accumulate duplicates across remounts (each call to
+    // setupSelfieWrapperEventListeners would otherwise add another listener,
+    // causing multiple transitions to review / multiple metadata events on
+    // navigating back from document capture).
+    if (this._selfieWrapperPublishHandler) {
+      this.removeEventListener(
+        'selfie-capture.publish',
+        this._selfieWrapperPublishHandler,
+      );
     }
 
     // Create new event handlers
@@ -313,6 +395,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
     // Also listen for the publish event on the parent SelfieCaptureScreens element
     // in case smartselfie-capture dispatches it there
+    this._selfieWrapperPublishHandler = publishHandler;
     this.addEventListener('selfie-capture.publish', publishHandler);
   }
 

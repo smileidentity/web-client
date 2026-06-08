@@ -424,7 +424,14 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       return;
     }
 
-    if (feedback === visibleFeedback) return;
+    if (feedback === visibleFeedback) {
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+        feedbackTimerRef.current = null;
+      }
+      pendingFeedbackRef.current = null;
+      return;
+    }
 
     const now = Date.now();
     const remaining = feedbackHoldUntilRef.current - now;
@@ -457,6 +464,30 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     },
     [],
   );
+
+  // Debounced compliance state for visual output.
+  // The raw complianceState updates every detection frame (~60fps). Feeding it
+  // directly to the Overlay and spinner causes rapid color/mount oscillation
+  // when detection quality is borderline. A 150ms trailing debounce smooths
+  // this; CAPTURING/SUCCESS bypass it so the final confirmation is immediate.
+  const COMPLIANCE_DEBOUNCE_MS = 150;
+  const [visibleComplianceState, setVisibleComplianceState] = useState(
+    complianceState,
+  );
+  useEffect(() => {
+    if (
+      complianceState === COMPLIANCE_STATES.CAPTURING ||
+      complianceState === COMPLIANCE_STATES.SUCCESS
+    ) {
+      setVisibleComplianceState(complianceState);
+      return;
+    }
+    const t = setTimeout(
+      () => setVisibleComplianceState(complianceState),
+      COMPLIANCE_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(t);
+  }, [complianceState]);
 
   // Notify smart-camera-web when the capture session begins.
   useEffect(() => {
@@ -591,7 +622,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // lookup was always undefined (the hook never sets that field), so the ring
   // stayed at 0.
   const progress =
-    complianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
+    visibleComplianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
   // Whether to show the manual capture button.
   //   manualCaptureOnly  — always show
@@ -648,12 +679,12 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     COMPLIANCE_STATES.DETECTING,
     COMPLIANCE_STATES.STABLE,
     COMPLIANCE_STATES.CAPTURING,
-  ].includes(complianceState);
+  ].includes(visibleComplianceState);
 
   let spinnerProgress: number;
-  if (complianceState === COMPLIANCE_STATES.STABLE) {
+  if (visibleComplianceState === COMPLIANCE_STATES.STABLE) {
     spinnerProgress = Math.max(15, progress);
-  } else if (complianceState === COMPLIANCE_STATES.CAPTURING) {
+  } else if (visibleComplianceState === COMPLIANCE_STATES.CAPTURING) {
     spinnerProgress = 99;
   } else {
     spinnerProgress = 25;
@@ -676,7 +707,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const showSideSpinner =
     baseShowSideSpinner && shouldRotateUi && !useSideManualCapture;
   const sideButtonProgress =
-    complianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
+    visibleComplianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
   const handlePickFromGallery = () => {
     if (!allowGalleryUpload) return;
@@ -1112,7 +1143,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
           {/* Detection overlay with guide box */}
           <Overlay
-            complianceState={complianceState}
+            complianceState={visibleComplianceState}
             debugPath={debugPath}
             showDebug={showDebug}
             guideAspectRatio={guideAspectRatio}

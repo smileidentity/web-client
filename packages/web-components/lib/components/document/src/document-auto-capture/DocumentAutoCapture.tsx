@@ -375,9 +375,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // when detection quality is borderline. A 150ms trailing debounce smooths
   // this; CAPTURING/SUCCESS bypass it so the final confirmation is immediate.
   const COMPLIANCE_DEBOUNCE_MS = 150;
-  const [visibleComplianceState, setVisibleComplianceState] = useState(
-    complianceState,
-  );
+  const [visibleComplianceState, setVisibleComplianceState] =
+    useState(complianceState);
   useEffect(() => {
     const isImmediate =
       complianceState === COMPLIANCE_STATES.CAPTURING ||

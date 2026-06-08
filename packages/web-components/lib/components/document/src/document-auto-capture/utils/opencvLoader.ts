@@ -6,7 +6,7 @@
  * — calling this function is a no-op once `window.cv.Mat` is defined.
  */
 const OPENCV_SRC =
-  'https://web-sdk-files.s3.us-west-2.amazonaws.com/open-cv/4.8.0-opencv.min.js';
+  'https://web-models.smileidentity.com/open-cv/4.8.0-opencv.min.js';
 
 declare global {
   interface Window {

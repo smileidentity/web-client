@@ -5,10 +5,12 @@
  * Hosts that already include opencv.js via a <script> tag will short-circuit
  * — calling this function is a no-op once `window.cv.Mat` is defined.
  */
-// TODO: Self-host opencv.js or add SRI hash for supply-chain safety.
-// Example with SRI (replace hash with actual sha384 of the hosted file):
 const OPENCV_SRC = 'https://docs.opencv.org/4.8.0/opencv.js';
-const OPENCV_INTEGRITY = ''; // e.g. 'sha384-...' — compute from the pinned file
+// SRI hash pinned to the 4.8.0 build. If the CDN serves a different payload
+// the browser will refuse to execute it. Recompute when upgrading:
+//   curl -sL https://docs.opencv.org/4.8.0/opencv.js | openssl dgst -sha384 -binary | openssl base64 -A
+const OPENCV_INTEGRITY =
+  'sha384-kEC+2KaGZ4b+M4g8HgCNH9N+2TfOMWcNR6Ttw3mclO4ppnH1tX4Xgl9jwfowxoxM';
 
 declare global {
   interface Window {
@@ -66,6 +68,8 @@ export function ensureOpenCv(): Promise<void> {
     const script = document.createElement('script');
     script.src = OPENCV_SRC;
     script.async = true;
+    script.crossOrigin = 'anonymous';
+    if (OPENCV_INTEGRITY) script.integrity = OPENCV_INTEGRITY;
     script.dataset.opencvLoader = 'document-auto-capture';
     script.onload = waitForRuntime;
     script.onerror = () => reject(new Error('Failed to load opencv.js'));

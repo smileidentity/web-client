@@ -5,7 +5,10 @@
  * Hosts that already include opencv.js via a <script> tag will short-circuit
  * — calling this function is a no-op once `window.cv.Mat` is defined.
  */
+// TODO: Self-host opencv.js or add SRI hash for supply-chain safety.
+// Example with SRI (replace hash with actual sha384 of the hosted file):
 const OPENCV_SRC = 'https://docs.opencv.org/4.8.0/opencv.js';
+const OPENCV_INTEGRITY = ''; // e.g. 'sha384-...' — compute from the pinned file
 
 declare global {
   interface Window {

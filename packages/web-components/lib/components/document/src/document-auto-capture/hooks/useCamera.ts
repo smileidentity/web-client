@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from 'preact/hooks';
  * still get a usable stream.
  */
 export function useCamera() {
-  const videoRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [stream, setStream] = useState(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    let currentStream = null;
+    let cancelled = false;
+    let currentStream: MediaStream | null = null;
 
     const startCamera = async () => {
       try {
@@ -51,6 +52,14 @@ export function useCamera() {
 
         if (!mediaStream) throw new Error('All camera constraints failed');
 
+        // The component may have unmounted while getUserMedia was pending; if
+        // so, stop the freshly-acquired stream immediately so we don't leak the
+        // camera (the cleanup below ran before currentStream was assigned).
+        if (cancelled) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
         const track = mediaStream.getVideoTracks()[0];
 
         // Best-effort continuous autofocus / exposure / white balance.
@@ -87,6 +96,7 @@ export function useCamera() {
     startCamera();
 
     return () => {
+      cancelled = true;
       if (currentStream) {
         currentStream.getTracks().forEach((track) => track.stop());
       }

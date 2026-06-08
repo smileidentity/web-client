@@ -75,9 +75,12 @@
         "webcamCapture": "Impossible de capturer les images de la webcam - Veuillez essayer un autre appareil"
       },
       "loading": {
-        "progress": "Chargement... {{progress}}%",
-        "slowConnection": "La connexion Internet est trop lente, veuillez patienter...",
-        "connectionError": "Erreur de connexion Internet, vérifiez votre connexion et réessayez"
+        "progress": "Configuration de la caméra... {{progress}}%",
+        "slowConnection": "Configuration en cours — cela peut prendre un instant la première fois.",
+        "connectionError": "Erreur de connexion Internet, vérifiez votre connexion et réessayez",
+        "setupError": "Nous n’avons pas pu terminer la configuration de la capture du visage sur cet appareil. Veuillez réessayer.",
+        "offlineError": "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer"
       }
     },
     "smart": {

@@ -100,7 +100,7 @@ export default function Product() {
     if (typeof window.SmileIdentity === 'function' && config) {
       window.SmileIdentity({
         ...config,
-        allow_agent_mode: true,
+        allow_agent_mode: false,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
         auto_capture: autoCapture,
         auto_capture_mode: autoCaptureMode,

@@ -141,17 +141,10 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // after returning from document capture), reuse the cached singleton instance
   // immediately instead of showing the loading spinner again. The model and
   // WASM are already in memory, so no network call is needed.
-  //
-  // Gated on `!skipMediapipeForTests` so Cypress specs continue to take the
-  // legacy short-circuit even if some earlier code path populated the global —
-  // otherwise tests that rely on the legacy `selfie-capture` fallback would
-  // intermittently render the SmartSelfie path instead.
-  const mediapipeAlreadyLoaded =
-    !skipMediapipeForTests &&
-    !!(
-      window.__smileIdentityMediapipe?.loaded &&
-      window.__smileIdentityMediapipe?.instance
-    );
+  const mediapipeAlreadyLoaded = !!(
+    window.__smileIdentityMediapipe?.loaded &&
+    window.__smileIdentityMediapipe?.instance
+  );
 
   const [mediapipeReady, setMediapipeReady] = useState(mediapipeAlreadyLoaded);
   const [loadingProgress, setLoadingProgress] = useState(

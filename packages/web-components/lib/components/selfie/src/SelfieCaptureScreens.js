@@ -123,8 +123,18 @@ class SelfieCaptureScreens extends HTMLElement {
     // to the legacy `selfie-capture` fallback; pre-warming here would race with
     // that seam and (intermittently) flip the wrapper into the SmartSelfie path
     // by populating `window.__smileIdentityMediapipe` before the wrapper mounts.
+    //
+    // The parent check covers the embed Cypress context where this element runs
+    // inside an iframe and window.Cypress is only set on the parent frame.
     const isCypress =
       !!window.Cypress ||
+      (() => {
+        try {
+          return !!window.parent.Cypress;
+        } catch {
+          return false;
+        }
+      })() ||
       (window.navigator.userAgent.includes('Electron') && window.__Cypress);
     const forceMediapipeLoad = !!window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
     if (!isCypress || forceMediapipeLoad) {

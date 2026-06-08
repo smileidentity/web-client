@@ -17,6 +17,8 @@ import { captureImageFromVideo } from '../utils/imageCapture';
 import { ImageType } from '../constants';
 import { MESSAGES, type MessageKey } from '../utils/alertMessages';
 import { getMediapipeInstance } from '../utils/mediapipeManager';
+import type { MediapipeRunningMode } from '../utils/mediapipeManager';
+import { DEFAULT_MEDIAPIPE_RUNNING_MODE } from '../utils/mediapipeManager';
 import { t } from '../../../../../domain/localisation';
 import packageJson from '../../../../../../package.json';
 
@@ -74,6 +76,10 @@ export const useFaceCapture = ({
   const totalCaptures = useSignal(1);
   const capturesTaken = useSignal(0);
   const hasFinishedCapture = useSignal(false);
+  const runningMode = useSignal<MediapipeRunningMode>(
+    DEFAULT_MEDIAPIPE_RUNNING_MODE,
+  );
+  const runningModeError = useSignal<string | null>(null);
 
   const smileCheckpoint = useComputed(() =>
     Math.floor(totalCaptures.value * 0.4),
@@ -118,24 +124,41 @@ export const useFaceCapture = ({
     try {
       const isAlreadyLoaded =
         window.__smileIdentityMediapipe?.loaded &&
-        window.__smileIdentityMediapipe?.instance;
+        window.__smileIdentityMediapipe?.instance &&
+        window.__smileIdentityMediapipe?.runningMode === runningMode.value;
 
       if (!isAlreadyLoaded) {
         isInitializing.value = true;
         updateAlertImmediate('initializing');
       }
 
-      faceLandmarkerRef.current = await getMediapipeInstance();
+      faceLandmarkerRef.current = await getMediapipeInstance(runningMode.value);
+      runningModeError.value = null;
       isInitializing.value = false;
       startFallbackTimer();
     } catch (error) {
       console.error('Failed to initialize MediaPipe:', error);
+      runningModeError.value =
+        error instanceof Error ? error.message : String(error);
       isInitializing.value = false;
       // MediaPipe failed — start the fallback timer so the button eventually
       // enables and the user isn't permanently stuck.
       startFallbackTimer();
     }
     startFallbackTimer();
+  };
+
+  // Diagnostic-only: rebuild the FaceLandmarker with a new runningMode.
+  // Driven by the temporary three-button bar on SmartSelfieCapture.
+  const setRunningMode = async (mode: MediapipeRunningMode) => {
+    if (mode === runningMode.value) return;
+    stopDetectionLoop();
+    resetFaceDetectionState();
+    runningMode.value = mode;
+    faceLandmarkerRef.current = null;
+    await initializeFaceLandmarker();
+    setupCanvas();
+    startDetectionLoop();
   };
 
   const setupCanvas = () => {
@@ -229,10 +252,14 @@ export const useFaceCapture = ({
       const croppedCanvas = createCroppedVideoFrame(videoRef.current);
       const detectionSource = croppedCanvas || videoRef.current;
 
-      const results = faceLandmarkerRef.current.detectForVideo(
-        detectionSource,
-        performance.now(),
-      );
+      // Dispatch detection by runningMode. JS bindings only expose `detect()`
+      // and `detectForVideo()`; LIVE_STREAM is upstream-only and is forced
+      // through `detectForVideo` here so we can observe behaviour on the wasm.
+      const landmarker = faceLandmarkerRef.current;
+      const results =
+        runningMode.value === 'IMAGE'
+          ? landmarker.detect(detectionSource)
+          : landmarker.detectForVideo(detectionSource, performance.now());
 
       faceLandmarks.value = results.faceLandmarks || [];
 
@@ -629,5 +656,8 @@ export const useFaceCapture = ({
     handleClose,
     cleanup,
     resetFaceDetectionState,
+    runningMode,
+    runningModeError,
+    setRunningMode,
   };
 };

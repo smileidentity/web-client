@@ -179,6 +179,29 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
 
           <AlertDisplay alertTitle={faceCapture.alertTitle.value} />
 
+          {/* Diagnostic-only running-mode toggle (test PR). */}
+          <div className="running-mode-bar" role="group" aria-label="MediaPipe running mode">
+            {(['IMAGE', 'VIDEO', 'LIVE_STREAM'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className={`running-mode-btn${
+                  faceCapture.runningMode.value === mode ? ' is-active' : ''
+                }`}
+                onClick={() => {
+                  faceCapture.setRunningMode(mode);
+                }}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+          {faceCapture.runningModeError.value && (
+            <p className="running-mode-error" role="status">
+              {faceCapture.runningMode.value}: {faceCapture.runningModeError.value}
+            </p>
+          )}
+
           {!faceCapture.isCapturing.value &&
             !faceCapture.hasFinishedCapture.value && (
               <CaptureControls
@@ -259,6 +282,38 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           text-align: center;
           font-size: 1rem;
           font-weight: 500;
+        }
+
+        .running-mode-bar {
+          display: flex;
+          gap: 0.5rem;
+          justify-content: center;
+          margin: 0.75rem 0;
+        }
+
+        .running-mode-btn {
+          background: #eee;
+          color: #222;
+          border: 1px solid #ccc;
+          border-radius: 999px;
+          padding: 0.4rem 0.9rem;
+          font-size: 0.85rem;
+          font-weight: 500;
+          cursor: pointer;
+        }
+
+        .running-mode-btn.is-active {
+          background: ${themeColor || '#001096'};
+          color: white;
+          border-color: transparent;
+        }
+
+        .running-mode-error {
+          margin: 0 0 0.75rem;
+          color: #b00020;
+          text-align: center;
+          font-size: 0.85rem;
+          word-break: break-word;
         }
       `}</style>
     </div>

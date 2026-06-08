@@ -61,6 +61,19 @@ const isExcludedGpuFromWebGL = (renderer?: string | null): boolean => {
   return matchesExcludedGpu(rendererString);
 };
 
+/**
+ * Running modes the FaceLandmarker can be configured with.
+ * The MediaPipe JS task bindings only declare `IMAGE | VIDEO` in their
+ * TypeScript types; `LIVE_STREAM` is exposed in the upstream Java API
+ * (https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/core/RunningMode)
+ * and is included here so this diagnostic build can probe whether the web
+ * wasm runtime accepts it. Expect a runtime error when LIVE_STREAM is
+ * selected on the current bindings.
+ */
+export type MediapipeRunningMode = 'IMAGE' | 'VIDEO' | 'LIVE_STREAM';
+
+export const DEFAULT_MEDIAPIPE_RUNNING_MODE: MediapipeRunningMode = 'VIDEO';
+
 declare global {
   interface Window {
     __smileIdentityMediapipe?: {
@@ -68,6 +81,7 @@ declare global {
       loading: Promise<FaceLandmarker> | null;
       loaded: boolean;
       supportsWasmReftypes?: boolean;
+      runningMode?: MediapipeRunningMode;
     };
   }
 }
@@ -207,7 +221,9 @@ const hasFP16Support = () => {
   return !!(hasHalfFloatExt && hasColorBufferHalfFloat && hasHalfFloatLinear);
 };
 
-export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
+export const getMediapipeInstance = async (
+  runningMode: MediapipeRunningMode = DEFAULT_MEDIAPIPE_RUNNING_MODE,
+): Promise<FaceLandmarker> => {
   if (!window.__smileIdentityMediapipe) {
     window.__smileIdentityMediapipe = {
       instance: null,
@@ -218,7 +234,30 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
 
   const mediapipeGlobal = window.__smileIdentityMediapipe;
 
-  if (mediapipeGlobal.loaded && mediapipeGlobal.instance) {
+  // If a cached instance exists but was built for a different runningMode,
+  // tear it down so we rebuild with the requested mode. This is the test-PR
+  // toggle path; production callers stick with the default VIDEO mode.
+  if (
+    mediapipeGlobal.loaded &&
+    mediapipeGlobal.instance &&
+    mediapipeGlobal.runningMode !== runningMode
+  ) {
+    try {
+      mediapipeGlobal.instance.close();
+    } catch (closeError) {
+      console.warn('[SmileID] FaceLandmarker.close() failed.', closeError);
+    }
+    mediapipeGlobal.instance = null;
+    mediapipeGlobal.loaded = false;
+    mediapipeGlobal.loading = null;
+    mediapipeGlobal.runningMode = undefined;
+  }
+
+  if (
+    mediapipeGlobal.loaded &&
+    mediapipeGlobal.instance &&
+    mediapipeGlobal.runningMode === runningMode
+  ) {
     return mediapipeGlobal.instance;
   }
 
@@ -249,18 +288,26 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       const delegate =
         gpuDelegate === 'CPU' || !hasFP16Support() ? 'CPU' : 'GPU';
 
+      console.info(
+        `[SmileID] Creating FaceLandmarker with runningMode=${runningMode}, delegate=${delegate}.`,
+      );
+
       const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://web-models.smileidentity.com/face_landmarker/face_landmarker.task`,
           delegate,
         },
         outputFaceBlendshapes: true,
-        runningMode: 'VIDEO',
+        // Cast covers `LIVE_STREAM`, which is not in the JS RunningMode union
+        // but is exposed by the upstream Java API. Selecting it here is the
+        // explicit point of this diagnostic PR.
+        runningMode: runningMode as 'IMAGE' | 'VIDEO',
         numFaces: 2,
       });
 
       mediapipeGlobal.instance = faceLandmarker;
       mediapipeGlobal.loaded = true;
+      mediapipeGlobal.runningMode = runningMode;
       mediapipeGlobal.loading = null;
 
       return faceLandmarker;

@@ -172,11 +172,13 @@ class SmartCameraWeb extends HTMLElement {
     this.documentCapture.addEventListener(
       'document-capture-screens.cancelled',
       () => {
-        this.SelfieCaptureScreens.setAttribute(
-          'initial-screen',
-          'selfie-capture',
-        );
         this.setActiveScreen(this.SelfieCaptureScreens);
+        // Land on a clean selfie capture screen by driving the navigation
+        // explicitly. Previously this set `initial-screen="selfie-capture"`,
+        // whose side effect was a full SelfieCaptureScreens rebuild — re-fired
+        // on every back-navigation (setAttribute invokes attributeChangedCallback
+        // even when the value is unchanged).
+        this.SelfieCaptureScreens.restartSelfieCapture();
         this.SelfieCaptureScreens.removeAttribute('data-camera-error');
         this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
       },

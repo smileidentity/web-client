@@ -1490,7 +1490,7 @@ export function useCardDetection(
         if (glareMask && !glareMask.isDeleted()) glareMask.delete();
 
         // Loop
-        if (!isCapturingRef.current && !capturedImage) {
+        if (!isCapturingRef.current) {
           animationFrameId = requestAnimationFrame(processFrame);
         }
       }
@@ -1502,7 +1502,7 @@ export function useCardDetection(
       clearTimeout(timeoutId);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [videoRef, capturedImage, variant, shouldRotateUi]);
+  }, [videoRef, variant, shouldRotateUi]);
 
   // Helper to rotate a canvas 90° counter-clockwise with dimension swap.
   // Must match the auto-capture rotation direction (-π/2) so manual and auto

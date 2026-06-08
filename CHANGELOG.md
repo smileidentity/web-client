@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Embed: derive `host_application` metadata from `document.referrer` so the parent page's origin is reported instead of the iframe host (`cdn.smileidentity.com`)
+
 ## [11.4.4] - 2026-05-27
 
 ### Changed

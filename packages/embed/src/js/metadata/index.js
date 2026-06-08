@@ -207,10 +207,26 @@ const getArchitectureFromWebGPU = async () => {
   }
 };
 
+const getHostApplication = () => {
+  // Reason: embed runs inside an iframe on cdn.smileidentity.com, so
+  // window.location is always our own origin. document.referrer is the
+  // parent page set by the browser (origin-only under default
+  // strict-origin-when-cross-origin policy), which is what we want.
+  if (document.referrer) {
+    try {
+      const { origin } = new URL(document.referrer);
+      // Reason: opaque origins (about:blank, sandboxed iframes, data:) serialize as "null"
+      if (origin && origin !== 'null') return origin;
+    } catch {
+      // fall through to self-origin fallback
+    }
+  }
+  return window.location.origin;
+};
+
 export const initializeMetadata = async () => {
   metadata = [];
-  const hostApplication = `${window.location.protocol}//${window.location.hostname}`;
-  addMetadataEntry('host_application', hostApplication);
+  addMetadataEntry('host_application', getHostApplication());
 
   if (
     'ondeviceproximity' in window ||

@@ -117,7 +117,19 @@ class SelfieCaptureScreens extends HTMLElement {
     // in-flight promise / instance, so the wrapper (and any remount) reuses the
     // same load instead of starting a new one. Errors are handled by the
     // wrapper's own retry/fallback path, so swallow them here.
-    getMediapipeInstance().catch(() => {});
+    //
+    // Skipped under Cypress to match `SelfieCaptureWrapper`'s existing test
+    // seam (`skipMediapipeForTests`). Specs rely on the wrapper short-circuiting
+    // to the legacy `selfie-capture` fallback; pre-warming here would race with
+    // that seam and (intermittently) flip the wrapper into the SmartSelfie path
+    // by populating `window.__smileIdentityMediapipe` before the wrapper mounts.
+    const isCypress =
+      !!window.Cypress ||
+      (window.navigator.userAgent.includes('Electron') && window.__Cypress);
+    const forceMediapipeLoad = !!window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+    if (!isCypress || forceMediapipeLoad) {
+      getMediapipeInstance().catch(() => {});
+    }
   }
 
   getAgentMode() {
@@ -305,6 +317,17 @@ class SelfieCaptureScreens extends HTMLElement {
         window.removeEventListener(event, handler);
       });
     }
+    // Also remove the previously-attached element-level publish handler so we
+    // don't accumulate duplicates across remounts (each call to
+    // setupSelfieWrapperEventListeners would otherwise add another listener,
+    // causing multiple transitions to review / multiple metadata events on
+    // navigating back from document capture).
+    if (this._selfieWrapperPublishHandler) {
+      this.removeEventListener(
+        'selfie-capture.publish',
+        this._selfieWrapperPublishHandler,
+      );
+    }
 
     // Create new event handlers
     const cancelledHandler = async () => {
@@ -362,6 +385,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
     // Also listen for the publish event on the parent SelfieCaptureScreens element
     // in case smartselfie-capture dispatches it there
+    this._selfieWrapperPublishHandler = publishHandler;
     this.addEventListener('selfie-capture.publish', publishHandler);
   }
 

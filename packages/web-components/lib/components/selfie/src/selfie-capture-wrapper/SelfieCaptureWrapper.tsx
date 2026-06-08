@@ -60,6 +60,11 @@ const DEFAULT_WAIT_MS = 20 * 1000;
 // exponential backoff (base * 2^(attempt-1)) so we don't hammer the CDN.
 const MAX_MEDIAPIPE_INIT_ATTEMPTS = 3;
 const MEDIAPIPE_RETRY_BASE_DELAY_MS = 500;
+// Cap user-initiated retries from the failure screen. Each tap resets the
+// per-attempt counter (granting another `MAX_MEDIAPIPE_INIT_ATTEMPTS` round of
+// internal retries), so without this cap a frustrated or malicious user could
+// hammer Retry indefinitely and generate unbounded requests to the model CDN.
+const MAX_USER_RETRIES = 3;
 
 // Wrapper component that decides whether to use the modern
 // SmartSelfieCapture (Mediapipe-based) or fallback to the legacy `selfie-capture`
@@ -136,10 +141,17 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // after returning from document capture), reuse the cached singleton instance
   // immediately instead of showing the loading spinner again. The model and
   // WASM are already in memory, so no network call is needed.
-  const mediapipeAlreadyLoaded = !!(
-    window.__smileIdentityMediapipe?.loaded &&
-    window.__smileIdentityMediapipe?.instance
-  );
+  //
+  // Gated on `!skipMediapipeForTests` so Cypress specs continue to take the
+  // legacy short-circuit even if some earlier code path populated the global —
+  // otherwise tests that rely on the legacy `selfie-capture` fallback would
+  // intermittently render the SmartSelfie path instead.
+  const mediapipeAlreadyLoaded =
+    !skipMediapipeForTests &&
+    !!(
+      window.__smileIdentityMediapipe?.loaded &&
+      window.__smileIdentityMediapipe?.instance
+    );
 
   const [mediapipeReady, setMediapipeReady] = useState(mediapipeAlreadyLoaded);
   const [loadingProgress, setLoadingProgress] = useState(
@@ -173,6 +185,9 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // Dedup flag so we only report a given init failure to Sentry once per
   // wrapper instance, even if we end up retrying. Ref for the same reason.
   const mediapipeInitReportedRef = useRef(false);
+  // User-initiated Retry presses are also bounded — see `MAX_USER_RETRIES`.
+  const userRetryCountRef = useRef(0);
+  const [retriesExhausted, setRetriesExhausted] = useState(false);
   const [usingSelfieCapture, setUsingSelfieCapture] = useState(false);
 
   // Attempt to load Mediapipe (with a small bounded retry budget). If
@@ -433,8 +448,15 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   // effect, deadline, and cosmetic progress so we make a fresh attempt. We reset
   // `unsupportedEnvironment` so a genuinely unsupported device fails fast again
   // (rather than spinning for the full deadline) instead of being permanently
-  // latched off.
+  // latched off. User taps are capped by `MAX_USER_RETRIES` so a frustrated or
+  // malicious user can't hammer Retry indefinitely and generate unbounded
+  // requests to the model CDN.
   const handleRetry = () => {
+    if (userRetryCountRef.current >= MAX_USER_RETRIES) {
+      setRetriesExhausted(true);
+      return;
+    }
+    userRetryCountRef.current += 1;
     mediapipeInitAttemptsRef.current = 0;
     mediapipeInitReportedRef.current = false;
     mediapipeLoadingRef.current = false;
@@ -527,6 +549,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         <button
           type="button"
           onClick={handleRetry}
+          disabled={retriesExhausted}
           style={{
             marginTop: '16px',
             padding: '0.75rem 1.5rem',
@@ -536,7 +559,8 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
             color: '#fff',
             fontSize: '1rem',
             fontWeight: 600,
-            cursor: 'pointer',
+            cursor: retriesExhausted ? 'not-allowed' : 'pointer',
+            opacity: retriesExhausted ? 0.6 : 1,
           }}
         >
           {translate('selfie.capture.loading.retry')}

@@ -335,25 +335,57 @@ export const getMediapipeInstance = async (): Promise<FaceLandmarker> => {
       // progress — abandoning it to start a redundant CPU init only makes
       // things worse. A timeout therefore propagates as a transient failure for
       // the wrapper's bounded retry / hard deadline to handle.
+      //
+      // Orphan handling: when `withTimeout` fires, the underlying
+      // `createLandmarker` promise is still in flight (it cannot be aborted).
+      // If it eventually resolves, the resulting `FaceLandmarker` would leak a
+      // GPU/WebGL context, so we attach a best-effort `.close()` cleanup to the
+      // original promise reference for both the GPU and CPU init paths.
+      const closeOrphan = (orphan: FaceLandmarker) => {
+        try {
+          orphan.close();
+        } catch {
+          /* best effort */
+        }
+      };
+
       let faceLandmarker: FaceLandmarker;
+      const initPromise = createLandmarker(vision, delegate);
       try {
         faceLandmarker = await withTimeout(
-          createLandmarker(vision, delegate),
+          initPromise,
           MEDIAPIPE_INIT_TIMEOUT_MS,
           `MediaPipe initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms (delegate: ${delegate}).`,
         );
       } catch (error) {
         const isTimeout = error instanceof MediapipeInitTimeoutError;
+        if (isTimeout) {
+          // Stop awaiting the in-flight init, but if it eventually resolves,
+          // close the orphaned instance to avoid leaking a GPU/WebGL context.
+          initPromise.then(closeOrphan, () => {
+            /* already failed; nothing to clean up */
+          });
+        }
         if (delegate === 'GPU' && !isTimeout) {
           console.warn(
             '[SmileID] GPU MediaPipe init failed; retrying with CPU delegate.',
             error,
           );
-          faceLandmarker = await withTimeout(
-            createLandmarker(vision, 'CPU'),
-            MEDIAPIPE_INIT_TIMEOUT_MS,
-            `MediaPipe CPU initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms.`,
-          );
+          const cpuInitPromise = createLandmarker(vision, 'CPU');
+          try {
+            faceLandmarker = await withTimeout(
+              cpuInitPromise,
+              MEDIAPIPE_INIT_TIMEOUT_MS,
+              `MediaPipe CPU initialization timed out after ${MEDIAPIPE_INIT_TIMEOUT_MS}ms.`,
+            );
+          } catch (cpuError) {
+            if (cpuError instanceof MediapipeInitTimeoutError) {
+              cpuInitPromise.then(closeOrphan, () => {
+                /* already failed; nothing to clean up */
+              });
+            }
+            throw cpuError;
+          }
         } else {
           throw error;
         }

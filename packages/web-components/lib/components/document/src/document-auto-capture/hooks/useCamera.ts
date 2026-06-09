@@ -37,32 +37,25 @@ export function useCamera() {
         ];
 
         // Sequential fallback: try each constraint set; only attempt the next
-        // if the previous one rejects. We use a plain for…of so the intent is
-        // obvious; the lint rules below are silenced because the loop is the
-        // whole point (we WANT each attempt to wait for the previous to fail).
-        let mediaStream: MediaStream | null = null;
-        let lastError: unknown;
-        // eslint-disable-next-line no-restricted-syntax
-        for (const constraints of constraintsList) {
-          try {
-            // eslint-disable-next-line no-await-in-loop
-            mediaStream =
-              await navigator.mediaDevices.getUserMedia(constraints);
-            break;
-          } catch (e) {
-            lastError = e;
-            console.warn(
-              'Camera constraint failed, trying next:',
-              (e as Error)?.message,
-            );
+        // if the previous one rejects. Implemented as a small recursive helper
+        // so we avoid both `await`-in-loop and the contrived reduce/Promise
+        // chain that the previous version used.
+        const tryConstraints = (index: number): Promise<MediaStream> => {
+          if (index >= constraintsList.length) {
+            return Promise.reject(new Error('All camera constraints failed'));
           }
-        }
+          return navigator.mediaDevices
+            .getUserMedia(constraintsList[index])
+            .catch((e: Error) => {
+              console.warn(
+                'Camera constraint failed, trying next:',
+                e?.message,
+              );
+              return tryConstraints(index + 1);
+            });
+        };
 
-        if (!mediaStream) {
-          throw (
-            (lastError as Error) || new Error('All camera constraints failed')
-          );
-        }
+        const mediaStream = await tryConstraints(0);
 
         // The component may have unmounted while getUserMedia was pending; if
         // so, stop the freshly-acquired stream immediately so we don't leak the

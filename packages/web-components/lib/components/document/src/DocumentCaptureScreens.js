@@ -51,9 +51,9 @@ class DocumentCaptureScreens extends HTMLElement {
 
   connectedCallback() {
     // Tag name to use for the live capture view. Opt-in via the
-    // `auto-capture` attribute on <document-capture-screens>; defaults to the
+    // `auto-capture-feature` attribute on <document-capture-screens>; defaults to the
     // legacy <document-capture> element so existing flows are untouched.
-    const captureTag = this.autoCapture
+    const captureTag = this.autoCaptureFeature
       ? 'document-auto-capture'
       : 'document-capture';
     const instructionsTag = this.newInstructions
@@ -68,13 +68,13 @@ class DocumentCaptureScreens extends HTMLElement {
       ></${instructionsTag}>
       <${captureTag} id='document-capture-front' side-of-id='Front'
       ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
-      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} ${this.autoCaptureTimeout} theme-color='${this.themeColor}'
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}'
       ></${captureTag}>
       <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
        ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></${instructionsTag}>
       <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
-      ${this.documentCaptureModes} ${this.documentType} ${this.autoCaptureMode} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden
       ></${captureTag}>
       <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
@@ -104,7 +104,7 @@ class DocumentCaptureScreens extends HTMLElement {
     this.thankYouScreen = this.querySelector('thank-you');
 
     if (this.hideInstructions) {
-      if (!this.autoCapture) {
+      if (!this.autoCaptureFeature) {
         // <document-auto-capture> manages its own camera; calling
         // getPermissions here would race a second getUserMedia for the
         // rear camera and freeze the page.
@@ -148,7 +148,7 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCapture);
-        if (!this.autoCapture) await getPermissions(this.idCapture);
+        if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
       },
     );
     this.documentInstruction.addEventListener(
@@ -172,7 +172,7 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
-      if (this.autoCapture) {
+      if (this.autoCaptureFeature) {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-front-origin', {
             detail: { imageOrigin: event.detail.captureOrigin },
@@ -206,7 +206,7 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          if (!this.autoCapture) await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
@@ -220,7 +220,8 @@ class DocumentCaptureScreens extends HTMLElement {
           this._publishSelectedImages();
         } else if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          if (!this.autoCapture) await getPermissions(this.idCaptureBack);
+          if (!this.autoCaptureFeature)
+            await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -239,7 +240,7 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCaptureBack);
-        if (!this.autoCapture) await getPermissions(this.idCaptureBack);
+        if (!this.autoCaptureFeature) await getPermissions(this.idCaptureBack);
       },
     );
 
@@ -250,7 +251,7 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          if (!this.autoCapture) await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
@@ -277,7 +278,7 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-end'),
       );
-      if (this.autoCapture) {
+      if (this.autoCaptureFeature) {
         smartCameraWeb?.dispatchEvent(
           new CustomEvent('metadata.document-back-origin', {
             detail: { imageOrigin: event.detail.captureOrigin },
@@ -298,7 +299,7 @@ class DocumentCaptureScreens extends HTMLElement {
       async () => {
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          if (!this.autoCapture) await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -315,7 +316,8 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          if (!this.autoCapture) await getPermissions(this.idCaptureBack);
+          if (!this.autoCaptureFeature)
+            await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -357,16 +359,16 @@ class DocumentCaptureScreens extends HTMLElement {
     return this.hasAttribute('hide-instructions');
   }
 
-  get autoCapture() {
-    return this.hasAttribute('auto-capture');
+  get autoCaptureFeature() {
+    return this.hasAttribute('auto-capture-feature');
   }
 
-  get autoCaptureMode() {
-    if (!this.hasAttribute('auto-capture-mode')) {
+  get autoCapture() {
+    if (!this.hasAttribute('auto-capture')) {
       return '';
     }
 
-    const value = this.getAttribute('auto-capture-mode');
+    const value = this.getAttribute('auto-capture');
     const normalizedValue = value === '' ? 'autoCapture' : value;
     const allowedValues = [
       'autoCapture',
@@ -375,10 +377,10 @@ class DocumentCaptureScreens extends HTMLElement {
     ];
 
     if (allowedValues.includes(normalizedValue)) {
-      return `auto-capture-mode='${normalizedValue}'`;
+      return `auto-capture='${normalizedValue}'`;
     }
 
-    return `auto-capture-mode='autoCapture'`;
+    return `auto-capture='autoCapture'`;
   }
 
   get autoCaptureTimeout() {
@@ -446,8 +448,8 @@ class DocumentCaptureScreens extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'hide-back-of-id',
+      'auto-capture-feature',
       'auto-capture',
-      'auto-capture-mode',
       'auto-capture-timeout',
       'new-instructions',
     ];
@@ -460,8 +462,8 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'auto-capture-feature':
       case 'auto-capture':
-      case 'auto-capture-mode':
       case 'auto-capture-timeout':
       case 'new-instructions':
         this.innerHTML = '';

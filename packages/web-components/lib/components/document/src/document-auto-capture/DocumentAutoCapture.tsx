@@ -15,7 +15,7 @@ import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
 interface Props {
   'document-type'?: string;
-  'auto-capture-mode'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
+  'auto-capture'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
   'auto-capture-timeout'?: string | number;
   'side-of-id'?: 'Front' | 'Back' | string;
   'theme-color'?: string;
@@ -173,7 +173,7 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
  */
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
-  'auto-capture-mode': captureModeProp = 'autoCapture',
+  'auto-capture': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
   'show-navigation': showNavigationProp = false,
@@ -1019,7 +1019,7 @@ if (
     'document-auto-capture',
     [
       'document-type',
-      'auto-capture-mode',
+      'auto-capture',
       'auto-capture-timeout',
       'side-of-id',
       'theme-color',

@@ -22,7 +22,7 @@ function scwTemplateString() {
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
     ></selfie-capture-screens>
-    <document-capture-screens ${this.autoCapture} ${this.autoCaptureMode} ${this.autoCaptureTimeout} ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+    <document-capture-screens ${this.autoCaptureFeature} ${this.autoCapture} ${this.autoCaptureTimeout} ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;
@@ -70,8 +70,8 @@ class SmartCameraWeb extends HTMLElement {
     return [
       'allow-agent-mode',
       'allow-legacy-selfie-fallback',
+      'auto-capture-feature',
       'auto-capture',
-      'auto-capture-mode',
       'auto-capture-timeout',
       'disable-image-tests',
       'document-capture-modes',
@@ -89,8 +89,8 @@ class SmartCameraWeb extends HTMLElement {
     switch (name) {
       case 'allow-agent-mode':
       case 'allow-legacy-selfie-fallback':
+      case 'auto-capture-feature':
       case 'auto-capture':
-      case 'auto-capture-mode':
       case 'auto-capture-timeout':
       case 'disable-image-tests':
       case 'document-capture-modes':
@@ -276,15 +276,15 @@ class SmartCameraWeb extends HTMLElement {
       : '';
   }
 
-  get autoCapture() {
-    return this.hasAttribute('auto-capture')
-      ? `auto-capture='${this.getAttribute('auto-capture')}'`
+  get autoCaptureFeature() {
+    return this.hasAttribute('auto-capture-feature')
+      ? 'auto-capture-feature'
       : '';
   }
 
-  get autoCaptureMode() {
-    return this.hasAttribute('auto-capture-mode')
-      ? `auto-capture-mode='${this.getAttribute('auto-capture-mode')}'`
+  get autoCapture() {
+    return this.hasAttribute('auto-capture')
+      ? `auto-capture='${this.getAttribute('auto-capture')}'`
       : '';
   }
 

@@ -18,8 +18,8 @@ export default function setupForm() {
   const allowLegacySelfieFallback = document.querySelector(
     '#allowLegacySelfieFallback',
   );
+  const autoCaptureEnabled = document.querySelector('#autoCaptureEnabled');
   const autoCapture = document.querySelector('#autoCapture');
-  const autoCaptureMode = document.querySelector('#autoCaptureMode');
   const newInstructions = document.querySelector('#newInstructions');
 
   const resetButton = () => {
@@ -82,8 +82,8 @@ export default function setupForm() {
         previewBVNMFA: true,
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
-        auto_capture: autoCapture.value === 'true',
-        auto_capture_mode: autoCaptureMode.value,
+        auto_capture_feature: autoCaptureEnabled.value === 'true',
+        auto_capture: autoCapture.value,
         new_instructions: newInstructions.value === 'true',
         hide_attribution: true,
         document_capture_modes: ['camera', 'upload'],

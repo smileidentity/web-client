@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.5] - 2026-06-09
+
+### Changed
+
+- Selfie: add a bounded timeout for MediaPipe on-device initialization and clear stale cached loading state so retries/remounts can recover from init stalls
+
 ## [11.4.4] - 2026-05-27
 
 ### Changed

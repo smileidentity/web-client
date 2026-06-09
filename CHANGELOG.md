@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.5] - 2026-06-09
+
+### Changed
+
+- Previews: allow overriding embed/app dev ports via environment variables and add explicit port-in-use validation to the mobile tunnel script
+- Previews: type `EmbedUrl` as a secret and add `WafWebAclArn` to the SST environment type declarations
+
 ## [11.4.4] - 2026-05-27
 
 ### Changed

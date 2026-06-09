@@ -10,7 +10,7 @@ declare module 'sst' {
       value: string;
     };
     EmbedUrl: {
-      type: 'sst.sst.Linkable';
+      type: 'sst.sst.Secret';
       value: string;
     };
     GetToken: {
@@ -31,6 +31,10 @@ declare module 'sst' {
       value: string;
     };
     SmileIdEnvironment: {
+      type: 'sst.sst.Secret';
+      value: string;
+    };
+    WafWebAclArn: {
       type: 'sst.sst.Secret';
       value: string;
     };

@@ -244,9 +244,7 @@ export default function Product() {
               </div>
 
               <div>
-                <label htmlFor="auto-capture-value-select">
-                  Auto Capture
-                </label>
+                <label htmlFor="auto-capture-value-select">Auto Capture</label>
                 <select
                   id="auto-capture-value-select"
                   value={autoCapture}

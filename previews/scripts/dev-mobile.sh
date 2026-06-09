@@ -8,9 +8,9 @@
 #   - The embed package built (we'll run `npm start` in packages/embed which builds + serves it)
 #
 # What it does:
-#   1. Starts the embed dev server on http://localhost:${EMBED_PORT:-8000}
-#   2. Opens a Cloudflare quick tunnel to EMBED_PORT → public HTTPS URL
-#   3. Opens a Cloudflare quick tunnel to APP_PORT (Remix/Vite) → public HTTPS URL
+#   1. Starts the embed dev server on http://localhost:8000
+#   2. Opens a Cloudflare quick tunnel to port 8000 → public HTTPS URL
+#   3. Opens a Cloudflare quick tunnel to port 5173 (Remix/Vite) → public HTTPS URL
 #   4. Exports EmbedUrl=<embed tunnel URL> and runs `sst dev`
 #
 # Stop with Ctrl+C — all child processes are killed.
@@ -21,54 +21,6 @@ PREVIEWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$PREVIEWS_DIR/.." && pwd)"
 EMBED_DIR="$REPO_ROOT/packages/embed"
 WEB_COMPONENTS_DIR="$REPO_ROOT/packages/web-components"
-
-# Optionally load local defaults from previews/.env.
-# Explicitly exported environment variables still take precedence.
-if [ -f "$PREVIEWS_DIR/.env" ]; then
-  if [ "${EMBED_PORT+x}" = "x" ]; then
-    EMBED_PORT_OVERRIDE="$EMBED_PORT"
-  fi
-  if [ "${APP_PORT+x}" = "x" ]; then
-    APP_PORT_OVERRIDE="$APP_PORT"
-  fi
-
-  set -a
-  # shellcheck disable=SC1091
-  . "$PREVIEWS_DIR/.env"
-  set +a
-
-  if [ "${EMBED_PORT_OVERRIDE+x}" = "x" ]; then
-    EMBED_PORT="$EMBED_PORT_OVERRIDE"
-  fi
-  if [ "${APP_PORT_OVERRIDE+x}" = "x" ]; then
-    APP_PORT="$APP_PORT_OVERRIDE"
-  fi
-fi
-
-EMBED_PORT="${EMBED_PORT:-8000}"
-APP_PORT="${APP_PORT:-5173}"
-
-if ! [[ "$EMBED_PORT" =~ ^[0-9]+$ ]] || ! [[ "$APP_PORT" =~ ^[0-9]+$ ]]; then
-  echo "❌ EMBED_PORT and APP_PORT must be numeric."
-  echo "   Example: EMBED_PORT=8001 APP_PORT=5174 npm run dev:mobile"
-  exit 1
-fi
-
-is_port_in_use() {
-  lsof -n -P -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
-}
-
-if is_port_in_use "$EMBED_PORT"; then
-  echo "❌ EMBED_PORT $EMBED_PORT is already in use."
-  echo "   Retry with a different port, for example: EMBED_PORT=8001 npm run dev:mobile"
-  exit 1
-fi
-
-if is_port_in_use "$APP_PORT"; then
-  echo "❌ APP_PORT $APP_PORT is already in use."
-  echo "   Retry with a different port, for example: APP_PORT=5174 npm run dev:mobile"
-  exit 1
-fi
 
 if ! command -v cloudflared >/dev/null 2>&1; then
   echo "❌ cloudflared not found. Install it first:"
@@ -136,19 +88,19 @@ echo "📦 Building @smileid/web-components (embed depends on its dist/ output).
   exit 1
 }
 
-echo "📦 Starting embed dev server (port $EMBED_PORT)..."
-(cd "$EMBED_DIR" && npm run build && npx serve -p "$EMBED_PORT" build) > "$EMBED_LOG" 2>&1 &
+echo "📦 Starting embed dev server (port 8000)..."
+(cd "$EMBED_DIR" && npm start) > "$EMBED_LOG" 2>&1 &
 PIDS+=($!)
 
-echo "🌩  Opening Cloudflare tunnel for embed (port $EMBED_PORT)..."
-cloudflared tunnel --url "http://localhost:$EMBED_PORT" --no-autoupdate > "$EMBED_TUNNEL_LOG" 2>&1 &
+echo "🌩  Opening Cloudflare tunnel for embed (port 8000)..."
+cloudflared tunnel --url http://localhost:8000 --no-autoupdate > "$EMBED_TUNNEL_LOG" 2>&1 &
 PIDS+=($!)
 
 EMBED_TUNNEL_URL=$(wait_for_tunnel_url "$EMBED_TUNNEL_LOG" "embed")
 echo "   Embed:  $EMBED_TUNNEL_URL"
 
-echo "🌩  Opening Cloudflare tunnel for previews app (port $APP_PORT)..."
-cloudflared tunnel --url "http://localhost:$APP_PORT" --no-autoupdate > "$APP_TUNNEL_LOG" 2>&1 &
+echo "🌩  Opening Cloudflare tunnel for previews app (port 5173)..."
+cloudflared tunnel --url http://localhost:5173 --no-autoupdate > "$APP_TUNNEL_LOG" 2>&1 &
 PIDS+=($!)
 
 APP_TUNNEL_URL=$(wait_for_tunnel_url "$APP_TUNNEL_LOG" "previews app")
@@ -192,9 +144,9 @@ fi
 echo "💾 URLs saved to: $URLS_FILE"
 echo "   Recover any time with:  cat $URLS_FILE"
 echo ""
-echo "🚀 Starting sst dev with EmbedUrl=$EMBED_TUNNEL_URL on APP_PORT=$APP_PORT"
+echo "🚀 Starting sst dev with EmbedUrl=$EMBED_TUNNEL_URL"
 echo ""
 sleep 3
 
 cd "$PREVIEWS_DIR"
-EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev remix vite:dev -- --port "$APP_PORT"
+EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev

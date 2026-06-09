@@ -12,8 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Selfie: add a bounded timeout for MediaPipe on-device initialization and clear stale cached loading state so retries/remounts can recover from init stalls
-- Previews: allow overriding embed/app dev ports via environment variables and add explicit port-in-use validation to the mobile tunnel script
-- Previews: type `EmbedUrl` as a secret and add `WafWebAclArn` to the SST environment type declarations
 
 ## [11.4.4] - 2026-05-27
 

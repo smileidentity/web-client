@@ -18,7 +18,6 @@ interface Props {
   'auto-capture'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
   'auto-capture-timeout'?: string | number;
   'side-of-id'?: 'Front' | 'Back' | string;
-  'theme-color'?: string;
   'show-navigation'?: string | boolean;
   'allow-gallery-upload'?: string | boolean;
   'document-capture-modes'?: string;
@@ -179,7 +178,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
   'document-capture-modes': documentCaptureModesProp,
-  'sync-roi-to-guide': syncRoiToGuideProp = true,
+  'sync-roi-to-guide': syncRoiToGuideProp = false,
 }) => {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const captureFiredRef = useRef(false);
@@ -207,16 +206,26 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   })();
   const allowGalleryUpload =
     getBoolProp(allowGalleryUploadProp, true) && captureModesAllowUpload;
-  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, true);
+  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, false);
 
   const captureMode: CaptureMode = CAPTURE_MODES.includes(
     captureModeProp as CaptureMode,
   )
     ? (captureModeProp as CaptureMode)
     : 'autoCapture';
+  // Clamp to the documented 3000–30000ms range. Values outside this band
+  // tend to either fire the manual fallback before the user has a chance
+  // to align the document (too low) or never surface it at all (too high).
+  const AUTO_CAPTURE_TIMEOUT_MIN_MS = 3_000;
+  const AUTO_CAPTURE_TIMEOUT_MAX_MS = 30_000;
+  const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 10_000;
   const autoCaptureTimeout = (() => {
     const n = Number(autoCaptureTimeoutProp);
-    return Number.isFinite(n) && n > 0 ? n : 10_000;
+    if (!Number.isFinite(n) || n <= 0) return AUTO_CAPTURE_TIMEOUT_DEFAULT_MS;
+    return Math.min(
+      AUTO_CAPTURE_TIMEOUT_MAX_MS,
+      Math.max(AUTO_CAPTURE_TIMEOUT_MIN_MS, n),
+    );
   })();
 
   // Map upper-case enum values used elsewhere in web-components (GREEN_BOOK,
@@ -1022,7 +1031,6 @@ if (
       'auto-capture',
       'auto-capture-timeout',
       'side-of-id',
-      'theme-color',
       'show-navigation',
       'allow-gallery-upload',
       'document-capture-modes',

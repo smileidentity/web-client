@@ -121,17 +121,21 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
       src: animationSrc,
     });
 
-    animation.addEventListener('loadError', () => {
-      if (isMounted) {
-        setHasError(true);
+    // Tear the animation down before unmounting the canvas so dotLottie
+    // stops trying to render into a detached node (which would otherwise
+    // log render errors until the component itself unmounts).
+    const handleError = () => {
+      if (!isMounted) return;
+      try {
+        animation.destroy();
+      } catch {
+        /* destroy may throw if already torn down; ignore */
       }
-    });
+      setHasError(true);
+    };
 
-    animation.addEventListener('renderError', () => {
-      if (isMounted) {
-        setHasError(true);
-      }
-    });
+    animation.addEventListener('loadError', handleError);
+    animation.addEventListener('renderError', handleError);
 
     return () => {
       isMounted = false;

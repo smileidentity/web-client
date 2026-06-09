@@ -2,6 +2,26 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 
 declare const cv: any;
 
+// Internal debug flag: only emit verbose detection telemetry when the page
+// URL contains `?debug` (the same switch that exposes the tuning panel).
+// Evaluated once at module load to avoid recomputing in the hot loop.
+const IS_DEBUG_MODE =
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).has('debug');
+
+// Helper to safely release a list of OpenCV Mats. Mats not yet allocated or
+// already deleted are skipped. Used in `finally` blocks to avoid a wall of
+// repetitive `if (m && !m.isDeleted()) m.delete();` lines.
+const safeDelete = (
+  ...mats: Array<
+    { isDeleted?: () => boolean; delete: () => void } | null | undefined
+  >
+) => {
+  mats.forEach((m) => {
+    if (m && !m.isDeleted?.()) m.delete();
+  });
+};
+
 export const COMPLIANCE_STATES = {
   IDLE: 'idle', // Searching for a card
   DETECTING: 'detecting', // Found a candidate, checking quality
@@ -154,12 +174,7 @@ function detectCardOutsideGuide(
   } catch {
     // best-effort
   } finally {
-    if (mat) mat.delete();
-    if (gray) gray.delete();
-    if (blurred) blurred.delete();
-    if (edges) edges.delete();
-    if (contours) contours.delete();
-    if (hierarchy) hierarchy.delete();
+    safeDelete(mat, gray, blurred, edges, contours, hierarchy);
   }
   return foundOutside;
 }
@@ -1054,7 +1069,7 @@ export function useCardDetection(
                 console.info(
                   `[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`,
                 );
-                setFeedback('ID Card assumed — hold steady');
+                setFeedback('Hold steady');
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
                 return;
@@ -1091,9 +1106,7 @@ export function useCardDetection(
                 recentVotes.length >= DISCOVERY_CONSENSUS_THRESHOLD &&
                 recentVotes.every((v) => v === recentVotes[0]);
 
-              setFeedback(
-                `Detecting document type... (${normalizedRatio.toFixed(2)})`,
-              );
+              setFeedback('Detecting document type…');
               setDebugInfo({
                 blur: 0,
                 glare: 0,
@@ -1115,9 +1128,7 @@ export function useCardDetection(
                 console.info(
                   `[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`,
                 );
-                setFeedback(
-                  `${classifiedType === 'passport' ? 'Passport' : 'ID Card'} detected — hold steady`,
-                );
+                setFeedback('Hold steady');
                 // Force ROI recalculation on next frame by clearing the log flag
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
               }
@@ -1219,7 +1230,7 @@ export function useCardDetection(
         });
 
         if (glarePercent > settingsRef.current.glareThreshold) {
-          setFeedback(`Glare Detected (${glarePercent.toFixed(1)}%)`);
+          setFeedback('Glare detected — adjust lighting');
           setComplianceState(COMPLIANCE_STATES.DETECTING);
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
@@ -1327,39 +1338,41 @@ export function useCardDetection(
           stabilityRef.current.count >= settingsRef.current.stabilityThreshold
         ) {
           if (captureModeRef.current !== 'manualCaptureOnly') {
-            console.info('--- AUTO CAPTURE TRIGGERED ---');
-            console.info(
-              'Document Type:',
-              discoveryRef.current.docType || 'unknown',
-            );
-            console.info(
-              'Edge Density:',
-              `${edgeDensity.toFixed(1)}%`,
-              '| Quadrants:',
-              quadDensities.join('/'),
-            );
-            console.info(
-              'Blur Variance:',
-              Math.round(variance),
-              '(threshold:',
-              `${settingsRef.current.blurThreshold})`,
-            );
-            console.info(
-              'Glare:',
-              `${glarePercent.toFixed(1)}%`,
-              '(threshold:',
-              `${settingsRef.current.glareThreshold}%)`,
-            );
-            console.info(
-              'Stability Frames:',
-              stabilityRef.current.count,
-              '/',
-              settingsRef.current.stabilityThreshold,
-            );
-            console.info(
-              'Best Frame Score:',
-              Math.round(bestFrameRef.current.score),
-            );
+            if (IS_DEBUG_MODE) {
+              console.info('--- AUTO CAPTURE TRIGGERED ---');
+              console.info(
+                'Document Type:',
+                discoveryRef.current.docType || 'unknown',
+              );
+              console.info(
+                'Edge Density:',
+                `${edgeDensity.toFixed(1)}%`,
+                '| Quadrants:',
+                quadDensities.join('/'),
+              );
+              console.info(
+                'Blur Variance:',
+                Math.round(variance),
+                '(threshold:',
+                `${settingsRef.current.blurThreshold})`,
+              );
+              console.info(
+                'Glare:',
+                `${glarePercent.toFixed(1)}%`,
+                '(threshold:',
+                `${settingsRef.current.glareThreshold}%)`,
+              );
+              console.info(
+                'Stability Frames:',
+                stabilityRef.current.count,
+                '/',
+                settingsRef.current.stabilityThreshold,
+              );
+              console.info(
+                'Best Frame Score:',
+                Math.round(bestFrameRef.current.score),
+              );
+            }
             setFeedback('Capturing document...');
             setComplianceState(COMPLIANCE_STATES.CAPTURING);
             isCapturingRef.current = true;
@@ -1415,26 +1428,27 @@ export function useCardDetection(
         runDetection();
       } catch (err: any) {
         console.error('CV Error:', err);
-        setFeedback(`Error: ${err?.message || 'Processing failed'}`);
+        setFeedback('Processing failed — please try again');
         setComplianceState(COMPLIANCE_STATES.IDLE);
         stabilityRef.current.count = 0;
         bestFrameRef.current = { image: null, preview: null, score: 0 };
       } finally {
         // Clean Memory
-        if (fullFrame && !fullFrame.isDeleted()) fullFrame.delete();
-        if (src && !src.isDeleted()) src.delete();
-        if (presenceBlurred && !presenceBlurred.isDeleted())
-          presenceBlurred.delete();
-        if (presenceEdges && !presenceEdges.isDeleted()) presenceEdges.delete();
-        if (gray && !gray.isDeleted()) gray.delete();
-        if (blurred && !blurred.isDeleted()) blurred.delete();
-        if (edges && !edges.isDeleted()) edges.delete();
-        if (contours && !contours.isDeleted()) contours.delete();
-        if (hierarchy && !hierarchy.isDeleted()) hierarchy.delete();
-        if (laplacian && !laplacian.isDeleted()) laplacian.delete();
-        if (mean && !mean.isDeleted()) mean.delete();
-        if (stdDev && !stdDev.isDeleted()) stdDev.delete();
-        if (glareMask && !glareMask.isDeleted()) glareMask.delete();
+        safeDelete(
+          fullFrame,
+          src,
+          presenceBlurred,
+          presenceEdges,
+          gray,
+          blurred,
+          edges,
+          contours,
+          hierarchy,
+          laplacian,
+          mean,
+          stdDev,
+          glareMask,
+        );
 
         // Loop
         if (!isCapturingRef.current) {

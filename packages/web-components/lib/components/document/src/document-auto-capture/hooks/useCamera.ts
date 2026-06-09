@@ -17,7 +17,7 @@ export function useCamera() {
 
     const startCamera = async () => {
       try {
-        const constraintsList = [
+        const constraintsList: MediaStreamConstraints[] = [
           {
             audio: false,
             video: {
@@ -37,20 +37,32 @@ export function useCamera() {
         ];
 
         // Sequential fallback: try each constraint set; only attempt the next
-        // if the previous one rejects. Implemented via a reduce-driven promise
-        // chain so we avoid `for...of` + `await-in-loop` lint rules.
-        const INITIAL = new Error('__initial__');
-        const mediaStream = await constraintsList.reduce<Promise<MediaStream>>(
-          (prev, constraints) =>
-            prev.catch((e: Error) => {
-              if (e !== INITIAL)
-                console.warn('Constraint failed, trying next:', e.message);
-              return navigator.mediaDevices.getUserMedia(constraints);
-            }),
-          Promise.reject(INITIAL),
-        );
+        // if the previous one rejects. We use a plain for…of so the intent is
+        // obvious; the lint rules below are silenced because the loop is the
+        // whole point (we WANT each attempt to wait for the previous to fail).
+        let mediaStream: MediaStream | null = null;
+        let lastError: unknown;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const constraints of constraintsList) {
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            mediaStream =
+              await navigator.mediaDevices.getUserMedia(constraints);
+            break;
+          } catch (e) {
+            lastError = e;
+            console.warn(
+              'Camera constraint failed, trying next:',
+              (e as Error)?.message,
+            );
+          }
+        }
 
-        if (!mediaStream) throw new Error('All camera constraints failed');
+        if (!mediaStream) {
+          throw (
+            (lastError as Error) || new Error('All camera constraints failed')
+          );
+        }
 
         // The component may have unmounted while getUserMedia was pending; if
         // so, stop the freshly-acquired stream immediately so we don't leak the

@@ -23,6 +23,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
+    "resolveJsonModule": true,
 
     /* Linting */
     "strict": true,

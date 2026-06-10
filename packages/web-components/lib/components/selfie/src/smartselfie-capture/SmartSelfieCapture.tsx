@@ -237,11 +237,11 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           font-family: "DM Sans", sans-serif;
           cursor: pointer;
         }
-        
+
         button.btn-primary:hover {
           background-color: #2d2b2a;
         }
-          
+
         button.btn-primary:disabled {
           background-color: #666;
           cursor: not-allowed;

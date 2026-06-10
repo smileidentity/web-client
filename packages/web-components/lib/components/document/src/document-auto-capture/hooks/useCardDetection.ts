@@ -1418,6 +1418,7 @@ export function useCardDetection(
                   isCapturingRef.current = false;
                   setComplianceState(COMPLIANCE_STATES.IDLE);
                   setFeedback('Capture failed — please try again');
+                  animationFrameId = requestAnimationFrame(processFrame);
                 });
             } else {
               setCapturedImage(bestFrameUrl);

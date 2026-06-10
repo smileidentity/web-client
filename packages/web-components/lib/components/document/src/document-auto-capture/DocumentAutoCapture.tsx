@@ -178,7 +178,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
   'document-capture-modes': documentCaptureModesProp,
-  'sync-roi-to-guide': syncRoiToGuideProp = false,
+  'sync-roi-to-guide': syncRoiToGuideProp = true,
 }) => {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const captureFiredRef = useRef(false);
@@ -206,7 +206,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   })();
   const allowGalleryUpload =
     getBoolProp(allowGalleryUploadProp, true) && captureModesAllowUpload;
-  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, false);
+  const syncRoiToGuide = getBoolProp(syncRoiToGuideProp, true);
 
   const captureMode: CaptureMode = CAPTURE_MODES.includes(
     captureModeProp as CaptureMode,

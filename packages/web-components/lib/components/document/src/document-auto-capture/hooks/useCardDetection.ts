@@ -191,7 +191,7 @@ export function useCardDetection(
     autoCaptureTimeout = 10000,
     captureOrientation = 'landscape',
     shouldRotateUi = false,
-    syncRoiToGuide = false,
+    syncRoiToGuide = true,
   } = options;
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
   const autoCaptureTimeoutMs = Math.max(

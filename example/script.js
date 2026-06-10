@@ -82,7 +82,7 @@ export default function setupForm() {
         previewBVNMFA: true,
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
-        auto_capture_feature: autoCaptureEnabled.value === 'true',
+        auto_capture_enabled: autoCaptureEnabled.value === 'true',
         auto_capture: autoCapture.value,
         new_instructions: newInstructions.value === 'true',
         hide_attribution: true,

@@ -78,7 +78,7 @@ class SmartCameraWeb extends HTMLElement {
     return [
       'allow-agent-mode',
       'allow-legacy-selfie-fallback',
-      'auto-capture-feature',
+      'auto-capture-enabled',
       'auto-capture',
       'auto-capture-timeout',
       'disable-image-tests',
@@ -103,7 +103,7 @@ class SmartCameraWeb extends HTMLElement {
     switch (name) {
       case 'allow-agent-mode':
       case 'allow-legacy-selfie-fallback':
-      case 'auto-capture-feature':
+      case 'auto-capture-enabled':
       case 'auto-capture':
       case 'auto-capture-timeout':
       case 'disable-image-tests':
@@ -303,8 +303,8 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get autoCaptureFeature() {
-    return this.hasAttribute('auto-capture-feature')
-      ? 'auto-capture-feature'
+    return this.hasAttribute('auto-capture-enabled')
+      ? 'auto-capture-enabled'
       : '';
   }
 

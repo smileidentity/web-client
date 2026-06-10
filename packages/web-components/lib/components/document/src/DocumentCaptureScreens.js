@@ -51,7 +51,7 @@ class DocumentCaptureScreens extends HTMLElement {
 
   connectedCallback() {
     // Tag name to use for the live capture view. Opt-in via the
-    // `auto-capture-feature` attribute on <document-capture-screens>; defaults to the
+    // `auto-capture-enabled` attribute on <document-capture-screens>; defaults to the
     // legacy <document-capture> element so existing flows are untouched.
     const captureTag = this.autoCaptureFeature
       ? 'document-auto-capture'
@@ -360,7 +360,7 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   get autoCaptureFeature() {
-    return this.hasAttribute('auto-capture-feature');
+    return this.hasAttribute('auto-capture-enabled');
   }
 
   get autoCapture() {
@@ -448,7 +448,7 @@ class DocumentCaptureScreens extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'hide-back-of-id',
-      'auto-capture-feature',
+      'auto-capture-enabled',
       'auto-capture',
       'auto-capture-timeout',
       'new-instructions',
@@ -462,7 +462,7 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':
-      case 'auto-capture-feature':
+      case 'auto-capture-enabled':
       case 'auto-capture':
       case 'auto-capture-timeout':
       case 'new-instructions':

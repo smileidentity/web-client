@@ -594,7 +594,12 @@ export function useCardDetection(
 
         // Crop ROI (from downscaled canvas — all CV ops run at PROCESS_WIDTH)
         fullFrame = cv.imread(dsCanvas);
-        const rect = new cv.Rect(dsClampedX, dsClampedY, dsClampedW, dsClampedH);
+        const rect = new cv.Rect(
+          dsClampedX,
+          dsClampedY,
+          dsClampedW,
+          dsClampedH,
+        );
         src = fullFrame.roi(rect);
         fullFrame.delete();
         fullFrame = null;

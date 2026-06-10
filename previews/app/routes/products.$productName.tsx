@@ -103,7 +103,7 @@ export default function Product() {
         ...config,
         allow_agent_mode: false,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
-        auto_capture_feature: enableAutoCapture,
+        auto_capture_enabled: enableAutoCapture,
         auto_capture: autoCapture,
         use_strict_mode: allowStrictMode,
         show_navigation: true,

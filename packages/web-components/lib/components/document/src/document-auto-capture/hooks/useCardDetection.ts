@@ -1408,11 +1408,17 @@ export function useCardDetection(
                 bestPreviewUrl
                   ? rotateDataUrl(bestPreviewUrl)
                   : Promise.resolve<string | null>(null),
-              ]).then(([rotatedFull, rotatedPreview]) => {
-                setCapturedImage(rotatedFull);
-                setPreviewImage(rotatedPreview);
-                setComplianceState(COMPLIANCE_STATES.SUCCESS);
-              });
+              ])
+                .then(([rotatedFull, rotatedPreview]) => {
+                  setCapturedImage(rotatedFull);
+                  setPreviewImage(rotatedPreview);
+                  setComplianceState(COMPLIANCE_STATES.SUCCESS);
+                })
+                .catch(() => {
+                  isCapturingRef.current = false;
+                  setComplianceState(COMPLIANCE_STATES.IDLE);
+                  setFeedback('Capture failed — please try again');
+                });
             } else {
               setCapturedImage(bestFrameUrl);
               setPreviewImage(bestPreviewUrl);

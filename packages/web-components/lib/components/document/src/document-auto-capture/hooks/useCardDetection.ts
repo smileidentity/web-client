@@ -87,6 +87,10 @@ const OFF_GUIDE_DOWNSCALE_WIDTH = 320;
 const OFF_GUIDE_MIN_MARGIN_X_CSS = 120;
 const OFF_GUIDE_MIN_MARGIN_Y_CSS = 80;
 
+// Downscale width for OpenCV detection. All CV ops run on this resolution;
+// the full-res canvas is only read for the final captured image.
+const PROCESS_WIDTH = 640;
+
 function detectCardOutsideGuide(
   video: HTMLVideoElement,
   guideRectVideo: { x: number; y: number; w: number; h: number },
@@ -249,6 +253,7 @@ export function useCardDetection(
   const canvasRef = useRef<
     (HTMLCanvasElement & { _roiLogged?: boolean }) | null
   >(null);
+  const detectionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef<{
     votes: AspectKey[];
@@ -371,6 +376,21 @@ export function useCardDetection(
           canvas.height = video.videoHeight;
 
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Downscaled canvas for OpenCV (all CV ops run here; full-res canvas is
+        // only used for the final captured image).
+        if (!detectionCanvasRef.current) {
+          detectionCanvasRef.current = document.createElement('canvas');
+        }
+        const dsCanvas = detectionCanvasRef.current;
+        const dsW = Math.min(PROCESS_WIDTH, video.videoWidth);
+        const dsH = Math.round(video.videoHeight * (dsW / video.videoWidth));
+        if (dsCanvas.width !== dsW) dsCanvas.width = dsW;
+        if (dsCanvas.height !== dsH) dsCanvas.height = dsH;
+        dsCanvas
+          .getContext('2d', { willReadFrequently: true })!
+          .drawImage(video, 0, 0, dsW, dsH);
+        const dsScale = dsW / video.videoWidth;
 
         // 2. Define ROI (Region of Interest)
         // The guide box is rendered in CSS space (Overlay.jsx) but detection
@@ -504,6 +524,12 @@ export function useCardDetection(
         }
         const clampedH = Math.min(guideHeight, videoH - clampedY);
 
+        // Downscaled ROI coords — used for all OpenCV ops below.
+        const dsClampedX = Math.round(clampedX * dsScale);
+        const dsClampedY = Math.round(clampedY * dsScale);
+        const dsClampedW = Math.max(1, Math.round(clampedW * dsScale));
+        const dsClampedH = Math.max(1, Math.round(clampedH * dsScale));
+
         // Store current ROI coords for on-demand manual capture (zero cost — no canvas ops).
         latestCropCoordsRef.current = {
           clampedX,
@@ -566,9 +592,9 @@ export function useCardDetection(
           }
         }
 
-        // Crop ROI
-        fullFrame = cv.imread(canvas);
-        const rect = new cv.Rect(clampedX, clampedY, clampedW, clampedH);
+        // Crop ROI (from downscaled canvas — all CV ops run at PROCESS_WIDTH)
+        fullFrame = cv.imread(dsCanvas);
+        const rect = new cv.Rect(dsClampedX, dsClampedY, dsClampedW, dsClampedH);
         src = fullFrame.roi(rect);
         fullFrame.delete();
         fullFrame = null;
@@ -760,7 +786,7 @@ export function useCardDetection(
           let combinedMaxX = -Infinity;
           let combinedMaxY = -Infinity;
           let hasSignificantContour = false;
-          const minContourPixels = guideWidth * guideHeight * 0.005; // 0.5% — catches small text fragments
+          const minContourPixels = dsClampedW * dsClampedH * 0.005; // 0.5% — catches small text fragments
 
           for (let i = 0; i < contours.size(); ++i) {
             const cnt = contours.get(i);
@@ -776,7 +802,7 @@ export function useCardDetection(
               combinedMaxY = Math.max(combinedMaxY, br.y + br.height);
             }
 
-            if (area > guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT) {
+            if (area > dsClampedW * dsClampedH * MIN_CONTOUR_AREA_PERCENT) {
               const peri = cv.arcLength(cnt, true);
               let approx = new cv.Mat();
               cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
@@ -894,7 +920,7 @@ export function useCardDetection(
                   Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
                   0.35;
                 const minArea =
-                  guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
+                  dsClampedW * dsClampedH * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
                   const synth = new cv.Mat(4, 1, cv.CV_32SC2);
                   synth.data32S[0] = combinedMinX;
@@ -917,7 +943,7 @@ export function useCardDetection(
           // are broken into many fragments by fingers, glare, etc.
           // Skip in card variant: the ROI is the full video frame, so background
           // contours (wall, desk, etc.) inflate the bbox to ~100% always.
-          const roiArea = clampedW * clampedH;
+          const roiArea = dsClampedW * dsClampedH;
           let docFillPercent = 0;
 
           if (bestContour) {
@@ -1025,12 +1051,14 @@ export function useCardDetection(
                 h: clampedH,
               };
             } else {
+              // Contour coords are in downscaled ROI space — scale back to full-res
+              // so capture cropping (triggerManualCapture + bestFrame) stays accurate.
               const cardRect = cv.boundingRect(bestContour);
               latestCardRectRef.current = {
-                x: clampedX + cardRect.x,
-                y: clampedY + cardRect.y,
-                w: cardRect.width,
-                h: cardRect.height,
+                x: clampedX + Math.round(cardRect.x / dsScale),
+                y: clampedY + Math.round(cardRect.y / dsScale),
+                w: Math.round(cardRect.width / dsScale),
+                h: Math.round(cardRect.height / dsScale),
               };
             }
 
@@ -1046,8 +1074,8 @@ export function useCardDetection(
                   y: bestContour.data32S[i * 2 + 1],
                 });
               }
-              points.roiWidth = clampedW;
-              points.roiHeight = clampedH;
+              points.roiWidth = dsClampedW;
+              points.roiHeight = dsClampedH;
               setDebugPath(points);
             }
             setComplianceState(COMPLIANCE_STATES.DETECTING);

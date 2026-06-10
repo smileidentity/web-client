@@ -11,6 +11,15 @@ const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
 
+/**
+ * Minimum-correct HTML attribute escape. `&` must be replaced first so the
+ * subsequent `"` -> `&quot;` substitution isn't double-encoded. Used by every
+ * getter that interpolates a partner-supplied value into the `innerHTML`
+ * template in `connectedCallback` — without this, a value containing `"`
+ * (or `&`) would break out of the attribute and inject markup.
+ */
+const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
 const cropImageFromDataUri = (dataUri, cropPercentX = 0, cropPercentY = 0) =>
   new Promise((resolve, reject) => {
     if (!dataUri || typeof dataUri !== 'string') {
@@ -83,9 +92,9 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles(this.themeColor)}
             <div style="height: 100%;">
-              <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
-              <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture-wrapper theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.showBackOnGuidelines} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
+              <selfie-capture-review theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -101,7 +110,11 @@ class SelfieCaptureScreens extends HTMLElement {
 
     if (
       this.getAttribute('initial-screen') === 'selfie-capture' ||
-      this.hideInstructions
+      this.hideInstructions ||
+      // In strict mode the modern `enhanced-smartselfie-capture` element
+      // renders its own guidelines screen, so we skip the legacy
+      // `selfie-capture-instructions` element entirely.
+      this.isStrictMode
     ) {
       this.setActiveScreen(this.selfieCapture);
     } else {
@@ -346,7 +359,7 @@ class SelfieCaptureScreens extends HTMLElement {
       // Force remount of selfie-capture-wrapper for clean state on next visit
       await this.forceWrapperRemount();
 
-      if (this.hideInstructions) {
+      if (this.hideInstructions || this.isStrictMode) {
         this.handleBackEvents();
         return;
       }
@@ -367,6 +380,18 @@ class SelfieCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
+      this._data.images = event.detail.images;
+      SmartCamera.stopMedia();
+
+      // In strict mode (Enhanced SmartSelfie), the ESS component already
+      // shows its own review screen and only re-dispatches `publish` after
+      // the user confirms. Skip the legacy `selfie-capture-review` step and
+      // publish straight up to the host page.
+      if (this.isStrictMode) {
+        this._publishSelectedImages();
+        return;
+      }
+
       this.selfieReview.setAttribute(
         'data-image',
         await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
@@ -376,8 +401,6 @@ class SelfieCaptureScreens extends HTMLElement {
         'mirror-image',
         shouldMirror ? 'true' : 'false',
       );
-      this._data.images = event.detail.images;
-      SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
     };
 
@@ -450,8 +473,29 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get allowLegacySelfieFallback() {
     return this.hasAttribute('allow-legacy-selfie-fallback')
-      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      ? `allow-legacy-selfie-fallback="${escAttr(this.getAttribute('allow-legacy-selfie-fallback'))}"`
       : '';
+  }
+
+  get useStrictMode() {
+    return this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+      ? 'use-strict-mode="true"'
+      : '';
+  }
+
+  get showBackOnGuidelines() {
+    return this.hasAttribute('show-back-on-guidelines')
+      ? 'show-back-on-guidelines="true"'
+      : '';
+  }
+
+  /** Boolean form of `use-strict-mode` for runtime checks. */
+  get isStrictMode() {
+    return (
+      this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+    );
   }
 
   get themeColor() {
@@ -477,6 +521,8 @@ class SelfieCaptureScreens extends HTMLElement {
       'allow-legacy-selfie-fallback',
       'show-agent-mode-for-tests',
       'disable-image-tests',
+      'use-strict-mode',
+      'show-back-on-guidelines',
     ];
   }
 
@@ -489,6 +535,8 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'allow-legacy-selfie-fallback':
       case 'show-agent-mode-for-tests':
       case 'disable-image-tests':
+      case 'use-strict-mode':
+      case 'show-back-on-guidelines':
         this.connectedCallback();
         break;
       default:

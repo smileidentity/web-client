@@ -94,6 +94,7 @@ export default function Product() {
     useState<boolean>(false);
   const [enableAutoCapture, setEnableAutoCapture] = useState<boolean>(true);
   const [autoCapture, setAutoCapture] = useState<string>('autoCapture');
+  const [allowStrictMode, setAllowStrictMode] = useState<boolean>(true);
   const [newInstructions, setNewInstructions] = useState<boolean>(true);
 
   function initializeSdk(config: TokenResults) {
@@ -104,6 +105,8 @@ export default function Product() {
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
         auto_capture_feature: enableAutoCapture,
         auto_capture: autoCapture,
+        use_strict_mode: allowStrictMode,
+        show_navigation: true,
         new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (
@@ -227,7 +230,20 @@ export default function Product() {
                   <option value="true">Enabled</option>
                 </select>
               </div>
-
+              <div>
+                <label htmlFor="strict-mode-select">Strict Mode</label>
+                <select
+                  id="strict-mode-select"
+                  value={allowStrictMode ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setAllowStrictMode(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
               <div>
                 <label htmlFor="auto-capture-select">Enable Auto Capture</label>
                 <select

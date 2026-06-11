@@ -403,6 +403,19 @@ export function useCardDetection(
         dsCtx.drawImage(video, 0, 0, dsW, dsH);
         const dsScale = dsW / video.videoWidth;
 
+        // Kernels are fixed pixel sizes, so they become proportionally larger as the
+        // image shrinks. Scale them with dsScale so the physical blur radius and
+        // morphological closing distance stay constant relative to the scene content.
+        // This prevents background texture gaps (e.g. carpet lines) that are wider
+        // than the kernel at full resolution from being bridged at 640 px.
+        // `| 1` ensures the kernel size is always odd (OpenCV requirement).
+        const rawKernel = Math.round(5 * dsScale);
+        const blurKernel = Math.max(
+          3,
+          rawKernel % 2 === 0 ? rawKernel + 1 : rawKernel,
+        );
+        const closingIterations = Math.max(1, Math.round(2 * dsScale));
+
         // 2. Define ROI (Region of Interest)
         // The guide box is rendered in CSS space (Overlay.jsx) but detection
         // runs on the native-resolution canvas. With objectFit:'cover' on the
@@ -628,7 +641,7 @@ export function useCardDetection(
         cv.GaussianBlur(
           gray,
           presenceBlurred,
-          new cv.Size(5, 5),
+          new cv.Size(blurKernel, blurKernel),
           0,
           0,
           cv.BORDER_DEFAULT,
@@ -749,7 +762,7 @@ export function useCardDetection(
           cv.GaussianBlur(
             gray,
             blurred,
-            new cv.Size(5, 5),
+            new cv.Size(blurKernel, blurKernel),
             0,
             0,
             cv.BORDER_DEFAULT,
@@ -759,8 +772,8 @@ export function useCardDetection(
           cv.Canny(blurred, edges, 50, 150);
 
           // Bridge gaps in the card border caused by lamination glare or finger occlusion.
-          // A 3×3 closing kernel run twice fills edge breaks up to ~5px without merging
-          // unrelated edges or creating false rectangles.
+          // Iterations are scaled with dsScale so the physical bridging distance stays
+          // constant regardless of the processing resolution.
           const closingKernel = cv.getStructuringElement(
             cv.MORPH_RECT,
             new cv.Size(3, 3),
@@ -772,7 +785,7 @@ export function useCardDetection(
             cv.MORPH_CLOSE,
             closingKernel,
             new cv.Point(-1, -1),
-            2,
+            closingIterations,
           );
           closingKernel.delete();
           edges.delete();

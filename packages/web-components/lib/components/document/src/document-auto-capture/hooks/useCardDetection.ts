@@ -80,6 +80,14 @@ const MIN_CONTOUR_AREA_PERCENT = 0.05;
 // Less strict than full allQuadrantsPass (9/9) but still filters empty scenes.
 const MIN_DISCOVERY_GRID_CELLS = 3;
 
+// --- Contour rejection thresholds (shared by the in-guide pass and the
+// off-guide detector) ---
+// A real card border survives approxPolyDP with little perimeter loss;
+// jagged background-texture paths compress 4-10×.
+const PERI_COMPRESSION_MAX = 3.5;
+// Minimum contour-area / bounding-box-area ratio for a card-shaped contour.
+const MIN_RECT_FILL_RATIO = 0.65;
+
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
 // RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
@@ -157,7 +165,15 @@ function detectCardOutsideGuide(
           const aspectOk = expectedAspect
             ? Math.abs(aspect - expectedAspect) / expectedAspect < 0.25
             : aspect >= 1.15 && aspect <= 2.0;
-          if (aspectOk) {
+          // Same texture rejection as the in-guide pass: background quads are
+          // jagged paths that approxPolyDP compresses heavily and that fill
+          // their bounding box poorly. Without these gates a textured backdrop
+          // outside the guide fires false "Align document in frame" prompts.
+          const approxPeri = cv.arcLength(approx, true);
+          const isCompact =
+            approxPeri > 0 && peri / approxPeri < PERI_COMPRESSION_MAX;
+          const fillRatio = area / (br.width * br.height);
+          if (aspectOk && isCompact && fillRatio > MIN_RECT_FILL_RATIO) {
             bestArea = area;
             bestBR = br;
           }
@@ -258,6 +274,9 @@ export function useCardDetection(
     (HTMLCanvasElement & { _roiLogged?: boolean }) | null
   >(null);
   const detectionCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Full-resolution crop of just the guide-box ROI. Contour detection runs
+  // here at native pixel fidelity (the 640px dsCanvas loses the card border).
+  const contourCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef<{
     votes: AspectKey[];
@@ -351,6 +370,8 @@ export function useCardDetection(
       let fullFrame: any = null;
       let src: any = null;
       let gray: any = null;
+      let contourFull: any = null;
+      let contourGray: any = null;
       let blurred: any = null;
       let edges: any = null;
       let presenceEdges: any = null;
@@ -403,18 +424,16 @@ export function useCardDetection(
         dsCtx.drawImage(video, 0, 0, dsW, dsH);
         const dsScale = dsW / video.videoWidth;
 
-        // Kernels are fixed pixel sizes, so they become proportionally larger as the
-        // image shrinks. Scale them with dsScale so the physical blur radius and
-        // morphological closing distance stay constant relative to the scene content.
-        // This prevents background texture gaps (e.g. carpet lines) that are wider
-        // than the kernel at full resolution from being bridged at 640 px.
+        // The cheap presence gate runs on the 640px dsCanvas, so its blur
+        // kernel is scaled with dsScale to keep the physical blur radius
+        // constant (a fixed 5px kernel would over-smooth at 640px and bridge
+        // background texture gaps like carpet lines).
         // `| 1` ensures the kernel size is always odd (OpenCV requirement).
         const rawKernel = Math.round(5 * dsScale);
         const blurKernel = Math.max(
           3,
           rawKernel % 2 === 0 ? rawKernel + 1 : rawKernel,
         );
-        const closingIterations = Math.max(1, Math.round(2 * dsScale));
 
         // 2. Define ROI (Region of Interest)
         // The guide box is rendered in CSS space (Overlay.jsx) but detection
@@ -616,7 +635,8 @@ export function useCardDetection(
           }
         }
 
-        // Crop ROI (from downscaled canvas — all CV ops run at PROCESS_WIDTH)
+        // Crop ROI for the cheap gates from the downscaled canvas (presence,
+        // texture, grid, blur, glare all run at PROCESS_WIDTH).
         fullFrame = cv.imread(dsCanvas);
         const rect = new cv.Rect(
           dsClampedX,
@@ -758,11 +778,50 @@ export function useCardDetection(
         // scenes (textured desk, no document) never trigger the timeout.
 
         if (shouldRunContour) {
+          // Contour detection runs at FULL resolution on a crop of just the
+          // guide-box ROI. The 640px dsCanvas collapses the card border to a
+          // ~1px line that Canny/findContours can't recover unless the card is
+          // large in frame — running here at native fidelity restores reliable
+          // border detection while staying cheap (the ROI is a fraction of the
+          // frame, and this pass is gated behind the presence/grid check above).
+          if (!contourCanvasRef.current) {
+            contourCanvasRef.current = document.createElement('canvas');
+          }
+          const contourCanvas = contourCanvasRef.current;
+          if (contourCanvas.width !== clampedW) contourCanvas.width = clampedW;
+          if (contourCanvas.height !== clampedH)
+            contourCanvas.height = clampedH;
+          const contourCtx = contourCanvas.getContext('2d', {
+            willReadFrequently: true,
+          });
+          if (!contourCtx) {
+            animationFrameId = requestAnimationFrame(processFrame);
+            return;
+          }
+          // Draw only the ROI sub-rect from the full-res canvas at native size
+          // (avoids cv.imread over the whole multi-megapixel canvas).
+          contourCtx.drawImage(
+            canvas,
+            clampedX,
+            clampedY,
+            clampedW,
+            clampedH,
+            0,
+            0,
+            clampedW,
+            clampedH,
+          );
+          contourFull = cv.imread(contourCanvas);
+          contourGray = new cv.Mat();
+          cv.cvtColor(contourFull, contourGray, cv.COLOR_RGBA2GRAY, 0);
+          contourFull.delete();
+          contourFull = null;
+
           blurred = new cv.Mat();
           cv.GaussianBlur(
-            gray,
+            contourGray,
             blurred,
-            new cv.Size(blurKernel, blurKernel),
+            new cv.Size(5, 5),
             0,
             0,
             cv.BORDER_DEFAULT,
@@ -771,9 +830,9 @@ export function useCardDetection(
           edges = new cv.Mat();
           cv.Canny(blurred, edges, 50, 150);
 
-          // Bridge gaps in the card border caused by lamination glare or finger occlusion.
-          // Iterations are scaled with dsScale so the physical bridging distance stays
-          // constant regardless of the processing resolution.
+          // Bridge gaps in the card border caused by lamination glare or finger
+          // occlusion. At full resolution the card border is crisp and well
+          // separated from the background, so a fixed 2-iteration close is safe.
           const closingKernel = cv.getStructuringElement(
             cv.MORPH_RECT,
             new cv.Size(3, 3),
@@ -785,7 +844,7 @@ export function useCardDetection(
             cv.MORPH_CLOSE,
             closingKernel,
             new cv.Point(-1, -1),
-            closingIterations,
+            2,
           );
           closingKernel.delete();
           edges.delete();
@@ -815,7 +874,8 @@ export function useCardDetection(
           let combinedMaxX = -Infinity;
           let combinedMaxY = -Infinity;
           let hasSignificantContour = false;
-          const minContourPixels = dsClampedW * dsClampedH * 0.005; // 0.5% — catches small text fragments
+          // All contour-pass geometry is in full-res ROI pixels.
+          const minContourPixels = clampedW * clampedH * 0.005; // 0.5% — catches small text fragments
 
           for (let i = 0; i < contours.size(); ++i) {
             const cnt = contours.get(i);
@@ -831,7 +891,7 @@ export function useCardDetection(
               combinedMaxY = Math.max(combinedMaxY, br.y + br.height);
             }
 
-            if (area > dsClampedW * dsClampedH * MIN_CONTOUR_AREA_PERCENT) {
+            if (area > clampedW * clampedH * MIN_CONTOUR_AREA_PERCENT) {
               const peri = cv.arcLength(cnt, true);
               let approx = new cv.Mat();
               cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
@@ -851,61 +911,19 @@ export function useCardDetection(
                 const bRect = cv.boundingRect(approx);
                 const fillRatio = area / (bRect.width * bRect.height);
 
-                // --- Perimeter compression check ---
-                // A real card border is already near-rectangular before
-                // approxPolyDP — original perimeter ≈ approximated perimeter
-                // (ratio ~1.0–2.0). Background texture contours are long,
-                // jagged edge paths that approxPolyDP collapses dramatically
-                // (ratio 4–10×). Reject anything compressed more than 3.5×.
-                const approxPeri = cv.arcLength(approx, true);
-                const isCompactContour =
-                  approxPeri > 0 && peri / approxPeri < 3.5;
-
-                // --- Background-normalized polygon-side edge support ---
-                // Sample presenceEdges along each polygon side. A real card
-                // border produces much higher edge density on those exact lines
-                // than the ambient background level. Background "rectangles"
-                // have side density close to the overall background density.
-                const presenceData = presenceEdges.data as Uint8Array;
-                const peCols = presenceEdges.cols;
-                const peRows = presenceEdges.rows;
-                const SIDE_SAMPLES = 20;
-                let sideHits = 0;
-                const totalSideSamples = 4 * (SIDE_SAMPLES + 1);
-                for (let s = 0; s < 4; s++) {
-                  const ax = approx.data32S[s * 2];
-                  const ay = approx.data32S[s * 2 + 1];
-                  const bx = approx.data32S[((s + 1) % 4) * 2];
-                  const by = approx.data32S[((s + 1) % 4) * 2 + 1];
-                  for (let t = 0; t <= SIDE_SAMPLES; t++) {
-                    const px = Math.round(ax + (bx - ax) * (t / SIDE_SAMPLES));
-                    const py = Math.round(ay + (by - ay) * (t / SIDE_SAMPLES));
-                    if (px >= 0 && px < peCols && py >= 0 && py < peRows) {
-                      if (presenceData[py * peCols + px] > 0) sideHits++;
-                    }
-                  }
-                }
-                const sideSupport = sideHits / totalSideSamples;
-                const bgDensity = edgeDensity / 100;
-                // Require side edge density ≥ 2.5× background, or ≥ 45%
-                // absolute for plain backgrounds where the ratio is less stable.
-                const hasEdgeSupport =
-                  (bgDensity > 0 && sideSupport / bgDensity >= 2.5) ||
-                  sideSupport >= 0.45;
-
                 // --- ROI-boundary check ---
                 // Reject contours that hug 3+ walls of the ROI. A real card
                 // at correct distance leaves visible space on at least 2 sides;
                 // background pattern rectangles fill the entire ROI and touch
                 // all 4 walls simultaneously.
                 const wallMargin = Math.round(
-                  Math.min(dsClampedW, dsClampedH) * 0.04,
+                  Math.min(clampedW, clampedH) * 0.04,
                 );
                 const wallTouches =
                   (bRect.x <= wallMargin ? 1 : 0) +
                   (bRect.y <= wallMargin ? 1 : 0) +
-                  (bRect.x + bRect.width >= dsClampedW - wallMargin ? 1 : 0) +
-                  (bRect.y + bRect.height >= dsClampedH - wallMargin ? 1 : 0);
+                  (bRect.x + bRect.width >= clampedW - wallMargin ? 1 : 0) +
+                  (bRect.y + bRect.height >= clampedH - wallMargin ? 1 : 0);
                 const roiWallHug = wallTouches >= 3;
 
                 // --- Aspect-ratio gate ---
@@ -965,12 +983,10 @@ export function useCardDetection(
                 }
 
                 if (
-                  fillRatio > 0.65 &&
+                  fillRatio > MIN_RECT_FILL_RATIO &&
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
-                  isCompactContour &&
-                  hasEdgeSupport &&
                   area > maxArea
                 ) {
                   maxArea = area;
@@ -1008,8 +1024,7 @@ export function useCardDetection(
                 const aspectOk =
                   Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
                   0.35;
-                const minArea =
-                  dsClampedW * dsClampedH * MIN_CONTOUR_AREA_PERCENT;
+                const minArea = clampedW * clampedH * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
                   const synth = new cv.Mat(4, 1, cv.CV_32SC2);
                   synth.data32S[0] = combinedMinX;
@@ -1032,7 +1047,11 @@ export function useCardDetection(
           // are broken into many fragments by fingers, glare, etc.
           // Skip in card variant: the ROI is the full video frame, so background
           // contours (wall, desk, etc.) inflate the bbox to ~100% always.
-          const roiArea = dsClampedW * dsClampedH;
+          // docFillPercent is a ratio, so each branch divides by the ROI area
+          // in ITS OWN coordinate space: full-res for the contour-pass geometry,
+          // 640px for the presenceEdges fallback.
+          const roiArea = clampedW * clampedH; // full-res ROI (contour pass)
+          const dsRoiArea = dsClampedW * dsClampedH; // 640px ROI (presence map)
           let docFillPercent = 0;
 
           if (bestContour) {
@@ -1049,7 +1068,7 @@ export function useCardDetection(
               cv.findNonZero(presenceEdges, nz);
               if (nz.rows > 0) {
                 const br = cv.boundingRect(nz);
-                docFillPercent = ((br.width * br.height) / roiArea) * 100;
+                docFillPercent = ((br.width * br.height) / dsRoiArea) * 100;
               }
             } catch {
               // fall through with docFillPercent = 0
@@ -1140,14 +1159,15 @@ export function useCardDetection(
                 h: clampedH,
               };
             } else {
-              // Contour coords are in downscaled ROI space — scale back to full-res
-              // so capture cropping (triggerManualCapture + bestFrame) stays accurate.
+              // Contour coords are already in full-res ROI space, so only the
+              // ROI origin offset is needed for capture cropping
+              // (triggerManualCapture + bestFrame).
               const cardRect = cv.boundingRect(bestContour);
               latestCardRectRef.current = {
-                x: clampedX + Math.round(cardRect.x / dsScale),
-                y: clampedY + Math.round(cardRect.y / dsScale),
-                w: Math.round(cardRect.width / dsScale),
-                h: Math.round(cardRect.height / dsScale),
+                x: clampedX + cardRect.x,
+                y: clampedY + cardRect.y,
+                w: cardRect.width,
+                h: cardRect.height,
               };
             }
 
@@ -1163,8 +1183,8 @@ export function useCardDetection(
                   y: bestContour.data32S[i * 2 + 1],
                 });
               }
-              points.roiWidth = dsClampedW;
-              points.roiHeight = dsClampedH;
+              points.roiWidth = clampedW;
+              points.roiHeight = clampedH;
               setDebugPath(points);
             }
             setComplianceState(COMPLIANCE_STATES.DETECTING);
@@ -1567,6 +1587,8 @@ export function useCardDetection(
         safeDelete(
           fullFrame,
           src,
+          contourFull,
+          contourGray,
           presenceBlurred,
           presenceEdges,
           gray,

@@ -1461,7 +1461,11 @@ export function useCardDetection(
                 .catch(() => {
                   isCapturingRef.current = false;
                   stabilityRef.current.count = 0;
-                  bestFrameRef.current = { image: null, preview: null, score: 0 };
+                  bestFrameRef.current = {
+                    image: null,
+                    preview: null,
+                    score: 0,
+                  };
                   setComplianceState(COMPLIANCE_STATES.IDLE);
                   setFeedback('Capture failed — please try again');
                   animationFrameId = requestAnimationFrame(processFrame);

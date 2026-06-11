@@ -387,13 +387,20 @@ export function useCardDetection(
           detectionCanvasRef.current = document.createElement('canvas');
         }
         const dsCanvas = detectionCanvasRef.current;
+        if (!video.videoWidth) {
+          animationFrameId = requestAnimationFrame(processFrame);
+          return;
+        }
         const dsW = Math.min(PROCESS_WIDTH, video.videoWidth);
         const dsH = Math.round(video.videoHeight * (dsW / video.videoWidth));
         if (dsCanvas.width !== dsW) dsCanvas.width = dsW;
         if (dsCanvas.height !== dsH) dsCanvas.height = dsH;
-        dsCanvas
-          .getContext('2d', { willReadFrequently: true })!
-          .drawImage(video, 0, 0, dsW, dsH);
+        const dsCtx = dsCanvas.getContext('2d', { willReadFrequently: true });
+        if (!dsCtx) {
+          animationFrameId = requestAnimationFrame(processFrame);
+          return;
+        }
+        dsCtx.drawImage(video, 0, 0, dsW, dsH);
         const dsScale = dsW / video.videoWidth;
 
         // 2. Define ROI (Region of Interest)
@@ -1453,6 +1460,8 @@ export function useCardDetection(
                 })
                 .catch(() => {
                   isCapturingRef.current = false;
+                  stabilityRef.current.count = 0;
+                  bestFrameRef.current = { image: null, preview: null, score: 0 };
                   setComplianceState(COMPLIANCE_STATES.IDLE);
                   setFeedback('Capture failed — please try again');
                   animationFrameId = requestAnimationFrame(processFrame);

@@ -861,6 +861,38 @@ export function useCardDetection(
                 const isCompactContour =
                   approxPeri > 0 && peri / approxPeri < 3.5;
 
+                // --- Background-normalized polygon-side edge support ---
+                // Sample presenceEdges along each polygon side. A real card
+                // border produces much higher edge density on those exact lines
+                // than the ambient background level. Background "rectangles"
+                // have side density close to the overall background density.
+                const presenceData = presenceEdges.data as Uint8Array;
+                const peCols = presenceEdges.cols;
+                const peRows = presenceEdges.rows;
+                const SIDE_SAMPLES = 20;
+                let sideHits = 0;
+                const totalSideSamples = 4 * (SIDE_SAMPLES + 1);
+                for (let s = 0; s < 4; s++) {
+                  const ax = approx.data32S[s * 2];
+                  const ay = approx.data32S[s * 2 + 1];
+                  const bx = approx.data32S[((s + 1) % 4) * 2];
+                  const by = approx.data32S[((s + 1) % 4) * 2 + 1];
+                  for (let t = 0; t <= SIDE_SAMPLES; t++) {
+                    const px = Math.round(ax + (bx - ax) * (t / SIDE_SAMPLES));
+                    const py = Math.round(ay + (by - ay) * (t / SIDE_SAMPLES));
+                    if (px >= 0 && px < peCols && py >= 0 && py < peRows) {
+                      if (presenceData[py * peCols + px] > 0) sideHits++;
+                    }
+                  }
+                }
+                const sideSupport = sideHits / totalSideSamples;
+                const bgDensity = edgeDensity / 100;
+                // Require side edge density ≥ 2.5× background, or ≥ 45%
+                // absolute for plain backgrounds where the ratio is less stable.
+                const hasEdgeSupport =
+                  (bgDensity > 0 && sideSupport / bgDensity >= 2.5) ||
+                  sideSupport >= 0.45;
+
                 // --- ROI-boundary check ---
                 // Reject contours that hug 3+ walls of the ROI. A real card
                 // at correct distance leaves visible space on at least 2 sides;
@@ -938,6 +970,7 @@ export function useCardDetection(
                   aspectOk &&
                   !roiWallHug &&
                   isCompactContour &&
+                  hasEdgeSupport &&
                   area > maxArea
                 ) {
                   maxArea = area;

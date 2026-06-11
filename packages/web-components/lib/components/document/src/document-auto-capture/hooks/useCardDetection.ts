@@ -851,6 +851,21 @@ export function useCardDetection(
                 const bRect = cv.boundingRect(approx);
                 const fillRatio = area / (bRect.width * bRect.height);
 
+                // --- ROI-boundary check ---
+                // Reject contours that hug 3+ walls of the ROI. A real card
+                // at correct distance leaves visible space on at least 2 sides;
+                // background pattern rectangles fill the entire ROI and touch
+                // all 4 walls simultaneously.
+                const wallMargin = Math.round(
+                  Math.min(dsClampedW, dsClampedH) * 0.04,
+                );
+                const wallTouches =
+                  (bRect.x <= wallMargin ? 1 : 0) +
+                  (bRect.y <= wallMargin ? 1 : 0) +
+                  (bRect.x + bRect.width >= dsClampedW - wallMargin ? 1 : 0) +
+                  (bRect.y + bRect.height >= dsClampedH - wallMargin ? 1 : 0);
+                const roiWallHug = wallTouches >= 3;
+
                 // --- Aspect-ratio gate ---
                 // Reject candidates whose shape doesn't match a document.
                 // During discovery, allow anything in the union of passport
@@ -911,6 +926,7 @@ export function useCardDetection(
                   fillRatio > 0.65 &&
                   anglesOk &&
                   aspectOk &&
+                  !roiWallHug &&
                   area > maxArea
                 ) {
                   maxArea = area;

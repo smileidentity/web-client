@@ -851,6 +851,16 @@ export function useCardDetection(
                 const bRect = cv.boundingRect(approx);
                 const fillRatio = area / (bRect.width * bRect.height);
 
+                // --- Perimeter compression check ---
+                // A real card border is already near-rectangular before
+                // approxPolyDP — original perimeter ≈ approximated perimeter
+                // (ratio ~1.0–2.0). Background texture contours are long,
+                // jagged edge paths that approxPolyDP collapses dramatically
+                // (ratio 4–10×). Reject anything compressed more than 3.5×.
+                const approxPeri = cv.arcLength(approx, true);
+                const isCompactContour =
+                  approxPeri > 0 && peri / approxPeri < 3.5;
+
                 // --- ROI-boundary check ---
                 // Reject contours that hug 3+ walls of the ROI. A real card
                 // at correct distance leaves visible space on at least 2 sides;
@@ -927,6 +937,7 @@ export function useCardDetection(
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
+                  isCompactContour &&
                   area > maxArea
                 ) {
                   maxArea = area;

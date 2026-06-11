@@ -18,7 +18,11 @@ const safeDelete = (
   >
 ) => {
   mats.forEach((m) => {
-    if (m && !m.isDeleted?.()) m.delete();
+    try {
+      if (m && !m.isDeleted?.()) m.delete();
+    } catch {
+      // best-effort; continue releasing remaining mats
+    }
   });
 };
 

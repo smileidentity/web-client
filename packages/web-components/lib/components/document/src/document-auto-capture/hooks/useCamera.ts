@@ -40,9 +40,14 @@ export function useCamera() {
         // if the previous one rejects. Implemented as a small recursive helper
         // so we avoid both `await`-in-loop and the contrived reduce/Promise
         // chain that the previous version used.
-        const tryConstraints = (index: number): Promise<MediaStream> => {
+        const tryConstraints = (
+          index: number,
+          lastError?: Error,
+        ): Promise<MediaStream> => {
           if (index >= constraintsList.length) {
-            return Promise.reject(new Error('All camera constraints failed'));
+            return Promise.reject(
+              lastError || new Error('All camera constraints failed'),
+            );
           }
           return navigator.mediaDevices
             .getUserMedia(constraintsList[index])
@@ -51,7 +56,7 @@ export function useCamera() {
                 'Camera constraint failed, trying next:',
                 e?.message,
               );
-              return tryConstraints(index + 1);
+              return tryConstraints(index + 1, e);
             });
         };
 

@@ -139,7 +139,11 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
 
     return () => {
       isMounted = false;
-      animation.destroy();
+      try {
+        animation.destroy();
+      } catch {
+        /* may already be destroyed by handleError */
+      }
     };
   }, [animationSrc]);
 

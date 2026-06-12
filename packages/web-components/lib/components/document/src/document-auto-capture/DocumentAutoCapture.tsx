@@ -10,6 +10,10 @@ import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
 import { theme } from './theme';
 
+// Registers the <smileid-navigation> custom element (back/close buttons,
+// localised labels, RTL handling) reused across the SDK's capture screens.
+import '../../../navigation/src';
+
 import { getBoolProp } from '../../../../utils/props';
 import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
@@ -79,21 +83,6 @@ const getOptimalDefaults = () => {
         minFillPercent: 70,
         maxFillPercent: 98,
       };
-};
-
-const roundControlButtonStyle = {
-  width: 52,
-  height: 52,
-  borderRadius: '50%',
-  backgroundColor: 'rgba(0,0,0,0.55)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  padding: 0,
-  backdropFilter: 'blur(1px)',
 };
 
 const galleryButtonStyle = {
@@ -342,6 +331,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // host) rather than the page viewport, so the component fills its parent
   // even when embedded inside another layout (e.g. <document-capture-screens>).
   const cameraViewportRef = useRef<HTMLDivElement>(null);
+  // The shared <smileid-navigation> element (only one layout mounts at a time).
+  const navigationRef = useRef<HTMLElement | null>(null);
   const [viewportBox, setViewportBox] = useState<{ w: number; h: number }>({
     w: 0,
     h: 0,
@@ -349,10 +340,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).has('debug');
+  const showDebug = true;
 
+  console.log('[DocumentAutoCapture] settings', { settings, window });
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {
     ensureOpenCv().catch((err: unknown) => {
@@ -625,6 +615,23 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     dispatchHostEvent('document-auto-capture.close');
   };
 
+  // Bridge the <smileid-navigation> element's custom events to the same
+  // back/close handlers. Mirrors SmartSelfieCapture's wiring; only one layout
+  // (and thus one navigation element) is mounted at a time, so a single ref
+  // suffices.
+  useEffect(() => {
+    const navigation = navigationRef.current;
+    if (!navigation || !showNavigation) return undefined;
+    const handleBack = () => onBack();
+    const handleClose = () => onClose();
+    navigation.addEventListener('navigation.back', handleBack);
+    navigation.addEventListener('navigation.close', handleClose);
+    return () => {
+      navigation.removeEventListener('navigation.back', handleBack);
+      navigation.removeEventListener('navigation.close', handleClose);
+    };
+  }, [showNavigation]);
+
   // Capture-button ring progress. `captureProgress` (0–100) already reflects
   // the stability count vs the threshold; the previous `debugInfo.stability`
   // lookup was always undefined (the hook never sets that field), so the ring
@@ -778,20 +785,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
     const titleLabel = title || `Submit ${sideOfId} of ID`;
 
-    const desktopNavBtnStyle: Record<string, string | number> = {
-      width: 44,
-      height: 44,
-      borderRadius: '50%',
-      background: 'rgba(0,0,0,0.08)',
-      border: '1px solid rgba(0,0,0,0.12)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      padding: 0,
-      flexShrink: 0,
-    };
-
     return (
       <div
         className="document-auto-capture document-auto-capture--desktop"
@@ -817,69 +810,21 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           />
         )}
 
-        {/* Navigation row */}
+        {/* Navigation row — reuses the shared <smileid-navigation> element.
+            Light desktop chrome: dark icons on a faint grey pill, overriding
+            the element's default translucent-on-dark styling via CSS vars. */}
         {showNavigation && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0.75rem 1rem 0',
-            }}
-          >
-            <button
-              onClick={onBack}
-              style={desktopNavBtnStyle}
-              aria-label="Back"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M15 6l-6 6 6 6"
-                  stroke="rgba(0,0,0,0.7)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={onClose}
-              style={desktopNavBtnStyle}
-              aria-label="Close"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                aria-hidden="true"
-              >
-                <line
-                  x1="3"
-                  y1="3"
-                  x2="17"
-                  y2="17"
-                  stroke="rgba(0,0,0,0.7)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="17"
-                  y1="3"
-                  x2="3"
-                  y2="17"
-                  stroke="rgba(0,0,0,0.7)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
+          <div style={{ padding: '0.75rem 1rem 0' }}>
+            {/* @ts-expect-error preact-custom-element lacks ref/attr types */}
+            <smileid-navigation
+              ref={navigationRef}
+              style={{
+                width: '100%',
+                '--smileid-navigation-button-bg': 'rgba(0,0,0,0.08)',
+                '--smileid-navigation-icon-color': 'rgba(0,0,0,0.7)',
+                '--smileid-navigation-focus-color': themeColor,
+              }}
+            />
           </div>
         )}
 
@@ -1103,80 +1048,31 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             zIndex: 5,
           }}
         >
-          {/* Top controls — id-scanner-styled round translucent buttons.
-              Back sits near the top edge; Close is aligned vertically with the
-              capture button row so they share the same baseline. */}
+          {/* Top controls — reuses the shared <smileid-navigation> element,
+              spanning the top so Back lands top-left and Close top-right. The
+              element's default translucent-on-dark styling already matches the
+              fullscreen camera chrome. */}
           {showNavigation && (
-            <>
-              <button
-                onClick={onBack}
+            <div
+              style={{
+                position: 'absolute',
+                top: 32,
+                left: 16,
+                right: 16,
+                zIndex: 10,
+                pointerEvents: 'auto',
+              }}
+            >
+              {/* @ts-expect-error preact-custom-element lacks ref/attr types */}
+              <smileid-navigation
+                ref={navigationRef}
                 style={{
-                  ...roundControlButtonStyle,
-                  position: 'absolute',
-                  top: 32,
-                  left: 16,
-                  zIndex: 10,
-                  pointerEvents: 'auto',
+                  width: '100%',
+                  '--smileid-navigation-button-bg': 'rgba(0,0,0,0.55)',
+                  '--smileid-navigation-icon-color': '#fff',
                 }}
-                aria-label="Back"
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M15 6l-6 6 6 6"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-
-              <button
-                onClick={onClose}
-                style={{
-                  ...roundControlButtonStyle,
-                  position: 'absolute',
-                  top: 32,
-                  right: 34,
-                  zIndex: 10,
-                  pointerEvents: 'auto',
-                }}
-                aria-label="Close camera"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <line
-                    x1="3"
-                    y1="3"
-                    x2="17"
-                    y2="17"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="17"
-                    y1="3"
-                    x2="3"
-                    y2="17"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </>
+              />
+            </div>
           )}
 
           {/* Detection overlay with guide box */}

@@ -6,6 +6,7 @@ import type { FunctionComponent } from 'preact';
 import { getBoolProp } from '../../../../utils/props';
 import { translate, translateHtml } from '../../../../domain/localisation';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
+import EnhancedSmartSelfieCapture from '../enhanced-smartselfie-capture/EnhancedSmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
 import '../selfie-capture/SelfieCapture';
 // Mediapipe loader/manager used by SmartSelfieCapture
@@ -40,6 +41,8 @@ interface Props {
   'show-agent-mode-for-tests'?: string | boolean;
   'hide-attribution'?: string | boolean;
   'disable-image-tests'?: string | boolean;
+  'use-strict-mode'?: string | boolean;
+  'show-back-on-guidelines'?: string | boolean;
   key?: string;
   'start-countdown'?: string | boolean;
   hidden?: string | boolean;
@@ -73,6 +76,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
   timeout,
   'start-countdown': startCountdownProp = false,
   'allow-legacy-selfie-fallback': allowLegacySelfieFallbackProp = false,
+  'use-strict-mode': useStrictModeProp = false,
   hidden: hiddenProp = false,
   ...props
 }) => {
@@ -106,7 +110,11 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
 
   const hidden = getBoolProp(hiddenProp);
   const startCountdown = getBoolProp(startCountdownProp);
-  const allowLegacySelfieFallback = getBoolProp(allowLegacySelfieFallbackProp);
+  const useStrictMode = getBoolProp(useStrictModeProp);
+  // Strict mode (Enhanced SmartSelfie) requires Mediapipe head-pose detection,
+  // so the legacy fallback is force-disabled regardless of the partner setting.
+  const allowLegacySelfieFallback =
+    !useStrictMode && getBoolProp(allowLegacySelfieFallbackProp);
 
   // Resolve how long we'll wait for Mediapipe before the hard deadline fires.
   // Precedence:
@@ -463,6 +471,19 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
     return null;
   }
 
+  // Strict mode (Enhanced SmartSelfie) owns its own loading UX. Mount it
+  // immediately — the guidelines screen doesn't need Mediapipe, and by the
+  // time the user reaches the capture screen the background load started by
+  // `useFaceCapture.initializeFaceLandmarker()` will normally have resolved.
+  if (useStrictMode) {
+    return (
+      <>
+        <style>{`:host { display: block; height: 100%; }`}</style>
+        <EnhancedSmartSelfieCapture {...(props as any)} />
+      </>
+    );
+  }
+
   // on retakes, prefer SmartSelfieCapture if Mediapipe is ready
   if (initialSessionCompleted && mediapipeReady && !usingSelfieCapture) {
     return <SmartSelfieCapture {...props} />;
@@ -613,6 +634,8 @@ if (!customElements.get('selfie-capture-wrapper')) {
       'show-agent-mode-for-tests',
       'hide-attribution',
       'disable-image-tests',
+      'use-strict-mode',
+      'show-back-on-guidelines',
       'key',
       'start-countdown',
       'hidden',

@@ -100,7 +100,14 @@ module.exports = {
     'import/extensions': [
       'error',
       'ignorePackages',
-      { js: 'never', jsx: 'never', ts: 'always', tsx: 'never' },
+      // `ts: 'always'` is required because `lib/components/selfie/src/SelfieCaptureScreens.js`
+      // imports a `.ts` helper directly. `tsx: 'always'` is required because
+      // `lib/components/document/src/document-capture-instructions/index.js`
+      // imports `./DocumentCaptureInstructions.tsx` for its custom-element
+      // side-effect, alongside a sibling `.js` of the same basename. The
+      // TS/TSX override below relaxes both back to `'never'` for files
+      // already inside the TS sources.
+      { js: 'never', jsx: 'never', ts: 'always', tsx: 'always' },
     ],
     'import/no-extraneous-dependencies': [
       'error',
@@ -141,7 +148,10 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        // `.lottie` / `.svg` are bundler-only asset extensions; listing them
+        // here lets eslint-plugin-import resolve them to the on-disk file
+        // instead of flagging import/no-unresolved.
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.lottie', '.svg'],
       },
       typescript: {
         alwaysTryTypes: true,

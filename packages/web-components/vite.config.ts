@@ -100,6 +100,11 @@ export default defineConfig(({ mode }) => {
     sourcemap: isProduction,
     minify: isProduction,
     emptyOutDir: buildFormat === 'esm',
+    // Always base64-inline .lottie animations regardless of size so the
+    // built ESM/IIFE bundles do not produce sibling asset files that
+    // consumers would otherwise have to host.
+    assetsInlineLimit: (assetPath: string) =>
+      assetPath.endsWith('.lottie') ? true : undefined,
   };
 
   const iifeBuildConfig = {
@@ -119,6 +124,10 @@ export default defineConfig(({ mode }) => {
     minify: isProduction,
     outDir: 'dist',
     emptyOutDir: false,
+    // Match the ESM build: keep .lottie animations inlined in the IIFE
+    // bundle so smart-camera-web.js stays a single distributable file.
+    assetsInlineLimit: (assetPath: string) =>
+      assetPath.endsWith('.lottie') ? true : undefined,
   };
 
   return {

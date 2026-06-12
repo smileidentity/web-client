@@ -1,6 +1,41 @@
 import { useState } from 'preact/hooks';
+import type { FunctionComponent } from 'preact';
 
-export function TuningPanel({ settings, updateSetting, debugInfo }) {
+interface TuningSettings {
+  deviceType: string;
+  cropToCard: boolean;
+  cropPadding: number;
+  useDynamicBorder: boolean;
+  edgeDensityThreshold: number;
+  gridCellRatio: number;
+  blurThreshold: number;
+  glareThreshold: number;
+  stabilityThreshold: number;
+  cropToContour?: boolean;
+  previewCropPadding?: number;
+  [key: string]: unknown;
+}
+
+interface TuningDebugInfo {
+  edgeDensity?: number | string;
+  texture?: number | string;
+  quadrants?: string;
+  blur?: number;
+  glare?: number | string;
+  [key: string]: unknown;
+}
+
+interface TuningPanelProps {
+  settings: TuningSettings;
+  updateSetting: (key: string, value: unknown) => void;
+  debugInfo?: TuningDebugInfo | null;
+}
+
+export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
+  settings,
+  updateSetting,
+  debugInfo,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Default is minimized for UX, expand for dev
@@ -225,4 +260,4 @@ export function TuningPanel({ settings, updateSetting, debugInfo }) {
       </label>
     </div>
   );
-}
+};

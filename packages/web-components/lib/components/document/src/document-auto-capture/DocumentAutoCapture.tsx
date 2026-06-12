@@ -15,10 +15,9 @@ import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
 interface Props {
   'document-type'?: string;
-  'auto-capture-mode'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
+  'auto-capture'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';
   'auto-capture-timeout'?: string | number;
   'side-of-id'?: 'Front' | 'Back' | string;
-  'theme-color'?: string;
   'show-navigation'?: string | boolean;
   'allow-gallery-upload'?: string | boolean;
   'document-capture-modes'?: string;
@@ -266,7 +265,7 @@ function DesktopCaptureButton({
 
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
-  'auto-capture-mode': captureModeProp = 'autoCapture',
+  'auto-capture': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
   'theme-color': themeColor = '#001096',
@@ -309,9 +308,19 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   )
     ? (captureModeProp as CaptureMode)
     : 'autoCapture';
+  // Clamp to the documented 3000–30000ms range. Values outside this band
+  // tend to either fire the manual fallback before the user has a chance
+  // to align the document (too low) or never surface it at all (too high).
+  const AUTO_CAPTURE_TIMEOUT_MIN_MS = 3_000;
+  const AUTO_CAPTURE_TIMEOUT_MAX_MS = 30_000;
+  const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 10_000;
   const autoCaptureTimeout = (() => {
     const n = Number(autoCaptureTimeoutProp);
-    return Number.isFinite(n) && n > 0 ? n : 10_000;
+    if (!Number.isFinite(n) || n <= 0) return AUTO_CAPTURE_TIMEOUT_DEFAULT_MS;
+    return Math.min(
+      AUTO_CAPTURE_TIMEOUT_MAX_MS,
+      Math.max(AUTO_CAPTURE_TIMEOUT_MIN_MS, n),
+    );
   })();
 
   // Map upper-case enum values used elsewhere in web-components (GREEN_BOOK,
@@ -1367,10 +1376,9 @@ if (
     'document-auto-capture',
     [
       'document-type',
-      'auto-capture-mode',
+      'auto-capture',
       'auto-capture-timeout',
       'side-of-id',
-      'theme-color',
       'show-navigation',
       'allow-gallery-upload',
       'document-capture-modes',

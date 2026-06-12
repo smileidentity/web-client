@@ -24,14 +24,14 @@ document.querySelector('#app').innerHTML = `
         <option value="false" selected>Legacy Selfie Fallback: Disabled</option>
         <option value="true">Legacy Selfie Fallback: Enabled</option>
       </select>
-      <select id="autoCapture">
+      <select id="autoCaptureEnabled">
         <option value="false">Auto Capture: Disabled (legacy capture)</option>
         <option value="true" selected>Auto Capture: Enabled</option>
       </select>
-      <select id="autoCaptureMode">
-        <option value="autoCapture" selected>Auto Capture Mode: autoCapture</option>
-        <option value="autoCaptureOnly">Auto Capture Mode: autoCaptureOnly</option>
-        <option value="manualCaptureOnly">Auto Capture Mode: manualCaptureOnly</option>
+      <select id="autoCapture">
+        <option value="autoCapture" selected>Auto Capture: autoCapture</option>
+        <option value="autoCaptureOnly">Auto Capture: autoCaptureOnly</option>
+        <option value="manualCaptureOnly">Auto Capture: manualCaptureOnly</option>
       </select>
       <select id="newInstructions">
         <option value="false">New Document Instructions: Disabled</option>

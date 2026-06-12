@@ -1068,15 +1068,25 @@ export function useCardDetection(
             const isBookDocFallback =
               lockedDocTypeForFallback === 'passport' ||
               lockedDocTypeForFallback === 'greenbook';
-            // Desktop id-card synthetics only bridge brief dropouts of a card
-            // that was genuinely detected moments ago. Without the recency
-            // gate, a busy document-free scene (face, furniture, window
-            // frames) forms a combined bbox that passes the aspect/area
-            // checks below and can auto-capture a non-document.
+            // Desktop id-card synthetics are eligible in two cases:
+            // 1. Bridge: a genuine 4-corner card was detected moments ago and
+            //    briefly dropped out (finger/glare broke an edge), or
+            // 2. Coverage: the scene passes the same 7/9 grid-coverage bar
+            //    mobile enforces for every capture — fingers permanently
+            //    crossing a card edge can prevent a clean quad from EVER
+            //    forming, but a card filling the box lights up the whole
+            //    grid, while a document-free scene (face, furniture, window
+            //    frames) leaves blank cells.
+            // Without these gates the combined bbox of background contours
+            // passes the aspect/area checks below and can auto-capture a
+            // non-document.
+            const idCardSynthEligible =
+              framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
+              passingCells >= 7;
             const isIdCardFallback =
               skipGridCheck &&
               lockedDocTypeForFallback === 'id-card' &&
-              framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES;
+              idCardSynthEligible;
             if (isBookDocFallback || isIdCardFallback) {
               const bw = combinedMaxX - combinedMinX;
               const bh = combinedMaxY - combinedMinY;

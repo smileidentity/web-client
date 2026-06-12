@@ -336,6 +336,17 @@ export const useFaceCapture = ({
             }, 0);
           }
         }
+
+        // Before the smile zone, resume automatically when face returns to a
+        // valid position — no smile is needed yet.
+        if (
+          isPaused.value &&
+          isCapturing.value &&
+          capturesTaken.value < smileCheckpoint.value &&
+          resumeCaptureRef.current
+        ) {
+          resumeCaptureRef.current();
+        }
       } else {
         // No face detected - reset values
         currentSmileScore.value = 0;

@@ -13,6 +13,8 @@ interface TuningSettings {
   stabilityThreshold: number;
   cropToContour?: boolean;
   previewCropPadding?: number;
+  minFillPercent?: number;
+  maxFillPercent?: number;
   [key: string]: unknown;
 }
 
@@ -255,6 +257,34 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           value={settings.stabilityThreshold}
           onInput={(e) =>
             updateSetting('stabilityThreshold', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>Min Fill (%): {settings.minFillPercent}</span>
+        <input
+          type="range"
+          min="20"
+          max="95"
+          step="1"
+          value={settings.minFillPercent}
+          onInput={(e) =>
+            updateSetting('minFillPercent', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>Max Fill (%): {settings.maxFillPercent}</span>
+        <input
+          type="range"
+          min="50"
+          max="100"
+          step="1"
+          value={settings.maxFillPercent}
+          onInput={(e) =>
+            updateSetting('maxFillPercent', Number(e.target.value))
           }
         />
       </label>

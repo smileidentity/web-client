@@ -71,9 +71,12 @@ const getOptimalDefaults = () => {
         previewCropPadding: 2,
         // Desktop ROI == the visible video box (see useCardDetection's
         // skipGridCheck branch), so these percentages are measured against what
-        // the user actually sees. Require the card to fill ~78% of the box
-        // before quality checks run; allow up to 98% before asking to back off.
-        minFillPercent: 78,
+        // the user actually sees. Require the card to fill ~70% of the box
+        // area (~84% linear — still ~990px of card width on a 720p webcam)
+        // before quality checks run; allow up to 98% before asking to back
+        // off. The lower floor lets fixed-focus webcams sit at a sharper
+        // distance instead of being forced right up to the lens.
+        minFillPercent: 70,
         maxFillPercent: 98,
       };
 };

@@ -882,6 +882,11 @@ export function useCardDetection(
           // Its bbox covers inner content (photo/text/MRZ), not the full page,
           // so distance gates that compare bbox/ROI are unreliable for it.
           let bestContourIsSynthetic = false;
+          // Desktop only: a card-shaped quad passed every shape gate EXCEPT
+          // the ROI wall-hug check this frame — i.e. a real card, too close.
+          // Consumed in the no-contour handling below to show distance
+          // guidance instead of the dead-end "Align document in frame".
+          let wallHugRejectedCardThisFrame = false;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -928,10 +933,13 @@ export function useCardDetection(
                 const fillRatio = area / (bRect.width * bRect.height);
 
                 // --- ROI-boundary check ---
-                // Reject contours that hug 3+ walls of the ROI. A real card
-                // at correct distance leaves visible space on at least 2 sides;
-                // background pattern rectangles fill the entire ROI and touch
-                // all 4 walls simultaneously.
+                // Reject contours that hug the ROI walls: background pattern
+                // rectangles fill the entire ROI and touch all 4 walls
+                // simultaneously. Mobile rejects at 3+ touches (a real card at
+                // correct distance leaves space on at least 2 sides). Desktop
+                // requires all 4 — its ROI is the visible bordered box, which
+                // users naturally fill, so 3 touches is common for legitimate
+                // off-center hand-held cards.
                 const wallMargin = Math.round(
                   Math.min(clampedW, clampedH) * 0.04,
                 );
@@ -940,7 +948,7 @@ export function useCardDetection(
                   (bRect.y <= wallMargin ? 1 : 0) +
                   (bRect.x + bRect.width >= clampedW - wallMargin ? 1 : 0) +
                   (bRect.y + bRect.height >= clampedH - wallMargin ? 1 : 0);
-                const roiWallHug = wallTouches >= 3;
+                const roiWallHug = wallTouches >= (skipGridCheck ? 4 : 3);
 
                 // --- Aspect-ratio gate ---
                 // Reject candidates whose shape doesn't match a document.
@@ -1009,6 +1017,18 @@ export function useCardDetection(
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
                 } else {
+                  // Desktop: the quad failed ONLY the wall-hug check — every
+                  // shape gate (rectangularity, angles, aspect) says this is
+                  // a real card, just too close.
+                  if (
+                    skipGridCheck &&
+                    roiWallHug &&
+                    fillRatio > 0.75 &&
+                    anglesOk &&
+                    aspectOk
+                  ) {
+                    wallHugRejectedCardThisFrame = true;
+                  }
                   approx.delete();
                 }
               } else {
@@ -1136,8 +1156,8 @@ export function useCardDetection(
           // ID-card synthetics use the standard floor — their bbox has been
           // pre-expanded above to approximate the true card edge.
           // Per-device overrides can be supplied via settings (minFillPercent /
-          // maxFillPercent). Desktop uses 85 / 99 to require the card to fill
-          // most of the guide before quality checks run; mobile keeps 75 / 95.
+          // maxFillPercent). Desktop uses 70 / 98 (measured against the visible
+          // box, which IS the desktop ROI); mobile keeps 75 / 95.
           const lockedDocTypeForFill = discoveryRef.current.docType;
           const isBookDocFill =
             lockedDocTypeForFill === 'passport' ||
@@ -1333,7 +1353,15 @@ export function useCardDetection(
             inGuideDetectedRef.current = false;
             // During discovery, no contour found — keep waiting
             if (isDiscovery) {
-              setFeedback('Position your document in the frame');
+              // A wall-hug-rejected card means the user is too close, not
+              // absent. Without this hint a too-close card deadlocks
+              // discovery: the timeout counter only advances on valid
+              // contours, so no fallback classification ever fires.
+              setFeedback(
+                skipGridCheck && wallHugRejectedCardThisFrame
+                  ? 'Move document further away'
+                  : 'Position your document in the frame',
+              );
               // Tolerate a few consecutive misses before resetting votes.
               // Mobile cameras drop detections for 1-2 frames due to motion blur,
               // auto-exposure changes, etc. Hard-resetting on every miss prevents
@@ -1351,6 +1379,25 @@ export function useCardDetection(
                 quadrants: quadDensities.join('/'),
                 misses: discoveryRef.current.consecutiveMisses,
                 votes: `${discoveryRef.current.votes.filter((v) => v === 'id-card').length}id / ${discoveryRef.current.votes.filter((v) => v === 'passport').length}pp`,
+              });
+              return;
+            }
+            // CAPTURE phase, desktop: a card-shaped quad was rejected solely
+            // for hugging the ROI walls — the card is real but too close.
+            // Surface distance guidance immediately instead of letting the
+            // miss counter drift to "Align document in frame". Mirrors the
+            // maxFillPercent branch above, which cannot run here because
+            // distance gating requires a bestContour.
+            if (skipGridCheck && wallHugRejectedCardThisFrame) {
+              captureMissCounterRef.current = 0;
+              setFeedback('Move document further away');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+              stabilityRef.current.count = 0;
+              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              setDebugInfo({
+                edgeDensity: edgeDensity.toFixed(1),
+                texture: Math.round(textureScore),
+                quadrants: quadDensities.join('/'),
               });
               return;
             }

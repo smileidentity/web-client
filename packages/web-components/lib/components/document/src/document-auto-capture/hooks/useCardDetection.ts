@@ -266,6 +266,9 @@ export function useCardDetection(
   } | null>(null);
   const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  // Latest distance fill %, stashed each frame so debug payloads emitted
+  // AFTER the contour block (blur/glare/capture gates) can still report it.
+  const latestDocFillRef = useRef(0);
   const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
     providedDocType,
   ); // null = not yet classified
@@ -1228,6 +1231,7 @@ export function useCardDetection(
               if (nz) nz.delete();
             }
           }
+          latestDocFillRef.current = docFillPercent;
 
           // Active whenever we have a real contour to measure against.
           // Skip distance gating when the contour is the synthetic book-doc
@@ -1559,6 +1563,7 @@ export function useCardDetection(
           edgeDensity: edgeDensity.toFixed(1),
           texture: Math.round(textureScore),
           quadrants: quadDensities.join('/'),
+          docFill: Math.round(latestDocFillRef.current),
         });
 
         if (glarePercent > settingsRef.current.glareThreshold) {

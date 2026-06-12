@@ -24,6 +24,7 @@ interface TuningDebugInfo {
   quadrants?: string;
   blur?: number;
   glare?: number | string;
+  docFill?: number | string;
   [key: string]: unknown;
 }
 
@@ -135,11 +136,9 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           Texture:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.texture ?? '0'}</span>
         </div>
-        <div hidden>
-          Grid 3×3:{' '}
-          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
-            {debugInfo?.quadrants ?? '-'}
-          </span>
+        <div>
+          Doc Fill:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.docFill ?? '-'}%</span>
         </div>
         <div>
           Blur Variance:{' '}
@@ -148,6 +147,12 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
         <div>
           Glare %:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.glare || 0}%</span>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          Grid 3×3:{' '}
+          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
+            {debugInfo?.quadrants ?? '-'}
+          </span>
         </div>
       </div>
 

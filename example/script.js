@@ -80,10 +80,12 @@ export default function setupForm() {
         previewBVNMFA: true,
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
-        new_instructions: newInstructions.value === 'true',
-        hide_attribution: true,
+        new_instructions: true,
+        hide_attribution: false,
+        show_navigation: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,
+        use_strict_mode: true,
         translation: {
           language: language.value,
           locales: {
@@ -120,9 +122,10 @@ export default function setupForm() {
           signature,
           timestamp,
           name: 'Demo Account',
-          logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
+          logo_url:
+            'https://placeholderimage.co/200x80/0f172a/22c55e/?text=Solo%27s+Bank',
           policy_url: 'https://smileidentity.com/privacy-privacy',
-          theme_color: '#96002d',
+          theme_color: '#151F72',
         },
         onSuccess: () => {
           resetButton();

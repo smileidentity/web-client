@@ -8,6 +8,7 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
@@ -61,6 +62,65 @@ window.Sentry = Sentry;
 
   let fileToUpload;
   let uploadURL;
+  let SubmissionElement;
+  // Set to e.g. 'active_liveness_timed_out' when ESS dispatches
+  // `enhanced-smartselfie.force-fail-published` (inactivity timeout). The
+  // upload still runs so the backend gets the partial submission tagged
+  // with `failure_reason` metadata, but the user-facing card must land on
+  // the error state regardless of HTTP status. ESS fires this event
+  // synchronously *before* `selfie-capture.publish`, so by the time the
+  // `smart-camera-web.publish` handler runs the flag is already set.
+  let forcedFailureReason = null;
+  window.addEventListener(
+    'enhanced-smartselfie.force-fail-published',
+    (event) => {
+      forcedFailureReason = event.detail?.reason || null;
+    },
+  );
+
+  // Image type 2 corresponds to SELFIE_IMAGE_BASE64 in the capture pipeline.
+  const SELFIE_IMAGE_TYPE_ID = 2;
+
+  function getSelfieDataUri(capturedImages) {
+    const selfie = capturedImages?.find(
+      (img) => img.image_type_id === SELFIE_IMAGE_TYPE_ID,
+    );
+    if (!selfie?.image) return '';
+    return `data:image/jpeg;base64,${selfie.image}`;
+  }
+
+  function mountSubmissionElement(imageSrc) {
+    if (SubmissionElement) {
+      if (imageSrc) SubmissionElement.setAttribute('image-src', imageSrc);
+      SubmissionElement.hidden = false;
+      return SubmissionElement;
+    }
+    SubmissionElement = document.createElement(
+      'enhanced-smart-selfie-submission',
+    );
+    if (imageSrc) SubmissionElement.setAttribute('image-src', imageSrc);
+    SubmissionElement.setAttribute('mirror', 'true');
+    SubmissionElement.setAttribute('submission-state', 'submitting');
+    if (config.partner_details?.theme_color) {
+      SubmissionElement.setAttribute(
+        'theme-color',
+        config.partner_details.theme_color,
+      );
+    }
+    if (config.hide_attribution) {
+      SubmissionElement.setAttribute('hide-attribution', 'true');
+    }
+    document.querySelector('main').appendChild(SubmissionElement);
+    return SubmissionElement;
+  }
+
+  function dispatchSubmissionState(detail) {
+    window.dispatchEvent(
+      new CustomEvent('enhanced-smart-selfie-submission.set-state', {
+        detail,
+      }),
+    );
+  }
 
   function applyPageTranslations() {
     document.querySelectorAll('[data-i18n]').forEach((el) => {
@@ -97,15 +157,42 @@ window.Sentry = Sentry;
 
         SmartCameraWeb.setAttribute(
           'allow-agent-mode',
-          config.allow_agent_mode,
+          config.use_strict_mode ? false : config.allow_agent_mode,
         );
         SmartCameraWeb.setAttribute(
           'theme-color',
           config.partner_details.theme_color,
         );
 
+        if (config.partner_details.name) {
+          SmartCameraWeb.setAttribute(
+            'partner-name',
+            config.partner_details.name,
+          );
+        }
+        if (config.partner_details.logo_url) {
+          SmartCameraWeb.setAttribute(
+            'partner-logo',
+            config.partner_details.logo_url,
+          );
+        }
+        if (config.partner_details.policy_url) {
+          SmartCameraWeb.setAttribute(
+            'policy-url',
+            config.partner_details.policy_url,
+          );
+        }
+
         if (config.allow_legacy_selfie_fallback) {
           SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
+        }
+
+        if (config.use_strict_mode) {
+          SmartCameraWeb.setAttribute('use-strict-mode', 'true');
+        }
+
+        if (config.show_navigation) {
+          SmartCameraWeb.setAttribute('show-navigation', '');
         }
 
         if (config.hide_attribution) {
@@ -115,6 +202,9 @@ window.Sentry = Sentry;
           });
           SmartCameraWeb.setAttribute('hide-attribution', true);
         }
+        installActiveLivenessTimeout(SmartCameraWeb, {
+          enabled: !!config.use_strict_mode,
+        });
         setActiveScreen(SmartCameraWeb);
       }
     },
@@ -128,7 +218,22 @@ window.Sentry = Sentry;
       const title = document.querySelector('#uploadTitle');
       const jobType = partner_params.job_type;
       title.textContent = translate(labelKeys[jobType].upload);
-      setActiveScreen(UploadProgressScreen);
+      // In strict mode the host owns the post-capture UI via the standalone
+      // <enhanced-smart-selfie-submission> element instead of the legacy
+      // `Registering User` upload screen.
+      if (!config.use_strict_mode) {
+        setActiveScreen(UploadProgressScreen);
+      } else {
+        SmartCameraWeb.hidden = true;
+        const submissionEl = mountSubmissionElement(
+          getSelfieDataUri(event.detail.images),
+        );
+        if (forcedFailureReason) {
+          submissionEl.setAttribute('failure-reason', forcedFailureReason);
+        }
+        setActiveScreen(submissionEl);
+        dispatchSubmissionState({ state: 'submitting' });
+      }
       handleFormSubmit();
     },
     false,
@@ -164,6 +269,26 @@ window.Sentry = Sentry;
       closeWindow(true);
     },
     false,
+  );
+
+  // Strict-mode (Enhanced SmartSelfie) end-of-flow signals: the standalone
+  // <enhanced-smart-selfie-submission> element dispatches these window events
+  // when the user taps Continue / Exit. We mirror the legacy behaviour: close
+  // the iframe. `once: true` guards against an accidental double-dispatch —
+  // by contract exactly one of continue/exit fires per session.
+  window.addEventListener(
+    'enhanced-smart-selfie-submission.continue',
+    () => {
+      closeWindow(true);
+    },
+    { once: true },
+  );
+  window.addEventListener(
+    'enhanced-smart-selfie-submission.exit',
+    () => {
+      closeWindow(true);
+    },
+    { once: true },
   );
 
   function parseJWT(token) {
@@ -217,7 +342,18 @@ window.Sentry = Sentry;
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      if (config.use_strict_mode) {
+        // The submission element owns the post-submit UI. Surface the failure
+        // via the same set-state event the upload XHR uses so the user lands
+        // on the proper "Submission Failed" screen instead of getting a stray
+        // "Something went wrong" banner above the still-spinning view.
+        dispatchSubmissionState({
+          state: 'error',
+          message: translate('pages.error.generic'),
+        });
+      } else {
+        displayErrorMessage(translate('pages.error.generic'));
+      }
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -312,7 +448,14 @@ window.Sentry = Sentry;
     });
 
     request.upload.addEventListener('error', function (e) {
-      setActiveScreen(UploadFailureScreen);
+      if (config.use_strict_mode) {
+        dispatchSubmissionState({
+          state: 'error',
+          failureReason: forcedFailureReason || undefined,
+        });
+      } else {
+        setActiveScreen(UploadFailureScreen);
+      }
       throw new Error('uploadZip failed', { cause: e });
     });
 
@@ -321,15 +464,32 @@ window.Sentry = Sentry;
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen);
-        handleSuccess();
-        window.setTimeout(closeWindow, 2000);
+        // Forced-failure sessions (e.g. active-liveness inactivity timeout)
+        // are still submitted to the backend so analytics + metadata stay
+        // correct. Once the upload itself returns 200, the submission is
+        // complete from the user's perspective — show the success card
+        // regardless of the original capture reason.
+        if (config.use_strict_mode) {
+          dispatchSubmissionState({ state: 'success' });
+          handleSuccess();
+        } else {
+          setActiveScreen(CompleteScreen);
+          handleSuccess();
+          window.setTimeout(closeWindow, 2000);
+        }
       }
       if (
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
-        setActiveScreen(UploadFailureScreen);
+        if (config.use_strict_mode) {
+          dispatchSubmissionState({
+            state: 'error',
+            failureReason: forcedFailureReason || undefined,
+          });
+        } else {
+          setActiveScreen(UploadFailureScreen);
+        }
         throw new Error('uploadZip failed', { cause: request });
       }
     };

@@ -218,7 +218,7 @@ export function t(key) {
   const resolvedLocale = resolveLocale(currentLocale);
   const currentLocaleData = locales[resolvedLocale];
   const value = getNestedValue(currentLocaleData, key);
-  if (value) {
+  if (typeof value === 'string') {
     return value;
   }
 
@@ -226,7 +226,7 @@ export function t(key) {
   const resolvedDefault = resolveLocale(DEFAULT_LOCALE);
   if (resolvedLocale !== resolvedDefault) {
     const defaultValue = getNestedValue(locales[resolvedDefault], key);
-    if (defaultValue) {
+    if (typeof defaultValue === 'string') {
       return defaultValue;
     }
   }

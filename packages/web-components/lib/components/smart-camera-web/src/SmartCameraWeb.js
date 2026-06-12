@@ -8,6 +8,14 @@ import packageJson from '../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
 
+// Minimal HTML-attribute escaper for values interpolated into the innerHTML
+// template below. Order matters: encode `&` first so we don't double-encode
+// the `&` we introduce when escaping `"`. Used because partner-supplied
+// attributes (partner-name, partner-logo, policy-url, theme-color, ...) flow
+// straight into the template string and an unescaped quote would otherwise
+// allow attribute injection / XSS.
+const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
 function scwTemplateString() {
   return `
   <style>
@@ -19,8 +27,8 @@ function scwTemplateString() {
   ${styles(this.themeColor)}
   <div style="height: 100%;">
     <camera-permission ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}></camera-permission>
-    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} hidden
-      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback}
+    <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} hidden
+      ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.showBackOnGuidelines}
     ></selfie-capture-screens>
     <document-capture-screens ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
@@ -76,9 +84,15 @@ class SmartCameraWeb extends HTMLElement {
       'hide-attribution',
       'hide-back-of-id',
       'hide-back-to-host',
+      'hide-consent',
+      'partner-name',
+      'partner-logo',
+      'policy-url',
       'show-navigation',
+      'show-back-on-guidelines',
       'theme-color',
       'new-instructions',
+      'use-strict-mode',
     ];
   }
 
@@ -92,9 +106,15 @@ class SmartCameraWeb extends HTMLElement {
       case 'hide-attribution':
       case 'hide-back-of-id':
       case 'hide-back-to-host':
+      case 'hide-consent':
+      case 'partner-name':
+      case 'partner-logo':
+      case 'policy-url':
       case 'show-navigation':
+      case 'show-back-on-guidelines':
       case 'theme-color':
       case 'new-instructions':
+      case 'use-strict-mode':
         this.disconnectedCallback();
         this.shadowRoot.innerHTML = this.render();
         this.setUpEventListeners();
@@ -166,11 +186,13 @@ class SmartCameraWeb extends HTMLElement {
     this.documentCapture.addEventListener(
       'document-capture-screens.cancelled',
       () => {
-        this.SelfieCaptureScreens.setAttribute(
-          'initial-screen',
-          'selfie-capture',
-        );
         this.setActiveScreen(this.SelfieCaptureScreens);
+        // Land on a clean selfie capture screen by driving the navigation
+        // explicitly. Previously this set `initial-screen="selfie-capture"`,
+        // whose side effect was a full SelfieCaptureScreens rebuild — re-fired
+        // on every back-navigation (setAttribute invokes attributeChangedCallback
+        // even when the value is unchanged).
+        this.SelfieCaptureScreens.restartSelfieCapture();
         this.SelfieCaptureScreens.removeAttribute('data-camera-error');
         this.SelfieCaptureScreens.setAttribute('data-camera-ready', true);
       },
@@ -237,6 +259,12 @@ class SmartCameraWeb extends HTMLElement {
     return this.hasAttribute('show-navigation') ? 'show-navigation' : '';
   }
 
+  get showBackOnGuidelines() {
+    return this.hasAttribute('show-back-on-guidelines')
+      ? 'show-back-on-guidelines'
+      : '';
+  }
+
   get hideBackToHost() {
     return this.hasAttribute('hide-back-to-host') ||
       this.hasAttribute('hide-back')
@@ -246,7 +274,7 @@ class SmartCameraWeb extends HTMLElement {
 
   get allowAgentMode() {
     return this.hasAttribute('allow-agent-mode')
-      ? `allow-agent-mode=${this.getAttribute('allow-agent-mode')}`
+      ? `allow-agent-mode="${escAttr(this.getAttribute('allow-agent-mode'))}"`
       : '';
   }
 
@@ -258,13 +286,13 @@ class SmartCameraWeb extends HTMLElement {
 
   get title() {
     return this.hasAttribute('title')
-      ? `title=${this.getAttribute('title')}`
+      ? `title="${escAttr(this.getAttribute('title'))}"`
       : '';
   }
 
   get documentCaptureModes() {
     return this.hasAttribute('document-capture-modes')
-      ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
+      ? `document-capture-modes="${escAttr(this.getAttribute('document-capture-modes'))}"`
       : '';
   }
 
@@ -276,12 +304,41 @@ class SmartCameraWeb extends HTMLElement {
 
   get allowLegacySelfieFallback() {
     return this.hasAttribute('allow-legacy-selfie-fallback')
-      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      ? `allow-legacy-selfie-fallback="${escAttr(this.getAttribute('allow-legacy-selfie-fallback'))}"`
+      : '';
+  }
+
+  get useStrictMode() {
+    return this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+      ? 'use-strict-mode="true"'
       : '';
   }
 
   get hideAttribution() {
     return this.hasAttribute('hide-attribution') ? 'hide-attribution' : '';
+  }
+
+  get hideConsent() {
+    return this.hasAttribute('hide-consent') ? 'hide-consent' : '';
+  }
+
+  get partnerName() {
+    return this.hasAttribute('partner-name')
+      ? `partner-name="${escAttr(this.getAttribute('partner-name'))}"`
+      : '';
+  }
+
+  get partnerLogo() {
+    return this.hasAttribute('partner-logo')
+      ? `partner-logo="${escAttr(this.getAttribute('partner-logo'))}"`
+      : '';
+  }
+
+  get policyUrl() {
+    return this.hasAttribute('policy-url')
+      ? `policy-url="${escAttr(this.getAttribute('policy-url'))}"`
+      : '';
   }
 
   get hasThemeColor() {
@@ -298,7 +355,9 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get applyComponentThemeColor() {
-    return this.hasThemeColor ? `theme-color='${this.themeColor}'` : '';
+    return this.hasThemeColor
+      ? `theme-color="${escAttr(this.themeColor)}"`
+      : '';
   }
 
   setActiveScreen(screen) {

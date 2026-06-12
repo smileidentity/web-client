@@ -1056,6 +1056,25 @@ export function useCardDetection(
             cnt.delete();
           }
 
+          // --- Desktop overflow detection ---
+          // A card pushed too close overflows the ROI: its outer edges leave
+          // the frame, so no 4-corner quad forms (and the wall-hug "too
+          // close" signal above never fires — it needs a complete quad).
+          // What remains are inner-content contours CLIPPED at the ROI
+          // walls. A combined bbox touching 2+ walls with capture-grade grid
+          // coverage means the document overflows the box; a genuinely far
+          // card produces a small, centered bbox touching nothing.
+          let combinedBboxOverflow = false;
+          if (skipGridCheck && hasSignificantContour) {
+            const cbMargin = Math.round(Math.min(clampedW, clampedH) * 0.04);
+            const cbTouches =
+              (combinedMinX <= cbMargin ? 1 : 0) +
+              (combinedMinY <= cbMargin ? 1 : 0) +
+              (combinedMaxX >= clampedW - cbMargin ? 1 : 0) +
+              (combinedMaxY >= clampedH - cbMargin ? 1 : 0);
+            combinedBboxOverflow = cbTouches >= 2 && passingCells >= 7;
+          }
+
           // --- Book-doc fallback ---
           // Passport/greenbook frequently fail the strict 4-vertex check
           // because the binding seam at the top is low-contrast and breaks
@@ -1080,9 +1099,14 @@ export function useCardDetection(
             // Without these gates the combined bbox of background contours
             // passes the aspect/area checks below and can auto-capture a
             // non-document.
+            // An overflowing card must never synthesize: its bbox covers only
+            // the visible (clipped) content, so the fill metric underestimates
+            // distance and a capture would clip the card's edges anyway. The
+            // overflow case gets "Move document further away" guidance below.
             const idCardSynthEligible =
-              framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
-              passingCells >= 7;
+              !combinedBboxOverflow &&
+              (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
+                passingCells >= 7);
             const isIdCardFallback =
               skipGridCheck &&
               lockedDocTypeForFallback === 'id-card' &&
@@ -1393,7 +1417,8 @@ export function useCardDetection(
               // discovery: the timeout counter only advances on valid
               // contours, so no fallback classification ever fires.
               setFeedback(
-                skipGridCheck && wallHugRejectedCardThisFrame
+                skipGridCheck &&
+                  (wallHugRejectedCardThisFrame || combinedBboxOverflow)
                   ? 'Move document further away'
                   : 'Position your document in the frame',
               );
@@ -1417,13 +1442,18 @@ export function useCardDetection(
               });
               return;
             }
-            // CAPTURE phase, desktop: a card-shaped quad was rejected solely
-            // for hugging the ROI walls — the card is real but too close.
-            // Surface distance guidance immediately instead of letting the
-            // miss counter drift to "Align document in frame". Mirrors the
-            // maxFillPercent branch above, which cannot run here because
-            // distance gating requires a bestContour.
-            if (skipGridCheck && wallHugRejectedCardThisFrame) {
+            // CAPTURE phase, desktop: the card is real but too close —
+            // either a card-shaped quad was rejected solely for hugging the
+            // ROI walls, or the card overflows the box entirely (no quad can
+            // form; inner content is clipped at 2+ ROI walls with full grid
+            // coverage). Surface distance guidance immediately instead of
+            // letting the miss counter drift to "Align document in frame".
+            // Mirrors the maxFillPercent branch above, which cannot run here
+            // because distance gating requires a bestContour.
+            if (
+              skipGridCheck &&
+              (wallHugRejectedCardThisFrame || combinedBboxOverflow)
+            ) {
               captureMissCounterRef.current = 0;
               setFeedback('Move document further away');
               setComplianceState(COMPLIANCE_STATES.DETECTING);

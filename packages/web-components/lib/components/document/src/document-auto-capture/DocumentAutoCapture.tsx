@@ -55,19 +55,27 @@ const getOptimalDefaults = () => {
         cropToContour: true,
         cropPadding: 10,
         previewCropPadding: 2,
+        minFillPercent: 75,
+        maxFillPercent: 95,
       }
     : {
         deviceType: 'Desktop',
         useDynamicBorder: false,
         edgeDensityThreshold: 6,
         gridCellRatio: 0.6,
-        blurThreshold: 130,
+        blurThreshold: 60,
         glareThreshold: 18.0,
         stabilityThreshold: 3,
         cropToCard: true,
         cropToContour: true,
         cropPadding: 10,
         previewCropPadding: 2,
+        // Desktop ROI == the visible video box (see useCardDetection's
+        // skipGridCheck branch), so these percentages are measured against what
+        // the user actually sees. Require the card to fill ~78% of the box
+        // before quality checks run; allow up to 98% before asking to back off.
+        minFillPercent: 78,
+        maxFillPercent: 98,
       };
 };
 
@@ -171,11 +179,98 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
  * `hidden`. That collision was causing the page to freeze when the element
  * was used inside `<document-capture-screens>`.
  */
+function DesktopCaptureButton({
+  progress = 0,
+  themeColor = '#001096',
+  disabled = false,
+  onClick,
+}: {
+  progress: number;
+  themeColor: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const size = 70;
+  const strokeWidth = 4;
+  const ringRadius = size / 2 - strokeWidth / 2;
+  const circumference = 2 * Math.PI * ringRadius;
+  const offset = circumference - (progress / 100) * circumference;
+  const isActive = progress > 0 && progress < 100;
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        position: 'relative',
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        border: 'none',
+        background: 'transparent',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        padding: 0,
+        opacity: disabled ? 0.4 : 1,
+        transition: 'opacity 0.2s ease',
+        WebkitTapHighlightColor: 'transparent',
+        flexShrink: 0,
+      }}
+      aria-label="Capture photo"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 70 70"
+        fill="none"
+        aria-hidden="true"
+        style={{ display: 'block' }}
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M35 70C54.33 70 70 54.33 70 35C70 15.67 54.33 0 35 0C15.67 0 0 15.67 0 35C0 54.33 15.67 70 35 70ZM61 35C61 49.3594 49.3594 61 35 61C20.6406 61 9 49.3594 9 35C9 20.6406 20.6406 9 35 9C49.3594 9 61 20.6406 61 35ZM65 35C65 51.5685 51.5685 65 35 65C18.4315 65 5 51.5685 5 35C5 18.4315 18.4315 5 35 5C51.5685 5 65 18.4315 65 35Z"
+          fill={themeColor}
+        />
+      </svg>
+      {isActive && (
+        <svg
+          width={size}
+          height={size}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+          }}
+          aria-hidden="true"
+        >
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={ringRadius}
+            fill="none"
+            stroke="#2CC05C"
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            style={{ transition: 'stroke-dashoffset 0.3s ease' }}
+          />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
   'auto-capture': captureModeProp = 'autoCapture',
   'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
   'side-of-id': sideOfId = 'Front',
+  'theme-color': themeColor = '#001096',
+  title = '',
   'show-navigation': showNavigationProp = false,
   'allow-gallery-upload': allowGalleryUploadProp = true,
   'document-capture-modes': documentCaptureModesProp,
@@ -305,6 +400,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     captureOrientation: effectiveCaptureOrientation,
     shouldRotateUi,
     syncRoiToGuide,
+    skipGridCheck: settings.deviceType !== 'Mobile',
   });
 
   const [visibleFeedback, setVisibleFeedback] = useState<string>(feedback);
@@ -644,6 +740,258 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     :host { display: block; width: 100%; height: 100%; }
     *, *::before, *::after { box-sizing: border-box; }
   `;
+
+  /* ---- Desktop layout ----
+     Matches the legacy `<document-capture>` visual style: optional nav
+     buttons at top, constrained video with a simple solid border whose
+     colour reflects detection state, title + dynamic feedback text below
+     the video, and the legacy concentric-circle capture button.
+     Auto-capture detection logic (useCardDetection) is unchanged.
+  */
+  if (!isMobileDevice) {
+    const borderColor = (() => {
+      if (
+        complianceState === COMPLIANCE_STATES.STABLE ||
+        complianceState === COMPLIANCE_STATES.SUCCESS ||
+        complianceState === COMPLIANCE_STATES.CAPTURING
+      ) {
+        return '#2CC05C';
+      }
+      if (complianceState === COMPLIANCE_STATES.DETECTING) {
+        return '#F59E0B';
+      }
+      return '#9394ab';
+    })();
+
+    const titleLabel = title || `Submit ${sideOfId} of ID`;
+
+    const desktopNavBtnStyle: Record<string, string | number> = {
+      width: 44,
+      height: 44,
+      borderRadius: '50%',
+      background: 'rgba(0,0,0,0.08)',
+      border: '1px solid rgba(0,0,0,0.12)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      padding: 0,
+      flexShrink: 0,
+    };
+
+    return (
+      <div
+        className="document-auto-capture document-auto-capture--desktop"
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#fff',
+          fontFamily: theme.fonts.base,
+          boxSizing: 'border-box',
+        }}
+      >
+        <style>{hostStyles}</style>
+
+        {allowGalleryUpload && (
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleGalleryChange}
+            style={{ display: 'none' }}
+          />
+        )}
+
+        {/* Navigation row */}
+        {showNavigation && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.75rem 1rem 0',
+            }}
+          >
+            <button
+              onClick={onBack}
+              style={desktopNavBtnStyle}
+              aria-label="Back"
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M15 6l-6 6 6 6"
+                  stroke="rgba(0,0,0,0.7)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={onClose}
+              style={desktopNavBtnStyle}
+              aria-label="Close"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <line
+                  x1="3"
+                  y1="3"
+                  x2="17"
+                  y2="17"
+                  stroke="rgba(0,0,0,0.7)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="17"
+                  y1="3"
+                  x2="3"
+                  y2="17"
+                  stroke="rgba(0,0,0,0.7)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Video area */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            ref={cameraViewportRef}
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: 480,
+              aspectRatio: `${guideAspectRatio} / 1`,
+              borderRadius: 4,
+              overflow: 'hidden',
+              border: `4px solid ${borderColor}`,
+              transition: 'border-color 0.25s ease',
+              backgroundColor: '#000',
+            }}
+          >
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Footer: title, feedback text, capture button */}
+        <div
+          style={{
+            padding: '0 1.5rem 1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            textAlign: 'center',
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '1rem',
+              fontWeight: 700,
+              color: themeColor,
+            }}
+          >
+            {titleLabel}
+          </h2>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '0.9rem',
+              color: '#333',
+              minHeight: '1.25rem',
+            }}
+          >
+            {visibleFeedback}
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '1.25rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '0.75rem',
+            }}
+          >
+            {allowGalleryUpload && (
+              <GalleryButton onClick={handlePickFromGallery} />
+            )}
+            <DesktopCaptureButton
+              progress={
+                complianceState === COMPLIANCE_STATES.STABLE
+                  ? captureProgress
+                  : 0
+              }
+              themeColor={themeColor}
+              disabled={complianceState === COMPLIANCE_STATES.SUCCESS}
+              onClick={triggerManualCapture}
+            />
+          </div>
+
+          {captureMode === 'autoCaptureOnly' && cvLoadFailed && (
+            <p
+              style={{
+                color: theme.colors.error,
+                fontSize: '0.8rem',
+                textAlign: 'center',
+                margin: 0,
+              }}
+            >
+              Auto-detection unavailable. Please reload or try another browser.
+            </p>
+          )}
+        </div>
+
+        {showDebug && (
+          <TuningPanel
+            settings={settings}
+            updateSetting={updateSetting}
+            debugInfo={debugInfo}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="document-auto-capture" style={containerStyle}>

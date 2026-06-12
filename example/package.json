@@ -20,7 +20,7 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "concurrently": "^9.1.2",
     "vite": "^5.4.19"
   }

@@ -266,6 +266,13 @@ export function useCardDetection(
   } | null>(null);
   const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  // Merge debug fields rather than replace: each gate emits only the values
+  // it computed, so the panel keeps the last-known docFill / grid / blur /
+  // glare visible together instead of blanking whichever the current frame's
+  // early-return path didn't include. Debug-only; setDebugInfo identity is
+  // stable so this needs no memoisation.
+  const mergeDebugInfo = (patch: Record<string, unknown>) =>
+    setDebugInfo((prev) => ({ ...prev, ...patch }));
   // Latest distance fill %, stashed each frame so debug payloads emitted
   // AFTER the contour block (blur/glare/capture gates) can still report it.
   const latestDocFillRef = useRef(0);
@@ -811,7 +818,7 @@ export function useCardDetection(
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
           setDebugPath(null);
-          setDebugInfo({
+          mergeDebugInfo({
             blur: 0,
             glare: 0,
             edgeDensity: edgeDensity.toFixed(1),
@@ -1277,7 +1284,7 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({
+            mergeDebugInfo({
               docFill: Math.round(docFillPercent),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
@@ -1295,7 +1302,7 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({
+            mergeDebugInfo({
               docFill: Math.round(docFillPercent),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
@@ -1410,7 +1417,7 @@ export function useCardDetection(
                 recentVotes.every((v) => v === recentVotes[0]);
 
               setFeedback('Detecting document type…');
-              setDebugInfo({
+              mergeDebugInfo({
                 blur: 0,
                 glare: 0,
                 edgeDensity: edgeDensity.toFixed(1),
@@ -1469,7 +1476,7 @@ export function useCardDetection(
               ) {
                 discoveryRef.current.votes = [];
               }
-              setDebugInfo({
+              mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
@@ -1495,7 +1502,7 @@ export function useCardDetection(
               setComplianceState(COMPLIANCE_STATES.DETECTING);
               stabilityRef.current.count = 0;
               bestFrameRef.current = { image: null, preview: null, score: 0 };
-              setDebugInfo({
+              mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
@@ -1511,7 +1518,7 @@ export function useCardDetection(
             captureMissCounterRef.current += 1;
             const CAPTURE_MISS_TOLERANCE = 20;
             if (captureMissCounterRef.current < CAPTURE_MISS_TOLERANCE) {
-              setDebugInfo({
+              mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
@@ -1523,7 +1530,7 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
-            setDebugInfo({
+            mergeDebugInfo({
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
               quadrants: quadDensities.join('/'),
@@ -1546,7 +1553,7 @@ export function useCardDetection(
           setComplianceState(COMPLIANCE_STATES.DETECTING);
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
-          setDebugInfo({ blur: Math.round(variance), glare: 0 });
+          mergeDebugInfo({ blur: Math.round(variance), glare: 0 });
           return;
         }
 
@@ -1557,7 +1564,7 @@ export function useCardDetection(
         const totalPixels = gray.rows * gray.cols;
         const glarePercent = (glarePixels / totalPixels) * 100;
 
-        setDebugInfo({
+        mergeDebugInfo({
           blur: Math.round(variance),
           glare: glarePercent.toFixed(1),
           edgeDensity: edgeDensity.toFixed(1),

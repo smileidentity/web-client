@@ -33,9 +33,19 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: './tsconfig.app.json',
+        tsconfigRootDir: __dirname,
       },
       plugins: ['@typescript-eslint'],
       rules: {
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-check': false,
+            'ts-expect-error': 'allow-with-description',
+            'ts-ignore': 'allow-with-description',
+            'ts-nocheck': 'allow-with-description',
+          },
+        ],
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unused-vars': [
           'error',
@@ -87,6 +97,18 @@ module.exports = {
   plugins: ['cypress'],
   rules: {
     'class-methods-use-this': 'off',
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      // `ts: 'always'` is required because `lib/components/selfie/src/SelfieCaptureScreens.js`
+      // imports a `.ts` helper directly. `tsx: 'always'` is required because
+      // `lib/components/document/src/document-capture-instructions/index.js`
+      // imports `./DocumentCaptureInstructions.tsx` for its custom-element
+      // side-effect, alongside a sibling `.js` of the same basename. The
+      // TS/TSX override below relaxes both back to `'never'` for files
+      // already inside the TS sources.
+      { js: 'never', jsx: 'never', ts: 'always', tsx: 'always' },
+    ],
     'import/no-extraneous-dependencies': [
       'error',
       {

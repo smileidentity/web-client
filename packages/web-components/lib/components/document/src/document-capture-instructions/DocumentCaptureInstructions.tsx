@@ -4,6 +4,9 @@ import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
 import { getDirection, t } from '../../../../domain/localisation';
+// Registers the shared <smileid-navigation> custom element (back button,
+// localised label, RTL arrow flip) used across the SDK's capture screens.
+import '../../../navigation/src';
 import idCardLottie from '../assets/lottie/id-card.lottie?inline';
 import passportLottie from '../assets/lottie/passport.lottie?inline';
 import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
@@ -162,27 +165,6 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
 
 // ── Inline SVG helpers ───────────────────────────────────────────────────────
 
-function BackArrowIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M19 12H5M5 12L12 19M5 12L12 5"
-        stroke="white"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  );
-}
-
 function ArrowRightIcon() {
   return (
     <svg
@@ -335,6 +317,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
   const rootRef = useRef<HTMLDivElement>(null);
+  const navigationRef = useRef<HTMLElement | null>(null);
   const guidelineItems: GuidelineItem[] = [
     { key: 'good', label: t('document.instructions.guidelines.good') },
     {
@@ -372,22 +355,35 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
     dispatchInstructionEvent('document-capture-instructions.cancelled');
   };
 
+  // Bridge the <smileid-navigation> element's back event to handleBack.
+  useEffect(() => {
+    const navigation = navigationRef.current;
+    if (!navigation || hideBack) return undefined;
+    const onNavigationBack = () => handleBack();
+    navigation.addEventListener('navigation.back', onNavigationBack);
+    return () =>
+      navigation.removeEventListener('navigation.back', onNavigationBack);
+  }, [hideBack]);
+
   const handleStartCapture = () => {
     dispatchInstructionEvent('document-capture-instructions.capture');
   };
 
   return (
     <div ref={rootRef} class="doc-instr-root" dir={direction}>
-      {/* ── Back button ──────────────────────────────────────── */}
+      {/* ── Back button (shared <smileid-navigation>, back only) ─ */}
       {!hideBack && (
-        <button
-          class="back-button"
-          type="button"
-          aria-label="Go back"
-          onClick={handleBack}
-        >
-          <BackArrowIcon />
-        </button>
+        // @ts-expect-error preact-custom-element lacks ref/attr types
+        <smileid-navigation
+          ref={navigationRef}
+          hide-close=""
+          class="back-nav"
+          style={{
+            '--smileid-navigation-button-bg': '#2d2b2a',
+            '--smileid-navigation-icon-color': '#ffffff',
+            '--smileid-navigation-focus-color': '#151f72',
+          }}
+        />
       )}
 
       {/* ── Scrollable content ───────────────────────────────── */}
@@ -482,32 +478,13 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           overflow: hidden;
         }
 
-        /* ── Back button ─────────────────────────────────────── */
-        .back-button {
+        /* ── Back button (positions the shared <smileid-navigation>;
+              the circle, hover and focus styling live in its shadow) ── */
+        .back-nav {
           position: absolute;
           top: 24px;
           left: 20px;
           z-index: 10;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #2d2b2a;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          flex-shrink: 0;
-          transition: opacity 0.15s ease;
-        }
-
-        .back-button:hover {
-          opacity: 0.85;
-        }
-
-        .back-button:focus-visible {
-          outline: 2px solid #151f72;
-          outline-offset: 3px;
         }
 
         /* ── Scrollable area ──────────────────────────────────── */
@@ -691,7 +668,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             padding-right: 32px;
           }
 
-          .back-button {
+          .back-nav {
             top: 28px;
             left: 28px;
           }

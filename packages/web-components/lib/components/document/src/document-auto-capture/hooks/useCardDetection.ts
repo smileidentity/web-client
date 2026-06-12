@@ -87,6 +87,12 @@ const MIN_DISCOVERY_GRID_CELLS = 3;
 const PERI_COMPRESSION_MAX = 3.5;
 // Minimum contour-area / bounding-box-area ratio for a card-shaped contour.
 const MIN_RECT_FILL_RATIO = 0.65;
+// Desktop id-card synthetic fallback: only bridge contour dropouts when a
+// genuine 4-corner card was validated within this many frames (~0.5s at
+// 30fps). Without the recency gate the fallback synthesizes a "card" from
+// background contours (face, furniture, window frames) and can auto-capture
+// a document-free scene.
+const SYNTH_BRIDGE_MAX_FRAMES = 15;
 
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
@@ -316,6 +322,11 @@ export function useCardDetection(
   // documents whose spine/page edges can momentarily break) before flipping
   // the user-facing prompt to "Align document in frame".
   const captureMissCounterRef = useRef(0);
+  // Frames since a genuine (non-synthetic) 4-corner card last passed
+  // validation. Gates the desktop id-card synthetic fallback so it only
+  // bridges brief dropouts of a card that WAS being detected, rather than
+  // synthesizing one from background contours (see SYNTH_BRIDGE_MAX_FRAMES).
+  const framesSinceRealCardRef = useRef(Number.POSITIVE_INFINITY);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -887,6 +898,10 @@ export function useCardDetection(
           // Consumed in the no-contour handling below to show distance
           // guidance instead of the dead-end "Align document in frame".
           let wallHugRejectedCardThisFrame = false;
+          // Age the real-card recency window each detection frame; reset to 0
+          // below when a genuine 4-corner card passes validation.
+          // (Infinity + 1 stays Infinity, so the pristine state is preserved.)
+          framesSinceRealCardRef.current += 1;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -1016,6 +1031,9 @@ export function useCardDetection(
                   maxArea = area;
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
+                  // Genuine 4-corner card validated — open the synthetic
+                  // fallback's bridge window.
+                  framesSinceRealCardRef.current = 0;
                 } else {
                   // Desktop: the quad failed ONLY the wall-hug check — every
                   // shape gate (rectangularity, angles, aspect) says this is
@@ -1050,8 +1068,15 @@ export function useCardDetection(
             const isBookDocFallback =
               lockedDocTypeForFallback === 'passport' ||
               lockedDocTypeForFallback === 'greenbook';
+            // Desktop id-card synthetics only bridge brief dropouts of a card
+            // that was genuinely detected moments ago. Without the recency
+            // gate, a busy document-free scene (face, furniture, window
+            // frames) forms a combined bbox that passes the aspect/area
+            // checks below and can auto-capture a non-document.
             const isIdCardFallback =
-              skipGridCheck && lockedDocTypeForFallback === 'id-card';
+              skipGridCheck &&
+              lockedDocTypeForFallback === 'id-card' &&
+              framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES;
             if (isBookDocFallback || isIdCardFallback) {
               const bw = combinedMaxX - combinedMinX;
               const bh = combinedMaxY - combinedMinY;
@@ -1822,6 +1847,7 @@ export function useCardDetection(
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
     captureMissCounterRef.current = 0;
+    framesSinceRealCardRef.current = Number.POSITIVE_INFINITY;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);

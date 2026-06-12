@@ -255,6 +255,16 @@ export function useCardDetection(
     COMPLIANCE_STATES.IDLE,
   );
   const [debugPath, setDebugPath] = useState<any>(null); // For drawing the green box on overlay
+  // Debug-only: the active detection ROI mapped to the video element's CSS
+  // box, for drawing an on-screen outline. Updated only when the rect
+  // actually changes (keyed via ref) to avoid a setState per frame.
+  const [debugRoi, setDebugRoi] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
+  const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
   const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
     providedDocType,
@@ -606,6 +616,22 @@ export function useCardDetection(
           clampedW,
           clampedH,
         };
+
+        // Debug overlay: publish the clamped ROI mapped back to the video
+        // element's CSS box (inverse of the CSS → native mapping above).
+        if (IS_DEBUG_MODE) {
+          const roiCss = {
+            x: Math.round((clampedX - offsetX) * coverScale),
+            y: Math.round((clampedY - offsetY) * coverScale),
+            w: Math.round(clampedW * coverScale),
+            h: Math.round(clampedH * coverScale),
+          };
+          const roiKey = `${roiCss.x},${roiCss.y},${roiCss.w},${roiCss.h}`;
+          if (debugRoiKeyRef.current !== roiKey) {
+            debugRoiKeyRef.current = roiKey;
+            setDebugRoi(roiCss);
+          }
+        }
 
         // --- Off-guide detection ---
         // Active on every layout that has spare margin around the visible
@@ -1064,15 +1090,21 @@ export function useCardDetection(
           // walls. A combined bbox touching 2+ walls with capture-grade grid
           // coverage means the document overflows the box; a genuinely far
           // card produces a small, centered bbox touching nothing.
+          // Require an OPPOSITE wall pair (left+right or top+bottom): a card
+          // overflowing the box spans the ROI along an axis, while the hand
+          // holding it intrudes from one side or corner — adjacent touches —
+          // and must not read as overflow at an otherwise good distance.
           let combinedBboxOverflow = false;
           if (skipGridCheck && hasSignificantContour) {
             const cbMargin = Math.round(Math.min(clampedW, clampedH) * 0.04);
-            const cbTouches =
-              (combinedMinX <= cbMargin ? 1 : 0) +
-              (combinedMinY <= cbMargin ? 1 : 0) +
-              (combinedMaxX >= clampedW - cbMargin ? 1 : 0) +
-              (combinedMaxY >= clampedH - cbMargin ? 1 : 0);
-            combinedBboxOverflow = cbTouches >= 2 && passingCells >= 7;
+            const touchesLeft = combinedMinX <= cbMargin;
+            const touchesTop = combinedMinY <= cbMargin;
+            const touchesRight = combinedMaxX >= clampedW - cbMargin;
+            const touchesBottom = combinedMaxY >= clampedH - cbMargin;
+            combinedBboxOverflow =
+              ((touchesLeft && touchesRight) ||
+                (touchesTop && touchesBottom)) &&
+              passingCells >= 7;
           }
 
           // --- Book-doc fallback ---
@@ -1921,6 +1953,7 @@ export function useCardDetection(
     complianceState,
     debugPath,
     debugInfo,
+    debugRoi,
     detectedDocType,
     guideAspectRatio,
     manualFallbackActive,

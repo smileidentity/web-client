@@ -399,6 +399,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     complianceState,
     debugInfo,
     debugPath,
+    debugRoi,
     detectedDocType,
     guideAspectRatio,
     manualFallbackActive,
@@ -921,6 +922,36 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 display: 'block',
               }}
             />
+            {/* Debug-only: outline the active detection ROI so threshold
+                issues (wall-hug, overflow, fill %) can be judged visually. */}
+            {showDebug && debugRoi ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: debugRoi.x,
+                  top: debugRoi.y,
+                  width: debugRoi.w,
+                  height: debugRoi.h,
+                  border: '2px dashed #ff3b30',
+                  boxSizing: 'border-box',
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    left: 4,
+                    color: '#ff3b30',
+                    font: '600 10px/1 sans-serif',
+                    textShadow: '0 0 2px rgba(0,0,0,0.8)',
+                  }}
+                >
+                  ROI
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
 

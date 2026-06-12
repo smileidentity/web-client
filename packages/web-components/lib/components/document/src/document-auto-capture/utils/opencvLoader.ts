@@ -16,11 +16,16 @@ declare global {
 
 let inflight: Promise<void> | null = null;
 
+// `typeof window === 'undefined'` covers server-side rendering hosts
+// (React + Next.js, Remix, Astro, etc.) that import the bundle on the
+// server during page generation. There's nothing to load there — the
+// browser will run this again on hydration.
 function isReady(): boolean {
   return typeof window !== 'undefined' && !!window.cv && !!window.cv.Mat;
 }
 
 export function ensureOpenCv(): Promise<void> {
+  // SSR no-op (see isReady above).
   if (typeof window === 'undefined') return Promise.resolve();
   if (isReady()) return Promise.resolve();
   if (inflight) return inflight;

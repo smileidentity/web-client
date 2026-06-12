@@ -1,5 +1,4 @@
 // Local theme palette/tokens used by the auto-capture screen.
-// `theme-color` attribute can override `colors.primary` at runtime.
 export const theme = {
   colors: {
     background: '#F8FAFC',

@@ -944,16 +944,24 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             {allowGalleryUpload && (
               <GalleryButton onClick={handlePickFromGallery} />
             )}
-            <DesktopCaptureButton
-              progress={
-                complianceState === COMPLIANCE_STATES.STABLE
-                  ? captureProgress
-                  : 0
-              }
-              themeColor={themeColor}
-              disabled={complianceState === COMPLIANCE_STATES.SUCCESS}
-              onClick={triggerManualCapture}
-            />
+            {/* The manual shutter only appears when it can actually be used
+                (showManualButton): immediately for manualCaptureOnly, after
+                the auto-capture timeout fallback fires in autoCapture, or on
+                CV load failure; never in autoCaptureOnly. Auto-capture state
+                is conveyed by the video border, so no progress ring is needed
+                while the shutter is hidden. */}
+            {showManualButton && (
+              <DesktopCaptureButton
+                progress={
+                  complianceState === COMPLIANCE_STATES.STABLE
+                    ? captureProgress
+                    : 0
+                }
+                themeColor={themeColor}
+                disabled={complianceState === COMPLIANCE_STATES.SUCCESS}
+                onClick={triggerManualCapture}
+              />
+            )}
           </div>
 
           {captureMode === 'autoCaptureOnly' && cvLoadFailed && (

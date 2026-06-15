@@ -218,7 +218,7 @@ export function useCardDetection(
     variant = 'fullscreen',
     documentType = null,
     captureMode = 'autoCapture',
-    autoCaptureTimeout = 10000,
+    autoCaptureTimeout = 20_000,
     captureOrientation = 'landscape',
     shouldRotateUi = false,
     syncRoiToGuide = false,

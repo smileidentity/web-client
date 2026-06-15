@@ -258,7 +258,7 @@ function DesktopCaptureButton({
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
   'auto-capture': captureModeProp = 'autoCapture',
-  'auto-capture-timeout': autoCaptureTimeoutProp = '10000',
+  'auto-capture-timeout': autoCaptureTimeoutProp = '20000',
   'side-of-id': sideOfId = 'Front',
   'theme-color': themeColor = '#001096',
   title = '',
@@ -305,7 +305,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // to align the document (too low) or never surface it at all (too high).
   const AUTO_CAPTURE_TIMEOUT_MIN_MS = 3_000;
   const AUTO_CAPTURE_TIMEOUT_MAX_MS = 30_000;
-  const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 10_000;
+  const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 20_000;
   const autoCaptureTimeout = (() => {
     const n = Number(autoCaptureTimeoutProp);
     if (!Number.isFinite(n) || n <= 0) return AUTO_CAPTURE_TIMEOUT_DEFAULT_MS;

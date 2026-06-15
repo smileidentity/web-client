@@ -4,7 +4,7 @@ import './index.ts';
 const meta = {
   args: {
     'auto-capture': 'autoCapture',
-    'auto-capture-timeout': 10000,
+    'auto-capture-timeout': 20000,
     'document-type': 'id-card',
     language: 'en',
     'side-of-id': 'Front',

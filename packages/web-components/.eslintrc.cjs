@@ -126,7 +126,10 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        // `.lottie` / `.svg` are bundler-only asset extensions; listing them
+        // here lets eslint-plugin-import resolve them to the on-disk file
+        // instead of flagging import/no-unresolved.
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.lottie', '.svg'],
       },
       typescript: {
         alwaysTryTypes: true,

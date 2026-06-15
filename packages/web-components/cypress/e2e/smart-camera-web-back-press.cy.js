@@ -14,7 +14,7 @@ variants.forEach(({ name, suffix }) => {
   context(`SmartCameraWeb BackPress [${name}]`, () => {
     beforeEach(() => {
       cy.visit(
-        `/?component=smart-camera-web&direct=true&capture-id=back&disable-image-tests=true&show-navigation=true${suffix}`,
+        `/?component=smart-camera-web&direct=true&capture-id=back&disable-image-tests=true&show-navigation=true&new-instructions=true${suffix}`,
       );
     });
 
@@ -116,24 +116,22 @@ variants.forEach(({ name, suffix }) => {
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-instructions')
+        .find('document-capture-instructions-v2')
         .should('be.visible');
 
       // Click back button in document instructions
       cy.get('smart-camera-web')
         .shadow()
         .find(
-          'document-capture-instructions#document-capture-instructions-front',
+          'document-capture-instructions-v2#document-capture-instructions-front',
         )
-        .shadow()
-        .find('smileid-navigation')
         .shadow()
         .find('.back-button')
         .click();
 
       cy.get('smart-camera-web')
         .shadow()
-        .find('document-capture-instructions')
+        .find('document-capture-instructions-v2')
         .should('not.be.visible');
 
       // Should go back to the selfie capture wrapper, not review

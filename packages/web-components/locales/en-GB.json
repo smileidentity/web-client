@@ -23,11 +23,12 @@
       "requestButton": "Request Camera Access"
     },
     "error": {
-      "notAllowed": "Camera access not granted or blocked by a browser/extensions.  Enable access in your browser/extension to continue. You may need to refresh.",
+      "notAllowed": "Camera permission not granted for this service. Enable access to your camera in your device settings or browser/extension to continue. You may need to refresh.",
       "abort": "Something happened, and we lost access to your camera. Please refresh.",
       "notReadable": "There seems to be a problem with your camera connection. Please check and try again or try using device.",
       "notFound": "We are unable to find your camera. Please refresh.",
-      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner."
+      "insecure": "Secure connection required. Camera access is disabled on insecure sites. Please switch to the secure page or contact the app owner.",
+      "retry": "Try again"
     }
   },
   "selfie": {
@@ -74,9 +75,12 @@
         "webcamCapture": "Unable to capture webcam images - Please try another device"
       },
       "loading": {
-        "progress": "Loading... {{progress}}%",
-        "slowConnection": "Internet is too slow, wait a little more...",
-        "connectionError": "Internet connection error, check your connection and retry"
+        "progress": "Setting up the camera... {{progress}}%",
+        "slowConnection": "Still setting things up — this can take a moment the first time.",
+        "connectionError": "Internet connection error, check your connection and retry",
+        "setupError": "We couldn’t finish setting up face capture on this device. Please try again.",
+        "offlineError": "You appear to be offline. Check your connection and try again.",
+        "retry": "Try again"
       }
     },
     "smart": {
@@ -88,12 +92,26 @@
         "neutralExpression": "Neutral expression",
         "smileRequired": "Smile!",
         "openMouthSmile": "Wider smile - teeth visible",
+        "tooDark": "Too dark - find better lighting",
+        "tooBlurry": "Hold steady - too blurry",
+        "faceNotCentered": "Centre your face in the oval",
+        "turnHeadLeft": "Slowly turn your head to the left",
+        "turnHeadRight": "Slowly turn your head to the right",
+        "lookStraight": "Look straight at the camera",
+        "tiltHeadUp": "Tilt your head slightly up",
         "initializing": "Initialising..."
       },
       "status": {
         "capturing": "Capturing...",
         "keepSmiling": "Keep smiling!",
-        "readyToCapture": "Ready to capture"
+        "readyToCapture": "Ready to capture",
+        "poseCaptured": "Great! Hold still",
+        "sessionTimeout": "Session timed out — please try again"
+      },
+      "instructions": {
+        "title": "Active liveness check",
+        "description": "You'll be asked to slowly turn your head to follow on-screen prompts. Keep your face inside the oval at all times.",
+        "continueButton": "Start"
       }
     },
     "review": {
@@ -101,6 +119,88 @@
       "question": "Is your whole face clear?",
       "acceptButton": "Yes, use this",
       "retakeButton": "No, Retake Selfie"
+    },
+    "ess": {
+      "back": "Back",
+      "consent": {
+        "titleSuffix": "would like to verify your identity using",
+        "bodyPrefix": "By selecting Allow, you consent to ",
+        "bodyMiddle": " collecting and processing your personal data for the purpose of providing identity verification and fraud prevention services, and securely sharing the results with ",
+        "bodySuffix": ". This may include processing:",
+        "items": {
+          "contact": "Contact Information",
+          "personal": "Personal Information",
+          "biometric": "Biometric data and Identification documents",
+          "device": "Device Information"
+        },
+        "consentCheckbox": "I consent to my identity information and related data being shared with service providers to prevent fraud and securely process this transaction.",
+        "learnMore": "Learn more",
+        "learnMoreBodyPrefix": "",
+        "learnMoreBodyAnd": " and ",
+        "learnMoreBodySuffix": " process your personal and biometric data to verify your identity and prevent fraud. We retain your data for 5 years to meet legal obligations.",
+        "learnMoreShare": "We may share data with specific partners to complete this check.",
+        "learnMoreRightsPrefix": "You can withdraw consent, access your data, or exercise your rights at our",
+        "dsarLink": "DSAR",
+        "learnMoreRightsMiddle": "page. Full details are in the",
+        "smileIdPrivacyLink": "Smile ID",
+        "partnerPrivacyTail": "and {{partnerName}} Privacy Policies.",
+        "partnerPrivacyTailLinked": "and",
+        "partnerPrivacyTailEnd": "Privacy Policies.",
+        "allow": "Allow",
+        "deny": "Deny"
+      },
+      "instructions": {
+        "titlePrefix": "Get ready to capture your",
+        "titleAccent": "selfie",
+        "guidelinesHeader": "CAPTURE GUIDELINES",
+        "tile": {
+          "good": "Good",
+          "accessories": "Accessories",
+          "multipleFaces": "Multiple Faces",
+          "poorLighting": "Poor Lighting"
+        },
+        "continue": "Next",
+        "settingUpCamera": "Setting up camera…"
+      },
+      "submission": {
+        "review": {
+          "title": "Confirm image quality",
+          "body": "Make sure that the image is clear.",
+          "retake": "Retake",
+          "confirm": "Confirm"
+        },
+        "submitting": {
+          "title": "Submitting…",
+          "body": "This might take a moment…\nDo not close or refresh this page"
+        },
+        "success": {
+          "title": "Submission Complete",
+          "body": "Thank you for your submission. We are currently verifying your details."
+        },
+        "error": {
+          "title": "Submission Failed"
+        },
+        "continue": "Continue",
+        "exit": "Exit",
+        "imageAlt": "Captured selfie"
+      },
+      "alert": {
+        "centerFace": "Centre your face within the oval frame",
+        "holdStill": "Hold still…",
+        "tooDark": "Move to a well lit environment",
+        "tooClose": "Move your device away from your face",
+        "tooFar": "Move your device closer to your face",
+        "moveDeviceUp": "Move your device higher",
+        "moveDeviceDown": "Move your device lower",
+        "moveDeviceLeft": "Move your device to the left",
+        "moveDeviceRight": "Move your device to the right",
+        "turnHeadLeft": "Turn your head to the left",
+        "turnHeadRight": "Turn your head to the right",
+        "tiltHeadUp": "Turn your head slightly upwards"
+      },
+      "failure": {
+        "sessionTimedOut": "Your session timed out. Please try again."
+      }
     }
   },
   "document": {
@@ -117,8 +217,16 @@
       "captureButton": "Capture Document"
     },
     "instructions": {
+      "captureTitlePrefix": "Get ready to capture your",
+      "captureGuidelines": "Capture Guidelines",
       "description": "We'll use it to verify your identity.",
       "followInstructions": "Please follow the instructions below.",
+      "guidelines": {
+        "good": "Good",
+        "notCropped": "Not cropped",
+        "notBlurry": "Not blurry",
+        "notReflective": "Not reflective"
+      },
       "goodLight": {
         "header": "Good Light",
         "body": "Make sure the image is taken in a well-lit environment where the ID document is easy to read."
@@ -127,6 +235,7 @@
         "header": "Clear Image",
         "body": "Hold your device steady so the information on the ID are not blurry."
       },
+      "startCapture": "Start Capture",
       "takePhotoButton": "Take Photo",
       "uploadPhotoButton": "Upload Photo"
     },

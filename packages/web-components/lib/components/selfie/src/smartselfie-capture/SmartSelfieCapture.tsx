@@ -3,6 +3,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { translate } from '../../../../domain/localisation';
 import { useFaceCapture, useCamera } from './hooks';
 import { CameraPreview } from './components/CameraPreview';
 import { AlertDisplay } from './components/AlertDisplay';
@@ -61,8 +62,8 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
     getFacingMode: () => camera.facingMode,
   });
 
-  useEffect(() => {
-    const initializeCamera = async () => {
+  const initializeCamera = async () => {
+    try {
       await camera.startCamera(initialFacingMode, (cameraName) => {
         const smartCameraWeb = document.querySelector('smart-camera-web');
         smartCameraWeb?.dispatchEvent(
@@ -71,15 +72,20 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           }),
         );
       });
-      await camera.checkAgentSupport();
-      await faceCapture.initializeFaceLandmarker();
+    } catch {
+      // startCamera already set cameraError; surface UI and skip downstream init
+      return;
+    }
+    await camera.checkAgentSupport();
+    await faceCapture.initializeFaceLandmarker();
 
-      setTimeout(() => {
-        faceCapture.setupCanvas();
-        faceCapture.startDetectionLoop();
-      }, 500);
-    };
+    setTimeout(() => {
+      faceCapture.setupCanvas();
+      faceCapture.startDetectionLoop();
+    }, 500);
+  };
 
+  useEffect(() => {
     camera.registerCameraSwitchCallback(() => {
       try {
         faceCapture.resetFaceDetectionState();
@@ -142,39 +148,57 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         <smileid-navigation ref={navigationRef} theme-color={themeColor} />
       )}
 
-      <CameraPreview
-        videoRef={camera.videoRef}
-        canvasRef={canvasRef}
-        facingMode={camera.facingMode}
-        progress={
-          faceCapture.capturesTaken.value > 0
-            ? faceCapture.capturesTaken.value / faceCapture.totalCaptures.value
-            : 0
-        }
-        interval={interval}
-        themeColor={themeColor}
-      />
-
-      <AlertDisplay alertTitle={faceCapture.alertTitle.value} />
-
-      {!faceCapture.isCapturing.value &&
-        !faceCapture.hasFinishedCapture.value && (
-          <CaptureControls
-            isCapturing={faceCapture.isCapturing.value}
-            hasFinishedCapture={faceCapture.hasFinishedCapture.value}
-            isReadyToCapture={faceCapture.isReadyToCapture.value}
-            captureButtonFallbackEnabled={
-              faceCapture.captureButtonFallbackEnabled.value
-            }
-            allowAgentMode={allowAgentMode}
-            agentSupported={camera.agentSupported}
-            showAgentModeForTests={showAgentModeForTests}
+      {camera.cameraError ? (
+        <div className="camera-error" role="alert">
+          <p>{camera.cameraError}</p>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              initializeCamera();
+            }}
+          >
+            {translate('camera.error.retry')}
+          </button>
+        </div>
+      ) : (
+        <>
+          <CameraPreview
+            videoRef={camera.videoRef}
+            canvasRef={canvasRef}
             facingMode={camera.facingMode}
+            progress={
+              faceCapture.capturesTaken.value > 0
+                ? faceCapture.capturesTaken.value /
+                  faceCapture.totalCaptures.value
+                : 0
+            }
+            interval={interval}
             themeColor={themeColor}
-            onStartCapture={faceCapture.startCapture}
-            onSwitchCamera={camera.switchCamera}
           />
-        )}
+
+          <AlertDisplay alertTitle={faceCapture.alertTitle.value} />
+
+          {!faceCapture.isCapturing.value &&
+            !faceCapture.hasFinishedCapture.value && (
+              <CaptureControls
+                isCapturing={faceCapture.isCapturing.value}
+                hasFinishedCapture={faceCapture.hasFinishedCapture.value}
+                isReadyToCapture={faceCapture.isReadyToCapture.value}
+                captureButtonFallbackEnabled={
+                  faceCapture.captureButtonFallbackEnabled.value
+                }
+                allowAgentMode={allowAgentMode}
+                agentSupported={camera.agentSupported}
+                showAgentModeForTests={showAgentModeForTests}
+                facingMode={camera.facingMode}
+                themeColor={themeColor}
+                onStartCapture={faceCapture.startCapture}
+                onSwitchCamera={camera.switchCamera}
+              />
+            )}
+        </>
+      )}
 
       {/* @ts-expect-error -- preact-custom-element doesn't have proper types for refs */}
       {!hideAttribution && <powered-by-smile-id />}
@@ -213,11 +237,11 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
           font-family: "DM Sans", sans-serif;
           cursor: pointer;
         }
-        
+
         button.btn-primary:hover {
           background-color: #2d2b2a;
         }
-          
+
         button.btn-primary:disabled {
           background-color: #666;
           cursor: not-allowed;
@@ -226,6 +250,15 @@ const SmartSelfieCapture: FunctionComponent<Props> = ({
         .smartselfie-capture {
           padding: 1rem;
           font-family: sans-serif;
+        }
+
+        .camera-error {
+          margin-top: 1.5rem;
+          padding: 1rem 1.5rem;
+          color: #b00020;
+          text-align: center;
+          font-size: 1rem;
+          font-weight: 500;
         }
       `}</style>
     </div>

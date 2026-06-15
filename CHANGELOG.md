@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Selfie: auto-resume capture when the face returns to a valid zone before the smile checkpoint, so the flow no longer stalls in a "capturing" state without taking frames
+
+## [11.4.5] - 2026-06-09
+
+### Changed
+
+- Selfie: add a bounded timeout for MediaPipe on-device initialization and clear stale cached loading state so retries/remounts can recover from init stalls
+
+## [11.4.4] - 2026-05-27
+
+### Changed
+
+- Selfie: separate the cosmetic countdown from the load deadline so the capture flow no longer races against the visible timer
+- Web-components: add repository metadata to the published package for npm provenance
+- Dependencies: bump the npm_and_yarn group across 2 directories
+
+## [11.4.3] - 2026-05-22
+
+### Changed
+
+- Selfie: surface camera errors in `SmartSelfieCapture` instead of silently failing
+- Embed: prevent unhandled FingerprintJS load rejections from surfacing as runtime errors
+- Embed: include network diagnostics when reporting WASM init failures
+
+## [11.4.2] - 2026-05-20
+
+### Changed
+
+- Embed: handle device meta collection failures gracefully so init no longer aborts when device meta errors out
+- Embed: retry the `web_client_guard` dynamic import on transient network failures
+- Embed: add fetch retry and timeout to the init-API request to recover from intermittent iOS Safari failures
+- Selfie: short-circuit to the legacy capture flow when the MediaPipe environment is unsupported
+- Selfie: fall back to legacy capture when the browser does not support WebAssembly reftypes
+
+## [11.4.1] - 2026-05-18
+
+### Added
+
+- Improve error reporting
+- Add new document capture instructions with an opt-in option to use the new design
+
+### Changed
+
+- Fixed combobox filtering on Huawei devices by using the `input` event
+
 ## [11.4.0] - 2026-03-25
 
 ### Added

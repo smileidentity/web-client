@@ -10,15 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: set node version
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
       - name: install dependencies
         run: npm ci
       - name: lint
         run: npx prettier --check .
       - name: version consistency
         run: node ./scripts/versionConsistency.js
+      - name: locale parity
+        run: node ./scripts/checkLocaleParity.js
       - name: Check Dependency Versions
         run: npm exec check-dependency-version-consistency || true
   web-components:
@@ -28,9 +30,9 @@ jobs:
         working-directory: ./packages/web-components
     steps:
       - name: checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: set node version
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -42,9 +44,9 @@ jobs:
         working-directory: ./packages/smart-camera-web
     steps:
       - name: checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: set node version
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
       - name: install dependencies
         run: npm ci
       - name: lint
@@ -56,9 +58,9 @@ jobs:
         working-directory: ./packages/embed
     steps:
       - name: checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: set node version
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
       - name: install dependencies
         run: npm ci
       - name: lint html

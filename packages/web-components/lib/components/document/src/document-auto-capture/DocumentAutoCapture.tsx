@@ -10,8 +10,6 @@ import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
 import { theme } from './theme';
 
-// Registers the <smileid-navigation> custom element (back/close buttons,
-// localised labels, RTL handling) reused across the SDK's capture screens.
 import '../../../navigation/src';
 
 import { getBoolProp } from '../../../../utils/props';
@@ -26,6 +24,7 @@ interface Props {
   'allow-gallery-upload'?: string | boolean;
   'document-capture-modes'?: string;
   'sync-roi-to-guide'?: string | boolean;
+  'theme-color'?: string;
   title?: string;
 }
 
@@ -254,11 +253,14 @@ function DesktopCaptureButton({
     </button>
   );
 }
-
+const AUTO_CAPTURE_TIMEOUT_MIN_MS = 3_000;
+const AUTO_CAPTURE_TIMEOUT_MAX_MS = 30_000;
+const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 20_000;
 const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   'document-type': documentTypeProp = '',
   'auto-capture': captureModeProp = 'autoCapture',
-  'auto-capture-timeout': autoCaptureTimeoutProp = '20000',
+  'auto-capture-timeout':
+    autoCaptureTimeoutProp = AUTO_CAPTURE_TIMEOUT_DEFAULT_MS,
   'side-of-id': sideOfId = 'Front',
   'theme-color': themeColor = '#001096',
   title = '',
@@ -303,9 +305,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   // Clamp to the documented 3000–30000ms range. Values outside this band
   // tend to either fire the manual fallback before the user has a chance
   // to align the document (too low) or never surface it at all (too high).
-  const AUTO_CAPTURE_TIMEOUT_MIN_MS = 3_000;
-  const AUTO_CAPTURE_TIMEOUT_MAX_MS = 30_000;
-  const AUTO_CAPTURE_TIMEOUT_DEFAULT_MS = 20_000;
   const autoCaptureTimeout = (() => {
     const n = Number(autoCaptureTimeoutProp);
     if (!Number.isFinite(n) || n <= 0) return AUTO_CAPTURE_TIMEOUT_DEFAULT_MS;
@@ -342,7 +341,6 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     setSettings((prev) => ({ ...prev, [key]: value }));
   const showDebug = true;
 
-  console.log('[DocumentAutoCapture] settings', { settings, window });
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {
     ensureOpenCv().catch((err: unknown) => {

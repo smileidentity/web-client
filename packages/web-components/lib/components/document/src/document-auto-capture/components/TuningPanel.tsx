@@ -1,6 +1,44 @@
 import { useState } from 'preact/hooks';
+import type { FunctionComponent } from 'preact';
 
-export function TuningPanel({ settings, updateSetting, debugInfo }) {
+interface TuningSettings {
+  deviceType: string;
+  cropToCard: boolean;
+  cropPadding: number;
+  useDynamicBorder: boolean;
+  edgeDensityThreshold: number;
+  gridCellRatio: number;
+  blurThreshold: number;
+  glareThreshold: number;
+  stabilityThreshold: number;
+  cropToContour?: boolean;
+  previewCropPadding?: number;
+  minFillPercent?: number;
+  maxFillPercent?: number;
+  [key: string]: unknown;
+}
+
+interface TuningDebugInfo {
+  edgeDensity?: number | string;
+  texture?: number | string;
+  quadrants?: string;
+  blur?: number;
+  glare?: number | string;
+  docFill?: number | string;
+  [key: string]: unknown;
+}
+
+interface TuningPanelProps {
+  settings: TuningSettings;
+  updateSetting: (key: string, value: unknown) => void;
+  debugInfo?: TuningDebugInfo | null;
+}
+
+export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
+  settings,
+  updateSetting,
+  debugInfo,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Default is minimized for UX, expand for dev
@@ -98,11 +136,9 @@ export function TuningPanel({ settings, updateSetting, debugInfo }) {
           Texture:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.texture ?? '0'}</span>
         </div>
-        <div hidden>
-          Grid 3×3:{' '}
-          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
-            {debugInfo?.quadrants ?? '-'}
-          </span>
+        <div>
+          Doc Fill:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.docFill ?? '-'}%</span>
         </div>
         <div>
           Blur Variance:{' '}
@@ -111,6 +147,12 @@ export function TuningPanel({ settings, updateSetting, debugInfo }) {
         <div>
           Glare %:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.glare || 0}%</span>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          Grid 3×3:{' '}
+          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
+            {debugInfo?.quadrants ?? '-'}
+          </span>
         </div>
       </div>
 
@@ -223,6 +265,34 @@ export function TuningPanel({ settings, updateSetting, debugInfo }) {
           }
         />
       </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>Min Fill (%): {settings.minFillPercent}</span>
+        <input
+          type="range"
+          min="20"
+          max="95"
+          step="1"
+          value={settings.minFillPercent}
+          onInput={(e) =>
+            updateSetting('minFillPercent', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>Max Fill (%): {settings.maxFillPercent}</span>
+        <input
+          type="range"
+          min="50"
+          max="100"
+          step="1"
+          value={settings.maxFillPercent}
+          onInput={(e) =>
+            updateSetting('maxFillPercent', Number(e.target.value))
+          }
+        />
+      </label>
     </div>
   );
-}
+};

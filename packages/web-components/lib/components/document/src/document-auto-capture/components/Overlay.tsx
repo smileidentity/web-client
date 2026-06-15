@@ -70,9 +70,12 @@ export const Overlay: FunctionComponent<OverlayProps> = ({
         canvasRef.current.height = rect.height;
       }
     };
+    resizeCanvas();
+    // ResizeObserver is missing on older browsers; the debug canvas is
+    // optional, so fall back to the initial size rather than throwing.
+    if (typeof ResizeObserver === 'undefined') return undefined;
     const observer = new ResizeObserver(resizeCanvas);
     if (guideBoxRef.current) observer.observe(guideBoxRef.current);
-    resizeCanvas();
     return () => observer.disconnect();
   }, []);
 

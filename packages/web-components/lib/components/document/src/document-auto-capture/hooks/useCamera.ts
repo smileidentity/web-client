@@ -17,7 +17,7 @@ export function useCamera() {
 
     const startCamera = async () => {
       try {
-        const constraintsList = [
+        const constraintsList: MediaStreamConstraints[] = [
           {
             audio: false,
             video: {
@@ -37,20 +37,30 @@ export function useCamera() {
         ];
 
         // Sequential fallback: try each constraint set; only attempt the next
-        // if the previous one rejects. Implemented via a reduce-driven promise
-        // chain so we avoid `for...of` + `await-in-loop` lint rules.
-        const INITIAL = new Error('__initial__');
-        const mediaStream = await constraintsList.reduce<Promise<MediaStream>>(
-          (prev, constraints) =>
-            prev.catch((e: Error) => {
-              if (e !== INITIAL)
-                console.warn('Constraint failed, trying next:', e.message);
-              return navigator.mediaDevices.getUserMedia(constraints);
-            }),
-          Promise.reject(INITIAL),
-        );
+        // if the previous one rejects. Implemented as a small recursive helper
+        // so we avoid both `await`-in-loop and the contrived reduce/Promise
+        // chain that the previous version used.
+        const tryConstraints = (
+          index: number,
+          lastError?: Error,
+        ): Promise<MediaStream> => {
+          if (index >= constraintsList.length) {
+            return Promise.reject(
+              lastError || new Error('All camera constraints failed'),
+            );
+          }
+          return navigator.mediaDevices
+            .getUserMedia(constraintsList[index])
+            .catch((e: Error) => {
+              console.warn(
+                'Camera constraint failed, trying next:',
+                e?.message,
+              );
+              return tryConstraints(index + 1, e);
+            });
+        };
 
-        if (!mediaStream) throw new Error('All camera constraints failed');
+        const mediaStream = await tryConstraints(0);
 
         // The component may have unmounted while getUserMedia was pending; if
         // so, stop the freshly-acquired stream immediately so we don't leak the

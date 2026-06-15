@@ -9,9 +9,8 @@ until cutover (the same staged rollout used for `SmartSelfieCapture`).
 ```html
 <document-auto-capture
   document-type="id-card"
-  auto-capture-mode="autoCapture"
+  auto-capture="autoCapture"
   side-of-id="Front"
-  theme-color="#001096"
   show-navigation
 ></document-auto-capture>
 ```
@@ -34,14 +33,13 @@ document
 | Attribute              | Default         | Description                                                                                                                                                                                                                                                                                                     |
 | ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `document-type`        | _(auto-detect)_ | `id-card`, `passport`, or `greenbook`. When omitted the element auto-classifies from contour aspect ratio.                                                                                                                                                                                                      |
-| `auto-capture-mode`    | `autoCapture`   | Matches the mobile SDKs: `autoCapture` (auto with a manual-capture fallback button after the `auto-capture-timeout`, default 10s), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger).                                                                                                 |
-| `auto-capture-timeout` | `10000`         | Milliseconds before the manual fallback button is surfaced in `autoCapture` mode. Clamped to the 3000–30000ms range.                                                                                                                                                                                            |
+| `auto-capture`         | `autoCapture`   | Matches the mobile SDKs: `autoCapture` (auto with a manual-capture fallback button after the `auto-capture-timeout`, default 20s), `autoCaptureOnly` (no manual button), `manualCaptureOnly` (no auto trigger).                                                                                                 |
+| `auto-capture-timeout` | `20000`         | Milliseconds before the manual fallback button is surfaced in `autoCapture` mode. Clamped to the 3000–30000ms range.                                                                                                                                                                                            |
 | `side-of-id`           | `Front`         | Echoed into the publish event so consumers can wire front/back flows.                                                                                                                                                                                                                                           |
-| `theme-color`          | `#001096`       | Primary accent colour.                                                                                                                                                                                                                                                                                          |
 | `show-navigation`      | `false`         | Embed the shared `<smileid-navigation>` header.                                                                                                                                                                                                                                                                 |
 | `hide-attribution`     | `false`         | Hide the "Powered by Smile ID" footer.                                                                                                                                                                                                                                                                          |
 | `allow-gallery-upload` | `true`          | Show a gallery-pick button alongside the capture controls.                                                                                                                                                                                                                                                      |
-| `sync-roi-to-guide`    | `false`         | When `true`, the detection ROI matches the visible guide-box width (`100% − 16rem` rotated, `100% − 4rem` otherwise, capped at 600px). When `false` (default), ROI uses the legacy `min(displayW × 0.90, 600px)` and is wider than the visible guide. Provided as an A/B switch — see [AGENTS.md](./AGENTS.md). |
+| `sync-roi-to-guide`    | `true`          | When `true` (default), the detection ROI matches the visible guide-box width (`100% − 16rem` rotated, `100% − 4rem` otherwise, capped at 600px). When `false`, ROI uses the legacy `min(displayW × 0.90, 600px)` and is wider than the visible guide. Provided as an A/B switch — see [AGENTS.md](./AGENTS.md). |
 | `title`                | _(none)_        | Optional title overlay rendered at the top of the camera viewport.                                                                                                                                                                                                                                              |
 
 ## Events

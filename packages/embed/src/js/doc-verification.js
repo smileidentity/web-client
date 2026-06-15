@@ -11,6 +11,7 @@ import {
 import JSZip from 'jszip';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 import {
   hasIdInfo,
@@ -356,18 +357,18 @@ window.Sentry = Sentry;
     let selectedIdType;
     let selectedIdName;
 
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    SmartCameraWeb.setAttribute(
+      'allow-agent-mode',
+      config.use_strict_mode ? false : config.allow_agent_mode,
+    );
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
     }
-    if (config.auto_capture) {
-      SmartCameraWeb.setAttribute('auto-capture', true);
+    if (config.auto_capture_enabled === true) {
+      SmartCameraWeb.setAttribute('auto-capture-enabled', true);
     }
-    if (config.auto_capture_mode) {
-      SmartCameraWeb.setAttribute(
-        'auto-capture-mode',
-        config.auto_capture_mode,
-      );
+    if (config.auto_capture) {
+      SmartCameraWeb.setAttribute('auto-capture', config.auto_capture);
     }
     if (config.auto_capture_timeout) {
       SmartCameraWeb.setAttribute(
@@ -375,6 +376,12 @@ window.Sentry = Sentry;
         config.auto_capture_timeout,
       );
     }
+    if (config.use_strict_mode) {
+      SmartCameraWeb.setAttribute('use-strict-mode', 'true');
+    }
+    installActiveLivenessTimeout(SmartCameraWeb, {
+      enabled: !!config.use_strict_mode,
+    });
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

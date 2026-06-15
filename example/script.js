@@ -18,8 +18,8 @@ export default function setupForm() {
   const allowLegacySelfieFallback = document.querySelector(
     '#allowLegacySelfieFallback',
   );
+  const autoCaptureEnabled = document.querySelector('#autoCaptureEnabled');
   const autoCapture = document.querySelector('#autoCapture');
-  const autoCaptureMode = document.querySelector('#autoCaptureMode');
   const newInstructions = document.querySelector('#newInstructions');
 
   const resetButton = () => {
@@ -82,12 +82,14 @@ export default function setupForm() {
         previewBVNMFA: true,
         allow_legacy_selfie_fallback:
           allowLegacySelfieFallback.value === 'true',
-        auto_capture: autoCapture.value === 'true',
-        auto_capture_mode: autoCaptureMode.value,
+        auto_capture_enabled: autoCaptureEnabled.value === 'true',
+        auto_capture: autoCapture.value,
         new_instructions: newInstructions.value === 'true',
         hide_attribution: true,
+        show_navigation: true,
         document_capture_modes: ['camera', 'upload'],
         allow_agent_mode: true,
+        use_strict_mode: true,
         translation: {
           language: language.value,
           locales: {
@@ -124,9 +126,10 @@ export default function setupForm() {
           signature,
           timestamp,
           name: 'Demo Account',
-          logo_url: 'https://via.placeholder.com/50/000000/FFFFFF?text=DA',
+          logo_url:
+            'https://placeholderimage.co/200x80/0f172a/22c55e/?text=Solo%27s+Bank',
           policy_url: 'https://smileidentity.com/privacy-privacy',
-          theme_color: '#96002d',
+          theme_color: '#151F72',
         },
         onSuccess: () => {
           resetButton();

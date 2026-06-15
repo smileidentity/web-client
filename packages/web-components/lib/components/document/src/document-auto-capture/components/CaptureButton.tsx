@@ -1,19 +1,27 @@
+import type { FunctionComponent } from 'preact';
 import { theme } from '../theme';
+
+interface CaptureButtonProps {
+  /** 0–100 auto-capture progress (0 = idle, animates the ring). */
+  progress?: number;
+  disabled?: boolean;
+  onClick?: () => void;
+  /**
+   * Kept for API compat. The new icon is self-styled, so this only
+   * affects the background ring colour.
+   */
+  appearance?: 'dark' | 'light';
+}
 
 /**
  * CaptureButton — circular shutter button with progress ring.
- * @param {number} progress — 0-100 auto-capture progress (0 = idle)
- * @param {boolean} disabled
- * @param {function} onClick — manual capture trigger
- * @param {'dark'|'light'} appearance — kept for API compat; the new icon is
- *   self-styled, so this only affects the background ring color.
  */
-export function CaptureButton({
+export const CaptureButton: FunctionComponent<CaptureButtonProps> = ({
   progress = 0,
   disabled = false,
   onClick,
   appearance = 'dark',
-}) {
+}) => {
   const size = 72;
   const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
@@ -111,4 +119,4 @@ export function CaptureButton({
       </svg>
     </button>
   );
-}
+};

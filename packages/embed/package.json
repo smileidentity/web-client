@@ -29,7 +29,7 @@
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.5.1",
     "@sentry/browser": "^8.33.0",
-    "@sentry/esbuild-plugin": "^2.22.3",
+    "@sentry/esbuild-plugin": "^5.3.0",
     "@smileid/web-components": "file:../web-components",
     "dayjs": "^1.11.13",
     "jszip": "^3.10.1",
@@ -38,7 +38,7 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@cypress/code-coverage": "^3.10.0",
+    "@cypress/code-coverage": "^4.0.3",
     "@types/chai": "^5.0.1",
     "@types/cypress": "^0.1.6",
     "@types/mocha": "^10.0.10",
@@ -52,7 +52,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-prettier": "^5.2.1",
-    "nyc": "17.0.0",
+    "nyc": "18.0.0",
     "prettier": "^3.3.3",
     "serve": "^14.2.6"
   }

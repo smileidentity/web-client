@@ -1,7 +1,7 @@
 // Self-contained check for the validate.js drop-in replacement.
-// This is the web-components copy of the embed shim and must stay
-// behaviour-identical to it; the cases below mirror
-// packages/embed/src/js/validate.test.mjs to catch any drift between the two.
+// This is the single shared shim (web-components owns it; embed imports it
+// via the `@smileid/web-components/validate` export), so this is the one
+// place its behaviour is pinned.
 // Expected outputs were captured from the real validate.js 0.13.1 before
 // it was removed, so this locks in byte-for-byte behaviour parity.
 // Run: node --test packages/web-components/lib/utils/validate.test.mjs

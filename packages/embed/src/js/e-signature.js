@@ -1,4 +1,4 @@
-import validate from './validate.js';
+import validate from '@smileid/web-components/validate';
 import {
   setCurrentLocale,
   translate,

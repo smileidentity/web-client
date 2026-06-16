@@ -45,6 +45,10 @@
     "./localisation": {
       "types": "./dist/types/localisation.d.ts",
       "import": "./dist/esm/localisation.js"
+    },
+    "./validate": {
+      "types": "./dist/types/validate.d.ts",
+      "import": "./dist/esm/validate.js"
     }
   },
   "files": [

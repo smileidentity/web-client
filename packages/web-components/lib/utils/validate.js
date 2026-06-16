@@ -5,7 +5,8 @@
 // humanizing. Dropping the dependency clears advisory GHSA-rv73-9c8w-jp4c
 // (a ReDoS in validate.js's built-in email/url/date regexes, which we
 // never invoked).
-// ponytail: presence + format are the only validators this codebase uses.
+// Scope is intentionally limited to `presence` and `format` — the only
+// validators this codebase uses.
 
 function isEmpty(value) {
   return value == null || (typeof value === 'string' && /^\s*$/.test(value));
@@ -37,7 +38,7 @@ export default function validate(values, constraints) {
     // preserves that order in its error array, and callers read errors[0].
     Object.keys(rules).forEach((rule) => {
       if (rule === 'presence') {
-        // allowEmpty !== false ? fail only if undefined : fail if empty.
+        // allowEmpty !== false ? fail only if null/undefined : fail if empty.
         const allowEmpty = rules.presence.allowEmpty !== false;
         if (allowEmpty ? value == null : isEmpty(value)) {
           messages.push(

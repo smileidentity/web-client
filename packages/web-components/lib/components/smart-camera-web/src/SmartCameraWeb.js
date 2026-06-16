@@ -30,7 +30,7 @@ function scwTemplateString() {
     <selfie-capture-screens ${this.applyComponentThemeColor} ${this.title} ${this.showNavigation} ${this.disableImageTests} ${this.hideAttribution} ${this.hideInstructions} ${this.hideConsent} ${this.partnerName} ${this.partnerLogo} ${this.policyUrl} hidden
       ${this.hideBackToHost} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.showBackOnGuidelines}
     ></selfie-capture-screens>
-    <document-capture-screens ${this.autoCaptureFeature} ${this.autoCapture} ${this.autoCaptureTimeout} ${this.applyComponentThemeColor} document-type=${this.documentType} ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
+    <document-capture-screens ${this.autoCaptureFeature} ${this.autoCapture} ${this.autoCaptureTimeout} ${this.applyComponentThemeColor} document-type="${escAttr(this.documentType)}" ${this.title} ${this.documentCaptureModes} ${this.showNavigation}  ${this.hideAttribution}
      ${this.hideBackOfId} ${this.newInstructions} ${this.applyComponentThemeColor} hidden></document-capture-screens>
   </div>
 `;
@@ -310,13 +310,13 @@ class SmartCameraWeb extends HTMLElement {
 
   get autoCapture() {
     return this.hasAttribute('auto-capture')
-      ? `auto-capture='${this.getAttribute('auto-capture')}'`
+      ? `auto-capture="${escAttr(this.getAttribute('auto-capture'))}"`
       : '';
   }
 
   get autoCaptureTimeout() {
     return this.hasAttribute('auto-capture-timeout')
-      ? `auto-capture-timeout='${this.getAttribute('auto-capture-timeout')}'`
+      ? `auto-capture-timeout="${escAttr(this.getAttribute('auto-capture-timeout'))}"`
       : '';
   }
 

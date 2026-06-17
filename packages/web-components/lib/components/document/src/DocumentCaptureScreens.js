@@ -384,8 +384,13 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   get autoCaptureTimeout() {
-    return this.hasAttribute('auto-capture-timeout')
-      ? `auto-capture-timeout='${this.getAttribute('auto-capture-timeout')}'`
+    const raw = this.getAttribute('auto-capture-timeout');
+    const n = Number(raw);
+    // Numeric milliseconds only — omit if not a finite positive number so an
+    // arbitrary attribute value can't break/inject the template. The downstream
+    // <document-auto-capture> clamps the value to its supported range.
+    return raw !== null && Number.isFinite(n) && n > 0
+      ? `auto-capture-timeout="${n}"`
       : '';
   }
 

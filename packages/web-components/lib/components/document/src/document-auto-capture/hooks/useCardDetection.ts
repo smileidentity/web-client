@@ -545,7 +545,7 @@ export function useCardDetection(
         const clampedW = Math.min(guideWidth, videoW - clampedX);
 
         // Log ROI mapping once for diagnostics
-        if (!canvasRef.current._roiLogged) {
+        if (IS_DEBUG_MODE && !canvasRef.current._roiLogged) {
           canvasRef.current._roiLogged = true;
           console.info(
             '[ROI] display:',
@@ -1702,7 +1702,9 @@ export function useCardDetection(
       ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
       : null;
 
-    console.info('--- MANUAL CAPTURE TRIGGERED ---');
+    if (IS_DEBUG_MODE) {
+      console.info('--- MANUAL CAPTURE TRIGGERED ---');
+    }
     setCaptureOrigin('camera_manual_capture');
     setCapturedImage(fullDataUrl);
     setPreviewImage(previewDataUrl);

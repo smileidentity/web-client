@@ -10,6 +10,9 @@ import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
+import initIframeSentry from './sentry-iframe-init.js';
+
+initIframeSentry('smartselfie-auth');
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report

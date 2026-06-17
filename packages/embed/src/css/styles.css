@@ -103,7 +103,8 @@ main {
   overflow-y: auto;
 }
 
-main:has(smart-camera-web:not([hidden])) {
+main:has(smart-camera-web:not([hidden])),
+main:has(enhanced-smart-selfie-submission:not([hidden])) {
   padding: 0;
 }
 
@@ -114,7 +115,8 @@ main:has(smart-camera-web:not([hidden])) {
     padding: 1rem;
   }
 
-  main:has(smart-camera-web:not([hidden])) {
+  main:has(smart-camera-web:not([hidden])),
+  main:has(enhanced-smart-selfie-submission:not([hidden])) {
     padding: 0;
   }
 }

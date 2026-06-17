@@ -12,6 +12,7 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 import {
   hasIdInfo,
@@ -323,10 +324,19 @@ window.Sentry = Sentry;
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    SmartCameraWeb.setAttribute(
+      'allow-agent-mode',
+      config.use_strict_mode ? false : config.allow_agent_mode,
+    );
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
     }
+    if (config.use_strict_mode) {
+      SmartCameraWeb.setAttribute('use-strict-mode', 'true');
+    }
+    installActiveLivenessTimeout(SmartCameraWeb, {
+      enabled: !!config.use_strict_mode,
+    });
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

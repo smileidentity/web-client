@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import validate from 'validate.js';
+import validate from '@smileid/web-components/validate';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
 import {

@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
-import validate from 'validate.js';
+import validate from '@smileid/web-components/validate';
 import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
 import {

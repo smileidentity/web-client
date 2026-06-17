@@ -71,6 +71,7 @@ jobs:
       - name: build application
         env:
           SENTRY_AUTH_TOKEN: '${{ secrets.SENTRY_AUTH_TOKEN }}'
+          SENTRY_ENVIRONMENT: preview
         run: npm run build && npm run build:dist
       - name: set destination directory
         id: set_dest_dir_embed

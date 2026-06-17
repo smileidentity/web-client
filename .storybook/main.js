@@ -1,4 +1,5 @@
 import { join, dirname } from 'path';
+import { mergeConfig } from 'vite';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -22,6 +23,14 @@ const config = {
   framework: {
     name: getAbsolutePath('@storybook/web-components-vite'),
     options: {},
+  },
+  // Storybook runs its own Vite config, so it needs the same `.lottie` asset
+  // registration as packages/web-components/vite.config.ts for the hero
+  // animations imported via `?inline` in DocumentCaptureInstructions.
+  async viteFinal(viteConfig) {
+    return mergeConfig(viteConfig, {
+      assetsInclude: ['**/*.lottie'],
+    });
   },
 };
 export default config;

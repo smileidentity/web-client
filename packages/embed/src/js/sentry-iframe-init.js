@@ -24,28 +24,23 @@ export default function initIframeSentry(pageName) {
     dsn: DSN,
     beforeSend(event) {
       const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
-      // TEMP: diagnostic for filter regex verification — remove before merge
-      // eslint-disable-next-line no-console
-      console.log(
-        '[sentry-iframe-init] frames',
-        frames.map((f) => f.filename),
-        'request.url',
-        event.request?.url,
-        'pageUrlPattern',
-        pageUrlPattern,
-      );
       // Keep the event if at least one frame is from the library's source
-      // files. Previously any non-matching frame (e.g. a browser-internal
+      // files(both prod and preview apps).
+      // Previously any non-matching frame (e.g. a browser-internal
       // or polyfill frame in the chain) would drop the entire event.
-      // if (
-      //   frames.length > 0 &&
-      //   !frames.some((frame) => frame.filename?.match(/inline\/src/))
-      // ) {
-      //   return null;
-      // }
-      // if (!event.request?.url?.match(pageUrlPattern)) {
-      //   return null;
-      // }
+      if (
+        frames.length > 0 &&
+        !frames.some(
+          (frame) =>
+            frame.filename?.match(/inline\/src/) ||
+            frame.filename?.match(/inline\/preview/),
+        )
+      ) {
+        return null;
+      }
+      if (!event.request?.url?.match(pageUrlPattern)) {
+        return null;
+      }
       return event;
     },
     tracesSampleRate: 1.0, // TEMP: set 100% trace sampling for diagnostic purposes — adjust as needed

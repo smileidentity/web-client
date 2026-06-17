@@ -1,6 +1,6 @@
 {
   "name": "@smileid/embed",
-  "version": "11.4.5",
+  "version": "11.5.0",
   "description": "Self Hosted Integration for Smile Identity on the Web",
   "private": true,
   "main": "inline.js",
@@ -34,8 +34,7 @@
     "dayjs": "^1.11.13",
     "jszip": "^3.10.1",
     "proxycheck-ts": "^0.0.11",
-    "ua-parser-js": "^2.0.2",
-    "validate.js": "^0.13.1"
+    "ua-parser-js": "^2.0.2"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.10.0",
@@ -44,7 +43,7 @@
     "@types/mocha": "^10.0.10",
     "cross-env": "^7.0.3",
     "cypress": "^13.17.0",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

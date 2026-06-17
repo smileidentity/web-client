@@ -3,6 +3,12 @@ import path from 'path';
 import esbuild from 'esbuild';
 import * as sentry from '@sentry/esbuild-plugin';
 
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+const SENTRY_RELEASE = `web-client@${pkg.version}`;
+const define = {
+  __SENTRY_RELEASE__: JSON.stringify(SENTRY_RELEASE),
+};
+
 /**
  * Ensures a directory exists. If not, creates it.
  * @param {string} dirPath - The path to the directory.
@@ -93,11 +99,13 @@ if (process.env.NODE_ENV === 'development') {
 const devOptions = {
   bundle: true,
   minify: process.env.MINIFY === 'true',
+  define,
 };
 
 const prodOptions = {
   bundle: true,
   minify: true,
+  define,
 };
 
 files.forEach((file) => {
@@ -123,6 +131,7 @@ files.forEach((file) => {
           authToken: process.env.SENTRY_AUTH_TOKEN,
           org: 'smile-identity',
           project: 'web-client',
+          release: { name: SENTRY_RELEASE },
           errorHandler: (err) => {
             // eslint-disable-next-line no-console
             console.warn('Sentry plugin error:', err);

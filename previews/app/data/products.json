@@ -135,16 +135,16 @@
         "type": "select",
         "options": [
           {
+            "name": "camera,upload",
+            "label": "Camera + Upload"
+          },
+          {
             "name": "camera",
             "label": "Camera"
           },
           {
             "name": "upload",
             "label": "Upload"
-          },
-          {
-            "name": "camera,upload",
-            "label": "Camera + Upload"
           }
         ]
       }
@@ -176,16 +176,16 @@
         "type": "select",
         "options": [
           {
+            "name": "camera,upload",
+            "label": "Camera + Upload"
+          },
+          {
             "name": "camera",
             "label": "Camera"
           },
           {
             "name": "upload",
             "label": "Upload"
-          },
-          {
-            "name": "camera,upload",
-            "label": "Camera + Upload"
           }
         ]
       }

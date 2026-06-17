@@ -57,6 +57,7 @@ export default defineConfig(({ mode }) => {
         combobox: resolve(__dirname, 'lib/components/combobox/src/index.js'),
         document: resolve(__dirname, 'lib/components/document/src/index.js'),
         localisation: resolve(__dirname, 'lib/domain/localisation/index.js'),
+        validate: resolve(__dirname, 'lib/utils/validate.js'),
         'end-user-consent': resolve(
           __dirname,
           'lib/components/end-user-consent/src/index.js',
@@ -82,7 +83,7 @@ export default defineConfig(({ mode }) => {
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['signature_pad', 'validate.js'],
+      external: ['signature_pad'],
       output: {
         dir: 'dist/esm',
         entryFileNames: '[name].js',

@@ -45,6 +45,10 @@
     "./localisation": {
       "types": "./dist/types/localisation.d.ts",
       "import": "./dist/esm/localisation.js"
+    },
+    "./validate": {
+      "types": "./dist/types/validate.d.ts",
+      "import": "./dist/esm/validate.js"
     }
   },
   "files": [
@@ -94,8 +98,7 @@
     "preact": "^10.27.3",
     "preact-custom-element": "^4.3.0",
     "preact-router": "^4.1.2",
-    "signature_pad": "^5.0.2",
-    "validate.js": "^0.13.1"
+    "signature_pad": "^5.0.2"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.2",

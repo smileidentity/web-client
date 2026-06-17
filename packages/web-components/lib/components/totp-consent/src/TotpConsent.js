@@ -1,4 +1,4 @@
-import validate from 'validate.js';
+import validate from '../../../utils/validate';
 import { getDirection } from '../../../domain/localisation';
 
 function postData(url, data) {

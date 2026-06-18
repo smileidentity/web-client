@@ -64,6 +64,12 @@ const getOptimalDefaults = () => {
         chromaCannyLow: 15,
         chromaCannyHigh: 40,
         mobileRegionFallback: true,
+        // False-positive controls. minAreaRect gives the card's true aspect, so
+        // a tight id-card window (1.585 ± 12% = [1.395, 1.775]) excludes 16:9
+        // screens and most non-card rectangles. minFillRatio rejects ragged
+        // quads (rotated-rect fill, tilt-invariant).
+        idAspectTolerance: 0.12,
+        minFillRatio: 0.8,
         blurThreshold: 150,
         glareThreshold: 5.0,
         stabilityThreshold: 5,
@@ -88,6 +94,10 @@ const getOptimalDefaults = () => {
         chromaCannyLow: 15,
         chromaCannyHigh: 40,
         mobileRegionFallback: false,
+        // Shared gate code; same false-positive controls as mobile. Tunable per
+        // device if desktop needs looser values.
+        idAspectTolerance: 0.12,
+        minFillRatio: 0.8,
         blurThreshold: 60,
         glareThreshold: 18.0,
         stabilityThreshold: 3,

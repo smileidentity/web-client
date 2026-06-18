@@ -20,6 +20,8 @@ interface TuningSettings {
   chromaCannyLow?: number;
   chromaCannyHigh?: number;
   mobileRegionFallback?: boolean;
+  idAspectTolerance?: number;
+  minFillRatio?: number;
   [key: string]: unknown;
 }
 
@@ -32,6 +34,8 @@ interface TuningDebugInfo {
   docFill?: number | string;
   canny?: string;
   contourSource?: string;
+  aspect?: number | string;
+  chroma?: number | string;
   [key: string]: unknown;
 }
 
@@ -165,6 +169,14 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
             {debugInfo?.contourSource ?? '—'}
           </span>
         </div>
+        <div>
+          Aspect:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.aspect ?? '—'}</span>
+        </div>
+        <div>
+          Chroma:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.chroma ?? '—'}</span>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
           <span style={{ color: '#fff', fontSize: '0.7rem' }}>
@@ -257,6 +269,38 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           onInput={(e) =>
             updateSetting('autoCannySigma', Number(e.target.value))
           }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          ID Aspect Tol: {settings.idAspectTolerance}{' '}
+          <em>(Lower = stricter; rejects screens/odd rectangles)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="0.35"
+          step="0.01"
+          value={settings.idAspectTolerance as number}
+          onInput={(e) =>
+            updateSetting('idAspectTolerance', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Min Fill Ratio: {settings.minFillRatio}{' '}
+          <em>(Higher = stricter rectangularity)</em>
+        </span>
+        <input
+          type="range"
+          min="0.5"
+          max="1"
+          step="0.01"
+          value={settings.minFillRatio as number}
+          onInput={(e) => updateSetting('minFillRatio', Number(e.target.value))}
         />
       </label>
 

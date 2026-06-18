@@ -926,6 +926,10 @@ export function useCardDetection(
             contourFull = null;
           }
           let edgeSource = 'lum';
+          // Colourfulness of the contour crop (Fix 2 chroma block fills this in
+          // when fusion is on): ~0 for a white keyboard / blank paper, higher
+          // for a colour ID. Debug-only for now; the Level 2 gate will use it.
+          let chromaScore = 0;
 
           blurred = new cv.Mat();
           cv.GaussianBlur(
@@ -1021,6 +1025,20 @@ export function useCardDetection(
               cv.GaussianBlur(aPlane, aBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
               cv.GaussianBlur(bPlane, bBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
 
+              // Colourfulness = spread of the a/b chroma channels. A neutral
+              // white/gray object (keyboard, paper, desk) has near-uniform a,b
+              // (~0); a colour ID has real chroma variance. Used as a debug
+              // metric now and as the Level 2 content gate later.
+              const chMean = new cv.Mat();
+              const chStd = new cv.Mat();
+              cv.meanStdDev(aPlane, chMean, chStd);
+              const stdA = chStd.doubleAt(0, 0);
+              cv.meanStdDev(bPlane, chMean, chStd);
+              const stdB = chStd.doubleAt(0, 0);
+              chMean.delete();
+              chStd.delete();
+              chromaScore = stdA + stdB;
+
               const chromaLow = settingsRef.current.chromaCannyLow ?? 15;
               const chromaHigh = settingsRef.current.chromaCannyHigh ?? 40;
               aEdges = new cv.Mat();
@@ -1049,7 +1067,10 @@ export function useCardDetection(
               edgeSource = 'lum';
             }
           }
-          mergeDebugInfo({ contourSource: edgeSource });
+          mergeDebugInfo({
+            contourSource: edgeSource,
+            chroma: Math.round(chromaScore),
+          });
 
           // Bridge gaps in the card border caused by lamination glare or finger
           // occlusion. At full resolution the card border is crisp and well
@@ -1082,6 +1103,10 @@ export function useCardDetection(
           );
 
           let maxArea = 0;
+          // Aspect of the largest 4-corner candidate this frame (debug only):
+          // lets on-device tuning read why a keyboard/screen passed or failed
+          // the aspect gate. 0 when no 4-corner candidate was evaluated.
+          let lastCandidateAspect = 0;
           let bestContour: any = null;
           // True when bestContour is the synthesized book-doc fallback rect.
           // Its bbox covers inner content (photo/text/MRZ), not the full page,
@@ -1182,6 +1207,7 @@ export function useCardDetection(
                   detectedAspect,
                   detectedAspect > 0 ? 1 / detectedAspect : 0,
                 );
+                if (area > maxArea) lastCandidateAspect = normalizedAspect;
                 const lockedDocType = discoveryRef.current.docType;
                 const expectedAspect = lockedDocType
                   ? ASPECT_RATIOS[lockedDocType]
@@ -1192,7 +1218,13 @@ export function useCardDetection(
                 // aspect tolerance for those types.
                 const isBookDocAspect =
                   lockedDocType === 'passport' || lockedDocType === 'greenbook';
-                const aspectTolerance = isBookDocAspect ? 0.35 : 0.2;
+                // minAreaRect gives the card's TRUE aspect (tilt-invariant), so
+                // the id-card window can be tight: 1.585 ± 12% = [1.395, 1.775]
+                // excludes 16:9 screens (1.778) and most non-card rectangles
+                // without rejecting real cards. Tunable for on-device dialing.
+                const aspectTolerance = isBookDocAspect
+                  ? 0.35
+                  : (settingsRef.current.idAspectTolerance ?? 0.12);
                 const aspectOk = expectedAspect
                   ? Math.abs(normalizedAspect - expectedAspect) /
                       expectedAspect <
@@ -1228,8 +1260,10 @@ export function useCardDetection(
                   }
                 }
 
+                const minFillRatio =
+                  settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO;
                 if (
-                  fillRatio > MIN_RECT_FILL_RATIO &&
+                  fillRatio > minFillRatio &&
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
@@ -1249,7 +1283,7 @@ export function useCardDetection(
                   if (
                     skipGridCheck &&
                     roiWallHug &&
-                    fillRatio > MIN_RECT_FILL_RATIO &&
+                    fillRatio > minFillRatio &&
                     anglesOk &&
                     aspectOk
                   ) {
@@ -1263,6 +1297,8 @@ export function useCardDetection(
             }
             cnt.delete();
           }
+
+          mergeDebugInfo({ aspect: lastCandidateAspect.toFixed(2) });
 
           // --- Desktop overflow detection ---
           // A card pushed too close overflows the ROI: its outer edges leave

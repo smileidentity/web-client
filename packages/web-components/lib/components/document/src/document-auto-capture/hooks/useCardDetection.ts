@@ -451,6 +451,9 @@ export function useCardDetection(
       let bBlur: any = null;
       let aEdges: any = null;
       let bEdges: any = null;
+      // Per-pixel chroma magnitude, kept alive past the chroma block for the
+      // Level 2 content gate (measured per detected rectangle).
+      let chromaMag: any = null;
 
       // Inner function so each early `return` inside the detection pipeline
       // exits only this helper (then falls through to the shared finally
@@ -926,10 +929,6 @@ export function useCardDetection(
             contourFull = null;
           }
           let edgeSource = 'lum';
-          // Colourfulness of the contour crop (Fix 2 chroma block fills this in
-          // when fusion is on): ~0 for a white keyboard / blank paper, higher
-          // for a colour ID. Debug-only for now; the Level 2 gate will use it.
-          let chromaScore = 0;
 
           blurred = new cv.Mat();
           cv.GaussianBlur(
@@ -1025,19 +1024,19 @@ export function useCardDetection(
               cv.GaussianBlur(aPlane, aBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
               cv.GaussianBlur(bPlane, bBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
 
-              // Colourfulness = spread of the a/b chroma channels. A neutral
-              // white/gray object (keyboard, paper, desk) has near-uniform a,b
-              // (~0); a colour ID has real chroma variance. Used as a debug
-              // metric now and as the Level 2 content gate later.
-              const chMean = new cv.Mat();
-              const chStd = new cv.Mat();
-              cv.meanStdDev(aPlane, chMean, chStd);
-              const stdA = chStd.doubleAt(0, 0);
-              cv.meanStdDev(bPlane, chMean, chStd);
-              const stdB = chStd.doubleAt(0, 0);
-              chMean.delete();
-              chStd.delete();
-              chromaScore = stdA + stdB;
+              // Per-pixel chroma magnitude |a-128| + |b-128| (Lab neutral =
+              // 128). Near 0 for a neutral white/gray object (keyboard, paper,
+              // desk); high where a colour ID has a photo/printing. Kept alive
+              // for the Level 2 content gate, measured per detected rectangle
+              // below so background colour can't mask a monochrome object.
+              const aAbs = new cv.Mat();
+              const bAbs = new cv.Mat();
+              cv.convertScaleAbs(aPlane, aAbs, 1, -128);
+              cv.convertScaleAbs(bPlane, bAbs, 1, -128);
+              chromaMag = new cv.Mat();
+              cv.addWeighted(aAbs, 1, bAbs, 1, 0, chromaMag);
+              aAbs.delete();
+              bAbs.delete();
 
               const chromaLow = settingsRef.current.chromaCannyLow ?? 15;
               const chromaHigh = settingsRef.current.chromaCannyHigh ?? 40;
@@ -1067,10 +1066,7 @@ export function useCardDetection(
               edgeSource = 'lum';
             }
           }
-          mergeDebugInfo({
-            contourSource: edgeSource,
-            chroma: Math.round(chromaScore),
-          });
+          mergeDebugInfo({ contourSource: edgeSource });
 
           // Bridge gaps in the card border caused by lamination glare or finger
           // occlusion. At full resolution the card border is crisp and well
@@ -1107,6 +1103,9 @@ export function useCardDetection(
           // lets on-device tuning read why a keyboard/screen passed or failed
           // the aspect gate. 0 when no 4-corner candidate was evaluated.
           let lastCandidateAspect = 0;
+          // Mean chroma magnitude of the largest candidate's bbox (debug); -1
+          // when not measured (gate off or chroma unavailable).
+          let lastCandidateChroma = -1;
           let bestContour: any = null;
           // True when bestContour is the synthesized book-doc fallback rect.
           // Its bbox covers inner content (photo/text/MRZ), not the full page,
@@ -1262,10 +1261,40 @@ export function useCardDetection(
 
                 const minFillRatio =
                   settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO;
+
+                // --- Level 2: chroma-content gate ---
+                // A white/silver keyboard (or blank paper) is rectangular,
+                // card-aspect and fills its rotated rect, so geometry alone
+                // can't reject it — but it has almost no colour. Measure the
+                // mean chroma magnitude over THIS candidate's bbox (not the
+                // whole crop, so coloured background can't mask it) and reject
+                // near-monochrome winners. Only active when chroma fusion built
+                // chromaMag; tunable + toggleable.
+                let chromaOk = true;
+                if (
+                  chromaMag &&
+                  settingsRef.current.chromaContentGate === true
+                ) {
+                  const cx = Math.max(0, bRect.x);
+                  const cy = Math.max(0, bRect.y);
+                  const cw = Math.min(chromaMag.cols - cx, bRect.width);
+                  const ch = Math.min(chromaMag.rows - cy, bRect.height);
+                  let candChroma = 0;
+                  if (cw > 0 && ch > 0) {
+                    const chRoi = chromaMag.roi(new cv.Rect(cx, cy, cw, ch));
+                    [candChroma] = cv.mean(chRoi);
+                    chRoi.delete();
+                  }
+                  if (area > maxArea) lastCandidateChroma = candChroma;
+                  chromaOk =
+                    candChroma >= (settingsRef.current.minChromaContent ?? 8);
+                }
+
                 if (
                   fillRatio > minFillRatio &&
                   anglesOk &&
                   aspectOk &&
+                  chromaOk &&
                   !roiWallHug &&
                   area > maxArea
                 ) {
@@ -1298,7 +1327,11 @@ export function useCardDetection(
             cnt.delete();
           }
 
-          mergeDebugInfo({ aspect: lastCandidateAspect.toFixed(2) });
+          mergeDebugInfo({
+            aspect: lastCandidateAspect.toFixed(2),
+            chroma:
+              lastCandidateChroma < 0 ? '—' : Math.round(lastCandidateChroma),
+          });
 
           // --- Desktop overflow detection ---
           // A card pushed too close overflows the ROI: its outer edges leave
@@ -2047,6 +2080,7 @@ export function useCardDetection(
           bBlur,
           aEdges,
           bEdges,
+          chromaMag,
         );
 
         // Loop

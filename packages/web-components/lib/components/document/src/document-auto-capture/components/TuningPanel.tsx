@@ -22,6 +22,8 @@ interface TuningSettings {
   mobileRegionFallback?: boolean;
   idAspectTolerance?: number;
   minFillRatio?: number;
+  chromaContentGate?: boolean;
+  minChromaContent?: number;
   [key: string]: unknown;
 }
 
@@ -354,6 +356,34 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           }
         />
       </label>
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Chroma Content Gate
+        <input
+          type="checkbox"
+          checked={Boolean(settings.chromaContentGate)}
+          onInput={(e) => updateSetting('chromaContentGate', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.chromaContentGate) && (
+        <label style={{ display: 'flex', flexDirection: 'column' }}>
+          <span>
+            Min Chroma Content: {settings.minChromaContent}{' '}
+            <em>(Higher = reject more monochrome objects, e.g. keyboards)</em>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="50"
+            step="1"
+            value={settings.minChromaContent as number}
+            onInput={(e) =>
+              updateSetting('minChromaContent', Number(e.target.value))
+            }
+          />
+        </label>
+      )}
 
       <label style={{ display: 'flex', flexDirection: 'column' }}>
         <span>Sharpness Threshold: {settings.blurThreshold}</span>

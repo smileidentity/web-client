@@ -80,6 +80,15 @@ const MIN_CONTOUR_AREA_PERCENT = 0.05;
 // Less strict than full allQuadrantsPass (9/9) but still filters empty scenes.
 const MIN_DISCOVERY_GRID_CELLS = 3;
 
+// Adaptive contour-Canny high-threshold band (see the Sobel/magnitude block in
+// the contour pass). CANNY_HIGH_MAX is the previously-fixed value: high-contrast
+// scenes still cap here so the working metallic/high-contrast path cannot
+// regress. CANNY_HIGH_MIN is the relaxed floor that lets faint document borders
+// on plain backgrounds be detected. The low threshold is 40% of the resolved
+// high threshold.
+const CANNY_HIGH_MAX = 150;
+const CANNY_HIGH_MIN = 60;
+
 // --- Contour rejection thresholds (shared by the in-guide pass and the
 // off-guide detector) ---
 // A real card border survives approxPolyDP with little perimeter loss;
@@ -890,8 +899,54 @@ export function useCardDetection(
             cv.BORDER_DEFAULT,
           );
 
+          // Adaptive Canny thresholds (anchored on the frame's own gradient
+          // distribution) instead of a fixed 50/150. The fixed pair needs a
+          // strong brightness gradient at the document border, so capture only
+          // fires reliably on high-contrast surfaces (e.g. a card on metal) and
+          // stalls on general backgrounds (wood, matte desk, similar-toned
+          // paper) where the boundary gradient is weak.
+          //
+          // Canny thresholds are compared against gradient magnitude, so derive
+          // them from the magnitude statistics: high ≈ mean + sigma·stddev. A
+          // plain background yields a small mean/stddev → lower thresholds →
+          // the faint border is still detected. A busy/cluttered background
+          // yields large stats → thresholds stay high → spurious edges are
+          // suppressed. The magnitude here is just a per-frame anchor for
+          // choosing the threshold; cv.Canny keeps its default gradient norm
+          // (unchanged from before), so at the cap the behaviour is identical.
+          //
+          // high is clamped to [CANNY_HIGH_MIN, CANNY_HIGH_MAX]; the ceiling is
+          // the proven fixed value so the high-contrast path that already works
+          // cannot regress — this only *relaxes* detection for low contrast.
+          const sobelX = new cv.Mat();
+          const sobelY = new cv.Mat();
+          cv.Sobel(blurred, sobelX, cv.CV_32F, 1, 0, 3);
+          cv.Sobel(blurred, sobelY, cv.CV_32F, 0, 1, 3);
+          const gradMag = new cv.Mat();
+          cv.magnitude(sobelX, sobelY, gradMag);
+          sobelX.delete();
+          sobelY.delete();
+          const gradMean = new cv.Mat();
+          const gradStdDev = new cv.Mat();
+          cv.meanStdDev(gradMag, gradMean, gradStdDev);
+          const gMean = gradMean.doubleAt(0, 0);
+          const gStd = gradStdDev.doubleAt(0, 0);
+          gradMag.delete();
+          gradMean.delete();
+          gradStdDev.delete();
+
+          const cannySigma = settingsRef.current.autoCannySigma ?? 1.0;
+          const highThreshold = Math.min(
+            CANNY_HIGH_MAX,
+            Math.max(CANNY_HIGH_MIN, gMean + cannySigma * gStd),
+          );
+          const lowThreshold = Math.max(15, highThreshold * 0.4);
+          mergeDebugInfo({
+            canny: `${Math.round(lowThreshold)}/${Math.round(highThreshold)}`,
+          });
+
           edges = new cv.Mat();
-          cv.Canny(blurred, edges, 50, 150);
+          cv.Canny(blurred, edges, lowThreshold, highThreshold);
 
           // Bridge gaps in the card border caused by lamination glare or finger
           // occlusion. At full resolution the card border is crisp and well

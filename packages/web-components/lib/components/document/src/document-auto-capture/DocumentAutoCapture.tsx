@@ -50,6 +50,12 @@ const getOptimalDefaults = () => {
         useDynamicBorder: true,
         edgeDensityThreshold: 6,
         gridCellRatio: 0.5,
+        // Adaptive contour-Canny sensitivity. The high threshold is
+        // mean + autoCannySigma·stddev of the frame's gradient magnitude,
+        // clamped to [60, 150]. Lower = detect fainter borders (better on
+        // plain backgrounds), higher = stricter (fewer false edges on busy
+        // backgrounds).
+        autoCannySigma: 1.0,
         blurThreshold: 150,
         glareThreshold: 5.0,
         stabilityThreshold: 5,
@@ -65,6 +71,9 @@ const getOptimalDefaults = () => {
         useDynamicBorder: false,
         edgeDensityThreshold: 6,
         gridCellRatio: 0.6,
+        // See mobile note. Adaptive contour-Canny high = mean + σ·stddev of the
+        // gradient magnitude, clamped to [60, 150].
+        autoCannySigma: 1.0,
         blurThreshold: 60,
         glareThreshold: 18.0,
         stabilityThreshold: 3,

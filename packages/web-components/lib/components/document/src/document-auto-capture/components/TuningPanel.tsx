@@ -148,6 +148,10 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           Glare %:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.glare || 0}%</span>
         </div>
+        <div>
+          Canny (lo/hi):{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.canny ?? '—'}</span>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
           <span style={{ color: '#fff', fontSize: '0.7rem' }}>
@@ -222,6 +226,23 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           value={settings.gridCellRatio}
           onInput={(e) =>
             updateSetting('gridCellRatio', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Edge Sensitivity (σ): {settings.autoCannySigma}{' '}
+          <em>(Lower = detect fainter borders on plain backgrounds)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="3"
+          step="0.05"
+          value={settings.autoCannySigma}
+          onInput={(e) =>
+            updateSetting('autoCannySigma', Number(e.target.value))
           }
         />
       </label>

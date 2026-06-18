@@ -69,7 +69,7 @@ const getOptimalDefaults = () => {
     : {
         deviceType: 'Desktop',
         useDynamicBorder: false,
-        edgeDensityThreshold: 6,
+        edgeDensityThreshold: 10,
         gridCellRatio: 0.6,
         // See mobile note. Adaptive contour-Canny high = mean + σ·stddev of the
         // gradient magnitude, clamped to [60, 150].

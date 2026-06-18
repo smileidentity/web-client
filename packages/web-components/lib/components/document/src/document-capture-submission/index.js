@@ -1,3 +1,3 @@
-import DocumentCaptureSubmission from './DocumentCaptureSubmission';
+import DocumentCaptureSubmission from './DocumentCaptureSubmission.tsx';
 
 export default DocumentCaptureSubmission;

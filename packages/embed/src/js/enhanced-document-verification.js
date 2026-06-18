@@ -17,6 +17,9 @@ import {
   idInfoToIdSelection,
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import initIframeSentry from './sentry-iframe-init.js';
+
+initIframeSentry('enhanced-document-verification');
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -189,6 +192,18 @@ function applyPageTranslations() {
     );
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
+    }
+    if (config.auto_capture_enabled === true) {
+      SmartCameraWeb.setAttribute('auto-capture-enabled', true);
+    }
+    if (config.auto_capture) {
+      SmartCameraWeb.setAttribute('auto-capture', config.auto_capture);
+    }
+    if (config.auto_capture_timeout) {
+      SmartCameraWeb.setAttribute(
+        'auto-capture-timeout',
+        config.auto_capture_timeout,
+      );
     }
     if (config.use_strict_mode) {
       SmartCameraWeb.setAttribute('use-strict-mode', 'true');

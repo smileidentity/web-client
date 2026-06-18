@@ -72,10 +72,11 @@ const getOptimalDefaults = () => {
         minFillRatio: 0.8,
         // Level 2: reject near-monochrome winners (white keyboard, blank paper)
         // by mean chroma magnitude over the detected rectangle. Needs chroma
-        // fusion on. minChromaContent is conservative; raise it (watch the
-        // Chroma metric) if keyboards still pass, lower it if real IDs reject.
+        // fusion on. 13 sits in the measured gap between a white keyboard (~10)
+        // and a real colour ID (~17-26): keyboard rejected, card passes with
+        // margin. Tunable via the panel.
         chromaContentGate: true,
-        minChromaContent: 8,
+        minChromaContent: 13,
         blurThreshold: 150,
         glareThreshold: 5.0,
         stabilityThreshold: 5,
@@ -106,7 +107,7 @@ const getOptimalDefaults = () => {
         minFillRatio: 0.8,
         // Desktop chroma fusion is off, so this gate no-ops; off for clarity.
         chromaContentGate: false,
-        minChromaContent: 8,
+        minChromaContent: 13,
         blurThreshold: 60,
         glareThreshold: 18.0,
         stabilityThreshold: 3,

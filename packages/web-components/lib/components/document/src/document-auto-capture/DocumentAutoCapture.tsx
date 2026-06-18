@@ -56,6 +56,14 @@ const getOptimalDefaults = () => {
         // plain backgrounds), higher = stricter (fewer false edges on busy
         // backgrounds).
         autoCannySigma: 1.0,
+        // Fix 2: OR chroma (Lab a/b) edges into the contour edge map so a card
+        // whose border is invisible in luminance (beige ID on light wood) is
+        // still detected. Fix 3: allow the content-region fallback so a card
+        // that never forms a clean 4-corner quad can still auto-capture.
+        chromaEdgeFusion: true,
+        chromaCannyLow: 15,
+        chromaCannyHigh: 40,
+        mobileRegionFallback: true,
         blurThreshold: 150,
         glareThreshold: 5.0,
         stabilityThreshold: 5,
@@ -74,6 +82,12 @@ const getOptimalDefaults = () => {
         // See mobile note. Adaptive contour-Canny high = mean + σ·stddev of the
         // gradient magnitude, clamped to [60, 150].
         autoCannySigma: 1.0,
+        // Desktop has its own synthetic fallback and a working high-contrast
+        // path; keep the chroma/region features off to avoid any regression.
+        chromaEdgeFusion: false,
+        chromaCannyLow: 15,
+        chromaCannyHigh: 40,
+        mobileRegionFallback: false,
         blurThreshold: 60,
         glareThreshold: 18.0,
         stabilityThreshold: 3,

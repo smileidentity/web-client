@@ -103,6 +103,12 @@ const MIN_RECT_FILL_RATIO = 0.65;
 // a document-free scene.
 const SYNTH_BRIDGE_MAX_FRAMES = 15;
 
+// Mobile content-region fallback (Fix 3): a low-contrast/tilted id-card that
+// never forms a clean 4-corner quad can still be captured from the combined
+// content bbox, but only after the region candidate has persisted this many
+// consecutive frames — a transient blob must not trigger a capture.
+const MOBILE_REGION_STABILITY_FRAMES = 8;
+
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
 // RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
@@ -176,7 +182,13 @@ function detectCardOutsideGuide(
         cv.approxPolyDP(cnt, approx, 0.04 * peri, true);
         if (approx.rows === 4) {
           const br = cv.boundingRect(approx);
-          const aspect = Math.max(br.width / br.height, br.height / br.width);
+          // Tilt-invariant aspect + fill from the rotated rect (see in-guide
+          // pass); br is kept only to report the off-guide card position.
+          const minRect = cv.minAreaRect(approx);
+          const rotW = minRect.size.width;
+          const rotH = minRect.size.height;
+          const aspect =
+            rotW > 0 && rotH > 0 ? Math.max(rotW / rotH, rotH / rotW) : 0;
           const aspectOk = expectedAspect
             ? Math.abs(aspect - expectedAspect) / expectedAspect < 0.25
             : aspect >= 1.15 && aspect <= 2.0;
@@ -187,7 +199,7 @@ function detectCardOutsideGuide(
           const approxPeri = cv.arcLength(approx, true);
           const isCompact =
             approxPeri > 0 && peri / approxPeri < PERI_COMPRESSION_MAX;
-          const fillRatio = area / (br.width * br.height);
+          const fillRatio = rotW > 0 && rotH > 0 ? area / (rotW * rotH) : 0;
           if (aspectOk && isCompact && fillRatio > MIN_RECT_FILL_RATIO) {
             bestArea = area;
             bestBR = br;
@@ -351,6 +363,13 @@ export function useCardDetection(
   // documents whose spine/page edges can momentarily break) before flipping
   // the user-facing prompt to "Align document in frame".
   const captureMissCounterRef = useRef(0);
+  // Set true if Lab chroma conversion is unavailable/throws on this device, so
+  // the chroma-fusion path (Fix 2) disables itself for the session and falls
+  // back to luminance-only edges.
+  const chromaUnavailableRef = useRef(false);
+  // Consecutive frames a mobile content-region candidate has qualified (Fix 3).
+  // Gates the mobile region fallback so a transient blob can't trigger capture.
+  const regionStabilityRef = useRef(0);
   // Frames since a genuine (non-synthetic) 4-corner card last passed
   // validation. Gates the desktop id-card synthetic fallback so it only
   // bridges brief dropouts of a card that WAS being detected, rather than
@@ -423,6 +442,15 @@ export function useCardDetection(
       let mean: any = null;
       let stdDev: any = null;
       let glareMask: any = null;
+      // Chroma-fusion Mats (Fix 2). Declared here so the shared finally frees
+      // them even if a gate returns mid-pipeline.
+      let contourRgb: any = null;
+      let contourLab: any = null;
+      let labPlanes: any = null;
+      let aBlur: any = null;
+      let bBlur: any = null;
+      let aEdges: any = null;
+      let bEdges: any = null;
 
       // Inner function so each early `return` inside the detection pipeline
       // exits only this helper (then falls through to the shared finally
@@ -886,8 +914,18 @@ export function useCardDetection(
           contourFull = cv.imread(contourCanvas);
           contourGray = new cv.Mat();
           cv.cvtColor(contourFull, contourGray, cv.COLOR_RGBA2GRAY, 0);
-          contourFull.delete();
-          contourFull = null;
+          // Fix 2: keep the RGBA crop (contourFull) alive for chroma fusion
+          // when enabled; otherwise free it immediately as before so the
+          // luminance-only path is byte-identical.
+          const chromaFusionOn =
+            settingsRef.current.chromaEdgeFusion === true &&
+            !chromaUnavailableRef.current &&
+            typeof cv.COLOR_RGB2Lab !== 'undefined';
+          if (!chromaFusionOn) {
+            contourFull.delete();
+            contourFull = null;
+          }
+          let edgeSource = 'lum';
 
           blurred = new cv.Mat();
           cv.GaussianBlur(
@@ -947,6 +985,71 @@ export function useCardDetection(
 
           edges = new cv.Mat();
           cv.Canny(blurred, edges, lowThreshold, highThreshold);
+
+          // Fix 2: chroma-aware edge fusion. A card whose border has near-zero
+          // LUMINANCE gradient against the background (e.g. a beige ID on light
+          // wood) is invisible to the grayscale Canny above, so no 4-corner
+          // quad forms. The same boundary is strong in CHROMA, which grayscale
+          // discards. Convert the colour crop to Lab, run Canny on the a/b
+          // chroma channels, and OR those edges into `edges`. findContours is
+          // RETR_EXTERNAL, so the extra interior chroma edges cannot corrupt
+          // the outer-contour search — only the (now reinforced) outer boundary
+          // matters. Falls back to luminance-only if Lab is unavailable.
+          if (chromaFusionOn) {
+            try {
+              contourRgb = new cv.Mat();
+              cv.cvtColor(contourFull, contourRgb, cv.COLOR_RGBA2RGB, 0);
+              contourFull.delete();
+              contourFull = null;
+
+              contourLab = new cv.Mat();
+              cv.cvtColor(contourRgb, contourLab, cv.COLOR_RGB2Lab, 0);
+              contourRgb.delete();
+              contourRgb = null;
+
+              labPlanes = new cv.MatVector();
+              cv.split(contourLab, labPlanes); // [0]=L, [1]=a, [2]=b
+              contourLab.delete();
+              contourLab = null;
+
+              // Borrowed views — owned by labPlanes, never deleted directly.
+              const aPlane = labPlanes.get(1);
+              const bPlane = labPlanes.get(2);
+              const chromaK = new cv.Size(7, 7); // chroma is noisier than luma
+              aBlur = new cv.Mat();
+              bBlur = new cv.Mat();
+              cv.GaussianBlur(aPlane, aBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
+              cv.GaussianBlur(bPlane, bBlur, chromaK, 0, 0, cv.BORDER_DEFAULT);
+
+              const chromaLow = settingsRef.current.chromaCannyLow ?? 15;
+              const chromaHigh = settingsRef.current.chromaCannyHigh ?? 40;
+              aEdges = new cv.Mat();
+              bEdges = new cv.Mat();
+              cv.Canny(aBlur, aEdges, chromaLow, chromaHigh);
+              cv.Canny(bBlur, bEdges, chromaLow, chromaHigh);
+
+              cv.bitwise_or(edges, aEdges, edges);
+              cv.bitwise_or(edges, bEdges, edges);
+              edgeSource = 'lum+chroma';
+
+              labPlanes.delete(); // frees L/a/b incl. borrowed aPlane/bPlane
+              labPlanes = null;
+              aBlur.delete();
+              aBlur = null;
+              bBlur.delete();
+              bBlur = null;
+              aEdges.delete();
+              aEdges = null;
+              bEdges.delete();
+              bEdges = null;
+            } catch {
+              // Lab path failed on this device — disable for the session and
+              // continue with the luminance edges already in `edges`.
+              chromaUnavailableRef.current = true;
+              edgeSource = 'lum';
+            }
+          }
+          mergeDebugInfo({ contourSource: edgeSource });
 
           // Bridge gaps in the card border caused by lamination glare or finger
           // occlusion. At full resolution the card border is crisp and well
@@ -1035,8 +1138,18 @@ export function useCardDetection(
               if (approx.rows === 4 && area > maxArea) {
                 // --- Rectangularity check ---
                 // Reject contours that aren't proper rectangles (e.g. faces).
+                // Measure fill against the MINIMUM-AREA (rotated) rect, not the
+                // axis-aligned bbox: a real card fills its rotated rect ~fully
+                // at ANY tilt, whereas the axis-aligned bbox is inflated by
+                // rotation and wrongly fails a tilted card (a ~15° tilt drops
+                // axis-aligned fill to ~0.64). bRect is still used for the
+                // wall-hug check below.
                 const bRect = cv.boundingRect(approx);
-                const fillRatio = area / (bRect.width * bRect.height);
+                const minRect = cv.minAreaRect(approx);
+                const rotW = minRect.size.width;
+                const rotH = minRect.size.height;
+                const fillRatio =
+                  rotW > 0 && rotH > 0 ? area / (rotW * rotH) : 0;
 
                 // --- ROI-boundary check ---
                 // Reject contours that hug the ROI walls: background pattern
@@ -1061,10 +1174,13 @@ export function useCardDetection(
                 // During discovery, allow anything in the union of passport
                 // (1.42) and ID (1.585) ranges with ±20% slack. After the
                 // doc type is locked, gate tightly against the expected ratio.
-                const detectedAspect = bRect.width / bRect.height;
+                // Use the rotated-rect dimensions so the aspect is the card's
+                // TRUE aspect, not the tilt-skewed axis-aligned bbox aspect
+                // (which drifts toward 1.0 as the card rotates).
+                const detectedAspect = rotH > 0 ? rotW / rotH : 0;
                 const normalizedAspect = Math.max(
                   detectedAspect,
-                  1 / detectedAspect,
+                  detectedAspect > 0 ? 1 / detectedAspect : 0,
                 );
                 const lockedDocType = discoveryRef.current.docType;
                 const expectedAspect = lockedDocType
@@ -1113,7 +1229,7 @@ export function useCardDetection(
                 }
 
                 if (
-                  fillRatio > 0.75 &&
+                  fillRatio > MIN_RECT_FILL_RATIO &&
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
@@ -1123,8 +1239,9 @@ export function useCardDetection(
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
                   // Genuine 4-corner card validated — open the synthetic
-                  // fallback's bridge window.
+                  // fallback's bridge window and reset the mobile-region streak.
                   framesSinceRealCardRef.current = 0;
+                  regionStabilityRef.current = 0;
                 } else {
                   // Desktop: the quad failed ONLY the wall-hug check — every
                   // shape gate (rectangularity, angles, aspect) says this is
@@ -1132,7 +1249,7 @@ export function useCardDetection(
                   if (
                     skipGridCheck &&
                     roiWallHug &&
-                    fillRatio > 0.75 &&
+                    fillRatio > MIN_RECT_FILL_RATIO &&
                     anglesOk &&
                     aspectOk
                   ) {
@@ -1204,10 +1321,31 @@ export function useCardDetection(
               !combinedBboxOverflow &&
               (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
                 passingCells >= 7);
-            const isIdCardFallback =
-              skipGridCheck &&
+            // Fix 3: mobile content-region fallback. Mirror the desktop id-card
+            // synthetic on mobile (where skipGridCheck is false), but gate it on
+            // sustained presence: a candidate must persist
+            // MOBILE_REGION_STABILITY_FRAMES frames before it can synthesize a
+            // card. The aspect/area gates below and the synthetic id-card fill
+            // enforcement downstream still apply, so distance/shape safety holds.
+            const mobileRegionCandidate =
+              settingsRef.current.mobileRegionFallback === true &&
+              !skipGridCheck &&
               lockedDocTypeForFallback === 'id-card' &&
-              idCardSynthEligible;
+              passingCells >= 7 &&
+              !combinedBboxOverflow;
+            if (mobileRegionCandidate) {
+              regionStabilityRef.current += 1;
+            } else {
+              regionStabilityRef.current = 0;
+            }
+            const mobileRegionEligible =
+              mobileRegionCandidate &&
+              regionStabilityRef.current >= MOBILE_REGION_STABILITY_FRAMES;
+            const isIdCardFallback =
+              (skipGridCheck &&
+                lockedDocTypeForFallback === 'id-card' &&
+                idCardSynthEligible) ||
+              mobileRegionEligible;
             if (isBookDocFallback || isIdCardFallback) {
               const bw = combinedMaxX - combinedMinX;
               const bh = combinedMaxY - combinedMinY;
@@ -1253,6 +1391,10 @@ export function useCardDetection(
                   synth.data32S[7] = maxY;
                   bestContour = synth;
                   bestContourIsSynthetic = true;
+                  if (mobileRegionEligible) {
+                    edgeSource = 'region';
+                    mergeDebugInfo({ contourSource: edgeSource });
+                  }
                 }
               }
             }
@@ -1862,6 +2004,13 @@ export function useCardDetection(
           mean,
           stdDev,
           glareMask,
+          contourRgb,
+          contourLab,
+          labPlanes,
+          aBlur,
+          bBlur,
+          aEdges,
+          bEdges,
         );
 
         // Loop
@@ -1989,6 +2138,7 @@ export function useCardDetection(
     latestCardRectRef.current = null;
     captureMissCounterRef.current = 0;
     framesSinceRealCardRef.current = Number.POSITIVE_INFINITY;
+    regionStabilityRef.current = 0;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);

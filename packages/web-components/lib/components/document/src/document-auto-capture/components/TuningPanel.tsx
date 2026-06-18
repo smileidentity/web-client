@@ -15,6 +15,11 @@ interface TuningSettings {
   previewCropPadding?: number;
   minFillPercent?: number;
   maxFillPercent?: number;
+  autoCannySigma?: number;
+  chromaEdgeFusion?: boolean;
+  chromaCannyLow?: number;
+  chromaCannyHigh?: number;
+  mobileRegionFallback?: boolean;
   [key: string]: unknown;
 }
 
@@ -25,6 +30,8 @@ interface TuningDebugInfo {
   blur?: number;
   glare?: number | string;
   docFill?: number | string;
+  canny?: string;
+  contourSource?: string;
   [key: string]: unknown;
 }
 
@@ -152,6 +159,12 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           Canny (lo/hi):{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.canny ?? '—'}</span>
         </div>
+        <div>
+          Edge Src:{' '}
+          <span style={{ color: '#fff' }}>
+            {debugInfo?.contourSource ?? '—'}
+          </span>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
           <span style={{ color: '#fff', fontSize: '0.7rem' }}>
@@ -243,6 +256,57 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           value={settings.autoCannySigma}
           onInput={(e) =>
             updateSetting('autoCannySigma', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Chroma Edge Fusion
+        <input
+          type="checkbox"
+          checked={Boolean(settings.chromaEdgeFusion)}
+          onInput={(e) => updateSetting('chromaEdgeFusion', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.chromaEdgeFusion) && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Chroma Canny Low: {settings.chromaCannyLow}</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={settings.chromaCannyLow as number}
+              onInput={(e) =>
+                updateSetting('chromaCannyLow', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Chroma Canny High: {settings.chromaCannyHigh}</span>
+            <input
+              type="range"
+              min="0"
+              max="150"
+              step="1"
+              value={settings.chromaCannyHigh as number}
+              onInput={(e) =>
+                updateSetting('chromaCannyHigh', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
+      )}
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Mobile Region Fallback
+        <input
+          type="checkbox"
+          checked={Boolean(settings.mobileRegionFallback)}
+          onInput={(e) =>
+            updateSetting('mobileRegionFallback', e.target.checked)
           }
         />
       </label>

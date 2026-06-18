@@ -63,7 +63,7 @@ const getOptimalDefaults = () => {
     : {
         deviceType: 'Desktop',
         useDynamicBorder: false,
-        edgeDensityThreshold: 6,
+        edgeDensityThreshold: 10,
         gridCellRatio: 0.6,
         blurThreshold: 60,
         glareThreshold: 18.0,

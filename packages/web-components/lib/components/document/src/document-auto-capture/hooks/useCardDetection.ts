@@ -72,8 +72,8 @@ const DISCOVERY_MISS_TOLERANCE = 20;
 // Below MIN_FILL → too far (card is tiny). Above MAX_FILL → too close (edges clipped).
 // Min 65% ensures the document occupies ≥65-70% of the final captured image,
 // satisfying the product requirement of a clear, readable scan.
-const MIN_FILL_PERCENT = 65;
-const MAX_FILL_PERCENT = 90;
+const MIN_FILL_PERCENT = 75;
+const MAX_FILL_PERCENT = 95;
 // Minimum contour area to even consider (5% — catches far-away documents)
 const MIN_CONTOUR_AREA_PERCENT = 0.05;
 // During discovery, require at least this many grid cells to pass (out of 9).
@@ -87,6 +87,12 @@ const MIN_DISCOVERY_GRID_CELLS = 3;
 const PERI_COMPRESSION_MAX = 3.5;
 // Minimum contour-area / bounding-box-area ratio for a card-shaped contour.
 const MIN_RECT_FILL_RATIO = 0.65;
+// Desktop id-card synthetic fallback: only bridge contour dropouts when a
+// genuine 4-corner card was validated within this many frames (~0.5s at
+// 30fps). Without the recency gate the fallback synthesizes a "card" from
+// background contours (face, furniture, window frames) and can auto-capture
+// a document-free scene.
+const SYNTH_BRIDGE_MAX_FRAMES = 15;
 
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
@@ -212,10 +218,11 @@ export function useCardDetection(
     variant = 'fullscreen',
     documentType = null,
     captureMode = 'autoCapture',
-    autoCaptureTimeout = 10000,
+    autoCaptureTimeout = 20_000,
     captureOrientation = 'landscape',
     shouldRotateUi = false,
-    syncRoiToGuide = true,
+    syncRoiToGuide = false,
+    skipGridCheck = false,
   } = options;
   // captureMode: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly'
   const autoCaptureTimeoutMs = Math.max(
@@ -248,7 +255,27 @@ export function useCardDetection(
     COMPLIANCE_STATES.IDLE,
   );
   const [debugPath, setDebugPath] = useState<any>(null); // For drawing the green box on overlay
+  // Debug-only: the active detection ROI mapped to the video element's CSS
+  // box, for drawing an on-screen outline. Updated only when the rect
+  // actually changes (keyed via ref) to avoid a setState per frame.
+  const [debugRoi, setDebugRoi] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
+  const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  // Merge debug fields rather than replace: each gate emits only the values
+  // it computed, so the panel keeps the last-known docFill / grid / blur /
+  // glare visible together instead of blanking whichever the current frame's
+  // early-return path didn't include. Debug-only; setDebugInfo identity is
+  // stable so this needs no memoisation.
+  const mergeDebugInfo = (patch: Record<string, unknown>) =>
+    setDebugInfo((prev) => ({ ...prev, ...patch }));
+  // Latest distance fill %, stashed each frame so debug payloads emitted
+  // AFTER the contour block (blur/glare/capture gates) can still report it.
+  const latestDocFillRef = useRef(0);
   const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
     providedDocType,
   ); // null = not yet classified
@@ -315,6 +342,11 @@ export function useCardDetection(
   // documents whose spine/page edges can momentarily break) before flipping
   // the user-facing prompt to "Align document in frame".
   const captureMissCounterRef = useRef(0);
+  // Frames since a genuine (non-synthetic) 4-corner card last passed
+  // validation. Gates the desktop id-card synthetic fallback so it only
+  // bridges brief dropouts of a card that WAS being detected, rather than
+  // synthesizing one from background contours (see SYNTH_BRIDGE_MAX_FRAMES).
+  const framesSinceRealCardRef = useRef(Number.POSITIVE_INFINITY);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -522,6 +554,20 @@ export function useCardDetection(
           guideYCSS = ovX; // = (displayH - guideOvW) / 2
           guideWidthCSS = guideOvH; // narrow in unrotated video
           guideHeightCSS = guideOvW; // tall in unrotated video
+        } else if (skipGridCheck) {
+          // Desktop: the video container IS the visible guide (it's already
+          // sized to the card aspect ratio and bordered). Use almost the whole
+          // displayed box as the ROI — only a small 4% margin so the card's
+          // corners aren't clipped at the edge — so "card fills the on-screen
+          // box" == "card fills the detection region". The fixed 64px inset
+          // below is for the mobile overlay; on a ≤480px desktop box it shrank
+          // the (invisible) ROI to ~75% of the box and made a full-looking card
+          // read as too far away.
+          const marginFrac = 0.04;
+          guideWidthCSS = displayW * (1 - marginFrac * 2);
+          guideHeightCSS = displayH * (1 - marginFrac * 2);
+          guideXCSS = (displayW - guideWidthCSS) / 2;
+          guideYCSS = (displayH - guideHeightCSS) / 2;
         } else {
           // Unrotated: original behaviour.
           const insetPx = syncRoiToGuide ? 64 : 0;
@@ -581,6 +627,22 @@ export function useCardDetection(
           clampedH,
         };
 
+        // Debug overlay: publish the clamped ROI mapped back to the video
+        // element's CSS box (inverse of the CSS → native mapping above).
+        if (IS_DEBUG_MODE) {
+          const roiCss = {
+            x: Math.round((clampedX - offsetX) * coverScale),
+            y: Math.round((clampedY - offsetY) * coverScale),
+            w: Math.round(clampedW * coverScale),
+            h: Math.round(clampedH * coverScale),
+          };
+          const roiKey = `${roiCss.x},${roiCss.y},${roiCss.w},${roiCss.h}`;
+          if (debugRoiKeyRef.current !== roiKey) {
+            debugRoiKeyRef.current = roiKey;
+            setDebugRoi(roiCss);
+          }
+        }
+
         // --- Off-guide detection ---
         // Active on every layout that has spare margin around the visible
         // guide. In CAPTURE phase the gate runs unconditionally on the 5-frame
@@ -606,6 +668,7 @@ export function useCardDetection(
           detectionPhaseRef.current === DETECTION_PHASE.CAPTURE;
         const shouldRunOffGuide =
           !isCardVariant &&
+          !skipGridCheck &&
           !isBookDoc &&
           hasMargin &&
           (isCapturePhase || !inGuideDetectedRef.current) &&
@@ -735,8 +798,8 @@ export function useCardDetection(
         const isDiscoveryPhase =
           detectionPhaseRef.current === DETECTION_PHASE.DISCOVERY;
         let gridCheckFails;
-        if (isCard) {
-          gridCheckFails = false; // Skip grid check entirely for card variant
+        if (isCard || skipGridCheck) {
+          gridCheckFails = false; // Skip grid check (card variant or desktop fullscreen)
         } else if (isDiscoveryPhase) {
           gridCheckFails = passingCells < MIN_DISCOVERY_GRID_CELLS; // Relaxed: 3/9 cells
         } else {
@@ -755,7 +818,7 @@ export function useCardDetection(
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
           setDebugPath(null);
-          setDebugInfo({
+          mergeDebugInfo({
             blur: 0,
             glare: 0,
             edgeDensity: edgeDensity.toFixed(1),
@@ -866,6 +929,15 @@ export function useCardDetection(
           // Its bbox covers inner content (photo/text/MRZ), not the full page,
           // so distance gates that compare bbox/ROI are unreliable for it.
           let bestContourIsSynthetic = false;
+          // Desktop only: a card-shaped quad passed every shape gate EXCEPT
+          // the ROI wall-hug check this frame — i.e. a real card, too close.
+          // Consumed in the no-contour handling below to show distance
+          // guidance instead of the dead-end "Align document in frame".
+          let wallHugRejectedCardThisFrame = false;
+          // Age the real-card recency window each detection frame; reset to 0
+          // below when a genuine 4-corner card passes validation.
+          // (Infinity + 1 stays Infinity, so the pristine state is preserved.)
+          framesSinceRealCardRef.current += 1;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -912,10 +984,13 @@ export function useCardDetection(
                 const fillRatio = area / (bRect.width * bRect.height);
 
                 // --- ROI-boundary check ---
-                // Reject contours that hug 3+ walls of the ROI. A real card
-                // at correct distance leaves visible space on at least 2 sides;
-                // background pattern rectangles fill the entire ROI and touch
-                // all 4 walls simultaneously.
+                // Reject contours that hug the ROI walls: background pattern
+                // rectangles fill the entire ROI and touch all 4 walls
+                // simultaneously. Mobile rejects at 3+ touches (a real card at
+                // correct distance leaves space on at least 2 sides). Desktop
+                // requires all 4 — its ROI is the visible bordered box, which
+                // users naturally fill, so 3 touches is common for legitimate
+                // off-center hand-held cards.
                 const wallMargin = Math.round(
                   Math.min(clampedW, clampedH) * 0.04,
                 );
@@ -924,7 +999,7 @@ export function useCardDetection(
                   (bRect.y <= wallMargin ? 1 : 0) +
                   (bRect.x + bRect.width >= clampedW - wallMargin ? 1 : 0) +
                   (bRect.y + bRect.height >= clampedH - wallMargin ? 1 : 0);
-                const roiWallHug = wallTouches >= 3;
+                const roiWallHug = wallTouches >= (skipGridCheck ? 4 : 3);
 
                 // --- Aspect-ratio gate ---
                 // Reject candidates whose shape doesn't match a document.
@@ -983,7 +1058,7 @@ export function useCardDetection(
                 }
 
                 if (
-                  fillRatio > MIN_RECT_FILL_RATIO &&
+                  fillRatio > 0.75 &&
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
@@ -992,7 +1067,22 @@ export function useCardDetection(
                   maxArea = area;
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
+                  // Genuine 4-corner card validated — open the synthetic
+                  // fallback's bridge window.
+                  framesSinceRealCardRef.current = 0;
                 } else {
+                  // Desktop: the quad failed ONLY the wall-hug check — every
+                  // shape gate (rectangularity, angles, aspect) says this is
+                  // a real card, just too close.
+                  if (
+                    skipGridCheck &&
+                    roiWallHug &&
+                    fillRatio > 0.75 &&
+                    anglesOk &&
+                    aspectOk
+                  ) {
+                    wallHugRejectedCardThisFrame = true;
+                  }
                   approx.delete();
                 }
               } else {
@@ -1000,6 +1090,31 @@ export function useCardDetection(
               }
             }
             cnt.delete();
+          }
+
+          // --- Desktop overflow detection ---
+          // A card pushed too close overflows the ROI: its outer edges leave
+          // the frame, so no 4-corner quad forms (and the wall-hug "too
+          // close" signal above never fires — it needs a complete quad).
+          // What remains are inner-content contours CLIPPED at the ROI
+          // walls. A combined bbox touching 2+ walls with capture-grade grid
+          // coverage means the document overflows the box; a genuinely far
+          // card produces a small, centered bbox touching nothing.
+          // Require an OPPOSITE wall pair (left+right or top+bottom): a card
+          // overflowing the box spans the ROI along an axis, while the hand
+          // holding it intrudes from one side or corner — adjacent touches —
+          // and must not read as overflow at an otherwise good distance.
+          let combinedBboxOverflow = false;
+          if (skipGridCheck && hasSignificantContour) {
+            const cbMargin = Math.round(Math.min(clampedW, clampedH) * 0.04);
+            const touchesLeft = combinedMinX <= cbMargin;
+            const touchesTop = combinedMinY <= cbMargin;
+            const touchesRight = combinedMaxX >= clampedW - cbMargin;
+            const touchesBottom = combinedMaxY >= clampedH - cbMargin;
+            combinedBboxOverflow =
+              ((touchesLeft && touchesRight) ||
+                (touchesTop && touchesBottom)) &&
+              passingCells >= 7;
           }
 
           // --- Book-doc fallback ---
@@ -1014,27 +1129,73 @@ export function useCardDetection(
             const isBookDocFallback =
               lockedDocTypeForFallback === 'passport' ||
               lockedDocTypeForFallback === 'greenbook';
-            if (isBookDocFallback) {
+            // Desktop id-card synthetics are eligible in two cases:
+            // 1. Bridge: a genuine 4-corner card was detected moments ago and
+            //    briefly dropped out (finger/glare broke an edge), or
+            // 2. Coverage: the scene passes the same 7/9 grid-coverage bar
+            //    mobile enforces for every capture — fingers permanently
+            //    crossing a card edge can prevent a clean quad from EVER
+            //    forming, but a card filling the box lights up the whole
+            //    grid, while a document-free scene (face, furniture, window
+            //    frames) leaves blank cells.
+            // Without these gates the combined bbox of background contours
+            // passes the aspect/area checks below and can auto-capture a
+            // non-document.
+            // An overflowing card must never synthesize: its bbox covers only
+            // the visible (clipped) content, so the fill metric underestimates
+            // distance and a capture would clip the card's edges anyway. The
+            // overflow case gets "Move document further away" guidance below.
+            const idCardSynthEligible =
+              !combinedBboxOverflow &&
+              (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
+                passingCells >= 7);
+            const isIdCardFallback =
+              skipGridCheck &&
+              lockedDocTypeForFallback === 'id-card' &&
+              idCardSynthEligible;
+            if (isBookDocFallback || isIdCardFallback) {
               const bw = combinedMaxX - combinedMinX;
               const bh = combinedMaxY - combinedMinY;
               if (bw > 0 && bh > 0) {
                 const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
                 const rawAspect = bw / bh;
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
+                const aspectTol = isBookDocFallback ? 0.35 : 0.25;
                 const aspectOk =
                   Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
-                  0.35;
-                const minArea = clampedW * clampedH * MIN_CONTOUR_AREA_PERCENT;
+                  aspectTol;
+                const minArea =
+                  guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
                 if (aspectOk && bw * bh > minArea) {
+                  // For id-card synthetics, the combined bbox covers only the
+                  // inner printed content (text, photo, header band). Real cards
+                  // have a ~10-15% margin from card edge to first element, so
+                  // the raw bbox understates the true card extent. Expand from
+                  // the bbox center by a card-margin factor and clamp to ROI.
+                  let minX = combinedMinX;
+                  let minY = combinedMinY;
+                  let maxX = combinedMaxX;
+                  let maxY = combinedMaxY;
+                  if (isIdCardFallback) {
+                    const SYNTH_EXPAND = 1.15;
+                    const cx = (combinedMinX + combinedMaxX) / 2;
+                    const cy = (combinedMinY + combinedMaxY) / 2;
+                    const halfW = (bw * SYNTH_EXPAND) / 2;
+                    const halfH = (bh * SYNTH_EXPAND) / 2;
+                    minX = Math.max(0, Math.round(cx - halfW));
+                    minY = Math.max(0, Math.round(cy - halfH));
+                    maxX = Math.min(clampedW, Math.round(cx + halfW));
+                    maxY = Math.min(clampedH, Math.round(cy + halfH));
+                  }
                   const synth = new cv.Mat(4, 1, cv.CV_32SC2);
-                  synth.data32S[0] = combinedMinX;
-                  synth.data32S[1] = combinedMinY;
-                  synth.data32S[2] = combinedMaxX;
-                  synth.data32S[3] = combinedMinY;
-                  synth.data32S[4] = combinedMaxX;
-                  synth.data32S[5] = combinedMaxY;
-                  synth.data32S[6] = combinedMinX;
-                  synth.data32S[7] = combinedMaxY;
+                  synth.data32S[0] = minX;
+                  synth.data32S[1] = minY;
+                  synth.data32S[2] = maxX;
+                  synth.data32S[3] = minY;
+                  synth.data32S[4] = maxX;
+                  synth.data32S[5] = maxY;
+                  synth.data32S[6] = minX;
+                  synth.data32S[7] = maxY;
                   bestContour = synth;
                   bestContourIsSynthetic = true;
                 }
@@ -1055,12 +1216,13 @@ export function useCardDetection(
           let docFillPercent = 0;
 
           if (bestContour) {
-            // Use the validated 4-corner card's bounding box. The aspect-ratio
-            // gate above ensures bestContour is actually card-shaped, so this
-            // is a clean "how much of the ROI does the card occupy" signal.
             const cardRect = cv.boundingRect(bestContour);
             docFillPercent =
               ((cardRect.width * cardRect.height) / roiArea) * 100;
+          } else if (hasSignificantContour) {
+            const cbw = combinedMaxX - combinedMinX;
+            const cbh = combinedMaxY - combinedMinY;
+            docFillPercent = ((cbw * cbh) / roiArea) * 100;
           } else if (USE_PRESENCE_FILL_METRIC) {
             let nz = null;
             try {
@@ -1075,27 +1237,38 @@ export function useCardDetection(
             } finally {
               if (nz) nz.delete();
             }
-          } else if (hasSignificantContour) {
-            const combinedW = combinedMaxX - combinedMinX;
-            const combinedH = combinedMaxY - combinedMinY;
-            const combinedArea = combinedW * combinedH;
-            docFillPercent = (combinedArea / roiArea) * 100;
           }
+          latestDocFillRef.current = docFillPercent;
 
           // Active whenever we have a real contour to measure against.
           // Skip distance gating when the contour is the synthetic book-doc
           // fallback: its bbox reflects inner content, not the full page,
           // so fill% is structurally low and would block capture forever.
-          const fillCheckActive = !!bestContour && !bestContourIsSynthetic;
+          // ID-card synthetics still enforce fill — the combined bbox reflects
+          // the card's actual extent so the distance signal is meaningful.
+          const isIdCardSynthetic =
+            bestContourIsSynthetic &&
+            discoveryRef.current.docType === 'id-card';
+          const fillCheckActive =
+            !!bestContour && (!bestContourIsSynthetic || isIdCardSynthetic);
 
           // Book-style docs (passport/greenbook) frequently yield a contour
           // covering only the bio-data page rather than the full guide rect,
           // so we relax the minimum fill threshold for them.
+          // ID-card synthetics use the standard floor — their bbox has been
+          // pre-expanded above to approximate the true card edge.
+          // Per-device overrides can be supplied via settings (minFillPercent /
+          // maxFillPercent). Desktop uses 70 / 98 (measured against the visible
+          // box, which IS the desktop ROI); mobile keeps 75 / 95.
           const lockedDocTypeForFill = discoveryRef.current.docType;
           const isBookDocFill =
             lockedDocTypeForFill === 'passport' ||
             lockedDocTypeForFill === 'greenbook';
-          const minFillPercent = isBookDocFill ? 20 : MIN_FILL_PERCENT;
+          const minFillPercent = isBookDocFill
+            ? 20
+            : (settingsRef.current.minFillPercent ?? MIN_FILL_PERCENT);
+          const maxFillPercent =
+            settingsRef.current.maxFillPercent ?? MAX_FILL_PERCENT;
 
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
@@ -1111,7 +1284,7 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({
+            mergeDebugInfo({
               docFill: Math.round(docFillPercent),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
@@ -1122,14 +1295,14 @@ export function useCardDetection(
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent > MAX_FILL_PERCENT
+            docFillPercent > maxFillPercent
           ) {
             setFeedback('Move document further away');
             setComplianceState(COMPLIANCE_STATES.DETECTING);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
             if (bestContour) bestContour.delete();
-            setDebugInfo({
+            mergeDebugInfo({
               docFill: Math.round(docFillPercent),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
@@ -1244,7 +1417,7 @@ export function useCardDetection(
                 recentVotes.every((v) => v === recentVotes[0]);
 
               setFeedback('Detecting document type…');
-              setDebugInfo({
+              mergeDebugInfo({
                 blur: 0,
                 glare: 0,
                 edgeDensity: edgeDensity.toFixed(1),
@@ -1282,7 +1455,16 @@ export function useCardDetection(
             inGuideDetectedRef.current = false;
             // During discovery, no contour found — keep waiting
             if (isDiscovery) {
-              setFeedback('Position your document in the frame');
+              // A wall-hug-rejected card means the user is too close, not
+              // absent. Without this hint a too-close card deadlocks
+              // discovery: the timeout counter only advances on valid
+              // contours, so no fallback classification ever fires.
+              setFeedback(
+                skipGridCheck &&
+                  (wallHugRejectedCardThisFrame || combinedBboxOverflow)
+                  ? 'Move document further away'
+                  : 'Position your document in the frame',
+              );
               // Tolerate a few consecutive misses before resetting votes.
               // Mobile cameras drop detections for 1-2 frames due to motion blur,
               // auto-exposure changes, etc. Hard-resetting on every miss prevents
@@ -1294,12 +1476,36 @@ export function useCardDetection(
               ) {
                 discoveryRef.current.votes = [];
               }
-              setDebugInfo({
+              mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
                 misses: discoveryRef.current.consecutiveMisses,
                 votes: `${discoveryRef.current.votes.filter((v) => v === 'id-card').length}id / ${discoveryRef.current.votes.filter((v) => v === 'passport').length}pp`,
+              });
+              return;
+            }
+            // CAPTURE phase, desktop: the card is real but too close —
+            // either a card-shaped quad was rejected solely for hugging the
+            // ROI walls, or the card overflows the box entirely (no quad can
+            // form; inner content is clipped at 2+ ROI walls with full grid
+            // coverage). Surface distance guidance immediately instead of
+            // letting the miss counter drift to "Align document in frame".
+            // Mirrors the maxFillPercent branch above, which cannot run here
+            // because distance gating requires a bestContour.
+            if (
+              skipGridCheck &&
+              (wallHugRejectedCardThisFrame || combinedBboxOverflow)
+            ) {
+              captureMissCounterRef.current = 0;
+              setFeedback('Move document further away');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+              stabilityRef.current.count = 0;
+              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              mergeDebugInfo({
+                edgeDensity: edgeDensity.toFixed(1),
+                texture: Math.round(textureScore),
+                quadrants: quadDensities.join('/'),
               });
               return;
             }
@@ -1310,9 +1516,9 @@ export function useCardDetection(
             // cross the edge, and flipping between "Move closer" and "Align
             // document" on every miss is jarring.
             captureMissCounterRef.current += 1;
-            const CAPTURE_MISS_TOLERANCE = 8;
+            const CAPTURE_MISS_TOLERANCE = 20;
             if (captureMissCounterRef.current < CAPTURE_MISS_TOLERANCE) {
-              setDebugInfo({
+              mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
@@ -1324,7 +1530,7 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
-            setDebugInfo({
+            mergeDebugInfo({
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
               quadrants: quadDensities.join('/'),
@@ -1347,7 +1553,7 @@ export function useCardDetection(
           setComplianceState(COMPLIANCE_STATES.DETECTING);
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
-          setDebugInfo({ blur: Math.round(variance), glare: 0 });
+          mergeDebugInfo({ blur: Math.round(variance), glare: 0 });
           return;
         }
 
@@ -1358,12 +1564,13 @@ export function useCardDetection(
         const totalPixels = gray.rows * gray.cols;
         const glarePercent = (glarePixels / totalPixels) * 100;
 
-        setDebugInfo({
+        mergeDebugInfo({
           blur: Math.round(variance),
           glare: glarePercent.toFixed(1),
           edgeDensity: edgeDensity.toFixed(1),
           texture: Math.round(textureScore),
           quadrants: quadDensities.join('/'),
+          docFill: Math.round(latestDocFillRef.current),
         });
 
         if (glarePercent > settingsRef.current.glareThreshold) {
@@ -1726,6 +1933,7 @@ export function useCardDetection(
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
     captureMissCounterRef.current = 0;
+    framesSinceRealCardRef.current = Number.POSITIVE_INFINITY;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {
       setDetectedDocType(providedDocType);
@@ -1759,6 +1967,7 @@ export function useCardDetection(
     complianceState,
     debugPath,
     debugInfo,
+    debugRoi,
     detectedDocType,
     guideAspectRatio,
     manualFallbackActive,

@@ -1367,29 +1367,30 @@ export function useCardDetection(
           // page edges) if the aspect roughly matches the locked doc type.
           if (!bestContour && hasSignificantContour && !isDiscovery) {
             const lockedDocTypeForFallback = discoveryRef.current.docType;
-            const isBookDocFallback =
-              lockedDocTypeForFallback === 'passport' ||
-              lockedDocTypeForFallback === 'greenbook';
-            // Desktop id-card synthetics are eligible in two cases:
-            // 1. Bridge: a genuine 4-corner card was detected moments ago and
-            //    briefly dropped out (finger/glare broke an edge), or
-            // 2. Coverage: the scene passes the same 7/9 grid-coverage bar
-            //    mobile enforces for every capture — fingers permanently
-            //    crossing a card edge can prevent a clean quad from EVER
-            //    forming, but a card filling the box lights up the whole
-            //    grid, while a document-free scene (face, furniture, window
-            //    frames) leaves blank cells.
-            // Without these gates the combined bbox of background contours
-            // passes the aspect/area checks below and can auto-capture a
-            // non-document.
+            // Synthetic-fallback eligibility, shared by id-card AND book docs.
+            // Either a genuine 4-corner quad was seen moments ago and briefly
+            // dropped out (finger/glare broke an edge), OR the scene passes the
+            // 7/9 grid-coverage bar (a document fills the box; a document-free
+            // scene — face, furniture, window frames — leaves blank cells).
+            // Without this gate the combined bbox of background contours passes
+            // the aspect/area checks below and auto-captures a non-document.
             // An overflowing card must never synthesize: its bbox covers only
             // the visible (clipped) content, so the fill metric underestimates
-            // distance and a capture would clip the card's edges anyway. The
-            // overflow case gets "Move document further away" guidance below.
-            const idCardSynthEligible =
+            // distance and a capture would clip the card's edges anyway.
+            const synthCoverageEligible =
               !combinedBboxOverflow &&
               (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
                 passingCells >= 7);
+            // Passports/greenbooks rarely form a clean 4-corner quad (the spine
+            // breaks the outer contour), so they depend on this synthetic path
+            // — but it MUST be gated like id-card. Previously book docs
+            // synthesized on aspect+area alone, so an empty desktop scene
+            // synthesized a passport from background contours and auto-captured.
+            const isBookDocFallback =
+              (lockedDocTypeForFallback === 'passport' ||
+                lockedDocTypeForFallback === 'greenbook') &&
+              synthCoverageEligible;
+            const idCardSynthEligible = synthCoverageEligible;
             // Fix 3: mobile content-region fallback. Mirror the desktop id-card
             // synthetic on mobile (where skipGridCheck is false), but gate it on
             // sustained presence: a candidate must persist

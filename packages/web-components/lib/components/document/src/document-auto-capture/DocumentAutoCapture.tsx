@@ -72,6 +72,10 @@ const getOptimalDefaults = () => {
         // screens and most non-card rectangles. minFillRatio rejects ragged
         // quads (rotated-rect fill, tilt-invariant).
         idAspectTolerance: 0.12,
+        // Passport/greenbook aspect window (1.42 ± 10% = [1.278, 1.562]).
+        // Tight enough to exclude ID cards (1.585), monitors and phones that
+        // the old ±0.35 admitted in the passport flow.
+        bookDocAspectTolerance: 0.1,
         minFillRatio: 0.8,
         // Level 2: reject near-monochrome winners (white keyboard, blank paper)
         // by mean chroma magnitude over the detected rectangle. Needs chroma
@@ -107,6 +111,7 @@ const getOptimalDefaults = () => {
         // Shared gate code; same false-positive controls as mobile. Tunable per
         // device if desktop needs looser values.
         idAspectTolerance: 0.12,
+        bookDocAspectTolerance: 0.1,
         minFillRatio: 0.8,
         // Desktop chroma fusion is off, so this gate no-ops; off for clarity.
         chromaContentGate: false,

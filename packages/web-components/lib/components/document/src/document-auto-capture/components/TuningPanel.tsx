@@ -21,6 +21,7 @@ interface TuningSettings {
   chromaCannyHigh?: number;
   mobileRegionFallback?: boolean;
   idAspectTolerance?: number;
+  bookDocAspectTolerance?: number;
   minFillRatio?: number;
   chromaContentGate?: boolean;
   minChromaContent?: number;
@@ -287,6 +288,23 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           value={settings.idAspectTolerance as number}
           onInput={(e) =>
             updateSetting('idAspectTolerance', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Book-Doc Aspect Tol: {settings.bookDocAspectTolerance}{' '}
+          <em>(Passport/greenbook; lower rejects ID cards/screens)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="0.35"
+          step="0.01"
+          value={settings.bookDocAspectTolerance as number}
+          onInput={(e) =>
+            updateSetting('bookDocAspectTolerance', Number(e.target.value))
           }
         />
       </label>

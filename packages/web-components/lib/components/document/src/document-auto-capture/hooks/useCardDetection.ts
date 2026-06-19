@@ -1211,18 +1211,15 @@ export function useCardDetection(
                 const expectedAspect = lockedDocType
                   ? ASPECT_RATIOS[lockedDocType]
                   : null;
-                // Book-style documents (passport, greenbook) have a low-
-                // contrast spine fold and facing page, so the detected
-                // contour is inherently noisier than a card. Allow a wider
-                // aspect tolerance for those types.
                 const isBookDocAspect =
                   lockedDocType === 'passport' || lockedDocType === 'greenbook';
-                // minAreaRect gives the card's TRUE aspect (tilt-invariant), so
-                // the id-card window can be tight: 1.585 ± 12% = [1.395, 1.775]
-                // excludes 16:9 screens (1.778) and most non-card rectangles
-                // without rejecting real cards. Tunable for on-device dialing.
+                // minAreaRect gives the document's TRUE aspect (tilt-invariant),
+                // so both windows can be tight. id-card: 1.585 ± 12%. Passport
+                // (1.42) ± 10% = [1.278, 1.562] — excludes ID cards (1.585),
+                // 16:9/16:10 monitors and phones that the old ±0.35 admitted.
+                // Both tunable for on-device dialing.
                 const aspectTolerance = isBookDocAspect
-                  ? 0.35
+                  ? (settingsRef.current.bookDocAspectTolerance ?? 0.1)
                   : (settingsRef.current.idAspectTolerance ?? 0.12);
                 const aspectOk = expectedAspect
                   ? Math.abs(normalizedAspect - expectedAspect) /
@@ -1423,12 +1420,11 @@ export function useCardDetection(
                 const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
                 const rawAspect = bw / bh;
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
-                // Use the same tight id-card aspect window as the real-contour
-                // path so the fallback can't accept a 16:9 screen / off-aspect
-                // rectangle the strict path would reject. Book docs keep their
-                // wider tolerance (noisy spine/page contour).
+                // Use the same tight aspect windows as the real-contour path so
+                // the fallback can't accept an off-aspect rectangle the strict
+                // path would reject (16:9 screen, ID card in passport flow…).
                 const aspectTol = isBookDocFallback
-                  ? 0.35
+                  ? (settingsRef.current.bookDocAspectTolerance ?? 0.1)
                   : (settingsRef.current.idAspectTolerance ?? 0.12);
                 const aspectOk =
                   Math.abs(normalizedAspect - expectedAspect) / expectedAspect <

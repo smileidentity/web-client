@@ -35,7 +35,7 @@ export default $config({
     // Only add WAF configuration for deployed stages (skip local `sst dev`)
     const WafWebAclArn = $dev ? undefined : new sst.Secret('WafWebAclArn');
 
-    const site = new sst.aws.Remix('PreviewApp', {
+    const site = new sst.aws.React('PreviewApp', {
       link: [api, EmbedUrl, PARTNER_ID],
       transform: {
         cdn: {

@@ -1423,13 +1423,44 @@ export function useCardDetection(
                 const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
                 const rawAspect = bw / bh;
                 const normalizedAspect = Math.max(rawAspect, 1 / rawAspect);
-                const aspectTol = isBookDocFallback ? 0.35 : 0.25;
+                // Use the same tight id-card aspect window as the real-contour
+                // path so the fallback can't accept a 16:9 screen / off-aspect
+                // rectangle the strict path would reject. Book docs keep their
+                // wider tolerance (noisy spine/page contour).
+                const aspectTol = isBookDocFallback
+                  ? 0.35
+                  : (settingsRef.current.idAspectTolerance ?? 0.12);
                 const aspectOk =
                   Math.abs(normalizedAspect - expectedAspect) / expectedAspect <
                   aspectTol;
                 const minArea =
                   guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
-                if (aspectOk && bw * bh > minArea) {
+                // Chroma-content gate on the synthetic/region path too —
+                // otherwise a near-monochrome object (white keyboard) that
+                // never forms a clean quad is synthesized and captured,
+                // bypassing the real-contour chroma gate. Measured over the
+                // detected content bbox; only active when chroma fusion built
+                // chromaMag (mobile).
+                let synthChromaOk = true;
+                if (
+                  chromaMag &&
+                  settingsRef.current.chromaContentGate === true
+                ) {
+                  const sx = Math.max(0, combinedMinX);
+                  const sy = Math.max(0, combinedMinY);
+                  const sw = Math.min(chromaMag.cols - sx, bw);
+                  const sh = Math.min(chromaMag.rows - sy, bh);
+                  let synthChroma = 0;
+                  if (sw > 0 && sh > 0) {
+                    const sRoi = chromaMag.roi(new cv.Rect(sx, sy, sw, sh));
+                    [synthChroma] = cv.mean(sRoi);
+                    sRoi.delete();
+                  }
+                  mergeDebugInfo({ chroma: Math.round(synthChroma) });
+                  synthChromaOk =
+                    synthChroma >= (settingsRef.current.minChromaContent ?? 13);
+                }
+                if (aspectOk && bw * bh > minArea && synthChromaOk) {
                   // For id-card synthetics, the combined bbox covers only the
                   // inner printed content (text, photo, header band). Real cards
                   // have a ~10-15% margin from card edge to first element, so

@@ -193,6 +193,17 @@ After installation and necessary imports:
 
    This approach can also be achieved using other Server to Server libraries.
 
+### Enhanced SmartSelfie
+
+For web-component integrations, Enhanced SmartSelfie is enabled with the
+`use-strict-mode` attribute on the component.
+
+```html
+<smart-camera-web use-strict-mode="true"></smart-camera-web>
+```
+
+- Set `use-strict-mode="true"` to enable strict-mode selfie capture.
+
 ## Compatibility
 
 `SmartCameraWeb` is compatible with most JavaScript frameworks and libraries. For integration with [ReactJS](https://reactjs.org), refer to this [tutorial](https://www.robinwieruch.de/react-web-components) due to React-WebComponents compatibility issues.

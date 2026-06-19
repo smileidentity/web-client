@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 import preact from '@preact/preset-vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import dts from 'vite-plugin-dts';
 import { visualizer } from 'rollup-plugin-visualizer';
 
@@ -22,6 +23,11 @@ export default defineConfig(({ mode }) => {
   const generateStats = process.env.GENERATE_STATS === 'true';
   const buildFormat = process.env.BUILD_FORMAT || 'esm';
   const port = parseInt(env.PORT || '3005', 10);
+  const enableHttps =
+    env.HTTPS === 'true' ||
+    env.HTTPS === '1' ||
+    process.env.HTTPS === 'true' ||
+    process.env.HTTPS === '1';
 
   const plugins = [
     preact({
@@ -49,6 +55,9 @@ export default defineConfig(({ mode }) => {
       }),
     );
   }
+  if (enableHttps) {
+    plugins.push(basicSsl());
+  }
 
   const esmBuildConfig = {
     lib: {
@@ -57,6 +66,7 @@ export default defineConfig(({ mode }) => {
         combobox: resolve(__dirname, 'lib/components/combobox/src/index.js'),
         document: resolve(__dirname, 'lib/components/document/src/index.js'),
         localisation: resolve(__dirname, 'lib/domain/localisation/index.js'),
+        validate: resolve(__dirname, 'lib/utils/validate.js'),
         'end-user-consent': resolve(
           __dirname,
           'lib/components/end-user-consent/src/index.js',
@@ -82,7 +92,7 @@ export default defineConfig(({ mode }) => {
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['signature_pad', 'validate.js'],
+      external: ['signature_pad'],
       output: {
         dir: 'dist/esm',
         entryFileNames: '[name].js',
@@ -124,9 +134,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins,
 
-    // Inline .lottie animation files as base64 data URLs so the IIFE bundle
-    // remains a single self-contained file (matches the previous behaviour
-    // when animations were imported as JSON modules).
+    // Treat .lottie animations as static assets so they can be imported and
+    // inlined (via ?inline) rather than left to fail asset resolution.
     assetsInclude: ['**/*.lottie'],
 
     esbuild: {
@@ -143,6 +152,8 @@ export default defineConfig(({ mode }) => {
 
     server: {
       port,
+      host: process.env.HOST || 'localhost',
+      https: enableHttps,
     },
 
     resolve: {

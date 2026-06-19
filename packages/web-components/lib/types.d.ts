@@ -1,8 +1,3 @@
-declare module 'validate.js' {
-  const validate: any;
-  export default validate;
-}
-
 // Vite resolves SVG imports to URL strings by default.
 declare module '*.svg' {
   const src: string;

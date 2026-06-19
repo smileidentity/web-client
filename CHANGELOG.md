@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.5.0] - 2026-06-16
+
+### Added
+
+- Selfie: new Enhanced SmartSelfie capture workflow with an oval-progress active-liveness overlay, on-device face guidance (lighting, blur, proximity, directional nudges), in-flow consent and submission views, and an inactivity timeout integrated with the embed metadata pipeline
+
+### Changed
+
+- Selfie: auto-resume capture when the face returns to a valid zone before the smile checkpoint, so the flow no longer stalls in a "capturing" state without taking frames
+
 ## [11.4.5] - 2026-06-09
 
 ### Changed

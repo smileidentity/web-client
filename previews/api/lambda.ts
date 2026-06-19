@@ -13,12 +13,7 @@ export const handler = async (event: { body: string }) => {
     const environmentServer =
       SID_SERVER_MAPPING[Resource.SmileIdEnvironment.value] ||
       Resource.SmileIdEnvironment.value;
-    let baseServer = Resource.SmileIdEnvironment.value;
-    // the smile-identity-core client appears to append https:// to the baseServer
-    // this is a workaround to prevent the client from appending https:// twice
-    if (baseServer.startsWith('https://')) {
-      baseServer = `${baseServer.slice(8)}/v1`;
-    }
+    const baseServer = `${Resource.SmileIdEnvironment.value}/v1`;
 
     const connection = new SIDWebAPI(
       Resource.PartnerId.value,

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import validate from 'validate.js';
+import validate from '@smileid/web-components/validate';
 import '@smileid/web-components/combobox';
 import '@smileid/web-components/end-user-consent';
 import {
@@ -23,6 +23,9 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import initIframeSentry from './sentry-iframe-init.js';
+
+initIframeSentry('basic-kyc');
 
 (function basicKyc() {
   'use strict';

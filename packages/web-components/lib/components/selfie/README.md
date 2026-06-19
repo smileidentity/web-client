@@ -44,6 +44,19 @@ Usage:
 <selfie-capture-screens show-navigation></selfie-capture-screens>
 ```
 
+#### use-strict-mode
+
+This attribute enables Enhanced SmartSelfie (strict-mode capture flow).
+
+Usage:
+
+```html
+<selfie-capture-screens use-strict-mode="true"></selfie-capture-screens>
+```
+
+`allow-legacy-selfie-fallback` is also available as an optional compatibility
+attribute.
+
 ### Permissions
 
 The `SelfieCaptureScreens` component requires camera permissions to function. It will automatically request these permissions when used. If the permissions are granted, it will remove the `data-camera-error` attribute from the capture screen and set the `data-camera-ready` attribute to true. If the permissions are denied, it will remove the `data-camera-ready` attribute and set the `data-camera-error` attribute with the error message.

@@ -109,12 +109,30 @@ When you're ready to create a new release for this project, follow the steps bel
 
 The embed supports several configuration options:
 
-| Option                         | Type      | Default | Description                                                                                                                                                          |
-| ------------------------------ | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `hide_attribution`             | `boolean` | `false` | Hide Smile ID attribution/credits                                                                                                                                    |
-| `allow_agent_mode`             | `boolean` | `false` | Allow agent mode for assisted capture                                                                                                                                |
-| `allow_legacy_selfie_fallback` | `boolean` | `false` | Allow fallback to legacy selfie capture if Mediapipe fails to load. When `false` (default), an error message is shown instead of falling back to the legacy capture. |
-| `id_info`                      | `object`  | —       | Pre-fill ID information fields. Keys are country codes mapping to ID types and field data. See [Pre-filled ID Inputs](#pre-filled-id-inputs) below.                  |
+| Option                         | Type      | Default | Description                                                                                                                                         |
+| ------------------------------ | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hide_attribution`             | `boolean` | `false` | Hide Smile ID attribution/credits                                                                                                                   |
+| `allow_agent_mode`             | `boolean` | `false` | Allow agent mode for assisted capture                                                                                                               |
+| `use_strict_mode`              | `boolean` | `false` | Enables Enhanced SmartSelfie capture behavior. Set to `true` to enable strict-mode selfie capture.                                                  |
+| `allow_legacy_selfie_fallback` | `boolean` | `false` | Optional compatibility setting for legacy selfie fallback behavior.                                                                                 |
+| `id_info`                      | `object`  | —       | Pre-fill ID information fields. Keys are country codes mapping to ID types and field data. See [Pre-filled ID Inputs](#pre-filled-id-inputs) below. |
+
+### Enhanced SmartSelfie
+
+Enhanced SmartSelfie capture is controlled through strict mode.
+
+- Enable Enhanced SmartSelfie by setting `use_strict_mode: true` at the top level of the SmileIdentity config.
+
+```javascript
+window.SmileIdentity({
+  token: 'your-token',
+  product: 'smartselfie',
+  callback_url: 'https://your-callback.com',
+  use_strict_mode: true,
+  onSuccess: () => {},
+  onError: () => {},
+});
+```
 
 ## Pre-filled ID Inputs
 
@@ -208,9 +226,6 @@ window.SmileIdentity({
   token: 'your-token',
   product: 'biometric_kyc',
   callback_url: 'https://your-callback.com',
-
-  // Optional: Allow legacy selfie fallback if Mediapipe fails
-  allow_legacy_selfie_fallback: true,
 
   // Set language (supports 'en-GB', 'fr-FR', 'ar-EG')
   translation: {

@@ -193,22 +193,16 @@ After installation and necessary imports:
 
    This approach can also be achieved using other Server to Server libraries.
 
-### Enhanced SmartSelfie (Strict Mode)
+### Enhanced SmartSelfie
 
 For web-component integrations, Enhanced SmartSelfie is enabled with the
 `use-strict-mode` attribute on the component.
 
 ```html
-<smart-camera-web
-  use-strict-mode="true"
-  allow-legacy-selfie-fallback="false"
-></smart-camera-web>
+<smart-camera-web use-strict-mode="true"></smart-camera-web>
 ```
 
 - Set `use-strict-mode="true"` to enable strict-mode selfie capture.
-- `allow-legacy-selfie-fallback="true"` is optional. If enabled, the
-  component can fall back to the legacy selfie flow when MediaPipe cannot
-  initialize.
 
 ## Compatibility
 

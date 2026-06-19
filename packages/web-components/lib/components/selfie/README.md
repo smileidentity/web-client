@@ -54,19 +54,8 @@ Usage:
 <selfie-capture-screens use-strict-mode="true"></selfie-capture-screens>
 ```
 
-#### allow-legacy-selfie-fallback
-
-Optional attribute that allows fallback to the legacy selfie flow when
-MediaPipe cannot initialize.
-
-Usage:
-
-```html
-<selfie-capture-screens
-  use-strict-mode="true"
-  allow-legacy-selfie-fallback="false"
-></selfie-capture-screens>
-```
+`allow-legacy-selfie-fallback` is also available as an optional compatibility
+attribute.
 
 ### Permissions
 

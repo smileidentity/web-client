@@ -58,12 +58,15 @@ const getOptimalDefaults = () => {
         autoCannySigma: 1.0,
         // Fix 2: OR chroma (Lab a/b) edges into the contour edge map so a card
         // whose border is invisible in luminance (beige ID on light wood) is
-        // still detected. Fix 3: allow the content-region fallback so a card
-        // that never forms a clean 4-corner quad can still auto-capture.
+        // still detected.
         chromaEdgeFusion: true,
         chromaCannyLow: 15,
         chromaCannyHigh: 40,
-        mobileRegionFallback: true,
+        // Level 3: mobile content-region fallback OFF by default. The
+        // tilt-robust real-contour path (minAreaRect) + chroma fusion now
+        // detect cards directly, so the looser synthetic fallback is mostly a
+        // false-positive source. Re-enable live via the panel to compare.
+        mobileRegionFallback: false,
         // False-positive controls. minAreaRect gives the card's true aspect, so
         // a tight id-card window (1.585 ± 12% = [1.395, 1.775]) excludes 16:9
         // screens and most non-card rectangles. minFillRatio rejects ragged

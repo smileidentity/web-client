@@ -1597,8 +1597,7 @@ export function useCardDetection(
             const win = chromaWindowRef.current;
             win.push(candChroma);
             if (win.length > CHROMA_AVG_WINDOW) win.shift();
-            const avgChroma =
-              win.reduce((sum, v) => sum + v, 0) / win.length;
+            const avgChroma = win.reduce((sum, v) => sum + v, 0) / win.length;
             mergeDebugInfo({ chroma: Math.round(avgChroma) });
             if (
               win.length >= CHROMA_MIN_SAMPLES &&

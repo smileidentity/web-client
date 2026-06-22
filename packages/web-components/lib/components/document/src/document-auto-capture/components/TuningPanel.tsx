@@ -39,6 +39,7 @@ interface TuningDebugInfo {
   contourSource?: string;
   aspect?: number | string;
   chroma?: number | string;
+  quality?: number | string;
   [key: string]: unknown;
 }
 
@@ -179,6 +180,10 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
         <div>
           Chroma:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.chroma ?? '—'}</span>
+        </div>
+        <div>
+          Quality:{' '}
+          <span style={{ color: '#0f0' }}>{debugInfo?.quality ?? '—'}</span>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}

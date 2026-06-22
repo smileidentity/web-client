@@ -119,6 +119,56 @@ const MOBILE_REGION_STABILITY_FRAMES = 8;
 const CHROMA_AVG_WINDOW = 6;
 const CHROMA_MIN_SAMPLES = 4;
 
+// --- Composite per-frame quality score ---
+// Stripe/Persona-style readability scoring: instead of picking the best frame
+// by sharpness alone, score each qualifying frame on a blend of the metrics we
+// already compute, normalized to 0–1, and keep the highest-scoring frame of the
+// stability window. This selects the most *readable* capture (well-framed, in
+// focus, low glare, true card shape), not merely the sharpest. Weights are
+// auto-normalized over whichever components are present, so chroma (mobile only)
+// can drop out without re-tuning the rest.
+const QUALITY_WEIGHTS = {
+  sharpness: 0.35, // Laplacian variance vs blurThreshold
+  glare: 0.15, // inverse of glare coverage
+  fill: 0.2, // distance from the center of the accepted fill band
+  aspect: 0.2, // closeness of the winner's aspect to the doc-type ratio
+  contour: 0.1, // rotated-rect fill of a real quad (synthetic = lower)
+  chroma: 0.05, // colour content (mobile, when the chroma gate is active)
+};
+// A synthesized fallback rect is inherently lower-confidence than a real
+// 4-corner quad (its bbox is inferred from inner content, not the card edge).
+const SYNTHETIC_CONTOUR_CONFIDENCE = 0.55;
+// How many consecutive blur/glare misses to tolerate before discarding an
+// already-captured best frame. Mobile cameras drop 1–2 frames to motion blur or
+// AWB; nulling the candidate on the first stumble throws away a good capture and
+// restarts the stability climb. Mirrors DISCOVERY_MISS_TOLERANCE in spirit.
+const BEST_FRAME_MISS_TOLERANCE = 3;
+
+const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
+
+// Combine sub-scores (each already in 0–1) into one weighted score, normalizing
+// over only the components that are present (null/undefined ones are skipped).
+function frameQualityScore(parts: {
+  sharpness?: number | null;
+  glare?: number | null;
+  fill?: number | null;
+  aspect?: number | null;
+  contour?: number | null;
+  chroma?: number | null;
+}): number {
+  const keys = Object.keys(QUALITY_WEIGHTS) as Array<
+    keyof typeof QUALITY_WEIGHTS
+  >;
+  const present = keys.filter((key) => parts[key] != null);
+  const den = present.reduce((sum, key) => sum + QUALITY_WEIGHTS[key], 0);
+  if (den <= 0) return 0;
+  const num = present.reduce(
+    (sum, key) => sum + clamp01(parts[key] as number) * QUALITY_WEIGHTS[key],
+    0,
+  );
+  return num / den;
+}
+
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
 // RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
@@ -384,6 +434,22 @@ export function useCardDetection(
   // CHROMA_AVG_WINDOW frames). Smooths the noisy per-frame reading so the
   // chroma-content gate acts on a stable average. Cleared when no candidate.
   const chromaWindowRef = useRef<number[]>([]);
+  // Geometry of the candidate selected as bestContour this frame, captured at
+  // the selection site (deep in the contour pass) so the composite quality
+  // score can read it at the later blur/glare/stability gates, where the
+  // contour-scope locals are out of scope. `aspect` is the normalized (>=1)
+  // rotated-rect aspect; `fillRatio` is the rotated-rect fill of a real quad
+  // (0 for synthetic); `synthetic` flags the inferred fallback rect.
+  const winnerGeomRef = useRef<{
+    aspect: number;
+    fillRatio: number;
+    synthetic: boolean;
+  }>({ aspect: 0, fillRatio: 0, synthetic: false });
+  // Consecutive blur/glare misses while a best frame is already held. Lets a
+  // transient bad frame pass without discarding the captured candidate
+  // (see BEST_FRAME_MISS_TOLERANCE). Reset once a frame reaches the stability
+  // section cleanly.
+  const bestFrameMissRef = useRef(0);
   // Frames since a genuine (non-synthetic) 4-corner card last passed
   // validation. Gates the desktop id-card synthetic fallback so it only
   // bridges brief dropouts of a card that WAS being detected, rather than
@@ -1286,6 +1352,13 @@ export function useCardDetection(
                   maxArea = area;
                   if (bestContour) bestContour.delete();
                   bestContour = approx;
+                  // Record the winner's true geometry for the composite quality
+                  // score read later at the stability gate (out of scope there).
+                  winnerGeomRef.current = {
+                    aspect: normalizedAspect,
+                    fillRatio,
+                    synthetic: false,
+                  };
                   // Genuine 4-corner card validated — open the synthetic
                   // fallback's bridge window and reset the mobile-region streak.
                   framesSinceRealCardRef.current = 0;
@@ -1454,6 +1527,14 @@ export function useCardDetection(
                   synth.data32S[7] = maxY;
                   bestContour = synth;
                   bestContourIsSynthetic = true;
+                  // Synthetic rect: record its aspect; fillRatio is not
+                  // meaningful (the rect is inferred), so the quality score
+                  // applies a fixed lower confidence (SYNTHETIC_CONTOUR_*).
+                  winnerGeomRef.current = {
+                    aspect: normalizedAspect,
+                    fillRatio: 0,
+                    synthetic: true,
+                  };
                   if (mobileRegionEligible) {
                     edgeSource = 'region';
                     mergeDebugInfo({ contourSource: edgeSource });
@@ -1856,8 +1937,23 @@ export function useCardDetection(
         if (variance < settingsRef.current.blurThreshold) {
           setFeedback('Too Blurry');
           setComplianceState(COMPLIANCE_STATES.DETECTING);
-          stabilityRef.current.count = 0;
-          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          // Tolerate a transient blurry frame while a best frame is already
+          // held — mobile cameras drop 1–2 frames to motion blur / AWB. Soften
+          // the stability count instead of discarding the captured candidate.
+          if (
+            bestFrameRef.current.image &&
+            bestFrameMissRef.current < BEST_FRAME_MISS_TOLERANCE
+          ) {
+            bestFrameMissRef.current += 1;
+            stabilityRef.current.count = Math.max(
+              0,
+              stabilityRef.current.count - 1,
+            );
+          } else {
+            bestFrameMissRef.current = 0;
+            stabilityRef.current.count = 0;
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+          }
           mergeDebugInfo({ blur: Math.round(variance), glare: 0 });
           return;
         }
@@ -1881,12 +1977,27 @@ export function useCardDetection(
         if (glarePercent > settingsRef.current.glareThreshold) {
           setFeedback('Glare detected — adjust lighting');
           setComplianceState(COMPLIANCE_STATES.DETECTING);
-          stabilityRef.current.count = 0;
-          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          // Same transient-miss tolerance as the blur gate above.
+          if (
+            bestFrameRef.current.image &&
+            bestFrameMissRef.current < BEST_FRAME_MISS_TOLERANCE
+          ) {
+            bestFrameMissRef.current += 1;
+            stabilityRef.current.count = Math.max(
+              0,
+              stabilityRef.current.count - 1,
+            );
+          } else {
+            bestFrameMissRef.current = 0;
+            stabilityRef.current.count = 0;
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+          }
           return;
         }
 
         // --- Gate 3: Stability (track best frame) ---
+        // Clean frame — clear the transient-miss streak.
+        bestFrameMissRef.current = 0;
         stabilityRef.current.count++;
         const progress = Math.min(
           100,
@@ -1895,9 +2006,73 @@ export function useCardDetection(
             100,
         );
 
-        // Track the sharpest frame during the stability window
-        if (variance > bestFrameRef.current.score) {
-          bestFrameRef.current.score = variance;
+        // --- Composite per-frame quality score ---
+        // Blend the metrics already computed this frame into one 0–1
+        // readability score and keep the highest-scoring frame of the window
+        // (Stripe/Persona-style), rather than the merely-sharpest one. Sub-
+        // scores: sharpness vs blur threshold; inverse glare; framing (distance
+        // from the center of the accepted fill band); aspect closeness to the
+        // doc-type ratio; contour confidence (real quad fill, synthetic capped);
+        // and colour content on mobile.
+        const sharpScore = clamp01(
+          variance / (2 * settingsRef.current.blurThreshold),
+        );
+        const glareLimit = settingsRef.current.glareThreshold || 1;
+        const glareScore = clamp01(1 - glarePercent / glareLimit);
+        // Recompute the accepted fill band (same basis as the distance gate's
+        // minFillPercent/maxFillPercent, which are out of scope here).
+        const qDocType = discoveryRef.current.docType;
+        const qIsBookDoc = qDocType === 'passport' || qDocType === 'greenbook';
+        const qMinFill = qIsBookDoc
+          ? 20
+          : (settingsRef.current.minFillPercent ?? MIN_FILL_PERCENT);
+        const qMaxFill = settingsRef.current.maxFillPercent ?? MAX_FILL_PERCENT;
+        const fillCenter = (qMinFill + qMaxFill) / 2;
+        const fillHalf = Math.max(1, (qMaxFill - qMinFill) / 2);
+        const fillScore = clamp01(
+          1 - Math.abs(latestDocFillRef.current - fillCenter) / fillHalf,
+        );
+        const expectedAspect = isAspectKey(qDocType)
+          ? ASPECT_RATIOS[qDocType]
+          : null;
+        const qAspectTol = qIsBookDoc
+          ? (settingsRef.current.bookDocAspectTolerance ?? 0.1)
+          : (settingsRef.current.idAspectTolerance ?? 0.12);
+        const aspectScore =
+          expectedAspect && winnerGeomRef.current.aspect > 0
+            ? clamp01(
+                1 -
+                  Math.abs(winnerGeomRef.current.aspect - expectedAspect) /
+                    (expectedAspect * qAspectTol),
+              )
+            : null;
+        const contourScore = winnerGeomRef.current.synthetic
+          ? SYNTHETIC_CONTOUR_CONFIDENCE
+          : clamp01((winnerGeomRef.current.fillRatio - 0.5) / 0.5);
+        let chromaScore: number | null = null;
+        const chromaWin = chromaWindowRef.current;
+        if (
+          settingsRef.current.chromaContentGate === true &&
+          chromaWin.length
+        ) {
+          const chromaAvg =
+            chromaWin.reduce((sum, v) => sum + v, 0) / chromaWin.length;
+          const minChroma = settingsRef.current.minChromaContent ?? 13;
+          chromaScore = clamp01(chromaAvg / (2 * minChroma));
+        }
+        const composite = frameQualityScore({
+          sharpness: sharpScore,
+          glare: glareScore,
+          fill: fillScore,
+          aspect: aspectScore,
+          contour: contourScore,
+          chroma: chromaScore,
+        });
+        mergeDebugInfo({ quality: composite.toFixed(2) });
+
+        // Keep the most readable frame (highest composite) of the window.
+        if (composite > bestFrameRef.current.score) {
+          bestFrameRef.current.score = composite;
 
           // Submitted image: full frame, or guide-rect crop when cropToCard
           // is enabled (original behavior). Padded by `cropPadding` (default 10%).
@@ -2018,8 +2193,8 @@ export function useCardDetection(
                 settingsRef.current.stabilityThreshold,
               );
               console.info(
-                'Best Frame Score:',
-                Math.round(bestFrameRef.current.score),
+                'Best Frame Quality:',
+                bestFrameRef.current.score.toFixed(2),
               );
             }
             setFeedback('Capturing document...');

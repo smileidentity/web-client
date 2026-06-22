@@ -35,6 +35,91 @@ const CAPTURE_MODES: CaptureMode[] = [
   'manualCaptureOnly',
 ];
 
+// Settings shared by both device profiles. These are device-independent —
+// shape/colour gates and crop geometry behave the same on a phone and a webcam,
+// so they live in one place to stop the two profiles from drifting apart.
+const SHARED_DEFAULTS = {
+  // Adaptive contour-Canny sensitivity. The high threshold is
+  // mean + autoCannySigma·stddev of the frame's gradient magnitude, clamped to
+  // [60, 150]. Lower = detect fainter borders (better on plain backgrounds),
+  // higher = stricter (fewer false edges on busy backgrounds).
+  autoCannySigma: 1.0,
+  chromaCannyLow: 15,
+  chromaCannyHigh: 40,
+  // Mobile content-region fallback OFF by default on both profiles. The
+  // tilt-robust real-contour path (minAreaRect) + chroma fusion detect cards
+  // directly, so the looser synthetic fallback is mostly a false-positive
+  // source. Re-enable live via the panel to compare.
+  mobileRegionFallback: false,
+  // False-positive controls. minAreaRect gives the card's true aspect, so a
+  // tight id-card window (1.585 ± 12% = [1.395, 1.775]) excludes 16:9 screens
+  // and most non-card rectangles. Passport/greenbook window (1.42 ± 10% =
+  // [1.278, 1.562]) is tight enough to exclude ID cards (1.585), monitors and
+  // phones. minFillRatio rejects ragged quads (rotated-rect fill, tilt-invariant).
+  idAspectTolerance: 0.12,
+  bookDocAspectTolerance: 0.1,
+  minFillRatio: 0.8,
+  minChromaContent: 13,
+  cropToCard: true,
+  cropToContour: true,
+  cropPadding: 10,
+  previewCropPadding: 2,
+};
+
+// Per-device overrides. Only the knobs that genuinely differ between a
+// hand-held phone camera and a fixed webcam appear here, each with its reason —
+// everything else comes from SHARED_DEFAULTS. The divergent numbers don't share
+// a common scale factor (they were measured independently per device), so they
+// stay as explicit, documented values rather than a synthetic multiplier.
+const MOBILE_OVERRIDES = {
+  deviceType: 'Mobile',
+  // Show the detected card outline only on mobile (handheld framing aid).
+  useDynamicBorder: true,
+  edgeDensityThreshold: 6,
+  // Phone framing is looser, so each grid cell needs only 50% of the threshold.
+  gridCellRatio: 0.5,
+  // Fix 2: OR chroma (Lab a/b) edges into the contour edge map so a card whose
+  // border is invisible in luminance (beige ID on light wood) is still detected.
+  // Mobile only — desktop has a working high-contrast path and stays off.
+  chromaEdgeFusion: true,
+  // Level 2: reject near-monochrome winners (white keyboard, blank paper) by
+  // mean chroma over the detected rect. Needs chroma fusion, so mobile only.
+  // 13 sits in the measured gap between a white keyboard (~10) and a real
+  // colour ID (~17-26).
+  chromaContentGate: true,
+  // Phone cameras resolve more detail, so demand a higher sharpness floor.
+  blurThreshold: 150,
+  // Phone flash/specular highlights are harsh and localized — strict glare cap.
+  glareThreshold: 5.0,
+  // Handheld motion → require more stable frames before auto-capture.
+  stabilityThreshold: 5,
+  minFillPercent: 75,
+  maxFillPercent: 95,
+};
+
+const DESKTOP_OVERRIDES = {
+  deviceType: 'Desktop',
+  useDynamicBorder: false,
+  edgeDensityThreshold: 10,
+  // Webcam ROI is the visible box the user fills — stricter per-cell coverage.
+  gridCellRatio: 0.6,
+  chromaEdgeFusion: false,
+  chromaContentGate: false,
+  // Fixed-focus webcams are softer; a 150 floor would never pass, so use 60.
+  blurThreshold: 60,
+  // Webcams sit under diffuse room light — much more glare is normal/acceptable.
+  glareThreshold: 18.0,
+  // Webcam on a stand is steady, so fewer stable frames are needed.
+  stabilityThreshold: 3,
+  // Desktop ROI == the visible video box (see useCardDetection's skipGridCheck
+  // branch), so these percentages are measured against what the user actually
+  // sees. Require ~70% area fill (~84% linear — still ~990px of card width on a
+  // 720p webcam) before quality checks; allow up to 98% before backing off. The
+  // lower floor lets fixed-focus webcams sit at a sharper distance.
+  minFillPercent: 70,
+  maxFillPercent: 98,
+};
+
 const getOptimalDefaults = () => {
   const ua =
     navigator.userAgent ||
@@ -44,95 +129,10 @@ const getOptimalDefaults = () => {
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
-  return isMobile
-    ? {
-        deviceType: 'Mobile',
-        useDynamicBorder: true,
-        edgeDensityThreshold: 6,
-        gridCellRatio: 0.5,
-        // Adaptive contour-Canny sensitivity. The high threshold is
-        // mean + autoCannySigma·stddev of the frame's gradient magnitude,
-        // clamped to [60, 150]. Lower = detect fainter borders (better on
-        // plain backgrounds), higher = stricter (fewer false edges on busy
-        // backgrounds).
-        autoCannySigma: 1.0,
-        // Fix 2: OR chroma (Lab a/b) edges into the contour edge map so a card
-        // whose border is invisible in luminance (beige ID on light wood) is
-        // still detected.
-        chromaEdgeFusion: true,
-        chromaCannyLow: 15,
-        chromaCannyHigh: 40,
-        // Level 3: mobile content-region fallback OFF by default. The
-        // tilt-robust real-contour path (minAreaRect) + chroma fusion now
-        // detect cards directly, so the looser synthetic fallback is mostly a
-        // false-positive source. Re-enable live via the panel to compare.
-        mobileRegionFallback: false,
-        // False-positive controls. minAreaRect gives the card's true aspect, so
-        // a tight id-card window (1.585 ± 12% = [1.395, 1.775]) excludes 16:9
-        // screens and most non-card rectangles. minFillRatio rejects ragged
-        // quads (rotated-rect fill, tilt-invariant).
-        idAspectTolerance: 0.12,
-        // Passport/greenbook aspect window (1.42 ± 10% = [1.278, 1.562]).
-        // Tight enough to exclude ID cards (1.585), monitors and phones that
-        // the old ±0.35 admitted in the passport flow.
-        bookDocAspectTolerance: 0.1,
-        minFillRatio: 0.8,
-        // Level 2: reject near-monochrome winners (white keyboard, blank paper)
-        // by mean chroma magnitude over the detected rectangle. Needs chroma
-        // fusion on. 13 sits in the measured gap between a white keyboard (~10)
-        // and a real colour ID (~17-26): keyboard rejected, card passes with
-        // margin. Tunable via the panel.
-        chromaContentGate: true,
-        minChromaContent: 13,
-        blurThreshold: 150,
-        glareThreshold: 5.0,
-        stabilityThreshold: 5,
-        cropToCard: true,
-        cropToContour: true,
-        cropPadding: 10,
-        previewCropPadding: 2,
-        minFillPercent: 75,
-        maxFillPercent: 95,
-      }
-    : {
-        deviceType: 'Desktop',
-        useDynamicBorder: false,
-        edgeDensityThreshold: 10,
-        gridCellRatio: 0.6,
-        // See mobile note. Adaptive contour-Canny high = mean + σ·stddev of the
-        // gradient magnitude, clamped to [60, 150].
-        autoCannySigma: 1.0,
-        // Desktop has its own synthetic fallback and a working high-contrast
-        // path; keep the chroma/region features off to avoid any regression.
-        chromaEdgeFusion: false,
-        chromaCannyLow: 15,
-        chromaCannyHigh: 40,
-        mobileRegionFallback: false,
-        // Shared gate code; same false-positive controls as mobile. Tunable per
-        // device if desktop needs looser values.
-        idAspectTolerance: 0.12,
-        bookDocAspectTolerance: 0.1,
-        minFillRatio: 0.8,
-        // Desktop chroma fusion is off, so this gate no-ops; off for clarity.
-        chromaContentGate: false,
-        minChromaContent: 13,
-        blurThreshold: 60,
-        glareThreshold: 18.0,
-        stabilityThreshold: 3,
-        cropToCard: true,
-        cropToContour: true,
-        cropPadding: 10,
-        previewCropPadding: 2,
-        // Desktop ROI == the visible video box (see useCardDetection's
-        // skipGridCheck branch), so these percentages are measured against what
-        // the user actually sees. Require the card to fill ~70% of the box
-        // area (~84% linear — still ~990px of card width on a 720p webcam)
-        // before quality checks run; allow up to 98% before asking to back
-        // off. The lower floor lets fixed-focus webcams sit at a sharper
-        // distance instead of being forced right up to the lens.
-        minFillPercent: 70,
-        maxFillPercent: 98,
-      };
+  return {
+    ...SHARED_DEFAULTS,
+    ...(isMobile ? MOBILE_OVERRIDES : DESKTOP_OVERRIDES),
+  };
 };
 
 const galleryButtonStyle = {

@@ -1,4 +1,4 @@
-import type { FunctionComponent, Ref } from 'preact';
+import type { FunctionComponent } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';

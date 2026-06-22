@@ -2269,6 +2269,11 @@ export function useCardDetection(
         setComplianceState(COMPLIANCE_STATES.IDLE);
         stabilityRef.current.count = 0;
         bestFrameRef.current = { image: null, preview: null, score: 0 };
+        // Never let a per-frame CV error freeze the loop: clearing the
+        // capturing flag guarantees the rescheduler below runs, so detection
+        // self-recovers on the next frame instead of getting stuck on
+        // "Processing failed" until a manual page refresh.
+        isCapturingRef.current = false;
       } finally {
         // Clean Memory
         safeDelete(

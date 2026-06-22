@@ -1207,6 +1207,16 @@ export function useCardDetection(
           let combinedMaxX = -Infinity;
           let combinedMaxY = -Infinity;
           let hasSignificantContour = false;
+          // Per-contour boxes (full-res ROI px), collected so the synthetic
+          // fallback can build a CARD-FOCUSED bbox via outlier trimming instead
+          // of the absolute union — a hand/arm entering the frame is a sparse
+          // outlier that would otherwise inflate the box and over-read distance.
+          const contourBoxes: Array<{
+            x: number;
+            y: number;
+            r: number;
+            b: number;
+          }> = [];
           // All contour-pass geometry is in full-res ROI pixels.
           const minContourPixels = clampedW * clampedH * 0.005; // 0.5% — catches small text fragments
 
@@ -1222,6 +1232,12 @@ export function useCardDetection(
               combinedMinY = Math.min(combinedMinY, br.y);
               combinedMaxX = Math.max(combinedMaxX, br.x + br.width);
               combinedMaxY = Math.max(combinedMaxY, br.y + br.height);
+              contourBoxes.push({
+                x: br.x,
+                y: br.y,
+                r: br.x + br.width,
+                b: br.y + br.height,
+              });
             }
 
             if (area > clampedW * clampedH * MIN_CONTOUR_AREA_PERCENT) {
@@ -1471,8 +1487,41 @@ export function useCardDetection(
                 idCardSynthEligible) ||
               mobileRegionEligible;
             if (isBookDocFallback || isIdCardFallback) {
-              const bw = combinedMaxX - combinedMinX;
-              const bh = combinedMaxY - combinedMinY;
+              // Card-focused bbox (A): the document is a dense cluster of content
+              // contours; a hand/arm entering the frame is a sparse outlier that
+              // the absolute union (combinedMin/Max) lets inflate the box, so
+              // distance over-reads and it captures from too far. On desktop,
+              // with enough contours, take a percentile envelope (10th–90th) so
+              // 1–2 outlier contours are trimmed and the box hugs the card.
+              // Mobile keeps the absolute union unchanged.
+              let cMinX = combinedMinX;
+              let cMinY = combinedMinY;
+              let cMaxX = combinedMaxX;
+              let cMaxY = combinedMaxY;
+              if (skipGridCheck && contourBoxes.length >= 8) {
+                const pctl = (vals: number[], p: number) => {
+                  const s = vals.slice().sort((a, b) => a - b);
+                  return s[Math.round(p * (s.length - 1))];
+                };
+                cMinX = pctl(
+                  contourBoxes.map((c) => c.x),
+                  0.1,
+                );
+                cMinY = pctl(
+                  contourBoxes.map((c) => c.y),
+                  0.1,
+                );
+                cMaxX = pctl(
+                  contourBoxes.map((c) => c.r),
+                  0.9,
+                );
+                cMaxY = pctl(
+                  contourBoxes.map((c) => c.b),
+                  0.9,
+                );
+              }
+              const bw = cMaxX - cMinX;
+              const bh = cMaxY - cMinY;
               if (bw > 0 && bh > 0) {
                 const expectedAspect = ASPECT_RATIOS[lockedDocTypeForFallback];
                 const rawAspect = bw / bh;
@@ -1501,14 +1550,14 @@ export function useCardDetection(
                   // have a ~10-15% margin from card edge to first element, so
                   // the raw bbox understates the true card extent. Expand from
                   // the bbox center by a card-margin factor and clamp to ROI.
-                  let minX = combinedMinX;
-                  let minY = combinedMinY;
-                  let maxX = combinedMaxX;
-                  let maxY = combinedMaxY;
+                  let minX = cMinX;
+                  let minY = cMinY;
+                  let maxX = cMaxX;
+                  let maxY = cMaxY;
                   if (isIdCardFallback) {
                     const SYNTH_EXPAND = 1.15;
-                    const cx = (combinedMinX + combinedMaxX) / 2;
-                    const cy = (combinedMinY + combinedMaxY) / 2;
+                    const cx = (cMinX + cMaxX) / 2;
+                    const cy = (cMinY + cMaxY) / 2;
                     const halfW = (bw * SYNTH_EXPAND) / 2;
                     const halfH = (bh * SYNTH_EXPAND) / 2;
                     minX = Math.max(0, Math.round(cx - halfW));

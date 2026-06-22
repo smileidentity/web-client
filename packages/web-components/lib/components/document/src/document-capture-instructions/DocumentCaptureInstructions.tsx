@@ -10,7 +10,6 @@ import '../../../navigation/src';
 import idCardLottie from '../assets/lottie/id-card.lottie?inline';
 import passportLottie from '../assets/lottie/passport.lottie?inline';
 import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
-import idCardFlipLottie from '../assets/lottie/id-card-flip.lottie?inline';
 import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
 import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
 import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
@@ -28,9 +27,6 @@ import greenbookNotReflective from '../assets/icons/guidelines/greenbook/not-ref
 const HERO_ID_CARD_LOTTIE_URL = idCardLottie;
 const HERO_PASSPORT_LOTTIE_URL = passportLottie;
 const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
-
-// Card-flip animation shown on the back-of-ID instruction screen.
-const FLIP_LOTTIE_URL = idCardFlipLottie;
 
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
@@ -290,43 +286,88 @@ function PoweredBySmileIdLogo() {
   );
 }
 
-// ── Front layout (default) ─────────────────────────────────────────────────
-interface FrontLayoutProps {
-  rootRef: Ref<HTMLDivElement>;
-  direction: 'ltr' | 'rtl' | 'auto';
-  displayDocumentType: string;
-  documentVariant: DocumentVariant;
-  heroAsset: HeroAssetConfig;
-  guidelineItems: GuidelineItem[];
-  hideBack: boolean;
-  hideAttribution: boolean;
-  onBack: () => void;
-  onCapture: () => void;
+// ── Props ────────────────────────────────────────────────────────────────────
+
+interface Props {
+  dir?: string;
+  'document-type'?: string;
+  'side-of-id'?: string;
+  title?: string;
+  'hide-attribution'?: string | boolean;
+  'hide-back'?: string | boolean;
+  'hide-back-to-host'?: string | boolean;
 }
 
-function FrontInstructionsLayout({
-  rootRef,
-  direction,
-  displayDocumentType,
-  documentVariant,
-  heroAsset,
-  guidelineItems,
-  hideBack,
-  hideAttribution,
-  onBack,
-  onCapture,
-}: FrontLayoutProps) {
-  const navigationRef = useRef<HTMLElement | null>(null);
+// ── Component ────────────────────────────────────────────────────────────────
 
-  // Bridge the shared <smileid-navigation> element's back event to onBack.
+const DocumentCaptureInstructions: FunctionComponent<Props> = ({
+  dir,
+  'document-type': documentType = '',
+  title = '',
+  'hide-attribution': hideAttributionProp = false,
+  'hide-back': hideBackProp = false,
+  'hide-back-to-host': hideBackToHostProp = false,
+}) => {
+  const hideAttribution = getBoolProp(hideAttributionProp);
+  const hideBack = getBoolProp(hideBackProp) || getBoolProp(hideBackToHostProp);
+  const displayDocumentType =
+    (documentType || title)?.replace(/[_\s]+/g, ' ')?.trim() || '';
+  const documentVariant = getDocumentVariant(displayDocumentType);
+  const direction = getTextDirection(dir);
+  const heroAsset = HERO_ASSETS[documentVariant];
+  const rootRef = useRef<HTMLDivElement>(null);
+  const navigationRef = useRef<HTMLElement | null>(null);
+  const guidelineItems: GuidelineItem[] = [
+    { key: 'good', label: t('document.instructions.guidelines.good') },
+    {
+      key: 'not-cropped',
+      label: t('document.instructions.guidelines.notCropped'),
+    },
+    {
+      key: 'not-blurry',
+      label: t('document.instructions.guidelines.notBlurry'),
+    },
+    {
+      key: 'not-reflective',
+      label: t('document.instructions.guidelines.notReflective'),
+    },
+  ];
+
+  const dispatchInstructionEvent = (
+    eventName:
+      | 'document-capture-instructions.cancelled'
+      | 'document-capture-instructions.capture'
+      | 'document-capture-instructions.skip',
+  ) => {
+    const rootNode = rootRef.current?.getRootNode();
+    const shadowHost = (rootNode as ShadowRoot)?.host as
+      | HTMLElement
+      | undefined;
+    const hostElement =
+      rootRef.current?.closest('document-capture-instructions-v2') ||
+      rootRef.current?.closest('document-capture-instructions') ||
+      shadowHost;
+
+    hostElement?.dispatchEvent(new CustomEvent(eventName));
+  };
+
+  const handleBack = () => {
+    dispatchInstructionEvent('document-capture-instructions.cancelled');
+  };
+
+  // Bridge the <smileid-navigation> element's back event to handleBack.
   useEffect(() => {
     const navigation = navigationRef.current;
     if (!navigation || hideBack) return undefined;
-    const onNavigationBack = () => onBack();
+    const onNavigationBack = () => handleBack();
     navigation.addEventListener('navigation.back', onNavigationBack);
     return () =>
       navigation.removeEventListener('navigation.back', onNavigationBack);
-  }, [hideBack, onBack]);
+  }, [hideBack]);
+
+  const handleStartCapture = () => {
+    dispatchInstructionEvent('document-capture-instructions.capture');
+  };
 
   return (
     <div ref={rootRef} class="doc-instr-root" dir={direction}>
@@ -395,7 +436,7 @@ function FrontInstructionsLayout({
           id="take-photo"
           class="doc-instr-start-btn"
           type="button"
-          onClick={onCapture}
+          onClick={handleStartCapture}
         >
           <span>{t('document.instructions.startCapture')}</span>
           <ArrowRightIcon />
@@ -408,187 +449,6 @@ function FrontInstructionsLayout({
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-// ── Back layout (flip-your-ID) ──────────────────────────────────────────────
-interface BackLayoutProps {
-  rootRef: Ref<HTMLDivElement>;
-  direction: 'ltr' | 'rtl' | 'auto';
-  displayDocumentType: string;
-  hideAttribution: boolean;
-  onCapture: () => void;
-  onSkip: () => void;
-}
-
-function BackInstructionsLayout({
-  rootRef,
-  direction,
-  displayDocumentType,
-  hideAttribution,
-  onCapture,
-  onSkip,
-}: BackLayoutProps) {
-  return (
-    <div
-      ref={rootRef}
-      class="doc-instr-root doc-instr-root--back"
-      dir={direction}
-    >
-      {/* ── Content: centered title + flip animation ─────────── */}
-      <div class="doc-instr-back-content">
-        <h1 class="doc-instr-flip-title">
-          <span class="doc-instr-flip-title-regular">
-            {t('document.instructions.flipTitlePrefix')}{' '}
-          </span>
-          <span class="doc-instr-flip-title-type">
-            {displayDocumentType || '<ID Type>'}
-          </span>
-        </h1>
-
-        <div class="doc-instr-flip-hero" aria-hidden="true">
-          <div class="doc-instr-flip-hero-inner">
-            <HeroLottie animationSrc={FLIP_LOTTIE_URL} fit="contain" />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Actions: Capture Back + Skip ─────────────────────── */}
-      <div class="doc-instr-footer">
-        <div class="doc-instr-back-actions">
-          <button
-            id="capture-back"
-            class="doc-instr-start-btn"
-            type="button"
-            onClick={onCapture}
-          >
-            <span>{t('document.instructions.captureBackButton')}</span>
-            <ArrowRightIcon />
-          </button>
-          <button
-            id="skip-back"
-            class="doc-instr-skip-btn"
-            type="button"
-            onClick={onSkip}
-          >
-            {t('document.instructions.skipButton')}
-          </button>
-        </div>
-
-        {!hideAttribution && (
-          <div class="doc-instr-attribution">
-            <PoweredBySmileIdLogo />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Props ────────────────────────────────────────────────────────────────────
-
-interface Props {
-  dir?: string;
-  'document-type'?: string;
-  'side-of-id'?: string;
-  title?: string;
-  'hide-attribution'?: string | boolean;
-  'hide-back'?: string | boolean;
-  'hide-back-to-host'?: string | boolean;
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
-
-const DocumentCaptureInstructions: FunctionComponent<Props> = ({
-  dir,
-  'document-type': documentType = '',
-  'side-of-id': sideOfId = 'Front',
-  title = '',
-  'hide-attribution': hideAttributionProp = false,
-  'hide-back': hideBackProp = false,
-  'hide-back-to-host': hideBackToHostProp = false,
-}) => {
-  const hideAttribution = getBoolProp(hideAttributionProp);
-  const hideBack = getBoolProp(hideBackProp) || getBoolProp(hideBackToHostProp);
-  const displayDocumentType =
-    (documentType || title)?.replace(/[_\s]+/g, ' ')?.trim() || '';
-  const documentVariant = getDocumentVariant(displayDocumentType);
-  const direction = getTextDirection(dir);
-  const heroAsset = HERO_ASSETS[documentVariant];
-  const isBack = String(sideOfId).toLowerCase() === 'back';
-  const rootRef = useRef<HTMLDivElement>(null);
-  const guidelineItems: GuidelineItem[] = [
-    { key: 'good', label: t('document.instructions.guidelines.good') },
-    {
-      key: 'not-cropped',
-      label: t('document.instructions.guidelines.notCropped'),
-    },
-    {
-      key: 'not-blurry',
-      label: t('document.instructions.guidelines.notBlurry'),
-    },
-    {
-      key: 'not-reflective',
-      label: t('document.instructions.guidelines.notReflective'),
-    },
-  ];
-
-  const dispatchInstructionEvent = (
-    eventName:
-      | 'document-capture-instructions.cancelled'
-      | 'document-capture-instructions.capture'
-      | 'document-capture-instructions.skip',
-  ) => {
-    const rootNode = rootRef.current?.getRootNode();
-    const shadowHost = (rootNode as ShadowRoot)?.host as
-      | HTMLElement
-      | undefined;
-    const hostElement =
-      rootRef.current?.closest('document-capture-instructions-v2') ||
-      rootRef.current?.closest('document-capture-instructions') ||
-      shadowHost;
-
-    hostElement?.dispatchEvent(new CustomEvent(eventName));
-  };
-
-  const handleBack = () => {
-    dispatchInstructionEvent('document-capture-instructions.cancelled');
-  };
-
-  const handleStartCapture = () => {
-    dispatchInstructionEvent('document-capture-instructions.capture');
-  };
-
-  const handleSkip = () => {
-    dispatchInstructionEvent('document-capture-instructions.skip');
-  };
-
-  return (
-    <>
-      {isBack ? (
-        <BackInstructionsLayout
-          rootRef={rootRef}
-          direction={direction}
-          displayDocumentType={displayDocumentType}
-          hideAttribution={hideAttribution}
-          onCapture={handleStartCapture}
-          onSkip={handleSkip}
-        />
-      ) : (
-        <FrontInstructionsLayout
-          rootRef={rootRef}
-          direction={direction}
-          displayDocumentType={displayDocumentType}
-          documentVariant={documentVariant}
-          heroAsset={heroAsset}
-          guidelineItems={guidelineItems}
-          hideBack={hideBack}
-          hideAttribution={hideAttribution}
-          onBack={handleBack}
-          onCapture={handleStartCapture}
-        />
-      )}
 
       {/* ── Scoped styles ────────────────────────────────────── */}
       <style>{`
@@ -928,7 +788,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           }
         }
       `}</style>
-    </>
+    </div>
   );
 };
 

@@ -109,6 +109,16 @@ const SYNTH_BRIDGE_MAX_FRAMES = 15;
 // consecutive frames — a transient blob must not trigger a capture.
 const MOBILE_REGION_STABILITY_FRAMES = 8;
 
+// --- Chroma-content gate (rolling average) ---
+// A white keyboard / blank paper is rectangular, card-aspect and fills its
+// rotated rect, so geometry alone can't reject it — but it has almost no
+// colour. The per-frame chroma reading over the selected candidate's bbox is
+// too noisy (AWB/exposure/contour jitter) to gate on directly, so we average
+// the last CHROMA_AVG_WINDOW frames and only act once CHROMA_MIN_SAMPLES have
+// accumulated (capture is still blocked by the stability counter meanwhile).
+const CHROMA_AVG_WINDOW = 6;
+const CHROMA_MIN_SAMPLES = 4;
+
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
 // RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
@@ -370,6 +380,10 @@ export function useCardDetection(
   // Consecutive frames a mobile content-region candidate has qualified (Fix 3).
   // Gates the mobile region fallback so a transient blob can't trigger capture.
   const regionStabilityRef = useRef(0);
+  // Rolling window of the selected candidate's mean bbox chroma (last
+  // CHROMA_AVG_WINDOW frames). Smooths the noisy per-frame reading so the
+  // chroma-content gate acts on a stable average. Cleared when no candidate.
+  const chromaWindowRef = useRef<number[]>([]);
   // Frames since a genuine (non-synthetic) 4-corner card last passed
   // validation. Gates the desktop id-card synthetic fallback so it only
   // bridges brief dropouts of a card that WAS being detected, rather than
@@ -1105,7 +1119,6 @@ export function useCardDetection(
           let lastCandidateAspect = 0;
           // Mean chroma magnitude of the largest candidate's bbox (debug); -1
           // when not measured (gate off or chroma unavailable).
-          let lastCandidateChroma = -1;
           let bestContour: any = null;
           // True when bestContour is the synthesized book-doc fallback rect.
           // Its bbox covers inner content (photo/text/MRZ), not the full page,
@@ -1259,39 +1272,14 @@ export function useCardDetection(
                 const minFillRatio =
                   settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO;
 
-                // --- Level 2: chroma-content gate ---
-                // A white/silver keyboard (or blank paper) is rectangular,
-                // card-aspect and fills its rotated rect, so geometry alone
-                // can't reject it — but it has almost no colour. Measure the
-                // mean chroma magnitude over THIS candidate's bbox (not the
-                // whole crop, so coloured background can't mask it) and reject
-                // near-monochrome winners. Only active when chroma fusion built
-                // chromaMag; tunable + toggleable.
-                let chromaOk = true;
-                if (
-                  chromaMag &&
-                  settingsRef.current.chromaContentGate === true
-                ) {
-                  const cx = Math.max(0, bRect.x);
-                  const cy = Math.max(0, bRect.y);
-                  const cw = Math.min(chromaMag.cols - cx, bRect.width);
-                  const ch = Math.min(chromaMag.rows - cy, bRect.height);
-                  let candChroma = 0;
-                  if (cw > 0 && ch > 0) {
-                    const chRoi = chromaMag.roi(new cv.Rect(cx, cy, cw, ch));
-                    [candChroma] = cv.mean(chRoi);
-                    chRoi.delete();
-                  }
-                  if (area > maxArea) lastCandidateChroma = candChroma;
-                  chromaOk =
-                    candChroma >= (settingsRef.current.minChromaContent ?? 8);
-                }
-
+                // Chroma-content gate is applied AFTER selection, on a rolling
+                // average of the chosen candidate's chroma (see below) — the
+                // per-frame value is too noisy (AWB/exposure/contour jitter) to
+                // gate on directly. Geometry selects the candidate here.
                 if (
                   fillRatio > minFillRatio &&
                   anglesOk &&
                   aspectOk &&
-                  chromaOk &&
                   !roiWallHug &&
                   area > maxArea
                 ) {
@@ -1324,11 +1312,7 @@ export function useCardDetection(
             cnt.delete();
           }
 
-          mergeDebugInfo({
-            aspect: lastCandidateAspect.toFixed(2),
-            chroma:
-              lastCandidateChroma < 0 ? '—' : Math.round(lastCandidateChroma),
-          });
+          mergeDebugInfo({ aspect: lastCandidateAspect.toFixed(2) });
 
           // --- Desktop overflow detection ---
           // A card pushed too close overflows the ROI: its outer edges leave
@@ -1431,32 +1415,14 @@ export function useCardDetection(
                   aspectTol;
                 const minArea =
                   guideWidth * guideHeight * MIN_CONTOUR_AREA_PERCENT;
-                // Chroma-content gate on the synthetic/region path too —
-                // otherwise a near-monochrome object (white keyboard) that
-                // never forms a clean quad is synthesized and captured,
-                // bypassing the real-contour chroma gate. Measured over the
-                // detected content bbox; only active when chroma fusion built
-                // chromaMag (mobile).
-                let synthChromaOk = true;
-                if (
-                  chromaMag &&
-                  settingsRef.current.chromaContentGate === true
-                ) {
-                  const sx = Math.max(0, combinedMinX);
-                  const sy = Math.max(0, combinedMinY);
-                  const sw = Math.min(chromaMag.cols - sx, bw);
-                  const sh = Math.min(chromaMag.rows - sy, bh);
-                  let synthChroma = 0;
-                  if (sw > 0 && sh > 0) {
-                    const sRoi = chromaMag.roi(new cv.Rect(sx, sy, sw, sh));
-                    [synthChroma] = cv.mean(sRoi);
-                    sRoi.delete();
-                  }
-                  mergeDebugInfo({ chroma: Math.round(synthChroma) });
-                  synthChromaOk =
-                    synthChroma >= (settingsRef.current.minChromaContent ?? 13);
-                }
-                if (aspectOk && bw * bh > minArea && synthChromaOk) {
+                // The chroma-content gate is NOT applied here — selection on
+                // both the real and synthetic paths is geometry-only. The
+                // synthesized contour is gated downstream on the rolling chroma
+                // average alongside the real-contour winner (see below), so a
+                // near-monochrome object (white keyboard) that only ever forms
+                // a synthetic rect is still rejected, without double-gating on
+                // the noisy per-frame value.
+                if (aspectOk && bw * bh > minArea) {
                   // For id-card synthetics, the combined bbox covers only the
                   // inner printed content (text, photo, header band). Real cards
                   // have a ~10-15% margin from card edge to first element, so
@@ -1604,6 +1570,49 @@ export function useCardDetection(
             return;
           }
 
+          // --- Chroma-content gate (rolling average, post-selection) ---
+          // Geometry just selected the best candidate (real quad or synthetic
+          // rect). A white keyboard / blank paper passes every shape gate, so
+          // reject near-monochrome winners by colour content. The per-frame
+          // chroma is noisy, so we average it over the candidate's bbox across
+          // the last few frames and only gate once the window has filled
+          // (capture is still blocked by the stability counter until then).
+          // Only active when chroma fusion built chromaMag (mobile) and on.
+          if (
+            bestContour &&
+            chromaMag &&
+            settingsRef.current.chromaContentGate === true
+          ) {
+            const cRect = cv.boundingRect(bestContour);
+            const cx = Math.max(0, cRect.x);
+            const cy = Math.max(0, cRect.y);
+            const cw = Math.min(chromaMag.cols - cx, cRect.width);
+            const ch = Math.min(chromaMag.rows - cy, cRect.height);
+            let candChroma = 0;
+            if (cw > 0 && ch > 0) {
+              const chRoi = chromaMag.roi(new cv.Rect(cx, cy, cw, ch));
+              [candChroma] = cv.mean(chRoi);
+              chRoi.delete();
+            }
+            const win = chromaWindowRef.current;
+            win.push(candChroma);
+            if (win.length > CHROMA_AVG_WINDOW) win.shift();
+            const avgChroma =
+              win.reduce((sum, v) => sum + v, 0) / win.length;
+            mergeDebugInfo({ chroma: Math.round(avgChroma) });
+            if (
+              win.length >= CHROMA_MIN_SAMPLES &&
+              avgChroma < (settingsRef.current.minChromaContent ?? 13)
+            ) {
+              setFeedback('Position your document in the frame');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+              stabilityRef.current.count = 0;
+              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              bestContour.delete();
+              return;
+            }
+          }
+
           if (bestContour) {
             // Reset consecutive miss counter on successful detection
             if (isDiscovery) discoveryRef.current.consecutiveMisses = 0;
@@ -1747,6 +1756,9 @@ export function useCardDetection(
             setDebugPath(null);
             // No card inside the guide → re-enable off-guide scanning.
             inGuideDetectedRef.current = false;
+            // No candidate this frame — drop the chroma history so a stale
+            // average can't carry over to the next object entering the frame.
+            chromaWindowRef.current = [];
             // During discovery, no contour found — keep waiting
             if (isDiscovery) {
               // A wall-hug-rejected card means the user is too close, not

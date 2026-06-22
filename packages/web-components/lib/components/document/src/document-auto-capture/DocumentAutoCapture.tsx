@@ -1030,7 +1030,10 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           )}
         </div>
 
-        {showDebug && (
+        {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
+            TuningPanel import) is dead-code-eliminated from production bundles;
+            showDebug then applies the runtime ?debug opt-in in dev + preview. */}
+        {__SMILE_DEBUG__ && showDebug && (
           <TuningPanel
             settings={settings}
             updateSetting={updateSetting}
@@ -1304,7 +1307,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       </div>
 
       {/* Tuning panel (debug mode only) */}
-      {showDebug && (
+      {/* Build-time gate → tree-shaken in production (see note above). */}
+      {__SMILE_DEBUG__ && showDebug && (
         <TuningPanel
           settings={settings}
           updateSetting={updateSetting}

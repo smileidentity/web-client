@@ -11,10 +11,9 @@
 //
 // Result: `?debug` toggles the tooling in dev + preview, and is inert in prod.
 //
-// `declare` keeps TypeScript happy; the `typeof` guard avoids a ReferenceError
-// under any bundler/test runner that doesn't inject the define (→ disabled).
-declare const __SMILE_DEBUG__: boolean | undefined;
-
+// `__SMILE_DEBUG__` is declared globally (lib/types.d.ts); the `typeof` guard
+// avoids a ReferenceError under any bundler/test runner that doesn't inject the
+// define (→ disabled).
 export const isDebugEnabled = (): boolean => {
   if (typeof __SMILE_DEBUG__ === 'undefined' || __SMILE_DEBUG__ !== true) {
     return false;

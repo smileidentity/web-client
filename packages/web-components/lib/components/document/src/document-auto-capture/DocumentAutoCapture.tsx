@@ -8,6 +8,7 @@ import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
+import { isDebugEnabled } from './utils/debug';
 import { theme } from './theme';
 
 import '../../../navigation/src';
@@ -390,7 +391,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug = true;
+  // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
+  // (see utils/debug.ts / __SMILE_DEBUG__); production builds strip it.
+  const showDebug = isDebugEnabled();
 
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {

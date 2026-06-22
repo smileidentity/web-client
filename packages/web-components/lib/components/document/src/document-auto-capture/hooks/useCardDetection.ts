@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { isDebugEnabled } from '../utils/debug';
 
 declare const cv: any;
 
-// Internal debug flag: only emit verbose detection telemetry when the page
-// URL contains `?debug` (the same switch that exposes the tuning panel).
-// Evaluated once at module load to avoid recomputing in the hot loop.
-const IS_DEBUG_MODE =
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).has('debug');
+// Internal debug flag: emit verbose detection telemetry only in dev + preview
+// builds (compiled-in via __SMILE_DEBUG__; off in production). Same switch that
+// gates the tuning panel. Evaluated once at module load.
+const IS_DEBUG_MODE = isDebugEnabled();
 
 // Helper to safely release a list of OpenCV Mats. Mats not yet allocated or
 // already deleted are skipped. Used in `finally` blocks to avoid a wall of

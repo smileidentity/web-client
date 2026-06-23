@@ -131,7 +131,11 @@ describe('document verification', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    // The document submission UI now shows the completion state in-place
+    // (image + tick) rather than switching to the legacy #complete-screen.
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 });
 
@@ -278,6 +282,10 @@ describe('legacy support - preselected country / id_types', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    // The document submission UI now shows the completion state in-place
+    // (image + tick) rather than switching to the legacy #complete-screen.
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 });

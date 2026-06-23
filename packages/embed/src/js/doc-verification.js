@@ -20,6 +20,7 @@ import {
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import { createDocSubmission } from './doc-submission.js';
 
 initIframeSentry('doc-verification');
 
@@ -59,6 +60,14 @@ window.Sentry = Sentry;
   );
   const UploadFailureScreen = document.querySelector('#upload-failure-screen');
   const CompleteScreen = document.querySelector('#complete-screen');
+  const DocSubmission = document.querySelector('#doc-submission');
+
+  const { showDocSubmission, setDocSubmissionState } = createDocSubmission({
+    docSubmission: DocSubmission,
+    setActiveScreen,
+    completeScreen: CompleteScreen,
+    uploadFailureScreen: UploadFailureScreen,
+  });
 
   const CloseIframeButtons = document.querySelectorAll('.close-iframe');
   const RetryUploadButton = document.querySelector('#retry-upload');
@@ -693,6 +702,7 @@ window.Sentry = Sentry;
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
+      showDocSubmission(config, images);
       setActiveScreen(UploadProgressScreen);
       handleFormSubmit(event);
     },
@@ -714,6 +724,11 @@ window.Sentry = Sentry;
     },
     false,
   );
+
+  // Close affordance on the submission screen (mirrors the iframe close).
+  window.addEventListener('document-capture-submission.close', () => {
+    closeWindow(true);
+  });
 
   RetryUploadButton.addEventListener(
     'click',
@@ -891,8 +906,12 @@ window.Sentry = Sentry;
     });
 
     request.upload.addEventListener('error', function (e) {
+      // Errors keep the legacy failure screen so the user retains the
+      // "Retry" affordance (#retry-upload); only success uses the new
+      // in-place submission card. Report rather than throw — a throw inside
+      // this listener is unhandled (no caller to catch it).
       setActiveScreen(UploadFailureScreen);
-      throw new Error('uploadZip failed', { cause: e });
+      console.error('SmileIdentity - uploadZip failed', e);
     });
 
     request.onreadystatechange = function () {
@@ -900,16 +919,16 @@ window.Sentry = Sentry;
         request.readyState === XMLHttpRequest.DONE &&
         request.status === 200
       ) {
-        setActiveScreen(CompleteScreen);
+        setDocSubmissionState('success');
         handleSuccess();
-        window.setTimeout(closeWindow, 2000);
+        window.setTimeout(closeWindow, 2500);
       }
       if (
         request.readyState === XMLHttpRequest.DONE &&
         request.status !== 200
       ) {
         setActiveScreen(UploadFailureScreen);
-        throw new Error('uploadZip failed', { cause: request });
+        console.error('SmileIdentity - uploadZip failed', request.status);
       }
     };
 

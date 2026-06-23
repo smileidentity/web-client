@@ -4,107 +4,67 @@ import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
 import { getDirection, t } from '../../../../domain/localisation';
+// Registers the shared <smileid-navigation> custom element (back button,
+// localised label, RTL arrow flip) used across the SDK's capture screens.
+import '../../../navigation/src';
+import idCardLottie from '../assets/lottie/id-card.lottie?inline';
+import passportLottie from '../assets/lottie/passport.lottie?inline';
+import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
+import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
+import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
+import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
+import idCardNotReflective from '../assets/icons/guidelines/id-card/not-reflective.svg?inline';
+import passportGood from '../assets/icons/guidelines/passport/good.svg?inline';
+import passportNotCropped from '../assets/icons/guidelines/passport/not-cropped.svg?inline';
+import passportNotBlurry from '../assets/icons/guidelines/passport/not-blurry.svg?inline';
+import passportNotReflective from '../assets/icons/guidelines/passport/not-reflective.svg?inline';
+import greenbookGood from '../assets/icons/guidelines/greenbook/good.svg?inline';
+import greenbookNotCropped from '../assets/icons/guidelines/greenbook/not-cropped.svg?inline';
+import greenbookNotBlurry from '../assets/icons/guidelines/greenbook/not-blurry.svg?inline';
+import greenbookNotReflective from '../assets/icons/guidelines/greenbook/not-reflective.svg?inline';
 
 // ── Visual assets ────────────────────────────────────────────────────────────
-const HERO_ID_CARD_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of ID.lottie',
-  import.meta.url,
-).href;
-
-const HERO_PASSPORT_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of passport 2.lottie',
-  import.meta.url,
-).href;
-
-const HERO_GREENBOOK_LOTTIE_URL = new URL(
-  '../assets/lottie/taking photo of green book passport.lottie',
-  import.meta.url,
-).href;
-
-const HERO_IMAGE_FALLBACK_URL =
-  'https://www.figma.com/api/mcp/asset/be898e16-cf3f-4c91-86ed-fbd2aa436e49';
+const HERO_ID_CARD_LOTTIE_URL = idCardLottie;
+const HERO_PASSPORT_LOTTIE_URL = passportLottie;
+const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 
 interface HeroAssetConfig {
   animationSrc: string;
-  fallbackAlt: string;
-  fallbackSrc: string;
 }
 
 const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
   'id-card': {
     animationSrc: HERO_ID_CARD_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing an ID card on a desk',
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
   passport: {
     animationSrc: HERO_PASSPORT_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing a passport on a desk',
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
   greenbook: {
     animationSrc: HERO_GREENBOOK_LOTTIE_URL,
-    fallbackAlt: 'Phone capturing a green book passport on a desk',
-    fallbackSrc: HERO_IMAGE_FALLBACK_URL,
   },
 };
 
 const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
   'id-card': {
-    good: new URL(
-      '../assets/icons/guidelines/id-card/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/id-card/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/id-card/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/id-card/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: idCardGood,
+    'not-cropped': idCardNotCropped,
+    'not-blurry': idCardNotBlurry,
+    'not-reflective': idCardNotReflective,
   },
   passport: {
-    good: new URL(
-      '../assets/icons/guidelines/passport/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/passport/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/passport/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/passport/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: passportGood,
+    'not-cropped': passportNotCropped,
+    'not-blurry': passportNotBlurry,
+    'not-reflective': passportNotReflective,
   },
   greenbook: {
-    good: new URL(
-      '../assets/icons/guidelines/greenbook/good.svg',
-      import.meta.url,
-    ).href,
-    'not-cropped': new URL(
-      '../assets/icons/guidelines/greenbook/not-cropped.svg',
-      import.meta.url,
-    ).href,
-    'not-blurry': new URL(
-      '../assets/icons/guidelines/greenbook/not-blurry.svg',
-      import.meta.url,
-    ).href,
-    'not-reflective': new URL(
-      '../assets/icons/guidelines/greenbook/not-reflective.svg',
-      import.meta.url,
-    ).href,
+    good: greenbookGood,
+    'not-cropped': greenbookNotCropped,
+    'not-blurry': greenbookNotBlurry,
+    'not-reflective': greenbookNotReflective,
   },
 };
 
@@ -135,15 +95,9 @@ function getTextDirection(dir?: string): 'ltr' | 'rtl' | 'auto' {
 
 interface HeroLottieProps {
   animationSrc: string;
-  fallbackSrc: string;
-  fallbackAlt: string;
 }
 
-function HeroLottie({
-  animationSrc,
-  fallbackSrc,
-  fallbackAlt,
-}: HeroLottieProps) {
+function HeroLottie({ animationSrc }: HeroLottieProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -170,33 +124,34 @@ function HeroLottie({
       src: animationSrc,
     });
 
-    animation.addEventListener('loadError', () => {
-      if (isMounted) {
-        setHasError(true);
+    // Tear the animation down before unmounting the canvas so dotLottie
+    // stops trying to render into a detached node (which would otherwise
+    // log render errors until the component itself unmounts).
+    const handleError = () => {
+      if (!isMounted) return;
+      try {
+        animation.destroy();
+      } catch {
+        /* destroy may throw if already torn down; ignore */
       }
-    });
+      setHasError(true);
+    };
 
-    animation.addEventListener('renderError', () => {
-      if (isMounted) {
-        setHasError(true);
-      }
-    });
+    animation.addEventListener('loadError', handleError);
+    animation.addEventListener('renderError', handleError);
 
     return () => {
       isMounted = false;
-      animation.destroy();
+      try {
+        animation.destroy();
+      } catch {
+        /* may already be destroyed by handleError */
+      }
     };
   }, [animationSrc]);
 
   return (
     <div class="doc-instr-hero-media">
-      <img
-        class="doc-instr-hero-img"
-        src={fallbackSrc}
-        alt={fallbackAlt}
-        loading="eager"
-        decoding="async"
-      />
       {!hasError && (
         <canvas
           ref={canvasRef}
@@ -209,27 +164,6 @@ function HeroLottie({
 }
 
 // ── Inline SVG helpers ───────────────────────────────────────────────────────
-
-function BackArrowIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M19 12H5M5 12L12 19M5 12L12 5"
-        stroke="white"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  );
-}
 
 function ArrowRightIcon() {
   return (
@@ -383,6 +317,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
   const rootRef = useRef<HTMLDivElement>(null);
+  const navigationRef = useRef<HTMLElement | null>(null);
   const guidelineItems: GuidelineItem[] = [
     { key: 'good', label: t('document.instructions.guidelines.good') },
     {
@@ -420,22 +355,35 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
     dispatchInstructionEvent('document-capture-instructions.cancelled');
   };
 
+  // Bridge the <smileid-navigation> element's back event to handleBack.
+  useEffect(() => {
+    const navigation = navigationRef.current;
+    if (!navigation || hideBack) return undefined;
+    const onNavigationBack = () => handleBack();
+    navigation.addEventListener('navigation.back', onNavigationBack);
+    return () =>
+      navigation.removeEventListener('navigation.back', onNavigationBack);
+  }, [hideBack]);
+
   const handleStartCapture = () => {
     dispatchInstructionEvent('document-capture-instructions.capture');
   };
 
   return (
     <div ref={rootRef} class="doc-instr-root" dir={direction}>
-      {/* ── Back button ──────────────────────────────────────── */}
+      {/* ── Back button (shared <smileid-navigation>, back only) ─ */}
       {!hideBack && (
-        <button
-          class="back-button"
-          type="button"
-          aria-label="Go back"
-          onClick={handleBack}
-        >
-          <BackArrowIcon />
-        </button>
+        // @ts-expect-error preact-custom-element lacks ref/attr types
+        <smileid-navigation
+          ref={navigationRef}
+          hide-close=""
+          class="back-nav"
+          style={{
+            '--smileid-navigation-button-bg': '#2d2b2a',
+            '--smileid-navigation-icon-color': '#ffffff',
+            '--smileid-navigation-focus-color': '#151f72',
+          }}
+        />
       )}
 
       {/* ── Scrollable content ───────────────────────────────── */}
@@ -454,11 +402,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 
         {/* ── Hero illustration ─────────────────────────────── */}
         <div class="doc-instr-hero-card" aria-hidden="true">
-          <HeroLottie
-            animationSrc={heroAsset.animationSrc}
-            fallbackSrc={heroAsset.fallbackSrc}
-            fallbackAlt={heroAsset.fallbackAlt}
-          />
+          <HeroLottie animationSrc={heroAsset.animationSrc} />
         </div>
 
         {/* ── Capture guidelines ────────────────────────────── */}
@@ -534,32 +478,13 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           overflow: hidden;
         }
 
-        /* ── Back button ─────────────────────────────────────── */
-        .back-button {
+        /* ── Back button (positions the shared <smileid-navigation>;
+              the circle, hover and focus styling live in its shadow) ── */
+        .back-nav {
           position: absolute;
           top: 24px;
           left: 20px;
           z-index: 10;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #2d2b2a;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          flex-shrink: 0;
-          transition: opacity 0.15s ease;
-        }
-
-        .back-button:hover {
-          opacity: 0.85;
-        }
-
-        .back-button:focus-visible {
-          outline: 2px solid #151f72;
-          outline-offset: 3px;
         }
 
         /* ── Scrollable area ──────────────────────────────────── */
@@ -606,14 +531,6 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .doc-instr-hero-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          border-radius: inherit;
         }
 
         .doc-instr-hero-media {
@@ -751,7 +668,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             padding-right: 32px;
           }
 
-          .back-button {
+          .back-nav {
             top: 28px;
             left: 28px;
           }

@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import JSZip from 'jszip';
-import validate from 'validate.js';
+import validate from '@smileid/web-components/validate';
 import '@smileid/web-components/end-user-consent';
 import '@smileid/web-components/smart-camera-web';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
+import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 import {
   hasIdInfo,
@@ -25,6 +26,9 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import initIframeSentry from './sentry-iframe-init.js';
+
+initIframeSentry('biometric-kyc');
 
 // Expose Sentry on the iframe window so the standalone `smart-camera-web`
 // web component (which has no @sentry/browser dep of its own) can report
@@ -320,10 +324,19 @@ window.Sentry = Sentry;
   }
 
   function initializeSession(generalConstraints, partnerConstraints) {
-    SmartCameraWeb.setAttribute('allow-agent-mode', config.allow_agent_mode);
+    SmartCameraWeb.setAttribute(
+      'allow-agent-mode',
+      config.use_strict_mode ? false : config.allow_agent_mode,
+    );
     if (config.allow_legacy_selfie_fallback) {
       SmartCameraWeb.setAttribute('allow-legacy-selfie-fallback', true);
     }
+    if (config.use_strict_mode) {
+      SmartCameraWeb.setAttribute('use-strict-mode', 'true');
+    }
+    installActiveLivenessTimeout(SmartCameraWeb, {
+      enabled: !!config.use_strict_mode,
+    });
     if (hasThemeColor()) {
       SmartCameraWeb.setAttribute(
         'theme-color',

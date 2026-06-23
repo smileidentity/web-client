@@ -1,6 +1,23 @@
-declare module 'validate.js' {
-  const validate: any;
-  export default validate;
+// Vite resolves SVG imports to URL strings by default.
+declare module '*.svg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.svg?raw' {
+  const src: string;
+  export default src;
+}
+
+// .lottie animation packages — imported as URLs (or inlined data URLs) via Vite.
+declare module '*.lottie' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.lottie?url' {
+  const src: string;
+  export default src;
 }
 
 declare module 'signature_pad' {
@@ -48,6 +65,8 @@ declare namespace JSX {
     'smileid-combobox-listbox': any;
     'smileid-combobox-option': any;
     'end-user-consent': any;
+    'enhanced-smart-selfie-consent': any;
+    'enhanced-smart-selfie-submission': any;
     'totp-consent': any;
     'signature-pad': any;
     'smart-camera-web': any;

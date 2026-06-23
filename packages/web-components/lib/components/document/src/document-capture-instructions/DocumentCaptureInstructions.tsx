@@ -10,6 +10,7 @@ import '../../../navigation/src';
 import idCardLottie from '../assets/lottie/id-card.lottie?inline';
 import passportLottie from '../assets/lottie/passport.lottie?inline';
 import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
+import idCardFlipLottie from '../assets/lottie/id-card-flip.lottie?inline';
 import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
 import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
 import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
@@ -27,6 +28,9 @@ import greenbookNotReflective from '../assets/icons/guidelines/greenbook/not-ref
 const HERO_ID_CARD_LOTTIE_URL = idCardLottie;
 const HERO_PASSPORT_LOTTIE_URL = passportLottie;
 const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
+
+// Card-flip animation shown on the back-of-ID instruction screen.
+const FLIP_LOTTIE_URL = idCardFlipLottie;
 
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
@@ -303,6 +307,7 @@ interface Props {
 const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   dir,
   'document-type': documentType = '',
+  'side-of-id': sideOfId = 'Front',
   title = '',
   'hide-attribution': hideAttributionProp = false,
   'hide-back': hideBackProp = false,
@@ -369,89 +374,14 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
     dispatchInstructionEvent('document-capture-instructions.capture');
   };
 
-  return (
-    <div ref={rootRef} class="doc-instr-root" dir={direction}>
-      {/* ── Back button (shared <smileid-navigation>, back only) ─ */}
-      {!hideBack && (
-        // @ts-expect-error preact-custom-element lacks ref/attr types
-        <smileid-navigation
-          ref={navigationRef}
-          hide-close=""
-          class="back-nav"
-          style={{
-            '--smileid-navigation-button-bg': '#2d2b2a',
-            '--smileid-navigation-icon-color': '#ffffff',
-            '--smileid-navigation-focus-color': '#151f72',
-          }}
-        />
-      )}
+  const handleSkip = () => {
+    dispatchInstructionEvent('document-capture-instructions.skip');
+  };
 
-      {/* ── Scrollable content ───────────────────────────────── */}
-      <div class="doc-instr-scroll">
-        {/* ── Title ─────────────────────────────────────────── */}
-        <div class="doc-instr-title-block">
-          <h1 class="doc-instr-title">
-            <span class="doc-instr-title-regular">
-              {t('document.instructions.captureTitlePrefix')}{' '}
-            </span>
-            <span class="doc-instr-title-type">
-              {displayDocumentType || '<ID Type>'}
-            </span>
-          </h1>
-        </div>
+  const isBack = String(sideOfId).toLowerCase() === 'back';
 
-        {/* ── Hero illustration ─────────────────────────────── */}
-        <div class="doc-instr-hero-card" aria-hidden="true">
-          <HeroLottie animationSrc={heroAsset.animationSrc} />
-        </div>
-
-        {/* ── Capture guidelines ────────────────────────────── */}
-        <div class="doc-instr-guidelines">
-          <div class="doc-instr-guidelines-header">
-            <GuidelinesIcon />
-            <span class="doc-instr-guidelines-label">
-              {t('document.instructions.captureGuidelines')}
-            </span>
-          </div>
-
-          <div class="doc-instr-guidelines-grid">
-            {guidelineItems.map((item) => (
-              <div class="doc-instr-guide-item" key={item.label}>
-                <div class="doc-instr-guide-thumb-wrap">
-                  <GuidelineThumbnail
-                    src={GUIDELINE_ICONS[documentVariant][item.key]}
-                    label={item.label}
-                  />
-                </div>
-                <p class="doc-instr-guide-caption">{item.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── CTA button ───────────────────────────────────────── */}
-      <div class="doc-instr-footer">
-        <button
-          id="take-photo"
-          class="doc-instr-start-btn"
-          type="button"
-          onClick={handleStartCapture}
-        >
-          <span>{t('document.instructions.startCapture')}</span>
-          <ArrowRightIcon />
-        </button>
-
-        {/* ── Attribution ───────────────────────────────────── */}
-        {!hideAttribution && (
-          <div class="doc-instr-attribution">
-            <PoweredBySmileIdLogo />
-          </div>
-        )}
-      </div>
-
-      {/* ── Scoped styles ────────────────────────────────────── */}
-      <style>{`
+  // Scoped styles shared by the front and back (flip) layouts.
+  const STYLES = `
         *,
         *::before,
         *::after {
@@ -787,7 +717,151 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             font-size: 18px;
           }
         }
-      `}</style>
+      `;
+
+  if (isBack) {
+    return (
+      <div
+        ref={rootRef}
+        class="doc-instr-root doc-instr-root--back"
+        dir={direction}
+      >
+        {/* ── Content: centered title + flip animation ─────────── */}
+        <div class="doc-instr-back-content">
+          <h1 class="doc-instr-flip-title">
+            <span class="doc-instr-flip-title-regular">
+              {t('document.instructions.flipTitlePrefix')}{' '}
+            </span>
+            <span class="doc-instr-flip-title-type">
+              {displayDocumentType || '<ID Type>'}
+            </span>
+          </h1>
+
+          <div class="doc-instr-flip-hero" aria-hidden="true">
+            <div class="doc-instr-flip-hero-inner">
+              <HeroLottie animationSrc={FLIP_LOTTIE_URL} fit="contain" />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Actions: Capture Back + Skip ─────────────────────── */}
+        <div class="doc-instr-footer">
+          <div class="doc-instr-back-actions">
+            <button
+              id="capture-back"
+              class="doc-instr-start-btn"
+              type="button"
+              onClick={handleStartCapture}
+            >
+              <span>{t('document.instructions.captureBackButton')}</span>
+              <ArrowRightIcon />
+            </button>
+            <button
+              id="skip-back"
+              class="doc-instr-skip-btn"
+              type="button"
+              onClick={handleSkip}
+            >
+              {t('document.instructions.skipButton')}
+            </button>
+          </div>
+
+          {!hideAttribution && (
+            <div class="doc-instr-attribution">
+              <PoweredBySmileIdLogo />
+            </div>
+          )}
+        </div>
+
+        {/* ── Scoped styles (shared with front layout) ─────────── */}
+        <style>{STYLES}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={rootRef} class="doc-instr-root" dir={direction}>
+      {/* ── Back button (shared <smileid-navigation>, back only) ─ */}
+      {!hideBack && (
+        // @ts-expect-error preact-custom-element lacks ref/attr types
+        <smileid-navigation
+          ref={navigationRef}
+          hide-close=""
+          class="back-nav"
+          style={{
+            '--smileid-navigation-button-bg': '#2d2b2a',
+            '--smileid-navigation-icon-color': '#ffffff',
+            '--smileid-navigation-focus-color': '#151f72',
+          }}
+        />
+      )}
+
+      {/* ── Scrollable content ───────────────────────────────── */}
+      <div class="doc-instr-scroll">
+        {/* ── Title ─────────────────────────────────────────── */}
+        <div class="doc-instr-title-block">
+          <h1 class="doc-instr-title">
+            <span class="doc-instr-title-regular">
+              {t('document.instructions.captureTitlePrefix')}{' '}
+            </span>
+            <span class="doc-instr-title-type">
+              {displayDocumentType || '<ID Type>'}
+            </span>
+          </h1>
+        </div>
+
+        {/* ── Hero illustration ─────────────────────────────── */}
+        <div class="doc-instr-hero-card" aria-hidden="true">
+          <HeroLottie animationSrc={heroAsset.animationSrc} />
+        </div>
+
+        {/* ── Capture guidelines ────────────────────────────── */}
+        <div class="doc-instr-guidelines">
+          <div class="doc-instr-guidelines-header">
+            <GuidelinesIcon />
+            <span class="doc-instr-guidelines-label">
+              {t('document.instructions.captureGuidelines')}
+            </span>
+          </div>
+
+          <div class="doc-instr-guidelines-grid">
+            {guidelineItems.map((item) => (
+              <div class="doc-instr-guide-item" key={item.label}>
+                <div class="doc-instr-guide-thumb-wrap">
+                  <GuidelineThumbnail
+                    src={GUIDELINE_ICONS[documentVariant][item.key]}
+                    label={item.label}
+                  />
+                </div>
+                <p class="doc-instr-guide-caption">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA button ───────────────────────────────────────── */}
+      <div class="doc-instr-footer">
+        <button
+          id="take-photo"
+          class="doc-instr-start-btn"
+          type="button"
+          onClick={handleStartCapture}
+        >
+          <span>{t('document.instructions.startCapture')}</span>
+          <ArrowRightIcon />
+        </button>
+
+        {/* ── Attribution ───────────────────────────────────── */}
+        {!hideAttribution && (
+          <div class="doc-instr-attribution">
+            <PoweredBySmileIdLogo />
+          </div>
+        )}
+      </div>
+
+      {/* ── Scoped styles (shared with the back layout) ─────── */}
+      <style>{STYLES}</style>
     </div>
   );
 };

@@ -8,3 +8,4 @@ node_modules
 
 # sst
 .sst
+sst-env.d.ts

@@ -24,9 +24,18 @@ document.querySelector('#app').innerHTML = `
         <option value="false" selected>Legacy Selfie Fallback: Disabled</option>
         <option value="true">Legacy Selfie Fallback: Enabled</option>
       </select>
+      <select id="autoCaptureEnabled">
+        <option value="false">Auto Capture: Disabled (legacy capture)</option>
+        <option value="true" selected>Auto Capture: Enabled</option>
+      </select>
+      <select id="autoCapture">
+        <option value="autoCapture" selected>Auto Capture: autoCapture</option>
+        <option value="autoCaptureOnly">Auto Capture: autoCaptureOnly</option>
+        <option value="manualCaptureOnly">Auto Capture: manualCaptureOnly</option>
+      </select>
       <select id="newInstructions">
-        <option value="false" selected>New Document Instructions: Disabled</option>
-        <option value="true">New Document Instructions: Enabled</option>
+        <option value="false">New Document Instructions: Disabled</option>
+        <option value="true" selected>New Document Instructions: Enabled</option>
       </select>
       <button data-type="primary" id="submitForm">
         Verify with Smile Identity

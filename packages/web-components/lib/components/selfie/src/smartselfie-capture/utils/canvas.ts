@@ -1,8 +1,8 @@
-import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision';
-
 /**
  * Create a cropped square canvas from video for face detection
  */
+import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision';
+
 export const createCroppedVideoFrame = (
   videoElement: HTMLVideoElement,
 ): HTMLCanvasElement | null => {
@@ -51,16 +51,14 @@ export const drawFaceMesh = (
   const canvasHeight = canvas.height;
 
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  const drawingUtils = new DrawingUtils(ctx);
 
-  // use this if scaling is needed
-  // const scaleFactor = Math.sqrt(canvasWidth * canvasHeight) / 500;
+  const drawingUtils = new DrawingUtils(ctx);
 
   landmarks.forEach((landmark) => {
     if (!landmark || landmark.length === 0) return;
 
     const outlineColor = 'rgba(162, 155, 254,0.4)';
-    const lineWidth = 2; // Math.max(1, scaleFactor * 2);
+    const lineWidth = 2;
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.lineWidth = lineWidth;
     ctx.lineCap = 'round';

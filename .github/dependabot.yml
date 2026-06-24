@@ -4,16 +4,47 @@ updates:
     open-pull-requests-limit: 0
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
       day: wednesday
       time: '11:00'
     pull-request-branch-name:
       separator: '-'
-  - package-ecosystem: github-actions
+
+  - package-ecosystem: npm
     open-pull-requests-limit: 0
+    directory: /packages/embed
+    schedule:
+      interval: weekly
+      day: wednesday
+      time: '11:00'
+    pull-request-branch-name:
+      separator: '-'
+
+  - package-ecosystem: npm
+    open-pull-requests-limit: 0
+    directory: /packages/smart-camera-web
+    schedule:
+      interval: weekly
+      day: wednesday
+      time: '11:00'
+    pull-request-branch-name:
+      separator: '-'
+
+  - package-ecosystem: npm
+    open-pull-requests-limit: 0
+    directory: /packages/web-components
+    schedule:
+      interval: weekly
+      day: wednesday
+      time: '11:00'
+    pull-request-branch-name:
+      separator: '-'
+
+  - package-ecosystem: github-actions
+    open-pull-requests-limit: 5
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
       day: wednesday
       time: '11:00'
     groups:

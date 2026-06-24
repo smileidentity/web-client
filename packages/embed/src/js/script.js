@@ -157,9 +157,15 @@ window.SmileIdentity = (function () {
   function createIframe(productName) {
     const iframe = document.createElement('iframe');
 
+    // Forward the host page's `debug` flag into the iframe so the capture
+    // components (which read their own window.location.search) can enable
+    // the tuning panel and verbose telemetry.
+    const debugSuffix = new URLSearchParams(window.location.search).has('debug')
+      ? '?debug'
+      : '';
     iframe.setAttribute(
       'src',
-      `${innerConfig.siteURL}${getIFrameURL(productName)}`,
+      `${innerConfig.siteURL}${getIFrameURL(productName)}${debugSuffix}`,
     );
     iframe.setAttribute('id', 'smile-identity-hosted-web-integration');
     iframe.setAttribute('name', 'smile-identity-hosted-web-integration');

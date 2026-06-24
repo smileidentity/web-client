@@ -6,6 +6,7 @@ import { t } from '../../../domain/localisation';
 import './document-capture';
 import './document-capture-review';
 import './document-capture-instructions';
+import './document-capture-submission';
 import './document-auto-capture/index.ts';
 import packageJson from '../../../../package.json';
 
@@ -77,8 +78,8 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden
       ></${captureTag}>
-      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
-      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
+      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
+      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
       </div>
     `;
 
@@ -255,6 +256,15 @@ class DocumentCaptureScreens extends HTMLElement {
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
+      },
+    );
+
+    // "Skip" on the back instruction screen: the user chooses not to capture
+    // the back of the document, so we publish with just the front image.
+    this.documentInstructionBack.addEventListener(
+      'document-capture-instructions.skip',
+      () => {
+        this._publishSelectedImages();
       },
     );
 

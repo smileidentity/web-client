@@ -1,6 +1,7 @@
 import './selfie-capture-instructions';
 import './selfie-capture-review';
 import './selfie-capture-wrapper/index.ts';
+import { getMediapipeInstance } from './smartselfie-capture/utils/mediapipeManager.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
 import packageJson from '../../../../package.json';
@@ -9,6 +10,15 @@ import { JPEG_QUALITY } from '../../../domain/constants/src/Constants';
 const COMPONENTS_VERSION = packageJson.version;
 
 const smartCameraWeb = document.querySelector('smart-camera-web');
+
+/**
+ * Minimum-correct HTML attribute escape. `&` must be replaced first so the
+ * subsequent `"` -> `&quot;` substitution isn't double-encoded. Used by every
+ * getter that interpolates a partner-supplied value into the `innerHTML`
+ * template in `connectedCallback` — without this, a value containing `"`
+ * (or `&`) would break out of the attribute and inject markup.
+ */
+const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
 const cropImageFromDataUri = (dataUri, cropPercentX = 0, cropPercentY = 0) =>
   new Promise((resolve, reject) => {
@@ -82,9 +92,9 @@ class SelfieCaptureScreens extends HTMLElement {
     this.innerHTML = `
             ${styles(this.themeColor)}
             <div style="height: 100%;">
-              <selfie-capture-instructions theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
-              <selfie-capture-wrapper theme-color='${this.themeColor}' ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
-              <selfie-capture-review theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
+              <selfie-capture-instructions theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} ${this.hideBack} hidden></selfie-capture-instructions>
+              <selfie-capture-wrapper theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.allowAgentMode} ${this.allowAgentModeTests} ${this.hideAttribution} ${this.disableImageTests} ${this.allowLegacySelfieFallback} ${this.useStrictMode} ${this.showBackOnGuidelines} key="${this._remountKey}" start-countdown="false" hidden></selfie-capture-wrapper>
+              <selfie-capture-review theme-color="${escAttr(this.themeColor)}" ${this.showNavigation} ${this.hideAttribution} hidden></selfie-capture-review>
             </div>
         `;
 
@@ -100,7 +110,11 @@ class SelfieCaptureScreens extends HTMLElement {
 
     if (
       this.getAttribute('initial-screen') === 'selfie-capture' ||
-      this.hideInstructions
+      this.hideInstructions ||
+      // In strict mode the modern `enhanced-smartselfie-capture` element
+      // renders its own guidelines screen, so we skip the legacy
+      // `selfie-capture-instructions` element entirely.
+      this.isStrictMode
     ) {
       this.setActiveScreen(this.selfieCapture);
     } else {
@@ -108,6 +122,37 @@ class SelfieCaptureScreens extends HTMLElement {
     }
 
     this.setUpEventListeners();
+
+    // Pre-warm MediaPipe as soon as the selfie flow starts so the heavy WASM +
+    // model download (and on-device init) happens while the user reads the
+    // instructions — not behind a blocking spinner on the capture screen. This
+    // is fire-and-forget and idempotent: getMediapipeInstance() caches a single
+    // in-flight promise / instance, so the wrapper (and any remount) reuses the
+    // same load instead of starting a new one. Errors are handled by the
+    // wrapper's own retry/fallback path, so swallow them here.
+    //
+    // Skipped under Cypress to match `SelfieCaptureWrapper`'s existing test
+    // seam (`skipMediapipeForTests`). Specs rely on the wrapper short-circuiting
+    // to the legacy `selfie-capture` fallback; pre-warming here would race with
+    // that seam and (intermittently) flip the wrapper into the SmartSelfie path
+    // by populating `window.__smileIdentityMediapipe` before the wrapper mounts.
+    //
+    // The parent check covers the embed Cypress context where this element runs
+    // inside an iframe and window.Cypress is only set on the parent frame.
+    const isCypress =
+      !!window.Cypress ||
+      (() => {
+        try {
+          return !!window.parent.Cypress;
+        } catch {
+          return false;
+        }
+      })() ||
+      (window.navigator.userAgent.includes('Electron') && window.__Cypress);
+    const forceMediapipeLoad = !!window.__SMILE_ID_TEST_FORCE_MEDIAPIPE_LOAD__;
+    if (!isCypress || forceMediapipeLoad) {
+      getMediapipeInstance().catch(() => {});
+    }
   }
 
   getAgentMode() {
@@ -230,6 +275,45 @@ class SelfieCaptureScreens extends HTMLElement {
     });
   }
 
+  // Return to a clean selfie capture screen. Used when navigating back from the
+  // document flow. Previously this was driven by toggling the `initial-screen`
+  // attribute on this element, which re-fired a full `connectedCallback()`
+  // rebuild every time (even when the value was unchanged). We now swap in a
+  // fresh `selfie-capture-wrapper` synchronously and navigate explicitly, so we
+  // land on a clean capture screen — not the stale review — without rebuilding
+  // the whole screen tree or depending on timers.
+  restartSelfieCapture() {
+    SmartCamera.stopMedia();
+
+    const container = this.querySelector('div');
+    const oldWrapper = this.selfieCapture;
+
+    if (oldWrapper && container) {
+      this._remountKey++;
+
+      const newWrapper = document.createElement('selfie-capture-wrapper');
+      Array.from(oldWrapper.attributes).forEach((attr) => {
+        newWrapper.setAttribute(attr.name, attr.value);
+      });
+      newWrapper.setAttribute('key', this._remountKey.toString());
+      newWrapper.setAttribute('start-countdown', 'false');
+      newWrapper.setAttribute('hidden', '');
+
+      const reviewElement = container.querySelector('selfie-capture-review');
+      oldWrapper.remove();
+      if (reviewElement) {
+        container.insertBefore(newWrapper, reviewElement);
+      } else {
+        container.appendChild(newWrapper);
+      }
+
+      this.selfieCapture = newWrapper;
+      this.setupSelfieWrapperEventListeners();
+    }
+
+    this.setActiveScreen(this.selfieCapture);
+  }
+
   // Override setActiveScreen to enable countdown when selfie-capture is active
   setActiveScreen(screen) {
     if (this.activeScreen === screen) {
@@ -256,6 +340,17 @@ class SelfieCaptureScreens extends HTMLElement {
         window.removeEventListener(event, handler);
       });
     }
+    // Also remove the previously-attached element-level publish handler so we
+    // don't accumulate duplicates across remounts (each call to
+    // setupSelfieWrapperEventListeners would otherwise add another listener,
+    // causing multiple transitions to review / multiple metadata events on
+    // navigating back from document capture).
+    if (this._selfieWrapperPublishHandler) {
+      this.removeEventListener(
+        'selfie-capture.publish',
+        this._selfieWrapperPublishHandler,
+      );
+    }
 
     // Create new event handlers
     const cancelledHandler = async () => {
@@ -264,7 +359,7 @@ class SelfieCaptureScreens extends HTMLElement {
       // Force remount of selfie-capture-wrapper for clean state on next visit
       await this.forceWrapperRemount();
 
-      if (this.hideInstructions) {
+      if (this.hideInstructions || this.isStrictMode) {
         this.handleBackEvents();
         return;
       }
@@ -285,6 +380,18 @@ class SelfieCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.selfie-capture-end'),
       );
+      this._data.images = event.detail.images;
+      SmartCamera.stopMedia();
+
+      // In strict mode (Enhanced SmartSelfie), the ESS component already
+      // shows its own review screen and only re-dispatches `publish` after
+      // the user confirms. Skip the legacy `selfie-capture-review` step and
+      // publish straight up to the host page.
+      if (this.isStrictMode) {
+        this._publishSelectedImages();
+        return;
+      }
+
       this.selfieReview.setAttribute(
         'data-image',
         await cropImageFromDataUri(event.detail.referenceImage, 20, 20),
@@ -294,8 +401,6 @@ class SelfieCaptureScreens extends HTMLElement {
         'mirror-image',
         shouldMirror ? 'true' : 'false',
       );
-      this._data.images = event.detail.images;
-      SmartCamera.stopMedia();
       this.setActiveScreen(this.selfieReview);
     };
 
@@ -313,6 +418,7 @@ class SelfieCaptureScreens extends HTMLElement {
 
     // Also listen for the publish event on the parent SelfieCaptureScreens element
     // in case smartselfie-capture dispatches it there
+    this._selfieWrapperPublishHandler = publishHandler;
     this.addEventListener('selfie-capture.publish', publishHandler);
   }
 
@@ -367,8 +473,29 @@ class SelfieCaptureScreens extends HTMLElement {
 
   get allowLegacySelfieFallback() {
     return this.hasAttribute('allow-legacy-selfie-fallback')
-      ? `allow-legacy-selfie-fallback='${this.getAttribute('allow-legacy-selfie-fallback')}'`
+      ? `allow-legacy-selfie-fallback="${escAttr(this.getAttribute('allow-legacy-selfie-fallback'))}"`
       : '';
+  }
+
+  get useStrictMode() {
+    return this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+      ? 'use-strict-mode="true"'
+      : '';
+  }
+
+  get showBackOnGuidelines() {
+    return this.hasAttribute('show-back-on-guidelines')
+      ? 'show-back-on-guidelines="true"'
+      : '';
+  }
+
+  /** Boolean form of `use-strict-mode` for runtime checks. */
+  get isStrictMode() {
+    return (
+      this.hasAttribute('use-strict-mode') &&
+      this.getAttribute('use-strict-mode') !== 'false'
+    );
   }
 
   get themeColor() {
@@ -394,6 +521,8 @@ class SelfieCaptureScreens extends HTMLElement {
       'allow-legacy-selfie-fallback',
       'show-agent-mode-for-tests',
       'disable-image-tests',
+      'use-strict-mode',
+      'show-back-on-guidelines',
     ];
   }
 
@@ -406,6 +535,8 @@ class SelfieCaptureScreens extends HTMLElement {
       case 'allow-legacy-selfie-fallback':
       case 'show-agent-mode-for-tests':
       case 'disable-image-tests':
+      case 'use-strict-mode':
+      case 'show-back-on-guidelines':
         this.connectedCallback();
         break;
       default:

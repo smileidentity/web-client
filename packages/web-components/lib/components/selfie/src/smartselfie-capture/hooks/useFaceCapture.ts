@@ -363,6 +363,17 @@ export const useFaceCapture = ({
             }, 0);
           }
         }
+
+        // Before the smile zone, resume automatically when face returns to a
+        // valid position — no smile is needed yet.
+        if (
+          isPaused.value &&
+          isCapturing.value &&
+          capturesTaken.value < smileCheckpoint.value &&
+          resumeCaptureRef.current
+        ) {
+          resumeCaptureRef.current();
+        }
       } else {
         // No face detected - reset values
         currentSmileScore.value = 0;
@@ -441,9 +452,7 @@ export const useFaceCapture = ({
       };
 
       window.dispatchEvent(
-        new CustomEvent('selfie-capture.publish', {
-          detail: eventDetail,
-        }),
+        new CustomEvent('selfie-capture.publish', { detail: eventDetail }),
       );
 
       hasFinishedCapture.value = true;
@@ -542,10 +551,9 @@ export const useFaceCapture = ({
     smartCameraWeb?.dispatchEvent(
       new CustomEvent('metadata.selfie-origin', {
         detail: {
-          imageOrigin: {
-            environment: 'back_camera',
-            user: 'front_camera',
-          }[getFacingMode()],
+          imageOrigin: { environment: 'back_camera', user: 'front_camera' }[
+            getFacingMode()
+          ],
         },
       }),
     );

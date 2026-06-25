@@ -30,12 +30,9 @@ app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
     const environmentServer = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
-    let baseServer = SID_SERVER;
-    // the smile-identity-core client appears to append https:// to the baseServer
-    // this is a workaround to prevent the client from appending https:// twice
-    if (baseServer.startsWith('https://')) {
-      baseServer = `${baseServer.slice(8)}/v1`;
-    }
+    const baseServer = SID_SERVER_MAPPING[SID_SERVER]
+      ? SID_SERVER
+      : `${SID_SERVER}/v1`;
 
     const connection = new SIDWebAPI(
       PARTNER_ID,

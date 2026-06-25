@@ -75,9 +75,12 @@
         "webcamCapture": "Impossible de capturer les images de la webcam - Veuillez essayer un autre appareil"
       },
       "loading": {
-        "progress": "Chargement... {{progress}}%",
-        "slowConnection": "La connexion Internet est trop lente, veuillez patienter...",
-        "connectionError": "Erreur de connexion Internet, vérifiez votre connexion et réessayez"
+        "progress": "Configuration de la caméra... {{progress}}%",
+        "slowConnection": "Configuration en cours — cela peut prendre un instant la première fois.",
+        "connectionError": "Erreur de connexion Internet, vérifiez votre connexion et réessayez",
+        "setupError": "Nous n’avons pas pu terminer la configuration de la capture du visage sur cet appareil. Veuillez réessayer.",
+        "offlineError": "Vous semblez être hors ligne. Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer"
       }
     },
     "smart": {
@@ -89,12 +92,26 @@
         "neutralExpression": "Expression neutre",
         "smileRequired": "Souriez !",
         "openMouthSmile": "Sourire plus large - dents visibles",
+        "tooDark": "Trop sombre - améliorez l'éclairage",
+        "tooBlurry": "Restez immobile - image floue",
+        "faceNotCentered": "Centrez votre visage dans l'ovale",
+        "turnHeadLeft": "Tournez lentement la tête vers la gauche",
+        "turnHeadRight": "Tournez lentement la tête vers la droite",
+        "lookStraight": "Regardez droit vers la caméra",
+        "tiltHeadUp": "Inclinez légèrement la tête vers le haut",
         "initializing": "Initialisation en cours..."
       },
       "status": {
         "capturing": "Capture en cours...",
         "keepSmiling": "Continuez de sourire!",
-        "readyToCapture": "Prêt à enregistrer"
+        "readyToCapture": "Prêt à enregistrer",
+        "poseCaptured": "Parfait ! Ne bougez plus",
+        "sessionTimeout": "Session expirée — veuillez réessayer"
+      },
+      "instructions": {
+        "title": "Contrôle de vivacité actif",
+        "description": "Vous devrez tourner lentement la tête en suivant les indications à l'écran. Gardez votre visage dans l'ovale.",
+        "continueButton": "Commencer"
       }
     },
     "review": {
@@ -102,6 +119,88 @@
       "question": "Votre visage est-il entièrement net ?",
       "acceptButton": "Oui, utiliser ceci",
       "retakeButton": "Non, refaire le selfie"
+    },
+    "ess": {
+      "back": "Retour",
+      "consent": {
+        "titleSuffix": "souhaite vérifier votre identité avec",
+        "bodyPrefix": "En sélectionnant Autoriser, vous consentez à ce que ",
+        "bodyMiddle": " collecte et traite vos données personnelles afin de fournir des services de vérification d'identité et de prévention de la fraude, et partage les résultats en toute sécurité avec ",
+        "bodySuffix": ". Cela peut inclure le traitement des :",
+        "items": {
+          "contact": "Informations de contact",
+          "personal": "Informations personnelles",
+          "biometric": "Données biométriques et documents d'identité",
+          "device": "Informations sur l'appareil"
+        },
+        "consentCheckbox": "Je consens au partage de mes informations d'identité et données associées avec les prestataires afin de prévenir la fraude et de traiter cette transaction en toute sécurité.",
+        "learnMore": "En savoir plus",
+        "learnMoreBodyPrefix": "",
+        "learnMoreBodyAnd": " et ",
+        "learnMoreBodySuffix": " traitent vos données personnelles et biométriques pour vérifier votre identité et prévenir la fraude. Nous conservons vos données pendant 5 ans afin de respecter nos obligations légales.",
+        "learnMoreShare": "Nous pouvons partager des données avec certains partenaires pour réaliser cette vérification.",
+        "learnMoreRightsPrefix": "Vous pouvez retirer votre consentement, accéder à vos données ou exercer vos droits sur notre page",
+        "dsarLink": "DSAR",
+        "learnMoreRightsMiddle": ". Les détails complets sont disponibles dans les politiques de confidentialité de",
+        "smileIdPrivacyLink": "Smile ID",
+        "partnerPrivacyTail": "et de {{partnerName}}.",
+        "partnerPrivacyTailLinked": "et de",
+        "partnerPrivacyTailEnd": ".",
+        "allow": "Autoriser",
+        "deny": "Refuser"
+      },
+      "instructions": {
+        "titlePrefix": "Préparez-vous à capturer votre",
+        "titleAccent": "selfie",
+        "guidelinesHeader": "CONSIGNES DE CAPTURE",
+        "tile": {
+          "good": "Bien",
+          "accessories": "Accessoires",
+          "multipleFaces": "Plusieurs visages",
+          "poorLighting": "Mauvais éclairage"
+        },
+        "continue": "Suivant",
+        "settingUpCamera": "Configuration de la caméra…"
+      },
+      "submission": {
+        "review": {
+          "title": "Vérifier la qualité de l'image",
+          "body": "Assurez-vous que l'image est nette.",
+          "retake": "Reprendre",
+          "confirm": "Confirmer"
+        },
+        "submitting": {
+          "title": "Envoi en cours…",
+          "body": "Cela peut prendre un instant…\nNe fermez pas et n'actualisez pas cette page"
+        },
+        "success": {
+          "title": "Envoi terminé",
+          "body": "Merci pour votre soumission. Nous vérifions actuellement vos informations."
+        },
+        "error": {
+          "title": "Échec de la soumission"
+        },
+        "continue": "Continuer",
+        "exit": "Quitter",
+        "imageAlt": "Selfie capturé"
+      },
+      "alert": {
+        "centerFace": "Centrez votre visage dans le cadre ovale",
+        "holdStill": "Ne bougez plus…",
+        "tooDark": "Placez-vous dans un environnement bien éclairé",
+        "tooClose": "Éloignez l'appareil de votre visage",
+        "tooFar": "Rapprochez l'appareil de votre visage",
+        "moveDeviceUp": "Levez votre appareil",
+        "moveDeviceDown": "Baissez votre appareil",
+        "moveDeviceLeft": "Déplacez votre appareil vers la gauche",
+        "moveDeviceRight": "Déplacez votre appareil vers la droite",
+        "turnHeadLeft": "Tournez la tête vers la gauche",
+        "turnHeadRight": "Tournez la tête vers la droite",
+        "tiltHeadUp": "Inclinez légèrement la tête vers le haut"
+      },
+      "failure": {
+        "sessionTimedOut": "Votre session a expiré. Veuillez réessayer."
+      }
     }
   },
   "document": {
@@ -138,13 +237,33 @@
       },
       "startCapture": "Démarrer la capture",
       "takePhotoButton": "Prendre une photo",
-      "uploadPhotoButton": "Télécharger une photo"
+      "uploadPhotoButton": "Télécharger une photo",
+      "flipTitlePrefix": "Retournez votre",
+      "captureBackButton": "Capturer le verso",
+      "skipButton": "Ignorer"
     },
     "review": {
       "question": "Le document est-il clair et lisible ?",
       "description": "Assurez-vous que tous les coins du document sont visibles et qu'il n'y a pas de reflet.",
       "acceptButton": "Oui, ma pièce d'identité est lisible",
-      "retakeButton": "Non, reprendre la photo"
+      "retakeButton": "Non, reprendre la photo",
+      "confirmTitle": "Vérifiez la qualité de l'image",
+      "confirmBody": "Assurez-vous que toutes les informations sont lisibles.",
+      "retake": "Reprendre",
+      "confirm": "Confirmer"
+    },
+    "submission": {
+      "imageAlt": "Document capturé",
+      "submitting": {
+        "title": "Envoi en cours…",
+        "body": "Cela peut prendre un moment…\nNe fermez pas et n'actualisez pas cette page"
+      },
+      "success": {
+        "title": "Envoi terminé"
+      },
+      "error": {
+        "title": "Échec de l'envoi"
+      }
     }
   },
   "fileUpload": {

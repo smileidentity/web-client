@@ -6,6 +6,8 @@ import { t } from '../../../domain/localisation';
 import './document-capture';
 import './document-capture-review';
 import './document-capture-instructions';
+import './document-capture-submission';
+import './document-auto-capture/index.ts';
 import packageJson from '../../../../package.json';
 
 const COMPONENTS_VERSION = packageJson.version;
@@ -49,6 +51,12 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   connectedCallback() {
+    // Tag name to use for the live capture view. Opt-in via the
+    // `auto-capture-enabled` attribute on <document-capture-screens>; defaults to the
+    // legacy <document-capture> element so existing flows are untouched.
+    const captureTag = this.autoCaptureFeature
+      ? 'document-auto-capture'
+      : 'document-capture';
     const instructionsTag = this.newInstructions
       ? 'document-capture-instructions-v2'
       : 'document-capture-instructions';
@@ -59,19 +67,19 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.documentCaptureModes} ${this.showNavigation} ${this.hideInstructions ? 'hidden' : ''}
       ${this.hideAttribution}
       ></${instructionsTag}>
-      <document-capture id='document-capture-front' side-of-id='Front'
+      <${captureTag} id='document-capture-front' side-of-id='Front'
       ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
-      ${this.documentCaptureModes} ${this.documentType} theme-color='${this.themeColor}'
-      ></document-capture>
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}'
+      ></${captureTag}>
       <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
-       ${this.documentCaptureModes} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
+       ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></${instructionsTag}>
-      <document-capture id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
-      ${this.documentCaptureModes} theme-color='${this.themeColor}' ${this.hideAttribution}
-      hidden 
-      ></document-capture>
-      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
-      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.hideAttribution} hidden></document-capture-review>
+      <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
+      ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
+      hidden
+      ></${captureTag}>
+      <document-capture-review id='front-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
+      <document-capture-review id='back-of-document-capture-review' theme-color='${this.themeColor}' ${this.showNavigation} ${this.hideAttribution} hidden></document-capture-review>
       </div>
     `;
 
@@ -97,7 +105,12 @@ class DocumentCaptureScreens extends HTMLElement {
     this.thankYouScreen = this.querySelector('thank-you');
 
     if (this.hideInstructions) {
-      getPermissions(this.idCapture);
+      if (!this.autoCaptureFeature) {
+        // <document-auto-capture> manages its own camera; calling
+        // getPermissions here would race a second getUserMedia for the
+        // rear camera and freeze the page.
+        getPermissions(this.idCapture);
+      }
       this.setActiveScreen(this.idCapture);
     } else {
       this.setActiveScreen(this.documentInstruction);
@@ -136,7 +149,7 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCapture);
-        await getPermissions(this.idCapture);
+        if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
       },
     );
     this.documentInstruction.addEventListener(
@@ -160,6 +173,13 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-front-capture-end'),
       );
+      if (this.autoCaptureFeature) {
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.document-front-origin', {
+            detail: { imageOrigin: event.detail.captureOrigin },
+          }),
+        );
+      }
       this.idReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -187,7 +207,7 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
@@ -201,7 +221,8 @@ class DocumentCaptureScreens extends HTMLElement {
           this._publishSelectedImages();
         } else if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          await getPermissions(this.idCaptureBack);
+          if (!this.autoCaptureFeature)
+            await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -220,7 +241,7 @@ class DocumentCaptureScreens extends HTMLElement {
           }),
         );
         this.setActiveScreen(this.idCaptureBack);
-        await getPermissions(this.idCaptureBack);
+        if (!this.autoCaptureFeature) await getPermissions(this.idCaptureBack);
       },
     );
 
@@ -231,10 +252,19 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstruction);
         }
+      },
+    );
+
+    // "Skip" on the back instruction screen: the user chooses not to capture
+    // the back of the document, so we publish with just the front image.
+    this.documentInstructionBack.addEventListener(
+      'document-capture-instructions.skip',
+      () => {
+        this._publishSelectedImages();
       },
     );
 
@@ -258,6 +288,13 @@ class DocumentCaptureScreens extends HTMLElement {
       smartCameraWeb?.dispatchEvent(
         new CustomEvent('metadata.document-back-capture-end'),
       );
+      if (this.autoCaptureFeature) {
+        smartCameraWeb?.dispatchEvent(
+          new CustomEvent('metadata.document-back-origin', {
+            detail: { imageOrigin: event.detail.captureOrigin },
+          }),
+        );
+      }
       this.backOfIdReview.setAttribute('data-image', event.detail.previewImage);
       this._data.images.push({
         image: event.detail.image.split(',')[1],
@@ -272,7 +309,7 @@ class DocumentCaptureScreens extends HTMLElement {
       async () => {
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCapture);
-          await getPermissions(this.idCapture);
+          if (!this.autoCaptureFeature) await getPermissions(this.idCapture);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -289,7 +326,8 @@ class DocumentCaptureScreens extends HTMLElement {
         this._data.images.pop();
         if (this.hideInstructions) {
           this.setActiveScreen(this.idCaptureBack);
-          await getPermissions(this.idCaptureBack);
+          if (!this.autoCaptureFeature)
+            await getPermissions(this.idCaptureBack);
         } else {
           this.setActiveScreen(this.documentInstructionBack);
         }
@@ -329,6 +367,41 @@ class DocumentCaptureScreens extends HTMLElement {
 
   get hideInstructions() {
     return this.hasAttribute('hide-instructions');
+  }
+
+  get autoCaptureFeature() {
+    return this.hasAttribute('auto-capture-enabled');
+  }
+
+  get autoCapture() {
+    if (!this.hasAttribute('auto-capture')) {
+      return '';
+    }
+
+    const value = this.getAttribute('auto-capture');
+    const normalizedValue = value === '' ? 'autoCapture' : value;
+    const allowedValues = [
+      'autoCapture',
+      'autoCaptureOnly',
+      'manualCaptureOnly',
+    ];
+
+    if (allowedValues.includes(normalizedValue)) {
+      return `auto-capture='${normalizedValue}'`;
+    }
+
+    return `auto-capture='autoCapture'`;
+  }
+
+  get autoCaptureTimeout() {
+    const raw = this.getAttribute('auto-capture-timeout');
+    const n = Number(raw);
+    // Numeric milliseconds only — omit if not a finite positive number so an
+    // arbitrary attribute value can't break/inject the template. The downstream
+    // <document-auto-capture> clamps the value to its supported range.
+    return raw !== null && Number.isFinite(n) && n > 0
+      ? `auto-capture-timeout="${n}"`
+      : '';
   }
 
   get hideBackOfId() {
@@ -390,6 +463,9 @@ class DocumentCaptureScreens extends HTMLElement {
       'hide-back-to-host',
       'show-navigation',
       'hide-back-of-id',
+      'auto-capture-enabled',
+      'auto-capture',
+      'auto-capture-timeout',
       'new-instructions',
     ];
   }
@@ -401,6 +477,9 @@ class DocumentCaptureScreens extends HTMLElement {
       case 'hide-back-of-id':
       case 'hide-back-to-host':
       case 'show-navigation':
+      case 'auto-capture-enabled':
+      case 'auto-capture':
+      case 'auto-capture-timeout':
       case 'new-instructions':
         this.innerHTML = '';
         this.connectedCallback();

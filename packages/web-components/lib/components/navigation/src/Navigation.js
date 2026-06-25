@@ -12,12 +12,19 @@ class Navigation extends HTMLElement {
     const iconColor = this.hasThemeColor ? this.themeColor : '#FFFFFF';
     const focusColor = '#FFFFFF';
 
+    let justifyContent = 'flex-end';
+    if (this.showBackButton && this.showCloseButton) {
+      justifyContent = 'space-between';
+    } else if (this.showBackButton) {
+      justifyContent = 'flex-start';
+    }
+
     const style = document.createElement('style');
     style.textContent = `
 :host {
   display: flex;
   max-inline-size: 100%;
-  justify-content: ${this.showBackButton ? 'space-between' : 'flex-end'};
+  justify-content: ${justifyContent};
   direction: ${direction};
   padding: var(--smileid-navigation-padding, ${hostPadding});
   gap: 1rem;
@@ -135,23 +142,31 @@ button svg {
 
     shadow.appendChild(style);
     if (this.showBackButton) shadow.appendChild(backButton);
-    shadow.appendChild(closeButton);
+    if (this.showCloseButton) shadow.appendChild(closeButton);
 
     // Set language direction attribute on host for CSS selectors
     this.setAttribute('dir', direction);
 
     // Back Button Controls
-    this.backButton = backButton;
-    this.backButton.addEventListener('click', () => this.handleBack());
+    if (this.showBackButton) {
+      this.backButton = backButton;
+      this.backButton.addEventListener('click', () => this.handleBack());
+    }
 
     // Close Button Controls
-    this.closeButton = closeButton;
-    this.closeButton.addEventListener('click', () => this.handleClose());
+    if (this.showCloseButton) {
+      this.closeButton = closeButton;
+      this.closeButton.addEventListener('click', () => this.handleClose());
+    }
   }
 
   disconnectedCallback() {
-    this.backButton.removeEventListener('click', () => this.handleBack());
-    this.closeButton.removeEventListener('click', () => this.handleClose());
+    if (this.backButton) {
+      this.backButton.removeEventListener('click', () => this.handleBack());
+    }
+    if (this.closeButton) {
+      this.closeButton.removeEventListener('click', () => this.handleClose());
+    }
   }
 
   handleBack() {
@@ -164,6 +179,10 @@ button svg {
 
   get showBackButton() {
     return !this.hasAttribute('hide-back');
+  }
+
+  get showCloseButton() {
+    return !this.hasAttribute('hide-close');
   }
 
   get themeColor() {

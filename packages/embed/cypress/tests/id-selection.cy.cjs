@@ -209,7 +209,9 @@ describe('No ID Selection', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {
@@ -470,7 +472,9 @@ describe('Preselected Country', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {
@@ -725,7 +729,9 @@ describe('Preselected Country and ID Type', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {

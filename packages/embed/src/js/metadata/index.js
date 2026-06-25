@@ -506,6 +506,9 @@ eventTarget.addEventListener(
 eventTarget.addEventListener('metadata.active-liveness-version', (event) => {
   addMetadataEntry('active_liveness_version', event.detail.version);
 });
+eventTarget.addEventListener('metadata.active-liveness-type', (event) => {
+  addMetadataEntry('active_liveness_type', event.detail.type);
+});
 eventTarget.addEventListener(
   'metadata.allow-legacy-selfie-fallback',
   (event) => {

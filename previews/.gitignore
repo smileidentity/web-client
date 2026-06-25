@@ -2,8 +2,10 @@ node_modules
 
 /.cache
 /build
+/.react-router
 .env
 .dev-mobile-urls.txt
 
 # sst
 .sst
+sst-env.d.ts

@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import type { LoaderFunctionArgs } from 'react-router';
+import { useLoaderData } from 'react-router';
 import { useState } from 'react';
 import { Resource } from 'sst';
 import products from '~/data/products.json';
@@ -92,14 +92,21 @@ export default function Product() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [allowLegacySelfieFallback, setAllowLegacySelfieFallback] =
     useState<boolean>(false);
-  const [newInstructions, setNewInstructions] = useState<boolean>(false);
+  const [enableAutoCapture, setEnableAutoCapture] = useState<boolean>(true);
+  const [autoCapture, setAutoCapture] = useState<string>('autoCapture');
+  const [allowStrictMode, setAllowStrictMode] = useState<boolean>(true);
+  const [newInstructions, setNewInstructions] = useState<boolean>(true);
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
       window.SmileIdentity({
         ...config,
-        allow_agent_mode: true,
+        allow_agent_mode: false,
         allow_legacy_selfie_fallback: allowLegacySelfieFallback,
+        auto_capture_enabled: enableAutoCapture,
+        auto_capture: autoCapture,
+        use_strict_mode: allowStrictMode,
+        show_navigation: true,
         new_instructions: newInstructions,
         document_ids: [config.document_id],
         document_capture_modes: (
@@ -221,6 +228,50 @@ export default function Product() {
                 >
                   <option value="false">Disabled</option>
                   <option value="true">Enabled</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="strict-mode-select">Strict Mode</label>
+                <select
+                  id="strict-mode-select"
+                  value={allowStrictMode ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setAllowStrictMode(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="auto-capture-select">Enable Auto Capture</label>
+                <select
+                  id="auto-capture-select"
+                  value={enableAutoCapture ? 'true' : 'false'}
+                  onChange={(e) =>
+                    setEnableAutoCapture(e.target.value === 'true')
+                  }
+                  disabled={isGettingToken}
+                >
+                  <option value="false">Disabled (legacy capture)</option>
+                  <option value="true" selected>
+                    Enabled
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="auto-capture-value-select">Auto Capture</label>
+                <select
+                  id="auto-capture-value-select"
+                  value={autoCapture}
+                  onChange={(e) => setAutoCapture(e.target.value)}
+                  disabled={isGettingToken}
+                >
+                  <option value="autoCapture">autoCapture</option>
+                  <option value="autoCaptureOnly">autoCaptureOnly</option>
+                  <option value="manualCaptureOnly">manualCaptureOnly</option>
                 </select>
               </div>
 

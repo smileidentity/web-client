@@ -25,6 +25,10 @@ interface TuningSettings {
   minFillRatio?: number;
   chromaContentGate?: boolean;
   minChromaContent?: number;
+  seamRejectEnabled?: boolean;
+  houghThreshold?: number;
+  houghMinLengthRatio?: number;
+  houghMaxLineGap?: number;
   [key: string]: unknown;
 }
 
@@ -40,6 +44,8 @@ interface TuningDebugInfo {
   aspect?: number | string;
   chroma?: number | string;
   quality?: number | string;
+  houghLines?: number | string;
+  seamRejected?: boolean | string;
   [key: string]: unknown;
 }
 
@@ -184,6 +190,18 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
         <div>
           Quality:{' '}
           <span style={{ color: '#0f0' }}>{debugInfo?.quality ?? '—'}</span>
+        </div>
+        <div>
+          Hough Lines:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.houghLines ?? '—'}</span>
+        </div>
+        <div>
+          Seam Rejected:{' '}
+          <span style={{ color: debugInfo?.seamRejected ? '#f55' : '#fff' }}>
+            {debugInfo?.seamRejected == null
+              ? '—'
+              : String(debugInfo.seamRejected)}
+          </span>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
@@ -406,6 +424,66 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
             }
           />
         </label>
+      )}
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Seam Rejection{' '}
+        <em>(reject quads framed by straight lines, e.g. parquet)</em>
+        <input
+          type="checkbox"
+          checked={Boolean(settings.seamRejectEnabled)}
+          onInput={(e) => updateSetting('seamRejectEnabled', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.seamRejectEnabled) && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Hough Threshold: {settings.houghThreshold}{' '}
+              <em>(Higher = only stronger straight lines count)</em>
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="150"
+              step="1"
+              value={settings.houghThreshold as number}
+              onInput={(e) =>
+                updateSetting('houghThreshold', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Hough Min Length Ratio: {settings.houghMinLengthRatio}{' '}
+              <em>(min line length as fraction of ROI short side)</em>
+            </span>
+            <input
+              type="range"
+              min="0.1"
+              max="0.9"
+              step="0.05"
+              value={settings.houghMinLengthRatio as number}
+              onInput={(e) =>
+                updateSetting('houghMinLengthRatio', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Hough Max Line Gap: {settings.houghMaxLineGap}</span>
+            <input
+              type="range"
+              min="0"
+              max="30"
+              step="1"
+              value={settings.houghMaxLineGap as number}
+              onInput={(e) =>
+                updateSetting('houghMaxLineGap', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
       )}
 
       <label style={{ display: 'flex', flexDirection: 'column' }}>

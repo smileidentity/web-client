@@ -12,6 +12,11 @@ import {
   type AspectKey,
   type DiscoveryVote,
 } from '../detection/documentAspect';
+import {
+  isSeamFalseQuad,
+  type Corner as SeamCorner,
+  type Segment as SeamSegment,
+} from '../detection/seamRejection';
 
 // eslint-disable-next-line import/extensions
 import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
@@ -21,7 +26,7 @@ declare const cv: any;
 // Internal debug flag: only emit verbose detection telemetry when the page
 // URL contains `?debug` (the same switch that exposes the tuning panel).
 // Evaluated once at module load to avoid recomputing in the hot loop.
-const IS_DEBUG_MODE =
+export const IS_DEBUG_MODE =
   typeof window !== 'undefined' &&
   new URLSearchParams(window.location.search).has('debug');
 
@@ -90,6 +95,14 @@ const MIN_DISCOVERY_GRID_CELLS = 3;
 // high threshold.
 const CANNY_HIGH_MAX = 150;
 const CANNY_HIGH_MIN = 60;
+
+// --- Seam / straight-line rejection (parquet floors, slatted tables) ---
+// HoughLinesP detects long straight background lines; a candidate quad whose
+// edges sit on lines that overshoot its corners is a seam artifact, not a card
+// (see detection/seamRejection.ts). Only the Hough acquisition knobs are
+// tunable via settings; the geometric tolerances live in the helper.
+const HOUGH_RHO = 1; // px distance resolution
+const HOUGH_THETA = Math.PI / 180; // 1° angle resolution
 
 // --- Contour rejection thresholds (shared by the in-guide pass and the
 // off-guide detector) ---
@@ -297,13 +310,29 @@ export function useCardDetection(
   } | null>(null);
   const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  const debugInfoRef = useRef<Record<string, any>>({});
   // Merge debug fields rather than replace: each gate emits only the values
   // it computed, so the panel keeps the last-known docFill / grid / blur /
   // glare visible together instead of blanking whichever the current frame's
   // early-return path didn't include. Debug-only; setDebugInfo identity is
-  // stable so this needs no memoisation.
-  const mergeDebugInfo = (patch: Record<string, unknown>) =>
-    setDebugInfo((prev) => ({ ...prev, ...patch }));
+  // stable so this needs no memoisation. Outside debug mode this is a no-op;
+  // inside debug mode it also skips patches that don't change displayed values.
+  const mergeDebugInfo = (patch: Record<string, unknown>) => {
+    if (!IS_DEBUG_MODE) return;
+
+    const { current } = debugInfoRef;
+    const hasChanged = Object.entries(patch).some(
+      ([key, value]) => current[key] !== value,
+    );
+    if (!hasChanged) return;
+
+    const next = { ...current, ...patch };
+    debugInfoRef.current = next;
+    setDebugInfo(next);
+  };
+  const updateDebugPath = (path: any) => {
+    if (IS_DEBUG_MODE) setDebugPath(path);
+  };
   // Latest distance fill %, stashed each frame so debug payloads emitted
   // AFTER the contour block (blur/glare/capture gates) can still report it.
   const latestDocFillRef = useRef(0);
@@ -896,7 +925,7 @@ export function useCardDetection(
           setComplianceState(COMPLIANCE_STATES.IDLE);
           stabilityRef.current.count = 0;
           bestFrameRef.current = { image: null, preview: null, score: 0 };
-          setDebugPath(null);
+          updateDebugPath(null);
           mergeDebugInfo({
             blur: 0,
             glare: 0,
@@ -1175,6 +1204,54 @@ export function useCardDetection(
           // All contour-pass geometry is in full-res ROI pixels.
           const minContourPixels = clampedW * clampedH * 0.005; // 0.5% — catches small text fragments
 
+          // Seam rejection: straight background lines from the closed `edges`
+          // map. Computed lazily (once per frame, only when a 4-corner
+          // candidate actually reaches the acceptance gate) so empty / no-card
+          // frames pay nothing. Cached in a frame-local; the transient `lines`
+          // Mat is released immediately after conversion to a plain array.
+          const seamRejectEnabled =
+            settingsRef.current.seamRejectEnabled !== false;
+          let houghSegments: SeamSegment[] | null = null;
+          const getHoughSegments = (): SeamSegment[] => {
+            if (houghSegments) return houghSegments;
+            const found: SeamSegment[] = [];
+            const lines = new cv.Mat();
+            try {
+              const houghThreshold = settingsRef.current.houghThreshold ?? 40;
+              const minLenRatio =
+                settingsRef.current.houghMinLengthRatio ?? 0.3;
+              const maxGap = settingsRef.current.houghMaxLineGap ?? 10;
+              const minLineLen = Math.max(
+                10,
+                Math.round(minLenRatio * Math.min(clampedW, clampedH)),
+              );
+              cv.HoughLinesP(
+                edges,
+                lines,
+                HOUGH_RHO,
+                HOUGH_THETA,
+                houghThreshold,
+                minLineLen,
+                maxGap,
+              );
+              for (let li = 0; li < lines.rows; li++) {
+                found.push({
+                  x1: lines.data32S[li * 4],
+                  y1: lines.data32S[li * 4 + 1],
+                  x2: lines.data32S[li * 4 + 2],
+                  y2: lines.data32S[li * 4 + 3],
+                });
+              }
+            } catch {
+              // best-effort: on any failure, treat as "no seam lines found"
+              // so the gate never blocks capture on its own error.
+            } finally {
+              safeDelete(lines);
+            }
+            houghSegments = found;
+            return houghSegments;
+          };
+
           for (let i = 0; i < contours.size(); ++i) {
             const cnt = contours.get(i);
             const area = cv.contourArea(cnt);
@@ -1309,6 +1386,38 @@ export function useCardDetection(
                 const minFillRatio =
                   settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO;
 
+                // Seam rejection: a candidate that passes every shape gate and
+                // is the new largest is tested against the frame's straight
+                // background lines. If >= 2 of its edges sit on through-lines
+                // that overshoot its corners, it is framed by seams (parquet /
+                // slatted table), not a card — reject. Evaluated here (gated on
+                // passesShape && area > maxArea) so the lazy Hough pass runs at
+                // most once per frame and only when a real candidate appears.
+                const passesShape =
+                  fillRatio > minFillRatio &&
+                  anglesOk &&
+                  aspectOk &&
+                  !roiWallHug;
+                let seamReject = false;
+                if (passesShape && area > maxArea && seamRejectEnabled) {
+                  const corners: SeamCorner[] = [];
+                  for (let c = 0; c < 4; c++) {
+                    corners.push({
+                      x: approx.data32S[c * 2],
+                      y: approx.data32S[c * 2 + 1],
+                    });
+                  }
+                  const lineSegments = getHoughSegments();
+                  seamReject = isSeamFalseQuad(corners, lineSegments, {
+                    roiW: clampedW,
+                    roiH: clampedH,
+                  });
+                  mergeDebugInfo({
+                    houghLines: lineSegments.length,
+                    seamRejected: seamReject,
+                  });
+                }
+
                 // Chroma-content gate is applied AFTER selection, on a rolling
                 // average of the chosen candidate's chroma (see below) — the
                 // per-frame value is too noisy (AWB/exposure/contour jitter) to
@@ -1318,7 +1427,8 @@ export function useCardDetection(
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
-                  area > maxArea
+                  area > maxArea &&
+                  !seamReject
                 ) {
                   maxArea = area;
                   if (bestContour) bestContour.delete();
@@ -1748,7 +1858,7 @@ export function useCardDetection(
               }
               points.roiWidth = clampedW;
               points.roiHeight = clampedH;
-              setDebugPath(points);
+              updateDebugPath(points);
             }
             setComplianceState(COMPLIANCE_STATES.DETECTING);
 
@@ -1841,7 +1951,7 @@ export function useCardDetection(
 
             bestContour.delete();
           } else {
-            setDebugPath(null);
+            updateDebugPath(null);
             // No card inside the guide → re-enable off-guide scanning.
             inGuideDetectedRef.current = false;
             // No candidate this frame — drop the chroma history so a stale
@@ -2440,7 +2550,7 @@ export function useCardDetection(
     setCaptureOrigin(null);
     setComplianceState(COMPLIANCE_STATES.IDLE);
     setFeedback('Position your document in the frame');
-    setDebugPath(null);
+    updateDebugPath(null);
     isCapturingRef.current = false;
     stabilityRef.current.count = 0;
     stabilityRef.current.lastCenter = null;

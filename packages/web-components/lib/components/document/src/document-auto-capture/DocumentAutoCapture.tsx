@@ -3,7 +3,11 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { useCamera } from './hooks/useCamera';
-import { useCardDetection, COMPLIANCE_STATES } from './hooks/useCardDetection';
+import {
+  useCardDetection,
+  COMPLIANCE_STATES,
+  IS_DEBUG_MODE,
+} from './hooks/useCardDetection';
 import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
@@ -60,6 +64,16 @@ const SHARED_DEFAULTS = {
   bookDocAspectTolerance: 0.1,
   minFillRatio: 0.8,
   minChromaContent: 13,
+  // Seam rejection: reject a card-shaped quad whose edges sit on long straight
+  // background lines that overshoot its corners (parquet floor, slatted table),
+  // detected via HoughLinesP on the contour edge map. Only ADDS rejections —
+  // off, or with no through-lines present, detection is unchanged. houghThreshold
+  // is the accumulator vote count; houghMinLengthRatio is the minimum line length
+  // as a fraction of the smaller ROI side; houghMaxLineGap bridges dashed edges.
+  seamRejectEnabled: true,
+  houghThreshold: 40,
+  houghMinLengthRatio: 0.3,
+  houghMaxLineGap: 10,
   cropToCard: true,
   cropToContour: true,
   cropPadding: 10,
@@ -93,7 +107,7 @@ const MOBILE_OVERRIDES = {
   glareThreshold: 5.0,
   // Handheld motion → require more stable frames before auto-capture.
   stabilityThreshold: 5,
-  minFillPercent: 75,
+  minFillPercent: 65,
   maxFillPercent: 95,
 };
 
@@ -390,7 +404,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug = true;
+  const showDebug = IS_DEBUG_MODE;
 
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {

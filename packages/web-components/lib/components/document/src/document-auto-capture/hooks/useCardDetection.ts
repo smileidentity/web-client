@@ -19,6 +19,8 @@ import {
 } from '../detection/seamRejection';
 
 // eslint-disable-next-line import/extensions
+import { nextCvErrorRecoveryAction } from '../detection/cvErrorRecovery.ts';
+// eslint-disable-next-line import/extensions
 import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
 
 declare const cv: any;
@@ -2386,8 +2388,28 @@ export function useCardDetection(
         cvErrorStreakRef.current = 0;
       } catch (err: any) {
         console.error('CV Error:', err);
-        setFeedback('Processing failed — please try again');
-        setComplianceState(COMPLIANCE_STATES.IDLE);
+        const recoveryAction = nextCvErrorRecoveryAction({
+          errorStreak: cvErrorStreakRef.current,
+          chromaUnavailable: chromaUnavailableRef.current,
+        });
+        cvErrorStreakRef.current = recoveryAction.nextErrorStreak;
+        if (recoveryAction.shouldDisableChroma) {
+          chromaUnavailableRef.current = true;
+        }
+        if (recoveryAction.shouldActivateFallback) {
+          setManualFallbackActive(true);
+          setCvLoadFailed(true);
+        }
+        setFeedback(
+          recoveryAction.shouldClearProcessingError
+            ? 'Position your document in the frame'
+            : 'Processing failed — please try again',
+        );
+        setComplianceState(
+          recoveryAction.shouldClearProcessingError
+            ? COMPLIANCE_STATES.DETECTING
+            : COMPLIANCE_STATES.IDLE,
+        );
         stabilityRef.current.count = 0;
         bestFrameRef.current = { image: null, preview: null, score: 0 };
         // Never let a per-frame CV error freeze the loop: clearing the
@@ -2395,16 +2417,7 @@ export function useCardDetection(
         // self-recovers on the next frame instead of getting stuck on
         // "Processing failed" until a manual page refresh.
         isCapturingRef.current = false;
-        // Circuit breaker: the rescheduler alone can't help a *persistent*
-        // error (e.g. the chroma path leaving a malformed edge map that
-        // findContours rejects every frame) — it just re-throws, stranding the
-        // user on "Processing failed". After a few consecutive failures, drop
-        // chroma for the session so detection continues on luminance-only
-        // edges. chromaMag is then never built, so its gate/fusion are skipped.
-        cvErrorStreakRef.current += 1;
-        if (cvErrorStreakRef.current >= 3 && !chromaUnavailableRef.current) {
-          chromaUnavailableRef.current = true;
-        }
+        mergeDebugInfo({ cvErrors: recoveryAction.nextErrorStreak });
       } finally {
         // Clean Memory
         safeDelete(
@@ -2455,7 +2468,8 @@ export function useCardDetection(
     const rotated = document.createElement('canvas');
     rotated.width = canvas.height;
     rotated.height = canvas.width;
-    const ctx = rotated.getContext('2d')!;
+    const ctx = rotated.getContext('2d');
+    if (!ctx) throw new Error('2d context unavailable');
     ctx.translate(0, rotated.height);
     ctx.rotate(-Math.PI / 2);
     ctx.drawImage(canvas, 0, 0);
@@ -2470,78 +2484,89 @@ export function useCardDetection(
     const { clampedX, clampedY, clampedW, clampedH } = coords;
     const s = settingsRef.current;
 
-    // Submitted image: full frame, or guide-rect crop when cropToCard is on
-    // (original behavior, padded by `cropPadding`).
-    let submitCaptureCanvas: HTMLCanvasElement = canvas;
-    let previewCaptureCanvas: HTMLCanvasElement | null = null;
+    try {
+      // Submitted image: full frame, or guide-rect crop when cropToCard is on
+      // (original behavior, padded by `cropPadding`).
+      let submitCaptureCanvas: HTMLCanvasElement = canvas;
+      let previewCaptureCanvas: HTMLCanvasElement | null = null;
 
-    // Crop in unrotated native-pixel space. If the UI is rotated, the
-    // cropped canvas is rotated CCW below to match the on-screen orientation.
-    if (s.cropToCard) {
-      // Submitted: guide-rect crop with cropPadding.
-      const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
-      const sPadX = clampedW * submitPad;
-      const sPadY = clampedH * submitPad;
-      const scx = Math.max(0, Math.floor(clampedX - sPadX));
-      const scy = Math.max(0, Math.floor(clampedY - sPadY));
-      const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
-      const sch = Math.min(
-        canvas.height - scy,
-        Math.ceil(clampedH + sPadY * 2),
-      );
-      const submitCanvas = document.createElement('canvas');
-      submitCanvas.width = scw;
-      submitCanvas.height = sch;
-      submitCanvas
-        .getContext('2d')!
-        .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
-      submitCaptureCanvas = submitCanvas;
+      // Crop in unrotated native-pixel space. If the UI is rotated, the
+      // cropped canvas is rotated CCW below to match the on-screen orientation.
+      if (s.cropToCard) {
+        // Submitted: guide-rect crop with cropPadding.
+        const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
+        const sPadX = clampedW * submitPad;
+        const sPadY = clampedH * submitPad;
+        const scx = Math.max(0, Math.floor(clampedX - sPadX));
+        const scy = Math.max(0, Math.floor(clampedY - sPadY));
+        const scw = Math.min(
+          canvas.width - scx,
+          Math.ceil(clampedW + sPadX * 2),
+        );
+        const sch = Math.min(
+          canvas.height - scy,
+          Math.ceil(clampedH + sPadY * 2),
+        );
+        const submitCanvas = document.createElement('canvas');
+        submitCanvas.width = scw;
+        submitCanvas.height = sch;
+        const submitCtx = submitCanvas.getContext('2d');
+        if (!submitCtx) throw new Error('2d context unavailable');
+        submitCtx.drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+        submitCaptureCanvas = submitCanvas;
 
-      // Preview: tighter contour crop with previewCropPadding.
-      const useContour = s.cropToContour !== false && latestCardRectRef.current;
-      const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
-      const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
-      const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
-      const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
-      const padPct = s.previewCropPadding;
-      const pad = (padPct == null ? 2 : padPct) / 100;
-      const padX = sourceW * pad;
-      const padY = sourceH * pad;
-      const cx = Math.max(0, Math.floor(sourceX - padX));
-      const cy = Math.max(0, Math.floor(sourceY - padY));
-      const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
-      const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = cw;
-      cropCanvas.height = ch;
-      cropCanvas
-        .getContext('2d')!
-        .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-      previewCaptureCanvas = cropCanvas;
-    }
-
-    // Rotate both outputs if UI was rotated during capture.
-    if (shouldRotateUi) {
-      submitCaptureCanvas = rotateCanvas90CCW(submitCaptureCanvas);
-      if (previewCaptureCanvas) {
-        previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
+        // Preview: tighter contour crop with previewCropPadding.
+        const useContour =
+          s.cropToContour !== false && latestCardRectRef.current;
+        const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
+        const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
+        const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
+        const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
+        const padPct = s.previewCropPadding;
+        const pad = (padPct == null ? 2 : padPct) / 100;
+        const padX = sourceW * pad;
+        const padY = sourceH * pad;
+        const cx = Math.max(0, Math.floor(sourceX - padX));
+        const cy = Math.max(0, Math.floor(sourceY - padY));
+        const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
+        const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = cw;
+        cropCanvas.height = ch;
+        const cropCtx = cropCanvas.getContext('2d');
+        if (!cropCtx) throw new Error('2d context unavailable');
+        cropCtx.drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+        previewCaptureCanvas = cropCanvas;
       }
-    }
 
-    const fullDataUrl = submitCaptureCanvas.toDataURL('image/jpeg', 0.95);
-    const previewDataUrl = previewCaptureCanvas
-      ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
-      : null;
+      // Rotate both outputs if UI was rotated during capture.
+      if (shouldRotateUi) {
+        submitCaptureCanvas = rotateCanvas90CCW(submitCaptureCanvas);
+        if (previewCaptureCanvas) {
+          previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
+        }
+      }
 
-    if (IS_DEBUG_MODE) {
-      console.info('--- MANUAL CAPTURE TRIGGERED ---');
+      const fullDataUrl = submitCaptureCanvas.toDataURL('image/jpeg', 0.95);
+      const previewDataUrl = previewCaptureCanvas
+        ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
+        : null;
+
+      if (IS_DEBUG_MODE) {
+        console.info('--- MANUAL CAPTURE TRIGGERED ---');
+      }
+      setCaptureOrigin('camera_manual_capture');
+      setCapturedImage(fullDataUrl);
+      setPreviewImage(previewDataUrl);
+      setComplianceState(COMPLIANCE_STATES.SUCCESS);
+      setFeedback('Captured!');
+      isCapturingRef.current = true;
+    } catch (err) {
+      console.error('Manual capture failed:', err);
+      setComplianceState(COMPLIANCE_STATES.IDLE);
+      setFeedback('Capture failed — please try again');
+      isCapturingRef.current = false;
     }
-    setCaptureOrigin('camera_manual_capture');
-    setCapturedImage(fullDataUrl);
-    setPreviewImage(previewDataUrl);
-    setComplianceState(COMPLIANCE_STATES.SUCCESS);
-    setFeedback('Captured!');
-    isCapturingRef.current = true;
   };
 
   const resetCapture = () => {
@@ -2557,6 +2582,7 @@ export function useCardDetection(
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
     captureMissCounterRef.current = 0;
+    cvErrorStreakRef.current = 0;
     lastRealCardAtRef.current = null;
     regionStabilityRef.current = 0;
     // If documentType was provided, keep it locked; otherwise re-enter discovery

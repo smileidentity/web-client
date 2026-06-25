@@ -590,16 +590,24 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) ctx.drawImage(img, 0, 0);
-        resolve({
-          data: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
-          width: canvas.width,
-          height: canvas.height,
-        });
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('2d context unavailable'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            data: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+            width: canvas.width,
+            height: canvas.height,
+          });
+        } catch (err) {
+          reject(err);
+        }
       };
       img.onerror = reject;
       img.src = dataUrl;

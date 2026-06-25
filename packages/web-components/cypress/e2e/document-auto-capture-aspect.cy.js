@@ -26,9 +26,9 @@ describe('Document auto-capture aspect classification', () => {
       expect(
         mod.classifyDiscoveryAspect(mod.ASPECT_RATIOS['id-card']),
       ).to.equal('id-card');
-      expect(
-        mod.classifyDiscoveryAspect(mod.ASPECT_RATIOS.passport),
-      ).to.equal('passport');
+      expect(mod.classifyDiscoveryAspect(mod.ASPECT_RATIOS.passport)).to.equal(
+        'passport',
+      );
     });
   });
 

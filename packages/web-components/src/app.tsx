@@ -90,7 +90,12 @@ const App = () => {
     let componentElement;
     switch (component) {
       case 'document-capture':
-        componentElement = createElement('document-capture-screens', props);
+        componentElement = createElement('document-capture-screens', {
+          ...props,
+          'document-type': 'id_card',
+          'auto-capture-enabled': true,
+          'new-instructions': true,
+        });
         break;
       case 'selfie-capture':
         componentElement = createElement('selfie-capture-screens', props);
@@ -197,6 +202,9 @@ const App = () => {
       'show-navigation': true,
       'theme-color': themeColor,
       'auto-capture': true,
+      'document-type': 'id_card',
+      'auto-capture-enabled': true,
+      'new-instructions': true,
     };
 
     switch (component) {

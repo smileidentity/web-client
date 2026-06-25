@@ -23,7 +23,7 @@ declare module 'sst' {
       value: string;
     };
     PreviewApp: {
-      type: 'sst.aws.Remix';
+      type: 'sst.aws.React';
       url: string;
     };
     SmileIdApiKey: {

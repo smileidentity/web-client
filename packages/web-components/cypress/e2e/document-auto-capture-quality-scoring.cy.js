@@ -22,12 +22,11 @@ describe('Document auto-capture quality scoring', () => {
     cy.window().then(async (win) => {
       const mod = await importQualityScoring(win);
 
-      expect(
-        mod.frameQualityScore({ glare: 0, sharpness: 1 }),
-      ).to.be.closeTo(0.7, 0.0001);
-      expect(
-        mod.frameQualityScore({ glare: null, sharpness: 1 }),
-      ).to.equal(1);
+      expect(mod.frameQualityScore({ glare: 0, sharpness: 1 })).to.be.closeTo(
+        0.7,
+        0.0001,
+      );
+      expect(mod.frameQualityScore({ glare: null, sharpness: 1 })).to.equal(1);
       expect(mod.frameQualityScore({})).to.equal(0);
     });
   });

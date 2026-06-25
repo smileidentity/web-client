@@ -197,7 +197,7 @@ const App = () => {
       'show-navigation': true,
       'theme-color': themeColor,
       'auto-capture': true,
-      'document-type': 'id_card'
+      'document-type': 'id_card',
     };
 
     switch (component) {

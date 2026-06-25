@@ -1,5 +1,21 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 
+import {
+  clamp01,
+  frameQualityScore,
+  SYNTHETIC_CONTOUR_CONFIDENCE,
+} from '../detection/qualityScoring';
+import {
+  ASPECT_RATIOS,
+  classifyDiscoveryAspect,
+  isAspectKey,
+  type AspectKey,
+  type DiscoveryVote,
+} from '../detection/documentAspect';
+
+// eslint-disable-next-line import/extensions
+import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
+
 declare const cv: any;
 
 // Internal debug flag: only emit verbose detection telemetry when the page
@@ -39,20 +55,6 @@ const DETECTION_PHASE = {
   DISCOVERY: 'discovery', // Phase 1: identify document type via aspect ratio, when documentType prop is not provided
   CAPTURE: 'capture', // Phase 2: quality gating with locked guide box
 };
-
-const ASPECT_RATIOS = {
-  'id-card': 1.585, // CR80 / ID-1
-  passport: 1.42, // ID-3 bio-data page
-  greenbook: 1.42, // Greenbook uses passport-like landscape aspect
-};
-type AspectKey = keyof typeof ASPECT_RATIOS;
-const isAspectKey = (v: unknown): v is AspectKey =>
-  typeof v === 'string' &&
-  Object.prototype.hasOwnProperty.call(ASPECT_RATIOS, v);
-
-// Midpoint for classifying detected aspect ratio
-const ASPECT_RATIO_MIDPOINT =
-  (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS.passport) / 2; // ~1.50
 
 // Number of agreeing frames required to lock document type.
 // Lowered from 10 → 6: laminated/hand-held cards produce intermittent detections
@@ -96,13 +98,6 @@ const CANNY_HIGH_MIN = 60;
 const PERI_COMPRESSION_MAX = 3.5;
 // Minimum contour-area / bounding-box-area ratio for a card-shaped contour.
 const MIN_RECT_FILL_RATIO = 0.65;
-// Desktop id-card synthetic fallback: only bridge contour dropouts when a
-// genuine 4-corner card was validated within this many frames (~0.5s at
-// 30fps). Without the recency gate the fallback synthesizes a "card" from
-// background contours (face, furniture, window frames) and can auto-capture
-// a document-free scene.
-const SYNTH_BRIDGE_MAX_FRAMES = 15;
-
 // Mobile content-region fallback (Fix 3): a low-contrast/tilted id-card that
 // never forms a clean 4-corner quad can still be captured from the combined
 // content bbox, but only after the region candidate has persisted this many
@@ -118,56 +113,11 @@ const MOBILE_REGION_STABILITY_FRAMES = 8;
 // accumulated (capture is still blocked by the stability counter meanwhile).
 const CHROMA_AVG_WINDOW = 6;
 const CHROMA_MIN_SAMPLES = 4;
-
-// --- Composite per-frame quality score ---
-// Stripe/Persona-style readability scoring: instead of picking the best frame
-// by sharpness alone, score each qualifying frame on a blend of the metrics we
-// already compute, normalized to 0–1, and keep the highest-scoring frame of the
-// stability window. This selects the most *readable* capture (well-framed, in
-// focus, low glare, true card shape), not merely the sharpest. Weights are
-// auto-normalized over whichever components are present, so chroma (mobile only)
-// can drop out without re-tuning the rest.
-const QUALITY_WEIGHTS = {
-  sharpness: 0.35, // Laplacian variance vs blurThreshold
-  glare: 0.15, // inverse of glare coverage
-  fill: 0.2, // distance from the center of the accepted fill band
-  aspect: 0.2, // closeness of the winner's aspect to the doc-type ratio
-  contour: 0.1, // rotated-rect fill of a real quad (synthetic = lower)
-  chroma: 0.05, // colour content (mobile, when the chroma gate is active)
-};
-// A synthesized fallback rect is inherently lower-confidence than a real
-// 4-corner quad (its bbox is inferred from inner content, not the card edge).
-const SYNTHETIC_CONTOUR_CONFIDENCE = 0.55;
 // How many consecutive blur/glare misses to tolerate before discarding an
 // already-captured best frame. Mobile cameras drop 1–2 frames to motion blur or
 // AWB; nulling the candidate on the first stumble throws away a good capture and
 // restarts the stability climb. Mirrors DISCOVERY_MISS_TOLERANCE in spirit.
 const BEST_FRAME_MISS_TOLERANCE = 3;
-
-const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
-
-// Combine sub-scores (each already in 0–1) into one weighted score, normalizing
-// over only the components that are present (null/undefined ones are skipped).
-function frameQualityScore(parts: {
-  sharpness?: number | null;
-  glare?: number | null;
-  fill?: number | null;
-  aspect?: number | null;
-  contour?: number | null;
-  chroma?: number | null;
-}): number {
-  const keys = Object.keys(QUALITY_WEIGHTS) as Array<
-    keyof typeof QUALITY_WEIGHTS
-  >;
-  const present = keys.filter((key) => parts[key] != null);
-  const den = present.reduce((sum, key) => sum + QUALITY_WEIGHTS[key], 0);
-  if (den <= 0) return 0;
-  const num = present.reduce(
-    (sum, key) => sum + clamp01(parts[key] as number) * QUALITY_WEIGHTS[key],
-    0,
-  );
-  return num / den;
-}
 
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
@@ -387,7 +337,7 @@ export function useCardDetection(
   const contourCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef<{
-    votes: AspectKey[];
+    votes: DiscoveryVote[];
     docType: AspectKey | null;
     frameCount: number;
     consecutiveMisses: number;
@@ -427,6 +377,13 @@ export function useCardDetection(
   // the chroma-fusion path (Fix 2) disables itself for the session and falls
   // back to luminance-only edges.
   const chromaUnavailableRef = useRef(false);
+  // Consecutive per-frame CV errors (outer catch). A persistent throw is almost
+  // always the optional chroma path leaving a malformed edge map that the
+  // downstream findContours/morphology then rejects every frame — which strands
+  // detection on "Processing failed". After a few in a row we disable chroma for
+  // the session so detection self-heals onto the luminance-only path. Reset on
+  // any successful frame.
+  const cvErrorStreakRef = useRef(0);
   // Consecutive frames a mobile content-region candidate has qualified (Fix 3).
   // Gates the mobile region fallback so a transient blob can't trigger capture.
   const regionStabilityRef = useRef(0);
@@ -450,11 +407,11 @@ export function useCardDetection(
   // (see BEST_FRAME_MISS_TOLERANCE). Reset once a frame reaches the stability
   // section cleanly.
   const bestFrameMissRef = useRef(0);
-  // Frames since a genuine (non-synthetic) 4-corner card last passed
-  // validation. Gates the desktop id-card synthetic fallback so it only
-  // bridges brief dropouts of a card that WAS being detected, rather than
-  // synthesizing one from background contours (see SYNTH_BRIDGE_MAX_FRAMES).
-  const framesSinceRealCardRef = useRef(Number.POSITIVE_INFINITY);
+  // Timestamp for the last genuine (non-synthetic) 4-corner card validation.
+  // Gates the desktop id-card synthetic fallback so it only bridges brief
+  // dropouts of a card that WAS being detected, rather than synthesizing one
+  // from background contours.
+  const lastRealCardAtRef = useRef<number | null>(null);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -541,6 +498,8 @@ export function useCardDetection(
       // the per-function code-path graph small enough that the
       // `no-useless-return` ESLint rule does not exceed Node's call stack.
       const runDetection = () => {
+        const frameTimeMs = performance.now();
+
         if (!canvasRef.current) {
           canvasRef.current = document.createElement('canvas');
         }
@@ -1195,10 +1154,6 @@ export function useCardDetection(
           // Consumed in the no-contour handling below to show distance
           // guidance instead of the dead-end "Align document in frame".
           let wallHugRejectedCardThisFrame = false;
-          // Age the real-card recency window each detection frame; reset to 0
-          // below when a genuine 4-corner card passes validation.
-          // (Infinity + 1 stays Infinity, so the pristine state is preserved.)
-          framesSinceRealCardRef.current += 1;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -1377,7 +1332,7 @@ export function useCardDetection(
                   };
                   // Genuine 4-corner card validated — open the synthetic
                   // fallback's bridge window and reset the mobile-region streak.
-                  framesSinceRealCardRef.current = 0;
+                  lastRealCardAtRef.current = frameTimeMs;
                   regionStabilityRef.current = 0;
                 } else {
                   // Desktop: the quad failed ONLY the wall-hug check — every
@@ -1449,7 +1404,10 @@ export function useCardDetection(
             // distance and a capture would clip the card's edges anyway.
             const synthCoverageEligible =
               !combinedBboxOverflow &&
-              (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
+              (isSyntheticBridgeRecent(
+                lastRealCardAtRef.current,
+                frameTimeMs,
+              ) ||
                 passingCells >= 7);
             // Passports/greenbooks rarely form a clean 4-corner quad (the spine
             // breaks the outer contour), so they depend on this synthetic path
@@ -1819,14 +1777,15 @@ export function useCardDetection(
 
               const detectedRatio = bRect.width / bRect.height;
               // Normalize orientation so portrait-held docs still classify correctly.
-              const normalizedRatio = Math.max(
-                detectedRatio,
-                1 / detectedRatio,
-              );
-              const vote =
-                normalizedRatio >= ASPECT_RATIO_MIDPOINT
-                  ? 'id-card'
-                  : 'passport';
+              // Prefer the rotated-rect aspect computed during contour
+              // acceptance: unlike boundingRect, it is stable when the card is
+              // tilted in-plane. Fall back to boundingRect only if the winner
+              // geometry is unavailable.
+              const normalizedRatio =
+                winnerGeomRef.current.aspect > 0
+                  ? winnerGeomRef.current.aspect
+                  : Math.max(detectedRatio, 1 / detectedRatio);
+              const vote = classifyDiscoveryAspect(normalizedRatio);
 
               discoveryRef.current.votes.push(vote);
 
@@ -2312,6 +2271,9 @@ export function useCardDetection(
 
       try {
         runDetection();
+        // Clean frame — clear the error streak so a later one-off blip doesn't
+        // trip the circuit breaker below.
+        cvErrorStreakRef.current = 0;
       } catch (err: any) {
         console.error('CV Error:', err);
         setFeedback('Processing failed — please try again');
@@ -2323,6 +2285,16 @@ export function useCardDetection(
         // self-recovers on the next frame instead of getting stuck on
         // "Processing failed" until a manual page refresh.
         isCapturingRef.current = false;
+        // Circuit breaker: the rescheduler alone can't help a *persistent*
+        // error (e.g. the chroma path leaving a malformed edge map that
+        // findContours rejects every frame) — it just re-throws, stranding the
+        // user on "Processing failed". After a few consecutive failures, drop
+        // chroma for the session so detection continues on luminance-only
+        // edges. chromaMag is then never built, so its gate/fusion are skipped.
+        cvErrorStreakRef.current += 1;
+        if (cvErrorStreakRef.current >= 3 && !chromaUnavailableRef.current) {
+          chromaUnavailableRef.current = true;
+        }
       } finally {
         // Clean Memory
         safeDelete(
@@ -2475,7 +2447,7 @@ export function useCardDetection(
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
     captureMissCounterRef.current = 0;
-    framesSinceRealCardRef.current = Number.POSITIVE_INFINITY;
+    lastRealCardAtRef.current = null;
     regionStabilityRef.current = 0;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {

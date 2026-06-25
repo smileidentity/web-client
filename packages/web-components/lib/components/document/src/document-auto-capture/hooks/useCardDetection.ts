@@ -74,7 +74,7 @@ const DISCOVERY_MISS_TOLERANCE = 20;
 // Below MIN_FILL → too far (card is tiny). Above MAX_FILL → too close (edges clipped).
 // Min 65% ensures the document occupies ≥65-70% of the final captured image,
 // satisfying the product requirement of a clear, readable scan.
-const MIN_FILL_PERCENT = 75;
+const MIN_FILL_PERCENT = 65;
 const MAX_FILL_PERCENT = 95;
 // Minimum contour area to even consider (5% — catches far-away documents)
 const MIN_CONTOUR_AREA_PERCENT = 0.05;

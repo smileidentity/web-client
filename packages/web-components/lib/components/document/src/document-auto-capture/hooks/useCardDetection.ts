@@ -361,6 +361,11 @@ export function useCardDetection(
   // Latest distance fill %, stashed each frame so debug payloads emitted
   // AFTER the contour block (blur/glare/capture gates) can still report it.
   const latestDocFillRef = useRef(0);
+  // EMA of docFillPercent. Smooths distance jitter so a hand hovering near the
+  // fill thresholds doesn't toggle the "move closer/further" gate frame-to-frame.
+  // null until the first measurement; reset to null whenever the document is
+  // declared gone so a re-acquired doc doesn't inherit a stale average.
+  const docFillEmaRef = useRef<number | null>(null);
   const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
     providedDocType,
   ); // null = not yet classified
@@ -464,6 +469,26 @@ export function useCardDetection(
   // (see BEST_FRAME_MISS_TOLERANCE). Reset once a frame reaches the stability
   // section cleanly.
   const bestFrameMissRef = useRef(0);
+  // Soften a transient gate failure instead of nuking capture progress: while a
+  // best frame is held and we're within BEST_FRAME_MISS_TOLERANCE, decay the
+  // stability count by 1 (the same pattern the blur/glare gates already use) so
+  // a single jittery frame doesn't drain the ring or flip the compliance state.
+  // Returns true when the failure was ABSORBED (decayed); false when tolerance
+  // is exceeded and the candidate is hard-reset/discarded.
+  const softFailStability = (): boolean => {
+    if (
+      bestFrameRef.current.image &&
+      bestFrameMissRef.current < BEST_FRAME_MISS_TOLERANCE
+    ) {
+      bestFrameMissRef.current += 1;
+      stabilityRef.current.count = Math.max(0, stabilityRef.current.count - 1);
+      return true;
+    }
+    bestFrameMissRef.current = 0;
+    stabilityRef.current.count = 0;
+    bestFrameRef.current = { image: null, preview: null, score: 0 };
+    return false;
+  };
   // Timestamp for the last genuine (non-synthetic) 4-corner card validation.
   // Gates the desktop id-card synthetic fallback so it only bridges brief
   // dropouts of a card that WAS being detected, rather than synthesizing one
@@ -843,7 +868,9 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
+            docFillEmaRef.current = null;
             inGuideDetectedRef.current = false;
+            mergeDebugInfo({ rejectReason: 'off-guide (card outside guide)' });
             return;
           }
         }
@@ -972,10 +999,24 @@ export function useCardDetection(
           const reason = noDocumentPresent
             ? 'Place document in frame'
             : 'Ensure document is fully visible';
-          setFeedback(reason);
-          setComplianceState(COMPLIANCE_STATES.IDLE);
-          stabilityRef.current.count = 0;
-          bestFrameRef.current = { image: null, preview: null, score: 0 };
+          // Document truly absent → hard reset. Document present but coverage
+          // momentarily dipped ("fully visible") → soften so a flickered cell
+          // doesn't drain progress (mobile gateDecayEnabled only).
+          let gate0Absorbed = false;
+          if (noDocumentPresent) {
+            docFillEmaRef.current = null;
+            stabilityRef.current.count = 0;
+            bestFrameMissRef.current = 0;
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+          } else {
+            gate0Absorbed =
+              settingsRef.current.gateDecayEnabled === true &&
+              softFailStability();
+          }
+          if (!gate0Absorbed) {
+            setFeedback(reason);
+            setComplianceState(COMPLIANCE_STATES.IDLE);
+          }
           updateDebugPath(null);
           mergeDebugInfo({
             blur: 0,
@@ -983,6 +1024,9 @@ export function useCardDetection(
             edgeDensity: edgeDensity.toFixed(1),
             texture: Math.round(textureScore),
             quadrants: quadDensities.join('/'),
+            rejectReason: noDocumentPresent
+              ? 'Gate0: no document present'
+              : `Gate0: grid coverage (${passingCells}/9)${gate0Absorbed ? ' [held]' : ''}`,
           });
           return;
         }
@@ -1780,7 +1824,17 @@ export function useCardDetection(
               if (nz) nz.delete();
             }
           }
-          latestDocFillRef.current = docFillPercent;
+          // Smooth the fill % with an EMA so distance jitter near the gate
+          // thresholds doesn't toggle "move closer/further" frame-to-frame.
+          // alpha = 1 disables smoothing (desktop default via the ?? fallback).
+          const fillAlpha = settingsRef.current.docFillEmaAlpha ?? 1;
+          docFillEmaRef.current =
+            docFillEmaRef.current == null
+              ? docFillPercent
+              : fillAlpha * docFillPercent +
+                (1 - fillAlpha) * docFillEmaRef.current;
+          const smoothedDocFill = docFillEmaRef.current;
+          latestDocFillRef.current = smoothedDocFill;
 
           // Active whenever we have a real contour to measure against.
           // Skip distance gating when the contour is the synthetic book-doc
@@ -1815,21 +1869,30 @@ export function useCardDetection(
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
           // checks would block voting with misleading feedback.
+          // Hysteresis deadband (pct points): trip the distance gate only when
+          // the smoothed fill is clearly out of band, so a hand hovering on the
+          // threshold doesn't toggle. 0 disables (desktop default).
+          const fillBand = settingsRef.current.fillHysteresis ?? 0;
+          const gateDecayOn = settingsRef.current.gateDecayEnabled === true;
           if (
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent < minFillPercent
+            smoothedDocFill < minFillPercent - fillBand
           ) {
-            setFeedback('Move document closer');
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            // Soften instead of nuking progress on a transient dip; only
+            // downgrade the displayed state when the failure isn't absorbed.
+            const absorbed = gateDecayOn && softFailStability();
+            if (!absorbed) {
+              setFeedback('Move document closer');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+            }
             if (bestContour) bestContour.delete();
             mergeDebugInfo({
-              docFill: Math.round(docFillPercent),
+              docFill: Math.round(smoothedDocFill),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
+              rejectReason: `fill too small (${Math.round(smoothedDocFill)}% < ${minFillPercent}%)${absorbed ? ' [held]' : ''}`,
             });
             return;
           }
@@ -1837,17 +1900,19 @@ export function useCardDetection(
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent > maxFillPercent
+            smoothedDocFill > maxFillPercent + fillBand
           ) {
-            setFeedback('Move document further away');
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            const absorbed = gateDecayOn && softFailStability();
+            if (!absorbed) {
+              setFeedback('Move document further away');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+            }
             if (bestContour) bestContour.delete();
             mergeDebugInfo({
-              docFill: Math.round(docFillPercent),
+              docFill: Math.round(smoothedDocFill),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
+              rejectReason: `fill too large (${Math.round(smoothedDocFill)}% > ${maxFillPercent}%)${absorbed ? ' [held]' : ''}`,
             });
             return;
           }
@@ -1885,11 +1950,15 @@ export function useCardDetection(
               win.length >= CHROMA_MIN_SAMPLES &&
               avgChroma < (settingsRef.current.minChromaContent ?? 13)
             ) {
-              setFeedback('Position your document in the frame');
-              setComplianceState(COMPLIANCE_STATES.DETECTING);
-              stabilityRef.current.count = 0;
-              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              const absorbed = gateDecayOn && softFailStability();
+              if (!absorbed) {
+                setFeedback('Position your document in the frame');
+                setComplianceState(COMPLIANCE_STATES.DETECTING);
+              }
               bestContour.delete();
+              mergeDebugInfo({
+                rejectReason: `chroma content low (${Math.round(avgChroma)} < ${settingsRef.current.minChromaContent ?? 13})${absorbed ? ' [held]' : ''}`,
+              });
               return;
             }
           }
@@ -1966,6 +2035,9 @@ export function useCardDetection(
                 setFeedback('Hold steady');
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
+                mergeDebugInfo({
+                  rejectReason: 'discovery: timeout → id-card',
+                });
                 return;
               }
 
@@ -2010,6 +2082,9 @@ export function useCardDetection(
                 quadrants: quadDensities.join('/'),
                 detectedRatio: normalizedRatio.toFixed(3),
                 votes: `${recentVotes.filter((v) => v === 'id-card').length}id / ${recentVotes.filter((v) => v === 'passport').length}pp`,
+                rejectReason: allAgree
+                  ? 'discovery: type locked'
+                  : 'discovery: detecting type',
               });
 
               if (allAgree) {
@@ -2070,6 +2145,7 @@ export function useCardDetection(
                 quadrants: quadDensities.join('/'),
                 misses: discoveryRef.current.consecutiveMisses,
                 votes: `${discoveryRef.current.votes.filter((v) => v === 'id-card').length}id / ${discoveryRef.current.votes.filter((v) => v === 'passport').length}pp`,
+                rejectReason: 'discovery: no card contour',
               });
               return;
             }
@@ -2086,14 +2162,16 @@ export function useCardDetection(
               (wallHugRejectedCardThisFrame || combinedBboxOverflow)
             ) {
               captureMissCounterRef.current = 0;
-              setFeedback('Move document further away');
-              setComplianceState(COMPLIANCE_STATES.DETECTING);
-              stabilityRef.current.count = 0;
-              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              const absorbed = gateDecayOn && softFailStability();
+              if (!absorbed) {
+                setFeedback('Move document further away');
+                setComplianceState(COMPLIANCE_STATES.DETECTING);
+              }
               mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
+                rejectReason: `fill too large (card overflows ROI)${absorbed ? ' [held]' : ''}`,
               });
               return;
             }
@@ -2111,6 +2189,7 @@ export function useCardDetection(
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
                 missStreak: captureMissCounterRef.current,
+                rejectReason: `no card contour (miss ${captureMissCounterRef.current}/${CAPTURE_MISS_TOLERANCE})`,
               });
               return;
             }
@@ -2118,11 +2197,13 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
+            docFillEmaRef.current = null;
             mergeDebugInfo({
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
               quadrants: quadDensities.join('/'),
               missStreak: captureMissCounterRef.current,
+              rejectReason: 'no card contour (no 4-corner quad formed)',
             });
             return;
           }
@@ -2156,7 +2237,11 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
           }
-          mergeDebugInfo({ blur: Math.round(variance), glare: 0 });
+          mergeDebugInfo({
+            blur: Math.round(variance),
+            glare: 0,
+            rejectReason: `Gate1: too blurry (${Math.round(variance)} < ${settingsRef.current.blurThreshold})`,
+          });
           return;
         }
 
@@ -2194,6 +2279,9 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
           }
+          mergeDebugInfo({
+            rejectReason: `Gate2: glare (${glarePercent.toFixed(1)}% > ${settingsRef.current.glareThreshold}%)`,
+          });
           return;
         }
 
@@ -2359,6 +2447,9 @@ export function useCardDetection(
         setFeedback('Hold Still...');
         setCaptureProgress(Math.round(progress));
         setComplianceState(COMPLIANCE_STATES.STABLE);
+        mergeDebugInfo({
+          rejectReason: `Gate3: stabilizing (${stabilityRef.current.count}/${settingsRef.current.stabilityThreshold})`,
+        });
 
         if (
           stabilityRef.current.count >= settingsRef.current.stabilityThreshold
@@ -2401,6 +2492,7 @@ export function useCardDetection(
             }
             setFeedback('Capturing document...');
             setComplianceState(COMPLIANCE_STATES.CAPTURING);
+            mergeDebugInfo({ rejectReason: '✓ capturing' });
             isCapturingRef.current = true;
             setCaptureOrigin('camera_auto_capture');
             // Use the sharpest frame captured during stability
@@ -2516,6 +2608,7 @@ export function useCardDetection(
           cvError: formatDebugError(err),
           cvErrors: recoveryAction.nextErrorStreak,
           cvRecovery,
+          rejectReason: `CV error (${cvRecovery})`,
         });
       } finally {
         // Clean Memory
@@ -2683,6 +2776,7 @@ export function useCardDetection(
     stabilityRef.current.lastCenter = null;
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
+    docFillEmaRef.current = null;
     captureMissCounterRef.current = 0;
     cvErrorStreakRef.current = 0;
     lastRealCardAtRef.current = null;

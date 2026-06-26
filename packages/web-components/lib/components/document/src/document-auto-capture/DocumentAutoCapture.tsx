@@ -125,6 +125,18 @@ const MOBILE_OVERRIDES = {
   stabilityThreshold: 5,
   minFillPercent: 65,
   maxFillPercent: 95,
+  // Anti-flicker (mobile only — handheld jitter is the problem; webcams are
+  // steady so desktop keeps today's exact behavior via the hook's ?? fallbacks).
+  // gateDecayEnabled: on a transient gate failure, decay the stability count by
+  // 1 (within the blur/glare miss tolerance) instead of zeroing it, so a single
+  // jittery frame doesn't drain the progress ring or flip "Hold Still"↔"Align".
+  gateDecayEnabled: true,
+  // docFillEmaAlpha: EMA smoothing of the distance fill % (1 = off). 0.3 ≈ a
+  // 3-frame time constant — kills threshold chatter without lagging a real move.
+  docFillEmaAlpha: 0.3,
+  // fillHysteresis: deadband (pct points) around min/maxFillPercent so a hand
+  // hovering on the 65%/95% boundary doesn't toggle the distance gate.
+  fillHysteresis: 3,
 };
 
 const DESKTOP_OVERRIDES = {
@@ -858,13 +870,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   if (!isMobileDevice) {
     const borderColor = (() => {
       if (
-        complianceState === COMPLIANCE_STATES.STABLE ||
-        complianceState === COMPLIANCE_STATES.SUCCESS ||
-        complianceState === COMPLIANCE_STATES.CAPTURING
+        visibleComplianceState === COMPLIANCE_STATES.STABLE ||
+        visibleComplianceState === COMPLIANCE_STATES.SUCCESS ||
+        visibleComplianceState === COMPLIANCE_STATES.CAPTURING
       ) {
         return '#2CC05C';
       }
-      if (complianceState === COMPLIANCE_STATES.DETECTING) {
+      if (visibleComplianceState === COMPLIANCE_STATES.DETECTING) {
         return '#F59E0B';
       }
       return '#9394ab';
@@ -1040,7 +1052,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             {showManualButton && (
               <DesktopCaptureButton
                 progress={
-                  complianceState === COMPLIANCE_STATES.STABLE
+                  visibleComplianceState === COMPLIANCE_STATES.STABLE
                     ? captureProgress
                     : 0
                 }
@@ -1286,7 +1298,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 >
                   <CaptureButton
                     progress={
-                      complianceState === COMPLIANCE_STATES.STABLE
+                      visibleComplianceState === COMPLIANCE_STATES.STABLE
                         ? captureProgress
                         : 0
                     }

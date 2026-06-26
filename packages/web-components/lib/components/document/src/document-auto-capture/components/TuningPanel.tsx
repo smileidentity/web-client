@@ -29,10 +29,18 @@ interface TuningSettings {
   houghThreshold?: number;
   houghMinLengthRatio?: number;
   houghMaxLineGap?: number;
+  seamMaxHoughLines?: number;
+  lowClutterEdgeDensity?: number;
+  cannyHighMinLowClutter?: number;
+  captureGridMinCells?: number;
+  gateDecayEnabled?: boolean;
+  docFillEmaAlpha?: number;
+  fillHysteresis?: number;
   [key: string]: unknown;
 }
 
 interface TuningDebugInfo {
+  rejectReason?: string;
   edgeDensity?: number | string;
   texture?: number | string;
   quadrants?: string;
@@ -46,6 +54,7 @@ interface TuningDebugInfo {
   quality?: number | string;
   houghLines?: number | string;
   seamRejected?: boolean | string;
+  seamClutter?: boolean | string;
   cvError?: string;
   cvErrors?: number | string;
   cvRecovery?: string;
@@ -152,6 +161,17 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           color: '#888',
         }}
       >
+        <div style={{ gridColumn: '1 / -1' }}>
+          Blocking check:{' '}
+          <span
+            style={{
+              color: debugInfo?.rejectReason?.startsWith('✓') ? '#0f0' : '#fd5',
+              fontWeight: 'bold',
+            }}
+          >
+            {debugInfo?.rejectReason ?? '—'}
+          </span>
+        </div>
         <div>
           Edge Density:{' '}
           <span style={{ color: '#fff' }}>
@@ -214,6 +234,14 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
               : String(debugInfo.seamRejected)}
           </span>
         </div>
+        <div>
+          Seam Clutter:{' '}
+          <span style={{ color: debugInfo?.seamClutter ? '#fb5' : '#fff' }}>
+            {debugInfo?.seamClutter == null
+              ? '—'
+              : String(debugInfo.seamClutter)}
+          </span>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
           <span style={{ color: '#fff', fontSize: '0.7rem' }}>
@@ -231,7 +259,11 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           <div style={{ gridColumn: '1 / -1' }}>
             CV Error:{' '}
             <span
-              style={{ color: '#f88', fontSize: '0.7rem', wordBreak: 'break-word' }}
+              style={{
+                color: '#f88',
+                fontSize: '0.7rem',
+                wordBreak: 'break-word',
+              }}
             >
               {debugInfo.cvError}
             </span>
@@ -241,7 +273,11 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           <div style={{ gridColumn: '1 / -1' }}>
             Chroma Error:{' '}
             <span
-              style={{ color: '#f88', fontSize: '0.7rem', wordBreak: 'break-word' }}
+              style={{
+                color: '#f88',
+                fontSize: '0.7rem',
+                wordBreak: 'break-word',
+              }}
             >
               {debugInfo.chromaError}
             </span>
@@ -521,8 +557,121 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
               }
             />
           </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Seam Max Hough Lines: {settings.seamMaxHoughLines}{' '}
+              <em>(above this the scene is too cluttered — skip seam gate)</em>
+            </span>
+            <input
+              type="range"
+              min="10"
+              max="300"
+              step="5"
+              value={settings.seamMaxHoughLines as number}
+              onInput={(e) =>
+                updateSetting('seamMaxHoughLines', Number(e.target.value))
+              }
+            />
+          </label>
         </>
       )}
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Low-Clutter Edge Density %: {settings.lowClutterEdgeDensity}{' '}
+          <em>(below this, drop the Canny floor to catch faint borders)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="0.5"
+          value={settings.lowClutterEdgeDensity as number}
+          onInput={(e) =>
+            updateSetting('lowClutterEdgeDensity', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Canny High-Min (low clutter): {settings.cannyHighMinLowClutter}
+        </span>
+        <input
+          type="range"
+          min="20"
+          max="60"
+          step="1"
+          value={settings.cannyHighMinLowClutter as number}
+          onInput={(e) =>
+            updateSetting('cannyHighMinLowClutter', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Capture Grid Min Cells: {settings.captureGridMinCells}{' '}
+          <em>(of 9; early-out only — distance is owned by Doc Fill %)</em>
+        </span>
+        <input
+          type="range"
+          min="1"
+          max="9"
+          step="1"
+          value={settings.captureGridMinCells as number}
+          onInput={(e) =>
+            updateSetting('captureGridMinCells', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={settings.gateDecayEnabled === true}
+          onInput={(e) =>
+            updateSetting(
+              'gateDecayEnabled',
+              (e.target as HTMLInputElement).checked,
+            )
+          }
+        />
+        <span>
+          Gate Decay (anti-flicker){' '}
+          <em>(soften progress on transient gate misses)</em>
+        </span>
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Fill EMA α: {settings.docFillEmaAlpha}{' '}
+          <em>(lower = smoother distance; 1 = off)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="1"
+          step="0.05"
+          value={settings.docFillEmaAlpha as number}
+          onInput={(e) =>
+            updateSetting('docFillEmaAlpha', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Fill Hysteresis (±%): {settings.fillHysteresis}{' '}
+          <em>(deadband around the fill thresholds; 0 = off)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={settings.fillHysteresis as number}
+          onInput={(e) =>
+            updateSetting('fillHysteresis', Number(e.target.value))
+          }
+        />
+      </label>
 
       <label style={{ display: 'flex', flexDirection: 'column' }}>
         <span>Sharpness Threshold: {settings.blurThreshold}</span>

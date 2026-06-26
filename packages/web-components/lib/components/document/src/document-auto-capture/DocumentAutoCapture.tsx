@@ -90,6 +90,19 @@ const SHARED_DEFAULTS = {
   // here only false-rejected low-contrast cards on plain backgrounds before the
   // contour pass ran. Synthetic-fallback eligibility keeps its own 7/9 signal.
   captureGridMinCells: 4,
+  // Chroma-mask fallback: when no 4-corner quad forms in luminance (a strongly
+  // coloured card on a near-neutral background, e.g. a green/yellow ID on grey
+  // fabric), segment the card by chroma magnitude and accept the largest blob if
+  // it passes the same fill/aspect/wall-hug gates as a real contour. Gated to
+  // mobile (chroma fusion path) by the hook. KNOWN LIMITATION: a colourful
+  // rug/carpet patch is classically indistinguishable and can pass — toggle off
+  // here (or in the panel) if it false-captures. chromaMaskThreshold is the
+  // |a-128|+|b-128| binary cutoff; chromaMaskMinFrac/MaxFrac bound the blob's
+  // share of the ROI (a chromatic background spanning the ROI exceeds MaxFrac).
+  chromaMaskFallback: true,
+  chromaMaskThreshold: 18,
+  chromaMaskMinFrac: 0.08,
+  chromaMaskMaxFrac: 0.7,
   cropToCard: true,
   cropToContour: true,
   cropPadding: 10,

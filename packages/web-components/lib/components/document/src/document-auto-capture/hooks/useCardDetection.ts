@@ -1621,6 +1621,163 @@ export function useCardDetection(
               passingCells >= 7;
           }
 
+          // --- Chroma-mask fallback (colored card on neutral background) ---
+          // A strongly COLOURED card (e.g. a green/yellow ID) on a near-neutral
+          // surface (grey fabric) has almost no LUMINANCE border, and its chroma
+          // edges are swamped by the background texture, so no 4-corner quad
+          // forms above. Segment the card by CHROMA MAGNITUDE instead: threshold
+          // |a-128|+|b-128| (already computed as chromaMag), clean up, take the
+          // largest blob. Heavily gated — a chromatic BACKGROUND (wood/parquet)
+          // fills the ROI and is caught by the coverage/wall-hug gates.
+          // KNOWN LIMITATION: a colourful rug/carpet patch is classically
+          // indistinguishable from a card and CAN pass this path (fill, aspect
+          // and internal-edge density all overlap). Flag-gated (chromaMaskFallback,
+          // default on for mobile) so it can be disabled live if it regresses.
+          const chromaMaskOn =
+            settingsRef.current.chromaMaskFallback === true &&
+            !!chromaMag &&
+            !skipGridCheck;
+          if (!bestContour && chromaMaskOn) {
+            let mask: any = null;
+            let maskContours: any = null;
+            let maskHierarchy: any = null;
+            let maskKernel: any = null;
+            let maskBest: any = null;
+            let maskApprox: any = null;
+            try {
+              const roiPix = clampedW * clampedH;
+              mask = new cv.Mat();
+              const maskThresh = settingsRef.current.chromaMaskThreshold ?? 18;
+              cv.threshold(chromaMag, mask, maskThresh, 255, cv.THRESH_BINARY);
+              maskKernel = cv.getStructuringElement(
+                cv.MORPH_RECT,
+                new cv.Size(7, 7),
+              );
+              cv.morphologyEx(
+                mask,
+                mask,
+                cv.MORPH_CLOSE,
+                maskKernel,
+                new cv.Point(-1, -1),
+                2,
+              );
+              cv.morphologyEx(
+                mask,
+                mask,
+                cv.MORPH_OPEN,
+                maskKernel,
+                new cv.Point(-1, -1),
+                1,
+              );
+              const maskFrac = cv.countNonZero(mask) / roiPix;
+              maskContours = new cv.MatVector();
+              maskHierarchy = new cv.Mat();
+              cv.findContours(
+                mask,
+                maskContours,
+                maskHierarchy,
+                cv.RETR_EXTERNAL,
+                cv.CHAIN_APPROX_SIMPLE,
+              );
+              let maskBestArea = 0;
+              for (let mi = 0; mi < maskContours.size(); mi++) {
+                const c = maskContours.get(mi);
+                const a = cv.contourArea(c);
+                if (a > maskBestArea) {
+                  maskBestArea = a;
+                  if (maskBest) maskBest.delete();
+                  maskBest = c;
+                } else {
+                  c.delete();
+                }
+              }
+              const areaFrac = maskBestArea / roiPix;
+              const maskMaxFrac = settingsRef.current.chromaMaskMaxFrac ?? 0.7;
+              const maskMinFrac = settingsRef.current.chromaMaskMinFrac ?? 0.08;
+              // Coverage band: too small => noise; > maxFrac => a chromatic
+              // background spanning the whole ROI, not a card.
+              if (
+                maskBest &&
+                areaFrac >= maskMinFrac &&
+                maskFrac <= maskMaxFrac
+              ) {
+                const peri = cv.arcLength(maskBest, true);
+                maskApprox = new cv.Mat();
+                cv.approxPolyDP(maskBest, maskApprox, 0.04 * peri, true);
+                if (maskApprox.rows > 4 && maskApprox.rows <= 7) {
+                  maskApprox.delete();
+                  maskApprox = new cv.Mat();
+                  cv.approxPolyDP(maskBest, maskApprox, 0.07 * peri, true);
+                }
+                if (maskApprox.rows === 4) {
+                  const mRect = cv.minAreaRect(maskApprox);
+                  const mw = mRect.size.width;
+                  const mh = mRect.size.height;
+                  const mFill = mw > 0 && mh > 0 ? maskBestArea / (mw * mh) : 0;
+                  const mAsp = mh > 0 ? mw / mh : 0;
+                  const mNorm = Math.max(mAsp, mAsp > 0 ? 1 / mAsp : 0);
+                  const mBr = cv.boundingRect(maskApprox);
+                  const wm = Math.round(Math.min(clampedW, clampedH) * 0.04);
+                  const mTouches =
+                    (mBr.x <= wm ? 1 : 0) +
+                    (mBr.y <= wm ? 1 : 0) +
+                    (mBr.x + mBr.width >= clampedW - wm ? 1 : 0) +
+                    (mBr.y + mBr.height >= clampedH - wm ? 1 : 0);
+                  // Same aspect windows as the real-contour path: tight when the
+                  // doc type is locked, the passport∪ID discovery window otherwise.
+                  const maskDocType = discoveryRef.current.docType;
+                  const maskExpected = maskDocType
+                    ? ASPECT_RATIOS[maskDocType]
+                    : null;
+                  const maskIsBookDoc =
+                    maskDocType === 'passport' || maskDocType === 'greenbook';
+                  const maskAspectTol = maskIsBookDoc
+                    ? (settingsRef.current.bookDocAspectTolerance ?? 0.1)
+                    : (settingsRef.current.idAspectTolerance ?? 0.12);
+                  const maskAspectOk = maskExpected
+                    ? Math.abs(mNorm - maskExpected) / maskExpected <
+                      maskAspectTol
+                    : mNorm >= 1.18 && mNorm <= 1.95;
+                  const maskFillOk =
+                    mFill >
+                    (settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO);
+                  const maskWallOk = mTouches < (skipGridCheck ? 4 : 3);
+                  mergeDebugInfo({
+                    chromaMaskFrac: Math.round(maskFrac * 100),
+                    chromaMaskArea: Math.round(areaFrac * 100),
+                    chromaMaskFill: mFill.toFixed(2),
+                    chromaMaskAspect: mNorm.toFixed(2),
+                    chromaMaskWall: mTouches,
+                  });
+                  if (maskAspectOk && maskFillOk && maskWallOk) {
+                    // Genuine full-card quad — treat as a real contour (NOT
+                    // synthetic): distance/fill gating applies normally below.
+                    bestContour = maskApprox;
+                    maskApprox = null; // ownership transferred to bestContour
+                    winnerGeomRef.current = {
+                      aspect: mNorm,
+                      fillRatio: mFill,
+                      synthetic: false,
+                    };
+                    edgeSource = 'chroma-mask';
+                    mergeDebugInfo({ contourSource: edgeSource });
+                  }
+                }
+              }
+            } catch (maskErr) {
+              mergeDebugInfo({ chromaMaskError: formatDebugError(maskErr) });
+            } finally {
+              safeDelete(
+                mask,
+                maskContours,
+                maskHierarchy,
+                maskKernel,
+                maskBest,
+                maskApprox,
+              );
+            }
+          }
+
           // --- Book-doc fallback ---
           // Passport/greenbook frequently fail the strict 4-vertex check
           // because the binding seam at the top is low-contrast and breaks

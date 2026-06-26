@@ -33,6 +33,10 @@ interface TuningSettings {
   lowClutterEdgeDensity?: number;
   cannyHighMinLowClutter?: number;
   captureGridMinCells?: number;
+  chromaMaskFallback?: boolean;
+  chromaMaskThreshold?: number;
+  chromaMaskMinFrac?: number;
+  chromaMaskMaxFrac?: number;
   gateDecayEnabled?: boolean;
   docFillEmaAlpha?: number;
   fillHysteresis?: number;
@@ -55,6 +59,11 @@ interface TuningDebugInfo {
   houghLines?: number | string;
   seamRejected?: boolean | string;
   seamClutter?: boolean | string;
+  chromaMaskFrac?: number | string;
+  chromaMaskArea?: number | string;
+  chromaMaskFill?: number | string;
+  chromaMaskAspect?: number | string;
+  chromaMaskWall?: number | string;
   cvError?: string;
   cvErrors?: number | string;
   cvRecovery?: string;
@@ -240,6 +249,14 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
             {debugInfo?.seamClutter == null
               ? '—'
               : String(debugInfo.seamClutter)}
+          </span>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          Chroma-Mask:{' '}
+          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
+            {debugInfo?.chromaMaskFill == null
+              ? '—'
+              : `cover ${debugInfo.chromaMaskFrac}% · area ${debugInfo.chromaMaskArea}% · fill ${debugInfo.chromaMaskFill} · aspect ${debugInfo.chromaMaskAspect} · wall ${debugInfo.chromaMaskWall}`}
           </span>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
@@ -672,6 +689,77 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           }
         />
       </label>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={settings.chromaMaskFallback === true}
+          onInput={(e) =>
+            updateSetting(
+              'chromaMaskFallback',
+              (e.target as HTMLInputElement).checked,
+            )
+          }
+        />
+        <span>
+          Chroma-Mask Fallback{' '}
+          <em>(colored card on neutral bg; may false-capture a rug)</em>
+        </span>
+      </label>
+      {settings.chromaMaskFallback === true && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Threshold: {settings.chromaMaskThreshold}{' '}
+              <em>(|a|+|b| cutoff to isolate colored pixels)</em>
+            </span>
+            <input
+              type="range"
+              min="5"
+              max="60"
+              step="1"
+              value={settings.chromaMaskThreshold as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskThreshold', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Min Area: {settings.chromaMaskMinFrac}{' '}
+              <em>(blob must cover at least this fraction of ROI)</em>
+            </span>
+            <input
+              type="range"
+              min="0.02"
+              max="0.3"
+              step="0.01"
+              value={settings.chromaMaskMinFrac as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskMinFrac', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Max Coverage: {settings.chromaMaskMaxFrac}{' '}
+              <em>
+                (above this the colored region IS the background — reject)
+              </em>
+            </span>
+            <input
+              type="range"
+              min="0.3"
+              max="0.95"
+              step="0.05"
+              value={settings.chromaMaskMaxFrac as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskMaxFrac', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
+      )}
 
       <label style={{ display: 'flex', flexDirection: 'column' }}>
         <span>Sharpness Threshold: {settings.blurThreshold}</span>

@@ -17,8 +17,6 @@ import '../../../navigation/src';
 import { getBoolProp } from '../../../../utils/props';
 import { JPEG_QUALITY } from '../../../../domain/constants/src/Constants';
 
-declare const __SMILE_DEBUG__: boolean;
-
 interface Props {
   'document-type'?: string;
   'auto-capture'?: 'autoCapture' | 'autoCaptureOnly' | 'manualCaptureOnly';

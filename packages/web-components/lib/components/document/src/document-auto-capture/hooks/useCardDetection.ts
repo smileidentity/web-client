@@ -1,6 +1,29 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { isDebugEnabled } from '../utils/debug';
 
+import {
+  clamp01,
+  frameQualityScore,
+  SYNTHETIC_CONTOUR_CONFIDENCE,
+} from '../detection/qualityScoring';
+import {
+  ASPECT_RATIOS,
+  classifyDiscoveryAspect,
+  isAspectKey,
+  type AspectKey,
+  type DiscoveryVote,
+} from '../detection/documentAspect';
+import {
+  isSeamFalseQuad,
+  type Corner as SeamCorner,
+  type Segment as SeamSegment,
+} from '../detection/seamRejection';
+
+// eslint-disable-next-line import/extensions
+import { nextCvErrorRecoveryAction } from '../detection/cvErrorRecovery.ts';
+// eslint-disable-next-line import/extensions
+import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
+
 declare const cv: any;
 
 // Internal debug flag: emit verbose detection telemetry only in dev + preview
@@ -25,6 +48,32 @@ const safeDelete = (
   });
 };
 
+const formatDebugError = (err: unknown) => {
+  if (err instanceof Error) {
+    return err.message ? `${err.name}: ${err.message}` : err.name;
+  }
+  if (typeof err === 'number' && Number.isFinite(err)) {
+    const cvAny = typeof cv === 'undefined' ? null : (cv as any);
+    if (cvAny && typeof cvAny.exceptionFromPtr === 'function') {
+      try {
+        const ex = cvAny.exceptionFromPtr(err);
+        const msg =
+          ex?.msg || ex?.what || ex?.message || ex?.toString?.() || null;
+        if (msg) return `OpenCV(${err}): ${msg}`;
+      } catch {
+        // Best-effort decode only; fall through to numeric fallback.
+      }
+    }
+    return `OpenCV/WASM code: ${err}`;
+  }
+  if (typeof err === 'string') return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+};
+
 export const COMPLIANCE_STATES = {
   IDLE: 'idle', // Searching for a card
   DETECTING: 'detecting', // Found a candidate, checking quality
@@ -39,27 +88,14 @@ const DETECTION_PHASE = {
   CAPTURE: 'capture', // Phase 2: quality gating with locked guide box
 };
 
-const ASPECT_RATIOS = {
-  'id-card': 1.585, // CR80 / ID-1
-  passport: 1.42, // ID-3 bio-data page
-  greenbook: 1.42, // Greenbook uses passport-like landscape aspect
-};
-type AspectKey = keyof typeof ASPECT_RATIOS;
-const isAspectKey = (v: unknown): v is AspectKey =>
-  typeof v === 'string' &&
-  Object.prototype.hasOwnProperty.call(ASPECT_RATIOS, v);
-
-// Midpoint for classifying detected aspect ratio
-const ASPECT_RATIO_MIDPOINT =
-  (ASPECT_RATIOS['id-card'] + ASPECT_RATIOS.passport) / 2; // ~1.50
-
 // Number of agreeing frames required to lock document type.
 // Lowered from 10 → 6: laminated/hand-held cards produce intermittent detections
 // so a shorter streak is needed to reach consensus before votes are wiped.
 const DISCOVERY_CONSENSUS_THRESHOLD = 6;
 
-// If contour detection can't classify within this many frames, default to id-card
-const DISCOVERY_TIMEOUT_FRAMES = 60;
+// If contour detection can't classify within this many PROCESSED frames, default
+// to id-card. 30 ≈ 1s at the default 30fps processing throttle.
+const DISCOVERY_TIMEOUT_FRAMES = 30;
 
 // How many consecutive frames without a detected rectangle before resetting votes.
 // Raised from 5 → 20: laminated cards and slight hand movement cause many gap
@@ -71,7 +107,7 @@ const DISCOVERY_MISS_TOLERANCE = 20;
 // Below MIN_FILL → too far (card is tiny). Above MAX_FILL → too close (edges clipped).
 // Min 65% ensures the document occupies ≥65-70% of the final captured image,
 // satisfying the product requirement of a clear, readable scan.
-const MIN_FILL_PERCENT = 75;
+const MIN_FILL_PERCENT = 65;
 const MAX_FILL_PERCENT = 95;
 // Minimum contour area to even consider (5% — catches far-away documents)
 const MIN_CONTOUR_AREA_PERCENT = 0.05;
@@ -88,6 +124,14 @@ const MIN_DISCOVERY_GRID_CELLS = 3;
 const CANNY_HIGH_MAX = 150;
 const CANNY_HIGH_MIN = 60;
 
+// --- Seam / straight-line rejection (parquet floors, slatted tables) ---
+// HoughLinesP detects long straight background lines; a candidate quad whose
+// edges sit on lines that overshoot its corners is a seam artifact, not a card
+// (see detection/seamRejection.ts). Only the Hough acquisition knobs are
+// tunable via settings; the geometric tolerances live in the helper.
+const HOUGH_RHO = 1; // px distance resolution
+const HOUGH_THETA = Math.PI / 180; // 1° angle resolution
+
 // --- Contour rejection thresholds (shared by the in-guide pass and the
 // off-guide detector) ---
 // A real card border survives approxPolyDP with little perimeter loss;
@@ -95,13 +139,6 @@ const CANNY_HIGH_MIN = 60;
 const PERI_COMPRESSION_MAX = 3.5;
 // Minimum contour-area / bounding-box-area ratio for a card-shaped contour.
 const MIN_RECT_FILL_RATIO = 0.65;
-// Desktop id-card synthetic fallback: only bridge contour dropouts when a
-// genuine 4-corner card was validated within this many frames (~0.5s at
-// 30fps). Without the recency gate the fallback synthesizes a "card" from
-// background contours (face, furniture, window frames) and can auto-capture
-// a document-free scene.
-const SYNTH_BRIDGE_MAX_FRAMES = 15;
-
 // Mobile content-region fallback (Fix 3): a low-contrast/tilted id-card that
 // never forms a clean 4-corner quad can still be captured from the combined
 // content bbox, but only after the region candidate has persisted this many
@@ -117,56 +154,11 @@ const MOBILE_REGION_STABILITY_FRAMES = 8;
 // accumulated (capture is still blocked by the stability counter meanwhile).
 const CHROMA_AVG_WINDOW = 6;
 const CHROMA_MIN_SAMPLES = 4;
-
-// --- Composite per-frame quality score ---
-// Stripe/Persona-style readability scoring: instead of picking the best frame
-// by sharpness alone, score each qualifying frame on a blend of the metrics we
-// already compute, normalized to 0–1, and keep the highest-scoring frame of the
-// stability window. This selects the most *readable* capture (well-framed, in
-// focus, low glare, true card shape), not merely the sharpest. Weights are
-// auto-normalized over whichever components are present, so chroma (mobile only)
-// can drop out without re-tuning the rest.
-const QUALITY_WEIGHTS = {
-  sharpness: 0.35, // Laplacian variance vs blurThreshold
-  glare: 0.15, // inverse of glare coverage
-  fill: 0.2, // distance from the center of the accepted fill band
-  aspect: 0.2, // closeness of the winner's aspect to the doc-type ratio
-  contour: 0.1, // rotated-rect fill of a real quad (synthetic = lower)
-  chroma: 0.05, // colour content (mobile, when the chroma gate is active)
-};
-// A synthesized fallback rect is inherently lower-confidence than a real
-// 4-corner quad (its bbox is inferred from inner content, not the card edge).
-const SYNTHETIC_CONTOUR_CONFIDENCE = 0.55;
 // How many consecutive blur/glare misses to tolerate before discarding an
 // already-captured best frame. Mobile cameras drop 1–2 frames to motion blur or
 // AWB; nulling the candidate on the first stumble throws away a good capture and
 // restarts the stability climb. Mirrors DISCOVERY_MISS_TOLERANCE in spirit.
 const BEST_FRAME_MISS_TOLERANCE = 3;
-
-const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
-
-// Combine sub-scores (each already in 0–1) into one weighted score, normalizing
-// over only the components that are present (null/undefined ones are skipped).
-function frameQualityScore(parts: {
-  sharpness?: number | null;
-  glare?: number | null;
-  fill?: number | null;
-  aspect?: number | null;
-  contour?: number | null;
-  chroma?: number | null;
-}): number {
-  const keys = Object.keys(QUALITY_WEIGHTS) as Array<
-    keyof typeof QUALITY_WEIGHTS
-  >;
-  const present = keys.filter((key) => parts[key] != null);
-  const den = present.reduce((sum, key) => sum + QUALITY_WEIGHTS[key], 0);
-  if (den <= 0) return 0;
-  const num = present.reduce(
-    (sum, key) => sum + clamp01(parts[key] as number) * QUALITY_WEIGHTS[key],
-    0,
-  );
-  return num / den;
-}
 
 // --- Distance metric source ---
 // When true, compute docFillPercent from the presence edge map (independent of
@@ -346,16 +338,37 @@ export function useCardDetection(
   } | null>(null);
   const debugRoiKeyRef = useRef('');
   const [debugInfo, setDebugInfo] = useState<Record<string, any>>({}); // For tuning panel
+  const debugInfoRef = useRef<Record<string, any>>({});
   // Merge debug fields rather than replace: each gate emits only the values
   // it computed, so the panel keeps the last-known docFill / grid / blur /
   // glare visible together instead of blanking whichever the current frame's
   // early-return path didn't include. Debug-only; setDebugInfo identity is
-  // stable so this needs no memoisation.
-  const mergeDebugInfo = (patch: Record<string, unknown>) =>
-    setDebugInfo((prev) => ({ ...prev, ...patch }));
+  // stable so this needs no memoisation. Outside debug mode this is a no-op;
+  // inside debug mode it also skips patches that don't change displayed values.
+  const mergeDebugInfo = (patch: Record<string, unknown>) => {
+    if (!IS_DEBUG_MODE) return;
+
+    const { current } = debugInfoRef;
+    const hasChanged = Object.entries(patch).some(
+      ([key, value]) => current[key] !== value,
+    );
+    if (!hasChanged) return;
+
+    const next = { ...current, ...patch };
+    debugInfoRef.current = next;
+    setDebugInfo(next);
+  };
+  const updateDebugPath = (path: any) => {
+    if (IS_DEBUG_MODE) setDebugPath(path);
+  };
   // Latest distance fill %, stashed each frame so debug payloads emitted
   // AFTER the contour block (blur/glare/capture gates) can still report it.
   const latestDocFillRef = useRef(0);
+  // EMA of docFillPercent. Smooths distance jitter so a hand hovering near the
+  // fill thresholds doesn't toggle the "move closer/further" gate frame-to-frame.
+  // null until the first measurement; reset to null whenever the document is
+  // declared gone so a re-acquired doc doesn't inherit a stale average.
+  const docFillEmaRef = useRef<number | null>(null);
   const [detectedDocType, setDetectedDocType] = useState<AspectKey | null>(
     providedDocType,
   ); // null = not yet classified
@@ -386,7 +399,7 @@ export function useCardDetection(
   const contourCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const detectionPhaseRef = useRef(initialPhase);
   const discoveryRef = useRef<{
-    votes: AspectKey[];
+    votes: DiscoveryVote[];
     docType: AspectKey | null;
     frameCount: number;
     consecutiveMisses: number;
@@ -422,10 +435,25 @@ export function useCardDetection(
   // documents whose spine/page edges can momentarily break) before flipping
   // the user-facing prompt to "Align document in frame".
   const captureMissCounterRef = useRef(0);
+  // Timestamp (performance.now) of the last frame we actually ran detection on,
+  // and the timestamp before that — used to throttle the heavy CV pipeline to
+  // settingsRef.targetProcessingFps and to report the live processing rate.
+  const lastProcessedRef = useRef(0);
+  const prevProcessedRef = useRef(0);
   // Set true if Lab chroma conversion is unavailable/throws on this device, so
   // the chroma-fusion path (Fix 2) disables itself for the session and falls
   // back to luminance-only edges.
   const chromaUnavailableRef = useRef(false);
+  // Consecutive per-frame CV errors (outer catch). A persistent throw is almost
+  // always the optional chroma path leaving a malformed edge map that the
+  // downstream findContours/morphology then rejects every frame — which strands
+  // detection on "Processing failed". After a few in a row we disable chroma for
+  // the session so detection self-heals onto the luminance-only path. Reset on
+  // any successful frame.
+  const cvErrorStreakRef = useRef(0);
+  // When CV keeps throwing after optional chroma has been disabled, pause the
+  // hot detection loop so repeated state updates do not freeze the page.
+  const autoDetectionSuspendedRef = useRef(false);
   // Consecutive frames a mobile content-region candidate has qualified (Fix 3).
   // Gates the mobile region fallback so a transient blob can't trigger capture.
   const regionStabilityRef = useRef(0);
@@ -449,11 +477,31 @@ export function useCardDetection(
   // (see BEST_FRAME_MISS_TOLERANCE). Reset once a frame reaches the stability
   // section cleanly.
   const bestFrameMissRef = useRef(0);
-  // Frames since a genuine (non-synthetic) 4-corner card last passed
-  // validation. Gates the desktop id-card synthetic fallback so it only
-  // bridges brief dropouts of a card that WAS being detected, rather than
-  // synthesizing one from background contours (see SYNTH_BRIDGE_MAX_FRAMES).
-  const framesSinceRealCardRef = useRef(Number.POSITIVE_INFINITY);
+  // Soften a transient gate failure instead of nuking capture progress: while a
+  // best frame is held and we're within BEST_FRAME_MISS_TOLERANCE, decay the
+  // stability count by 1 (the same pattern the blur/glare gates already use) so
+  // a single jittery frame doesn't drain the ring or flip the compliance state.
+  // Returns true when the failure was ABSORBED (decayed); false when tolerance
+  // is exceeded and the candidate is hard-reset/discarded.
+  const softFailStability = (): boolean => {
+    if (
+      bestFrameRef.current.image &&
+      bestFrameMissRef.current < BEST_FRAME_MISS_TOLERANCE
+    ) {
+      bestFrameMissRef.current += 1;
+      stabilityRef.current.count = Math.max(0, stabilityRef.current.count - 1);
+      return true;
+    }
+    bestFrameMissRef.current = 0;
+    stabilityRef.current.count = 0;
+    bestFrameRef.current = { image: null, preview: null, score: 0 };
+    return false;
+  };
+  // Timestamp for the last genuine (non-synthetic) 4-corner card validation.
+  // Gates the desktop id-card synthetic fallback so it only bridges brief
+  // dropouts of a card that WAS being detected, rather than synthesizing one
+  // from background contours.
+  const lastRealCardAtRef = useRef<number | null>(null);
   // Last detected card bounding rect in CANVAS coords. Updated whenever the
   // contour-detection pass produces a 4-point card. Sticky across frames so
   // intermittent contour misses don't fall back to the looser guide rect.
@@ -494,6 +542,7 @@ export function useCardDetection(
     const processFrame = () => {
       // 0. Stop if capturing or video not ready
       if (isCapturingRef.current) return;
+      if (autoDetectionSuspendedRef.current) return;
       if (!videoRef.current) {
         animationFrameId = requestAnimationFrame(processFrame);
         return;
@@ -503,6 +552,27 @@ export function useCardDetection(
       if (video.readyState !== 4 || typeof cv === 'undefined' || !cv.Mat) {
         animationFrameId = requestAnimationFrame(processFrame);
         return;
+      }
+
+      // Throttle the heavy CV pipeline to a target processing rate (default
+      // 30fps). rAF fires at the display refresh rate (60/90/120Hz/adaptive), so
+      // a time-based gate keeps the real detection rate — and every frame-count
+      // constant tuned against it — consistent across devices and under thermal
+      // load. Skipped ticks reschedule and return BEFORE any Mat/canvas/state
+      // work, so they cost nothing and the UI naturally holds its last state.
+      const nowTs = performance.now();
+      const targetFps = settingsRef.current.targetProcessingFps ?? 30;
+      // ~4ms slack so a 33ms target doesn't beat against 16.7ms vsync into 20fps.
+      const minInterval = 1000 / targetFps - 4;
+      if (nowTs - lastProcessedRef.current < minInterval) {
+        animationFrameId = requestAnimationFrame(processFrame);
+        return;
+      }
+      prevProcessedRef.current = lastProcessedRef.current;
+      lastProcessedRef.current = nowTs;
+      if (prevProcessedRef.current > 0) {
+        const dt = nowTs - prevProcessedRef.current;
+        if (dt > 0) mergeDebugInfo({ procFps: Math.round(1000 / dt) });
       }
 
       // 1. Setup CV structs
@@ -526,6 +596,8 @@ export function useCardDetection(
       let contourRgb: any = null;
       let contourLab: any = null;
       let labPlanes: any = null;
+      let aPlane: any = null;
+      let bPlane: any = null;
       let aBlur: any = null;
       let bBlur: any = null;
       let aEdges: any = null;
@@ -540,6 +612,8 @@ export function useCardDetection(
       // the per-function code-path graph small enough that the
       // `no-useless-return` ESLint rule does not exceed Node's call stack.
       const runDetection = () => {
+        const frameTimeMs = performance.now();
+
         if (!canvasRef.current) {
           canvasRef.current = document.createElement('canvas');
         }
@@ -732,11 +806,22 @@ export function useCardDetection(
         }
         const clampedH = Math.min(guideHeight, videoH - clampedY);
 
-        // Downscaled ROI coords — used for all OpenCV ops below.
-        const dsClampedX = Math.round(clampedX * dsScale);
-        const dsClampedY = Math.round(clampedY * dsScale);
-        const dsClampedW = Math.max(1, Math.round(clampedW * dsScale));
-        const dsClampedH = Math.max(1, Math.round(clampedH * dsScale));
+        // Downscaled ROI coords — used for all OpenCV ops below. Clamp to the
+        // dsCanvas bounds (= fullFrame dims): rounding clampedX and clampedW
+        // independently can push x+w one pixel past dsW when the ROI sits flush
+        // against the frame edge, tripping the cv.Mat roi assertion
+        // (0 <= roi.x && roi.x + roi.width <= m.cols). Clamp x/y first, then size
+        // to the remaining span so x+w <= dsW and y+h <= dsH always hold.
+        const dsClampedX = Math.min(Math.round(clampedX * dsScale), dsW - 1);
+        const dsClampedY = Math.min(Math.round(clampedY * dsScale), dsH - 1);
+        const dsClampedW = Math.max(
+          1,
+          Math.min(Math.round(clampedW * dsScale), dsW - dsClampedX),
+        );
+        const dsClampedH = Math.max(
+          1,
+          Math.min(Math.round(clampedH * dsScale), dsH - dsClampedY),
+        );
 
         // Store current ROI coords for on-demand manual capture (zero cost — no canvas ops).
         latestCropCoordsRef.current = {
@@ -812,7 +897,9 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
+            docFillEmaRef.current = null;
             inGuideDetectedRef.current = false;
+            mergeDebugInfo({ rejectReason: 'off-guide (card outside guide)' });
             return;
           }
         }
@@ -922,7 +1009,16 @@ export function useCardDetection(
         } else if (isDiscoveryPhase) {
           gridCheckFails = passingCells < MIN_DISCOVERY_GRID_CELLS; // Relaxed: 3/9 cells
         } else {
-          gridCheckFails = passingCells < 7; // Capture: 7/9
+          // Early-out only: bail just on a near-empty grid. The real "document
+          // fills the box / is close enough" check is docFillPercent >=
+          // minFillPercent (65%) in the contour pass below. A 7/9 bar here
+          // false-rejected low-contrast cards on plain backgrounds (only the
+          // printed center cells carry edges; the plain outer cells read ~0)
+          // before the contour pass — incl. the clutter-adaptive Canny floor
+          // for faint borders — ever ran. Synthetic-fallback eligibility still
+          // requires the strong passingCells >= 7 signal separately below.
+          gridCheckFails =
+            passingCells < (settingsRef.current.captureGridMinCells ?? 4);
         }
 
         if (!hasDocument || gridCheckFails) {
@@ -932,17 +1028,34 @@ export function useCardDetection(
           const reason = noDocumentPresent
             ? 'Place document in frame'
             : 'Ensure document is fully visible';
-          setFeedback(reason);
-          setComplianceState(COMPLIANCE_STATES.IDLE);
-          stabilityRef.current.count = 0;
-          bestFrameRef.current = { image: null, preview: null, score: 0 };
-          setDebugPath(null);
+          // Document truly absent → hard reset. Document present but coverage
+          // momentarily dipped ("fully visible") → soften so a flickered cell
+          // doesn't drain progress (mobile gateDecayEnabled only).
+          let gate0Absorbed = false;
+          if (noDocumentPresent) {
+            docFillEmaRef.current = null;
+            stabilityRef.current.count = 0;
+            bestFrameMissRef.current = 0;
+            bestFrameRef.current = { image: null, preview: null, score: 0 };
+          } else {
+            gate0Absorbed =
+              settingsRef.current.gateDecayEnabled === true &&
+              softFailStability();
+          }
+          if (!gate0Absorbed) {
+            setFeedback(reason);
+            setComplianceState(COMPLIANCE_STATES.IDLE);
+          }
+          updateDebugPath(null);
           mergeDebugInfo({
             blur: 0,
             glare: 0,
             edgeDensity: edgeDensity.toFixed(1),
             texture: Math.round(textureScore),
             quadrants: quadDensities.join('/'),
+            rejectReason: noDocumentPresent
+              ? 'Gate0: no document present'
+              : `Gate0: grid coverage (${passingCells}/9)${gate0Absorbed ? ' [held]' : ''}`,
           });
           return;
         }
@@ -1056,9 +1169,21 @@ export function useCardDetection(
           gradStdDev.delete();
 
           const cannySigma = settingsRef.current.autoCannySigma ?? 1.0;
+          // Clutter-adaptive high-threshold floor. On a featureless surface
+          // (pale ID on pale wood) the card border gradient is faint and the
+          // fixed CANNY_HIGH_MIN=60 floor pins too high → no quad forms. But a
+          // genuinely empty scene (Gate-0 edgeDensity ~0) has no background
+          // texture to turn into false edges, so the floor can safely drop to
+          // recover the faint border. Busy scenes keep the proven 60 floor, so
+          // the working high-contrast/metallic path cannot regress.
+          const lowClutter =
+            edgeDensity < (settingsRef.current.lowClutterEdgeDensity ?? 2);
+          const cannyHighMin = lowClutter
+            ? (settingsRef.current.cannyHighMinLowClutter ?? 40)
+            : CANNY_HIGH_MIN;
           const highThreshold = Math.min(
             CANNY_HIGH_MAX,
-            Math.max(CANNY_HIGH_MIN, gMean + cannySigma * gStd),
+            Math.max(cannyHighMin, gMean + cannySigma * gStd),
           );
           const lowThreshold = Math.max(15, highThreshold * 0.4);
           mergeDebugInfo({
@@ -1094,9 +1219,9 @@ export function useCardDetection(
               contourLab.delete();
               contourLab = null;
 
-              // Borrowed views — owned by labPlanes, never deleted directly.
-              const aPlane = labPlanes.get(1);
-              const bPlane = labPlanes.get(2);
+              // OpenCV.js MatVector.get() returns Mats that must be released.
+              aPlane = labPlanes.get(1);
+              bPlane = labPlanes.get(2);
               const chromaK = new cv.Size(7, 7); // chroma is noisier than luma
               aBlur = new cv.Mat();
               bBlur = new cv.Mat();
@@ -1128,6 +1253,10 @@ export function useCardDetection(
               cv.bitwise_or(edges, bEdges, edges);
               edgeSource = 'lum+chroma';
 
+              safeDelete(aPlane, bPlane);
+              aPlane = null;
+              bPlane = null;
+
               labPlanes.delete(); // frees L/a/b incl. borrowed aPlane/bPlane
               labPlanes = null;
               aBlur.delete();
@@ -1138,11 +1267,15 @@ export function useCardDetection(
               aEdges = null;
               bEdges.delete();
               bEdges = null;
-            } catch {
+            } catch (chromaErr) {
               // Lab path failed on this device — disable for the session and
               // continue with the luminance edges already in `edges`.
               chromaUnavailableRef.current = true;
               edgeSource = 'lum';
+              mergeDebugInfo({
+                chromaError: formatDebugError(chromaErr),
+                chromaStatus: 'disabled',
+              });
             }
           }
           mergeDebugInfo({ contourSource: edgeSource });
@@ -1194,10 +1327,6 @@ export function useCardDetection(
           // Consumed in the no-contour handling below to show distance
           // guidance instead of the dead-end "Align document in frame".
           let wallHugRejectedCardThisFrame = false;
-          // Age the real-card recency window each detection frame; reset to 0
-          // below when a genuine 4-corner card passes validation.
-          // (Infinity + 1 stays Infinity, so the pristine state is preserved.)
-          framesSinceRealCardRef.current += 1;
           // Track the combined bounding box of ALL significant contours for distance guidance.
           // Single contour area fails when fingers break card edges into many small contours.
           // The combined bounding box captures the document's full spatial extent.
@@ -1218,6 +1347,54 @@ export function useCardDetection(
           }> = [];
           // All contour-pass geometry is in full-res ROI pixels.
           const minContourPixels = clampedW * clampedH * 0.005; // 0.5% — catches small text fragments
+
+          // Seam rejection: straight background lines from the closed `edges`
+          // map. Computed lazily (once per frame, only when a 4-corner
+          // candidate actually reaches the acceptance gate) so empty / no-card
+          // frames pay nothing. Cached in a frame-local; the transient `lines`
+          // Mat is released immediately after conversion to a plain array.
+          const seamRejectEnabled =
+            settingsRef.current.seamRejectEnabled !== false;
+          let houghSegments: SeamSegment[] | null = null;
+          const getHoughSegments = (): SeamSegment[] => {
+            if (houghSegments) return houghSegments;
+            const found: SeamSegment[] = [];
+            const lines = new cv.Mat();
+            try {
+              const houghThreshold = settingsRef.current.houghThreshold ?? 40;
+              const minLenRatio =
+                settingsRef.current.houghMinLengthRatio ?? 0.3;
+              const maxGap = settingsRef.current.houghMaxLineGap ?? 10;
+              const minLineLen = Math.max(
+                10,
+                Math.round(minLenRatio * Math.min(clampedW, clampedH)),
+              );
+              cv.HoughLinesP(
+                edges,
+                lines,
+                HOUGH_RHO,
+                HOUGH_THETA,
+                houghThreshold,
+                minLineLen,
+                maxGap,
+              );
+              for (let li = 0; li < lines.rows; li++) {
+                found.push({
+                  x1: lines.data32S[li * 4],
+                  y1: lines.data32S[li * 4 + 1],
+                  x2: lines.data32S[li * 4 + 2],
+                  y2: lines.data32S[li * 4 + 3],
+                });
+              }
+            } catch {
+              // best-effort: on any failure, treat as "no seam lines found"
+              // so the gate never blocks capture on its own error.
+            } finally {
+              safeDelete(lines);
+            }
+            houghSegments = found;
+            return houghSegments;
+          };
 
           for (let i = 0; i < contours.size(); ++i) {
             const cnt = contours.get(i);
@@ -1353,6 +1530,51 @@ export function useCardDetection(
                 const minFillRatio =
                   settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO;
 
+                // Seam rejection: a candidate that passes every shape gate and
+                // is the new largest is tested against the frame's straight
+                // background lines. If >= 2 of its edges sit on through-lines
+                // that overshoot its corners, it is framed by seams (parquet /
+                // slatted table), not a card — reject. Evaluated here (gated on
+                // passesShape && area > maxArea) so the lazy Hough pass runs at
+                // most once per frame and only when a real candidate appears.
+                const passesShape =
+                  fillRatio > minFillRatio &&
+                  anglesOk &&
+                  aspectOk &&
+                  !roiWallHug;
+                let seamReject = false;
+                if (passesShape && area > maxArea && seamRejectEnabled) {
+                  const corners: SeamCorner[] = [];
+                  for (let c = 0; c < 4; c++) {
+                    corners.push({
+                      x: approx.data32S[c * 2],
+                      y: approx.data32S[c * 2 + 1],
+                    });
+                  }
+                  const lineSegments = getHoughSegments();
+                  // Clutter guard: on a high-frequency texture (woven fabric,
+                  // carpet) HoughLinesP returns hundreds of long lines, so a
+                  // real card always has >=2 edges sitting on overshooting
+                  // through-lines and would be wrongly rejected. The seam
+                  // discriminator only holds on LOW-clutter surfaces (a parquet
+                  // shows a handful of lines, a fabric ~400+), so skip the gate
+                  // entirely once the line count is implausibly high.
+                  const seamMaxLines =
+                    settingsRef.current.seamMaxHoughLines ?? 60;
+                  const tooCluttered = lineSegments.length > seamMaxLines;
+                  seamReject =
+                    !tooCluttered &&
+                    isSeamFalseQuad(corners, lineSegments, {
+                      roiW: clampedW,
+                      roiH: clampedH,
+                    });
+                  mergeDebugInfo({
+                    houghLines: lineSegments.length,
+                    seamRejected: seamReject,
+                    seamClutter: tooCluttered,
+                  });
+                }
+
                 // Chroma-content gate is applied AFTER selection, on a rolling
                 // average of the chosen candidate's chroma (see below) — the
                 // per-frame value is too noisy (AWB/exposure/contour jitter) to
@@ -1362,7 +1584,8 @@ export function useCardDetection(
                   anglesOk &&
                   aspectOk &&
                   !roiWallHug &&
-                  area > maxArea
+                  area > maxArea &&
+                  !seamReject
                 ) {
                   maxArea = area;
                   if (bestContour) bestContour.delete();
@@ -1376,7 +1599,7 @@ export function useCardDetection(
                   };
                   // Genuine 4-corner card validated — open the synthetic
                   // fallback's bridge window and reset the mobile-region streak.
-                  framesSinceRealCardRef.current = 0;
+                  lastRealCardAtRef.current = frameTimeMs;
                   regionStabilityRef.current = 0;
                 } else {
                   // Desktop: the quad failed ONLY the wall-hug check — every
@@ -1427,6 +1650,163 @@ export function useCardDetection(
               passingCells >= 7;
           }
 
+          // --- Chroma-mask fallback (colored card on neutral background) ---
+          // A strongly COLOURED card (e.g. a green/yellow ID) on a near-neutral
+          // surface (grey fabric) has almost no LUMINANCE border, and its chroma
+          // edges are swamped by the background texture, so no 4-corner quad
+          // forms above. Segment the card by CHROMA MAGNITUDE instead: threshold
+          // |a-128|+|b-128| (already computed as chromaMag), clean up, take the
+          // largest blob. Heavily gated — a chromatic BACKGROUND (wood/parquet)
+          // fills the ROI and is caught by the coverage/wall-hug gates.
+          // KNOWN LIMITATION: a colourful rug/carpet patch is classically
+          // indistinguishable from a card and CAN pass this path (fill, aspect
+          // and internal-edge density all overlap). Flag-gated (chromaMaskFallback,
+          // default on for mobile) so it can be disabled live if it regresses.
+          const chromaMaskOn =
+            settingsRef.current.chromaMaskFallback === true &&
+            !!chromaMag &&
+            !skipGridCheck;
+          if (!bestContour && chromaMaskOn) {
+            let mask: any = null;
+            let maskContours: any = null;
+            let maskHierarchy: any = null;
+            let maskKernel: any = null;
+            let maskBest: any = null;
+            let maskApprox: any = null;
+            try {
+              const roiPix = clampedW * clampedH;
+              mask = new cv.Mat();
+              const maskThresh = settingsRef.current.chromaMaskThreshold ?? 18;
+              cv.threshold(chromaMag, mask, maskThresh, 255, cv.THRESH_BINARY);
+              maskKernel = cv.getStructuringElement(
+                cv.MORPH_RECT,
+                new cv.Size(7, 7),
+              );
+              cv.morphologyEx(
+                mask,
+                mask,
+                cv.MORPH_CLOSE,
+                maskKernel,
+                new cv.Point(-1, -1),
+                2,
+              );
+              cv.morphologyEx(
+                mask,
+                mask,
+                cv.MORPH_OPEN,
+                maskKernel,
+                new cv.Point(-1, -1),
+                1,
+              );
+              const maskFrac = cv.countNonZero(mask) / roiPix;
+              maskContours = new cv.MatVector();
+              maskHierarchy = new cv.Mat();
+              cv.findContours(
+                mask,
+                maskContours,
+                maskHierarchy,
+                cv.RETR_EXTERNAL,
+                cv.CHAIN_APPROX_SIMPLE,
+              );
+              let maskBestArea = 0;
+              for (let mi = 0; mi < maskContours.size(); mi++) {
+                const c = maskContours.get(mi);
+                const a = cv.contourArea(c);
+                if (a > maskBestArea) {
+                  maskBestArea = a;
+                  if (maskBest) maskBest.delete();
+                  maskBest = c;
+                } else {
+                  c.delete();
+                }
+              }
+              const areaFrac = maskBestArea / roiPix;
+              const maskMaxFrac = settingsRef.current.chromaMaskMaxFrac ?? 0.7;
+              const maskMinFrac = settingsRef.current.chromaMaskMinFrac ?? 0.08;
+              // Coverage band: too small => noise; > maxFrac => a chromatic
+              // background spanning the whole ROI, not a card.
+              if (
+                maskBest &&
+                areaFrac >= maskMinFrac &&
+                maskFrac <= maskMaxFrac
+              ) {
+                const peri = cv.arcLength(maskBest, true);
+                maskApprox = new cv.Mat();
+                cv.approxPolyDP(maskBest, maskApprox, 0.04 * peri, true);
+                if (maskApprox.rows > 4 && maskApprox.rows <= 7) {
+                  maskApprox.delete();
+                  maskApprox = new cv.Mat();
+                  cv.approxPolyDP(maskBest, maskApprox, 0.07 * peri, true);
+                }
+                if (maskApprox.rows === 4) {
+                  const mRect = cv.minAreaRect(maskApprox);
+                  const mw = mRect.size.width;
+                  const mh = mRect.size.height;
+                  const mFill = mw > 0 && mh > 0 ? maskBestArea / (mw * mh) : 0;
+                  const mAsp = mh > 0 ? mw / mh : 0;
+                  const mNorm = Math.max(mAsp, mAsp > 0 ? 1 / mAsp : 0);
+                  const mBr = cv.boundingRect(maskApprox);
+                  const wm = Math.round(Math.min(clampedW, clampedH) * 0.04);
+                  const mTouches =
+                    (mBr.x <= wm ? 1 : 0) +
+                    (mBr.y <= wm ? 1 : 0) +
+                    (mBr.x + mBr.width >= clampedW - wm ? 1 : 0) +
+                    (mBr.y + mBr.height >= clampedH - wm ? 1 : 0);
+                  // Same aspect windows as the real-contour path: tight when the
+                  // doc type is locked, the passport∪ID discovery window otherwise.
+                  const maskDocType = discoveryRef.current.docType;
+                  const maskExpected = maskDocType
+                    ? ASPECT_RATIOS[maskDocType]
+                    : null;
+                  const maskIsBookDoc =
+                    maskDocType === 'passport' || maskDocType === 'greenbook';
+                  const maskAspectTol = maskIsBookDoc
+                    ? (settingsRef.current.bookDocAspectTolerance ?? 0.1)
+                    : (settingsRef.current.idAspectTolerance ?? 0.12);
+                  const maskAspectOk = maskExpected
+                    ? Math.abs(mNorm - maskExpected) / maskExpected <
+                      maskAspectTol
+                    : mNorm >= 1.18 && mNorm <= 1.95;
+                  const maskFillOk =
+                    mFill >
+                    (settingsRef.current.minFillRatio ?? MIN_RECT_FILL_RATIO);
+                  const maskWallOk = mTouches < (skipGridCheck ? 4 : 3);
+                  mergeDebugInfo({
+                    chromaMaskFrac: Math.round(maskFrac * 100),
+                    chromaMaskArea: Math.round(areaFrac * 100),
+                    chromaMaskFill: mFill.toFixed(2),
+                    chromaMaskAspect: mNorm.toFixed(2),
+                    chromaMaskWall: mTouches,
+                  });
+                  if (maskAspectOk && maskFillOk && maskWallOk) {
+                    // Genuine full-card quad — treat as a real contour (NOT
+                    // synthetic): distance/fill gating applies normally below.
+                    bestContour = maskApprox;
+                    maskApprox = null; // ownership transferred to bestContour
+                    winnerGeomRef.current = {
+                      aspect: mNorm,
+                      fillRatio: mFill,
+                      synthetic: false,
+                    };
+                    edgeSource = 'chroma-mask';
+                    mergeDebugInfo({ contourSource: edgeSource });
+                  }
+                }
+              }
+            } catch (maskErr) {
+              mergeDebugInfo({ chromaMaskError: formatDebugError(maskErr) });
+            } finally {
+              safeDelete(
+                mask,
+                maskContours,
+                maskHierarchy,
+                maskKernel,
+                maskBest,
+                maskApprox,
+              );
+            }
+          }
+
           // --- Book-doc fallback ---
           // Passport/greenbook frequently fail the strict 4-vertex check
           // because the binding seam at the top is low-contrast and breaks
@@ -1448,7 +1828,10 @@ export function useCardDetection(
             // distance and a capture would clip the card's edges anyway.
             const synthCoverageEligible =
               !combinedBboxOverflow &&
-              (framesSinceRealCardRef.current <= SYNTH_BRIDGE_MAX_FRAMES ||
+              (isSyntheticBridgeRecent(
+                lastRealCardAtRef.current,
+                frameTimeMs,
+              ) ||
                 passingCells >= 7);
             // Passports/greenbooks rarely form a clean 4-corner quad (the spine
             // breaks the outer contour), so they depend on this synthetic path
@@ -1627,7 +2010,17 @@ export function useCardDetection(
               if (nz) nz.delete();
             }
           }
-          latestDocFillRef.current = docFillPercent;
+          // Smooth the fill % with an EMA so distance jitter near the gate
+          // thresholds doesn't toggle "move closer/further" frame-to-frame.
+          // alpha = 1 disables smoothing (desktop default via the ?? fallback).
+          const fillAlpha = settingsRef.current.docFillEmaAlpha ?? 1;
+          docFillEmaRef.current =
+            docFillEmaRef.current == null
+              ? docFillPercent
+              : fillAlpha * docFillPercent +
+                (1 - fillAlpha) * docFillEmaRef.current;
+          const smoothedDocFill = docFillEmaRef.current;
+          latestDocFillRef.current = smoothedDocFill;
 
           // Active whenever we have a real contour to measure against.
           // Skip distance gating when the contour is the synthetic book-doc
@@ -1662,21 +2055,30 @@ export function useCardDetection(
           // Distance guidance only applies during capture phase (after doc type is locked).
           // During discovery, the guide box uses the wider passport ratio and distance
           // checks would block voting with misleading feedback.
+          // Hysteresis deadband (pct points): trip the distance gate only when
+          // the smoothed fill is clearly out of band, so a hand hovering on the
+          // threshold doesn't toggle. 0 disables (desktop default).
+          const fillBand = settingsRef.current.fillHysteresis ?? 0;
+          const gateDecayOn = settingsRef.current.gateDecayEnabled === true;
           if (
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent < minFillPercent
+            smoothedDocFill < minFillPercent - fillBand
           ) {
-            setFeedback('Move document closer');
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            // Soften instead of nuking progress on a transient dip; only
+            // downgrade the displayed state when the failure isn't absorbed.
+            const absorbed = gateDecayOn && softFailStability();
+            if (!absorbed) {
+              setFeedback('Move document closer');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+            }
             if (bestContour) bestContour.delete();
             mergeDebugInfo({
-              docFill: Math.round(docFillPercent),
+              docFill: Math.round(smoothedDocFill),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
+              rejectReason: `fill too small (${Math.round(smoothedDocFill)}% < ${minFillPercent}%)${absorbed ? ' [held]' : ''}`,
             });
             return;
           }
@@ -1684,17 +2086,19 @@ export function useCardDetection(
             !isCard &&
             !isDiscovery &&
             fillCheckActive &&
-            docFillPercent > maxFillPercent
+            smoothedDocFill > maxFillPercent + fillBand
           ) {
-            setFeedback('Move document further away');
-            setComplianceState(COMPLIANCE_STATES.DETECTING);
-            stabilityRef.current.count = 0;
-            bestFrameRef.current = { image: null, preview: null, score: 0 };
+            const absorbed = gateDecayOn && softFailStability();
+            if (!absorbed) {
+              setFeedback('Move document further away');
+              setComplianceState(COMPLIANCE_STATES.DETECTING);
+            }
             if (bestContour) bestContour.delete();
             mergeDebugInfo({
-              docFill: Math.round(docFillPercent),
+              docFill: Math.round(smoothedDocFill),
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
+              rejectReason: `fill too large (${Math.round(smoothedDocFill)}% > ${maxFillPercent}%)${absorbed ? ' [held]' : ''}`,
             });
             return;
           }
@@ -1732,11 +2136,15 @@ export function useCardDetection(
               win.length >= CHROMA_MIN_SAMPLES &&
               avgChroma < (settingsRef.current.minChromaContent ?? 13)
             ) {
-              setFeedback('Position your document in the frame');
-              setComplianceState(COMPLIANCE_STATES.DETECTING);
-              stabilityRef.current.count = 0;
-              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              const absorbed = gateDecayOn && softFailStability();
+              if (!absorbed) {
+                setFeedback('Position your document in the frame');
+                setComplianceState(COMPLIANCE_STATES.DETECTING);
+              }
               bestContour.delete();
+              mergeDebugInfo({
+                rejectReason: `chroma content low (${Math.round(avgChroma)} < ${settingsRef.current.minChromaContent ?? 13})${absorbed ? ' [held]' : ''}`,
+              });
               return;
             }
           }
@@ -1789,7 +2197,7 @@ export function useCardDetection(
               }
               points.roiWidth = clampedW;
               points.roiHeight = clampedH;
-              setDebugPath(points);
+              updateDebugPath(points);
             }
             setComplianceState(COMPLIANCE_STATES.DETECTING);
 
@@ -1813,19 +2221,23 @@ export function useCardDetection(
                 setFeedback('Hold steady');
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
+                mergeDebugInfo({
+                  rejectReason: 'discovery: timeout → id-card',
+                });
                 return;
               }
 
               const detectedRatio = bRect.width / bRect.height;
               // Normalize orientation so portrait-held docs still classify correctly.
-              const normalizedRatio = Math.max(
-                detectedRatio,
-                1 / detectedRatio,
-              );
-              const vote =
-                normalizedRatio >= ASPECT_RATIO_MIDPOINT
-                  ? 'id-card'
-                  : 'passport';
+              // Prefer the rotated-rect aspect computed during contour
+              // acceptance: unlike boundingRect, it is stable when the card is
+              // tilted in-plane. Fall back to boundingRect only if the winner
+              // geometry is unavailable.
+              const normalizedRatio =
+                winnerGeomRef.current.aspect > 0
+                  ? winnerGeomRef.current.aspect
+                  : Math.max(detectedRatio, 1 / detectedRatio);
+              const vote = classifyDiscoveryAspect(normalizedRatio);
 
               discoveryRef.current.votes.push(vote);
 
@@ -1856,6 +2268,9 @@ export function useCardDetection(
                 quadrants: quadDensities.join('/'),
                 detectedRatio: normalizedRatio.toFixed(3),
                 votes: `${recentVotes.filter((v) => v === 'id-card').length}id / ${recentVotes.filter((v) => v === 'passport').length}pp`,
+                rejectReason: allAgree
+                  ? 'discovery: type locked'
+                  : 'discovery: detecting type',
               });
 
               if (allAgree) {
@@ -1881,7 +2296,7 @@ export function useCardDetection(
 
             bestContour.delete();
           } else {
-            setDebugPath(null);
+            updateDebugPath(null);
             // No card inside the guide → re-enable off-guide scanning.
             inGuideDetectedRef.current = false;
             // No candidate this frame — drop the chroma history so a stale
@@ -1916,6 +2331,7 @@ export function useCardDetection(
                 quadrants: quadDensities.join('/'),
                 misses: discoveryRef.current.consecutiveMisses,
                 votes: `${discoveryRef.current.votes.filter((v) => v === 'id-card').length}id / ${discoveryRef.current.votes.filter((v) => v === 'passport').length}pp`,
+                rejectReason: 'discovery: no card contour',
               });
               return;
             }
@@ -1932,14 +2348,16 @@ export function useCardDetection(
               (wallHugRejectedCardThisFrame || combinedBboxOverflow)
             ) {
               captureMissCounterRef.current = 0;
-              setFeedback('Move document further away');
-              setComplianceState(COMPLIANCE_STATES.DETECTING);
-              stabilityRef.current.count = 0;
-              bestFrameRef.current = { image: null, preview: null, score: 0 };
+              const absorbed = gateDecayOn && softFailStability();
+              if (!absorbed) {
+                setFeedback('Move document further away');
+                setComplianceState(COMPLIANCE_STATES.DETECTING);
+              }
               mergeDebugInfo({
                 edgeDensity: edgeDensity.toFixed(1),
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
+                rejectReason: `fill too large (card overflows ROI)${absorbed ? ' [held]' : ''}`,
               });
               return;
             }
@@ -1957,6 +2375,7 @@ export function useCardDetection(
                 texture: Math.round(textureScore),
                 quadrants: quadDensities.join('/'),
                 missStreak: captureMissCounterRef.current,
+                rejectReason: `no card contour (miss ${captureMissCounterRef.current}/${CAPTURE_MISS_TOLERANCE})`,
               });
               return;
             }
@@ -1964,11 +2383,13 @@ export function useCardDetection(
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
+            docFillEmaRef.current = null;
             mergeDebugInfo({
               edgeDensity: edgeDensity.toFixed(1),
               texture: Math.round(textureScore),
               quadrants: quadDensities.join('/'),
               missStreak: captureMissCounterRef.current,
+              rejectReason: 'no card contour (no 4-corner quad formed)',
             });
             return;
           }
@@ -2002,7 +2423,11 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
           }
-          mergeDebugInfo({ blur: Math.round(variance), glare: 0 });
+          mergeDebugInfo({
+            blur: Math.round(variance),
+            glare: 0,
+            rejectReason: `Gate1: too blurry (${Math.round(variance)} < ${settingsRef.current.blurThreshold})`,
+          });
           return;
         }
 
@@ -2040,6 +2465,9 @@ export function useCardDetection(
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
           }
+          mergeDebugInfo({
+            rejectReason: `Gate2: glare (${glarePercent.toFixed(1)}% > ${settingsRef.current.glareThreshold}%)`,
+          });
           return;
         }
 
@@ -2205,6 +2633,9 @@ export function useCardDetection(
         setFeedback('Hold Still...');
         setCaptureProgress(Math.round(progress));
         setComplianceState(COMPLIANCE_STATES.STABLE);
+        mergeDebugInfo({
+          rejectReason: `Gate3: stabilizing (${stabilityRef.current.count}/${settingsRef.current.stabilityThreshold})`,
+        });
 
         if (
           stabilityRef.current.count >= settingsRef.current.stabilityThreshold
@@ -2247,6 +2678,7 @@ export function useCardDetection(
             }
             setFeedback('Capturing document...');
             setComplianceState(COMPLIANCE_STATES.CAPTURING);
+            mergeDebugInfo({ rejectReason: '✓ capturing' });
             isCapturingRef.current = true;
             setCaptureOrigin('camera_auto_capture');
             // Use the sharpest frame captured during stability
@@ -2311,10 +2743,40 @@ export function useCardDetection(
 
       try {
         runDetection();
+        // Clean frame — clear the error streak so a later one-off blip doesn't
+        // trip the circuit breaker below.
+        cvErrorStreakRef.current = 0;
       } catch (err: any) {
         console.error('CV Error:', err);
-        setFeedback('Processing failed — please try again');
-        setComplianceState(COMPLIANCE_STATES.IDLE);
+        const recoveryAction = nextCvErrorRecoveryAction({
+          errorStreak: cvErrorStreakRef.current,
+          chromaUnavailable: chromaUnavailableRef.current,
+        });
+        cvErrorStreakRef.current = recoveryAction.nextErrorStreak;
+        if (recoveryAction.shouldDisableChroma) {
+          chromaUnavailableRef.current = true;
+        }
+        if (recoveryAction.shouldActivateFallback) {
+          autoDetectionSuspendedRef.current =
+            recoveryAction.shouldSuspendDetection;
+          setManualFallbackActive(true);
+          setCvLoadFailed(true);
+        }
+        let nextFeedback = 'Processing failed — please try again';
+        if (recoveryAction.shouldActivateFallback) {
+          nextFeedback =
+            captureModeRef.current === 'autoCaptureOnly'
+              ? 'Auto-detection unavailable — please try again'
+              : 'Auto-detection unavailable — capture manually';
+        } else if (recoveryAction.shouldClearProcessingError) {
+          nextFeedback = 'Position your document in the frame';
+        }
+        setFeedback(nextFeedback);
+        setComplianceState(
+          recoveryAction.shouldClearProcessingError
+            ? COMPLIANCE_STATES.DETECTING
+            : COMPLIANCE_STATES.IDLE,
+        );
         stabilityRef.current.count = 0;
         bestFrameRef.current = { image: null, preview: null, score: 0 };
         // Never let a per-frame CV error freeze the loop: clearing the
@@ -2322,6 +2784,18 @@ export function useCardDetection(
         // self-recovers on the next frame instead of getting stuck on
         // "Processing failed" until a manual page refresh.
         isCapturingRef.current = false;
+        let cvRecovery = 'retrying';
+        if (recoveryAction.shouldActivateFallback) {
+          cvRecovery = 'suspended';
+        } else if (recoveryAction.shouldDisableChroma) {
+          cvRecovery = 'disabled chroma';
+        }
+        mergeDebugInfo({
+          cvError: formatDebugError(err),
+          cvErrors: recoveryAction.nextErrorStreak,
+          cvRecovery,
+          rejectReason: `CV error (${cvRecovery})`,
+        });
       } finally {
         // Clean Memory
         safeDelete(
@@ -2343,6 +2817,8 @@ export function useCardDetection(
           contourRgb,
           contourLab,
           labPlanes,
+          aPlane,
+          bPlane,
           aBlur,
           bBlur,
           aEdges,
@@ -2351,13 +2827,13 @@ export function useCardDetection(
         );
 
         // Loop
-        if (!isCapturingRef.current) {
+        if (!isCapturingRef.current && !autoDetectionSuspendedRef.current) {
           animationFrameId = requestAnimationFrame(processFrame);
         }
       }
     };
 
-    const timeoutId = setTimeout(processFrame, 1000); // 1s warm up
+    const timeoutId = setTimeout(processFrame, 100); // 1s warm up
 
     return () => {
       clearTimeout(timeoutId);
@@ -2372,7 +2848,8 @@ export function useCardDetection(
     const rotated = document.createElement('canvas');
     rotated.width = canvas.height;
     rotated.height = canvas.width;
-    const ctx = rotated.getContext('2d')!;
+    const ctx = rotated.getContext('2d');
+    if (!ctx) throw new Error('2d context unavailable');
     ctx.translate(0, rotated.height);
     ctx.rotate(-Math.PI / 2);
     ctx.drawImage(canvas, 0, 0);
@@ -2387,78 +2864,89 @@ export function useCardDetection(
     const { clampedX, clampedY, clampedW, clampedH } = coords;
     const s = settingsRef.current;
 
-    // Submitted image: full frame, or guide-rect crop when cropToCard is on
-    // (original behavior, padded by `cropPadding`).
-    let submitCaptureCanvas: HTMLCanvasElement = canvas;
-    let previewCaptureCanvas: HTMLCanvasElement | null = null;
+    try {
+      // Submitted image: full frame, or guide-rect crop when cropToCard is on
+      // (original behavior, padded by `cropPadding`).
+      let submitCaptureCanvas: HTMLCanvasElement = canvas;
+      let previewCaptureCanvas: HTMLCanvasElement | null = null;
 
-    // Crop in unrotated native-pixel space. If the UI is rotated, the
-    // cropped canvas is rotated CCW below to match the on-screen orientation.
-    if (s.cropToCard) {
-      // Submitted: guide-rect crop with cropPadding.
-      const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
-      const sPadX = clampedW * submitPad;
-      const sPadY = clampedH * submitPad;
-      const scx = Math.max(0, Math.floor(clampedX - sPadX));
-      const scy = Math.max(0, Math.floor(clampedY - sPadY));
-      const scw = Math.min(canvas.width - scx, Math.ceil(clampedW + sPadX * 2));
-      const sch = Math.min(
-        canvas.height - scy,
-        Math.ceil(clampedH + sPadY * 2),
-      );
-      const submitCanvas = document.createElement('canvas');
-      submitCanvas.width = scw;
-      submitCanvas.height = sch;
-      submitCanvas
-        .getContext('2d')!
-        .drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
-      submitCaptureCanvas = submitCanvas;
+      // Crop in unrotated native-pixel space. If the UI is rotated, the
+      // cropped canvas is rotated CCW below to match the on-screen orientation.
+      if (s.cropToCard) {
+        // Submitted: guide-rect crop with cropPadding.
+        const submitPad = (s.cropPadding == null ? 10 : s.cropPadding) / 100;
+        const sPadX = clampedW * submitPad;
+        const sPadY = clampedH * submitPad;
+        const scx = Math.max(0, Math.floor(clampedX - sPadX));
+        const scy = Math.max(0, Math.floor(clampedY - sPadY));
+        const scw = Math.min(
+          canvas.width - scx,
+          Math.ceil(clampedW + sPadX * 2),
+        );
+        const sch = Math.min(
+          canvas.height - scy,
+          Math.ceil(clampedH + sPadY * 2),
+        );
+        const submitCanvas = document.createElement('canvas');
+        submitCanvas.width = scw;
+        submitCanvas.height = sch;
+        const submitCtx = submitCanvas.getContext('2d');
+        if (!submitCtx) throw new Error('2d context unavailable');
+        submitCtx.drawImage(canvas, scx, scy, scw, sch, 0, 0, scw, sch);
+        submitCaptureCanvas = submitCanvas;
 
-      // Preview: tighter contour crop with previewCropPadding.
-      const useContour = s.cropToContour !== false && latestCardRectRef.current;
-      const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
-      const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
-      const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
-      const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
-      const padPct = s.previewCropPadding;
-      const pad = (padPct == null ? 2 : padPct) / 100;
-      const padX = sourceW * pad;
-      const padY = sourceH * pad;
-      const cx = Math.max(0, Math.floor(sourceX - padX));
-      const cy = Math.max(0, Math.floor(sourceY - padY));
-      const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
-      const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = cw;
-      cropCanvas.height = ch;
-      cropCanvas
-        .getContext('2d')!
-        .drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-      previewCaptureCanvas = cropCanvas;
-    }
-
-    // Rotate both outputs if UI was rotated during capture.
-    if (shouldRotateUi) {
-      submitCaptureCanvas = rotateCanvas90CCW(submitCaptureCanvas);
-      if (previewCaptureCanvas) {
-        previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
+        // Preview: tighter contour crop with previewCropPadding.
+        const useContour =
+          s.cropToContour !== false && latestCardRectRef.current;
+        const sourceX = useContour ? latestCardRectRef.current!.x : clampedX;
+        const sourceY = useContour ? latestCardRectRef.current!.y : clampedY;
+        const sourceW = useContour ? latestCardRectRef.current!.w : clampedW;
+        const sourceH = useContour ? latestCardRectRef.current!.h : clampedH;
+        const padPct = s.previewCropPadding;
+        const pad = (padPct == null ? 2 : padPct) / 100;
+        const padX = sourceW * pad;
+        const padY = sourceH * pad;
+        const cx = Math.max(0, Math.floor(sourceX - padX));
+        const cy = Math.max(0, Math.floor(sourceY - padY));
+        const cw = Math.min(canvas.width - cx, Math.ceil(sourceW + padX * 2));
+        const ch = Math.min(canvas.height - cy, Math.ceil(sourceH + padY * 2));
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = cw;
+        cropCanvas.height = ch;
+        const cropCtx = cropCanvas.getContext('2d');
+        if (!cropCtx) throw new Error('2d context unavailable');
+        cropCtx.drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+        previewCaptureCanvas = cropCanvas;
       }
-    }
 
-    const fullDataUrl = submitCaptureCanvas.toDataURL('image/jpeg', 0.95);
-    const previewDataUrl = previewCaptureCanvas
-      ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
-      : null;
+      // Rotate both outputs if UI was rotated during capture.
+      if (shouldRotateUi) {
+        submitCaptureCanvas = rotateCanvas90CCW(submitCaptureCanvas);
+        if (previewCaptureCanvas) {
+          previewCaptureCanvas = rotateCanvas90CCW(previewCaptureCanvas);
+        }
+      }
 
-    if (IS_DEBUG_MODE) {
-      console.info('--- MANUAL CAPTURE TRIGGERED ---');
+      const fullDataUrl = submitCaptureCanvas.toDataURL('image/jpeg', 0.95);
+      const previewDataUrl = previewCaptureCanvas
+        ? previewCaptureCanvas.toDataURL('image/jpeg', 0.95)
+        : null;
+
+      if (IS_DEBUG_MODE) {
+        console.info('--- MANUAL CAPTURE TRIGGERED ---');
+      }
+      setCaptureOrigin('camera_manual_capture');
+      setCapturedImage(fullDataUrl);
+      setPreviewImage(previewDataUrl);
+      setComplianceState(COMPLIANCE_STATES.SUCCESS);
+      setFeedback('Captured!');
+      isCapturingRef.current = true;
+    } catch (err) {
+      console.error('Manual capture failed:', err);
+      setComplianceState(COMPLIANCE_STATES.IDLE);
+      setFeedback('Capture failed — please try again');
+      isCapturingRef.current = false;
     }
-    setCaptureOrigin('camera_manual_capture');
-    setCapturedImage(fullDataUrl);
-    setPreviewImage(previewDataUrl);
-    setComplianceState(COMPLIANCE_STATES.SUCCESS);
-    setFeedback('Captured!');
-    isCapturingRef.current = true;
   };
 
   const resetCapture = () => {
@@ -2467,14 +2955,19 @@ export function useCardDetection(
     setCaptureOrigin(null);
     setComplianceState(COMPLIANCE_STATES.IDLE);
     setFeedback('Position your document in the frame');
-    setDebugPath(null);
+    updateDebugPath(null);
     isCapturingRef.current = false;
+    autoDetectionSuspendedRef.current = false;
     stabilityRef.current.count = 0;
     stabilityRef.current.lastCenter = null;
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
+    docFillEmaRef.current = null;
+    lastProcessedRef.current = 0;
+    prevProcessedRef.current = 0;
     captureMissCounterRef.current = 0;
-    framesSinceRealCardRef.current = Number.POSITIVE_INFINITY;
+    cvErrorStreakRef.current = 0;
+    lastRealCardAtRef.current = null;
     regionStabilityRef.current = 0;
     // If documentType was provided, keep it locked; otherwise re-enter discovery
     if (providedDocType) {

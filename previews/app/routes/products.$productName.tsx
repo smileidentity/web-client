@@ -1,12 +1,12 @@
 import type { LoaderFunctionArgs } from 'react-router';
 import { useLoaderData } from 'react-router';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Resource } from 'sst';
 import products from '~/data/products.json';
 
 declare global {
   interface Window {
-    SmileIdentity: Function;
+    SmileIdentity: (config: Record<string, unknown>) => void;
   }
 }
 
@@ -41,6 +41,15 @@ interface TokenResults {
   token: string;
 }
 
+interface LoaderData {
+  product?: Product;
+  apiUrl?: string;
+  appStage?: string;
+  debugMode?: boolean;
+  embedUrl?: string;
+  partnerId?: string;
+}
+
 const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'ar', label: 'العربية (Arabic)' },
@@ -63,13 +72,15 @@ const getToken = async (apiUrl: string, body: string | object) => {
   }
 };
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   const product = products.find((p) => p.url === params.productName);
+  const debugMode = new URL(request.url).searchParams.has('debug');
   if (product) {
     return {
       product,
       apiUrl: Resource.GetToken.url,
       appStage: Resource.App.stage,
+      debugMode,
       embedUrl: Resource.EmbedUrl.value,
       partnerId: Resource.PartnerId.value,
     };
@@ -78,13 +89,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function Product() {
-  const { product, apiUrl, appStage, embedUrl, partnerId } = useLoaderData<{
-    product?: Product;
-    apiUrl?: string;
-    appStage?: string;
-    embedUrl?: string;
-    partnerId?: string;
-  }>();
+  const { product, apiUrl, appStage, debugMode, embedUrl, partnerId } =
+    useLoaderData<LoaderData>();
   const defaultCallbackUrl = partnerId
     ? `https://callbacks.dev.smileidentity.com/${partnerId}`
     : '';
@@ -96,6 +102,9 @@ export default function Product() {
   const [autoCapture, setAutoCapture] = useState<string>('autoCapture');
   const [allowStrictMode, setAllowStrictMode] = useState<boolean>(true);
   const [newInstructions, setNewInstructions] = useState<boolean>(true);
+  const [enableDebugMode, setEnableDebugMode] = useState<boolean>(
+    debugMode ?? false,
+  );
 
   function initializeSdk(config: TokenResults) {
     if (typeof window.SmileIdentity === 'function' && config) {
@@ -129,9 +138,14 @@ export default function Product() {
     }
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.target);
+    if (!apiUrl) {
+      return new Response(JSON.stringify({ error: 'Missing token API URL' }), {
+        status: 400,
+      });
+    }
+    const formData = new FormData(event.currentTarget);
     const body = Object.fromEntries(formData);
     setIsGettingToken(true);
     try {
@@ -147,9 +161,9 @@ export default function Product() {
 
   return (
     <>
-      {product === null ? <h1>Unsupported Product</h1> : null}
+      {!product ? <h1>Unsupported Product</h1> : null}
 
-      {product !== null ? (
+      {product ? (
         <>
           <form onSubmit={handleSubmit}>
             <fieldset disabled={isGettingToken}>
@@ -291,7 +305,22 @@ export default function Product() {
                   <option value="true">Enabled</option>
                 </select>
               </div>
-
+              {debugMode && (
+                <div>
+                  <label htmlFor="debug-mode-select">Debug Mode</label>
+                  <select
+                    id="debug-mode-select"
+                    value={enableDebugMode ? 'true' : 'false'}
+                    onChange={(e) =>
+                      setEnableDebugMode(e.target.value === 'true')
+                    }
+                    disabled={isGettingToken}
+                  >
+                    <option value="false">Disabled</option>
+                    <option value="true">Enabled</option>
+                  </select>
+                </div>
+              )}
               <button disabled={isGettingToken} type="submit">
                 Create Preview
               </button>

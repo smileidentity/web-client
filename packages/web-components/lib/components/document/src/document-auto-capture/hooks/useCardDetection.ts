@@ -25,12 +25,9 @@ import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
 
 declare const cv: any;
 
-// Internal debug flag: only emit verbose detection telemetry when the page
-// URL contains `?debug` (the same switch that exposes the tuning panel).
-// Evaluated once at module load to avoid recomputing in the hot loop.
-export const IS_DEBUG_MODE =
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).has('debug');
+// Temporary testing override: keep verbose detection telemetry and the tuning
+// panel enabled without requiring `?debug` in the URL.
+export const IS_DEBUG_MODE = true;
 
 // Helper to safely release a list of OpenCV Mats. Mats not yet allocated or
 // already deleted are skipped. Used in `finally` blocks to avoid a wall of
@@ -47,6 +44,32 @@ const safeDelete = (
       // best-effort; continue releasing remaining mats
     }
   });
+};
+
+const formatDebugError = (err: unknown) => {
+  if (err instanceof Error) {
+    return err.message ? `${err.name}: ${err.message}` : err.name;
+  }
+  if (typeof err === 'number' && Number.isFinite(err)) {
+    const cvAny = typeof cv === 'undefined' ? null : (cv as any);
+    if (cvAny && typeof cvAny.exceptionFromPtr === 'function') {
+      try {
+        const ex = cvAny.exceptionFromPtr(err);
+        const msg =
+          ex?.msg || ex?.what || ex?.message || ex?.toString?.() || null;
+        if (msg) return `OpenCV(${err}): ${msg}`;
+      } catch {
+        // Best-effort decode only; fall through to numeric fallback.
+      }
+    }
+    return `OpenCV/WASM code: ${err}`;
+  }
+  if (typeof err === 'string') return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
 };
 
 export const COMPLIANCE_STATES = {
@@ -415,6 +438,9 @@ export function useCardDetection(
   // the session so detection self-heals onto the luminance-only path. Reset on
   // any successful frame.
   const cvErrorStreakRef = useRef(0);
+  // When CV keeps throwing after optional chroma has been disabled, pause the
+  // hot detection loop so repeated state updates do not freeze the page.
+  const autoDetectionSuspendedRef = useRef(false);
   // Consecutive frames a mobile content-region candidate has qualified (Fix 3).
   // Gates the mobile region fallback so a transient blob can't trigger capture.
   const regionStabilityRef = useRef(0);
@@ -483,6 +509,7 @@ export function useCardDetection(
     const processFrame = () => {
       // 0. Stop if capturing or video not ready
       if (isCapturingRef.current) return;
+      if (autoDetectionSuspendedRef.current) return;
       if (!videoRef.current) {
         animationFrameId = requestAnimationFrame(processFrame);
         return;
@@ -515,6 +542,8 @@ export function useCardDetection(
       let contourRgb: any = null;
       let contourLab: any = null;
       let labPlanes: any = null;
+      let aPlane: any = null;
+      let bPlane: any = null;
       let aBlur: any = null;
       let bBlur: any = null;
       let aEdges: any = null;
@@ -1085,9 +1114,9 @@ export function useCardDetection(
               contourLab.delete();
               contourLab = null;
 
-              // Borrowed views — owned by labPlanes, never deleted directly.
-              const aPlane = labPlanes.get(1);
-              const bPlane = labPlanes.get(2);
+              // OpenCV.js MatVector.get() returns Mats that must be released.
+              aPlane = labPlanes.get(1);
+              bPlane = labPlanes.get(2);
               const chromaK = new cv.Size(7, 7); // chroma is noisier than luma
               aBlur = new cv.Mat();
               bBlur = new cv.Mat();
@@ -1119,6 +1148,10 @@ export function useCardDetection(
               cv.bitwise_or(edges, bEdges, edges);
               edgeSource = 'lum+chroma';
 
+              safeDelete(aPlane, bPlane);
+              aPlane = null;
+              bPlane = null;
+
               labPlanes.delete(); // frees L/a/b incl. borrowed aPlane/bPlane
               labPlanes = null;
               aBlur.delete();
@@ -1129,11 +1162,15 @@ export function useCardDetection(
               aEdges = null;
               bEdges.delete();
               bEdges = null;
-            } catch {
+            } catch (chromaErr) {
               // Lab path failed on this device — disable for the session and
               // continue with the luminance edges already in `edges`.
               chromaUnavailableRef.current = true;
               edgeSource = 'lum';
+              mergeDebugInfo({
+                chromaError: formatDebugError(chromaErr),
+                chromaStatus: 'disabled',
+              });
             }
           }
           mergeDebugInfo({ contourSource: edgeSource });
@@ -2397,14 +2434,21 @@ export function useCardDetection(
           chromaUnavailableRef.current = true;
         }
         if (recoveryAction.shouldActivateFallback) {
+          autoDetectionSuspendedRef.current =
+            recoveryAction.shouldSuspendDetection;
           setManualFallbackActive(true);
           setCvLoadFailed(true);
         }
-        setFeedback(
-          recoveryAction.shouldClearProcessingError
-            ? 'Position your document in the frame'
-            : 'Processing failed — please try again',
-        );
+        let nextFeedback = 'Processing failed — please try again';
+        if (recoveryAction.shouldActivateFallback) {
+          nextFeedback =
+            captureModeRef.current === 'autoCaptureOnly'
+              ? 'Auto-detection unavailable — please try again'
+              : 'Auto-detection unavailable — capture manually';
+        } else if (recoveryAction.shouldClearProcessingError) {
+          nextFeedback = 'Position your document in the frame';
+        }
+        setFeedback(nextFeedback);
         setComplianceState(
           recoveryAction.shouldClearProcessingError
             ? COMPLIANCE_STATES.DETECTING
@@ -2417,7 +2461,17 @@ export function useCardDetection(
         // self-recovers on the next frame instead of getting stuck on
         // "Processing failed" until a manual page refresh.
         isCapturingRef.current = false;
-        mergeDebugInfo({ cvErrors: recoveryAction.nextErrorStreak });
+        let cvRecovery = 'retrying';
+        if (recoveryAction.shouldActivateFallback) {
+          cvRecovery = 'suspended';
+        } else if (recoveryAction.shouldDisableChroma) {
+          cvRecovery = 'disabled chroma';
+        }
+        mergeDebugInfo({
+          cvError: formatDebugError(err),
+          cvErrors: recoveryAction.nextErrorStreak,
+          cvRecovery,
+        });
       } finally {
         // Clean Memory
         safeDelete(
@@ -2439,6 +2493,8 @@ export function useCardDetection(
           contourRgb,
           contourLab,
           labPlanes,
+          aPlane,
+          bPlane,
           aBlur,
           bBlur,
           aEdges,
@@ -2447,13 +2503,13 @@ export function useCardDetection(
         );
 
         // Loop
-        if (!isCapturingRef.current) {
+        if (!isCapturingRef.current && !autoDetectionSuspendedRef.current) {
           animationFrameId = requestAnimationFrame(processFrame);
         }
       }
     };
 
-    const timeoutId = setTimeout(processFrame, 1000); // 1s warm up
+    const timeoutId = setTimeout(processFrame, 100); // 1s warm up
 
     return () => {
       clearTimeout(timeoutId);
@@ -2577,6 +2633,7 @@ export function useCardDetection(
     setFeedback('Position your document in the frame');
     updateDebugPath(null);
     isCapturingRef.current = false;
+    autoDetectionSuspendedRef.current = false;
     stabilityRef.current.count = 0;
     stabilityRef.current.lastCenter = null;
     bestFrameRef.current = { image: null, preview: null, score: 0 };

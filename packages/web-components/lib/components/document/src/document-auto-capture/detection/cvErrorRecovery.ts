@@ -25,8 +25,7 @@ export function nextCvErrorRecoveryAction({
   const nextErrorStreak = errorStreak + 1;
   const shouldDisableChroma =
     !chromaUnavailable && nextErrorStreak >= chromaDisableThreshold;
-  const chromaUnavailableAfterError =
-    chromaUnavailable || shouldDisableChroma;
+  const chromaUnavailableAfterError = chromaUnavailable || shouldDisableChroma;
 
   const shouldActivateFallback =
     chromaUnavailableAfterError && nextErrorStreak >= fallbackThreshold;

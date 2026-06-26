@@ -752,11 +752,22 @@ export function useCardDetection(
         }
         const clampedH = Math.min(guideHeight, videoH - clampedY);
 
-        // Downscaled ROI coords — used for all OpenCV ops below.
-        const dsClampedX = Math.round(clampedX * dsScale);
-        const dsClampedY = Math.round(clampedY * dsScale);
-        const dsClampedW = Math.max(1, Math.round(clampedW * dsScale));
-        const dsClampedH = Math.max(1, Math.round(clampedH * dsScale));
+        // Downscaled ROI coords — used for all OpenCV ops below. Clamp to the
+        // dsCanvas bounds (= fullFrame dims): rounding clampedX and clampedW
+        // independently can push x+w one pixel past dsW when the ROI sits flush
+        // against the frame edge, tripping the cv.Mat roi assertion
+        // (0 <= roi.x && roi.x + roi.width <= m.cols). Clamp x/y first, then size
+        // to the remaining span so x+w <= dsW and y+h <= dsH always hold.
+        const dsClampedX = Math.min(Math.round(clampedX * dsScale), dsW - 1);
+        const dsClampedY = Math.min(Math.round(clampedY * dsScale), dsH - 1);
+        const dsClampedW = Math.max(
+          1,
+          Math.min(Math.round(clampedW * dsScale), dsW - dsClampedX),
+        );
+        const dsClampedH = Math.max(
+          1,
+          Math.min(Math.round(clampedH * dsScale), dsH - dsClampedY),
+        );
 
         // Store current ROI coords for on-demand manual capture (zero cost — no canvas ops).
         latestCropCoordsRef.current = {

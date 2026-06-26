@@ -123,6 +123,7 @@ const MOBILE_OVERRIDES = {
   deviceType: 'Mobile',
   // Show the detected card outline only on mobile (handheld framing aid).
   useDynamicBorder: true,
+  autoCannySigma: 0.0, // mobile cameras resolve more detail, so a lower threshold is needed to detect faint edges
   edgeDensityThreshold: 6,
   // Phone framing is looser, so each grid cell needs only 50% of the threshold.
   gridCellRatio: 0.5,

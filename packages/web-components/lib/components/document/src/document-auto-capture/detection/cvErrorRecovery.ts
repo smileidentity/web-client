@@ -13,6 +13,7 @@ type RecoveryAction = {
   shouldDisableChroma: boolean;
   shouldClearProcessingError: boolean;
   shouldActivateFallback: boolean;
+  shouldSuspendDetection: boolean;
 };
 
 export function nextCvErrorRecoveryAction({
@@ -27,11 +28,14 @@ export function nextCvErrorRecoveryAction({
   const chromaUnavailableAfterError =
     chromaUnavailable || shouldDisableChroma;
 
+  const shouldActivateFallback =
+    chromaUnavailableAfterError && nextErrorStreak >= fallbackThreshold;
+
   return {
     nextErrorStreak,
     shouldDisableChroma,
     shouldClearProcessingError: shouldDisableChroma,
-    shouldActivateFallback:
-      chromaUnavailableAfterError && nextErrorStreak >= fallbackThreshold,
+    shouldActivateFallback,
+    shouldSuspendDetection: shouldActivateFallback,
   };
 }

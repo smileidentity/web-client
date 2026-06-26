@@ -21,6 +21,7 @@ describe('Document auto-capture CV error recovery', () => {
       expect(action.shouldDisableChroma).to.equal(false);
       expect(action.shouldClearProcessingError).to.equal(false);
       expect(action.shouldActivateFallback).to.equal(false);
+      expect(action.shouldSuspendDetection).to.equal(false);
     });
   });
 
@@ -39,6 +40,7 @@ describe('Document auto-capture CV error recovery', () => {
       expect(action.shouldDisableChroma).to.equal(true);
       expect(action.shouldClearProcessingError).to.equal(true);
       expect(action.shouldActivateFallback).to.equal(false);
+      expect(action.shouldSuspendDetection).to.equal(false);
     });
   });
 
@@ -55,6 +57,7 @@ describe('Document auto-capture CV error recovery', () => {
       expect(action.shouldDisableChroma).to.equal(false);
       expect(action.shouldClearProcessingError).to.equal(false);
       expect(action.shouldActivateFallback).to.equal(true);
+      expect(action.shouldSuspendDetection).to.equal(true);
     });
   });
 });

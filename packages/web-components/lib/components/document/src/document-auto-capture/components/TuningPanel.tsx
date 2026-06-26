@@ -46,6 +46,11 @@ interface TuningDebugInfo {
   quality?: number | string;
   houghLines?: number | string;
   seamRejected?: boolean | string;
+  cvError?: string;
+  cvErrors?: number | string;
+  cvRecovery?: string;
+  chromaError?: string;
+  chromaStatus?: string;
   [key: string]: unknown;
 }
 
@@ -188,6 +193,12 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           <span style={{ color: '#fff' }}>{debugInfo?.chroma ?? '—'}</span>
         </div>
         <div>
+          Chroma Status:{' '}
+          <span style={{ color: '#fff' }}>
+            {debugInfo?.chromaStatus ?? '—'}
+          </span>
+        </div>
+        <div>
           Quality:{' '}
           <span style={{ color: '#0f0' }}>{debugInfo?.quality ?? '—'}</span>
         </div>
@@ -209,6 +220,33 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
             {debugInfo?.quadrants ?? '-'}
           </span>
         </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          CV Errors:{' '}
+          <span style={{ color: '#fbb', fontSize: '0.7rem' }}>
+            {debugInfo?.cvErrors ?? 0}
+            {debugInfo?.cvRecovery ? ` (${debugInfo.cvRecovery})` : ''}
+          </span>
+        </div>
+        {debugInfo?.cvError && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            CV Error:{' '}
+            <span
+              style={{ color: '#f88', fontSize: '0.7rem', wordBreak: 'break-word' }}
+            >
+              {debugInfo.cvError}
+            </span>
+          </div>
+        )}
+        {debugInfo?.chromaError && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            Chroma Error:{' '}
+            <span
+              style={{ color: '#f88', fontSize: '0.7rem', wordBreak: 'break-word' }}
+            >
+              {debugInfo.chromaError}
+            </span>
+          </div>
+        )}
       </div>
 
       <hr style={{ borderColor: '#333', margin: '5px 0' }} />

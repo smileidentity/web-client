@@ -91,8 +91,9 @@ const DETECTION_PHASE = {
 // so a shorter streak is needed to reach consensus before votes are wiped.
 const DISCOVERY_CONSENSUS_THRESHOLD = 6;
 
-// If contour detection can't classify within this many frames, default to id-card
-const DISCOVERY_TIMEOUT_FRAMES = 60;
+// If contour detection can't classify within this many PROCESSED frames, default
+// to id-card. 30 ≈ 1s at the default 30fps processing throttle.
+const DISCOVERY_TIMEOUT_FRAMES = 30;
 
 // How many consecutive frames without a detected rectangle before resetting votes.
 // Raised from 5 → 20: laminated cards and slight hand movement cause many gap
@@ -432,6 +433,11 @@ export function useCardDetection(
   // documents whose spine/page edges can momentarily break) before flipping
   // the user-facing prompt to "Align document in frame".
   const captureMissCounterRef = useRef(0);
+  // Timestamp (performance.now) of the last frame we actually ran detection on,
+  // and the timestamp before that — used to throttle the heavy CV pipeline to
+  // settingsRef.targetProcessingFps and to report the live processing rate.
+  const lastProcessedRef = useRef(0);
+  const prevProcessedRef = useRef(0);
   // Set true if Lab chroma conversion is unavailable/throws on this device, so
   // the chroma-fusion path (Fix 2) disables itself for the session and falls
   // back to luminance-only edges.
@@ -544,6 +550,27 @@ export function useCardDetection(
       if (video.readyState !== 4 || typeof cv === 'undefined' || !cv.Mat) {
         animationFrameId = requestAnimationFrame(processFrame);
         return;
+      }
+
+      // Throttle the heavy CV pipeline to a target processing rate (default
+      // 30fps). rAF fires at the display refresh rate (60/90/120Hz/adaptive), so
+      // a time-based gate keeps the real detection rate — and every frame-count
+      // constant tuned against it — consistent across devices and under thermal
+      // load. Skipped ticks reschedule and return BEFORE any Mat/canvas/state
+      // work, so they cost nothing and the UI naturally holds its last state.
+      const nowTs = performance.now();
+      const targetFps = settingsRef.current.targetProcessingFps ?? 30;
+      // ~4ms slack so a 33ms target doesn't beat against 16.7ms vsync into 20fps.
+      const minInterval = 1000 / targetFps - 4;
+      if (nowTs - lastProcessedRef.current < minInterval) {
+        animationFrameId = requestAnimationFrame(processFrame);
+        return;
+      }
+      prevProcessedRef.current = lastProcessedRef.current;
+      lastProcessedRef.current = nowTs;
+      if (prevProcessedRef.current > 0) {
+        const dt = nowTs - prevProcessedRef.current;
+        if (dt > 0) mergeDebugInfo({ procFps: Math.round(1000 / dt) });
       }
 
       // 1. Setup CV structs
@@ -2934,6 +2961,8 @@ export function useCardDetection(
     bestFrameRef.current = { image: null, preview: null, score: 0 };
     latestCardRectRef.current = null;
     docFillEmaRef.current = null;
+    lastProcessedRef.current = 0;
+    prevProcessedRef.current = 0;
     captureMissCounterRef.current = 0;
     cvErrorStreakRef.current = 0;
     lastRealCardAtRef.current = null;

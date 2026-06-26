@@ -90,6 +90,11 @@ const SHARED_DEFAULTS = {
   // here only false-rejected low-contrast cards on plain backgrounds before the
   // contour pass ran. Synthetic-fallback eligibility keeps its own 7/9 signal.
   captureGridMinCells: 4,
+  // Throttle the heavy CV pipeline to this processing rate (fps). rAF runs at the
+  // display refresh (60/90/120Hz), so a time-based throttle keeps detection — and
+  // the frame-count constants tuned against it — consistent across devices and
+  // saves ~2x CV cost on mobile. 60 effectively disables throttling.
+  targetProcessingFps: 30,
   // Chroma-mask fallback: when no 4-corner quad forms in luminance (a strongly
   // coloured card on a near-neutral background, e.g. a green/yellow ID on grey
   // fabric), segment the card by chroma magnitude and accept the largest blob if
@@ -144,9 +149,11 @@ const MOBILE_OVERRIDES = {
   // 1 (within the blur/glare miss tolerance) instead of zeroing it, so a single
   // jittery frame doesn't drain the progress ring or flip "Hold Still"↔"Align".
   gateDecayEnabled: true,
-  // docFillEmaAlpha: EMA smoothing of the distance fill % (1 = off). 0.3 ≈ a
-  // 3-frame time constant — kills threshold chatter without lagging a real move.
-  docFillEmaAlpha: 0.3,
+  // docFillEmaAlpha: EMA smoothing of the distance fill % (1 = off). At the
+  // default 30fps throttle the EMA updates ~half as often as the old 60fps loop,
+  // so 0.45 keeps a similar wall-clock time constant (~3 processed frames)
+  // without over-lagging a real move.
+  docFillEmaAlpha: 0.45,
   // fillHysteresis: deadband (pct points) around min/maxFillPercent so a hand
   // hovering on the 65%/95% boundary doesn't toggle the distance gate.
   fillHysteresis: 3,
@@ -573,20 +580,25 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   );
 
   // Debounced compliance state for visual output.
-  // The raw complianceState updates every detection frame (~60fps). Feeding it
-  // directly to the Overlay and spinner causes rapid color/mount oscillation
-  // when detection quality is borderline. A 150ms trailing debounce smooths
-  // this; CAPTURING/SUCCESS bypass it so the final confirmation is immediate.
+  // The raw complianceState updates every detection frame. Feeding it directly
+  // to the Overlay/spinner causes rapid color oscillation when quality is
+  // borderline. Debounce is ASYMMETRIC: snap immediately INTO the "good" green
+  // states (STABLE/CAPTURING/SUCCESS) so the guide turns green the instant the
+  // Hold-Still phase begins — that phase is only ~5 frames, shorter than the
+  // debounce, so a trailing debounce would skip green entirely — but apply the
+  // 150ms trailing debounce when DOWNGRADING to DETECTING/IDLE so a transient
+  // miss doesn't flash the border back to amber.
   const COMPLIANCE_DEBOUNCE_MS = 150;
   const [visibleComplianceState, setVisibleComplianceState] =
     useState(complianceState);
   useEffect(() => {
-    const isImmediate =
+    const isGoodState =
+      complianceState === COMPLIANCE_STATES.STABLE ||
       complianceState === COMPLIANCE_STATES.CAPTURING ||
       complianceState === COMPLIANCE_STATES.SUCCESS;
     const t = setTimeout(
       () => setVisibleComplianceState(complianceState),
-      isImmediate ? 0 : COMPLIANCE_DEBOUNCE_MS,
+      isGoodState ? 0 : COMPLIANCE_DEBOUNCE_MS,
     );
     return () => clearTimeout(t);
   }, [complianceState]);

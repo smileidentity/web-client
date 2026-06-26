@@ -40,11 +40,13 @@ interface TuningSettings {
   gateDecayEnabled?: boolean;
   docFillEmaAlpha?: number;
   fillHysteresis?: number;
+  targetProcessingFps?: number;
   [key: string]: unknown;
 }
 
 interface TuningDebugInfo {
   rejectReason?: string;
+  procFps?: number | string;
   edgeDensity?: number | string;
   texture?: number | string;
   quadrants?: string;
@@ -180,6 +182,10 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           >
             {debugInfo?.rejectReason ?? '—'}
           </span>
+        </div>
+        <div>
+          Proc FPS:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.procFps ?? '—'}</span>
         </div>
         <div>
           Edge Density:{' '}
@@ -637,6 +643,23 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           value={settings.captureGridMinCells as number}
           onInput={(e) =>
             updateSetting('captureGridMinCells', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Processing FPS: {settings.targetProcessingFps}{' '}
+          <em>(throttle heavy CV; 60 = every frame)</em>
+        </span>
+        <input
+          type="range"
+          min="10"
+          max="60"
+          step="5"
+          value={settings.targetProcessingFps as number}
+          onInput={(e) =>
+            updateSetting('targetProcessingFps', Number(e.target.value))
           }
         />
       </label>

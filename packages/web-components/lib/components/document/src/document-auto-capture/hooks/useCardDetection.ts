@@ -170,11 +170,19 @@ const getAutoCaptureFeedback = () => ({
   positionDocument: translate('document.autoCapture.feedback.positionDocument'),
   alignDocument: translate('document.autoCapture.feedback.alignDocument'),
   placeDocument: translate('document.autoCapture.feedback.placeDocument'),
-  ensureDocumentVisible: translate('document.autoCapture.feedback.ensureDocumentVisible'),
-  moveDocumentCloser: translate('document.autoCapture.feedback.moveDocumentCloser'),
-  moveDocumentFurtherAway: translate('document.autoCapture.feedback.moveDocumentFurtherAway'),
+  ensureDocumentVisible: translate(
+    'document.autoCapture.feedback.ensureDocumentVisible',
+  ),
+  moveDocumentCloser: translate(
+    'document.autoCapture.feedback.moveDocumentCloser',
+  ),
+  moveDocumentFurtherAway: translate(
+    'document.autoCapture.feedback.moveDocumentFurtherAway',
+  ),
   holdSteady: translate('document.autoCapture.feedback.holdSteady'),
-  detectingDocumentType: translate('document.autoCapture.feedback.detectingDocumentType'),
+  detectingDocumentType: translate(
+    'document.autoCapture.feedback.detectingDocumentType',
+  ),
   processingFailed: translate('document.autoCapture.feedback.processingFailed'),
   autoDetectionUnavailableRetry: translate(
     'document.autoCapture.feedback.autoDetectionUnavailableRetry',
@@ -189,7 +197,9 @@ const getAutoCaptureFeedback = () => ({
     'document.autoCapture.feedback.glareDetectedAdjustLighting',
   ),
   holdStill: translate('document.autoCapture.feedback.holdStill'),
-  capturingDocument: translate('document.autoCapture.feedback.capturingDocument'),
+  capturingDocument: translate(
+    'document.autoCapture.feedback.capturingDocument',
+  ),
 });
 
 // --- Off-guide detection (desktop / wide layouts) ---

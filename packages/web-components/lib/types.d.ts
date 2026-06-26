@@ -40,15 +40,18 @@ declare module 'signature_pad' {
 
 // Global constants
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const SMILE_COMPONENTS_VERSION: string;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const COMPONENTS_VERSION: string;
-// Build-time debug gate (Vite `define`, see vite.config.ts). Replaced inline
-// with a `true`/`false` literal at build, so guarding debug-only code with it
-// lets the bundler dead-code-eliminate that code from production builds.
-// `undefined` covers bundlers/runtimes that don't inject the define.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const __SMILE_DEBUG__: boolean | undefined;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const SMILE_COMPONENTS_VERSION: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const COMPONENTS_VERSION: string;
+  // Build-time debug gate (Vite `define`, see vite.config.ts). Replaced inline
+  // with a `true`/`false` literal at build, so guarding debug-only code with it
+  // lets the bundler dead-code-eliminate that code from production builds.
+  // `undefined` covers bundlers/runtimes that don't inject the define.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const __SMILE_DEBUG__: boolean | undefined;
+}
 
 // Custom Elements
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

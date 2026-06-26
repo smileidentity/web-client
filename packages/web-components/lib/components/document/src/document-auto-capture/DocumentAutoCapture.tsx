@@ -74,6 +74,22 @@ const SHARED_DEFAULTS = {
   houghThreshold: 40,
   houghMinLengthRatio: 0.3,
   houghMaxLineGap: 10,
+  // Clutter guard: skip seam-rejection when HoughLinesP returns more lines than
+  // this — a woven fabric/carpet floods the map (~400+) and would falsely reject
+  // a real card, whereas a parquet shows only a handful of seam lines.
+  seamMaxHoughLines: 60,
+  // Clutter-adaptive Canny floor: on a near-empty scene (edgeDensity below
+  // lowClutterEdgeDensity %) drop the high-threshold floor to
+  // cannyHighMinLowClutter so a faint border (pale ID on pale wood) is still
+  // traced; busy scenes keep the fixed 60 floor so the high-contrast path holds.
+  lowClutterEdgeDensity: 2,
+  cannyHighMinLowClutter: 40,
+  // Gate-0 grid coverage is an early-out only: bail just on a near-empty grid
+  // (this many of 9 inner cells must carry edges). Distance / "fully visible" is
+  // owned downstream by docFillPercent >= minFillPercent (65%), so a strict bar
+  // here only false-rejected low-contrast cards on plain backgrounds before the
+  // contour pass ran. Synthetic-fallback eligibility keeps its own 7/9 signal.
+  captureGridMinCells: 4,
   cropToCard: true,
   cropToContour: true,
   cropPadding: 10,

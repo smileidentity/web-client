@@ -953,7 +953,16 @@ export function useCardDetection(
         } else if (isDiscoveryPhase) {
           gridCheckFails = passingCells < MIN_DISCOVERY_GRID_CELLS; // Relaxed: 3/9 cells
         } else {
-          gridCheckFails = passingCells < 7; // Capture: 7/9
+          // Early-out only: bail just on a near-empty grid. The real "document
+          // fills the box / is close enough" check is docFillPercent >=
+          // minFillPercent (65%) in the contour pass below. A 7/9 bar here
+          // false-rejected low-contrast cards on plain backgrounds (only the
+          // printed center cells carry edges; the plain outer cells read ~0)
+          // before the contour pass — incl. the clutter-adaptive Canny floor
+          // for faint borders — ever ran. Synthetic-fallback eligibility still
+          // requires the strong passingCells >= 7 signal separately below.
+          gridCheckFails =
+            passingCells < (settingsRef.current.captureGridMinCells ?? 4);
         }
 
         if (!hasDocument || gridCheckFails) {
@@ -1087,9 +1096,21 @@ export function useCardDetection(
           gradStdDev.delete();
 
           const cannySigma = settingsRef.current.autoCannySigma ?? 1.0;
+          // Clutter-adaptive high-threshold floor. On a featureless surface
+          // (pale ID on pale wood) the card border gradient is faint and the
+          // fixed CANNY_HIGH_MIN=60 floor pins too high → no quad forms. But a
+          // genuinely empty scene (Gate-0 edgeDensity ~0) has no background
+          // texture to turn into false edges, so the floor can safely drop to
+          // recover the faint border. Busy scenes keep the proven 60 floor, so
+          // the working high-contrast/metallic path cannot regress.
+          const lowClutter =
+            edgeDensity < (settingsRef.current.lowClutterEdgeDensity ?? 2);
+          const cannyHighMin = lowClutter
+            ? (settingsRef.current.cannyHighMinLowClutter ?? 40)
+            : CANNY_HIGH_MIN;
           const highThreshold = Math.min(
             CANNY_HIGH_MAX,
-            Math.max(CANNY_HIGH_MIN, gMean + cannySigma * gStd),
+            Math.max(cannyHighMin, gMean + cannySigma * gStd),
           );
           const lowThreshold = Math.max(15, highThreshold * 0.4);
           mergeDebugInfo({
@@ -1458,13 +1479,26 @@ export function useCardDetection(
                     });
                   }
                   const lineSegments = getHoughSegments();
-                  seamReject = isSeamFalseQuad(corners, lineSegments, {
-                    roiW: clampedW,
-                    roiH: clampedH,
-                  });
+                  // Clutter guard: on a high-frequency texture (woven fabric,
+                  // carpet) HoughLinesP returns hundreds of long lines, so a
+                  // real card always has >=2 edges sitting on overshooting
+                  // through-lines and would be wrongly rejected. The seam
+                  // discriminator only holds on LOW-clutter surfaces (a parquet
+                  // shows a handful of lines, a fabric ~400+), so skip the gate
+                  // entirely once the line count is implausibly high.
+                  const seamMaxLines =
+                    settingsRef.current.seamMaxHoughLines ?? 60;
+                  const tooCluttered = lineSegments.length > seamMaxLines;
+                  seamReject =
+                    !tooCluttered &&
+                    isSeamFalseQuad(corners, lineSegments, {
+                      roiW: clampedW,
+                      roiH: clampedH,
+                    });
                   mergeDebugInfo({
                     houghLines: lineSegments.length,
                     seamRejected: seamReject,
+                    seamClutter: tooCluttered,
                   });
                 }
 

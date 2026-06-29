@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import { isDebugEnabled } from '../utils/debug';
-import { translate } from '../../../../../domain/localisation';
+import {
+  translate,
+  getCurrentLocale,
+} from '../../../../../domain/localisation';
 
 import {
   clamp01,
@@ -323,7 +326,12 @@ export function useCardDetection(
   settings: Record<string, any>,
   options: Record<string, any> = {},
 ) {
-  const autoCaptureFeedback = getAutoCaptureFeedback();
+  // Translated feedback strings. Memoized on the active locale so the ~18
+  // translate() lookups aren't rebuilt on every render (this hook re-renders
+  // on each setFeedback/setCaptureProgress/setComplianceState during capture).
+  const autoCaptureFeedback = useMemo(getAutoCaptureFeedback, [
+    getCurrentLocale(),
+  ]);
   const {
     variant = 'fullscreen',
     documentType = null,

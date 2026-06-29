@@ -48,7 +48,6 @@ declare const COMPONENTS_VERSION: string;
 // lets the bundler dead-code-eliminate that code from production builds.
 // `undefined` covers bundlers/runtimes that don't inject the define.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const __SMILE_DEBUG__: boolean | undefined;
 
 // Custom Elements
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -98,6 +97,7 @@ declare global {
   interface Window {
     customElements: CustomElementRegistry;
   }
+  declare const __SMILE_DEBUG__: boolean | undefined;
 }
 
 export {};

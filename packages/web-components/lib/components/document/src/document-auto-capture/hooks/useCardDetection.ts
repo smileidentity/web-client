@@ -1,5 +1,9 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import { isDebugEnabled } from '../utils/debug';
+import {
+  translate,
+  getCurrentLocale,
+} from '../../../../../domain/localisation';
 
 import {
   clamp01,
@@ -165,6 +169,42 @@ const BEST_FRAME_MISS_TOLERANCE = 3;
 // RETR_EXTERNAL). Set to false to revert to the legacy combined-contour metric.
 const USE_PRESENCE_FILL_METRIC = true;
 
+const getAutoCaptureFeedback = () => ({
+  positionDocument: translate('document.autoCapture.feedback.positionDocument'),
+  alignDocument: translate('document.autoCapture.feedback.alignDocument'),
+  placeDocument: translate('document.autoCapture.feedback.placeDocument'),
+  ensureDocumentVisible: translate(
+    'document.autoCapture.feedback.ensureDocumentVisible',
+  ),
+  moveDocumentCloser: translate(
+    'document.autoCapture.feedback.moveDocumentCloser',
+  ),
+  moveDocumentFurtherAway: translate(
+    'document.autoCapture.feedback.moveDocumentFurtherAway',
+  ),
+  holdSteady: translate('document.autoCapture.feedback.holdSteady'),
+  detectingDocumentType: translate(
+    'document.autoCapture.feedback.detectingDocumentType',
+  ),
+  processingFailed: translate('document.autoCapture.feedback.processingFailed'),
+  autoDetectionUnavailableRetry: translate(
+    'document.autoCapture.feedback.autoDetectionUnavailableRetry',
+  ),
+  autoDetectionUnavailableManual: translate(
+    'document.autoCapture.feedback.autoDetectionUnavailableManual',
+  ),
+  captured: translate('document.autoCapture.feedback.captured'),
+  captureFailed: translate('document.autoCapture.feedback.captureFailed'),
+  tooBlurry: translate('document.autoCapture.feedback.tooBlurry'),
+  glareDetectedAdjustLighting: translate(
+    'document.autoCapture.feedback.glareDetectedAdjustLighting',
+  ),
+  holdStill: translate('document.autoCapture.feedback.holdStill'),
+  capturingDocument: translate(
+    'document.autoCapture.feedback.capturingDocument',
+  ),
+});
+
 // --- Off-guide detection (desktop / wide layouts) ---
 const OFF_GUIDE_CHECK_INTERVAL = 5;
 const OFF_GUIDE_DOWNSCALE_WIDTH = 320;
@@ -286,6 +326,12 @@ export function useCardDetection(
   settings: Record<string, any>,
   options: Record<string, any> = {},
 ) {
+  // Translated feedback strings. Memoized on the active locale so the ~18
+  // translate() lookups aren't rebuilt on every render (this hook re-renders
+  // on each setFeedback/setCaptureProgress/setComplianceState during capture).
+  const autoCaptureFeedback = useMemo(getAutoCaptureFeedback, [
+    getCurrentLocale(),
+  ]);
   const {
     variant = 'fullscreen',
     documentType = null,
@@ -318,7 +364,7 @@ export function useCardDetection(
   );
 
   const [feedback, setFeedback] = useState(
-    'Position your document in the frame',
+    autoCaptureFeedback.positionDocument,
   );
   const [captureProgress, setCaptureProgress] = useState(0);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -893,7 +939,7 @@ export function useCardDetection(
             offGuideCanvasRef.current,
           );
           if (cardOutside) {
-            setFeedback('Align document in frame');
+            setFeedback(autoCaptureFeedback.alignDocument);
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
@@ -1026,8 +1072,8 @@ export function useCardDetection(
           const noDocumentPresent =
             !hasDocument || passingCells < Math.ceil(totalCells * 0.45);
           const reason = noDocumentPresent
-            ? 'Place document in frame'
-            : 'Ensure document is fully visible';
+            ? autoCaptureFeedback.placeDocument
+            : autoCaptureFeedback.ensureDocumentVisible;
           // Document truly absent → hard reset. Document present but coverage
           // momentarily dipped ("fully visible") → soften so a flickered cell
           // doesn't drain progress (mobile gateDecayEnabled only).
@@ -2070,7 +2116,7 @@ export function useCardDetection(
             // downgrade the displayed state when the failure isn't absorbed.
             const absorbed = gateDecayOn && softFailStability();
             if (!absorbed) {
-              setFeedback('Move document closer');
+              setFeedback(autoCaptureFeedback.moveDocumentCloser);
               setComplianceState(COMPLIANCE_STATES.DETECTING);
             }
             if (bestContour) bestContour.delete();
@@ -2090,7 +2136,7 @@ export function useCardDetection(
           ) {
             const absorbed = gateDecayOn && softFailStability();
             if (!absorbed) {
-              setFeedback('Move document further away');
+              setFeedback(autoCaptureFeedback.moveDocumentFurtherAway);
               setComplianceState(COMPLIANCE_STATES.DETECTING);
             }
             if (bestContour) bestContour.delete();
@@ -2138,7 +2184,7 @@ export function useCardDetection(
             ) {
               const absorbed = gateDecayOn && softFailStability();
               if (!absorbed) {
-                setFeedback('Position your document in the frame');
+                setFeedback(autoCaptureFeedback.positionDocument);
                 setComplianceState(COMPLIANCE_STATES.DETECTING);
               }
               bestContour.delete();
@@ -2218,7 +2264,7 @@ export function useCardDetection(
                 console.info(
                   `[Discovery] Timeout after ${discoveryRef.current.frameCount} frames — defaulting to: ${fallbackType}`,
                 );
-                setFeedback('Hold steady');
+                setFeedback(autoCaptureFeedback.holdSteady);
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
                 bestContour.delete();
                 mergeDebugInfo({
@@ -2259,7 +2305,7 @@ export function useCardDetection(
                 recentVotes.length >= DISCOVERY_CONSENSUS_THRESHOLD &&
                 recentVotes.every((v) => v === recentVotes[0]);
 
-              setFeedback('Detecting document type…');
+              setFeedback(autoCaptureFeedback.detectingDocumentType);
               mergeDebugInfo({
                 blur: 0,
                 glare: 0,
@@ -2284,7 +2330,7 @@ export function useCardDetection(
                 console.info(
                   `[Discovery] Document classified as: ${classifiedType} (ratio: ${normalizedRatio.toFixed(3)})`,
                 );
-                setFeedback('Hold steady');
+                setFeedback(autoCaptureFeedback.holdSteady);
                 // Force ROI recalculation on next frame by clearing the log flag
                 if (canvasRef.current) canvasRef.current._roiLogged = false;
               }
@@ -2311,8 +2357,8 @@ export function useCardDetection(
               setFeedback(
                 skipGridCheck &&
                   (wallHugRejectedCardThisFrame || combinedBboxOverflow)
-                  ? 'Move document further away'
-                  : 'Position your document in the frame',
+                  ? autoCaptureFeedback.moveDocumentFurtherAway
+                  : autoCaptureFeedback.positionDocument,
               );
               // Tolerate a few consecutive misses before resetting votes.
               // Mobile cameras drop detections for 1-2 frames due to motion blur,
@@ -2350,7 +2396,7 @@ export function useCardDetection(
               captureMissCounterRef.current = 0;
               const absorbed = gateDecayOn && softFailStability();
               if (!absorbed) {
-                setFeedback('Move document further away');
+                setFeedback(autoCaptureFeedback.moveDocumentFurtherAway);
                 setComplianceState(COMPLIANCE_STATES.DETECTING);
               }
               mergeDebugInfo({
@@ -2379,7 +2425,7 @@ export function useCardDetection(
               });
               return;
             }
-            setFeedback('Align document in frame');
+            setFeedback(autoCaptureFeedback.alignDocument);
             setComplianceState(COMPLIANCE_STATES.IDLE);
             stabilityRef.current.count = 0;
             bestFrameRef.current = { image: null, preview: null, score: 0 };
@@ -2404,7 +2450,7 @@ export function useCardDetection(
         const variance = stdDev.doubleAt(0, 0) ** 2;
 
         if (variance < settingsRef.current.blurThreshold) {
-          setFeedback('Too Blurry');
+          setFeedback(autoCaptureFeedback.tooBlurry);
           setComplianceState(COMPLIANCE_STATES.DETECTING);
           // Tolerate a transient blurry frame while a best frame is already
           // held — mobile cameras drop 1–2 frames to motion blur / AWB. Soften
@@ -2448,7 +2494,7 @@ export function useCardDetection(
         });
 
         if (glarePercent > settingsRef.current.glareThreshold) {
-          setFeedback('Glare detected — adjust lighting');
+          setFeedback(autoCaptureFeedback.glareDetectedAdjustLighting);
           setComplianceState(COMPLIANCE_STATES.DETECTING);
           // Same transient-miss tolerance as the blur gate above.
           if (
@@ -2630,7 +2676,7 @@ export function useCardDetection(
           bestFrameRef.current.preview = croppedDataUrl;
         }
 
-        setFeedback('Hold Still...');
+        setFeedback(autoCaptureFeedback.holdStill);
         setCaptureProgress(Math.round(progress));
         setComplianceState(COMPLIANCE_STATES.STABLE);
         mergeDebugInfo({
@@ -2676,7 +2722,7 @@ export function useCardDetection(
                 bestFrameRef.current.score.toFixed(2),
               );
             }
-            setFeedback('Capturing document...');
+            setFeedback(autoCaptureFeedback.capturingDocument);
             setComplianceState(COMPLIANCE_STATES.CAPTURING);
             mergeDebugInfo({ rejectReason: '✓ capturing' });
             isCapturingRef.current = true;
@@ -2727,7 +2773,7 @@ export function useCardDetection(
                     score: 0,
                   };
                   setComplianceState(COMPLIANCE_STATES.IDLE);
-                  setFeedback('Capture failed — please try again');
+                  setFeedback(autoCaptureFeedback.captureFailed);
                   animationFrameId = requestAnimationFrame(processFrame);
                 });
             } else {
@@ -2762,14 +2808,14 @@ export function useCardDetection(
           setManualFallbackActive(true);
           setCvLoadFailed(true);
         }
-        let nextFeedback = 'Processing failed — please try again';
+        let nextFeedback = autoCaptureFeedback.processingFailed;
         if (recoveryAction.shouldActivateFallback) {
           nextFeedback =
             captureModeRef.current === 'autoCaptureOnly'
-              ? 'Auto-detection unavailable — please try again'
-              : 'Auto-detection unavailable — capture manually';
+              ? autoCaptureFeedback.autoDetectionUnavailableRetry
+              : autoCaptureFeedback.autoDetectionUnavailableManual;
         } else if (recoveryAction.shouldClearProcessingError) {
-          nextFeedback = 'Position your document in the frame';
+          nextFeedback = autoCaptureFeedback.positionDocument;
         }
         setFeedback(nextFeedback);
         setComplianceState(
@@ -2939,12 +2985,12 @@ export function useCardDetection(
       setCapturedImage(fullDataUrl);
       setPreviewImage(previewDataUrl);
       setComplianceState(COMPLIANCE_STATES.SUCCESS);
-      setFeedback('Captured!');
+      setFeedback(autoCaptureFeedback.captured);
       isCapturingRef.current = true;
     } catch (err) {
       console.error('Manual capture failed:', err);
       setComplianceState(COMPLIANCE_STATES.IDLE);
-      setFeedback('Capture failed — please try again');
+      setFeedback(autoCaptureFeedback.captureFailed);
       isCapturingRef.current = false;
     }
   };
@@ -2954,7 +3000,7 @@ export function useCardDetection(
     setPreviewImage(null);
     setCaptureOrigin(null);
     setComplianceState(COMPLIANCE_STATES.IDLE);
-    setFeedback('Position your document in the frame');
+    setFeedback(autoCaptureFeedback.positionDocument);
     updateDebugPath(null);
     isCapturingRef.current = false;
     autoDetectionSuspendedRef.current = false;

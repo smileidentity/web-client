@@ -216,6 +216,36 @@
       "instructionText": "Assurez-vous que tous les coins sont visibles et qu'il n'y a pas de reflet.",
       "captureButton": "Capturez le document"
     },
+    "autoCapture": {
+      "galleryButtonLabel": "Sélectionner une image dans la galerie",
+      "capturePhotoButton": "Prendre une photo",
+      "error": {
+        "cameraUnavailable": {
+          "title": "Accès à la caméra refusé ou indisponible",
+          "body": "Autorisez l'accès à la caméra et rechargez la page."
+        },
+        "cvLoadFailed": "La détection automatique est indisponible. Rechargez la page ou essayez un autre navigateur."
+      },
+      "feedback": {
+        "positionDocument": "Placez votre document dans le cadre",
+        "alignDocument": "Alignez le document dans le cadre",
+        "placeDocument": "Placez le document dans le cadre",
+        "ensureDocumentVisible": "Assurez-vous que le document est entièrement visible",
+        "moveDocumentCloser": "Rapprochez le document",
+        "moveDocumentFurtherAway": "Éloignez le document",
+        "holdSteady": "Restez immobile",
+        "detectingDocumentType": "Détection du type de document…",
+        "tooBlurry": "Trop flou",
+        "glareDetectedAdjustLighting": "Reflet détecté — ajustez l'éclairage",
+        "holdStill": "Ne bougez plus...",
+        "capturingDocument": "Capture du document...",
+        "processingFailed": "Le traitement a échoué — veuillez réessayer",
+        "autoDetectionUnavailableRetry": "La détection automatique est indisponible — veuillez réessayer",
+        "autoDetectionUnavailableManual": "La détection automatique est indisponible — capturez manuellement",
+        "captured": "Capturé !",
+        "captureFailed": "La capture a échoué — veuillez réessayer"
+      }
+    },
     "instructions": {
       "captureTitlePrefix": "Préparez-vous à capturer votre",
       "captureGuidelines": "Consignes de capture",

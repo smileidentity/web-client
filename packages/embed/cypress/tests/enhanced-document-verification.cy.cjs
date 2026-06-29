@@ -67,7 +67,8 @@ describe('enhanced document verification', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 15000 })
+      .should('be.visible')
       .click();
 
     cy.getIFrameBody()
@@ -130,6 +131,10 @@ describe('enhanced document verification', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    // The document submission UI now shows the completion state in-place
+    // (image + tick) rather than switching to the legacy #complete-screen.
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 });

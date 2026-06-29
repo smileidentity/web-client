@@ -4,9 +4,13 @@ import register from 'preact-custom-element';
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { getBoolProp } from '../../../../utils/props';
 import { getDirection, t } from '../../../../domain/localisation';
+// Registers the shared <smileid-navigation> custom element (back button,
+// localised label, RTL arrow flip) used across the SDK's capture screens.
+import '../../../navigation/src';
 import idCardLottie from '../assets/lottie/id-card.lottie?inline';
 import passportLottie from '../assets/lottie/passport.lottie?inline';
 import greenbookLottie from '../assets/lottie/greenbook.lottie?inline';
+import idCardFlipLottie from '../assets/lottie/id-card-flip.lottie?inline';
 import idCardGood from '../assets/icons/guidelines/id-card/good.svg?inline';
 import idCardNotCropped from '../assets/icons/guidelines/id-card/not-cropped.svg?inline';
 import idCardNotBlurry from '../assets/icons/guidelines/id-card/not-blurry.svg?inline';
@@ -25,6 +29,9 @@ const HERO_ID_CARD_LOTTIE_URL = idCardLottie;
 const HERO_PASSPORT_LOTTIE_URL = passportLottie;
 const HERO_GREENBOOK_LOTTIE_URL = greenbookLottie;
 
+// Card-flip animation shown on the back-of-ID instruction screen.
+const FLIP_LOTTIE_URL = idCardFlipLottie;
+
 type DocumentVariant = 'id-card' | 'passport' | 'greenbook';
 type GuidelineKey = 'good' | 'not-cropped' | 'not-blurry' | 'not-reflective';
 
@@ -33,15 +40,9 @@ interface HeroAssetConfig {
 }
 
 const HERO_ASSETS: Record<DocumentVariant, HeroAssetConfig> = {
-  'id-card': {
-    animationSrc: HERO_ID_CARD_LOTTIE_URL,
-  },
-  passport: {
-    animationSrc: HERO_PASSPORT_LOTTIE_URL,
-  },
-  greenbook: {
-    animationSrc: HERO_GREENBOOK_LOTTIE_URL,
-  },
+  'id-card': { animationSrc: HERO_ID_CARD_LOTTIE_URL },
+  passport: { animationSrc: HERO_PASSPORT_LOTTIE_URL },
+  greenbook: { animationSrc: HERO_GREENBOOK_LOTTIE_URL },
 };
 
 const GUIDELINE_ICONS: Record<DocumentVariant, Record<GuidelineKey, string>> = {
@@ -92,9 +93,13 @@ function getTextDirection(dir?: string): 'ltr' | 'rtl' | 'auto' {
 
 interface HeroLottieProps {
   animationSrc: string;
+  // How the animation is scaled within the canvas. 'cover' fills and crops
+  // (front hero card); 'contain' fits the whole frame without cropping
+  // (flip card, which must stay fully visible).
+  fit?: 'cover' | 'contain';
 }
 
-function HeroLottie({ animationSrc }: HeroLottieProps) {
+function HeroLottie({ animationSrc, fit = 'cover' }: HeroLottieProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -112,7 +117,7 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
       loop: true,
       layout: {
         align: [0.5, 0.5],
-        fit: 'cover',
+        fit,
       },
       renderConfig: {
         autoResize: true,
@@ -145,7 +150,7 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
         /* may already be destroyed by handleError */
       }
     };
-  }, [animationSrc]);
+  }, [animationSrc, fit]);
 
   return (
     <div class="doc-instr-hero-media">
@@ -161,27 +166,6 @@ function HeroLottie({ animationSrc }: HeroLottieProps) {
 }
 
 // ── Inline SVG helpers ───────────────────────────────────────────────────────
-
-function BackArrowIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M19 12H5M5 12L12 19M5 12L12 5"
-        stroke="white"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
-  );
-}
 
 function ArrowRightIcon() {
   return (
@@ -259,7 +243,7 @@ function PoweredBySmileIdLogo() {
       style={{ width: '90px', height: '9px' }}
     >
       <path
-        d="M0.544 7V1.4H2.616C3.064 1.4 3.43467 1.47467 3.728 1.624C4.02133 1.77333 4.24 1.97867 4.384 2.24C4.528 2.50133 4.6 2.79467 4.6 3.12C4.6 3.42933 4.53067 3.71467 4.392 3.976C4.25333 4.232 4.03733 4.44 3.744 4.6C3.45067 4.75467 3.07467 4.832 2.616 4.832H1.568V7H0.544ZM1.568 4H2.552C2.90933 4 3.16533 3.92267 3.32 3.768C3.48 3.608 3.56 3.392 3.56 3.12C3.56 2.84267 3.48 2.62667 3.32 2.472C3.16533 2.312 2.90933 2.232 2.552 2.232H1.568V4ZM7.08025 7.096C6.69625 7.096 6.34958 7.008 6.04025 6.832C5.73625 6.656 5.49358 6.41333 5.31225 6.104C5.13625 5.78933 5.04825 5.42667 5.04825 5.016C5.04825 4.60533 5.13892 4.24533 5.32025 3.936C5.50158 3.62133 5.74425 3.376 6.04825 3.2C6.35758 3.024 6.70425 2.936 7.08825 2.936C7.46692 2.936 7.80825 3.024 8.11225 3.2C8.42158 3.376 8.66425 3.62133 8.84025 3.936C9.02158 4.24533 9.11225 4.60533 9.11225 5.016C9.11225 5.42667 9.02158 5.78933 8.84025 6.104C8.66425 6.41333 8.42158 6.656 8.11225 6.832C7.80292 7.008 7.45892 7.096 7.08025 7.096ZM7.08025 6.208C7.34692 6.208 7.57892 6.10933 7.77625 5.912C7.97358 5.70933 8.07225 5.41067 8.07225 5.016C8.07225 4.62133 7.97358 4.32533 7.77625 4.128C7.57892 3.92533 7.34958 3.824 7.08825 3.824C6.81625 3.824 6.58158 3.92533 6.38425 4.128C6.19225 4.32533 6.09625 4.62133 6.38425 5.912C6.58158 6.10933 6.81358 6.208 7.08025 6.208ZM10.6632 7L9.50319 3.032H10.5192L11.2072 5.888L12.0072 3.032H13.1432L13.9432 5.888L14.6392 3.032H15.6552L14.4872 7H13.4232L12.5752 4.032L11.7272 7H10.6632ZM18.0886 7.096C17.6886 7.096 17.334 7.01067 17.0246 6.84C16.7153 6.66933 16.4726 6.42933 16.2966 6.12C16.1206 5.81067 16.0326 5.45333 16.0326 5.048C16.0326 4.63733 16.118 4.272 16.2886 3.952C16.4646 3.632 16.7046 3.384 17.0086 3.208C17.318 3.02667 17.6806 2.936 18.0966 2.936C18.486 2.936 18.83 3.02133 19.1286 3.192C19.4273 3.36267 19.6593 3.59733 19.8246 3.896C19.9953 4.18933 20.0806 4.51733 20.0806 4.88C20.0806 4.93867 20.078 5 20.0726 5.064C20.0726 5.128 20.07 5.19467 20.0646 5.264H17.0486C17.07 5.57333 17.1766 5.816 17.3686 5.992C17.566 6.168 17.8033 6.256 18.0806 6.256C18.2886 6.256 18.462 6.21067 18.6006 6.12C18.7446 6.024 18.8513 5.90133 18.9206 5.752H19.9606C19.886 6.00267 19.7606 6.232 19.5846 6.44C19.414 6.64267 19.2006 6.80267 18.9446 6.92C18.694 7.03733 18.4086 7.096 18.0886 7.096ZM18.0966 3.768C17.846 3.768 17.6246 3.84 17.4326 3.984C17.2406 4.12267 17.118 4.336 17.0646 4.624H19.0406C19.0246 4.36267 18.9286 4.15467 18.7526 4C18.5766 3.84533 18.358 3.768 18.0966 3.768ZM20.9419 7V3.032H21.8539L21.9499 3.776C22.0939 3.52 22.2885 3.31733 22.5339 3.168C22.7845 3.01333 23.0779 2.936 23.4139 2.936V4.016H23.1259C22.9019 4.016 22.7019 4.05067 22.5259 4.12C22.3499 4.18933 22.2112 4.30933 22.1099 4.48C22.0139 4.65067 21.9659 4.888 21.9659 5.192V7H20.9419ZM25.9714 7.096C25.5714 7.096 25.2168 7.01067 24.9074 6.84C24.5981 6.66933 24.3554 6.42933 24.1794 6.12C24.0034 5.81067 23.9154 5.45333 23.9154 5.048C23.9154 4.63733 24.0008 4.272 24.1714 3.952C24.3474 3.632 24.5874 3.384 24.8914 3.208C25.2008 3.02667 25.5634 2.936 25.9794 2.936C26.3688 2.936 26.7128 3.02133 27.0114 3.192C27.3101 3.36267 27.5421 3.59733 27.7074 3.896C27.8781 4.18933 27.9634 4.51733 27.9634 4.88C27.9634 4.93867 27.9608 5 27.9554 5.064C27.9554 5.128 27.9528 5.19467 27.9474 5.264H24.9314C24.9528 5.57333 25.0594 5.816 25.2514 5.992C25.4488 6.168 25.6861 6.256 25.9634 6.256C26.1714 6.256 26.3448 6.21067 26.4834 6.12C26.6274 6.024 26.7341 5.90133 26.8034 5.752H27.8434C27.7688 6.00267 27.6434 6.232 27.4674 6.44C27.2968 6.64267 27.0834 6.80267 26.8274 6.92C26.5768 7.03733 26.2914 7.096 25.9714 7.096ZM25.9794 3.768C25.7288 3.768 25.5074 3.84 25.3154 3.984C25.1234 4.12267 25.0008 4.336 24.9474 4.624H26.9234C26.9074 4.36267 26.8114 4.15467 26.6354 4C26.4594 3.84533 26.2408 3.768 25.9794 3.768ZM30.6487 7.096C30.2754 7.096 29.942 7.00533 29.6487 6.824C29.3554 6.64267 29.1234 6.39467 28.9527 6.08C28.782 5.76533 28.6967 5.408 28.6967 5.008C28.6967 4.608 28.782 4.25333 28.9527 3.944C29.1234 3.62933 29.3554 3.384 29.6487 3.208C29.942 3.02667 30.2754 2.936 30.6487 2.936C30.9474 2.936 31.2087 2.992 31.4327 3.104C31.6567 3.216 31.838 3.37333 31.9767 3.576V1.24H33.0007V7H32.0887L31.9767 6.432C31.8487 6.608 31.678 6.76267 31.4647 6.896C31.2567 7.02933 30.9847 7.096 30.6487 7.096ZM30.8647 6.2C31.1954 6.2 31.4647 6.09067 31.6727 5.872C31.886 5.648 31.9927 5.36267 31.9927 5.016C31.9927 4.66933 31.886 4.38667 31.6727 4.168C31.4647 3.944 31.1954 3.832 30.8647 3.832C30.5394 3.832 30.27 3.94133 30.0567 4.16C29.8434 4.37867 29.7367 4.66133 29.7367 5.008C29.7367 5.35467 29.8434 5.64 30.0567 5.864C30.27 6.088 30.5394 6.2 30.8647 6.2ZM38.3017 7.096C38.003 7.096 37.7417 7.04 37.5177 6.928C37.2937 6.816 37.1124 6.65867 36.9737 6.456L36.8617 7H35.9497V1.24H36.9737V3.6C37.1017 3.424 37.2697 3.26933 37.4777 3.136C37.691 3.00267 37.9657 2.936 38.3017 2.936C38.675 2.936 39.0084 3.02667 39.3017 3.208C39.595 3.38933 39.827 3.63733 39.9977 3.952C40.1684 4.26667 40.2537 4.624 40.2537 5.024C40.2537 5.424 40.1684 5.78133 39.9977 6.096C39.827 6.40533 39.595 6.65067 39.3017 6.832C39.0084 7.008 38.675 7.096 38.3017 7.096ZM38.0857 6.2C38.411 6.2 38.6804 6.09067 38.8937 5.872C39.107 5.65333 39.2137 5.37067 39.2137 5.024C39.2137 4.67733 39.107 4.392 38.8937 4.168C38.6804 3.944 38.411 3.832 38.0857 3.832C37.755 3.832 37.483 3.944 37.2697 4.168C37.0617 4.38667 36.9577 4.66933 36.9577 5.016C36.9577 5.36267 37.0617 5.648 37.2697 5.872C37.483 6.09067 37.755 6.2 38.0857 6.2ZM41.3051 8.76L42.2251 6.736H41.9851L40.4411 3.032H41.5531L42.6651 5.824L43.8251 3.032H44.9131L42.3931 8.76H41.3051Z"
+        d="M0.544 7V1.4H2.616C3.064 1.4 3.43467 1.47467 3.728 1.624C4.02133 1.77333 4.24 1.97867 4.384 2.24C4.528 2.50133 4.6 2.79467 4.6 3.12C4.6 3.42933 4.53067 3.71467 4.392 3.976C4.25333 4.232 4.03733 4.44 3.744 4.6C3.45067 4.75467 3.07467 4.832 2.616 4.832H1.568V7H0.544ZM1.568 4H2.552C2.90933 4 3.16533 3.92267 3.32 3.768C3.48 3.608 3.56 3.392 3.56 3.12C3.56 2.84267 3.48 2.62667 3.32 2.472C3.16533 2.312 2.90933 2.232 2.552 2.232H1.568V4ZM7.08025 7.096C6.69625 7.096 6.34958 7.008 6.04025 6.832C5.73625 6.656 5.49358 6.41333 5.31225 6.104C5.13625 5.78933 5.04825 5.42667 5.04825 5.016C5.04825 4.60533 5.13892 4.24533 5.32025 3.936C5.50158 3.62133 5.74425 3.376 6.04825 3.2C6.35758 3.024 6.70425 2.936 7.08825 2.936C7.46692 2.936 7.80825 3.024 8.11225 3.2C8.42158 3.376 8.66425 3.62133 8.84025 3.936C9.02158 4.24533 9.11225 4.60533 9.11225 5.016C9.11225 5.42667 9.02158 5.78933 8.84025 6.104C8.66425 6.41333 8.42158 6.656 8.11225 6.832C7.80292 7.008 7.45892 7.096 7.08025 7.096ZM7.08025 6.208C7.34692 6.208 7.57892 6.10933 7.77625 5.912C7.97358 5.70933 8.07225 5.41067 8.07225 5.016C8.07225 4.62133 7.97358 4.32533 7.77625 4.128C7.57892 3.92533 7.34958 3.824 7.08825 3.824C6.81625 3.824 6.58158 3.92533 6.38425 4.128C6.19225 4.32533 6.09625 4.62133 6.09625 5.016C6.09625 5.41067 6.19225 5.70933 6.38425 5.912C6.58158 6.10933 6.81358 6.208 7.08025 6.208ZM10.6632 7L9.50319 3.032H10.5192L11.2072 5.888L12.0072 3.032H13.1432L13.9432 5.888L14.6392 3.032H15.6552L14.4872 7H13.4232L12.5752 4.032L11.7272 7H10.6632ZM18.0886 7.096C17.6886 7.096 17.334 7.01067 17.0246 6.84C16.7153 6.66933 16.4726 6.42933 16.2966 6.12C16.1206 5.81067 16.0326 5.45333 16.0326 5.048C16.0326 4.63733 16.118 4.272 16.2886 3.952C16.4646 3.632 16.7046 3.384 17.0086 3.208C17.318 3.02667 17.6806 2.936 18.0966 2.936C18.486 2.936 18.83 3.02133 19.1286 3.192C19.4273 3.36267 19.6593 3.59733 19.8246 3.896C19.9953 4.18933 20.0806 4.51733 20.0806 4.88C20.0806 4.93867 20.078 5 20.0726 5.064C20.0726 5.128 20.07 5.19467 20.0646 5.264H17.0486C17.07 5.57333 17.1766 5.816 17.3686 5.992C17.566 6.168 17.8033 6.256 18.0806 6.256C18.2886 6.256 18.462 6.21067 18.6006 6.12C18.7446 6.024 18.8513 5.90133 18.9206 5.752H19.9606C19.886 6.00267 19.7606 6.232 19.5846 6.44C19.414 6.64267 19.2006 6.80267 18.9446 6.92C18.694 7.03733 18.4086 7.096 18.0886 7.096ZM18.0966 3.768C17.846 3.768 17.6246 3.84 17.4326 3.984C17.2406 4.12267 17.118 4.336 17.0646 4.624H19.0406C19.0246 4.36267 18.9286 4.15467 18.7526 4C18.5766 3.84533 18.358 3.768 18.0966 3.768ZM20.9419 7V3.032H21.8539L21.9499 3.776C22.0939 3.52 22.2885 3.31733 22.5339 3.168C22.7845 3.01333 23.0779 2.936 23.4139 2.936V4.016H23.1259C22.9019 4.016 22.7019 4.05067 22.5259 4.12C22.3499 4.18933 22.2112 4.30933 22.1099 4.48C22.0139 4.65067 21.9659 4.888 21.9659 5.192V7H20.9419ZM25.9714 7.096C25.5714 7.096 25.2168 7.01067 24.9074 6.84C24.5981 6.66933 24.3554 6.42933 24.1794 6.12C24.0034 5.81067 23.9154 5.45333 23.9154 5.048C23.9154 4.63733 24.0008 4.272 24.1714 3.952C24.3474 3.632 24.5874 3.384 24.8914 3.208C25.2008 3.02667 25.5634 2.936 25.9794 2.936C26.3688 2.936 26.7128 3.02133 27.0114 3.192C27.3101 3.36267 27.5421 3.59733 27.7074 3.896C27.8781 4.18933 27.9634 4.51733 27.9634 4.88C27.9634 4.93867 27.9608 5 27.9554 5.064C27.9554 5.128 27.9528 5.19467 27.9474 5.264H24.9314C24.9528 5.57333 25.0594 5.816 25.2514 5.992C25.4488 6.168 25.6861 6.256 25.9634 6.256C26.1714 6.256 26.3448 6.21067 26.4834 6.12C26.6274 6.024 26.7341 5.90133 26.8034 5.752H27.8434C27.7688 6.00267 27.6434 6.232 27.4674 6.44C27.2968 6.64267 27.0834 6.80267 26.8274 6.92C26.5768 7.03733 26.2914 7.096 25.9714 7.096ZM25.9794 3.768C25.7288 3.768 25.5074 3.84 25.3154 3.984C25.1234 4.12267 25.0008 4.336 24.9474 4.624H26.9234C26.9074 4.36267 26.8114 4.15467 26.6354 4C26.4594 3.84533 26.2408 3.768 25.9794 3.768ZM30.6487 7.096C30.2754 7.096 29.942 7.00533 29.6487 6.824C29.3554 6.64267 29.1234 6.39467 28.9527 6.08C28.782 5.76533 28.6967 5.408 28.6967 5.008C28.6967 4.608 28.782 4.25333 28.9527 3.944C29.1234 3.62933 29.3554 3.384 29.6487 3.208C29.942 3.02667 30.2754 2.936 30.6487 2.936C30.9474 2.936 31.2087 2.992 31.4327 3.104C31.6567 3.216 31.838 3.37333 31.9767 3.576V1.24H33.0007V7H32.0887L31.9767 6.432C31.8487 6.608 31.678 6.76267 31.4647 6.896C31.2567 7.02933 30.9847 7.096 30.6487 7.096ZM30.8647 6.2C31.1954 6.2 31.4647 6.09067 31.6727 5.872C31.886 5.648 31.9927 5.36267 31.9927 5.016C31.9927 4.66933 31.886 4.38667 31.6727 4.168C31.4647 3.944 31.1954 3.832 30.8647 3.832C30.5394 3.832 30.27 3.94133 30.0567 4.16C29.8434 4.37867 29.7367 4.66133 29.7367 5.008C29.7367 5.35467 29.8434 5.64 30.0567 5.864C30.27 6.088 30.5394 6.2 30.8647 6.2ZM38.3017 7.096C38.003 7.096 37.7417 7.04 37.5177 6.928C37.2937 6.816 37.1124 6.65867 36.9737 6.456L36.8617 7H35.9497V1.24H36.9737V3.6C37.1017 3.424 37.2697 3.26933 37.4777 3.136C37.691 3.00267 37.9657 2.936 38.3017 2.936C38.675 2.936 39.0084 3.02667 39.3017 3.208C39.595 3.38933 39.827 3.63733 39.9977 3.952C40.1684 4.26667 40.2537 4.624 40.2537 5.024C40.2537 5.424 40.1684 5.78133 39.9977 6.096C39.827 6.40533 39.595 6.65067 39.3017 6.832C39.0084 7.008 38.675 7.096 38.3017 7.096ZM38.0857 6.2C38.411 6.2 38.6804 6.09067 38.8937 5.872C39.107 5.65333 39.2137 5.37067 39.2137 5.024C39.2137 4.67733 39.107 4.392 38.8937 4.168C38.6804 3.944 38.411 3.832 38.0857 3.832C37.755 3.832 37.483 3.944 37.2697 4.168C37.0617 4.38667 36.9577 4.66933 36.9577 5.016C36.9577 5.36267 37.0617 5.648 37.2697 5.872C37.483 6.09067 37.755 6.2 38.0857 6.2ZM41.3051 8.76L42.2251 6.736H41.9851L40.4411 3.032H41.5531L42.6651 5.824L43.8251 3.032H44.9131L42.3931 8.76H41.3051Z"
         fill="#001096"
       />
       <g clip-path="url(#clip0_du_1)">
@@ -311,6 +295,7 @@ function PoweredBySmileIdLogo() {
 interface Props {
   dir?: string;
   'document-type'?: string;
+  'side-of-id'?: string;
   title?: string;
   'hide-attribution'?: string | boolean;
   'hide-back'?: string | boolean;
@@ -322,6 +307,7 @@ interface Props {
 const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   dir,
   'document-type': documentType = '',
+  'side-of-id': sideOfId = 'Front',
   title = '',
   'hide-attribution': hideAttributionProp = false,
   'hide-back': hideBackProp = false,
@@ -335,6 +321,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const direction = getTextDirection(dir);
   const heroAsset = HERO_ASSETS[documentVariant];
   const rootRef = useRef<HTMLDivElement>(null);
+  const navigationRef = useRef<HTMLElement | null>(null);
   const guidelineItems: GuidelineItem[] = [
     { key: 'good', label: t('document.instructions.guidelines.good') },
     {
@@ -354,7 +341,8 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
   const dispatchInstructionEvent = (
     eventName:
       | 'document-capture-instructions.cancelled'
-      | 'document-capture-instructions.capture',
+      | 'document-capture-instructions.capture'
+      | 'document-capture-instructions.skip',
   ) => {
     const rootNode = rootRef.current?.getRootNode();
     const shadowHost = (rootNode as ShadowRoot)?.host as
@@ -372,90 +360,28 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
     dispatchInstructionEvent('document-capture-instructions.cancelled');
   };
 
+  // Bridge the <smileid-navigation> element's back event to handleBack.
+  useEffect(() => {
+    const navigation = navigationRef.current;
+    if (!navigation || hideBack) return undefined;
+    const onNavigationBack = () => handleBack();
+    navigation.addEventListener('navigation.back', onNavigationBack);
+    return () =>
+      navigation.removeEventListener('navigation.back', onNavigationBack);
+  }, [hideBack]);
+
   const handleStartCapture = () => {
     dispatchInstructionEvent('document-capture-instructions.capture');
   };
 
-  return (
-    <div ref={rootRef} class="doc-instr-root" dir={direction}>
-      {/* ── Back button ──────────────────────────────────────── */}
-      {!hideBack && (
-        <button
-          class="back-button"
-          type="button"
-          aria-label="Go back"
-          onClick={handleBack}
-        >
-          <BackArrowIcon />
-        </button>
-      )}
+  const handleSkip = () => {
+    dispatchInstructionEvent('document-capture-instructions.skip');
+  };
 
-      {/* ── Scrollable content ───────────────────────────────── */}
-      <div class="doc-instr-scroll">
-        {/* ── Title ─────────────────────────────────────────── */}
-        <div class="doc-instr-title-block">
-          <h1 class="doc-instr-title">
-            <span class="doc-instr-title-regular">
-              {t('document.instructions.captureTitlePrefix')}{' '}
-            </span>
-            <span class="doc-instr-title-type">
-              {displayDocumentType || '<ID Type>'}
-            </span>
-          </h1>
-        </div>
+  const isBack = String(sideOfId).toLowerCase() === 'back';
 
-        {/* ── Hero illustration ─────────────────────────────── */}
-        <div class="doc-instr-hero-card" aria-hidden="true">
-          <HeroLottie animationSrc={heroAsset.animationSrc} />
-        </div>
-
-        {/* ── Capture guidelines ────────────────────────────── */}
-        <div class="doc-instr-guidelines">
-          <div class="doc-instr-guidelines-header">
-            <GuidelinesIcon />
-            <span class="doc-instr-guidelines-label">
-              {t('document.instructions.captureGuidelines')}
-            </span>
-          </div>
-
-          <div class="doc-instr-guidelines-grid">
-            {guidelineItems.map((item) => (
-              <div class="doc-instr-guide-item" key={item.label}>
-                <div class="doc-instr-guide-thumb-wrap">
-                  <GuidelineThumbnail
-                    src={GUIDELINE_ICONS[documentVariant][item.key]}
-                    label={item.label}
-                  />
-                </div>
-                <p class="doc-instr-guide-caption">{item.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── CTA button ───────────────────────────────────────── */}
-      <div class="doc-instr-footer">
-        <button
-          id="take-photo"
-          class="doc-instr-start-btn"
-          type="button"
-          onClick={handleStartCapture}
-        >
-          <span>{t('document.instructions.startCapture')}</span>
-          <ArrowRightIcon />
-        </button>
-
-        {/* ── Attribution ───────────────────────────────────── */}
-        {!hideAttribution && (
-          <div class="doc-instr-attribution">
-            <PoweredBySmileIdLogo />
-          </div>
-        )}
-      </div>
-
-      {/* ── Scoped styles ────────────────────────────────────── */}
-      <style>{`
+  // Scoped styles shared by the front and back (flip) layouts.
+  const STYLES = `
         *,
         *::before,
         *::after {
@@ -482,32 +408,13 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           overflow: hidden;
         }
 
-        /* ── Back button ─────────────────────────────────────── */
-        .back-button {
+        /* ── Back button (positions the shared <smileid-navigation>;
+              the circle, hover and focus styling live in its shadow) ── */
+        .back-nav {
           position: absolute;
           top: 24px;
           left: 20px;
           z-index: 10;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #2d2b2a;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          flex-shrink: 0;
-          transition: opacity 0.15s ease;
-        }
-
-        .back-button:hover {
-          opacity: 0.85;
-        }
-
-        .back-button:focus-visible {
-          outline: 2px solid #151f72;
-          outline-offset: 3px;
         }
 
         /* ── Scrollable area ──────────────────────────────────── */
@@ -671,6 +578,89 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           outline-offset: 3px;
         }
 
+        /* ── Back / flip layout ──────────────────────────────── */
+        .doc-instr-root--back {
+          background: #ffffff;
+        }
+
+        .doc-instr-back-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 48px 20px 0;
+          min-height: 0;
+        }
+
+        .doc-instr-flip-title {
+          font-size: clamp(20px, 5vw, 24px);
+          font-weight: 800;
+          line-height: 1.25;
+          letter-spacing: -0.025em;
+          text-align: center;
+          color: #0f172b;
+        }
+
+        .doc-instr-flip-title-type {
+          color: #151f72;
+        }
+
+        .doc-instr-flip-hero {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 0;
+          padding: 16px 0;
+        }
+
+        .doc-instr-flip-hero-inner {
+          width: 100%;
+          max-width: 420px;
+          aspect-ratio: 1 / 1;
+          position: relative;
+        }
+
+        /* ── Skip button (secondary outline) ─────────────────── */
+        .doc-instr-back-actions {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .doc-instr-skip-btn {
+          width: 100%;
+          max-width: 400px;
+          height: 48px;
+          background: #ffffff;
+          color: #151f72;
+          border: 1px solid #151f72;
+          border-radius: 32px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0px 1px 1px 0px rgba(16, 24, 40, 0.05);
+          transition: opacity 0.15s ease, transform 0.1s ease;
+          letter-spacing: 0.01em;
+        }
+
+        .doc-instr-skip-btn:hover {
+          opacity: 0.85;
+        }
+
+        .doc-instr-skip-btn:active {
+          transform: scale(0.98);
+        }
+
+        .doc-instr-skip-btn:focus-visible {
+          outline: 2px solid #151f72;
+          outline-offset: 3px;
+        }
+
         /* ── Attribution ─────────────────────────────────────── */
         .doc-instr-attribution {
           display: flex;
@@ -691,7 +681,7 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             padding-right: 32px;
           }
 
-          .back-button {
+          .back-nav {
             top: 28px;
             left: 28px;
           }
@@ -702,6 +692,10 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
 
           .doc-instr-guide-caption {
             font-size: 10px;
+          }
+
+          .doc-instr-back-content {
+            padding-top: 56px;
           }
         }
 
@@ -718,8 +712,156 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
           .doc-instr-title {
             font-size: 18px;
           }
+
+          .doc-instr-flip-title {
+            font-size: 18px;
+          }
         }
-      `}</style>
+      `;
+
+  if (isBack) {
+    return (
+      <div
+        ref={rootRef}
+        class="doc-instr-root doc-instr-root--back"
+        dir={direction}
+      >
+        {/* ── Content: centered title + flip animation ─────────── */}
+        <div class="doc-instr-back-content">
+          <h1 class="doc-instr-flip-title">
+            <span class="doc-instr-flip-title-regular">
+              {t('document.instructions.flipTitlePrefix')}{' '}
+            </span>
+            <span class="doc-instr-flip-title-type">
+              {displayDocumentType || '<ID Type>'}
+            </span>
+          </h1>
+
+          <div class="doc-instr-flip-hero" aria-hidden="true">
+            <div class="doc-instr-flip-hero-inner">
+              <HeroLottie animationSrc={FLIP_LOTTIE_URL} fit="contain" />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Actions: Capture Back + Skip ─────────────────────── */}
+        <div class="doc-instr-footer">
+          <div class="doc-instr-back-actions">
+            <button
+              id="capture-back"
+              class="doc-instr-start-btn"
+              type="button"
+              onClick={handleStartCapture}
+            >
+              <span>{t('document.instructions.captureBackButton')}</span>
+              <ArrowRightIcon />
+            </button>
+            <button
+              id="skip-back"
+              class="doc-instr-skip-btn"
+              type="button"
+              onClick={handleSkip}
+            >
+              {t('document.instructions.skipButton')}
+            </button>
+          </div>
+
+          {!hideAttribution && (
+            <div class="doc-instr-attribution">
+              <PoweredBySmileIdLogo />
+            </div>
+          )}
+        </div>
+
+        {/* ── Scoped styles (shared with front layout) ─────────── */}
+        <style>{STYLES}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={rootRef} class="doc-instr-root" dir={direction}>
+      {/* ── Back button (shared <smileid-navigation>, back only) ─ */}
+      {!hideBack && (
+        // @ts-expect-error preact-custom-element lacks ref/attr types
+        <smileid-navigation
+          ref={navigationRef}
+          hide-close=""
+          class="back-nav"
+          style={{
+            '--smileid-navigation-button-bg': '#2d2b2a',
+            '--smileid-navigation-icon-color': '#ffffff',
+            '--smileid-navigation-focus-color': '#151f72',
+          }}
+        />
+      )}
+
+      {/* ── Scrollable content ───────────────────────────────── */}
+      <div class="doc-instr-scroll">
+        {/* ── Title ─────────────────────────────────────────── */}
+        <div class="doc-instr-title-block">
+          <h1 class="doc-instr-title">
+            <span class="doc-instr-title-regular">
+              {t('document.instructions.captureTitlePrefix')}{' '}
+            </span>
+            <span class="doc-instr-title-type">
+              {displayDocumentType || '<ID Type>'}
+            </span>
+          </h1>
+        </div>
+
+        {/* ── Hero illustration ─────────────────────────────── */}
+        <div class="doc-instr-hero-card" aria-hidden="true">
+          <HeroLottie animationSrc={heroAsset.animationSrc} />
+        </div>
+
+        {/* ── Capture guidelines ────────────────────────────── */}
+        <div class="doc-instr-guidelines">
+          <div class="doc-instr-guidelines-header">
+            <GuidelinesIcon />
+            <span class="doc-instr-guidelines-label">
+              {t('document.instructions.captureGuidelines')}
+            </span>
+          </div>
+
+          <div class="doc-instr-guidelines-grid">
+            {guidelineItems.map((item) => (
+              <div class="doc-instr-guide-item" key={item.label}>
+                <div class="doc-instr-guide-thumb-wrap">
+                  <GuidelineThumbnail
+                    src={GUIDELINE_ICONS[documentVariant][item.key]}
+                    label={item.label}
+                  />
+                </div>
+                <p class="doc-instr-guide-caption">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA button ───────────────────────────────────────── */}
+      <div class="doc-instr-footer">
+        <button
+          id="take-photo"
+          class="doc-instr-start-btn"
+          type="button"
+          onClick={handleStartCapture}
+        >
+          <span>{t('document.instructions.startCapture')}</span>
+          <ArrowRightIcon />
+        </button>
+
+        {/* ── Attribution ───────────────────────────────────── */}
+        {!hideAttribution && (
+          <div class="doc-instr-attribution">
+            <PoweredBySmileIdLogo />
+          </div>
+        )}
+      </div>
+
+      {/* ── Scoped styles (shared with the back layout) ─────── */}
+      <style>{STYLES}</style>
     </div>
   );
 };
@@ -736,6 +878,7 @@ if (
     [
       'dir',
       'document-type',
+      'side-of-id',
       'title',
       'hide-attribution',
       'hide-back',

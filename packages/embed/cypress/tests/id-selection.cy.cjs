@@ -176,7 +176,8 @@ describe('No ID Selection', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 15000 })
+      .should('be.visible')
       .click();
 
     cy.getIFrameBody()
@@ -209,7 +210,9 @@ describe('No ID Selection', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {
@@ -437,7 +440,8 @@ describe('Preselected Country', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 15000 })
+      .should('be.visible')
       .click();
 
     cy.getIFrameBody()
@@ -470,7 +474,9 @@ describe('Preselected Country', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {
@@ -692,7 +698,8 @@ describe('Preselected Country and ID Type', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 15000 })
+      .should('be.visible')
       .click();
 
     cy.getIFrameBody()
@@ -725,7 +732,9 @@ describe('Preselected Country and ID Type', () => {
 
     cy.wait('@successfulUpload');
 
-    cy.getIFrameBody().find('#complete-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
   });
 
   it('enhanced_kyc', () => {

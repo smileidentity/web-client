@@ -237,13 +237,33 @@
       },
       "startCapture": "بدء الالتقاط",
       "takePhotoButton": "التقط صورة",
-      "uploadPhotoButton": "تحميل صورة"
+      "uploadPhotoButton": "تحميل صورة",
+      "flipTitlePrefix": "اقلب",
+      "captureBackButton": "التقط ظهر البطاقة",
+      "skipButton": "تخطّي"
     },
     "review": {
       "question": "هل الوثيقة واضحة ومقروءة؟",
       "description": "تأكد من أن جميع زوايا المستند مرئية ولا يوجد توهج",
       "acceptButton": "نعم، بطاقة هويتي واضحة و مقروءة",
-      "retakeButton": "لا، أعد التقاط الصورة"
+      "retakeButton": "لا، أعد التقاط الصورة",
+      "confirmTitle": "تأكد من جودة الصورة",
+      "confirmBody": "تأكد من أن جميع المعلومات مقروءة.",
+      "retake": "إعادة الالتقاط",
+      "confirm": "تأكيد"
+    },
+    "submission": {
+      "imageAlt": "المستند الملتقَط",
+      "submitting": {
+        "title": "جارٍ الإرسال…",
+        "body": "قد يستغرق هذا لحظة…\nلا تغلق الصفحة أو تعيد تحميلها"
+      },
+      "success": {
+        "title": "اكتمل الإرسال"
+      },
+      "error": {
+        "title": "فشل الإرسال"
+      }
     }
   },
   "fileUpload": {

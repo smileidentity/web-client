@@ -1,1 +1,8 @@
 previews/.sst
+
+# Build output (minified bundles, declaration files) — never format generated artifacts
+dist
+**/dist
+
+# React Router generated typegen output (previews app)
+previews/.react-router

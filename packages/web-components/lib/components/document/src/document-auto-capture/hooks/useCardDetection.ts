@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { isDebugEnabled } from '../utils/debug';
 
 import {
   clamp01,
@@ -25,9 +26,10 @@ import { isSyntheticBridgeRecent } from '../detection/synthesisTiming.ts';
 
 declare const cv: any;
 
-// Temporary testing override: keep verbose detection telemetry and the tuning
-// panel enabled without requiring `?debug` in the URL.
-export const IS_DEBUG_MODE = true;
+// Internal debug flag: emit verbose detection telemetry only in dev + preview
+// builds (compiled-in via __SMILE_DEBUG__; off in production). Same switch that
+// gates the tuning panel. Evaluated once at module load.
+const IS_DEBUG_MODE = isDebugEnabled();
 
 // Helper to safely release a list of OpenCV Mats. Mats not yet allocated or
 // already deleted are skipped. Used in `finally` blocks to avoid a wall of

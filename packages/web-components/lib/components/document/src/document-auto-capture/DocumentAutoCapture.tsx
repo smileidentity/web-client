@@ -3,15 +3,12 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { useCamera } from './hooks/useCamera';
-import {
-  useCardDetection,
-  COMPLIANCE_STATES,
-  IS_DEBUG_MODE,
-} from './hooks/useCardDetection';
+import { useCardDetection, COMPLIANCE_STATES } from './hooks/useCardDetection';
 import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
+import { isDebugEnabled } from './utils/debug';
 import { theme } from './theme';
 
 import '../../../navigation/src';
@@ -453,7 +450,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug = IS_DEBUG_MODE;
+  // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
+  // (see utils/debug.ts / __SMILE_DEBUG__); production builds strip it.
+  const showDebug = isDebugEnabled();
 
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {
@@ -1103,7 +1102,10 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           )}
         </div>
 
-        {showDebug && (
+        {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
+            TuningPanel import) is dead-code-eliminated from production bundles;
+            showDebug then applies the runtime ?debug opt-in in dev + preview. */}
+        {__SMILE_DEBUG__ && showDebug && (
           <TuningPanel
             settings={settings}
             updateSetting={updateSetting}
@@ -1377,7 +1379,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       </div>
 
       {/* Tuning panel (debug mode only) */}
-      {showDebug && (
+      {/* Build-time gate → tree-shaken in production (see note above). */}
+      {__SMILE_DEBUG__ && showDebug && (
         <TuningPanel
           settings={settings}
           updateSetting={updateSetting}

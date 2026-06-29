@@ -216,6 +216,36 @@
       "instructionText": "تأكد من أن جميع الزوايا مرئية ولا يوجد وهج.",
       "captureButton": "التقاط وثيقة"
     },
+    "autoCapture": {
+      "galleryButtonLabel": "اختيار صورة من المعرض",
+      "capturePhotoButton": "التقاط صورة",
+      "error": {
+        "cameraUnavailable": {
+          "title": "تم رفض الوصول إلى الكاميرا أو أنها غير متاحة",
+          "body": "يرجى السماح بالوصول إلى الكاميرا وإعادة تحميل الصفحة."
+        },
+        "cvLoadFailed": "الالتقاط التلقائي غير متاح. يرجى إعادة تحميل الصفحة أو تجربة متصفح آخر."
+      },
+      "feedback": {
+        "positionDocument": "ضع مستندك داخل الإطار",
+        "alignDocument": "قم بمحاذاة المستند داخل الإطار",
+        "placeDocument": "ضع المستند داخل الإطار",
+        "ensureDocumentVisible": "تأكد من ظهور المستند بالكامل",
+        "moveDocumentCloser": "قرّب المستند",
+        "moveDocumentFurtherAway": "أبعد المستند",
+        "holdSteady": "ثبّت المستند",
+        "detectingDocumentType": "جارٍ تحديد نوع المستند…",
+        "tooBlurry": "ضبابي جدًا",
+        "glareDetectedAdjustLighting": "تم اكتشاف انعكاس — اضبط الإضاءة",
+        "holdStill": "لا تتحرك...",
+        "capturingDocument": "جارٍ التقاط المستند...",
+        "processingFailed": "فشلت المعالجة — يرجى المحاولة مرة أخرى",
+        "autoDetectionUnavailableRetry": "الالتقاط التلقائي غير متاح — يرجى المحاولة مرة أخرى",
+        "autoDetectionUnavailableManual": "الالتقاط التلقائي غير متاح — التقط يدويًا",
+        "captured": "تم الالتقاط!",
+        "captureFailed": "فشل الالتقاط — يرجى المحاولة مرة أخرى"
+      }
+    },
     "instructions": {
       "captureTitlePrefix": "استعد لالتقاط",
       "captureGuidelines": "إرشادات الالتقاط",

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.6.0] - 2026-06-29
+
+### Added
+
+- DocumentCapture: Add support for auto capture, including the new instructions and back-document review/submission flow, localized feedback, adaptive detection for low-contrast and challenging backgrounds, and capture stability/reliability hardening across desktop and mobile
+- Embed: Improve Sentry release/version tagging for iframe flows
+- Dependencies: Remove archived validate.js (GHSA-rv73-9c8w-jp4c)
+
 ## [11.5.0] - 2026-06-16
 
 ### Added
@@ -28,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Selfie: separate the cosmetic countdown from the load deadline so the capture flow no longer races against the visible timer
+
 - Web-components: add repository metadata to the published package for npm provenance
 - Dependencies: bump the npm_and_yarn group across 2 directories
 

@@ -3,16 +3,14 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { useCamera } from './hooks/useCamera';
-import {
-  useCardDetection,
-  COMPLIANCE_STATES,
-  IS_DEBUG_MODE,
-} from './hooks/useCardDetection';
+import { useCardDetection, COMPLIANCE_STATES } from './hooks/useCardDetection';
 import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
+import { isDebugEnabled } from './utils/debug';
 import { theme } from './theme';
+import { translate } from '../../../../domain/localisation';
 
 import '../../../navigation/src';
 
@@ -268,7 +266,7 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       style={galleryButtonStyle}
-      aria-label="Select image from gallery"
+      aria-label={translate('document.autoCapture.galleryButtonLabel')}
     >
       <GalleryIcon />
     </button>
@@ -319,7 +317,7 @@ function DesktopCaptureButton({
         WebkitTapHighlightColor: 'transparent',
         flexShrink: 0,
       }}
-      aria-label="Capture photo"
+      aria-label={translate('document.autoCapture.capturePhotoButton')}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -453,7 +451,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug = IS_DEBUG_MODE;
+  // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
+  // (see utils/debug.ts / __SMILE_DEBUG__); production builds strip it.
+  const showDebug = isDebugEnabled();
 
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {
@@ -597,11 +597,11 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       complianceState === COMPLIANCE_STATES.STABLE ||
       complianceState === COMPLIANCE_STATES.CAPTURING ||
       complianceState === COMPLIANCE_STATES.SUCCESS;
-    const t = setTimeout(
+    const timer = setTimeout(
       () => setVisibleComplianceState(complianceState),
       isGoodState ? 0 : COMPLIANCE_DEBOUNCE_MS,
     );
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [complianceState]);
 
   // Notify smart-camera-web when the capture session begins.
@@ -799,7 +799,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
         <p style={{ marginTop: theme.spacing.md, fontSize: '1rem' }}>
-          Camera access denied or unavailable
+          {translate('document.autoCapture.error.cameraUnavailable.title')}
         </p>
         <p
           style={{
@@ -808,7 +808,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             marginTop: theme.spacing.sm,
           }}
         >
-          Please allow camera access and reload the page.
+          {translate('document.autoCapture.error.cameraUnavailable.body')}
         </p>
       </div>
     );
@@ -1098,12 +1098,15 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 margin: 0,
               }}
             >
-              Auto-detection unavailable. Please reload or try another browser.
+              {translate('document.autoCapture.error.cvLoadFailed')}
             </p>
           )}
         </div>
 
-        {showDebug && (
+        {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
+            TuningPanel import) is dead-code-eliminated from production bundles;
+            showDebug then applies the runtime ?debug opt-in in dev + preview. */}
+        {__SMILE_DEBUG__ && showDebug && (
           <TuningPanel
             settings={settings}
             updateSetting={updateSetting}
@@ -1368,8 +1371,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                     margin: 0,
                   }}
                 >
-                  Auto-detection unavailable. Please reload or try another
-                  browser.
+                  {translate('document.autoCapture.error.cvLoadFailed')}
                 </p>
               )}
             </>
@@ -1377,7 +1379,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       </div>
 
       {/* Tuning panel (debug mode only) */}
-      {showDebug && (
+      {/* Build-time gate → tree-shaken in production (see note above). */}
+      {__SMILE_DEBUG__ && showDebug && (
         <TuningPanel
           settings={settings}
           updateSetting={updateSetting}

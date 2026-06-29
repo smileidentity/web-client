@@ -44,7 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-
 - Selfie: surface camera errors in `SmartSelfieCapture` instead of silently failing
 - Embed: prevent unhandled FingerprintJS load rejections from surfacing as runtime errors
 - Embed: include network diagnostics when reporting WASM init failures

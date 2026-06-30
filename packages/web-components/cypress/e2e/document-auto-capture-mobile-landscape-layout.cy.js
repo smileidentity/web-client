@@ -3,7 +3,10 @@ import { stubFakeCamera } from '../support/mediapipeStub';
 const mobileUserAgent =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
-const mountDocumentAutoCapture = ({ width = '100vw', height = '100vh' } = {}) => {
+const mountDocumentAutoCapture = ({
+  width = '100vw',
+  height = '100vh',
+} = {}) => {
   cy.document().then((doc) => {
     doc.body.innerHTML = '';
     doc.body.style.margin = '0';
@@ -22,12 +25,7 @@ const mountDocumentAutoCapture = ({ width = '100vw', height = '100vh' } = {}) =>
 };
 
 const getUiOverlay = () =>
-  cy
-    .get('document-auto-capture')
-    .shadow()
-    .find('.guide-box')
-    .parent()
-    .parent();
+  cy.get('document-auto-capture').shadow().find('.guide-box').parent().parent();
 
 const expectLandscapeEdgeLayout = ({ shouldRotateOverlay }) => {
   getUiOverlay().should(($overlay) => {

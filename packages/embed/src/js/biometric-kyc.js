@@ -1026,7 +1026,14 @@ window.Sentry = Sentry;
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      // Network drops during upload (offline, timeout) are the most common
+      // cause of failure here — surface an actionable message instead of the
+      // generic one so the user knows to check their connection.
+      const message =
+        isNetworkFailure(error) || !navigator.onLine
+          ? translate('pages.error.checkInternet')
+          : translate('pages.error.generic');
+      displayErrorMessage(message);
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
@@ -1035,16 +1042,35 @@ window.Sentry = Sentry;
     }
   }
 
+  // Walk the `cause` chain to find the network flag set by `fetchWithTimeout`.
+  // getUploadURL/createZip wrap the underlying fetch rejection in a
+  // higher-level Error, so the flag lives one or more `cause` levels down.
+  function isNetworkFailure(error) {
+    let current = error;
+    while (current) {
+      if (current.isNetworkError === true) return true;
+      current = current.cause;
+    }
+    return false;
+  }
+
   function displayErrorMessage(message) {
-    const p = document.createElement('p');
+    const main = document.querySelector('main');
+
+    // Reuse a single error element so repeated failed submissions (e.g.
+    // clicking "Yes, use this" again while offline) update the existing
+    // message in place instead of stacking a new one on every click.
+    let p = main.querySelector('#submission-error-message');
+    if (!p) {
+      p = document.createElement('p');
+      p.id = 'submission-error-message';
+      p.classList.add('validation-message');
+      p.style.fontSize = '1.5rem';
+      p.style.textAlign = 'center';
+      main.prepend(p);
+    }
 
     p.textContent = message;
-    p.classList.add('validation-message');
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
-
-    const main = document.querySelector('main');
-    main.prepend(p);
   }
 
   async function createZip() {

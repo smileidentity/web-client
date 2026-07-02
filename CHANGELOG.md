@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Embed (Biometric KYC): show an actionable "check your connection" message when a selfie submission fails due to a network drop, and stop stacking a new error message on every retry when `id_info` is supplied
+
 ## [11.6.0] - 2026-06-29
 
 ### Added

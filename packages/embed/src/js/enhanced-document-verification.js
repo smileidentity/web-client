@@ -17,6 +17,10 @@ import {
   idInfoToIdSelection,
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import {
+  displayErrorMessage,
+  submissionErrorMessage,
+} from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
 import { createDocSubmission } from './doc-submission.js';
 
@@ -564,23 +568,11 @@ function applyPageTranslations() {
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      displayErrorMessage(submissionErrorMessage(error, translate));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     }
-  }
-
-  function displayErrorMessage(message) {
-    const p = document.createElement('p');
-
-    p.textContent = message;
-    p.style.color = 'red';
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
-
-    const main = document.querySelector('main');
-    main.prepend(p);
   }
 
   async function createZip() {

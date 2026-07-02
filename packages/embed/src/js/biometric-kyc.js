@@ -26,6 +26,10 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import {
+  displayErrorMessage,
+  submissionErrorMessage,
+} from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('biometric-kyc');
@@ -1026,51 +1030,13 @@ window.Sentry = Sentry;
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      // Network drops during upload (offline, timeout) are the most common
-      // cause of failure here — surface an actionable message instead of the
-      // generic one so the user knows to check their connection.
-      const message =
-        isNetworkFailure(error) || !navigator.onLine
-          ? translate('pages.error.checkInternet')
-          : translate('pages.error.generic');
-      displayErrorMessage(message);
+      displayErrorMessage(submissionErrorMessage(error, translate));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     } finally {
       if (event && event.target) event.target.disabled = false;
     }
-  }
-
-  // Walk the `cause` chain to find the network flag set by `fetchWithTimeout`.
-  // getUploadURL/createZip wrap the underlying fetch rejection in a
-  // higher-level Error, so the flag lives one or more `cause` levels down.
-  function isNetworkFailure(error) {
-    let current = error;
-    while (current) {
-      if (current.isNetworkError === true) return true;
-      current = current.cause;
-    }
-    return false;
-  }
-
-  function displayErrorMessage(message) {
-    const main = document.querySelector('main');
-
-    // Reuse a single error element so repeated failed submissions (e.g.
-    // clicking "Yes, use this" again while offline) update the existing
-    // message in place instead of stacking a new one on every click.
-    let p = main.querySelector('#submission-error-message');
-    if (!p) {
-      p = document.createElement('p');
-      p.id = 'submission-error-message';
-      p.classList.add('validation-message');
-      p.style.fontSize = '1.5rem';
-      p.style.textAlign = 'center';
-      main.prepend(p);
-    }
-
-    p.textContent = message;
   }
 
   async function createZip() {

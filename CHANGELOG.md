@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Embed (Biometric KYC): show an actionable "check your connection" message when a selfie submission fails due to a network drop, and stop stacking a new error message on every retry when `id_info` is supplied
+- Embed: when a submission fails, show an actionable "check your connection" message for network drops (instead of the generic error) and update a single on-page message in place rather than stacking a new one on every retry. Applies across the Biometric KYC, eKYC, Basic KYC, Document Verification, Enhanced Document Verification, and SmartSelfie Authentication flows
 
 ## [11.6.0] - 2026-06-29
 

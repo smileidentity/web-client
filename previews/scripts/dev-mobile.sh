@@ -125,12 +125,15 @@ echo "📦 Building @smileid/web-components (embed depends on its dist/ output).
 # Workspace deps live at $REPO_ROOT/node_modules; only run an install if the
 # root install hasn't happened yet. Stream build output to the terminal so
 # failures are immediately visible.
+# SMILE_DEBUG_BUILD=true compiles the document-capture debug tooling (TuningPanel
+# / ROI overlay) into this local build — same flag the preview deploy sets — so
+# the embed shown via the tunnel has the debug panel. Production builds omit it.
 (
   cd "$REPO_ROOT"
   if [ ! -d node_modules ]; then
     npm ci
   fi
-  npm run build --workspace=@smileid/web-components
+  SMILE_DEBUG_BUILD=true npm run build --workspace=@smileid/web-components
 ) || {
   echo "❌ web-components build failed; aborting." >&2
   exit 1

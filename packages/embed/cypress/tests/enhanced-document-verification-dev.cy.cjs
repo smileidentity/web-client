@@ -67,7 +67,8 @@ describe('enhanced document verification', () => {
       .shadow()
       .find('document-capture#document-capture-front')
       .shadow()
-      .find('#capture-id-image')
+      .find('#capture-id-image', { timeout: 15000 })
+      .should('be.visible')
       .click();
 
     cy.getIFrameBody()

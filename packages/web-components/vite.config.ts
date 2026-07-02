@@ -20,6 +20,13 @@ const { version } = packageJson;
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
+  // Debug tooling (document-capture TuningPanel / ROI overlay / verbose logs) is
+  // compiled in for dev (any non-production vite mode → vite dev + Storybook) and
+  // for builds that explicitly opt in via SMILE_DEBUG_BUILD=true (preview deploy,
+  // local dev-mobile). Production / npm-publish builds run `vite build` with no
+  // flag → debug is compiled OUT. Exposed to source as `__SMILE_DEBUG__`.
+  const debugEnabled =
+    !isProduction || process.env.SMILE_DEBUG_BUILD === 'true';
   const generateStats = process.env.GENERATE_STATS === 'true';
   const buildFormat = process.env.BUILD_FORMAT || 'esm';
   const port = parseInt(env.PORT || '3005', 10);
@@ -146,6 +153,7 @@ export default defineConfig(({ mode }) => {
     define: {
       SMILE_COMPONENTS_VERSION: JSON.stringify(version),
       COMPONENTS_VERSION: JSON.stringify(version),
+      __SMILE_DEBUG__: JSON.stringify(debugEnabled),
     },
 
     build: buildFormat === 'iife' ? iifeBuildConfig : esmBuildConfig,

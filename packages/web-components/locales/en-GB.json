@@ -216,6 +216,36 @@
       "instructionText": "Make sure all corners are visible and there is no glare.",
       "captureButton": "Capture Document"
     },
+    "autoCapture": {
+      "galleryButtonLabel": "Select image from gallery",
+      "capturePhotoButton": "Capture photo",
+      "error": {
+        "cameraUnavailable": {
+          "title": "Camera access denied or unavailable",
+          "body": "Please allow camera access and reload the page."
+        },
+        "cvLoadFailed": "Auto-detection unavailable. Please reload or try another browser."
+      },
+      "feedback": {
+        "positionDocument": "Position your document in the frame",
+        "alignDocument": "Align document in frame",
+        "placeDocument": "Place document in frame",
+        "ensureDocumentVisible": "Ensure document is fully visible",
+        "moveDocumentCloser": "Move document closer",
+        "moveDocumentFurtherAway": "Move document further away",
+        "holdSteady": "Hold steady",
+        "detectingDocumentType": "Detecting document type…",
+        "tooBlurry": "Too Blurry",
+        "glareDetectedAdjustLighting": "Glare detected — adjust lighting",
+        "holdStill": "Hold Still...",
+        "capturingDocument": "Capturing document...",
+        "processingFailed": "Processing failed — please try again",
+        "autoDetectionUnavailableRetry": "Auto-detection unavailable — please try again",
+        "autoDetectionUnavailableManual": "Auto-detection unavailable — capture manually",
+        "captured": "Captured!",
+        "captureFailed": "Capture failed — please try again"
+      }
+    },
     "instructions": {
       "captureTitlePrefix": "Get ready to capture your",
       "captureGuidelines": "Capture Guidelines",

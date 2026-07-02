@@ -15,16 +15,62 @@ interface TuningSettings {
   previewCropPadding?: number;
   minFillPercent?: number;
   maxFillPercent?: number;
+  autoCannySigma?: number;
+  chromaEdgeFusion?: boolean;
+  chromaCannyLow?: number;
+  chromaCannyHigh?: number;
+  mobileRegionFallback?: boolean;
+  idAspectTolerance?: number;
+  bookDocAspectTolerance?: number;
+  minFillRatio?: number;
+  chromaContentGate?: boolean;
+  minChromaContent?: number;
+  seamRejectEnabled?: boolean;
+  houghThreshold?: number;
+  houghMinLengthRatio?: number;
+  houghMaxLineGap?: number;
+  seamMaxHoughLines?: number;
+  lowClutterEdgeDensity?: number;
+  cannyHighMinLowClutter?: number;
+  captureGridMinCells?: number;
+  chromaMaskFallback?: boolean;
+  chromaMaskThreshold?: number;
+  chromaMaskMinFrac?: number;
+  chromaMaskMaxFrac?: number;
+  gateDecayEnabled?: boolean;
+  docFillEmaAlpha?: number;
+  fillHysteresis?: number;
+  targetProcessingFps?: number;
   [key: string]: unknown;
 }
 
 interface TuningDebugInfo {
+  rejectReason?: string;
+  procFps?: number | string;
   edgeDensity?: number | string;
   texture?: number | string;
   quadrants?: string;
   blur?: number;
   glare?: number | string;
   docFill?: number | string;
+  canny?: string;
+  contourSource?: string;
+  aspect?: number | string;
+  chroma?: number | string;
+  quality?: number | string;
+  houghLines?: number | string;
+  seamRejected?: boolean | string;
+  seamClutter?: boolean | string;
+  chromaMaskFrac?: number | string;
+  chromaMaskArea?: number | string;
+  chromaMaskFill?: number | string;
+  chromaMaskAspect?: number | string;
+  chromaMaskWall?: number | string;
+  cvError?: string;
+  cvErrors?: number | string;
+  cvRecovery?: string;
+  chromaError?: string;
+  chromaStatus?: string;
   [key: string]: unknown;
 }
 
@@ -126,6 +172,21 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           color: '#888',
         }}
       >
+        <div style={{ gridColumn: '1 / -1' }}>
+          Blocking check:{' '}
+          <span
+            style={{
+              color: debugInfo?.rejectReason?.startsWith('✓') ? '#0f0' : '#fd5',
+              fontWeight: 'bold',
+            }}
+          >
+            {debugInfo?.rejectReason ?? '—'}
+          </span>
+        </div>
+        <div>
+          Proc FPS:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.procFps ?? '—'}</span>
+        </div>
         <div>
           Edge Density:{' '}
           <span style={{ color: '#fff' }}>
@@ -148,12 +209,103 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           Glare %:{' '}
           <span style={{ color: '#fff' }}>{debugInfo?.glare || 0}%</span>
         </div>
+        <div>
+          Canny (lo/hi):{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.canny ?? '—'}</span>
+        </div>
+        <div>
+          Edge Src:{' '}
+          <span style={{ color: '#fff' }}>
+            {debugInfo?.contourSource ?? '—'}
+          </span>
+        </div>
+        <div>
+          Aspect:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.aspect ?? '—'}</span>
+        </div>
+        <div>
+          Chroma:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.chroma ?? '—'}</span>
+        </div>
+        <div>
+          Chroma Status:{' '}
+          <span style={{ color: '#fff' }}>
+            {debugInfo?.chromaStatus ?? '—'}
+          </span>
+        </div>
+        <div>
+          Quality:{' '}
+          <span style={{ color: '#0f0' }}>{debugInfo?.quality ?? '—'}</span>
+        </div>
+        <div>
+          Hough Lines:{' '}
+          <span style={{ color: '#fff' }}>{debugInfo?.houghLines ?? '—'}</span>
+        </div>
+        <div>
+          Seam Rejected:{' '}
+          <span style={{ color: debugInfo?.seamRejected ? '#f55' : '#fff' }}>
+            {debugInfo?.seamRejected == null
+              ? '—'
+              : String(debugInfo.seamRejected)}
+          </span>
+        </div>
+        <div>
+          Seam Clutter:{' '}
+          <span style={{ color: debugInfo?.seamClutter ? '#fb5' : '#fff' }}>
+            {debugInfo?.seamClutter == null
+              ? '—'
+              : String(debugInfo.seamClutter)}
+          </span>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          Chroma-Mask:{' '}
+          <span style={{ color: '#fff', fontSize: '0.7rem' }}>
+            {debugInfo?.chromaMaskFill == null
+              ? '—'
+              : `cover ${debugInfo.chromaMaskFrac}% · area ${debugInfo.chromaMaskArea}% · fill ${debugInfo.chromaMaskFill} · aspect ${debugInfo.chromaMaskAspect} · wall ${debugInfo.chromaMaskWall}`}
+          </span>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           Grid 3×3:{' '}
           <span style={{ color: '#fff', fontSize: '0.7rem' }}>
             {debugInfo?.quadrants ?? '-'}
           </span>
         </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          CV Errors:{' '}
+          <span style={{ color: '#fbb', fontSize: '0.7rem' }}>
+            {debugInfo?.cvErrors ?? 0}
+            {debugInfo?.cvRecovery ? ` (${debugInfo.cvRecovery})` : ''}
+          </span>
+        </div>
+        {debugInfo?.cvError && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            CV Error:{' '}
+            <span
+              style={{
+                color: '#f88',
+                fontSize: '0.7rem',
+                wordBreak: 'break-word',
+              }}
+            >
+              {debugInfo.cvError}
+            </span>
+          </div>
+        )}
+        {debugInfo?.chromaError && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            Chroma Error:{' '}
+            <span
+              style={{
+                color: '#f88',
+                fontSize: '0.7rem',
+                wordBreak: 'break-word',
+              }}
+            >
+              {debugInfo.chromaError}
+            </span>
+          </div>
+        )}
       </div>
 
       <hr style={{ borderColor: '#333', margin: '5px 0' }} />
@@ -225,6 +377,412 @@ export const TuningPanel: FunctionComponent<TuningPanelProps> = ({
           }
         />
       </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Edge Sensitivity (σ): {settings.autoCannySigma}{' '}
+          <em>(Lower = detect fainter borders on plain backgrounds)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="3"
+          step="0.05"
+          value={settings.autoCannySigma}
+          onInput={(e) =>
+            updateSetting('autoCannySigma', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          ID Aspect Tol: {settings.idAspectTolerance}{' '}
+          <em>(Lower = stricter; rejects screens/odd rectangles)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="0.35"
+          step="0.01"
+          value={settings.idAspectTolerance as number}
+          onInput={(e) =>
+            updateSetting('idAspectTolerance', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Book-Doc Aspect Tol: {settings.bookDocAspectTolerance}{' '}
+          <em>(Passport/greenbook; lower rejects ID cards/screens)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="0.35"
+          step="0.01"
+          value={settings.bookDocAspectTolerance as number}
+          onInput={(e) =>
+            updateSetting('bookDocAspectTolerance', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Min Fill Ratio: {settings.minFillRatio}{' '}
+          <em>(Higher = stricter rectangularity)</em>
+        </span>
+        <input
+          type="range"
+          min="0.5"
+          max="1"
+          step="0.01"
+          value={settings.minFillRatio as number}
+          onInput={(e) => updateSetting('minFillRatio', Number(e.target.value))}
+        />
+      </label>
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Chroma Edge Fusion
+        <input
+          type="checkbox"
+          checked={Boolean(settings.chromaEdgeFusion)}
+          onInput={(e) => updateSetting('chromaEdgeFusion', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.chromaEdgeFusion) && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Chroma Canny Low: {settings.chromaCannyLow}</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={settings.chromaCannyLow as number}
+              onInput={(e) =>
+                updateSetting('chromaCannyLow', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Chroma Canny High: {settings.chromaCannyHigh}</span>
+            <input
+              type="range"
+              min="0"
+              max="150"
+              step="1"
+              value={settings.chromaCannyHigh as number}
+              onInput={(e) =>
+                updateSetting('chromaCannyHigh', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
+      )}
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Mobile Region Fallback
+        <input
+          type="checkbox"
+          checked={Boolean(settings.mobileRegionFallback)}
+          onInput={(e) =>
+            updateSetting('mobileRegionFallback', e.target.checked)
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Chroma Content Gate
+        <input
+          type="checkbox"
+          checked={Boolean(settings.chromaContentGate)}
+          onInput={(e) => updateSetting('chromaContentGate', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.chromaContentGate) && (
+        <label style={{ display: 'flex', flexDirection: 'column' }}>
+          <span>
+            Min Chroma Content: {settings.minChromaContent}{' '}
+            <em>(Higher = reject more monochrome objects, e.g. keyboards)</em>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="50"
+            step="1"
+            value={settings.minChromaContent as number}
+            onInput={(e) =>
+              updateSetting('minChromaContent', Number(e.target.value))
+            }
+          />
+        </label>
+      )}
+
+      <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+        Seam Rejection{' '}
+        <em>(reject quads framed by straight lines, e.g. parquet)</em>
+        <input
+          type="checkbox"
+          checked={Boolean(settings.seamRejectEnabled)}
+          onInput={(e) => updateSetting('seamRejectEnabled', e.target.checked)}
+        />
+      </label>
+
+      {Boolean(settings.seamRejectEnabled) && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Hough Threshold: {settings.houghThreshold}{' '}
+              <em>(Higher = only stronger straight lines count)</em>
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="150"
+              step="1"
+              value={settings.houghThreshold as number}
+              onInput={(e) =>
+                updateSetting('houghThreshold', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Hough Min Length Ratio: {settings.houghMinLengthRatio}{' '}
+              <em>(min line length as fraction of ROI short side)</em>
+            </span>
+            <input
+              type="range"
+              min="0.1"
+              max="0.9"
+              step="0.05"
+              value={settings.houghMinLengthRatio as number}
+              onInput={(e) =>
+                updateSetting('houghMinLengthRatio', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Hough Max Line Gap: {settings.houghMaxLineGap}</span>
+            <input
+              type="range"
+              min="0"
+              max="30"
+              step="1"
+              value={settings.houghMaxLineGap as number}
+              onInput={(e) =>
+                updateSetting('houghMaxLineGap', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Seam Max Hough Lines: {settings.seamMaxHoughLines}{' '}
+              <em>(above this the scene is too cluttered — skip seam gate)</em>
+            </span>
+            <input
+              type="range"
+              min="10"
+              max="300"
+              step="5"
+              value={settings.seamMaxHoughLines as number}
+              onInput={(e) =>
+                updateSetting('seamMaxHoughLines', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
+      )}
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Low-Clutter Edge Density %: {settings.lowClutterEdgeDensity}{' '}
+          <em>(below this, drop the Canny floor to catch faint borders)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="0.5"
+          value={settings.lowClutterEdgeDensity as number}
+          onInput={(e) =>
+            updateSetting('lowClutterEdgeDensity', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Canny High-Min (low clutter): {settings.cannyHighMinLowClutter}
+        </span>
+        <input
+          type="range"
+          min="20"
+          max="60"
+          step="1"
+          value={settings.cannyHighMinLowClutter as number}
+          onInput={(e) =>
+            updateSetting('cannyHighMinLowClutter', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Capture Grid Min Cells: {settings.captureGridMinCells}{' '}
+          <em>(of 9; early-out only — distance is owned by Doc Fill %)</em>
+        </span>
+        <input
+          type="range"
+          min="1"
+          max="9"
+          step="1"
+          value={settings.captureGridMinCells as number}
+          onInput={(e) =>
+            updateSetting('captureGridMinCells', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Processing FPS: {settings.targetProcessingFps}{' '}
+          <em>(throttle heavy CV; 60 = every frame)</em>
+        </span>
+        <input
+          type="range"
+          min="10"
+          max="60"
+          step="5"
+          value={settings.targetProcessingFps as number}
+          onInput={(e) =>
+            updateSetting('targetProcessingFps', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={settings.gateDecayEnabled === true}
+          onInput={(e) =>
+            updateSetting(
+              'gateDecayEnabled',
+              (e.target as HTMLInputElement).checked,
+            )
+          }
+        />
+        <span>
+          Gate Decay (anti-flicker){' '}
+          <em>(soften progress on transient gate misses)</em>
+        </span>
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Fill EMA α: {settings.docFillEmaAlpha}{' '}
+          <em>(lower = smoother distance; 1 = off)</em>
+        </span>
+        <input
+          type="range"
+          min="0.05"
+          max="1"
+          step="0.05"
+          value={settings.docFillEmaAlpha as number}
+          onInput={(e) =>
+            updateSetting('docFillEmaAlpha', Number(e.target.value))
+          }
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>
+          Fill Hysteresis (±%): {settings.fillHysteresis}{' '}
+          <em>(deadband around the fill thresholds; 0 = off)</em>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={settings.fillHysteresis as number}
+          onInput={(e) =>
+            updateSetting('fillHysteresis', Number(e.target.value))
+          }
+        />
+      </label>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <input
+          type="checkbox"
+          checked={settings.chromaMaskFallback === true}
+          onInput={(e) =>
+            updateSetting(
+              'chromaMaskFallback',
+              (e.target as HTMLInputElement).checked,
+            )
+          }
+        />
+        <span>
+          Chroma-Mask Fallback{' '}
+          <em>(colored card on neutral bg; may false-capture a rug)</em>
+        </span>
+      </label>
+      {settings.chromaMaskFallback === true && (
+        <>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Threshold: {settings.chromaMaskThreshold}{' '}
+              <em>(|a|+|b| cutoff to isolate colored pixels)</em>
+            </span>
+            <input
+              type="range"
+              min="5"
+              max="60"
+              step="1"
+              value={settings.chromaMaskThreshold as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskThreshold', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Min Area: {settings.chromaMaskMinFrac}{' '}
+              <em>(blob must cover at least this fraction of ROI)</em>
+            </span>
+            <input
+              type="range"
+              min="0.02"
+              max="0.3"
+              step="0.01"
+              value={settings.chromaMaskMinFrac as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskMinFrac', Number(e.target.value))
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>
+              Chroma-Mask Max Coverage: {settings.chromaMaskMaxFrac}{' '}
+              <em>
+                (above this the colored region IS the background — reject)
+              </em>
+            </span>
+            <input
+              type="range"
+              min="0.3"
+              max="0.95"
+              step="0.05"
+              value={settings.chromaMaskMaxFrac as number}
+              onInput={(e) =>
+                updateSetting('chromaMaskMaxFrac', Number(e.target.value))
+              }
+            />
+          </label>
+        </>
+      )}
 
       <label style={{ display: 'flex', flexDirection: 'column' }}>
         <span>Sharpness Threshold: {settings.blurThreshold}</span>

@@ -196,6 +196,14 @@ const getOptimalDefaults = () => {
   };
 };
 
+const getScreenViewportBox = () => {
+  const viewport = window.visualViewport;
+  return {
+    w: Math.round(viewport?.width ?? window.innerWidth ?? 0),
+    h: Math.round(viewport?.height ?? window.innerHeight ?? 0),
+  };
+};
+
 const galleryButtonStyle = {
   width: 72,
   height: 72,
@@ -448,7 +456,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     w: 0,
     h: 0,
   });
-  const isTallViewport = viewportBox.h > viewportBox.w;
+  const [screenViewportBox, setScreenViewportBox] =
+    useState(getScreenViewportBox);
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
   // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
@@ -477,16 +486,35 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    const update = () => setScreenViewportBox(getScreenViewportBox());
+    update();
+
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    window.visualViewport?.addEventListener('resize', update);
+
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+      window.visualViewport?.removeEventListener('resize', update);
+    };
+  }, []);
+
   const isLandscapeDocumentType =
     documentType === 'id-card' || documentType === 'passport';
   const useLandscapeUi = isLandscapeDocumentType;
-  // Rotate the UI 90 degrees only on touch devices (mobile / tablet) where
-  // the user is expected to be holding the phone in portrait. On desktop /
-  // laptop with a portrait-shaped parent box (e.g. the dev playground
-  // 360px column) we keep the un-rotated layout because the user can't
-  // rotate their monitor.
+  // Use the landscape/edge layout for mobile landscape documents regardless of
+  // physical phone orientation. Only rotate the overlay transform when the
+  // browser viewport is portrait-shaped; embed shells can constrain the camera
+  // host to a portrait box even while the phone itself is landscape.
   const isMobileDevice = settings.deviceType === 'Mobile';
-  const shouldRotateUi = useLandscapeUi && isTallViewport && isMobileDevice;
+  const useLandscapeLayout = useLandscapeUi && isMobileDevice;
+  const isScreenViewportPortrait =
+    screenViewportBox.w === 0 ||
+    screenViewportBox.h === 0 ||
+    screenViewportBox.h >= screenViewportBox.w;
+  const shouldRotateUi = useLandscapeLayout && isScreenViewportPortrait;
   const effectiveCaptureOrientation = isLandscapeDocumentType
     ? 'landscape'
     : 'portrait';
@@ -834,18 +862,16 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     showManualButton ||
     (allowGalleryUpload && captureMode !== 'autoCaptureOnly');
 
-  // Side-mounted controls are only used in the rotated UI. When the UI is
-  // not rotated (e.g. landscape doc type on desktop), buttons live in the
-  // bottom row alongside the portrait layout.
-  const useSideManualCapture = shouldRotateUi && showManualCaptureControl;
-  const showSideGalleryButton = shouldRotateUi && allowGalleryUpload;
+  // Side-mounted controls are used for mobile landscape documents whether the
+  // viewport is portrait (rotated overlay) or physically landscape.
+  const useSideManualCapture = useLandscapeLayout && showManualCaptureControl;
+  const showSideGalleryButton = useLandscapeLayout && allowGalleryUpload;
   const showBottomGalleryButton = allowGalleryUpload && !showSideGalleryButton;
-  // Only show the side progress spinner when the UI is actually rotated
-  // (landscape doc type on a portrait viewport). In portrait/un-rotated UI
-  // the bottom CaptureButton already shows progress, so a second spinner on
-  // the right would just be a duplicate floating button.
+  // Only show the side progress spinner for mobile landscape documents. In the
+  // portrait layout, the bottom CaptureButton already shows progress, so a
+  // second spinner on the right would just be a duplicate floating button.
   const showSideSpinner =
-    baseShowSideSpinner && shouldRotateUi && !useSideManualCapture;
+    baseShowSideSpinner && useLandscapeLayout && !useSideManualCapture;
   const sideButtonProgress =
     visibleComplianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
@@ -1219,7 +1245,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             guideAspectRatio={guideAspectRatio}
             detectedDocType={detectedDocType}
             sideOfId={sideOfId}
-            isRotated={shouldRotateUi}
+            isRotated={useLandscapeLayout}
           />
 
           {/* Side capture-progress button */}
@@ -1279,7 +1305,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             style={{
               position: 'absolute',
               left: '50%',
-              bottom: shouldRotateUi ? 5 : 184,
+              bottom: useLandscapeLayout ? 5 : 184,
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(35,35,35,0.95)',
               borderRadius: 14,
@@ -1311,7 +1337,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             no pill background. The CaptureButton is centered absolutely; the
             gallery button is anchored to its right so the shutter stays on
             the horizontal centerline regardless of which controls are shown. */}
-        {!shouldRotateUi &&
+        {!useLandscapeLayout &&
           (showManualCaptureControl || showBottomGalleryButton) &&
           !useSideManualCapture && (
             <>

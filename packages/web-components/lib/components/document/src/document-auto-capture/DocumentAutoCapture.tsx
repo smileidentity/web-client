@@ -8,7 +8,9 @@ import { Overlay } from './components/Overlay';
 import { CaptureButton } from './components/CaptureButton';
 import { TuningPanel } from './components/TuningPanel';
 import { ensureOpenCv } from './utils/opencvLoader';
+import { isDebugEnabled } from './utils/debug';
 import { theme } from './theme';
+import { translate } from '../../../../domain/localisation';
 
 import '../../../navigation/src';
 
@@ -35,6 +37,150 @@ const CAPTURE_MODES: CaptureMode[] = [
   'manualCaptureOnly',
 ];
 
+// Settings shared by both device profiles. These are device-independent —
+// shape/colour gates and crop geometry behave the same on a phone and a webcam,
+// so they live in one place to stop the two profiles from drifting apart.
+const SHARED_DEFAULTS = {
+  // Adaptive contour-Canny sensitivity. The high threshold is
+  // mean + autoCannySigma·stddev of the frame's gradient magnitude, clamped to
+  // [60, 150]. Lower = detect fainter borders (better on plain backgrounds),
+  // higher = stricter (fewer false edges on busy backgrounds).
+  autoCannySigma: 1.0,
+  chromaCannyLow: 15,
+  chromaCannyHigh: 40,
+  // Mobile content-region fallback OFF by default on both profiles. The
+  // tilt-robust real-contour path (minAreaRect) + chroma fusion detect cards
+  // directly, so the looser synthetic fallback is mostly a false-positive
+  // source. Re-enable live via the panel to compare.
+  mobileRegionFallback: false,
+  // False-positive controls. minAreaRect gives the card's true aspect, so a
+  // tight id-card window (1.585 ± 12% = [1.395, 1.775]) excludes 16:9 screens
+  // and most non-card rectangles. Passport/greenbook window (1.42 ± 10% =
+  // [1.278, 1.562]) is tight enough to exclude ID cards (1.585), monitors and
+  // phones. minFillRatio rejects ragged quads (rotated-rect fill, tilt-invariant).
+  idAspectTolerance: 0.12,
+  bookDocAspectTolerance: 0.1,
+  minFillRatio: 0.8,
+  minChromaContent: 13,
+  // Seam rejection: reject a card-shaped quad whose edges sit on long straight
+  // background lines that overshoot its corners (parquet floor, slatted table),
+  // detected via HoughLinesP on the contour edge map. Only ADDS rejections —
+  // off, or with no through-lines present, detection is unchanged. houghThreshold
+  // is the accumulator vote count; houghMinLengthRatio is the minimum line length
+  // as a fraction of the smaller ROI side; houghMaxLineGap bridges dashed edges.
+  seamRejectEnabled: true,
+  houghThreshold: 40,
+  houghMinLengthRatio: 0.3,
+  houghMaxLineGap: 10,
+  // Clutter guard: skip seam-rejection when HoughLinesP returns more lines than
+  // this — a woven fabric/carpet floods the map (~400+) and would falsely reject
+  // a real card, whereas a parquet shows only a handful of seam lines.
+  seamMaxHoughLines: 60,
+  // Clutter-adaptive Canny floor: on a near-empty scene (edgeDensity below
+  // lowClutterEdgeDensity %) drop the high-threshold floor to
+  // cannyHighMinLowClutter so a faint border (pale ID on pale wood) is still
+  // traced; busy scenes keep the fixed 60 floor so the high-contrast path holds.
+  lowClutterEdgeDensity: 2,
+  cannyHighMinLowClutter: 40,
+  // Gate-0 grid coverage is an early-out only: bail just on a near-empty grid
+  // (this many of 9 inner cells must carry edges). Distance / "fully visible" is
+  // owned downstream by docFillPercent >= minFillPercent (65%), so a strict bar
+  // here only false-rejected low-contrast cards on plain backgrounds before the
+  // contour pass ran. Synthetic-fallback eligibility keeps its own 7/9 signal.
+  captureGridMinCells: 4,
+  // Throttle the heavy CV pipeline to this processing rate (fps). rAF runs at the
+  // display refresh (60/90/120Hz), so a time-based throttle keeps detection — and
+  // the frame-count constants tuned against it — consistent across devices and
+  // saves ~2x CV cost on mobile. 60 effectively disables throttling.
+  targetProcessingFps: 30,
+  // Chroma-mask fallback: when no 4-corner quad forms in luminance (a strongly
+  // coloured card on a near-neutral background, e.g. a green/yellow ID on grey
+  // fabric), segment the card by chroma magnitude and accept the largest blob if
+  // it passes the same fill/aspect/wall-hug gates as a real contour. Gated to
+  // mobile (chroma fusion path) by the hook. KNOWN LIMITATION: a colourful
+  // rug/carpet patch is classically indistinguishable and can pass — toggle off
+  // here (or in the panel) if it false-captures. chromaMaskThreshold is the
+  // |a-128|+|b-128| binary cutoff; chromaMaskMinFrac/MaxFrac bound the blob's
+  // share of the ROI (a chromatic background spanning the ROI exceeds MaxFrac).
+  chromaMaskFallback: true,
+  chromaMaskThreshold: 18,
+  chromaMaskMinFrac: 0.08,
+  chromaMaskMaxFrac: 0.7,
+  cropToCard: true,
+  cropToContour: true,
+  cropPadding: 10,
+  previewCropPadding: 2,
+};
+
+// Per-device overrides. Only the knobs that genuinely differ between a
+// hand-held phone camera and a fixed webcam appear here, each with its reason —
+// everything else comes from SHARED_DEFAULTS. The divergent numbers don't share
+// a common scale factor (they were measured independently per device), so they
+// stay as explicit, documented values rather than a synthetic multiplier.
+const MOBILE_OVERRIDES = {
+  deviceType: 'Mobile',
+  // Show the detected card outline only on mobile (handheld framing aid).
+  useDynamicBorder: true,
+  autoCannySigma: 0.0, // mobile cameras resolve more detail, so a lower threshold is needed to detect faint edges
+  edgeDensityThreshold: 6,
+  // Phone framing is looser, so each grid cell needs only 50% of the threshold.
+  gridCellRatio: 0.5,
+  // Fix 2: OR chroma (Lab a/b) edges into the contour edge map so a card whose
+  // border is invisible in luminance (beige ID on light wood) is still detected.
+  // Mobile only — desktop has a working high-contrast path and stays off.
+  chromaEdgeFusion: true,
+  // Level 2: reject near-monochrome winners (white keyboard, blank paper) by
+  // mean chroma over the detected rect. Needs chroma fusion, so mobile only.
+  // 13 sits in the measured gap between a white keyboard (~10) and a real
+  // colour ID (~17-26).
+  chromaContentGate: true,
+  // Phone cameras resolve more detail, so demand a higher sharpness floor.
+  blurThreshold: 150,
+  // Phone flash/specular highlights are harsh and localized — strict glare cap.
+  glareThreshold: 5.0,
+  // Handheld motion → require more stable frames before auto-capture.
+  stabilityThreshold: 5,
+  minFillPercent: 65,
+  maxFillPercent: 95,
+  // Anti-flicker (mobile only — handheld jitter is the problem; webcams are
+  // steady so desktop keeps today's exact behavior via the hook's ?? fallbacks).
+  // gateDecayEnabled: on a transient gate failure, decay the stability count by
+  // 1 (within the blur/glare miss tolerance) instead of zeroing it, so a single
+  // jittery frame doesn't drain the progress ring or flip "Hold Still"↔"Align".
+  gateDecayEnabled: true,
+  // docFillEmaAlpha: EMA smoothing of the distance fill % (1 = off). At the
+  // default 30fps throttle the EMA updates ~half as often as the old 60fps loop,
+  // so 0.45 keeps a similar wall-clock time constant (~3 processed frames)
+  // without over-lagging a real move.
+  docFillEmaAlpha: 0.45,
+  // fillHysteresis: deadband (pct points) around min/maxFillPercent so a hand
+  // hovering on the 65%/95% boundary doesn't toggle the distance gate.
+  fillHysteresis: 3,
+};
+
+const DESKTOP_OVERRIDES = {
+  deviceType: 'Desktop',
+  useDynamicBorder: false,
+  edgeDensityThreshold: 10,
+  // Webcam ROI is the visible box the user fills — stricter per-cell coverage.
+  gridCellRatio: 0.6,
+  chromaEdgeFusion: false,
+  chromaContentGate: false,
+  // Fixed-focus webcams are softer; a 150 floor would never pass, so use 60.
+  blurThreshold: 60,
+  // Webcams sit under diffuse room light — much more glare is normal/acceptable.
+  glareThreshold: 18.0,
+  // Webcam on a stand is steady, so fewer stable frames are needed.
+  stabilityThreshold: 3,
+  // Desktop ROI == the visible video box (see useCardDetection's skipGridCheck
+  // branch), so these percentages are measured against what the user actually
+  // sees. Require ~70% area fill (~84% linear — still ~990px of card width on a
+  // 720p webcam) before quality checks; allow up to 98% before backing off. The
+  // lower floor lets fixed-focus webcams sit at a sharper distance.
+  minFillPercent: 70,
+  maxFillPercent: 98,
+};
+
 const getOptimalDefaults = () => {
   const ua =
     navigator.userAgent ||
@@ -44,44 +190,10 @@ const getOptimalDefaults = () => {
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
-  return isMobile
-    ? {
-        deviceType: 'Mobile',
-        useDynamicBorder: true,
-        edgeDensityThreshold: 6,
-        gridCellRatio: 0.5,
-        blurThreshold: 150,
-        glareThreshold: 5.0,
-        stabilityThreshold: 5,
-        cropToCard: true,
-        cropToContour: true,
-        cropPadding: 10,
-        previewCropPadding: 2,
-        minFillPercent: 75,
-        maxFillPercent: 95,
-      }
-    : {
-        deviceType: 'Desktop',
-        useDynamicBorder: false,
-        edgeDensityThreshold: 10,
-        gridCellRatio: 0.6,
-        blurThreshold: 60,
-        glareThreshold: 18.0,
-        stabilityThreshold: 3,
-        cropToCard: true,
-        cropToContour: true,
-        cropPadding: 10,
-        previewCropPadding: 2,
-        // Desktop ROI == the visible video box (see useCardDetection's
-        // skipGridCheck branch), so these percentages are measured against what
-        // the user actually sees. Require the card to fill ~70% of the box
-        // area (~84% linear — still ~990px of card width on a 720p webcam)
-        // before quality checks run; allow up to 98% before asking to back
-        // off. The lower floor lets fixed-focus webcams sit at a sharper
-        // distance instead of being forced right up to the lens.
-        minFillPercent: 70,
-        maxFillPercent: 98,
-      };
+  return {
+    ...SHARED_DEFAULTS,
+    ...(isMobile ? MOBILE_OVERRIDES : DESKTOP_OVERRIDES),
+  };
 };
 
 const galleryButtonStyle = {
@@ -154,7 +266,7 @@ function GalleryButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       style={galleryButtonStyle}
-      aria-label="Select image from gallery"
+      aria-label={translate('document.autoCapture.galleryButtonLabel')}
     >
       <GalleryIcon />
     </button>
@@ -205,7 +317,7 @@ function DesktopCaptureButton({
         WebkitTapHighlightColor: 'transparent',
         flexShrink: 0,
       }}
-      aria-label="Capture photo"
+      aria-label={translate('document.autoCapture.capturePhotoButton')}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -339,7 +451,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   const isTallViewport = viewportBox.h > viewportBox.w;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
-  const showDebug = true;
+  // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
+  // (see utils/debug.ts / __SMILE_DEBUG__); production builds strip it.
+  const showDebug = isDebugEnabled();
 
   // Lazy-load OpenCV on mount; the detection hook polls for `cv.Mat`.
   useEffect(() => {
@@ -467,22 +581,27 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   );
 
   // Debounced compliance state for visual output.
-  // The raw complianceState updates every detection frame (~60fps). Feeding it
-  // directly to the Overlay and spinner causes rapid color/mount oscillation
-  // when detection quality is borderline. A 150ms trailing debounce smooths
-  // this; CAPTURING/SUCCESS bypass it so the final confirmation is immediate.
+  // The raw complianceState updates every detection frame. Feeding it directly
+  // to the Overlay/spinner causes rapid color oscillation when quality is
+  // borderline. Debounce is ASYMMETRIC: snap immediately INTO the "good" green
+  // states (STABLE/CAPTURING/SUCCESS) so the guide turns green the instant the
+  // Hold-Still phase begins — that phase is only ~5 frames, shorter than the
+  // debounce, so a trailing debounce would skip green entirely — but apply the
+  // 150ms trailing debounce when DOWNGRADING to DETECTING/IDLE so a transient
+  // miss doesn't flash the border back to amber.
   const COMPLIANCE_DEBOUNCE_MS = 150;
   const [visibleComplianceState, setVisibleComplianceState] =
     useState(complianceState);
   useEffect(() => {
-    const isImmediate =
+    const isGoodState =
+      complianceState === COMPLIANCE_STATES.STABLE ||
       complianceState === COMPLIANCE_STATES.CAPTURING ||
       complianceState === COMPLIANCE_STATES.SUCCESS;
-    const t = setTimeout(
+    const timer = setTimeout(
       () => setVisibleComplianceState(complianceState),
-      isImmediate ? 0 : COMPLIANCE_DEBOUNCE_MS,
+      isGoodState ? 0 : COMPLIANCE_DEBOUNCE_MS,
     );
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [complianceState]);
 
   // Notify smart-camera-web when the capture session begins.
@@ -525,16 +644,24 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) ctx.drawImage(img, 0, 0);
-        resolve({
-          data: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
-          width: canvas.width,
-          height: canvas.height,
-        });
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('2d context unavailable'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            data: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+            width: canvas.width,
+            height: canvas.height,
+          });
+        } catch (err) {
+          reject(err);
+        }
       };
       img.onerror = reject;
       img.src = dataUrl;
@@ -672,7 +799,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
         <p style={{ marginTop: theme.spacing.md, fontSize: '1rem' }}>
-          Camera access denied or unavailable
+          {translate('document.autoCapture.error.cameraUnavailable.title')}
         </p>
         <p
           style={{
@@ -681,7 +808,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             marginTop: theme.spacing.sm,
           }}
         >
-          Please allow camera access and reload the page.
+          {translate('document.autoCapture.error.cameraUnavailable.body')}
         </p>
       </div>
     );
@@ -769,13 +896,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   if (!isMobileDevice) {
     const borderColor = (() => {
       if (
-        complianceState === COMPLIANCE_STATES.STABLE ||
-        complianceState === COMPLIANCE_STATES.SUCCESS ||
-        complianceState === COMPLIANCE_STATES.CAPTURING
+        visibleComplianceState === COMPLIANCE_STATES.STABLE ||
+        visibleComplianceState === COMPLIANCE_STATES.SUCCESS ||
+        visibleComplianceState === COMPLIANCE_STATES.CAPTURING
       ) {
         return '#2CC05C';
       }
-      if (complianceState === COMPLIANCE_STATES.DETECTING) {
+      if (visibleComplianceState === COMPLIANCE_STATES.DETECTING) {
         return '#F59E0B';
       }
       return '#9394ab';
@@ -951,7 +1078,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             {showManualButton && (
               <DesktopCaptureButton
                 progress={
-                  complianceState === COMPLIANCE_STATES.STABLE
+                  visibleComplianceState === COMPLIANCE_STATES.STABLE
                     ? captureProgress
                     : 0
                 }
@@ -971,12 +1098,15 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 margin: 0,
               }}
             >
-              Auto-detection unavailable. Please reload or try another browser.
+              {translate('document.autoCapture.error.cvLoadFailed')}
             </p>
           )}
         </div>
 
-        {showDebug && (
+        {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
+            TuningPanel import) is dead-code-eliminated from production bundles;
+            showDebug then applies the runtime ?debug opt-in in dev + preview. */}
+        {__SMILE_DEBUG__ && showDebug && (
           <TuningPanel
             settings={settings}
             updateSetting={updateSetting}
@@ -1197,7 +1327,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                 >
                   <CaptureButton
                     progress={
-                      complianceState === COMPLIANCE_STATES.STABLE
+                      visibleComplianceState === COMPLIANCE_STATES.STABLE
                         ? captureProgress
                         : 0
                     }
@@ -1241,8 +1371,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
                     margin: 0,
                   }}
                 >
-                  Auto-detection unavailable. Please reload or try another
-                  browser.
+                  {translate('document.autoCapture.error.cvLoadFailed')}
                 </p>
               )}
             </>
@@ -1250,7 +1379,8 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
       </div>
 
       {/* Tuning panel (debug mode only) */}
-      {showDebug && (
+      {/* Build-time gate → tree-shaken in production (see note above). */}
+      {__SMILE_DEBUG__ && showDebug && (
         <TuningPanel
           settings={settings}
           updateSetting={updateSetting}

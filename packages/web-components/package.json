@@ -1,6 +1,6 @@
 {
   "name": "@smileid/web-components",
-  "version": "11.5.0",
+  "version": "11.6.0",
   "private": false,
   "main": "dist/esm/main.js",
   "module": "dist/esm/main.js",
@@ -109,7 +109,7 @@
     "@typescript-eslint/parser": "^8.49.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "cross-env": "^7.0.3",
-    "cypress": "^13.17.0",
+    "cypress": "^15.16.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

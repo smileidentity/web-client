@@ -119,6 +119,8 @@ jobs:
           echo "DEST_DIR_EMBED=inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
+          SANITIZED_BRANCH_NAME=$(echo "$SANITIZED_BRANCH_NAME" | cut -c1-90 | sed 's/-*$//')
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install

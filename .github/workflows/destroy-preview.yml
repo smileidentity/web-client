@@ -34,13 +34,13 @@ jobs:
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
           SANITIZED_BRANCH_NAME=$(echo "$SANITIZED_BRANCH_NAME" | cut -c1-90 | sed 's/-*$//')
-          echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
       - name: install dependencies
         run: npm install
       - name: remove sst app (sandbox)
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: remove sst app (prod)
-        if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SS_STAGE != '' }}
+        if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SST_STAGE != '' }}
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}-prod
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}-prod

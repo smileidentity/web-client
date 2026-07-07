@@ -51,7 +51,19 @@ jobs:
           fi
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
           # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
-          SANITIZED_BRANCH_NAME=$(echo "$SANITIZED_BRANCH_NAME" | cut -c1-90 | sed 's/-*$//')
+          if [ "${#SANITIZED_BRANCH_NAME}" -gt 90 ]; then
+            BRANCH_HASH=$(printf '%s' "$BRANCH_NAME" | git hash-object --stdin | cut -c1-8)
+            SANITIZED_BRANCH_PREFIX=$(printf '%s' "$SANITIZED_BRANCH_NAME" | cut -c1-81 | sed 's/-*$//')
+            if [ -n "$SANITIZED_BRANCH_PREFIX" ]; then
+              SANITIZED_BRANCH_NAME="$SANITIZED_BRANCH_PREFIX-$BRANCH_HASH"
+            else
+              SANITIZED_BRANCH_NAME="$BRANCH_HASH"
+            fi
+          fi
+          if [ -z "$SANITIZED_BRANCH_NAME" ]; then
+            echo "::error::Sanitized branch name is empty"
+            exit 1
+          fi
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> $GITHUB_ENV
       - name: retrieve sst app url (sandbox)

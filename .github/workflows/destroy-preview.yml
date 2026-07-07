@@ -32,13 +32,27 @@ jobs:
         run: |
           BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
-          echo "SS_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
+          # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
+          if [ "${#SANITIZED_BRANCH_NAME}" -gt 90 ]; then
+            BRANCH_HASH=$(printf '%s' "$BRANCH_NAME" | git hash-object --stdin | cut -c1-8)
+            SANITIZED_BRANCH_PREFIX=$(printf '%s' "$SANITIZED_BRANCH_NAME" | cut -c1-81 | sed 's/-*$//')
+            if [ -n "$SANITIZED_BRANCH_PREFIX" ]; then
+              SANITIZED_BRANCH_NAME="$SANITIZED_BRANCH_PREFIX-$BRANCH_HASH"
+            else
+              SANITIZED_BRANCH_NAME="$BRANCH_HASH"
+            fi
+          fi
+          if [ -z "$SANITIZED_BRANCH_NAME" ]; then
+            echo "::error::Sanitized branch name is empty"
+            exit 1
+          fi
+          echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> $GITHUB_OUTPUT
       - name: install dependencies
         run: npm install
       - name: remove sst app (sandbox)
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
       - name: remove sst app (prod)
-        if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SS_STAGE != '' }}
+        if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SST_STAGE != '' }}
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SS_STAGE }}-prod
+          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}-prod

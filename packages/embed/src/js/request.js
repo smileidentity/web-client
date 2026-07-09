@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import { version as sdkVersion } from '../../package.json';
 
 const WASM_PATH = 'https://secure.smileidentity.com/web_client_guard_bg.wasm';
 const JS_PATH = 'https://secure.smileidentity.com/web_client_guard.js';
@@ -245,6 +246,63 @@ async function getZipSignature(fileDataForMac, partnerId) {
   };
 }
 
+// The OIDC endpoints live at a /v2 prefix, whereas the existing endpoints used
+// by the product pages are on /v1. Keep the mapping localized.
+function resolveV2Endpoint(environment) {
+  const map = {
+    sandbox: 'https://testapi.smileidentity.com/v2',
+    live: 'https://api.smileidentity.com/v2',
+    production: 'https://api.smileidentity.com/v2',
+  };
+  return map[environment] || `${environment}/v2`;
+}
+
+/**
+ * POST /v2/oidc/authorize_url as multipart/form-data. Returns
+ * { authorize_url, state, expires_in }.
+ *
+ * Authentication is the standard signature scheme: `getHeaders` signs the
+ * payload with the WASM module and returns the SmileID-Request-Mac /
+ * SmileID-Request-Timestamp / SmileID-Partner-ID header trio that every other
+ * signed call in this SDK sends. No JWT / token is involved.
+ *
+ * @param {object} config  the SDK config bag (needs `environment` and
+ *                         `partner_details.partner_id`).
+ * @param {object} extras  { country }
+ */
+async function requestOidcAuthorizeUrl(config, { country }) {
+  const payload = { country };
+  const { partner_id } = config.partner_details;
+
+  const url = `${resolveV2Endpoint(config.environment)}/oidc/authorize_url`;
+
+  const response = await fetchWithTimeout(
+    url,
+    {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        'smileid-token': config.token,
+        'smileid-partner-id': partner_id,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+
+      body: JSON.stringify(payload),
+    },
+    10000,
+  );
+
+  const json = await response.json();
+  if (!response.ok || json.error) {
+    throw new Error(
+      json.error || json.message || `authorize_url failed (${response.status})`,
+    );
+  }
+  return json;
+}
+
 // make the first call to initialize the WASM module
 initWasm();
 
@@ -255,4 +313,4 @@ setInterval(async () => {
   }
 }, GRACE_PERIOD);
 
-export { getHeaders, getZipSignature };
+export { getHeaders, getZipSignature, requestOidcAuthorizeUrl };

@@ -29,10 +29,20 @@ const SID_SERVER_MAPPING = {
 app.post('/token', async (req, res, next) => {
   try {
     const { PARTNER_ID, API_KEY, SID_SERVER } = process.env;
-    const environmentServer = SID_SERVER_MAPPING[SID_SERVER] || SID_SERVER;
-    const baseServer = SID_SERVER_MAPPING[SID_SERVER]
+    const isNamedEnvironment = SID_SERVER in SID_SERVER_MAPPING;
+    // A custom SID_SERVER (e.g. devapi.smileidentity.com) may be given with
+    // or without a scheme, but the two consumers disagree on the format:
+    // smile-identity-core prepends `https://` itself, while the SDK's
+    // `environment` config is dropped straight into fetch URLs and needs the
+    // scheme. Normalize for each rather than requiring one exact format.
+    const environmentServer = isNamedEnvironment
+      ? SID_SERVER_MAPPING[SID_SERVER]
+      : SID_SERVER.startsWith('http')
+        ? SID_SERVER
+        : `https://${SID_SERVER}`;
+    const baseServer = isNamedEnvironment
       ? SID_SERVER
-      : `${SID_SERVER}/v1`;
+      : `${SID_SERVER.replace(/^https?:\/\//, '')}/v1`;
 
     const connection = new SIDWebAPI(
       PARTNER_ID,

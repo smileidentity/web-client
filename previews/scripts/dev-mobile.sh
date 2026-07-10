@@ -5,10 +5,10 @@
 #
 # Requirements:
 #   - cloudflared (https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
-#   - The embed package built (we'll run `npm start` in packages/embed which builds + serves it)
+#   - The embed package (we run `npm run build` in packages/embed, then serve its build/ output with `npx serve`)
 #
 # What it does:
-#   1. Starts the embed dev server on http://localhost:${EMBED_PORT:-8000}
+#   1. Builds the embed and serves it on http://localhost:${EMBED_PORT:-8000}
 #   2. Opens a Cloudflare quick tunnel to EMBED_PORT → public HTTPS URL
 #   3. Opens a Cloudflare quick tunnel to APP_PORT (Remix/Vite) → public HTTPS URL
 #   4. Exports EmbedUrl=<embed tunnel URL> and runs `sst dev`
@@ -58,16 +58,20 @@ is_port_in_use() {
   lsof -n -P -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
 }
 
-if is_port_in_use "$EMBED_PORT"; then
-  echo "❌ EMBED_PORT $EMBED_PORT is already in use."
-  echo "   Retry with a different port, for example: EMBED_PORT=8001 npm run dev:mobile"
-  exit 1
-fi
+if command -v lsof >/dev/null 2>&1; then
+  if is_port_in_use "$EMBED_PORT"; then
+    echo "❌ EMBED_PORT $EMBED_PORT is already in use."
+    echo "   Retry with a different port, for example: EMBED_PORT=8001 npm run dev:mobile"
+    exit 1
+  fi
 
-if is_port_in_use "$APP_PORT"; then
-  echo "❌ APP_PORT $APP_PORT is already in use."
-  echo "   Retry with a different port, for example: APP_PORT=5174 npm run dev:mobile"
-  exit 1
+  if is_port_in_use "$APP_PORT"; then
+    echo "❌ APP_PORT $APP_PORT is already in use."
+    echo "   Retry with a different port, for example: APP_PORT=5174 npm run dev:mobile"
+    exit 1
+  fi
+else
+  echo "⚠️  lsof not found — skipping port-in-use preflight checks."
 fi
 
 if ! command -v cloudflared >/dev/null 2>&1; then
@@ -91,17 +95,17 @@ EMBED_LOG="$LOG_DIR/embed.log"
 EMBED_TUNNEL_LOG="$LOG_DIR/embed-tunnel.log"
 APP_TUNNEL_LOG="$LOG_DIR/app-tunnel.log"
 
-PIDS=()
 cleanup() {
+  trap - EXIT INT TERM
   echo ""
   echo "🛑 Shutting down..."
-  for pid in "${PIDS[@]}"; do
-    if kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null || true
-    fi
-  done
-  wait 2>/dev/null || true
   rm -rf "$LOG_DIR"
+  # Kill this script's entire process group: the background jobs (cloudflared,
+  # npx serve) and all their descendants share the group because the script
+  # runs without job control. Killing only the recorded PIDs would leave the
+  # serve subshell's node child running. Must be the last line — it also
+  # signals this shell (and the parent `npm run dev:mobile` wrapper).
+  kill -- 0 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
@@ -139,20 +143,23 @@ echo "📦 Building @smileid/web-components (embed depends on its dist/ output).
   exit 1
 }
 
-echo "📦 Starting embed dev server (port $EMBED_PORT)..."
-(cd "$EMBED_DIR" && npm run build && npx serve -p "$EMBED_PORT" build) > "$EMBED_LOG" 2>&1 &
-PIDS+=($!)
+echo "📦 Building embed package..."
+(cd "$EMBED_DIR" && npm run build) || {
+  echo "❌ embed build failed; aborting." >&2
+  exit 1
+}
+
+echo "📦 Serving embed build (port $EMBED_PORT)..."
+(cd "$EMBED_DIR" && npx --yes serve -p "$EMBED_PORT" build) > "$EMBED_LOG" 2>&1 &
 
 echo "🌩  Opening Cloudflare tunnel for embed (port $EMBED_PORT)..."
 cloudflared tunnel --url "http://localhost:$EMBED_PORT" --no-autoupdate > "$EMBED_TUNNEL_LOG" 2>&1 &
-PIDS+=($!)
 
 EMBED_TUNNEL_URL=$(wait_for_tunnel_url "$EMBED_TUNNEL_LOG" "embed")
 echo "   Embed:  $EMBED_TUNNEL_URL"
 
 echo "🌩  Opening Cloudflare tunnel for previews app (port $APP_PORT)..."
 cloudflared tunnel --url "http://localhost:$APP_PORT" --no-autoupdate > "$APP_TUNNEL_LOG" 2>&1 &
-PIDS+=($!)
 
 APP_TUNNEL_URL=$(wait_for_tunnel_url "$APP_TUNNEL_LOG" "previews app")
 echo "   App:    $APP_TUNNEL_URL"

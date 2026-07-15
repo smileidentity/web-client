@@ -1,4 +1,4 @@
-import { requestOidcAuthorizeUrl } from '../request';
+import { requestOidcAuthorizeUrl, resolveApiOrigin } from '../request';
 import {
   openOidcPopup,
   openPendingPopup,
@@ -36,6 +36,10 @@ export default function createOidcRedirect(config, { country, product }) {
   let sessionPromise = null;
   let session = null;
   let sessionFetchedAt = 0;
+
+  // The callback page (`/v3/oidc/callback`) is served by the same host we
+  // fetched the authorize URL from, so its postMessage must originate there.
+  const expectedOrigin = resolveApiOrigin(config.environment);
 
   function isSessionFresh() {
     if (!session) return false;
@@ -93,13 +97,22 @@ export default function createOidcRedirect(config, { country, product }) {
     }
 
     if (haveFreshSession) {
-      return waitForOidcCallback({ state: session.state, popup });
+      return waitForOidcCallback({
+        state: session.state,
+        popup,
+        expectedOrigin,
+      });
     }
 
     return sessionPromise.then(
       (res) => {
-        navigatePopup(popup, res.authorize_url);
-        return waitForOidcCallback({ state: res.state, popup });
+        // If the user closed the popup while the authorize URL was still in
+        // flight, there's nothing left to navigate — reject now with the same
+        // shape `waitForOidcCallback` uses rather than waiting out its poll.
+        if (!navigatePopup(popup, res.authorize_url)) {
+          throw Object.assign(new Error('closed'), { state: res.state });
+        }
+        return waitForOidcCallback({ state: res.state, popup, expectedOrigin });
       },
       (err) => {
         try {

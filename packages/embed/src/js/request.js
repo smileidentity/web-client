@@ -246,15 +246,38 @@ async function getZipSignature(fileDataForMac, partnerId) {
   };
 }
 
+// Base API host per environment. The OIDC endpoints live under version
+// prefixes (authorize_url on /v2, the callback page on /v3) but share this
+// host, so both endpoint building and origin validation derive from here.
+// A custom `environment` is treated as the base URL verbatim.
+function resolveApiBase(environment) {
+  const map = {
+    sandbox: 'https://testapi.smileidentity.com',
+    live: 'https://api.smileidentity.com',
+    production: 'https://api.smileidentity.com',
+  };
+  return map[environment] || environment;
+}
+
 // The OIDC endpoints live at a /v2 prefix, whereas the existing endpoints used
 // by the product pages are on /v1. Keep the mapping localized.
 function resolveV2Endpoint(environment) {
-  const map = {
-    sandbox: 'https://testapi.smileidentity.com/v2',
-    live: 'https://api.smileidentity.com/v2',
-    production: 'https://api.smileidentity.com/v2',
-  };
-  return map[environment] || `${environment}/v2`;
+  return `${resolveApiBase(environment)}/v2`;
+}
+
+// Origin that serves the OIDC callback page (`/v3/oidc/callback`). The callback
+// posts its result via postMessage, and the listener validates `event.origin`
+// against this value so a forged message from another window/extension can't
+// complete the flow. An origin is host-only (scheme + host + port), so the
+// version in the path is irrelevant — every OIDC endpoint shares the base host.
+// Returns null when the environment can't be parsed into a URL, in which case
+// the listener treats every origin as untrusted.
+function resolveApiOrigin(environment) {
+  try {
+    return new URL(resolveApiBase(environment)).origin;
+  } catch (_) {
+    return null;
+  }
 }
 
 /**
@@ -313,4 +336,9 @@ setInterval(async () => {
   }
 }, GRACE_PERIOD);
 
-export { getHeaders, getZipSignature, requestOidcAuthorizeUrl };
+export {
+  getHeaders,
+  getZipSignature,
+  requestOidcAuthorizeUrl,
+  resolveApiOrigin,
+};

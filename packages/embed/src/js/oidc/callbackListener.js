@@ -1,5 +1,5 @@
 /**
- * Wait for a postMessage from `/v2/oidc/callback`.
+ * Wait for a postMessage from `/v3/oidc/callback`.
  *
  * The callback page posts:
  *   { message: 'SmileIdentity::OidcCallback::Success' | 'SmileIdentity::OidcCallback::Error',
@@ -13,13 +13,22 @@
  *   - rejects with { message: 'closed',  state } if the popup handle is
  *     closed before a message arrives.
  *
- * Only messages whose `state` matches the one we started are accepted —
- * defense against stray postMessages from other tabs / extensions, and
- * against stale popups from prior attempts firing after a retry.
+ * Only messages that (a) originate from `expectedOrigin` (the host serving
+ * `/v3/oidc/callback`) and (b) carry the `state` we started are accepted.
+ * The origin check is the security boundary: without it any window / tab /
+ * extension could forge a Success message with a guessed/leaked state and
+ * complete the flow with attacker-controlled data. The state check is a
+ * secondary guard against stray messages and against stale popups from prior
+ * attempts firing after a retry.
+ *
+ * @param {string} opts.expectedOrigin  origin the callback must come from,
+ *   e.g. 'https://api.smileidentity.com'. When falsy (origin could not be
+ *   resolved) no origin is trusted and every message is rejected.
  */
 export default function waitForOidcCallback({
   state,
   popup,
+  expectedOrigin,
   timeoutMs = 10 * 60 * 1000,
 }) {
   return new Promise((resolve, reject) => {
@@ -34,6 +43,9 @@ export default function waitForOidcCallback({
     }
 
     function onMessage(event) {
+      // Reject anything not from the callback host. If we couldn't resolve an
+      // expected origin, trust nothing rather than falling open.
+      if (!expectedOrigin || event.origin !== expectedOrigin) return;
       const data = event && event.data;
       if (!data || typeof data !== 'object') return;
       if (data.state !== state) return;

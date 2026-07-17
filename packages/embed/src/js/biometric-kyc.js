@@ -26,6 +26,10 @@ import {
   captureInitApiFailure,
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
+import {
+  displayErrorMessage,
+  submissionErrorMessage,
+} from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('biometric-kyc');
@@ -1026,25 +1030,13 @@ window.Sentry = Sentry;
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      displayErrorMessage(submissionErrorMessage(error, translate));
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     } finally {
       if (event && event.target) event.target.disabled = false;
     }
-  }
-
-  function displayErrorMessage(message) {
-    const p = document.createElement('p');
-
-    p.textContent = message;
-    p.classList.add('validation-message');
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
-
-    const main = document.querySelector('main');
-    main.prepend(p);
   }
 
   async function createZip() {

@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - DocumentCapture: Keep the auto-capture UI consistent in landscape when device rotation is locked
 
-### Changed
-
-- Dependencies: Routine dependency and GitHub Actions updates
-
 ## [11.6.0] - 2026-06-29
 
 ### Added

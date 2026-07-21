@@ -196,14 +196,6 @@ const getOptimalDefaults = () => {
   };
 };
 
-const getScreenViewportBox = () => {
-  const viewport = window.visualViewport;
-  return {
-    w: Math.round(viewport?.width ?? window.innerWidth ?? 0),
-    h: Math.round(viewport?.height ?? window.innerHeight ?? 0),
-  };
-};
-
 const galleryButtonStyle = {
   width: 72,
   height: 72,
@@ -456,8 +448,12 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     w: 0,
     h: 0,
   });
-  const [screenViewportBox, setScreenViewportBox] =
-    useState(getScreenViewportBox);
+  const hasViewportDimensions = viewportBox.w > 0 && viewportBox.h > 0;
+  // null while orientation is unknown (before the ResizeObserver's first
+  // measure) — see the initial-paint handling on `applyRotationTransform`.
+  const isViewportPortrait: boolean | null = hasViewportDimensions
+    ? viewportBox.h >= viewportBox.w
+    : null;
   const updateSetting = (key: string, value: unknown) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
   // Debug UI (tuning panel + ROI overlay) is compiled in for dev + preview only
@@ -486,35 +482,52 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     return () => ro.disconnect();
   }, []);
 
-  useEffect(() => {
-    const update = () => setScreenViewportBox(getScreenViewportBox());
-    update();
-
-    window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update);
-    window.visualViewport?.addEventListener('resize', update);
-
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('orientationchange', update);
-      window.visualViewport?.removeEventListener('resize', update);
-    };
-  }, []);
-
   const isLandscapeDocumentType =
     documentType === 'id-card' || documentType === 'passport';
   const useLandscapeUi = isLandscapeDocumentType;
-  // Use the landscape/edge layout for mobile landscape documents regardless of
-  // physical phone orientation. Only rotate the overlay transform when the
-  // browser viewport is portrait-shaped; embed shells can constrain the camera
-  // host to a portrait box even while the phone itself is landscape.
   const isMobileDevice = settings.deviceType === 'Mobile';
+  // Two distinct concepts — keep them separate (this is the core invariant):
+  //  • useLandscapeLayout = "render the mobile landscape capture experience"
+  //    (navigation across the top, capture/gallery on the side edge, landscape
+  //    guide). This is a UI-arrangement intent only.
+  //  • applyRotationTransform = "the overlay DOM is visually rotated 90°, so the
+  //    captured-canvas + detection ROI math must compensate". This is the flag
+  //    passed to useCardDetection — never `useLandscapeLayout`.
+  //
+  // The rotation transform is gated on the live viewport orientation because we
+  // cannot stop the OS from auto-rotating the browser viewport:
+  //  - Rotation lock ON  → iOS keeps the viewport portrait however the phone is
+  //    held. We rotate(90deg); held in landscape the physical rotation cancels
+  //    it and the landscape UI appears upright.
+  //  - Rotation lock OFF → turning the phone makes iOS rotate the viewport to
+  //    landscape itself. Rotating again would double-rotate ("up and down"), so
+  //    we DON'T transform — we render the same landscape arrangement natively in
+  //    the already-landscape viewport.
+  // Either way the user sees the same arrangement (the reference layout).
   const useLandscapeLayout = useLandscapeUi && isMobileDevice;
-  const isScreenViewportPortrait =
-    screenViewportBox.w === 0 ||
-    screenViewportBox.h === 0 ||
-    screenViewportBox.h >= screenViewportBox.w;
-  const shouldRotateUi = useLandscapeLayout && isScreenViewportPortrait;
+  // Apply the CSS rotation only for a portrait viewport. While orientation is
+  // unknown (isViewportPortrait === null, pre-measure) we render the existing
+  // non-transformed baseline for one frame to avoid a rotate flash / detection
+  // restart; the ResizeObserver settles it immediately after.
+  const applyRotationTransform =
+    useLandscapeLayout && isViewportPortrait === true;
+  // The landscape arrangement (side controls etc.) is shown for BOTH the rotated
+  // (portrait-viewport) and native-landscape cases — i.e. as soon as we know the
+  // orientation on a mobile landscape-doc capture.
+  const useLandscapeEdgeLayout = useLandscapeLayout && hasViewportDimensions;
+  // Native-landscape = landscape arrangement WITHOUT the rotation transform
+  // (rotation lock off + phone turned). Here the overlay is laid out in the real
+  // landscape viewport, so edge-pinned controls must respect iOS safe-area insets
+  // (notch / Dynamic Island / home indicator). In the rotated case the insets
+  // belong to the un-rotated portrait viewport and would map to the wrong edges,
+  // so they're only applied here.
+  const isNativeLandscape = useLandscapeEdgeLayout && !applyRotationTransform;
+  const safeLeft = isNativeLandscape
+    ? 'max(16px, env(safe-area-inset-left))'
+    : undefined;
+  const safeRight = isNativeLandscape
+    ? 'max(22px, env(safe-area-inset-right))'
+    : undefined;
   const effectiveCaptureOrientation = isLandscapeDocumentType
     ? 'landscape'
     : 'portrait';
@@ -541,7 +554,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     captureMode,
     autoCaptureTimeout,
     captureOrientation: effectiveCaptureOrientation,
-    shouldRotateUi,
+    // Detection compensates for the visual rotation — pass the TRANSFORM flag
+    // here (never `useLandscapeLayout`).
+    shouldRotateUi: applyRotationTransform,
+    // Layout intent — lets the ROI use the landscape (256px) inset in the
+    // native-landscape case (edge layout, no transform) so the detection region
+    // matches the visible landscape guide (Overlay's `isRotated`).
+    useLandscapeLayout: useLandscapeEdgeLayout,
     syncRoiToGuide,
     skipGridCheck: settings.deviceType !== 'Mobile',
   });
@@ -858,20 +877,33 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
     spinnerProgress = 25;
   }
 
+  // Feedback-pill bottom offset. Rotated case keeps its 5px (the rotation maps
+  // it to a screen edge); native-landscape clears the home indicator; the
+  // baseline portrait layout sits above the bottom controls.
+  let pillBottom: number | string = 184;
+  if (applyRotationTransform) {
+    pillBottom = 5;
+  } else if (isNativeLandscape) {
+    pillBottom = 'max(16px, env(safe-area-inset-bottom))';
+  }
+
   const showManualCaptureControl =
     showManualButton ||
     (allowGalleryUpload && captureMode !== 'autoCaptureOnly');
 
-  // Side-mounted controls are used for mobile landscape documents whether the
-  // viewport is portrait (rotated overlay) or physically landscape.
-  const useSideManualCapture = useLandscapeLayout && showManualCaptureControl;
-  const showSideGalleryButton = useLandscapeLayout && allowGalleryUpload;
+  // Side-mounted controls belong to the landscape capture arrangement — used in
+  // BOTH the rotated (portrait viewport) and native-landscape (rotation-lock-off)
+  // cases. When the landscape layout isn't active (desktop, portrait doc types,
+  // or before the viewport is measured) buttons live in the bottom row instead.
+  const useSideManualCapture =
+    useLandscapeEdgeLayout && showManualCaptureControl;
+  const showSideGalleryButton = useLandscapeEdgeLayout && allowGalleryUpload;
   const showBottomGalleryButton = allowGalleryUpload && !showSideGalleryButton;
-  // Only show the side progress spinner for mobile landscape documents. In the
-  // portrait layout, the bottom CaptureButton already shows progress, so a
-  // second spinner on the right would just be a duplicate floating button.
+  // Only show the side progress spinner in the landscape arrangement. In the
+  // bottom (portrait/baseline) layout the bottom CaptureButton already shows
+  // progress, so a second spinner on the right would just be a duplicate.
   const showSideSpinner =
-    baseShowSideSpinner && useLandscapeLayout && !useSideManualCapture;
+    baseShowSideSpinner && useLandscapeEdgeLayout && !useSideManualCapture;
   const sideButtonProgress =
     visibleComplianceState === COMPLIANCE_STATES.STABLE ? captureProgress : 0;
 
@@ -1131,14 +1163,19 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
         {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
             TuningPanel import) is dead-code-eliminated from production bundles;
-            showDebug then applies the runtime ?debug opt-in in dev + preview. */}
-        {__SMILE_DEBUG__ && showDebug && (
-          <TuningPanel
-            settings={settings}
-            updateSetting={updateSetting}
-            debugInfo={debugInfo}
-          />
-        )}
+            showDebug then applies the runtime ?debug opt-in in dev + preview.
+            The `typeof` guard keeps elimination working (define folds it to
+            false) while avoiding a ReferenceError in environments that don't
+            inject the define, e.g. Storybook. */}
+        {typeof __SMILE_DEBUG__ !== 'undefined' &&
+          __SMILE_DEBUG__ &&
+          showDebug && (
+            <TuningPanel
+              settings={settings}
+              updateSetting={updateSetting}
+              debugInfo={debugInfo}
+            />
+          )}
       </div>
     );
   }
@@ -1185,13 +1222,16 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           }}
         />
 
-        {/* UI overlay container — rotated 90° CW on portrait phones with landscape doc types */}
+        {/* UI overlay container — rotated 90° CW on mobile for landscape doc
+            types while the viewport is portrait (see applyRotationTransform).
+            The width/height swap below sizes the pre-rotation box so the rotated
+            rectangle covers the camera viewport exactly. */}
         <div
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            ...(shouldRotateUi
+            ...(applyRotationTransform
               ? {
                   // Rotated 90° CW — swap parent box dimensions so the
                   // rotated rectangle covers the camera viewport exactly.
@@ -1210,17 +1250,22 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             zIndex: 5,
           }}
         >
-          {/* Top controls — reuses the shared <smileid-navigation> element,
-              spanning the top so Back lands top-left and Close top-right. The
-              element's default translucent-on-dark styling already matches the
-              fullscreen camera chrome. */}
+          {/* Top controls — a top bar spanning the width so Back lands top-left
+              and Close top-right. In the rotated (portrait) path the container
+              transform carries it along; in native landscape it stays a real
+              top bar, with left/right clearing a side notch / Dynamic Island via
+              safe-area insets.
+              In native landscape the right edge is inset an extra 16px beyond
+              the side capture column's gap so the 40px Close button's CENTER
+              lines up with the 72px capture/gallery column on one vertical axis
+              (16px = (72 − 40) / 2). */}
           {showNavigation && (
             <div
               style={{
                 position: 'absolute',
                 top: 32,
-                left: 16,
-                right: 16,
+                left: isNativeLandscape ? safeLeft : 16,
+                right: isNativeLandscape ? `calc(${safeRight} + 16px)` : 16,
                 zIndex: 10,
                 pointerEvents: 'auto',
               }}
@@ -1245,7 +1290,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             guideAspectRatio={guideAspectRatio}
             detectedDocType={detectedDocType}
             sideOfId={sideOfId}
-            isRotated={useLandscapeLayout}
+            isRotated={useLandscapeEdgeLayout}
           />
 
           {/* Side capture-progress button */}
@@ -1253,7 +1298,9 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             <div
               style={{
                 position: 'absolute',
-                right: 34,
+                right: isNativeLandscape
+                  ? 'max(34px, env(safe-area-inset-right))'
+                  : 34,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 11,
@@ -1276,7 +1323,7 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             <div
               style={{
                 position: 'absolute',
-                right: 22,
+                right: safeRight ?? 22,
                 top: 'calc(50% - 36px)',
                 zIndex: 12,
                 display: 'flex',
@@ -1300,12 +1347,16 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
             </div>
           )}
 
-          {/* Floating capture status pill */}
+          {/* Floating capture status pill — bottom-centre in the landscape
+              arrangement; the rotated case keeps its 5px offset (mapped to an
+              edge by the rotation), the native-landscape case clears the home
+              indicator via the safe-area inset, and the baseline portrait layout
+              sits above the bottom controls. */}
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              bottom: useLandscapeLayout ? 5 : 184,
+              bottom: pillBottom,
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(35,35,35,0.95)',
               borderRadius: 14,
@@ -1332,12 +1383,12 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
           </div>
         </div>
 
-        {/* Manual fallback button — only shown in portrait layout (not rotated).
-            Matches the landscape side-button styling: bare CaptureButton with
-            no pill background. The CaptureButton is centered absolutely; the
-            gallery button is anchored to its right so the shutter stays on
-            the horizontal centerline regardless of which controls are shown. */}
-        {!useLandscapeLayout &&
+        {/* Manual fallback button — only shown in the bottom (baseline/portrait)
+            layout, i.e. when the landscape edge arrangement is NOT active. The
+            CaptureButton is centered absolutely; the gallery button is anchored
+            to its right so the shutter stays on the horizontal centerline
+            regardless of which controls are shown. */}
+        {!useLandscapeEdgeLayout &&
           (showManualCaptureControl || showBottomGalleryButton) &&
           !useSideManualCapture && (
             <>
@@ -1406,13 +1457,15 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
       {/* Tuning panel (debug mode only) */}
       {/* Build-time gate → tree-shaken in production (see note above). */}
-      {__SMILE_DEBUG__ && showDebug && (
-        <TuningPanel
-          settings={settings}
-          updateSetting={updateSetting}
-          debugInfo={debugInfo}
-        />
-      )}
+      {typeof __SMILE_DEBUG__ !== 'undefined' &&
+        __SMILE_DEBUG__ &&
+        showDebug && (
+          <TuningPanel
+            settings={settings}
+            updateSetting={updateSetting}
+            debugInfo={debugInfo}
+          />
+        )}
     </div>
   );
 };

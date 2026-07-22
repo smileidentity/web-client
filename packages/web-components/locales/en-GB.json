@@ -438,6 +438,19 @@
       "selectCitizenship": "Select Citizenship Type",
       "dob": "Date of Birth"
     },
+    "oidc": {
+      "title": "Sign in with your national ID",
+      "launchPrompt": "You'll be sent to your national identity provider to sign in. A secure window will open when you continue.",
+      "continue": "Continue to sign-in",
+      "preparing": "Preparing your secure sign-in…",
+      "waiting": "Complete the sign-in in the window that opened. This screen will continue automatically.",
+      "popupBlocked": "Your browser held back the sign-in window. Select the button below to open it.",
+      "openSignIn": "Open sign-in window",
+      "timeout": "Sign-in timed out. Please try again.",
+      "closed": "The sign-in window was closed before completing sign-in.",
+      "declined": "Sign-in was declined at the identity provider.",
+      "genericError": "Something went wrong signing you in."
+    },
     "error": {
       "title": "An error occurred",
       "generic": "Something went wrong",

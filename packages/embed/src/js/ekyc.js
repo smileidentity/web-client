@@ -24,6 +24,7 @@ import {
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import createOidcRedirect from './oidc/oidcRedirect.js';
 
 initIframeSentry('ekyc');
 
@@ -57,6 +58,7 @@ initIframeSentry('ekyc');
   const LoadingScreen = document.querySelector('#loading-screen');
   const SelectIDType = document.querySelector('#select-id-type');
   const IDInfoForm = document.querySelector('#id-info');
+  const OidcRedirect = document.querySelector('#oidc-redirect');
   const CompleteScreen = document.querySelector('#complete-screen');
   let disableBackOnFirstScreen = false;
 
@@ -261,8 +263,21 @@ initIframeSentry('ekyc');
     false,
   );
 
+  // ET NATIONAL_ID (Fayda) is verified through an OIDC handshake at the
+  // national IdP instead of a partner-typed ID form.
+  function idTypeUsesOidc(country, idType) {
+    return country === 'ET' && idType === 'NATIONAL_ID';
+  }
+
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
+
+    if (idTypeUsesOidc(selectedCountry, selectedIDType)) {
+      // The IdP hosts both the consent surface and the ID entry, so the OIDC
+      // branch supersedes EndUserConsent and IDInfoForm.
+      handleOidcFlow();
+      return;
+    }
 
     const selectedIdRequiresConsent = partnerConstraints.consentRequired[
       selectedCountry
@@ -635,7 +650,7 @@ initIframeSentry('ekyc');
 
     EndUserConsent.addEventListener(
       'end-user-consent.totp.denied.contact-methods-outdated',
-      (event) => {
+      () => {
         [referenceWindow.parent || referenceWindow].forEach((win) => {
           win.postMessage(
             'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',
@@ -1033,6 +1048,163 @@ initIframeSentry('ekyc');
     const main = document.querySelector('main');
     main.prepend(p);
   }
+
+  function oidcErrorCopy(result) {
+    if (!result) return translate('pages.oidc.genericError');
+    if (result.message === 'timeout') return translate('pages.oidc.timeout');
+    if (result.message === 'closed') return translate('pages.oidc.closed');
+    if (result.error === 'access_denied') {
+      return translate('pages.oidc.declined');
+    }
+    return translate('pages.oidc.genericError');
+  }
+
+  async function completeOidcFlow(state) {
+    // The popup exchange already persisted the claims server-side; the
+    // submission only carries `openid_state` so the KYC processor can read
+    // them and skip the partner-typed ID form entirely.
+    id_info = { ...id_info, openid_state: state, entered: false };
+    await submitIdInfoForm();
+    complete();
+  }
+
+  function reportOidcError(result) {
+    [referenceWindow.parent, referenceWindow].forEach((win) => {
+      if (!win) return;
+      const outbound =
+        result && result.message === 'SmileIdentity::OidcCallback::Error'
+          ? result
+          : {
+              message: 'SmileIdentity::OidcCallback::Error',
+              state: result && result.state,
+              error: result && result.message,
+            };
+      win.postMessage(outbound, '*');
+    });
+  }
+
+  function handleOidcFlow() {
+    if (activeScreen !== OidcRedirect) {
+      setActiveScreen(OidcRedirect);
+    }
+    if (disableBackOnFirstScreen) {
+      OidcRedirect.querySelector('.back-wrapper').style.display = 'none';
+    }
+
+    const launchPanel = OidcRedirect.querySelector('#oidc-launch');
+    const loadingPanel = OidcRedirect.querySelector('#oidc-loading');
+    const preparingText = OidcRedirect.querySelector('#oidc-preparing');
+    const waitingText = OidcRedirect.querySelector('#oidc-waiting');
+    const popupBlockedPanel = OidcRedirect.querySelector('#oidc-popup-blocked');
+    const errorPanel = OidcRedirect.querySelector('#oidc-error');
+    const continueButton = OidcRedirect.querySelector('#oidc-continue-button');
+    const retryButton = OidcRedirect.querySelector('#oidc-retry-button');
+
+    const oidc = createOidcRedirect(config, {
+      country: id_info.country,
+      product: 'enhanced_kyc',
+    });
+
+    // Pre-launch: show a spinner while the authorize URL is fetched. The
+    // Continue button only appears once we hold a link (see the prefetch
+    // chain below), so the user can't click before there's anywhere to send
+    // the popup.
+    function showPreparing() {
+      launchPanel.hidden = true;
+      popupBlockedPanel.hidden = true;
+      errorPanel.hidden = true;
+      errorPanel.textContent = '';
+      preparingText.hidden = false;
+      waitingText.hidden = true;
+      loadingPanel.hidden = false;
+    }
+
+    // The link is ready: reveal the explanation + Continue button. The popup
+    // is opened by the button click so `window.open` runs inside a user
+    // gesture — the one condition popup blockers honour.
+    function showLaunchButton() {
+      loadingPanel.hidden = true;
+      popupBlockedPanel.hidden = true;
+      errorPanel.hidden = true;
+      launchPanel.hidden = false;
+    }
+
+    // `retryable` keeps the launch panel (and its Continue button) visible so
+    // it doubles as a retry — clicking it re-runs `oidc.launch()`, which
+    // re-fetches the authorize URL. `report` gates the partner-facing
+    // OidcCallback::Error: a pre-click prefetch failure is recoverable and the
+    // user hasn't attempted anything yet, so we don't emit a terminal error
+    // event until an actual launch fails.
+    function showError(result, { retryable = false, report = true } = {}) {
+      launchPanel.hidden = !retryable;
+      loadingPanel.hidden = true;
+      popupBlockedPanel.hidden = true;
+      errorPanel.hidden = false;
+      errorPanel.textContent = oidcErrorCopy(result);
+      if (report) {
+        reportOidcError(result);
+      }
+    }
+
+    function showPopupBlocked() {
+      launchPanel.hidden = true;
+      loadingPanel.hidden = true;
+      popupBlockedPanel.hidden = false;
+      [referenceWindow.parent, referenceWindow].forEach((win) => {
+        if (win) {
+          win.postMessage(
+            { message: 'SmileIdentity::OidcCallback::PopupBlocked' },
+            '*',
+          );
+        }
+      });
+    }
+
+    // Show the spinner up front and prefetch the authorize URL. Reveal the
+    // Continue button only once we hold a link. On failure, surface the error
+    // with the button as retry (it re-fetches), and hold the partner error
+    // event until the user actually attempts a launch.
+    showPreparing();
+    oidc
+      .prefetch()
+      .then(showLaunchButton)
+      .catch((error) => showError(error, { retryable: true, report: false }));
+
+    // Synchronous: opens the popup inside this gesture, then awaits the
+    // callback. Used for both the primary Continue button and the
+    // popup-blocked retry.
+    async function launch() {
+      launchPanel.hidden = true;
+      popupBlockedPanel.hidden = true;
+      errorPanel.hidden = true;
+      errorPanel.textContent = '';
+      preparingText.hidden = true;
+      waitingText.hidden = false;
+      loadingPanel.hidden = false;
+      try {
+        const { state } = await oidc.launch();
+        await completeOidcFlow(state);
+      } catch (result) {
+        if (result && result.message === 'popup_blocked') {
+          showPopupBlocked();
+          return;
+        }
+        showError(result);
+      }
+    }
+
+    continueButton.onclick = launch;
+    retryButton.onclick = launch;
+  }
+
+  OidcRedirect.querySelector('#oidc-back-button').addEventListener(
+    'click',
+    (event) => {
+      event.preventDefault();
+      setActiveScreen(SelectIDType);
+    },
+    false,
+  );
 
   async function submitIdInfoForm() {
     const { year, month, day, ...data } = id_info;

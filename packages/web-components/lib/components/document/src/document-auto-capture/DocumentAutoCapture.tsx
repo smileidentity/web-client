@@ -1164,18 +1164,16 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
         {/* __SMILE_DEBUG__ is a build-time literal → this whole branch (and the
             TuningPanel import) is dead-code-eliminated from production bundles;
             showDebug then applies the runtime ?debug opt-in in dev + preview.
-            The `typeof` guard keeps elimination working (define folds it to
-            false) while avoiding a ReferenceError in environments that don't
-            inject the define, e.g. Storybook. */}
-        {typeof __SMILE_DEBUG__ !== 'undefined' &&
-          __SMILE_DEBUG__ &&
-          showDebug && (
-            <TuningPanel
-              settings={settings}
-              updateSetting={updateSetting}
-              debugInfo={debugInfo}
-            />
-          )}
+            Storybook defines __SMILE_DEBUG__ as false (see .storybook/main.js)
+            so this direct reference is defined there too — keep it a plain
+            reference so the bundler can still fold the branch away. */}
+        {__SMILE_DEBUG__ && showDebug && (
+          <TuningPanel
+            settings={settings}
+            updateSetting={updateSetting}
+            debugInfo={debugInfo}
+          />
+        )}
       </div>
     );
   }
@@ -1457,15 +1455,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
 
       {/* Tuning panel (debug mode only) */}
       {/* Build-time gate → tree-shaken in production (see note above). */}
-      {typeof __SMILE_DEBUG__ !== 'undefined' &&
-        __SMILE_DEBUG__ &&
-        showDebug && (
-          <TuningPanel
-            settings={settings}
-            updateSetting={updateSetting}
-            debugInfo={debugInfo}
-          />
-        )}
+      {__SMILE_DEBUG__ && showDebug && (
+        <TuningPanel
+          settings={settings}
+          updateSetting={updateSetting}
+          debugInfo={debugInfo}
+        />
+      )}
     </div>
   );
 };

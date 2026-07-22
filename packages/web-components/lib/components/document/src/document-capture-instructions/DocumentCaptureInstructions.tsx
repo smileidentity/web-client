@@ -717,6 +717,55 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             font-size: 18px;
           }
         }
+
+        /* ── Short landscape (phone with rotation-lock off) ─────
+              Height is the scarce axis here, so tighten vertical
+              spacing, cap the hero, and make sure both layouts can
+              scroll — otherwise the CTA falls below the fold. */
+        @media (orientation: landscape) and (max-height: 520px) {
+          .doc-instr-scroll {
+            padding-top: 72px;
+            padding-bottom: 12px;
+            gap: 16px;
+          }
+
+          .doc-instr-hero-card {
+            aspect-ratio: auto;
+            height: 46vh;
+            min-height: 120px;
+          }
+
+          .doc-instr-footer {
+            padding-top: 12px;
+            padding-bottom: 16px;
+            gap: 10px;
+          }
+
+          .doc-instr-start-btn {
+            height: 48px;
+          }
+
+          /* Back / flip screen has no scroll region of its own —
+             give it one and shrink the flip illustration. */
+          .doc-instr-back-content {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-top: 24px;
+          }
+
+          .doc-instr-flip-hero {
+            flex: 0 0 auto;
+            padding: 8px 0;
+          }
+
+          .doc-instr-flip-hero-inner {
+            max-width: 200px;
+          }
+
+          .doc-instr-skip-btn {
+            height: 44px;
+          }
+        }
       `;
 
   if (isBack) {

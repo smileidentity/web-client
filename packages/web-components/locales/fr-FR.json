@@ -438,6 +438,19 @@
       "selectCitizenship": "Sélectionner le type de citoyenneté",
       "dob": "Date de naissance"
     },
+    "oidc": {
+      "title": "Connectez-vous avec votre pièce d'identité nationale",
+      "launchPrompt": "Vous serez redirigé vers votre fournisseur d'identité national pour vous connecter. Une fenêtre sécurisée s'ouvrira lorsque vous continuerez.",
+      "continue": "Continuer vers la connexion",
+      "preparing": "Préparation de votre connexion sécurisée…",
+      "waiting": "Terminez la connexion dans la fenêtre qui s'est ouverte. Cet écran continuera automatiquement.",
+      "popupBlocked": "Votre navigateur a retenu la fenêtre de connexion. Sélectionnez le bouton ci-dessous pour l'ouvrir.",
+      "openSignIn": "Ouvrir la fenêtre de connexion",
+      "timeout": "La connexion a expiré. Veuillez réessayer.",
+      "closed": "La fenêtre de connexion a été fermée avant la fin de la connexion.",
+      "declined": "La connexion a été refusée par le fournisseur d'identité.",
+      "genericError": "Une erreur est survenue lors de votre connexion."
+    },
     "error": {
       "title": "Une erreur est survenue",
       "generic": "Quelque chose s'est mal passé",

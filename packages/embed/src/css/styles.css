@@ -465,6 +465,14 @@ button[data-type='icon'] {
   inset-inline-start: 50%;
 }
 
+#oidc-preparing {
+  margin-bottom: 2rem;
+}
+
+#oidc-waiting {
+  margin-bottom: 2rem;
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg);

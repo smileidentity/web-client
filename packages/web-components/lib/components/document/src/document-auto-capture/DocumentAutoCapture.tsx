@@ -505,12 +505,13 @@ const DocumentAutoCaptureInner: FunctionComponent<Props> = ({
   //    the already-landscape viewport.
   // Either way the user sees the same arrangement (the reference layout).
   const useLandscapeLayout = useLandscapeUi && isMobileDevice;
-  // Apply the CSS rotation only for a portrait viewport. While orientation is
-  // unknown (isViewportPortrait === null, pre-measure) we render the existing
-  // non-transformed baseline for one frame to avoid a rotate flash / detection
-  // restart; the ResizeObserver settles it immediately after.
-  const applyRotationTransform =
-    useLandscapeLayout && isViewportPortrait === true;
+  // Apply the CSS rotation only for a portrait viewport. `isViewportPortrait`
+  // is `boolean | null`: while orientation is unknown (null, pre-measure) we
+  // render the existing non-transformed baseline for one frame to avoid a
+  // rotate flash / detection restart; the ResizeObserver settles it right
+  // after. `!!` coerces the null (unknown) case to false and keeps the result a
+  // strict boolean for `shouldRotateUi`.
+  const applyRotationTransform = useLandscapeLayout && !!isViewportPortrait;
   // The landscape arrangement (side controls etc.) is shown for BOTH the rotated
   // (portrait-viewport) and native-landscape cases — i.e. as soon as we know the
   // orientation on a mobile landscape-doc capture.

@@ -10,8 +10,11 @@
 # What it does:
 #   1. Builds the embed and serves it on http://localhost:${EMBED_PORT:-8000}
 #   2. Opens a Cloudflare quick tunnel to EMBED_PORT → public HTTPS URL
-#   3. Opens a Cloudflare quick tunnel to APP_PORT (Remix/Vite) → public HTTPS URL
-#   4. Exports EmbedUrl=<embed tunnel URL> and runs `sst dev`
+#   3. Opens a Cloudflare quick tunnel to APP_PORT (React Router/Vite) → public HTTPS URL
+#   4. Exports EmbedUrl=<embed tunnel URL>, starts the `sst dev` server (mode=basic),
+#      and once its dev stack is deployed, runs the previews app on APP_PORT
+#      (see the "sst dev is a client/server split" note lower down for why both steps
+#      are needed).
 #
 # Stop with Ctrl+C — all child processes are killed.
 
@@ -94,6 +97,7 @@ LOG_DIR="$(mktemp -d)"
 EMBED_LOG="$LOG_DIR/embed.log"
 EMBED_TUNNEL_LOG="$LOG_DIR/embed-tunnel.log"
 APP_TUNNEL_LOG="$LOG_DIR/app-tunnel.log"
+SST_SERVER_LOG="$LOG_DIR/sst-server.log"
 
 cleanup() {
   trap - EXIT INT TERM
@@ -101,10 +105,10 @@ cleanup() {
   echo "🛑 Shutting down..."
   rm -rf "$LOG_DIR"
   # Kill this script's entire process group: the background jobs (cloudflared,
-  # npx serve) and all their descendants share the group because the script
-  # runs without job control. Killing only the recorded PIDs would leave the
-  # serve subshell's node child running. Must be the last line — it also
-  # signals this shell (and the parent `npm run dev:mobile` wrapper).
+  # npx serve, the `sst dev` server) and all their descendants share the group
+  # because the script runs without job control. Killing only the recorded PIDs
+  # would leave the serve subshell's node child running. Must be the last line —
+  # it also signals this shell (and the parent `npm run dev:mobile` wrapper).
   kill -- 0 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
@@ -164,7 +168,7 @@ cloudflared tunnel --url "http://localhost:$APP_PORT" --no-autoupdate > "$APP_TU
 APP_TUNNEL_URL=$(wait_for_tunnel_url "$APP_TUNNEL_LOG" "previews app")
 echo "   App:    $APP_TUNNEL_URL"
 
-# Persist URLs to a file so they're recoverable after sst dev takes over the TTY.
+# Persist URLs to a file so they're recoverable once the sst dev logs scroll past.
 URLS_FILE="$PREVIEWS_DIR/.dev-mobile-urls.txt"
 cat > "$URLS_FILE" <<EOF
 Embed: $EMBED_TUNNEL_URL
@@ -202,9 +206,44 @@ fi
 echo "💾 URLs saved to: $URLS_FILE"
 echo "   Recover any time with:  cat $URLS_FILE"
 echo ""
-echo "🚀 Starting sst dev with EmbedUrl=$EMBED_TUNNEL_URL on APP_PORT=$APP_PORT"
-echo ""
-sleep 3
 
 cd "$PREVIEWS_DIR"
-EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev remix vite:dev -- --port "$APP_PORT"
+
+# sst dev is a client/server split (see previews/README.md → "Method 1"):
+#   - `sst dev --mode=basic` runs the multiplexer *server*: it deploys the dev
+#     stack and hosts the linked-resource session, without taking over the TTY.
+#   - `sst dev <command>` is a *client* that attaches to that server to run a
+#     process (here: react-router on APP_PORT). On its own it fails with
+#     "Could not find an `sst dev` session to connect to" — it never starts a
+#     server itself. So we start the server, wait for its deploy to complete,
+#     then run the client.
+echo "🚀 Starting sst dev server (mode=basic) with EmbedUrl=$EMBED_TUNNEL_URL..."
+EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev --mode=basic > "$SST_SERVER_LOG" 2>&1 &
+
+echo "   Waiting for the dev stack to finish deploying..."
+sst_ready=""
+for _ in $(seq 1 150); do
+  # SST prints "Complete" once the dev stack is deployed and the session is
+  # ready to accept client commands; starting the client before this leaves
+  # react-router stuck without ever binding APP_PORT.
+  if grep -qa "Complete" "$SST_SERVER_LOG" 2>/dev/null; then
+    sst_ready=1
+    break
+  fi
+  if grep -qaiE "^ *Error|✕|does not exist|expired token" "$SST_SERVER_LOG" 2>/dev/null; then
+    echo "❌ sst dev server failed to start. Logs:" >&2
+    cat "$SST_SERVER_LOG" >&2
+    exit 1
+  fi
+  sleep 2
+done
+
+if [ -z "$sst_ready" ]; then
+  echo "❌ Timed out waiting for the sst dev server to deploy. Logs: $SST_SERVER_LOG" >&2
+  cat "$SST_SERVER_LOG" >&2
+  exit 1
+fi
+
+echo "   sst dev server ready. Launching previews app on APP_PORT=$APP_PORT..."
+echo ""
+EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev -- react-router dev --port "$APP_PORT"

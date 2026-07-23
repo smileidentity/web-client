@@ -11,10 +11,8 @@
 #   1. Builds the embed and serves it on http://localhost:${EMBED_PORT:-8000}
 #   2. Opens a Cloudflare quick tunnel to EMBED_PORT → public HTTPS URL
 #   3. Opens a Cloudflare quick tunnel to APP_PORT (React Router/Vite) → public HTTPS URL
-#   4. Exports EmbedUrl=<embed tunnel URL>, starts the `sst dev` server (mode=basic),
-#      and once its dev stack is deployed, runs the previews app on APP_PORT
-#      (see the "sst dev is a client/server split" note lower down for why both steps
-#      are needed).
+#   4. Exports EmbedUrl, starts the `sst dev` server, and runs the previews app on
+#      APP_PORT (see the client/server note below the tunnels for why both steps).
 #
 # Stop with Ctrl+C — all child processes are killed.
 
@@ -209,24 +207,26 @@ echo ""
 
 cd "$PREVIEWS_DIR"
 
-# sst dev is a client/server split (see previews/README.md → "Method 1"):
-#   - `sst dev --mode=basic` runs the multiplexer *server*: it deploys the dev
-#     stack and hosts the linked-resource session, without taking over the TTY.
-#   - `sst dev <command>` is a *client* that attaches to that server to run a
-#     process (here: react-router on APP_PORT). On its own it fails with
-#     "Could not find an `sst dev` session to connect to" — it never starts a
-#     server itself. So we start the server, wait for its deploy to complete,
-#     then run the client.
+# sst dev is a client/server split (see README.md → "Method 1"): --mode=basic runs
+# the server (deploys the dev stack + hosts the session); `sst dev <command>` is a
+# client that fails with "Could not find an sst dev session" if none is running.
+# So: start the server, wait for its deploy, then run the client.
 echo "🚀 Starting sst dev server (mode=basic) with EmbedUrl=$EMBED_TUNNEL_URL..."
 EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev --mode=basic > "$SST_SERVER_LOG" 2>&1 &
+SST_SERVER_PID=$!
 
 echo "   Waiting for the dev stack to finish deploying..."
 sst_ready=""
 for _ in $(seq 1 150); do
-  # SST prints "Complete" once the dev stack is deployed and the session is
-  # ready to accept client commands; starting the client before this leaves
-  # react-router stuck without ever binding APP_PORT.
-  if grep -qa "Complete" "$SST_SERVER_LOG" 2>/dev/null; then
+  # Fail fast if the server process died, instead of waiting out the full timeout.
+  if ! kill -0 "$SST_SERVER_PID" 2>/dev/null; then
+    echo "❌ sst dev server exited before it was ready. Logs:" >&2
+    cat "$SST_SERVER_LOG" >&2
+    exit 1
+  fi
+  # Wait for SST's "Complete" line (deploy done); anchored to EOL so it won't
+  # match "Completed" etc. Starting the client early leaves react-router unbound.
+  if grep -qaE 'Complete[[:space:]]*$' "$SST_SERVER_LOG" 2>/dev/null; then
     sst_ready=1
     break
   fi

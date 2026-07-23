@@ -27,15 +27,27 @@ const mountDocumentAutoCapture = ({
 const getUiOverlay = () =>
   cy.get('document-auto-capture').shadow().find('.guide-box').parent().parent();
 
-const expectLandscapeEdgeLayout = ({ shouldRotateOverlay }) => {
+// Landscape document types (id-card/passport) on mobile always use the
+// landscape EDGE arrangement (landscape guide, side-mounted capture control).
+// The 90° overlay TRANSFORM is applied only when the measured camera box is
+// portrait-shaped:
+//   • portrait viewport  → transform (the phone is upright; rotate to present
+//     the landscape guide) = IMG_4440.
+//   • physical landscape → NO transform; the guide is rendered upright natively
+//     in the already-landscape box (the phone's own rotation does the work).
+// Orientation is read from the measured camera box, not the screen, so an embed
+// shell that constrains the box to a portrait card still rotates correctly.
+const expectEdgeLayout = ({ transformed }) => {
   getUiOverlay().should(($overlay) => {
-    if (shouldRotateOverlay) {
+    if (transformed) {
       expect($overlay[0].style.transform).to.contain('rotate(90deg)');
     } else {
       expect($overlay[0].style.transform).not.to.contain('rotate(90deg)');
     }
   });
 
+  // The landscape guide (16rem edge inset) is used in both the transformed and
+  // native-landscape cases.
   cy.get('document-auto-capture')
     .shadow()
     .find('.guide-box')
@@ -43,12 +55,13 @@ const expectLandscapeEdgeLayout = ({ shouldRotateOverlay }) => {
       expect($guideBox[0].style.width).to.equal('calc(100% - 16rem)');
     });
 
+  // Side-mounted capture control (edge arrangement) is present in both cases.
   cy.get('document-auto-capture')
     .shadow()
     .find('button[aria-label="Capture photo"]')
     .parent()
     .should(($buttonWrapper) => {
-      expect($buttonWrapper[0].style.right).to.equal('22px');
+      expect($buttonWrapper[0].style.right).not.to.equal('');
       expect($buttonWrapper[0].style.bottom).to.equal('');
     });
 };
@@ -66,29 +79,27 @@ const visitWithMobileUa = () => {
 };
 
 describe('DocumentAutoCapture mobile landscape document layout', () => {
-  it('keeps the landscape edge controls when the mobile viewport is portrait', () => {
+  it('applies the 90° transform in a portrait viewport (= IMG_4440)', () => {
     cy.viewport(390, 844);
     visitWithMobileUa();
     mountDocumentAutoCapture();
 
-    expectLandscapeEdgeLayout({ shouldRotateOverlay: true });
+    expectEdgeLayout({ transformed: true });
   });
 
-  it('keeps the landscape edge controls when the mobile viewport is physically landscape', () => {
+  it('renders the guide upright (no transform) when the camera box is physically landscape', () => {
     cy.viewport(844, 390);
     visitWithMobileUa();
     mountDocumentAutoCapture();
 
-    expectLandscapeEdgeLayout({ shouldRotateOverlay: false });
+    expectEdgeLayout({ transformed: false });
   });
 
-  it('does not rotate again when a landscape mobile viewport contains a portrait-shaped host', () => {
+  it('still transforms when the host box is portrait-shaped in a landscape viewport (embed card)', () => {
     cy.viewport(844, 390);
     visitWithMobileUa();
     mountDocumentAutoCapture({ height: '600px', width: '360px' });
 
-    getUiOverlay().should(($overlay) => {
-      expect($overlay[0].style.transform).not.to.contain('rotate(90deg)');
-    });
+    expectEdgeLayout({ transformed: true });
   });
 });

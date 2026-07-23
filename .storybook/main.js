@@ -30,6 +30,15 @@ const config = {
   async viteFinal(viteConfig) {
     return mergeConfig(viteConfig, {
       assetsInclude: ['**/*.lottie'],
+      // Mirror the build-time globals defined in
+      // packages/web-components/vite.config.ts so components that reference them
+      // (e.g. document-auto-capture's `__SMILE_DEBUG__` gate) don't throw a
+      // ReferenceError when rendered in Storybook.
+      define: {
+        SMILE_COMPONENTS_VERSION: JSON.stringify('storybook'),
+        COMPONENTS_VERSION: JSON.stringify('storybook'),
+        __SMILE_DEBUG__: JSON.stringify(false),
+      },
     });
   },
 };

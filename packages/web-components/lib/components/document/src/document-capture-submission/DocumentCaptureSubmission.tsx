@@ -405,6 +405,32 @@ const DocumentCaptureSubmission: FunctionComponent<Props> = ({
         @media (min-width: 640px) {
           .doc-submit-image-area { padding-top: 80px; }
         }
+
+        /* Short landscape viewport (e.g. a phone turned to landscape with
+           rotation-lock off, ~390-430px tall). The portrait column stack has
+           no vertical room, so the captured image (with its spinner / tick /
+           cross overlay) collapses to 0 height and the status card overflows.
+           Lay it out as two columns instead — image on the left, status card on
+           the right, both vertically centred. Gated on max-height (the actual
+           cause) so normal-height desktop / tablet windows keep the stack.
+           Mirrors the document-capture-review landscape layout. */
+        @media (orientation: landscape) and (max-height: 520px) {
+          .doc-submit-root { flex-direction: row; align-items: center; }
+          .doc-submit-image-area {
+            padding: 16px 8px 16px 16px;
+            height: 100%;
+          }
+          .doc-submit-footer {
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 45%;
+            max-width: 440px;
+            height: 100%;
+            padding: 16px 16px 16px 8px;
+          }
+          .doc-submit-card { padding: 20px; }
+        }
       `}</style>
     </div>
   );

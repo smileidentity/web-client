@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.6.2] - 2026-07-23
+
+### Fixed
+
+- DocumentCapture: Improve document capture UI in landscape when device lock is enabled or disabled
+
 ## [11.6.1] - 2026-07-17
 
 ### Fixed

@@ -5,13 +5,14 @@
 #
 # Requirements:
 #   - cloudflared (https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
-#   - The embed package built (we'll run `npm start` in packages/embed which builds + serves it)
+#   - The embed package (we run `npm run build` in packages/embed, then serve its build/ output with `npx serve`)
 #
 # What it does:
-#   1. Starts the embed dev server on http://localhost:8000
-#   2. Opens a Cloudflare quick tunnel to port 8000 → public HTTPS URL
-#   3. Opens a Cloudflare quick tunnel to port 5173 (Remix/Vite) → public HTTPS URL
-#   4. Exports EmbedUrl=<embed tunnel URL> and runs `sst dev`
+#   1. Builds the embed and serves it on http://localhost:${EMBED_PORT:-8000}
+#   2. Opens a Cloudflare quick tunnel to EMBED_PORT → public HTTPS URL
+#   3. Opens a Cloudflare quick tunnel to APP_PORT (React Router/Vite) → public HTTPS URL
+#   4. Exports EmbedUrl, starts the `sst dev` server, and runs the previews app on
+#      APP_PORT (see the client/server note below the tunnels for why both steps).
 #
 # Stop with Ctrl+C — all child processes are killed.
 
@@ -21,6 +22,58 @@ PREVIEWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$PREVIEWS_DIR/.." && pwd)"
 EMBED_DIR="$REPO_ROOT/packages/embed"
 WEB_COMPONENTS_DIR="$REPO_ROOT/packages/web-components"
+
+# Optionally load local defaults from previews/.env.
+# Explicitly exported environment variables still take precedence.
+if [ -f "$PREVIEWS_DIR/.env" ]; then
+  if [ "${EMBED_PORT+x}" = "x" ]; then
+    EMBED_PORT_OVERRIDE="$EMBED_PORT"
+  fi
+  if [ "${APP_PORT+x}" = "x" ]; then
+    APP_PORT_OVERRIDE="$APP_PORT"
+  fi
+
+  set -a
+  # shellcheck disable=SC1091
+  . "$PREVIEWS_DIR/.env"
+  set +a
+
+  if [ "${EMBED_PORT_OVERRIDE+x}" = "x" ]; then
+    EMBED_PORT="$EMBED_PORT_OVERRIDE"
+  fi
+  if [ "${APP_PORT_OVERRIDE+x}" = "x" ]; then
+    APP_PORT="$APP_PORT_OVERRIDE"
+  fi
+fi
+
+EMBED_PORT="${EMBED_PORT:-8000}"
+APP_PORT="${APP_PORT:-5173}"
+
+if ! [[ "$EMBED_PORT" =~ ^[0-9]+$ ]] || ! [[ "$APP_PORT" =~ ^[0-9]+$ ]]; then
+  echo "❌ EMBED_PORT and APP_PORT must be numeric."
+  echo "   Example: EMBED_PORT=8001 APP_PORT=5174 npm run dev:mobile"
+  exit 1
+fi
+
+is_port_in_use() {
+  lsof -n -P -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1
+}
+
+if command -v lsof >/dev/null 2>&1; then
+  if is_port_in_use "$EMBED_PORT"; then
+    echo "❌ EMBED_PORT $EMBED_PORT is already in use."
+    echo "   Retry with a different port, for example: EMBED_PORT=8001 npm run dev:mobile"
+    exit 1
+  fi
+
+  if is_port_in_use "$APP_PORT"; then
+    echo "❌ APP_PORT $APP_PORT is already in use."
+    echo "   Retry with a different port, for example: APP_PORT=5174 npm run dev:mobile"
+    exit 1
+  fi
+else
+  echo "⚠️  lsof not found — skipping port-in-use preflight checks."
+fi
 
 if ! command -v cloudflared >/dev/null 2>&1; then
   echo "❌ cloudflared not found. Install it first:"
@@ -42,18 +95,19 @@ LOG_DIR="$(mktemp -d)"
 EMBED_LOG="$LOG_DIR/embed.log"
 EMBED_TUNNEL_LOG="$LOG_DIR/embed-tunnel.log"
 APP_TUNNEL_LOG="$LOG_DIR/app-tunnel.log"
+SST_SERVER_LOG="$LOG_DIR/sst-server.log"
 
-PIDS=()
 cleanup() {
+  trap - EXIT INT TERM
   echo ""
   echo "🛑 Shutting down..."
-  for pid in "${PIDS[@]}"; do
-    if kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null || true
-    fi
-  done
-  wait 2>/dev/null || true
   rm -rf "$LOG_DIR"
+  # Kill this script's entire process group: the background jobs (cloudflared,
+  # npx serve, the `sst dev` server) and all their descendants share the group
+  # because the script runs without job control. Killing only the recorded PIDs
+  # would leave the serve subshell's node child running. Must be the last line —
+  # it also signals this shell (and the parent `npm run dev:mobile` wrapper).
+  kill -- 0 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
@@ -91,25 +145,28 @@ echo "📦 Building @smileid/web-components (embed depends on its dist/ output).
   exit 1
 }
 
-echo "📦 Starting embed dev server (port 8000)..."
-(cd "$EMBED_DIR" && npm start) > "$EMBED_LOG" 2>&1 &
-PIDS+=($!)
+echo "📦 Building embed package..."
+(cd "$EMBED_DIR" && npm run build) || {
+  echo "❌ embed build failed; aborting." >&2
+  exit 1
+}
 
-echo "🌩  Opening Cloudflare tunnel for embed (port 8000)..."
-cloudflared tunnel --url http://localhost:8000 --no-autoupdate > "$EMBED_TUNNEL_LOG" 2>&1 &
-PIDS+=($!)
+echo "📦 Serving embed build (port $EMBED_PORT)..."
+(cd "$EMBED_DIR" && npx --yes serve -p "$EMBED_PORT" build) > "$EMBED_LOG" 2>&1 &
+
+echo "🌩  Opening Cloudflare tunnel for embed (port $EMBED_PORT)..."
+cloudflared tunnel --url "http://localhost:$EMBED_PORT" --no-autoupdate > "$EMBED_TUNNEL_LOG" 2>&1 &
 
 EMBED_TUNNEL_URL=$(wait_for_tunnel_url "$EMBED_TUNNEL_LOG" "embed")
 echo "   Embed:  $EMBED_TUNNEL_URL"
 
-echo "🌩  Opening Cloudflare tunnel for previews app (port 5173)..."
-cloudflared tunnel --url http://localhost:5173 --no-autoupdate > "$APP_TUNNEL_LOG" 2>&1 &
-PIDS+=($!)
+echo "🌩  Opening Cloudflare tunnel for previews app (port $APP_PORT)..."
+cloudflared tunnel --url "http://localhost:$APP_PORT" --no-autoupdate > "$APP_TUNNEL_LOG" 2>&1 &
 
 APP_TUNNEL_URL=$(wait_for_tunnel_url "$APP_TUNNEL_LOG" "previews app")
 echo "   App:    $APP_TUNNEL_URL"
 
-# Persist URLs to a file so they're recoverable after sst dev takes over the TTY.
+# Persist URLs to a file so they're recoverable once the sst dev logs scroll past.
 URLS_FILE="$PREVIEWS_DIR/.dev-mobile-urls.txt"
 cat > "$URLS_FILE" <<EOF
 Embed: $EMBED_TUNNEL_URL
@@ -147,9 +204,46 @@ fi
 echo "💾 URLs saved to: $URLS_FILE"
 echo "   Recover any time with:  cat $URLS_FILE"
 echo ""
-echo "🚀 Starting sst dev with EmbedUrl=$EMBED_TUNNEL_URL"
-echo ""
-sleep 3
 
 cd "$PREVIEWS_DIR"
-EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev
+
+# sst dev is a client/server split (see README.md → "Method 1"): --mode=basic runs
+# the server (deploys the dev stack + hosts the session); `sst dev <command>` is a
+# client that fails with "Could not find an sst dev session" if none is running.
+# So: start the server, wait for its deploy, then run the client.
+echo "🚀 Starting sst dev server (mode=basic) with EmbedUrl=$EMBED_TUNNEL_URL..."
+EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev --mode=basic > "$SST_SERVER_LOG" 2>&1 &
+SST_SERVER_PID=$!
+
+echo "   Waiting for the dev stack to finish deploying..."
+sst_ready=""
+for _ in $(seq 1 150); do
+  # Fail fast if the server process died, instead of waiting out the full timeout.
+  if ! kill -0 "$SST_SERVER_PID" 2>/dev/null; then
+    echo "❌ sst dev server exited before it was ready. Logs:" >&2
+    cat "$SST_SERVER_LOG" >&2
+    exit 1
+  fi
+  # Wait for SST's "Complete" line (deploy done); anchored to EOL so it won't
+  # match "Completed" etc. Starting the client early leaves react-router unbound.
+  if grep -qaE 'Complete[[:space:]]*$' "$SST_SERVER_LOG" 2>/dev/null; then
+    sst_ready=1
+    break
+  fi
+  if grep -qaiE "^ *Error|✕|does not exist|expired token" "$SST_SERVER_LOG" 2>/dev/null; then
+    echo "❌ sst dev server failed to start. Logs:" >&2
+    cat "$SST_SERVER_LOG" >&2
+    exit 1
+  fi
+  sleep 2
+done
+
+if [ -z "$sst_ready" ]; then
+  echo "❌ Timed out waiting for the sst dev server to deploy. Logs: $SST_SERVER_LOG" >&2
+  cat "$SST_SERVER_LOG" >&2
+  exit 1
+fi
+
+echo "   sst dev server ready. Launching previews app on APP_PORT=$APP_PORT..."
+echo ""
+EmbedUrl="$EMBED_TUNNEL_URL" npx sst dev -- react-router dev --port "$APP_PORT"

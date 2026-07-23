@@ -121,6 +121,23 @@ main:has(enhanced-smart-selfie-submission:not([hidden])) {
   }
 }
 
+/* Touch devices (phones/tablets): the fullscreen camera experiences fill the
+   whole viewport in every orientation — no 40ch side margins, no rounded
+   "desktop card". Scoped to coarse pointers so genuine desktops keep the
+   centered card treatment above (their enhanced instructions / selfie / preview
+   screens are designed for it). This is what keeps a landscape phone — whose CSS
+   width crosses the 40rem breakpoint — edge-to-edge instead of being demoted to
+   the small centered card. Placed after the width query so it wins on touch. */
+@media (pointer: coarse) {
+  main:has(smart-camera-web:not([hidden])),
+  main:has(enhanced-smart-selfie-submission:not([hidden])) {
+    max-width: none;
+    height: 100%;
+    border-radius: 0;
+    padding: 0;
+  }
+}
+
 h1 {
   font-size: 2.25rem;
   font-weight: 600;

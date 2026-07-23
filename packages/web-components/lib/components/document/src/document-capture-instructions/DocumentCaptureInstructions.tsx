@@ -717,6 +717,93 @@ const DocumentCaptureInstructions: FunctionComponent<Props> = ({
             font-size: 18px;
           }
         }
+
+        /* ── Short landscape (phone with rotation-lock off) ─────
+              Height is the scarce axis. Reflow the existing DOM into
+              two columns with grid-template-areas (no markup change,
+              no re-rendered lottie): the hero sits beside the text
+              and the CTA becomes a bottom bar, so title, guidelines
+              and CTA are all on one screen instead of scrolling. */
+        @media (orientation: landscape) and (max-height: 520px) {
+          /* Front: hero on the left, title + guidelines on the right. */
+          .doc-instr-scroll {
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+            grid-template-rows: auto 1fr;
+            grid-template-areas:
+              'hero title'
+              'hero guides';
+            align-items: center;
+            column-gap: 28px;
+            row-gap: 8px;
+            padding: 52px 20px 8px;
+            overflow: hidden;
+          }
+
+          .doc-instr-title-block {
+            grid-area: title;
+            align-self: end;
+          }
+
+          .doc-instr-hero-card {
+            grid-area: hero;
+            justify-self: center;
+            width: auto;
+            height: 62vh;
+            max-height: 210px;
+          }
+
+          .doc-instr-guidelines {
+            grid-area: guides;
+            align-self: start;
+          }
+
+          .doc-instr-footer {
+            padding: 8px 20px 12px;
+            gap: 8px;
+          }
+
+          .doc-instr-start-btn {
+            height: 46px;
+          }
+
+          /* Back / flip: illustration on the left, title on the right,
+             actions in the bottom bar. */
+          .doc-instr-back-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas: 'hero title';
+            align-items: center;
+            column-gap: 28px;
+            padding: 16px 20px 8px;
+            overflow: hidden;
+          }
+
+          .doc-instr-flip-title {
+            grid-area: title;
+            text-align: start;
+          }
+
+          .doc-instr-flip-hero {
+            grid-area: hero;
+            min-height: 0;
+            padding: 0;
+          }
+
+          .doc-instr-flip-hero-inner {
+            max-width: 44vh;
+            margin: 0 auto;
+          }
+
+          .doc-instr-back-actions {
+            flex-direction: row;
+            justify-content: center;
+          }
+
+          .doc-instr-skip-btn {
+            height: 44px;
+          }
+        }
       `;
 
   if (isBack) {

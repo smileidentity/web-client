@@ -76,5 +76,8 @@ jobs:
       - name: delete s3 preview prefixes
         if: always()
         run: |
+          # Deliberately the RAW branch name, not the sanitised SST stage:
+          # deploy-preview.yml syncs to js/preview-<raw branch> and
+          # inline/preview-<raw branch>, so the delete must match byte for byte.
           aws s3 rm --recursive "s3://${{ secrets.AWS_S3_BUCKET }}/js/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}/"
           aws s3 rm --recursive "s3://${{ secrets.AWS_S3_BUCKET }}/inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}/"

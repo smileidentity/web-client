@@ -35,11 +35,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Capture the open-PR list into a variable first so a `gh` failure trips
-          # `set -e` here, rather than being swallowed by a `for B in $(...)` loop
-          # (which would silently iterate zero times and treat every deployed
-          # stage as stale).
-          OPEN_BRANCHES=$(gh pr list --state open --limit 1000 --json headRefName --jq '.[].headRefName')
+          # Capture the open-PR list with an explicit failure check, rather than
+          # inside a `for B in $(...)` loop (which would silently iterate zero
+          # times and treat every deployed stage as stale).
+          if ! OPEN_BRANCHES=$(gh pr list --state open --limit 1000 --json headRefName --jq '.[].headRefName'); then
+            echo "::error::gh pr list failed. Refusing to sweep, as an empty keep-list would mark every deployed stage as stale."
+            exit 1
+          fi
           BRANCH_COUNT=$(printf '%s\n' "$OPEN_BRANCHES" | wc -l | tr -d ' ')
 
           if [ -z "$OPEN_BRANCHES" ]; then

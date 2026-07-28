@@ -5,6 +5,11 @@ on:
   pull_request:
     types:
       - closed
+# Serialises deploy and destroy in both directions for a given branch, so a
+# manual re-run never races a PR-triggered run against the same SST stage.
+concurrency:
+  group: preview-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
 permissions:
   id-token: write
   contents: read
@@ -50,9 +55,26 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: remove sst app (sandbox)
+        env:
+          STAGE: ${{ steps.get_branch_name.outputs.SST_STAGE }}
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}
+          npm run sst remove -- --stage "$STAGE" --print-logs || {
+            echo "sst remove failed, retrying in 60s..."
+            sleep 60
+            npm run sst remove -- --stage "$STAGE" --print-logs
+          }
       - name: remove sst app (prod)
         if: ${{ always() && steps.get_branch_name.outcome == 'success' && steps.get_branch_name.outputs.SST_STAGE != '' }}
+        env:
+          STAGE: ${{ steps.get_branch_name.outputs.SST_STAGE }}-prod
         run: |
-          npm run sst remove -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }}-prod
+          npm run sst remove -- --stage "$STAGE" --print-logs || {
+            echo "sst remove failed, retrying in 60s..."
+            sleep 60
+            npm run sst remove -- --stage "$STAGE" --print-logs
+          }
+      - name: delete s3 preview prefixes
+        if: always()
+        run: |
+          aws s3 rm --recursive "s3://${{ secrets.AWS_S3_BUCKET }}/js/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}/"
+          aws s3 rm --recursive "s3://${{ secrets.AWS_S3_BUCKET }}/inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}/"

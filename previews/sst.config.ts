@@ -7,6 +7,13 @@ export default $config({
       name: 'previews',
       removal: input?.stage === 'production' ? 'retain' : 'remove',
       home: 'aws',
+      providers: {
+        aws: {
+          defaultTags: {
+            tags: { repo: 'web-client' },
+          },
+        },
+      },
     };
   },
   async run() {

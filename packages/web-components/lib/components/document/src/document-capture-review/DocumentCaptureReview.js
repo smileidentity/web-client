@@ -172,6 +172,40 @@ function templateString() {
         right: 28px;
       }
     }
+
+    /* Short landscape viewport (e.g. a phone turned to landscape with
+       rotation-lock off, ~390-430px tall). The portrait column stack has no
+       vertical room there, so the captured image collapses to 0 height and the
+       confirm card overflows. Lay the screen out as two columns instead —
+       captured image on the left, confirm card on the right, both vertically
+       centred — so the image stays visible and the card fits. Gated on
+       max-height (the actual cause) rather than pointer type: a normal desktop
+       window is tall enough to never match, so its centred-card layout (and the
+       min-width:640 rule above) is unaffected; taller tablets in landscape keep
+       the stack too. Ordered after the min-width:640 rule so it wins padding on
+       a landscape phone (width >= 640). */
+    @media (orientation: landscape) and (max-height: 520px) {
+      #document-capture-review-screen {
+        flex-direction: row;
+        align-items: center;
+      }
+      .review-image-area {
+        padding: 16px 8px 16px 16px;
+        height: 100%;
+      }
+      .review-footer {
+        flex-direction: column;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 45%;
+        max-width: 440px;
+        height: 100%;
+        padding: 16px 16px 16px 8px;
+      }
+      .review-card {
+        padding: 16px 20px;
+      }
+    }
   </style>
   ${styles(this.themeColor)}
   <div id='document-capture-review-screen' dir='${this.direction}'>

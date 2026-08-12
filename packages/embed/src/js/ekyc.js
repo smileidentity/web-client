@@ -28,6 +28,7 @@ import {
   submissionErrorMessage,
 } from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import createOidcRedirect from './oidc/oidcRedirect.js';
 
 initIframeSentry('ekyc');
 
@@ -61,6 +62,7 @@ initIframeSentry('ekyc');
   const LoadingScreen = document.querySelector('#loading-screen');
   const SelectIDType = document.querySelector('#select-id-type');
   const IDInfoForm = document.querySelector('#id-info');
+  const OidcRedirect = document.querySelector('#oidc-redirect');
   const CompleteScreen = document.querySelector('#complete-screen');
   let disableBackOnFirstScreen = false;
 
@@ -265,8 +267,21 @@ initIframeSentry('ekyc');
     false,
   );
 
+  // ET NATIONAL_ID (Fayda) is verified through an OIDC handshake at the
+  // national IdP instead of a partner-typed ID form.
+  function idTypeUsesOidc(country, idType) {
+    return country === 'ET' && idType === 'NATIONAL_ID';
+  }
+
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
+
+    if (idTypeUsesOidc(selectedCountry, selectedIDType)) {
+      // The IdP hosts both the consent surface and the ID entry, so the OIDC
+      // branch supersedes EndUserConsent and IDInfoForm.
+      handleOidcFlow();
+      return;
+    }
 
     const selectedIdRequiresConsent = partnerConstraints.consentRequired[
       selectedCountry
@@ -639,7 +654,7 @@ initIframeSentry('ekyc');
 
     EndUserConsent.addEventListener(
       'end-user-consent.totp.denied.contact-methods-outdated',
-      (event) => {
+      () => {
         [referenceWindow.parent || referenceWindow].forEach((win) => {
           win.postMessage(
             'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated',

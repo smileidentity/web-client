@@ -7,6 +7,13 @@ export default $config({
       name: 'previews',
       removal: input?.stage === 'production' ? 'retain' : 'remove',
       home: 'aws',
+      providers: {
+        aws: {
+          defaultTags: {
+            tags: { repo: 'web-client' },
+          },
+        },
+      },
     };
   },
   async run() {
@@ -37,6 +44,10 @@ export default $config({
 
     const site = new sst.aws.React('PreviewApp', {
       link: [api, EmbedUrl, PARTNER_ID],
+      // AWS-managed CachingDisabled policy. Previews don't need edge caching of
+      // server responses, and per-stage custom policies exhaust the account
+      // quota (~20) when `sst remove` fails to detach them from a distribution.
+      cachePolicy: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad',
       transform: {
         cdn: {
           transform: {

@@ -191,6 +191,33 @@ function templateString() {
     .content-body header {
       margin-top: 1rem;
     }
+
+    /* Short landscape (phone, rotation-lock off): height is scarce,
+       so let the screen scroll and shrink the header illustration —
+       otherwise the Take Photo button falls below the fold. */
+    @media (orientation: landscape) and (max-height: 520px) {
+      .content-root {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+      }
+
+      .content-body {
+        height: auto;
+        justify-content: flex-start;
+        gap: 0.5rem;
+      }
+
+      .content-body header {
+        margin-top: 0.5rem;
+      }
+
+      .content-body header svg {
+        width: auto;
+        height: 72px;
+      }
+    }
   </style>
     <div id="document-capture-instructions-screen" class="flow center" dir="${this.direction}">
         <div class="content-root">

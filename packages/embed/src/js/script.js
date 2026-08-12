@@ -111,6 +111,20 @@ Sentry.init({
 * N.B.: This controls the display of the screen for the provision of end-user
 	consent. Ensure that your authorization matches this in the sandbox
 	environment before publishing to end users
+*
+* Outbound postMessage events (from the SDK iframe to the parent window), in
+* addition to the existing SmileIdentity::Success / SmileIdentity::Error
+* events fired on final job completion. These fire during OIDC-backed ID
+* verification (e.g. ET NATIONAL_ID via the Fayda IdP) and are plain objects
+* with a `message` string discriminator:
+*   SmileIdentity::OidcCallback::Success — { message, state } emitted when the
+*     OIDC popup completed and claims are persisted server-side.
+*   SmileIdentity::OidcCallback::Error — { message, state, error } emitted
+*     when the popup returned an issuer error, timed out, was closed by the
+*     user, or the exchange failed.
+*   SmileIdentity::OidcCallback::PopupBlocked — { message } emitted when
+*     window.open returned null on first attempt (popup blocked); the SDK
+*     shows a retry button that re-opens the popup inside a user gesture.
 */
 window.SmileIdentity = (function () {
   'use strict';

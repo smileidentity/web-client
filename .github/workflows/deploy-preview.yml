@@ -11,6 +11,11 @@ on:
     types:
       - opened
       - synchronize
+# Serialises deploy and destroy in both directions for a given branch, so a
+# manual re-run never races a PR-triggered run against the same SST stage.
+concurrency:
+  group: preview-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
 permissions:
   contents: read
   id-token: write
@@ -29,9 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: set node version
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
       - name: install dependencies
         run: npm ci
       - name: build application
@@ -42,7 +47,7 @@ jobs:
           echo "DEST_DIR_SMART_CAMERA_WEB=js/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >>
           "$GITHUB_ENV"
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -58,9 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: set node version
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
       - name: build web-components dependency
         # Compile the document-capture debug tooling (TuningPanel/overlay) INTO
         # the preview bundle; production builds omit this flag → debug stripped.
@@ -81,7 +86,7 @@ jobs:
         id: set_dest_dir_embed
         run: echo "DEST_DIR_EMBED=inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >> "$GITHUB_ENV"
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -105,9 +110,9 @@ jobs:
       SST_PROD_URL: ${{ steps.deploy_sst_app_prod.outputs.SST_PROD_URL }}
     steps:
       - name: checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -119,6 +124,20 @@ jobs:
           echo "DEST_DIR_EMBED=inline/preview-${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
+          if [ "${#SANITIZED_BRANCH_NAME}" -gt 90 ]; then
+            BRANCH_HASH=$(printf '%s' "$BRANCH_NAME" | git hash-object --stdin | cut -c1-8)
+            SANITIZED_BRANCH_PREFIX=$(printf '%s' "$SANITIZED_BRANCH_NAME" | cut -c1-81 | sed 's/-*$//')
+            if [ -n "$SANITIZED_BRANCH_PREFIX" ]; then
+              SANITIZED_BRANCH_NAME="$SANITIZED_BRANCH_PREFIX-$BRANCH_HASH"
+            else
+              SANITIZED_BRANCH_NAME="$BRANCH_HASH"
+            fi
+          fi
+          if [ -z "$SANITIZED_BRANCH_NAME" ]; then
+            echo "::error::Sanitized branch name is empty"
+            exit 1
+          fi
           echo "SST_STAGE=$SANITIZED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       - name: install dependencies
         run: npm install
@@ -168,13 +187,13 @@ jobs:
     needs: [full-stack, embed]
     steps:
       - name: checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: set node version
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
       - name: install dependencies
         run: npm ci
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -191,6 +210,20 @@ jobs:
         run: |
           BRANCH_NAME="$BRANCH_REF"
           SANITIZED_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          # Pulumi caps stack names at 100 chars; reserve headroom for the "-prod" variant.
+          if [ "${#SANITIZED_BRANCH_NAME}" -gt 90 ]; then
+            BRANCH_HASH=$(printf '%s' "$BRANCH_NAME" | git hash-object --stdin | cut -c1-8)
+            SANITIZED_BRANCH_PREFIX=$(printf '%s' "$SANITIZED_BRANCH_NAME" | cut -c1-81 | sed 's/-*$//')
+            if [ -n "$SANITIZED_BRANCH_PREFIX" ]; then
+              SANITIZED_BRANCH_NAME="$SANITIZED_BRANCH_PREFIX-$BRANCH_HASH"
+            else
+              SANITIZED_BRANCH_NAME="$BRANCH_HASH"
+            fi
+          fi
+          if [ -z "$SANITIZED_BRANCH_NAME" ]; then
+            echo "::error::Sanitized branch name is empty"
+            exit 1
+          fi
           echo "SANITIZED_BRANCH_NAME=$SANITIZED_BRANCH_NAME" >> "$GITHUB_ENV"
       - name: retrieve sst app url
         continue-on-error: true

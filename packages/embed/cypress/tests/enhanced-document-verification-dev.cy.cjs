@@ -1,5 +1,54 @@
 describe('enhanced document verification', () => {
   beforeEach(() => {
+    const stubHostedIframeCamera = () => {
+      cy.get('iframe[data-cy="smile-identity-hosted-web-integration"]')
+        .its('0.contentWindow')
+        .should('exist')
+        .then((iframeWin) => {
+          const fakeDeviceId = 'fake-device';
+          const canvas = iframeWin.document.createElement('canvas');
+          canvas.width = 640;
+          canvas.height = 480;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+
+          const fakeStream = canvas.captureStream(30);
+
+          // The app resolves camera name by matching track.getSettings().deviceId
+          // to enumerateDevices() output. Canvas streams do not provide a useful
+          // deviceId by default, so we patch it for deterministic metadata.
+          const [videoTrack] = fakeStream.getVideoTracks();
+          if (videoTrack && typeof videoTrack.getSettings === 'function') {
+            const originalGetSettings = videoTrack.getSettings.bind(videoTrack);
+            videoTrack.getSettings = () => ({
+              ...originalGetSettings(),
+              deviceId: fakeDeviceId,
+            });
+          }
+
+          const mediaDevices = iframeWin.navigator.mediaDevices || {};
+
+          Object.defineProperty(iframeWin.navigator, 'mediaDevices', {
+            configurable: true,
+            value: {
+              ...mediaDevices,
+              enumerateDevices: () =>
+                Promise.resolve([
+                  {
+                    deviceId: fakeDeviceId,
+                    kind: 'videoinput',
+                    label: 'Fake Camera',
+                  },
+                ]),
+              getUserMedia: () => Promise.resolve(fakeStream),
+            },
+          });
+        });
+    };
+
     cy.intercept(
       {
         method: 'POST',
@@ -24,6 +73,8 @@ describe('enhanced document verification', () => {
     cy.loadIDOptions('https://example.smileidentity.com/v1');
 
     cy.visit('/enhanced_document_verification_dev');
+
+    stubHostedIframeCamera();
 
     cy.selectVOTERIDType();
 
@@ -66,8 +117,22 @@ describe('enhanced document verification', () => {
       .find('smart-camera-web')
       .shadow()
       .find('document-capture#document-capture-front')
+      .should('have.attr', 'data-camera-ready', 'true');
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
       .shadow()
-      .find('#capture-id-image', { timeout: 15000 })
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('#loader')
+      .should('have.prop', 'hidden', true);
+
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('document-capture#document-capture-front')
+      .shadow()
+      .find('#capture-id-image')
       .should('be.visible')
       .click();
 

@@ -339,6 +339,7 @@ export function useCardDetection(
     autoCaptureTimeout = 20_000,
     captureOrientation = 'landscape',
     shouldRotateUi = false,
+    useLandscapeLayout = false,
     syncRoiToGuide = false,
     skipGridCheck = false,
   } = options;
@@ -808,8 +809,15 @@ export function useCardDetection(
           guideXCSS = (displayW - guideWidthCSS) / 2;
           guideYCSS = (displayH - guideHeightCSS) / 2;
         } else {
-          // Unrotated: original behaviour.
-          const insetPx = syncRoiToGuide ? 64 : 0;
+          // Unrotated. When useLandscapeLayout is true (mobile + landscape doc
+          // type) but shouldRotateUi is false (device is physically landscape),
+          // the visible guide box still uses the 256px (16rem) inset — Overlay's
+          // `isRotated` prop mirrors `useLandscapeLayout`, not `shouldRotateUi`
+          // (see Overlay.tsx). Match that inset here so the detection ROI
+          // coincides with what the user sees. Portrait-document mobile keeps
+          // the original 64px (4rem) inset.
+          const landscapeInset = useLandscapeLayout ? 256 : 64;
+          const insetPx = syncRoiToGuide ? landscapeInset : 0;
           guideWidthCSS = syncRoiToGuide
             ? Math.min(Math.max(0, displayW - insetPx), 480)
             : Math.min(displayW * 0.9, 480);
@@ -2885,7 +2893,7 @@ export function useCardDetection(
       clearTimeout(timeoutId);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [videoRef, variant, shouldRotateUi]);
+  }, [videoRef, variant, shouldRotateUi, useLandscapeLayout]);
 
   // Helper to rotate a canvas 90° counter-clockwise with dimension swap.
   // Must match the auto-capture rotation direction (-π/2) so manual and auto

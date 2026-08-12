@@ -31,6 +31,7 @@ import {
   submissionErrorMessage,
 } from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import createOidcRedirect from './oidc/oidcRedirect';
 
 initIframeSentry('biometric-kyc');
 
@@ -70,6 +71,7 @@ window.Sentry = Sentry;
   const SelectIDType = document.querySelector('#select-id-type');
   const SmartCameraWeb = document.querySelector('smart-camera-web');
   const IDInfoForm = document.querySelector('#id-info');
+  const OidcRedirect = document.querySelector('#oidc-redirect');
   const UploadProgressScreen = document.querySelector(
     '#upload-progress-screen',
   );
@@ -286,6 +288,14 @@ window.Sentry = Sentry;
     },
     false,
   );
+
+  // ET NATIONAL_ID (Fayda) is verified through an OIDC handshake at the
+  // national IdP instead of a partner-typed ID form. Unlike enhanced KYC,
+  // the handshake runs after the SmartCamera selfie capture — see the
+  // 'smart-camera-web.publish' handler below.
+  function idTypeUsesOidc(country, idType) {
+    return country === 'ET' && idType === 'NATIONAL_ID';
+  }
 
   function setInitialScreen(partnerConstraints) {
     const { country: selectedCountry, id_type: selectedIDType } = id_info;
@@ -557,6 +567,14 @@ window.Sentry = Sentry;
     'smart-camera-web.publish',
     (event) => {
       images = event.detail.images;
+      // The OIDC handshake runs after the selfie capture: the biometric-kyc
+      // processor needs a captured selfie to face-match against the IdP's
+      // picture claim, and the /upload zip includes the id_info that carries
+      // `openid_state`.
+      if (idTypeUsesOidc(id_info.country, id_info.id_type)) {
+        handleOidcFlow();
+        return;
+      }
       const idRequiresTOTPConsent = ['BVN_MFA'].includes(id_info.id_type);
       if (idRequiresTOTPConsent || skipInputScreen) {
         handleFormSubmit();

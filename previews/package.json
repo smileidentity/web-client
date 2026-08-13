@@ -20,7 +20,7 @@
     "react-dom": "^19.2.7",
     "react-router": "^8.3.0",
     "smile-identity-core": "^3.2.1",
-    "sst": "^3.9.28"
+    "sst": "^4.17.1"
   },
   "devDependencies": {
     "@react-router/dev": "^8.3.0",

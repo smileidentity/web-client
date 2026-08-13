@@ -331,9 +331,11 @@ for _ in $(seq 1 150); do
     break
   fi
   # Match case-sensitively and only at the start of a line: `sst dev` streams
-  # function logs into this file too, and a case-insensitive match would abort a
+  # function logs into this file too, and an unanchored match would abort a
   # healthy deploy on any app log line that merely mentions an error.
-  if grep -qE '^[[:space:]]*(✕|Error:)|does not exist|[Ee]xpired [Tt]oken|ExpiredToken' <<<"$sst_log"; then
+  # Every alternative lives inside the group — `|` binds looser than the `^`
+  # anchor, so hoisting any of them out would leave it matching mid-line.
+  if grep -qE '^[[:space:]]*(✕|Error:|does not exist|[Ee]xpired [Tt]oken|ExpiredToken)' <<<"$sst_log"; then
     echo "❌ sst dev server failed to start. Logs:" >&2
     cat "$SST_SERVER_LOG" >&2
     exit 1

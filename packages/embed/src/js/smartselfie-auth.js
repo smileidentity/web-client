@@ -10,6 +10,10 @@ import { version as sdkVersion } from '../../package.json';
 import { getMetadata } from './metadata';
 import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
+import {
+  displayErrorMessage,
+  submissionErrorMessage,
+} from './submission-error.js';
 import initIframeSentry from './sentry-iframe-init.js';
 
 initIframeSentry('smartselfie-auth');
@@ -345,34 +349,23 @@ window.Sentry = Sentry;
       ]);
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
+      const message = submissionErrorMessage(error, translate);
       if (config.use_strict_mode) {
         // The submission element owns the post-submit UI. Surface the failure
         // via the same set-state event the upload XHR uses so the user lands
         // on the proper "Submission Failed" screen instead of getting a stray
-        // "Something went wrong" banner above the still-spinning view.
+        // banner above the still-spinning view.
         dispatchSubmissionState({
           state: 'error',
-          message: translate('pages.error.generic'),
+          message,
         });
       } else {
-        displayErrorMessage(translate('pages.error.generic'));
+        displayErrorMessage(message);
       }
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     }
-  }
-
-  function displayErrorMessage(message) {
-    const p = document.createElement('p');
-
-    p.textContent = message;
-    p.style.color = 'red';
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
-
-    const main = document.querySelector('main');
-    main.prepend(p);
   }
 
   async function createZip() {

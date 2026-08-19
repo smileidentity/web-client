@@ -7,17 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [11.6.2] - 2026-07-23
-
 ### Fixed
 
-- DocumentCapture: Improve document capture UI in landscape when device lock is enabled or disabled
-
-## [11.6.1] - 2026-07-17
-
-### Fixed
-
-- DocumentCapture: Keep the auto-capture UI consistent in landscape when device rotation is locked
+- Embed: when a submission fails, show an actionable "check your connection" message for network drops (instead of the generic error) and update a single on-page message in place rather than stacking a new one on every retry. Applies across the Biometric KYC, eKYC, Basic KYC, Document Verification, Enhanced Document Verification, and SmartSelfie Authentication flows
 
 ## [11.6.0] - 2026-06-29
 

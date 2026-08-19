@@ -507,4 +507,45 @@ describe('id_info - Enhanced KYC', () => {
       .should('contain', 'Nigeria')
       .should('contain', 'National ID');
   });
+
+  it('shows a single connection error when the upload fails on the skip path, no matter how many times "Yes, use this" is clicked', () => {
+    cy.visit('/biometric_kyc_id_info_complete');
+
+    cy.loadIDOptions();
+
+    // Selection and input screens are skipped, so accepting the selfie submits
+    // directly — the flow that previously stacked one error per click.
+    cy.getIFrameBody().find('smart-camera-web').should('be.visible');
+
+    // Simulate a network outage during upload.
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      { forceNetworkError: true },
+    ).as('getUploadURL');
+
+    cy.navigateThroughCameraScreens();
+    cy.wait('@getUploadURL');
+
+    // A descriptive, actionable message is shown instead of the generic one.
+    cy.getIFrameBody()
+      .find('#submission-error-message')
+      .should('be.visible')
+      .should('contain', 'stable internet connection');
+
+    // Clicking "Yes, use this" again re-submits and fails again...
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .shadow()
+      .find('selfie-capture-review')
+      .shadow()
+      .find('#select-id-image')
+      .click();
+    cy.wait('@getUploadURL');
+
+    // ...but the message is updated in place, never stacked.
+    cy.getIFrameBody().find('.validation-message').should('have.length', 1);
+  });
 });

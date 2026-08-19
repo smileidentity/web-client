@@ -8,6 +8,7 @@
     "dev": "sst dev react-router dev",
     "dev:mobile": "./scripts/dev-mobile.sh",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "test": "node --test scripts/*.test.mjs",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "sst": "sst"

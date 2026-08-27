@@ -18,42 +18,32 @@
 
 set -euo pipefail
 
-PREVIEWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PREVIEWS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$PREVIEWS_DIR/.." && pwd)"
 EMBED_DIR="$REPO_ROOT/packages/embed"
 WEB_COMPONENTS_DIR="$REPO_ROOT/packages/web-components"
 
-# Optionally read port defaults from previews/.env (gitignored).
-# Only these two keys are read — the file is deliberately not sourced: sourcing
-# it under `set -e` lets any line that returns non-zero abort the script with no
-# diagnostic, and would export every variable in it (PATH, NODE_ENV,
-# AWS_PROFILE, …) into the environment of `sst dev`.
-# Explicitly exported environment variables still take precedence.
-env_file_default() {
-  local key=$1 file="$PREVIEWS_DIR/.env" value
-  [ -f "$file" ] || return 0
-  value=$(grep -E "^[[:space:]]*(export[[:space:]]+)?${key}[[:space:]]*=" "$file" | tail -1 || true)
-  [ -n "$value" ] || return 0
-  value=${value#*=}
-  # Ports carry no internal whitespace, so stripping it wholesale is safe;
-  # anything left that isn't numeric is rejected by the check below.
-  value=$(printf '%s' "$value" | tr -d '[:space:]')
-  value=${value//\"/}
-  value=${value//\'/}
-  printf '%s' "$value"
-}
+# Pure string helpers live in lib/ so they can be unit-tested without running
+# this script; see dev-mobile.test.mjs.
+# shellcheck source=lib/dev-mobile-lib.sh
+source "$SCRIPT_DIR/lib/dev-mobile-lib.sh"
 
+# Optionally read port defaults from previews/.env (gitignored).
+# Only these two keys are read, and the file is parsed rather than sourced —
+# see env_file_default for why.
+# Explicitly exported environment variables still take precedence.
 if [ -z "${EMBED_PORT:-}" ]; then
-  EMBED_PORT="$(env_file_default EMBED_PORT)"
+  EMBED_PORT="$(env_file_default EMBED_PORT "$PREVIEWS_DIR/.env")"
 fi
 if [ -z "${APP_PORT:-}" ]; then
-  APP_PORT="$(env_file_default APP_PORT)"
+  APP_PORT="$(env_file_default APP_PORT "$PREVIEWS_DIR/.env")"
 fi
 
 EMBED_PORT="${EMBED_PORT:-8000}"
 APP_PORT="${APP_PORT:-5173}"
 
-if ! [[ "$EMBED_PORT" =~ ^[0-9]+$ ]] || ! [[ "$APP_PORT" =~ ^[0-9]+$ ]]; then
+if ! is_valid_port "$EMBED_PORT" || ! is_valid_port "$APP_PORT"; then
   echo "❌ EMBED_PORT and APP_PORT must be numeric."
   echo "   Example: EMBED_PORT=8001 APP_PORT=5174 npm run dev:mobile"
   exit 1
@@ -152,7 +142,7 @@ wait_for_tunnel_url() {
       cat "$log_file" >&2
       return 1
     fi
-    url=$(grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com' "$log_file" | head -1 || true)
+    url=$(extract_tunnel_url "$log_file")
     if [ -n "$url" ]; then
       echo "$url"
       return 0
@@ -299,15 +289,6 @@ start_bg env EmbedUrl="$EMBED_TUNNEL_URL" \
   bash -c 'exec npx sst dev --mode=basic >"$1" 2>&1' _ "$SST_SERVER_LOG"
 SST_SERVER_PID="$LAST_BG_PID"
 
-# Readiness is detected by scraping the log, so normalize it first: SST colorizes
-# its output and redraws progress with carriage returns even when writing to a
-# pipe, which leaves ANSI escapes and overwritten lines that defeat an
-# end-of-line anchor. Strip the escapes, turn CRs into newlines, drop trailing
-# whitespace. (`\033` rather than `\x1b` — BSD sed on macOS doesn't grok \x.)
-sst_log_plain() {
-  sed -E $'s/\r/\\\n/g; s/\033\\[[0-9;]*[a-zA-Z]//g; s/[[:space:]]+$//' "$SST_SERVER_LOG" 2>/dev/null
-}
-
 echo "   Waiting for the dev stack to finish deploying..."
 sst_ready=""
 for _ in $(seq 1 150); do
@@ -322,20 +303,12 @@ for _ in $(seq 1 150); do
   # `set -o pipefail` would report 141 — reading a ready log as not-ready and
   # waiting out the whole timeout. `sst dev` streams function logs in here, so
   # the log does get big enough for that race to land.
-  sst_log=$(sst_log_plain || true)
-  # Wait for SST's "Complete" line (deploy done). The line must *end* at
-  # "Complete", so "Completed 3 files" doesn't count as ready — starting the
-  # client early leaves react-router unbound.
-  if grep -qE '(^|[[:space:]])Complete$' <<<"$sst_log"; then
+  sst_log=$(sst_log_plain "$SST_SERVER_LOG" || true)
+  if sst_log_is_ready "$sst_log"; then
     sst_ready=1
     break
   fi
-  # Match case-sensitively and only at the start of a line: `sst dev` streams
-  # function logs into this file too, and an unanchored match would abort a
-  # healthy deploy on any app log line that merely mentions an error.
-  # Every alternative lives inside the group — `|` binds looser than the `^`
-  # anchor, so hoisting any of them out would leave it matching mid-line.
-  if grep -qE '^[[:space:]]*(✕|Error:|does not exist|[Ee]xpired [Tt]oken|ExpiredToken)' <<<"$sst_log"; then
+  if sst_log_has_error "$sst_log"; then
     echo "❌ sst dev server failed to start. Logs:" >&2
     cat "$SST_SERVER_LOG" >&2
     exit 1

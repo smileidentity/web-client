@@ -102,7 +102,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.6",
-    "@eslint/js": "9.39.5",
+    "@eslint/js": "10.0.1",
     "@preact/preset-vite": "^2.10.2",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20.11.24",

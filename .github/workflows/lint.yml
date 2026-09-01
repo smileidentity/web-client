@@ -13,11 +13,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: set node version
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+      # `npm ci` run from a workspace directory installs into the repo-root
+      # node_modules pruned to that workspace, so each job produces a different
+      # tree and needs its own key: a root install gives 630 entries, one from
+      # packages/embed gives 562. `path` and `hashFiles` are relative to the
+      # repo root, not to defaults.run.working-directory.
       - name: restore node_modules
         id: node-modules
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
+          key: node-modules-root-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
           path: |
             node_modules
             packages/*/node_modules
@@ -47,7 +52,7 @@ jobs:
         id: node-modules
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
+          key: node-modules-web-components-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
           path: |
             node_modules
             packages/*/node_modules
@@ -71,7 +76,7 @@ jobs:
         id: node-modules
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
+          key: node-modules-smart-camera-web-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
           path: |
             node_modules
             packages/*/node_modules
@@ -95,7 +100,7 @@ jobs:
         id: node-modules
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
+          key: node-modules-embed-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json', 'package.json', 'packages/*/package.json', '.npmrc') }}
           path: |
             node_modules
             packages/*/node_modules

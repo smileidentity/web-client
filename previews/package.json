@@ -39,14 +39,14 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5.1.6",
-    "vite": "8.2.1",
+    "vite": "8.2.2",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "engines": {
     "node": ">=22.22.0"
   },
   "overrides": {
-    "vite": "8.2.1",
+    "vite": "8.2.2",
     "eslint-plugin-jsx-a11y": {
       "eslint": "^10.9.1"
     },

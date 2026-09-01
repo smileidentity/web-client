@@ -10,7 +10,7 @@
     "clean": "rm -rf build dist",
     "instrument": "nyc instrument src build",
     "lint:html": "npx prettier --write $(git ls-files '*.html')",
-    "lint": "eslint . --ext .js,.cjs,.mjs",
+    "lint": "eslint .",
     "start:dist": "npm run build:dist && npx serve -p 8000 dist",
     "start": "npm run build && npx serve -p 8000 build",
     "test": "npx cypress run"
@@ -38,21 +38,23 @@
   },
   "devDependencies": {
     "@cypress/code-coverage": "^4.0.3",
+    "@eslint/eslintrc": "3.3.6",
+    "@eslint/js": "10.0.1",
     "@types/chai": "^5.0.1",
     "@types/cypress": "^0.1.6",
     "@types/mocha": "^10.0.10",
     "cross-env": "^7.0.3",
     "cypress": "^15.16.0",
     "esbuild": "^0.28.1",
-    "eslint": "^8.57.0",
+    "eslint": "^10.9.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-cypress": "^3.3.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-cypress": "7.0.1",
+    "eslint-plugin-import": "npm:eslint-plugin-import-x@4.17.1",
     "eslint-plugin-prettier": "^5.2.1",
     "nyc": "18.0.0",
     "prettier": "^3.3.3",
+    "resolve.exports": "^2.0.3",
     "serve": "^14.2.6"
   }
 }

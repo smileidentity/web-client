@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import pluginCypress from 'eslint-plugin-cypress';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const compat = new FlatCompat({
@@ -22,6 +23,9 @@ const unusedVars = [
 ];
 
 export default [
+  // eslint-plugin-cypress 7 dropped the eslintrc `cypress/globals` env; this flat
+  // config supplies the same globals (1221, a superset of the old 788).
+  pluginCypress.configs.globals,
   {
     // eslint 9 turned `reportUnusedDisableDirectives` on by default. Held at
     // the eslint 8 setting so the upgrade reports the same problems; turn it
@@ -45,7 +49,6 @@ export default [
     env: {
       browser: true,
       commonjs: true,
-      'cypress/globals': true,
       es2021: true,
     },
     extends: ['airbnb-base', 'prettier'],
@@ -123,7 +126,6 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
-    plugins: ['cypress'],
     rules: {
       'class-methods-use-this': 'off',
       'import/extensions': [
@@ -172,7 +174,7 @@ export default [
       'sort-keys': 'error',
     },
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         node: {
           // `.lottie` / `.svg` are bundler-only asset extensions; listing them
           // here lets eslint-plugin-import resolve them to the on-disk file

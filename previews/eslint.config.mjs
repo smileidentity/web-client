@@ -4,11 +4,20 @@
  * and should modify this configuration to best suit your team's needs.
  */
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import importX from 'eslint-plugin-import-x';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+// eslint-plugin-react's `version: 'detect'` path calls context.getFilename(),
+// which eslint 10 removed, so the plugin throws on load. Reading the installed
+// version here is what detection would have resolved to, without the crash.
+const reactVersion = createRequire(import.meta.url)(
+  'react/package.json',
+).version;
+
 const compat = new FlatCompat({
   baseDirectory: dirname,
   recommendedConfig: js.configs.recommended,
@@ -53,7 +62,7 @@ export default [
         plugins: ['react', 'jsx-a11y'],
         settings: {
           formComponents: ['Form'],
-          'import/resolver': {
+          'import-x/resolver': {
             typescript: {},
           },
           linkComponents: [
@@ -61,37 +70,17 @@ export default [
             { linkAttribute: 'to', name: 'NavLink' },
           ],
           react: {
-            version: 'detect',
+            version: reactVersion,
           },
         },
       },
 
       // Typescript
       {
-        extends: [
-          'plugin:@typescript-eslint/recommended',
-          'plugin:import/recommended',
-          'plugin:import/typescript',
-        ],
+        extends: ['plugin:@typescript-eslint/recommended'],
         files: ['**/*.{ts,tsx}'],
         parser: '@typescript-eslint/parser',
-        plugins: ['@typescript-eslint', 'import'],
-        settings: {
-          'import/internal-regex': '^~/',
-          // Under flat config eslint-plugin-import follows `import * as x`
-          // into node_modules and has no parser for the .js it lands on, so
-          // import/namespace reports "parserPath or languageOptions.parser is
-          // required". Stating the default ignore list explicitly stops it.
-          'import/ignore': ['node_modules'],
-          'import/resolver': {
-            node: {
-              extensions: ['.ts', '.tsx'],
-            },
-            typescript: {
-              alwaysTryTypes: true,
-            },
-          },
-        },
+        plugins: ['@typescript-eslint'],
       },
 
       // Node
@@ -111,4 +100,28 @@ export default [
     },
     root: true,
   }),
+  {
+    // Replaces `plugin:import/recommended` + `plugin:import/typescript`.
+    // eslint-plugin-import caps its eslint peer at ^9, so import-x takes over;
+    // its rules and settings live under the `import-x/` prefix.
+    ...importX.flatConfigs.recommended,
+    files: ['**/*.{ts,tsx}'],
+  },
+  {
+    ...importX.flatConfigs.typescript,
+    files: ['**/*.{ts,tsx}'],
+    settings: {
+      ...importX.flatConfigs.typescript.settings,
+      'import-x/internal-regex': '^~/',
+      // Under flat config import-x follows `import * as x` into node_modules
+      // and has no parser for the .js it lands on, so import-x/namespace
+      // reports "parserPath or languageOptions.parser is required". Stating
+      // the default ignore list explicitly stops it.
+      'import-x/ignore': ['node_modules'],
+      'import-x/resolver': {
+        node: { extensions: ['.ts', '.tsx'] },
+        typescript: { alwaysTryTypes: true },
+      },
+    },
+  },
 ];

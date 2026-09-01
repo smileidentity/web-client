@@ -28,13 +28,13 @@
   "homepage": "https://github.com/smileidentity/smart-camera-web#readme",
   "devDependencies": {
     "@cypress/code-coverage": "^4.0.3",
-    "@eslint/eslintrc": "^3.3.6",
-    "@eslint/js": "^9.39.5",
+    "@eslint/eslintrc": "3.3.6",
+    "@eslint/js": "9.39.5",
     "cypress": "^15.16.0",
-    "eslint": "^9.39.5",
+    "eslint": "^10.9.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-cypress": "^3.3.0",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-cypress": "7.0.1",
+    "eslint-plugin-import": "npm:eslint-plugin-import-x@4.17.1",
     "nyc": "18.0.0",
     "serve": "^14.2.4"
   }

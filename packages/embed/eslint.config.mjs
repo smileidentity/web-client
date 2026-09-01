@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import pluginCypress from 'eslint-plugin-cypress';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const compat = new FlatCompat({
@@ -10,6 +11,9 @@ const compat = new FlatCompat({
 });
 
 export default [
+  // eslint-plugin-cypress 7 dropped the eslintrc `cypress/globals` env; this flat
+  // config supplies the same globals (1221, a superset of the old 788).
+  pluginCypress.configs.globals,
   {
     // eslint 9 turned `reportUnusedDisableDirectives` on by default. Held at
     // the eslint 8 setting so the upgrade reports the same problems; turn it
@@ -19,7 +23,6 @@ export default [
   { ignores: ['build/**', 'dist/**', 'libs/**', '**/node_modules/**'] },
   ...compat.config({
     env: {
-      'cypress/globals': true,
       browser: true,
       commonjs: true,
       es2021: true,
@@ -39,17 +42,11 @@ export default [
           sourceType: 'module',
         },
       },
-      {
-        files: ['src/js/components/**'],
-        rules: {
-          'max-classes-per-file': 0,
-        },
-      },
     ],
     parserOptions: {
       ecmaVersion: 'latest',
     },
-    plugins: ['cypress', 'prettier'],
+    plugins: ['prettier'],
     rules: {
       'class-methods-use-this': 0,
       'func-names': 0,
@@ -91,7 +88,7 @@ export default [
       strict: 0,
     },
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         '../eslint-plugin-import-resolver.js': { someConfig: 1 },
       },
     },

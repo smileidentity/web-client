@@ -3,7 +3,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-import preact from '@preact/preset-vite';
+import { preact } from '@preact/preset-vite';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import dts from 'vite-plugin-dts';
 import { visualizer } from 'rollup-plugin-visualizer';

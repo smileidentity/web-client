@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx nyc instrument --compact=false smart-camera-web.js cypress/pages/instrumented",
     "start": "npx serve -p 8000 cypress/pages",
-    "lint": "eslint --ext .js *.js cypress/ --max-warnings=0",
+    "lint": "eslint *.js cypress/ --max-warnings=0",
     "test": "npx cypress run"
   },
   "repository": {
@@ -28,11 +28,13 @@
   "homepage": "https://github.com/smileidentity/smart-camera-web#readme",
   "devDependencies": {
     "@cypress/code-coverage": "^4.0.3",
+    "@eslint/eslintrc": "3.3.6",
+    "@eslint/js": "10.0.1",
     "cypress": "^15.16.0",
-    "eslint": "^8.57.0",
+    "eslint": "^10.9.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-cypress": "^3.3.0",
-    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-cypress": "7.0.1",
+    "eslint-plugin-import": "npm:eslint-plugin-import-x@4.17.1",
     "nyc": "18.0.0",
     "serve": "^14.2.4"
   }

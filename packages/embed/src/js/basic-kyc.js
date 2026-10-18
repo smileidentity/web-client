@@ -216,6 +216,8 @@ initIframeSentry('basic-kyc');
     'message',
     async (event) => {
       if (
+        // Only the frame that embeds this page may configure it.
+        event.source === referenceWindow &&
         event.data &&
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')

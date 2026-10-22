@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Embed and web components: Render configuration values as text, and accept only http(s) URLs for partner links and CSS colours for the theme colour
+
 ## [11.6.2] - 2026-07-23
 
 ### Fixed

@@ -2,13 +2,14 @@ import validate from '@smileid/web-components/validate';
 import {
   setCurrentLocale,
   translate,
-  translateHtml,
+  escapeHtml,
   getDirection,
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 
 initIframeSentry('e-signature');
 
@@ -19,7 +20,7 @@ const fieldTranslationKeys = {
 function getTranslatedValidationMessage(field) {
   const fieldKey = fieldTranslationKeys[field];
   const fieldLabel = fieldKey ? translate(fieldKey) : field;
-  return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+  return translate('pages.validation.isRequired', { field: fieldLabel });
 }
 
 function applyPageTranslations() {
@@ -243,7 +244,7 @@ function getHumanSize(numberOfBytes) {
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });
@@ -439,7 +440,7 @@ function getHumanSize(numberOfBytes) {
               `
                 <li>
                   <a
-                    href="${document.link}"
+                    href="${escapeHtml(document.link)}"
                     target="_blank"
                   >
                     <div class="document-meta">
@@ -451,7 +452,7 @@ function getHumanSize(numberOfBytes) {
                       </svg>
 
                       <div class="flow">
-                        <p class="font-weight:bold">${document.name}</p>
+                        <p class="font-weight:bold">${escapeHtml(document.name)}</p>
                         <p>${getHumanSize(document.size)}</p>
                       </div>
                     </div>

@@ -99,7 +99,7 @@ describe('configuration rendering', () => {
       });
     });
 
-    it('biometric_kyc: renders http(s) partner links with quote characters as given', () => {
+    it('biometric_kyc: renders http(s) partner links with quote characters as resolved URLs', () => {
       const logo = `https://example.com/logo' onerror='${RUN}' data-a='x`;
       const policy = `https://example.com/policy' onfocus='${RUN}' autofocus data-a='x`;
       visit('biometric_kyc', 'markup', { links: 'quoted' });
@@ -108,13 +108,13 @@ describe('configuration rendering', () => {
       consentScreen()
         .find('img[width="50"]')
         .should(($img) => {
-          expect($img.attr('src')).to.eq(logo);
+          expect($img.attr('src')).to.eq(new URL(logo).href);
           expect($img.attr('onerror')).to.eq(undefined);
         });
       consentScreen()
         .find('a.theme')
         .should(($link) => {
-          expect($link.attr('href')).to.eq(policy);
+          expect($link.attr('href')).to.eq(new URL(policy).href);
           expect($link.attr('onfocus')).to.eq(undefined);
           expect($link.attr('autofocus')).to.eq(undefined);
         });
@@ -177,7 +177,7 @@ describe('configuration rendering', () => {
         .find('#document-review-screen .document-list a')
         .should('have.length', 2)
         .then(($links) => {
-          expect($links.eq(0).attr('href')).to.eq(link);
+          expect($links.eq(0).attr('href')).to.eq(new URL(link).href);
           expect($links.eq(1).attr('href')).to.eq(undefined);
           $links.each((_, el) => {
             expect(el.querySelector('.flow p').textContent).to.eq(TEXT);
@@ -310,10 +310,10 @@ describe('configuration rendering', () => {
 
       consentScreen()
         .find('img[width="50"]')
-        .should('have.attr', 'src', '//example.com/logo.png');
+        .should('have.attr', 'src', 'http://example.com/logo.png');
       consentScreen()
         .find('a.theme')
-        .should('have.attr', 'href', '//example.com/privacy');
+        .should('have.attr', 'href', 'http://example.com/privacy');
     });
 
     it('biometric_kyc: renders a relative logo and policy link', () => {
@@ -325,10 +325,18 @@ describe('configuration rendering', () => {
 
       consentScreen()
         .find('img[width="50"]')
-        .should('have.attr', 'src', '/img/logo.png');
+        .should(
+          'have.attr',
+          'src',
+          `${Cypress.config('baseUrl')}/img/logo.png`,
+        );
       consentScreen()
         .find('a.theme')
-        .should('have.attr', 'href', 'privacy.html');
+        .should(
+          'have.attr',
+          'href',
+          `${Cypress.config('baseUrl')}/privacy.html`,
+        );
     });
 
     it('biometric_kyc: renders a data: image logo', () => {

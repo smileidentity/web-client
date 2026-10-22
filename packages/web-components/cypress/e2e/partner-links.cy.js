@@ -1,6 +1,7 @@
 /**
- * Partner logo and policy links are shown when they are http(s) URLs, or for
- * the logo a data: image URL, and left out otherwise.
+ * Partner logo and policy links are shown, resolved against the page, when
+ * they are http(s) URLs, or for the logo a data: image URL, and left out
+ * otherwise. The specs run on an http: page.
  */
 
 const LOGO = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
@@ -26,7 +27,7 @@ context('Partner links', () => {
 
     consent().find('img.partner-logo').should('have.attr', 'src', LOGO);
     consent().find('.ess-consent .learn-more').click();
-    policyLink().should('have.attr', 'href', '//example.com/privacy');
+    policyLink().should('have.attr', 'href', 'http://example.com/privacy');
   });
 
   it('consent screen shows a protocol-relative logo', () => {
@@ -37,7 +38,7 @@ context('Partner links', () => {
 
     consent()
       .find('img.partner-logo')
-      .should('have.attr', 'src', '//example.com/logo.png');
+      .should('have.attr', 'src', 'http://example.com/logo.png');
   });
 
   it('consent screen leaves out a data:text/html logo and a javascript: policy link', () => {
@@ -69,7 +70,7 @@ context('Partner links', () => {
       .shadow()
       .find('selfie-capture-screens')
       .should('have.attr', 'partner-logo', LOGO)
-      .and('have.attr', 'policy-url', '//example.com/privacy');
+      .and('have.attr', 'policy-url', 'http://example.com/privacy');
   });
 
   it('smart-camera-web leaves out a data:text/html logo and a javascript: policy link', () => {

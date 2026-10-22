@@ -1,4 +1,4 @@
-import validate from '@smileid/web-components/validate';
+import validate, { safeHttpUrl } from '@smileid/web-components/validate';
 import {
   setCurrentLocale,
   translate,
@@ -435,12 +435,12 @@ function getHumanSize(numberOfBytes) {
     list.innerHTML = `
       <ul class="document-list">
         ${documents
-          .map(
-            (document) =>
-              `
+          .map((document) => {
+            const link = safeHttpUrl(document.link);
+            return `
                 <li>
                   <a
-                    href="${escapeHtml(document.link)}"
+                    ${link ? `href="${escapeHtml(link)}"` : ''}
                     target="_blank"
                   >
                     <div class="document-meta">
@@ -460,8 +460,8 @@ function getHumanSize(numberOfBytes) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="19" fill="none"><path stroke="#2D2B2A" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.118 1.5v12.235m0 0L1.94 9.227m5.177 4.508 5.176-4.508M1 17.5h12.235"/></svg>
                   </a>
                 </li>
-              `,
-          )
+              `;
+          })
           .join('\n')}
       </ul>
     `;

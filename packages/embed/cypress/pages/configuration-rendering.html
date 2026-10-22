@@ -26,9 +26,14 @@
       //   product   - the product to load, or `product_selection` for id_types
       //   variant   - `markup` puts markup and quote characters in every
       //               rendered configuration value; `plain` uses normal values
+      //   links     - with `markup`: `quoted` uses http(s) links that contain
+      //               quote characters; otherwise the links have other forms
+      //   logo, theme - with `plain`: the logo URL and theme colour to use
+      //   language  - the translation language, `en-GB` by default
       const params = new URLSearchParams(window.location.search);
       const product = params.get('product');
       const markup = params.get('variant') === 'markup';
+      const language = params.get('language') || 'en-GB';
 
       // Any of these running sets localStorage.configMarker, which the
       // spec checks for.
@@ -40,23 +45,31 @@
       const partnerDetails = markup
         ? {
             name: `Acme ${tags} ${quotes}`,
-            logo_url: `x' onerror='${run}' data-a='`,
+            ...(params.get('links') === 'quoted'
+              ? {
+                  logo_url: `https://example.com/logo' onerror='${run}' data-a='x`,
+                  policy_url: `https://example.com/policy' onfocus='${run}' autofocus data-a='x`,
+                }
+              : {
+                  logo_url: `x' onerror='${run}' data-a='`,
+                  policy_url: `javascript:${run}`,
+                }),
             partner_id: '007',
-            policy_url: `javascript:${run}`,
             theme_color: `#000' data-a='"></style><img src="x" onerror="${run}">`,
           }
         : {
             name: "Test Org & Sons' Ltd",
-            logo_url: 'https://portal.usesmileid.com/favicon.ico',
+            logo_url:
+              params.get('logo') || 'https://portal.usesmileid.com/favicon.ico',
             partner_id: '007',
             policy_url: 'https://usesmileid.com/privacy-policy',
-            theme_color: '#000',
+            theme_color: params.get('theme') || '#000',
           };
 
       const translation = {
-        language: 'en-GB',
+        language,
         locales: {
-          'en-GB': {
+          [language]: {
             ...(markup ? { direction: `ltr' data-a='${run}` } : {}),
             camera: { permission: { description: text } },
             common: { allow: text, back: text, cancel: text },

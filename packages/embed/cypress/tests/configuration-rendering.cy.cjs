@@ -7,8 +7,10 @@ const RUN = 'localStorage.configMarker=1';
 const TEXT = `Acme <img src="x" onerror="${RUN}"><script>${RUN}</script><b class="config-markup">b</b> x" onfocus="${RUN}" autofocus data-a="x' onfocus='${RUN}' autofocus data-b='`;
 const PLAIN_TEXT = 'Allow & continue';
 
-const visit = (product, variant) =>
-  cy.visit(`/configuration-rendering?product=${product}&variant=${variant}`);
+const visit = (product, variant, extra = {}) =>
+  cy.visit(
+    `/configuration-rendering?${new URLSearchParams({ product, variant, ...extra })}`,
+  );
 
 const consentScreen = () =>
   cy.getIFrameBody().find('end-user-consent').shadow();
@@ -60,6 +62,7 @@ describe('configuration rendering', () => {
       { hostname: /^(testapi|api|example)\.smileidentity\.com$/ },
       { statusCode: 404 },
     );
+    cy.intercept({ hostname: 'example.com' }, { statusCode: 404 });
     cy.loadIDOptions();
     cy.intercept('GET', '*v1/documents**', {
       statusCode: 200,
@@ -94,6 +97,29 @@ describe('configuration rendering', () => {
 
         expectOnlyText();
       });
+    });
+
+    it('biometric_kyc: renders http(s) partner links with quote characters as given', () => {
+      const logo = `https://example.com/logo' onerror='${RUN}' data-a='x`;
+      const policy = `https://example.com/policy' onfocus='${RUN}' autofocus data-a='x`;
+      visit('biometric_kyc', 'markup', { links: 'quoted' });
+      cy.selectBVNIDType();
+
+      consentScreen()
+        .find('img[width="50"]')
+        .should(($img) => {
+          expect($img.attr('src')).to.eq(logo);
+          expect($img.attr('onerror')).to.eq(undefined);
+        });
+      consentScreen()
+        .find('a.theme')
+        .should(($link) => {
+          expect($link.attr('href')).to.eq(policy);
+          expect($link.attr('onfocus')).to.eq(undefined);
+          expect($link.attr('autofocus')).to.eq(undefined);
+        });
+
+      expectOnlyText();
     });
 
     it('biometric_kyc: renders the camera screens values as text', () => {
@@ -133,10 +159,30 @@ describe('configuration rendering', () => {
       expectOnlyText();
     });
 
-    it('e_signature: renders values as text', () => {
+    it('e_signature: renders values and document details as text', () => {
+      const link = `https://example.com/doc' onfocus='${RUN}' autofocus data-a='x`;
+      cy.intercept('GET', '*v1/documents**', {
+        statusCode: 200,
+        body: {
+          documents: [
+            { id: '1', link, name: TEXT, size: 1 },
+            { id: '2', link: `javascript:${RUN}`, name: TEXT, size: 1 },
+          ],
+        },
+      });
       visit('e_signature', 'markup');
 
       cy.getIFrameBody().find('#entry-screen').should('be.visible');
+      cy.getIFrameBody()
+        .find('#document-review-screen .document-list a')
+        .should('have.length', 2)
+        .then(($links) => {
+          expect($links.eq(0).attr('href')).to.eq(link);
+          expect($links.eq(1).attr('href')).to.eq(undefined);
+          $links.each((_, el) => {
+            expect(el.querySelector('.flow p').textContent).to.eq(TEXT);
+          });
+        });
       expectOnlyText();
     });
 
@@ -152,6 +198,56 @@ describe('configuration rendering', () => {
           'iframe[data-cy="smile-identity-hosted-web-integration-post-product-selection"]',
         )
         .should('have.attr', 'src', 'http://localhost:8000/biometric-kyc.html');
+      expectOnlyText();
+    });
+  });
+
+  describe('with an identity provider sign-in', () => {
+    it('enhanced_kyc: opens the sign-in link only when it is http(s)', () => {
+      cy.fixture('services.json').then((services) => {
+        services.hosted_web.enhanced_kyc.ET = {
+          name: 'Ethiopia',
+          id_types: {
+            NATIONAL_ID: {
+              required_fields: ['country', 'id_type', 'user_id', 'job_id'],
+              label: 'National ID',
+            },
+          },
+        };
+        cy.intercept('GET', '**/v1/services?locale=en-GB', services);
+      });
+      cy.fixture('products_config.json').then((productsConfig) => {
+        productsConfig.idSelection.enhanced_kyc.ET = ['NATIONAL_ID'];
+        cy.intercept('POST', '**/v1/products_config', productsConfig);
+      });
+      cy.intercept('POST', '**/v2/oidc/authorize_url', {
+        authorize_url: `javascript:${RUN}`,
+        state: 'state',
+        expires_in: 600,
+      });
+      visit('enhanced_kyc', 'plain');
+
+      cy.getIFrameBody().find('#country').select('ET');
+      cy.getIFrameBody().find('#id_type').select('NATIONAL_ID');
+      cy.getIFrameBody().find('#submitConfig').click();
+      cy.getIFrameBody().find('#oidc-error').should('be.visible');
+
+      const popup = {
+        closed: false,
+        location: {},
+        focus() {},
+        close() {
+          this.closed = true;
+        },
+      };
+      cy.get('iframe[data-cy="smile-identity-hosted-web-integration"]')
+        .its('0.contentWindow')
+        .then((win) => cy.stub(win, 'open').returns(popup));
+      cy.getIFrameBody().find('#oidc-continue-button').click();
+
+      cy.getIFrameBody().find('#oidc-error').should('be.visible');
+      cy.wrap(popup).its('closed').should('eq', true);
+      cy.wrap(popup).its('location').should('deep.eq', {});
       expectOnlyText();
     });
   });
@@ -193,6 +289,41 @@ describe('configuration rendering', () => {
         .then((text) => expect(text.trim()).to.eq(PLAIN_TEXT));
 
       expectOnlyText();
+    });
+
+    it('biometric_kyc: renders a named theme colour', () => {
+      visit('biometric_kyc', 'plain', { theme: 'red' });
+      cy.selectBVNIDType();
+
+      consentScreen()
+        .find('#back-button path')
+        .eq(1)
+        .should('have.attr', 'fill', 'red');
+    });
+
+    it('biometric_kyc: renders a protocol-relative logo URL', () => {
+      visit('biometric_kyc', 'plain', { logo: '//example.com/logo.png' });
+      cy.selectBVNIDType();
+
+      consentScreen()
+        .find('img[width="50"]')
+        .should('have.attr', 'src', '//example.com/logo.png');
+    });
+
+    it('biometric_kyc: leaves out a path-relative logo URL', () => {
+      visit('biometric_kyc', 'plain', { logo: '/img/logo.png' });
+      cy.selectBVNIDType();
+
+      consentScreen().find('#consent-screen').should('be.visible');
+      consentScreen().find('img[width="50"]').should('not.exist');
+    });
+
+    it('biometric_kyc: renders right to left for ar-EG', () => {
+      cy.loadIDOptions('**/v1', 'ar-EG');
+      visit('biometric_kyc', 'plain', { language: 'ar-EG' });
+      cy.selectBVNIDType();
+
+      consentScreen().find('#consent-screen').should('have.attr', 'dir', 'rtl');
     });
 
     it('doc_verification: renders the selection screen as before', () => {

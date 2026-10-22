@@ -449,7 +449,9 @@ export function setDocumentDir(lang) {
  * @returns {string} Direction ('ltr' or 'rtl'), defaults to 'ltr'
  */
 export function getDirection() {
-  return locales[currentLocale]?.direction === 'rtl' ? 'rtl' : 'ltr';
+  return String(locales[currentLocale]?.direction).toLowerCase() === 'rtl'
+    ? 'rtl'
+    : 'ltr';
 }
 
 export default {

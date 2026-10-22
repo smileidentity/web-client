@@ -28,7 +28,8 @@
       //               rendered configuration value; `plain` uses normal values
       //   links     - with `markup`: `quoted` uses http(s) links that contain
       //               quote characters; otherwise the links have other forms
-      //   logo, theme - with `plain`: the logo URL and theme colour to use
+      //   logo, policy, theme - with `plain`: the logo URL, policy URL and
+      //               theme colour to use
       //   language  - the translation language, `en-GB` by default
       const params = new URLSearchParams(window.location.search);
       const product = params.get('product');
@@ -51,8 +52,8 @@
                   policy_url: `https://example.com/policy' onfocus='${run}' autofocus data-a='x`,
                 }
               : {
-                  logo_url: `x' onerror='${run}' data-a='`,
-                  policy_url: `javascript:${run}`,
+                  logo_url: `data:text/html,<img src="x" onerror="${run}">`,
+                  policy_url: `JavaScript:${run}`,
                 }),
             partner_id: '007',
             theme_color: `#000' data-a='"></style><img src="x" onerror="${run}">`,
@@ -62,7 +63,8 @@
             logo_url:
               params.get('logo') || 'https://portal.usesmileid.com/favicon.ico',
             partner_id: '007',
-            policy_url: 'https://usesmileid.com/privacy-policy',
+            policy_url:
+              params.get('policy') || 'https://usesmileid.com/privacy-policy',
             theme_color: params.get('theme') || '#000',
           };
 

@@ -301,21 +301,54 @@ describe('configuration rendering', () => {
         .should('have.attr', 'fill', 'red');
     });
 
-    it('biometric_kyc: renders a protocol-relative logo URL', () => {
-      visit('biometric_kyc', 'plain', { logo: '//example.com/logo.png' });
+    it('biometric_kyc: renders a protocol-relative logo and policy link', () => {
+      visit('biometric_kyc', 'plain', {
+        logo: '//example.com/logo.png',
+        policy: '//example.com/privacy',
+      });
       cy.selectBVNIDType();
 
       consentScreen()
         .find('img[width="50"]')
         .should('have.attr', 'src', '//example.com/logo.png');
+      consentScreen()
+        .find('a.theme')
+        .should('have.attr', 'href', '//example.com/privacy');
     });
 
-    it('biometric_kyc: leaves out a path-relative logo URL', () => {
-      visit('biometric_kyc', 'plain', { logo: '/img/logo.png' });
+    it('biometric_kyc: renders a relative logo and policy link', () => {
+      visit('biometric_kyc', 'plain', {
+        logo: '/img/logo.png',
+        policy: 'privacy.html',
+      });
+      cy.selectBVNIDType();
+
+      consentScreen()
+        .find('img[width="50"]')
+        .should('have.attr', 'src', '/img/logo.png');
+      consentScreen()
+        .find('a.theme')
+        .should('have.attr', 'href', 'privacy.html');
+    });
+
+    it('biometric_kyc: renders a data: image logo', () => {
+      const logo = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+      visit('biometric_kyc', 'plain', { logo });
+      cy.selectBVNIDType();
+
+      consentScreen().find('img[width="50"]').should('have.attr', 'src', logo);
+    });
+
+    it('biometric_kyc: leaves out a data:text/html logo and a javascript: policy link', () => {
+      visit('biometric_kyc', 'plain', {
+        logo: 'data:text/html,<p>x</p>',
+        policy: ' JavaScript:void(0)',
+      });
       cy.selectBVNIDType();
 
       consentScreen().find('#consent-screen').should('be.visible');
       consentScreen().find('img[width="50"]').should('not.exist');
+      consentScreen().find('a.theme').should('not.exist');
     });
 
     it('biometric_kyc: renders right to left for ar-EG', () => {

@@ -60,6 +60,8 @@ The SDK uses a 3-level fallback chain for translations:
 
 This ensures the UI always displays something meaningful, even if a translation is missing.
 
+Translations are shown as plain text. Markup and HTML entities such as `&nbsp;` in a translation appear as written.
+
 ---
 
 ## Available Languages

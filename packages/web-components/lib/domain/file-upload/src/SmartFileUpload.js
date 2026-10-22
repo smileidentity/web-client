@@ -1,4 +1,4 @@
-import { t, tHtml } from '../../localisation';
+import { t } from '../../localisation';
 
 class SmartFileUpload {
   static memoryLimit = 10240000;
@@ -48,7 +48,7 @@ class SmartFileUpload {
 
     if (file.size > SmartFileUpload.memoryLimit) {
       throw new Error(
-        tHtml('fileUpload.error.fileTooLarge', {
+        t('fileUpload.error.fileTooLarge', {
           filename: file.name,
           size: SmartFileUpload.getHumanSize(SmartFileUpload.memoryLimit),
         }),

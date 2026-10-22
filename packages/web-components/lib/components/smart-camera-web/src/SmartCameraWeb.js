@@ -1,4 +1,5 @@
 import styles from '../../../styles/src/styles';
+import { safeCssColor, safeHttpUrl } from '../../../utils/safe-values';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import '../../document/src';
@@ -354,28 +355,21 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get partnerLogo() {
-    return this.hasAttribute('partner-logo')
-      ? `partner-logo="${escAttr(this.getAttribute('partner-logo'))}"`
-      : '';
+    const url = safeHttpUrl(this.getAttribute('partner-logo'));
+    return url ? `partner-logo="${escAttr(url)}"` : '';
   }
 
   get policyUrl() {
-    return this.hasAttribute('policy-url')
-      ? `policy-url="${escAttr(this.getAttribute('policy-url'))}"`
-      : '';
+    const url = safeHttpUrl(this.getAttribute('policy-url'));
+    return url ? `policy-url="${escAttr(url)}"` : '';
   }
 
   get hasThemeColor() {
-    return (
-      this.hasAttribute('theme-color') &&
-      ![null, undefined, 'null', 'undefined'].includes(
-        this.getAttribute('theme-color'),
-      )
-    );
+    return !!safeCssColor(this.getAttribute('theme-color'));
   }
 
   get themeColor() {
-    return this.hasThemeColor ? this.getAttribute('theme-color') : '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get applyComponentThemeColor() {

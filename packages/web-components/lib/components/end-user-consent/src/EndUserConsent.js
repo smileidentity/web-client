@@ -2,7 +2,11 @@ import styles from '../../../styles/src/styles';
 import '../../totp-consent/src/TotpConsent';
 import '../../attribution/PoweredBySmileId';
 import { escapeHtml, tHtml, getDirection } from '../../../domain/localisation';
-import { safeCssColor, safeHttpUrl } from '../../../utils/safe-values';
+import {
+  safeCssColor,
+  safeHttpUrl,
+  safeImageUrl,
+} from '../../../utils/safe-values';
 
 function templateString() {
   return `
@@ -712,7 +716,7 @@ class EndUserConsent extends HTMLElement {
   }
 
   get partnerLogoURL() {
-    return safeHttpUrl(this.getAttribute('partner-logo'));
+    return safeImageUrl(this.getAttribute('partner-logo'));
   }
 
   get partnerPolicyURL() {

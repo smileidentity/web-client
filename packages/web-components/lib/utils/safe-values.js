@@ -6,13 +6,33 @@
  * @returns {string|undefined} The URL or undefined
  */
 export function safeHttpUrl(value) {
-  if (typeof value !== 'string' || !value) return undefined;
+  if (typeof value !== 'string' || !value.trim()) return undefined;
   try {
     const { protocol } = new URL(value, globalThis.document?.baseURI);
     return protocol === 'https:' || protocol === 'http:' ? value : undefined;
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Returns an image URL, such as a partner logo, when safeHttpUrl() keeps it or
+ * when it is a data: URL with an image media type, which an image element
+ * only ever shows as a picture. Otherwise returns undefined.
+ * @param {*} value - Candidate URL
+ * @returns {string|undefined} The URL or undefined
+ */
+export function safeImageUrl(value) {
+  if (typeof value !== 'string') return undefined;
+  try {
+    const { protocol, pathname } = new URL(value);
+    if (protocol === 'data:' && /^image\/[\w.+-]+[;,]/i.test(pathname)) {
+      return value;
+    }
+  } catch {
+    // Not an absolute URL, so not a data: URL either.
+  }
+  return safeHttpUrl(value);
 }
 
 /**

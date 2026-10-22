@@ -1,7 +1,7 @@
 // Run: node --test packages/web-components/lib/utils/safe-values.test.mjs
 import test from 'node:test';
 import assert from 'node:assert';
-import { safeCssColor, safeHttpUrl } from './safe-values.js';
+import { safeCssColor, safeHttpUrl, safeImageUrl } from './safe-values.js';
 
 test('safeHttpUrl keeps absolute http(s) URLs as given', () => {
   [
@@ -21,11 +21,21 @@ test('safeHttpUrl drops anything that is not an http(s) URL', () => {
     'data:text/html,<p>x</p>',
     'vbscript:x',
     ' javascript:x',
+    'JaVaScRiPt:alert(1)',
     'java\tscript:x',
+    '   ',
+    'https://',
+    'http://[::1',
+    'https://exa mple.com/',
     // No page address to resolve against outside a browser.
     '/relative/logo.png',
     'logo.png',
   ].forEach((value) => assert.strictEqual(safeHttpUrl(value), undefined));
+});
+
+test('safeHttpUrl keeps whitespace-padded http(s) URLs', () => {
+  const url = '  https://example.com/logo.png\n';
+  assert.strictEqual(safeHttpUrl(url), url);
 });
 
 test('safeHttpUrl keeps relative URLs that resolve to http(s) on the page', () => {
@@ -35,7 +45,9 @@ test('safeHttpUrl keeps relative URLs that resolve to http(s) on the page', () =
     ['/img/logo.png', 'logo.png', '//cdn.example.com/logo.png'].forEach((url) =>
       assert.strictEqual(safeHttpUrl(url), url),
     );
-    assert.strictEqual(safeHttpUrl('javascript:x'), undefined);
+    ['javascript:x', ' JavaScript:x ', 'https://', 'http://[::1'].forEach(
+      (value) => assert.strictEqual(safeHttpUrl(value), undefined),
+    );
   } finally {
     globalThis.document = original;
   }
@@ -45,6 +57,59 @@ test('safeHttpUrl keeps quotes in a valid URL for the caller to escape', () => {
   // The URL parser accepts this, so callers must still escape it in markup.
   const url = "https://example.com/a' b";
   assert.strictEqual(safeHttpUrl(url), url);
+});
+
+test('safeImageUrl keeps http(s) URLs and data: image URLs', () => {
+  [
+    'https://portal.usesmileid.com/favicon.ico',
+    'http://example.com/logo.png',
+    'data:image/png;base64,iVBORw0KGgo=',
+    'data:image/jpeg;base64,/9j/4AAQ',
+    'data:image/gif;base64,R0lGODlh',
+    'data:image/webp;base64,UklGRg==',
+    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+    'DATA:IMAGE/PNG;base64,iVBORw0KGgo=',
+    ' data:image/png;base64,iVBORw0KGgo= ',
+  ].forEach((url) => assert.strictEqual(safeImageUrl(url), url));
+});
+
+test('safeImageUrl drops other data: URLs and non-http(s) URLs', () => {
+  [
+    undefined,
+    null,
+    '',
+    '   ',
+    42,
+    'data:text/html,<p>x</p>',
+    'data:text/html;base64,PHA+eDwvcD4=',
+    'data:,x',
+    'data:image,x',
+    'data:image/,x',
+    'data: image/png,x',
+    'data:application/xml,<x/>',
+    'javascript:alert(1)',
+    'JaVaScRiPt:alert(1)',
+    ' javascript:x',
+    'vbscript:x',
+    'blob:https://example.com/1',
+    'https://',
+    'http://[::1',
+  ].forEach((value) => assert.strictEqual(safeImageUrl(value), undefined));
+});
+
+test('safeImageUrl keeps relative and protocol-relative URLs on the page', () => {
+  const original = globalThis.document;
+  globalThis.document = { baseURI: 'https://partner.example/app/' };
+  try {
+    ['/img/logo.png', 'logo.png', '//cdn.example.com/logo.png'].forEach((url) =>
+      assert.strictEqual(safeImageUrl(url), url),
+    );
+    ['data:text/html,x', 'javascript:x', 'blob:x'].forEach((value) =>
+      assert.strictEqual(safeImageUrl(value), undefined),
+    );
+  } finally {
+    globalThis.document = original;
+  }
 });
 
 test('safeCssColor keeps colour values', () => {

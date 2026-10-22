@@ -1,5 +1,9 @@
 import styles from '../../../styles/src/styles';
-import { safeCssColor, safeHttpUrl } from '../../../utils/safe-values';
+import {
+  safeCssColor,
+  safeHttpUrl,
+  safeImageUrl,
+} from '../../../utils/safe-values';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 
 import '../../document/src';
@@ -355,7 +359,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get partnerLogo() {
-    const url = safeHttpUrl(this.getAttribute('partner-logo'));
+    const url = safeImageUrl(this.getAttribute('partner-logo'));
     return url ? `partner-logo="${escAttr(url)}"` : '';
   }
 

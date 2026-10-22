@@ -10,7 +10,7 @@ test('safeHttpUrl keeps absolute http(s) URLs as given', () => {
   ].forEach((url) => assert.strictEqual(safeHttpUrl(url), url));
 });
 
-test('safeHttpUrl drops anything that is not an absolute http(s) URL', () => {
+test('safeHttpUrl drops anything that is not an http(s) URL', () => {
   [
     undefined,
     null,
@@ -20,9 +20,25 @@ test('safeHttpUrl drops anything that is not an absolute http(s) URL', () => {
     'JAVASCRIPT:alert(1)',
     'data:text/html,<p>x</p>',
     'vbscript:x',
+    ' javascript:x',
+    'java\tscript:x',
+    // No page address to resolve against outside a browser.
     '/relative/logo.png',
     'logo.png',
   ].forEach((value) => assert.strictEqual(safeHttpUrl(value), undefined));
+});
+
+test('safeHttpUrl keeps relative URLs that resolve to http(s) on the page', () => {
+  const original = globalThis.document;
+  globalThis.document = { baseURI: 'https://partner.example/app/' };
+  try {
+    ['/img/logo.png', 'logo.png', '//cdn.example.com/logo.png'].forEach((url) =>
+      assert.strictEqual(safeHttpUrl(url), url),
+    );
+    assert.strictEqual(safeHttpUrl('javascript:x'), undefined);
+  } finally {
+    globalThis.document = original;
+  }
 });
 
 test('safeHttpUrl keeps quotes in a valid URL for the caller to escape', () => {

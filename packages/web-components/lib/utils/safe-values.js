@@ -1,13 +1,14 @@
 /**
- * Returns the value only when it is an absolute http(s) URL, otherwise
- * undefined.
+ * Returns the value only when it is an http(s) URL, otherwise undefined.
+ * Relative and protocol-relative URLs are checked against the page address,
+ * the same way the browser resolves them.
  * @param {*} value - Candidate URL
  * @returns {string|undefined} The URL or undefined
  */
 export function safeHttpUrl(value) {
   if (typeof value !== 'string' || !value) return undefined;
   try {
-    const { protocol } = new URL(value);
+    const { protocol } = new URL(value, globalThis.document?.baseURI);
     return protocol === 'https:' || protocol === 'http:' ? value : undefined;
   } catch {
     return undefined;

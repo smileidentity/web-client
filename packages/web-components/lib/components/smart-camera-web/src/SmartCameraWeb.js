@@ -1,7 +1,7 @@
 import styles from '../../../styles/src/styles';
 import {
   safeCssColor,
-  safeHttpUrl,
+  safeLinkUrl,
   safeImageUrl,
 } from '../../../utils/safe-values';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
@@ -364,7 +364,7 @@ class SmartCameraWeb extends HTMLElement {
   }
 
   get policyUrl() {
-    const url = safeHttpUrl(this.getAttribute('policy-url'));
+    const url = safeLinkUrl(this.getAttribute('policy-url'));
     return url ? `policy-url="${escAttr(url)}"` : '';
   }
 

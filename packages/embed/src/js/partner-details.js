@@ -1,6 +1,6 @@
 import {
   safeCssColor,
-  safeHttpUrl,
+  safeLinkUrl,
   safeImageUrl,
 } from '@smileid/web-components/validate';
 
@@ -41,7 +41,7 @@ export default function withCheckedPartnerDetails(config) {
       policy_url: partnerUrl(
         details,
         'policy_url',
-        safeHttpUrl,
+        safeLinkUrl,
         'an http(s) URL',
       ),
       theme_color: safeCssColor(details.theme_color),

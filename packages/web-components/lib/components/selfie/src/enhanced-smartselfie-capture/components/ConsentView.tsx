@@ -1,7 +1,7 @@
 import type { FunctionComponent } from 'preact';
 import { useState } from 'preact/hooks';
 import { t } from '../../../../../domain/localisation';
-import { safeHttpUrl, safeImageUrl } from '../../../../../utils/safe-values';
+import { safeLinkUrl, safeImageUrl } from '../../../../../utils/safe-values';
 import {
   SmileIdLogo,
   CheckIcon,
@@ -54,7 +54,7 @@ export const ConsentView: FunctionComponent<ConsentViewProps> = ({
   const [accepted, setAccepted] = useState(false);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const partner = partnerName;
-  const safePolicyUrl = safeHttpUrl(policyUrl);
+  const safePolicyUrl = safeLinkUrl(policyUrl);
   const safePartnerLogo = safeImageUrl(partnerLogo);
 
   return (

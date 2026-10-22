@@ -4,7 +4,7 @@ import '../../attribution/PoweredBySmileId';
 import { escapeHtml, tHtml, getDirection } from '../../../domain/localisation';
 import {
   safeCssColor,
-  safeHttpUrl,
+  safeLinkUrl,
   safeImageUrl,
 } from '../../../utils/safe-values';
 
@@ -720,7 +720,7 @@ class EndUserConsent extends HTMLElement {
   }
 
   get partnerPolicyURL() {
-    return safeHttpUrl(this.getAttribute('policy-url'));
+    return safeLinkUrl(this.getAttribute('policy-url'));
   }
 
   get themeColor() {

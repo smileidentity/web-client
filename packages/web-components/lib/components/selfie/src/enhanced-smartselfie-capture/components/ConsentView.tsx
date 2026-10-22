@@ -1,6 +1,7 @@
 import type { FunctionComponent } from 'preact';
 import { useState } from 'preact/hooks';
 import { t } from '../../../../../domain/localisation';
+import { safeHttpUrl } from '../../../../../utils/safe-values';
 import {
   SmileIdLogo,
   CheckIcon,
@@ -34,26 +35,6 @@ const ITEMS: { icon: string; key: string }[] = [
   { icon: idCardIcon, key: 'selfie.ess.consent.items.biometric' },
   { icon: deviceIcon, key: 'selfie.ess.consent.items.device' },
 ];
-
-/**
- * Returns the input only if it is a syntactically valid absolute URL whose
- * protocol is `http:` or `https:`. Anything else (including `javascript:`,
- * `data:`, malformed strings, or non-strings) is rejected. This prevents a
- * malicious partner config from injecting an XSS vector through props that
- * are rendered as `href`/`src`.
- */
-const safeHttpUrl = (value?: string): string | undefined => {
-  if (typeof value !== 'string' || value.length === 0) return undefined;
-  try {
-    const parsed = new URL(value);
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
-      return parsed.toString();
-    }
-  } catch {
-    /* fall through */
-  }
-  return undefined;
-};
 
 /**
  * Strict-mode consent screen rendered as the first step of the Enhanced

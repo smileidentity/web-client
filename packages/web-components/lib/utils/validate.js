@@ -69,3 +69,7 @@ export default function validate(values, constraints) {
 
   return Object.keys(errors).length ? errors : undefined;
 }
+
+// The extension lets `node --test` load this file directly.
+// eslint-disable-next-line import/extensions
+export { safeHttpUrl, safeCssColor } from './safe-values.js';

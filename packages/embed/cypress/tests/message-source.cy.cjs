@@ -132,11 +132,60 @@ describe('web integration - message source', () => {
     cy.get('.callback-message').should('not.exist');
 
     // The flow's own messages still reach the host.
-    cy.getIFrameBody().find('#select-id-type .close-iframe').click();
-    cy.get(sdkFrame).should('not.exist');
+    cy.get(sdkFrame)
+      .its('0.contentWindow')
+      .then((flowWindow) => {
+        cy.getIFrameBody().find('#select-id-type .close-iframe').click();
+        cy.get(sdkFrame).should('not.exist');
+
+        // On a top-level host, the product page's Close arrives twice from
+        // the same window. The second copy does nothing.
+        cy.window().then((win) => {
+          dispatchMessage(
+            win,
+            'SmileIdentity::Close',
+            flowWindow,
+            win.location.origin,
+          );
+        });
+      });
     cy.get('.callback-message')
       .should('have.length', 1)
       .and('have.text', 'onClose');
+  });
+
+  it('fires only the callbacks of the SmileIdentity() call whose flow closed', () => {
+    cy.visit('/message_source');
+    cy.getIFrameBody().find('#select-id-type .close-iframe').click();
+    cy.get(sdkFrame).should('not.exist');
+
+    cy.window().invoke('openSecondFlow');
+    cy.getIFrameBody().find('#select-id-type .close-iframe').click();
+    cy.get(sdkFrame).should('not.exist');
+    letMessagesLand();
+
+    cy.get('.callback-message').then((messages) => {
+      expect([...messages].map((message) => message.textContent)).to.deep.equal(
+        ['onClose', 'second onClose'],
+      );
+    });
+  });
+
+  it('accepts messages from the https form of an http SDK origin', () => {
+    cy.visit('/message_source');
+    cy.getIFrameBody().find('#select-id-type').should('be.visible');
+
+    cy.window().then((win) => {
+      dispatchMessage(
+        win,
+        'SmileIdentity::Close',
+        win.document.querySelector(sdkFrame).contentWindow,
+        win.location.origin.replace(/^http:/, 'https:'),
+      );
+    });
+
+    cy.get(sdkFrame).should('not.exist');
+    cy.get('.callback-message').should('have.text', 'onClose');
   });
 
   Object.entries(productPages).forEach(([page, hostPage]) => {

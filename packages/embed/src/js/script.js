@@ -355,34 +355,39 @@ window.SmileIdentity = (function () {
           return false;
         };
 
-        window.addEventListener(
-          'message',
-          (event) => {
-            if (!isFromFlow(event)) return undefined;
+        const onMessage = (event) => {
+          if (!isFromFlow(event)) return undefined;
 
-            const tag = event.data.message || event.data;
+          const tag = event.data.message || event.data;
 
-            switch (tag) {
-              case 'SmileIdentity::ChildPageReady':
-                // event.origin has just passed isFromFlow.
-                return publishConfigToIFrame(config, iframe, event.origin);
-              case 'SmileIdentity::Close':
-                return closeIFrame(config, iframe, true);
-              case 'SmileIdentity::Close::System':
-                return closeIFrame(config, iframe, false);
-              case 'SmileIdentity::Success':
-                return handleSuccess(config);
-              case 'SmileIdentity::ConsentDenied':
-              case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
-                return handleConsentRejection(config, event.data);
-              case 'SmileIdentity::Error':
-                return handleError(config, event.data);
-              default:
-                return undefined;
-            }
-          },
-          false,
-        );
+          switch (tag) {
+            case 'SmileIdentity::ChildPageReady':
+              // event.origin has just passed isFromFlow.
+              return publishConfigToIFrame(config, iframe, event.origin);
+            case 'SmileIdentity::Close':
+            case 'SmileIdentity::Close::System':
+              // Product pages post Close to both their parent and its
+              // parent, which are the same window on a top-level host.
+              // Stop listening so each close runs once.
+              window.removeEventListener('message', onMessage);
+              return closeIFrame(
+                config,
+                iframe,
+                tag === 'SmileIdentity::Close',
+              );
+            case 'SmileIdentity::Success':
+              return handleSuccess(config);
+            case 'SmileIdentity::ConsentDenied':
+            case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
+              return handleConsentRejection(config, event.data);
+            case 'SmileIdentity::Error':
+              return handleError(config, event.data);
+            default:
+              return undefined;
+          }
+        };
+
+        window.addEventListener('message', onMessage, false);
       }
     } catch (error) {
       if (config.onError) {

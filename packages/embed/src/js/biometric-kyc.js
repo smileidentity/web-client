@@ -6,7 +6,6 @@ import '@smileid/web-components/smart-camera-web';
 import {
   setCurrentLocale,
   translate,
-  translateHtml,
   getDirection,
   getCurrentLocale,
 } from '@smileid/web-components/localisation';
@@ -27,6 +26,7 @@ import {
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 import createOidcRedirect from './oidc/oidcRedirect';
 
 initIframeSentry('biometric-kyc');
@@ -241,7 +241,7 @@ window.Sentry = Sentry;
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         // Tag every Sentry event from this iframe context with partner_id and
         // environment. The parent script.js tags the parent window's Sentry
         // hub, but this iframe runs in its own JS context with its own hub —
@@ -764,7 +764,7 @@ window.Sentry = Sentry;
     const label = document.querySelector('[for="id_number"]');
     const input = document.querySelector('#id_number');
 
-    label.innerHTML =
+    label.textContent =
       productConstraints[id_info.country].id_types[id_info.id_type].label;
     input.setAttribute(
       'placeholder',
@@ -891,13 +891,13 @@ window.Sentry = Sentry;
   function getTranslatedValidationMessage(field) {
     const fieldKey = fieldTranslationKeys[field];
     const fieldLabel = fieldKey ? translate(fieldKey) : field;
-    return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+    return translate('pages.validation.isRequired', { field: fieldLabel });
   }
 
   function getTranslatedFormatMessage(field) {
     const fieldKey = fieldTranslationKeys[field];
     const fieldLabel = fieldKey ? translate(fieldKey) : field;
-    return translateHtml('pages.validation.invalidFormat', {
+    return translate('pages.validation.invalidFormat', {
       field: fieldLabel,
     });
   }
@@ -1315,7 +1315,7 @@ window.Sentry = Sentry;
 
         const thankYouMessage =
           CompleteScreen.querySelector('#thank-you-message');
-        thankYouMessage.innerHTML = translateHtml(
+        thankYouMessage.textContent = translate(
           'pages.complete.processingInfo',
           { country: countryName, idType: idTypeName },
         );

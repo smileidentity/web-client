@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Localisation: `tHtml()` and `translateHtml()` now escape the translation as well as the values, so markup in a custom translation shows as text and characters such as `'` and `&` come back as HTML entities. Use `t()` for `textContent` and `setAttribute`, and keep `tHtml()` for `innerHTML`
+
+### Fixed
+
+- Embed and web components: Show translation strings and other configuration values as plain text, and accept only http(s) URLs for partner links, or a data: image URL for the logo, and CSS colours for the theme colour. The embed accepts only absolute or protocol-relative partner links, because its pages are served from the SDK host
+
 ## [11.6.2] - 2026-07-23
 
 ### Fixed

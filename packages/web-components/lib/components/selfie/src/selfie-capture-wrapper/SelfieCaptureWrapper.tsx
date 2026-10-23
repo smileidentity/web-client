@@ -4,7 +4,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
-import { translate, translateHtml } from '../../../../domain/localisation';
+import { translate } from '../../../../domain/localisation';
 import SmartSelfieCapture from '../smartselfie-capture/SmartSelfieCapture';
 import EnhancedSmartSelfieCapture from '../enhanced-smartselfie-capture/EnhancedSmartSelfieCapture';
 // Legacy web component fallback (used when Mediapipe isn't available)
@@ -604,7 +604,7 @@ const SelfieCaptureWrapper: FunctionComponent<Props> = ({
         <p>{translate('selfie.capture.loading.slowConnection')}</p>
       ) : (
         <p>
-          {translateHtml('selfie.capture.loading.progress', {
+          {translate('selfie.capture.loading.progress', {
             progress: loadingProgress,
           })}
         </p>

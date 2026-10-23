@@ -5,7 +5,7 @@ import '@smileid/web-components/end-user-consent';
 import {
   setCurrentLocale,
   translate,
-  translateHtml,
+  escapeHtml,
   getDirection,
   getCurrentLocale,
 } from '@smileid/web-components/localisation';
@@ -24,6 +24,7 @@ import {
 } from './init-api-sentry.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 
 initIframeSentry('basic-kyc');
 
@@ -220,7 +221,7 @@ initIframeSentry('basic-kyc');
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         // Tag every Sentry event from this iframe context with partner_id and
         // environment. The parent script.js tags the parent window's Sentry
         // hub, but this iframe runs in its own JS context with its own hub —
@@ -672,7 +673,7 @@ initIframeSentry('basic-kyc');
     const label = document.querySelector('[for="id_number"]');
     const input = document.querySelector('#id_number');
 
-    label.innerHTML =
+    label.textContent =
       productConstraints[id_info.country].id_types[id_info.id_type].label;
     input.setAttribute(
       'placeholder',
@@ -690,19 +691,19 @@ initIframeSentry('basic-kyc');
     autocomplete.setAttribute('id', 'bank_code');
     autocomplete.innerHTML = `
       <smileid-combobox-trigger
-        label="${translate('pages.idInfo.searchBank')}">
+        label="${escapeHtml(translate('pages.idInfo.searchBank'))}">
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="${translate('pages.idInfo.noBankFound')}">
+      <smileid-combobox-listbox empty-label="${escapeHtml(translate('pages.idInfo.noBankFound'))}">
         ${bankCodes
           .map(
             (bank) =>
               `
                 <smileid-combobox-option
-                  value="${bank.code}"
-                  label="${bank.name}"
+                  value="${escapeHtml(bank.code)}"
+                  label="${escapeHtml(bank.name)}"
                 >
-                  ${bank.name}
+                  ${escapeHtml(bank.name)}
                 </smileid-combobox-option>
               `,
           )
@@ -852,13 +853,13 @@ initIframeSentry('basic-kyc');
   function getTranslatedValidationMessage(field) {
     const fieldKey = fieldTranslationKeys[field];
     const fieldLabel = fieldKey ? translate(fieldKey) : field;
-    return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+    return translate('pages.validation.isRequired', { field: fieldLabel });
   }
 
   function getTranslatedFormatMessage(field) {
     const fieldKey = fieldTranslationKeys[field];
     const fieldLabel = fieldKey ? translate(fieldKey) : field;
-    return translateHtml('pages.validation.invalidFormat', {
+    return translate('pages.validation.invalidFormat', {
       field: fieldLabel,
     });
   }
@@ -1079,13 +1080,10 @@ initIframeSentry('basic-kyc');
       productConstraints[id_info.country].id_types[id_info.id_type].label;
 
     const thankYouMessage = CompleteScreen.querySelector('#thank-you-message');
-    thankYouMessage.textContent = translateHtml(
-      'pages.complete.processingInfo',
-      {
-        country: countryName,
-        idType: idTypeName,
-      },
-    );
+    thankYouMessage.textContent = translate('pages.complete.processingInfo', {
+      country: countryName,
+      idType: idTypeName,
+    });
 
     setActiveScreen(CompleteScreen);
     handleSuccess();

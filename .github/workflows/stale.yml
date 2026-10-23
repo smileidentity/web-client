@@ -2,7 +2,7 @@ name: Flag stale PRs
 
 on:
   schedule:
-    - cron: "30 16 * * *"
+    - cron: 30 16 * * *
   workflow_dispatch:
 
 permissions:

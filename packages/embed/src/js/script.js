@@ -340,8 +340,12 @@ window.SmileIdentity = (function () {
           if (sdkOrigins.includes(event.origin)) return true;
 
           // Report once, so a page served from an unexpected origin shows up
-          // in Sentry rather than as a flow that silently never starts.
-          if (!reportedOriginMismatch) {
+          // in Sentry rather than as a flow that silently never starts. Only
+          // SDK messages count: other frames inside the SDK pages may post too.
+          const data = event.data?.message || event.data;
+          const isSdkMessage =
+            typeof data === 'string' && data.startsWith('SmileIdentity::');
+          if (isSdkMessage && !reportedOriginMismatch) {
             reportedOriginMismatch = true;
             Sentry.captureMessage(
               'SmileIdentity: ignored a message from the SDK iframe with an unexpected origin',

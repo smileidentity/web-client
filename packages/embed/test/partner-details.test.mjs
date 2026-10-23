@@ -29,21 +29,43 @@ test('keeps a data: image logo', (t) => {
   assert.equal(log.mock.callCount(), 0);
 });
 
-test('keeps protocol-relative and relative links on a page', (t) => {
-  const log = t.mock.method(console, 'error', () => {});
+// Runs fn as if in the SDK iframe, whose address is on the SDK host.
+function inIframe(fn) {
   const original = globalThis.document;
-  globalThis.document = { baseURI: 'https://partner.example/app/' };
+  globalThis.document = { baseURI: 'https://cdn.example.com/inline/v1/' };
   try {
-    [
-      { logo_url: '//cdn.example.com/logo.png', policy_url: '//example.com/p' },
-      { logo_url: 'img/logo.png', policy_url: '/privacy' },
-    ].forEach((links) =>
-      assert.deepEqual(check(links), { ...partnerDetails, ...links }),
-    );
-    assert.equal(log.mock.callCount(), 0);
+    fn();
   } finally {
     globalThis.document = original;
   }
+}
+
+test('keeps protocol-relative links', (t) => {
+  const log = t.mock.method(console, 'error', () => {});
+  const links = {
+    logo_url: '//cdn.example.com/logo.png',
+    policy_url: '//example.com/p',
+  };
+  inIframe(() =>
+    assert.deepEqual(check(links), { ...partnerDetails, ...links }),
+  );
+  assert.equal(log.mock.callCount(), 0);
+});
+
+test('drops relative and scheme-less links, which would point at the SDK host', (t) => {
+  const log = t.mock.method(console, 'error', () => {});
+  inIframe(() =>
+    [
+      { logo_url: 'img/logo.png', policy_url: '/privacy' },
+      { logo_url: 'www.example.com/logo.png', policy_url: 'www.example.com/p' },
+      { logo_url: 'https:logo.png', policy_url: 'https:privacy' },
+    ].forEach((links) => {
+      const details = check(links);
+      assert.equal(details.logo_url, '');
+      assert.equal(details.policy_url, '');
+    }),
+  );
+  assert.equal(log.mock.callCount(), 6);
 });
 
 test('drops other links and reports each one', (t) => {

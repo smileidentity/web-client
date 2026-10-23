@@ -316,27 +316,17 @@ describe('configuration rendering', () => {
         .should('have.attr', 'href', 'http://example.com/privacy');
     });
 
-    it('biometric_kyc: renders a relative logo and policy link', () => {
+    // The pages run on the SDK host, so a relative link would point there.
+    it('biometric_kyc: leaves out a relative logo and a scheme-less policy link', () => {
       visit('biometric_kyc', 'plain', {
         logo: '/img/logo.png',
-        policy: 'privacy.html',
+        policy: 'www.example.com/privacy',
       });
       cy.selectBVNIDType();
 
-      consentScreen()
-        .find('img[width="50"]')
-        .should(
-          'have.attr',
-          'src',
-          `${Cypress.config('baseUrl')}/img/logo.png`,
-        );
-      consentScreen()
-        .find('a.theme')
-        .should(
-          'have.attr',
-          'href',
-          `${Cypress.config('baseUrl')}/privacy.html`,
-        );
+      consentScreen().find('#consent-screen').should('be.visible');
+      consentScreen().find('img[width="50"]').should('not.exist');
+      consentScreen().find('a.theme').should('not.exist');
     });
 
     it('biometric_kyc: renders a data: image logo', () => {

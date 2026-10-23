@@ -4,12 +4,14 @@ import {
   safeImageUrl,
 } from '@smileid/web-components/validate';
 
-// Dropped values become '' because the pages set them as attributes, where
-// undefined would become 'undefined', which reads as a relative URL.
-function partnerUrl(details, key, check, expected) {
+// The pages run in an iframe served from the SDK host, where a relative link
+// would point at that host, so a value is kept only when it matches form
+// (absolute or protocol-relative). Dropped values become '' because the pages
+// set them as attributes, where undefined would become 'undefined'.
+function partnerUrl(details, key, form, check, expected) {
   const value = details[key];
   if (!value) return '';
-  if (check(value)) return value;
+  if (form.test(value) && check(value)) return value;
   console.error(
     `SmileIdentity: partner_details.${key} must be ${expected}, so it will not be shown`,
   );
@@ -18,10 +20,10 @@ function partnerUrl(details, key, check, expected) {
 
 /**
  * Keeps the partner_details values that the pages render only when they have
- * the expected form: an http(s) URL (absolute, protocol-relative or relative
- * to the page) for the logo and policy links, or a data: image URL for the
- * logo, and a CSS colour for the theme. Any other value is dropped, so the
- * page falls back to its default for it.
+ * the expected form: an absolute or protocol-relative http(s) URL for the
+ * logo and policy links, or a data: image URL for the logo, and a CSS colour
+ * for the theme. Any other value is dropped, so the page falls back to its
+ * default for it.
  * @param {Object} config - Configuration received from the host page
  * @returns {Object} The configuration with checked partner_details
  */
@@ -35,12 +37,14 @@ export default function withCheckedPartnerDetails(config) {
       logo_url: partnerUrl(
         details,
         'logo_url',
+        /^((https?:)?\/\/|data:)/i,
         safeImageUrl,
         'an http(s) URL or a data: image URL',
       ),
       policy_url: partnerUrl(
         details,
         'policy_url',
+        /^(https?:)?\/\//i,
         safeLinkUrl,
         'an http(s) URL',
       ),

@@ -94,6 +94,10 @@ test('turns missing links into empty strings without reporting them', (t) => {
   assert.equal(log.mock.callCount(), 0);
 });
 
-test('drops a theme colour that is not a CSS colour', () => {
-  assert.equal(check({ theme_color: 'red; x: y' }).theme_color, undefined);
+test('drops a theme colour that is not a CSS colour, and reports it', (t) => {
+  const log = t.mock.method(console, 'error', () => {});
+  assert.equal(check({ theme_color: 'red; x: y' }).theme_color, '');
+  assert.equal(check({ theme_color: 'red} * { color: red' }).theme_color, '');
+  assert.equal(check({ theme_color: undefined }).theme_color, '');
+  assert.equal(log.mock.callCount(), 2);
 });

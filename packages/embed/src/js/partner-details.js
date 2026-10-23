@@ -18,6 +18,18 @@ function partnerUrl(details, key, form, check, expected) {
   return '';
 }
 
+// Same rule for the theme colour: '' when missing or not a CSS colour.
+function partnerColour(details) {
+  const value = details.theme_color;
+  if (!value) return '';
+  const colour = safeCssColor(value);
+  if (colour) return colour;
+  console.error(
+    'SmileIdentity: partner_details.theme_color must be a CSS colour, so the default will be used',
+  );
+  return '';
+}
+
 /**
  * Keeps the partner_details values that the pages render only when they have
  * the expected form: an absolute or protocol-relative http(s) URL for the
@@ -48,7 +60,7 @@ export default function withCheckedPartnerDetails(config) {
         safeLinkUrl,
         'an http(s) URL',
       ),
-      theme_color: safeCssColor(details.theme_color),
+      theme_color: partnerColour(details),
     },
   };
 }

@@ -41,6 +41,8 @@ jobs:
           npm run build
       - name: install dependencies
         run: npm ci
+      - name: run unit tests
+        run: npm run test:unit
       - name: run tests
         uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v6
         with:
@@ -68,6 +70,8 @@ jobs:
         run: npm ci
       - name: build application
         run: npm run build
+      - name: run unit tests
+        run: npm run test:unit
       - name: run tests
         uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v6
         with:

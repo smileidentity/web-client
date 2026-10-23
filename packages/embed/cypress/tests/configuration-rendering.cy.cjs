@@ -268,6 +268,7 @@ describe('configuration rendering', () => {
       consentScreen()
         .find('a.theme')
         .should('have.attr', 'href', 'https://usesmileid.com/privacy-policy')
+        .and('have.attr', 'rel', 'noreferrer noopener')
         .and('have.text', PLAIN_TEXT);
       consentScreen()
         .find('#back-button path')
@@ -327,6 +328,9 @@ describe('configuration rendering', () => {
       consentScreen().find('#consent-screen').should('be.visible');
       consentScreen().find('img[width="50"]').should('not.exist');
       consentScreen().find('a.theme').should('not.exist');
+      consentScreen()
+        .find('.callout')
+        .should('not.contain.text', 'privacy policy');
     });
 
     it('biometric_kyc: renders a data: image logo', () => {
@@ -347,6 +351,9 @@ describe('configuration rendering', () => {
       consentScreen().find('#consent-screen').should('be.visible');
       consentScreen().find('img[width="50"]').should('not.exist');
       consentScreen().find('a.theme').should('not.exist');
+      consentScreen()
+        .find('.callout')
+        .should('not.contain.text', 'privacy policy');
     });
 
     it('biometric_kyc: renders right to left for ar-EG', () => {

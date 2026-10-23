@@ -415,10 +415,14 @@ function templateString() {
       </ul>
 
       <section class='callout | flow center' style='--flow-space: 2rem; margin: var(--flow-space) auto;'>
-        <p>
+        ${
+          this.partnerPolicyURL
+            ? `<p>
           ${tHtml('consent.privacyPolicy', { partnerName: this.partnerName })}
-          ${this.partnerPolicyURL ? `<a class='theme' href='${escapeHtml(this.partnerPolicyURL)}' rel='noreferer noopener' target='_blank'>${tHtml('consent.privacyPolicyLink')}</a>` : ''}
-        </p>
+          <a class='theme' href='${escapeHtml(this.partnerPolicyURL)}' rel='noreferrer noopener' target='_blank'>${tHtml('consent.privacyPolicyLink')}</a>
+        </p>`
+            : ''
+        }
 
         <p style='--flow-space: .75rem'>
           ${tHtml('consent.grantConsent', { partnerName: this.partnerName })}

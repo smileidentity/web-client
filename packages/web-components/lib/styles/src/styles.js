@@ -335,7 +335,7 @@ ${typography}
   }
 
   .instruction-header {
-    color: ${themeColor};
+    color: ${themeColor || '#001096'};
   }
 
   .flex-column {

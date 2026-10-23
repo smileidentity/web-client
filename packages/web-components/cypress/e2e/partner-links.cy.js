@@ -60,6 +60,17 @@ context('Partner links', () => {
       });
   });
 
+  it('consent screen uses the default theme colour when theme-color is not a CSS colour', () => {
+    visit('enhanced-smart-selfie-consent', {
+      'partner-name': 'Acme',
+      'theme-color': 'red} * { color: red',
+    });
+
+    consent()
+      .find('.ess-consent button.allow')
+      .should('have.css', 'border-top-color', 'rgb(0, 16, 150)');
+  });
+
   it('smart-camera-web passes on a data: image logo and a protocol-relative policy link', () => {
     visit('smart-camera-web', {
       'partner-logo': LOGO,

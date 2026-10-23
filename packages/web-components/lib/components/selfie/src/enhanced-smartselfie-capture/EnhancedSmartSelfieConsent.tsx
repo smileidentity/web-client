@@ -2,6 +2,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { safeCssColor } from '../../../../utils/safe-values';
 import { ConsentView } from './components/ConsentView';
 
 import '../../../attribution/PoweredBySmileId';
@@ -24,12 +25,13 @@ interface Props {
  *   - `enhanced-smart-selfie-consent.denied`  \u2014 user declined.
  */
 const EnhancedSmartSelfieConsent: FunctionComponent<Props> = ({
-  'theme-color': themeColor = '#001096',
+  'theme-color': themeColorProp,
   'hide-attribution': hideAttributionProp = false,
   'partner-name': partnerName,
   'partner-logo': partnerLogo,
   'policy-url': policyUrl,
 }) => {
+  const themeColor = safeCssColor(themeColorProp) || '#001096';
   const hideAttribution = getBoolProp(hideAttributionProp);
 
   return (

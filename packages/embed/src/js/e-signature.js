@@ -403,9 +403,11 @@ function getHumanSize(numberOfBytes) {
     }
 
     const formData = new FormData(PersonalInfoForm);
-    const payload = {
-      ...Object.fromEntries(formData.entries()),
-    };
+    const payload = {};
+    // Not Object.fromEntries: it needs Chrome 73, and some users run Chrome 71.
+    formData.forEach((value, key) => {
+      payload[key] = value;
+    });
 
     const isInvalid = validateInputs(payload);
 

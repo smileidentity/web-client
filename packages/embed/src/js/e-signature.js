@@ -1,14 +1,15 @@
-import validate from '@smileid/web-components/validate';
+import validate, { safeHttpUrl } from '@smileid/web-components/validate';
 import {
   setCurrentLocale,
   translate,
-  translateHtml,
+  escapeHtml,
   getDirection,
 } from '@smileid/web-components/localisation';
 import { version as sdkVersion } from '../../package.json';
 import '@smileid/web-components/signature-pad';
 import '@smileid/web-components/navigation';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 
 initIframeSentry('e-signature');
 
@@ -19,7 +20,7 @@ const fieldTranslationKeys = {
 function getTranslatedValidationMessage(field) {
   const fieldKey = fieldTranslationKeys[field];
   const fieldLabel = fieldKey ? translate(fieldKey) : field;
-  return translateHtml('pages.validation.isRequired', { field: fieldLabel });
+  return translate('pages.validation.isRequired', { field: fieldLabel });
 }
 
 function applyPageTranslations() {
@@ -243,7 +244,7 @@ function getHumanSize(numberOfBytes) {
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });
@@ -434,12 +435,12 @@ function getHumanSize(numberOfBytes) {
     list.innerHTML = `
       <ul class="document-list">
         ${documents
-          .map(
-            (document) =>
-              `
+          .map((document) => {
+            const link = safeHttpUrl(document.link);
+            return `
                 <li>
                   <a
-                    href="${document.link}"
+                    ${link ? `href="${escapeHtml(link)}"` : ''}
                     target="_blank"
                   >
                     <div class="document-meta">
@@ -451,7 +452,7 @@ function getHumanSize(numberOfBytes) {
                       </svg>
 
                       <div class="flow">
-                        <p class="font-weight:bold">${document.name}</p>
+                        <p class="font-weight:bold">${escapeHtml(document.name)}</p>
                         <p>${getHumanSize(document.size)}</p>
                       </div>
                     </div>
@@ -459,8 +460,8 @@ function getHumanSize(numberOfBytes) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="19" fill="none"><path stroke="#2D2B2A" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.118 1.5v12.235m0 0L1.94 9.227m5.177 4.508 5.176-4.508M1 17.5h12.235"/></svg>
                   </a>
                 </li>
-              `,
-          )
+              `;
+          })
           .join('\n')}
       </ul>
     `;

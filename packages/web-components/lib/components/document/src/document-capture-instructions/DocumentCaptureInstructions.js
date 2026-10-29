@@ -1,7 +1,13 @@
 import SmartFileUpload from '../../../../domain/file-upload/src/SmartFileUpload';
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t, escapeHtml, getDirection } from '../../../../domain/localisation';
+import {
+  t,
+  tHtml,
+  escapeHtml,
+  getDirection,
+} from '../../../../domain/localisation';
+import { safeCssColor } from '../../../../utils/safe-values';
 
 function frontDocumentIcon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="173" height="103" viewBox="0 0 173 103" fill="none">
@@ -219,7 +225,7 @@ function templateString() {
       }
     }
   </style>
-    <div id="document-capture-instructions-screen" class="flow center" dir="${this.direction}">
+    <div id="document-capture-instructions-screen" class="flow center" dir="${escapeHtml(this.direction)}">
         <div class="content-root">
             <div class="content-header">
         ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' show-navigation ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
@@ -229,10 +235,10 @@ function templateString() {
         ${this.isFrontOfId ? frontDocumentIcon() : backDocumentIcon()}
             <h1 class='title-color font-bold'>${escapeHtml(this.title)}</h1>
         <p class="description text-sm font-normal">
-            ${t('document.instructions.description')}
+            ${tHtml('document.instructions.description')}
           </p>
           <p class="description padding-bottom-2">
-          ${t('document.instructions.followInstructions')}
+          ${tHtml('document.instructions.followInstructions')}
           </p>
         </header>
         <div class="instructions-wrapper">
@@ -312,9 +318,9 @@ function templateString() {
                 </defs>
                 </svg>
                 <div class="instruction">
-                <p class="instruction-header font-bold text-base">${t('document.instructions.goodLight.header')}</p>
+                <p class="instruction-header font-bold text-base">${tHtml('document.instructions.goodLight.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  ${t('document.instructions.goodLight.body')}
+                  ${tHtml('document.instructions.goodLight.body')}
                 </p>
             </div>
         </div>
@@ -400,9 +406,9 @@ function templateString() {
             </defs>
             </svg>
             <div>
-                <p class="instruction-header font-bold text-base">${t('document.instructions.clearImage.header')}</p>
+                <p class="instruction-header font-bold text-base">${tHtml('document.instructions.clearImage.header')}</p>
                 <p class="instruction-body text-xs font-medium">
-                  ${t('document.instructions.clearImage.body')}
+                  ${tHtml('document.instructions.clearImage.body')}
                 </p>
             </div>
         </div>
@@ -414,7 +420,7 @@ function templateString() {
       this.supportBothCaptureModes || this.documentCaptureModes === 'camera'
         ? `
     <button data-variant='solid full-width' class='button' type='button' id='take-photo'>
-        ${t('document.instructions.takePhotoButton')}
+        ${tHtml('document.instructions.takePhotoButton')}
     </button>
     `
         : ''
@@ -426,7 +432,7 @@ function templateString() {
       this.supportBothCaptureModes ? 'outline' : 'solid'
     }' class='button'>
         <input type='file' hidden onclick='this.value=null;' id='upload-photo' name='document' accept='image/png, image/jpeg' />
-        <span>${t('document.instructions.uploadPhotoButton')}</span>
+        <span>${tHtml('document.instructions.uploadPhotoButton')}</span>
     </label>
     `
         : ''
@@ -501,7 +507,7 @@ class DocumentInstruction extends HTMLElement {
               }),
             );
           } catch (error) {
-            this.shadowRoot.querySelector('#error').innerHTML = error.message;
+            this.shadowRoot.querySelector('#error').textContent = error.message;
           }
         },
       );
@@ -517,7 +523,7 @@ class DocumentInstruction extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hideAttribution() {

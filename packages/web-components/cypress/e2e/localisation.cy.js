@@ -291,4 +291,66 @@ describe('Localisation Module', () => {
       });
     });
   });
+
+  describe('rendering translations', () => {
+    const markup = `<img src="x"> & 'quoted' "text"`;
+
+    it('tHtml returns the translation and its values as escaped text', () => {
+      cy.window().then(async (win) => {
+        const { setCurrentLocale, tHtml } = win.localisation;
+
+        await setCurrentLocale('en-GB', {
+          locales: {
+            'en-GB': {
+              consent: { allowPartner: `${markup} {{partnerName}}` },
+            },
+          },
+        });
+
+        const html = tHtml('consent.allowPartner', {
+          partnerName: { className: 'theme', value: markup },
+        });
+        const container = win.document.createElement('p');
+        container.innerHTML = html;
+
+        expect(container.querySelector('img')).to.equal(null);
+        expect(container.querySelector('span.theme').textContent).to.equal(
+          markup,
+        );
+        expect(container.textContent).to.equal(`${markup} ${markup}`);
+      });
+    });
+
+    it('t replaces placeholders with values as plain text', () => {
+      cy.window().then(async (win) => {
+        const { setCurrentLocale, t } = win.localisation;
+
+        await setCurrentLocale('en-GB');
+
+        expect(
+          t('pages.complete.processingInfo', {
+            country: "Côte d'Ivoire",
+            idType: 'A & B',
+          }),
+        ).to.equal(
+          "We will process your Côte d'Ivoire - A & B information to verify your identity",
+        );
+        expect(t('common.back')).to.equal('Back');
+      });
+    });
+
+    it('getDirection returns only ltr or rtl', () => {
+      cy.window().then(async (win) => {
+        const { setCurrentLocale, getDirection } = win.localisation;
+
+        await setCurrentLocale('custom-direction', {
+          locales: {
+            'custom-direction': { direction: `rtl' data-x='y` },
+          },
+        });
+
+        expect(getDirection()).to.equal('ltr');
+      });
+    });
+  });
 });

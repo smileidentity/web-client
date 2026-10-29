@@ -1,6 +1,12 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t, getDirection } from '../../../../domain/localisation';
+import {
+  t,
+  tHtml,
+  escapeHtml,
+  getDirection,
+} from '../../../../domain/localisation';
+import { safeCssColor } from '../../../../utils/safe-values';
 
 function templateString() {
   return `
@@ -208,7 +214,7 @@ function templateString() {
     }
   </style>
   ${styles(this.themeColor)}
-  <div id='document-capture-review-screen' dir='${this.direction}'>
+  <div id='document-capture-review-screen' dir='${escapeHtml(this.direction)}'>
     ${
       this.showNavigation
         ? `<div class='review-nav'>
@@ -218,30 +224,30 @@ function templateString() {
     }
 
     <div class='review-image-area'>
-      ${this.imageSrc ? `<img class='review-image' alt='${t('document.submission.imageAlt')}' id='document-capture-review-image' src='${this.imageSrc.replace(/'/g, '&#39;').replace(/</g, '&lt;')}' />` : ''}
+      ${this.imageSrc ? `<img class='review-image' alt='${tHtml('document.submission.imageAlt')}' id='document-capture-review-image' src='${this.imageSrc.replace(/'/g, '&#39;').replace(/</g, '&lt;')}' />` : ''}
     </div>
 
     <div class='review-footer'>
       <div class='review-card'>
-        <h1 class='review-title'>${t('document.review.confirmTitle')}</h1>
-        <p class='review-description'>${t('document.review.confirmBody')}</p>
+        <h1 class='review-title'>${tHtml('document.review.confirmTitle')}</h1>
+        <p class='review-description'>${tHtml('document.review.confirmBody')}</p>
         <div class='review-actions'>
-          <button class='circle-btn retake' type='button' id='re-capture-id-image' aria-label='${t('document.review.retake')}'>
+          <button class='circle-btn retake' type='button' id='re-capture-id-image' aria-label='${tHtml('document.review.retake')}'>
             <span class='circle'>
               <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#90A1B9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
                 <polyline points='1 4 1 10 7 10'></polyline>
                 <path d='M3.51 15a9 9 0 1 0 2.13-9.36L1 10'></path>
               </svg>
             </span>
-            <span class='circle-label'>${t('document.review.retake')}</span>
+            <span class='circle-label'>${tHtml('document.review.retake')}</span>
           </button>
-          <button class='circle-btn confirm' type='button' id='select-id-image' aria-label='${t('document.review.confirm')}'>
+          <button class='circle-btn confirm' type='button' id='select-id-image' aria-label='${tHtml('document.review.confirm')}'>
             <span class='circle'>
               <svg width='26' height='26' viewBox='0 0 24 24' fill='none' stroke='#12B76A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
                 <polyline points='20 6 9 17 4 12'></polyline>
               </svg>
             </span>
-            <span class='circle-label confirm-label'>${t('document.review.confirm')}</span>
+            <span class='circle-label confirm-label'>${tHtml('document.review.confirm')}</span>
           </button>
         </div>
       </div>
@@ -282,7 +288,7 @@ class IdReview extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hideAttribution() {

@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "start:dist": "npm run build:dist && npx serve -p 8000 dist",
     "start": "npm run build && npx serve -p 8000 build",
-    "test": "npx cypress run"
+    "test": "npx cypress run",
+    "test:unit": "node --test test/*.test.mjs"
   },
   "repository": {
     "type": "git",

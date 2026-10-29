@@ -11,6 +11,7 @@ import { getMetadata } from './metadata';
 import { installActiveLivenessTimeout } from './activeLivenessTimeout';
 import { getHeaders, getZipSignature } from './request';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 
 initIframeSentry('smartselfie-auth');
 
@@ -146,7 +147,7 @@ window.Sentry = Sentry;
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         await setCurrentLocale(config.translation?.language || 'en', {
           locales: config.translation?.locales,
         });

@@ -1,7 +1,8 @@
 import { IMAGE_TYPE } from '../../../domain/constants/src/Constants';
 import styles from '../../../styles/src/styles';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
-import { t } from '../../../domain/localisation';
+import { escapeHtml, tHtml } from '../../../domain/localisation';
+import { safeCssColor } from '../../../utils/safe-values';
 
 import './document-capture';
 import './document-capture-review';
@@ -68,13 +69,13 @@ class DocumentCaptureScreens extends HTMLElement {
       ${this.hideAttribution}
       ></${instructionsTag}>
       <${captureTag} id='document-capture-front' side-of-id='Front'
-      ${this.title || `title='${t('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
+      ${this.title || `title='${tHtml('document.title.front')}'`} ${this.showNavigation} ${this.hideInstructions ? '' : 'hidden'} ${this.hideAttribution}
       ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}'
       ></${captureTag}>
-      <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${t('document.title.back')}'
+      <${instructionsTag} id='document-capture-instructions-back' side-of-id='Back' title='${tHtml('document.title.back')}'
        ${this.documentCaptureModes} ${this.documentType} ${this.showNavigation} theme-color='${this.themeColor}' ${this.hideAttribution} hidden
        ></${instructionsTag}>
-      <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${t('document.title.back')}'`}  ${this.showNavigation}
+      <${captureTag} id='document-capture-back' side-of-id='Back' ${this.title || `title='${tHtml('document.title.back')}'`}  ${this.showNavigation}
       ${this.documentCaptureModes} ${this.documentType} ${this.autoCapture} ${this.autoCaptureTimeout} theme-color='${this.themeColor}' ${this.hideAttribution}
       hidden
       ></${captureTag}>
@@ -414,19 +415,19 @@ class DocumentCaptureScreens extends HTMLElement {
 
   get title() {
     return this.hasAttribute('title')
-      ? `title=${this.getAttribute('title')}`
+      ? `title='${escapeHtml(this.getAttribute('title'))}'`
       : '';
   }
 
   get documentCaptureModes() {
     return this.hasAttribute('document-capture-modes')
-      ? `document-capture-modes='${this.getAttribute('document-capture-modes')}'`
+      ? `document-capture-modes='${escapeHtml(this.getAttribute('document-capture-modes'))}'`
       : '';
   }
 
   get documentType() {
     return this.hasAttribute('document-type')
-      ? `document-type='${this.getAttribute('document-type')}'`
+      ? `document-type='${escapeHtml(this.getAttribute('document-type'))}'`
       : '';
   }
 
@@ -439,7 +440,7 @@ class DocumentCaptureScreens extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   handleBackEvents() {

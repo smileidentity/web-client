@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Embed: Build for ES2015 and drop `Object.fromEntries`, so the SDK starts and submits on Chrome 71 to 79, Safari 12.1 to 13.0 and Samsung Internet 11 to 12
+
 ## [11.6.2] - 2026-07-23
 
 ### Fixed

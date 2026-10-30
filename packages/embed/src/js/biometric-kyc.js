@@ -1019,7 +1019,11 @@ window.Sentry = Sentry;
     } else {
       // Non-skip path: merge form data over id_info (user may have edited fields)
       const formData = new FormData(form);
-      payload = { ...id_info, ...Object.fromEntries(formData.entries()) };
+      payload = { ...id_info };
+      // Not Object.fromEntries: it needs Chrome 73, and some users run Chrome 71.
+      formData.forEach((value, key) => {
+        payload[key] = value;
+      });
     }
 
     const isInvalid = validateInputs(payload);

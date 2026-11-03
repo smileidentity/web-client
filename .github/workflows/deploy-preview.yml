@@ -27,7 +27,8 @@ jobs:
     uses: ./.github/workflows/test.yml
   smart-camera-web:
     needs: [test]
-    if: ${{ !cancelled() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    # Dependabot PRs get no AWS role, so they skip the preview; their tests still run.
+    if: ${{ !cancelled() && (needs.test.result == 'success' || needs.test.result == 'skipped') && github.event.pull_request.user.login != 'dependabot[bot]' }}
     defaults:
       run:
         working-directory: ./packages/web-components
@@ -100,7 +101,7 @@ jobs:
             --paths "/${{ env.DEST_DIR_EMBED }}/*"
   full-stack:
     needs: [embed]
-    if: always()
+    if: ${{ always() && github.event.pull_request.user.login != 'dependabot[bot]' }}
     defaults:
       run:
         working-directory: ./previews

@@ -147,68 +147,64 @@ jobs:
       - name: delete orphaned preview CloudFront functions
         # Stage removal above only finds stages that still have a distribution.
         # A function whose distribution is gone, or whose deploy failed before
-        # creating one, is never removed, and the account limit is 100 functions
-        # shared with web-sdk's previews. An unattached function serves nothing,
-        # so delete preview functions that no distribution uses, that are older
-        # than 7 days, and that no open web-client PR's stage could own.
-        # CloudFront functions take no tags, so this covers both repos.
+        # creating one, is never removed, and the account limit is 100 functions,
+        # shared with web-sdk's previews. This step reads this repo's SST state
+        # to learn which stage owns each function, and deletes a function only
+        # when no open PR keeps its stage, no distribution uses it and it is more
+        # than 7 days old. Functions that web-sdk's state owns are never touched.
         if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
 
-          USED_FILE="$RUNNER_TEMP/cf-functions-in-use.txt"
-          : > "$USED_FILE"
-          MARKER=""
-          while :; do
-            if [ -n "$MARKER" ]; then
-              PAGE=$(aws cloudfront list-distributions --marker "$MARKER" --output json)
-            else
-              PAGE=$(aws cloudfront list-distributions --output json)
-            fi
-            echo "$PAGE" | jq -r '.DistributionList.Items[]? | (.DefaultCacheBehavior.FunctionAssociations.Items[]?.FunctionARN), (.CacheBehaviors.Items[]?.FunctionAssociations.Items[]?.FunctionARN)' \
-              | sed 's#.*:function/##' >> "$USED_FILE"
-            MARKER=$(echo "$PAGE" | jq -r '.DistributionList.NextMarker // empty')
-            [ -z "$MARKER" ] && break
+          KEEP_FILE="$RUNNER_TEMP/preview-sweeper-keep-stages.txt"
+          if [ ! -s "$KEEP_FILE" ]; then
+            echo "::error::No keep-list from the previous step. Refusing to delete functions."
+            exit 1
+          fi
+
+          # SST keeps each stage's Pulumi state in the bootstrap bucket for this region.
+          STATE_BUCKET=$(aws ssm get-parameter --name /sst/bootstrap --query Parameter.Value --output text | jq -r .state)
+          STATE_DIR="$RUNNER_TEMP/sst-state"
+          aws s3 sync --only-show-errors "s3://$STATE_BUCKET/app/previews/" "$STATE_DIR/"
+
+          OWNED_FILE="$RUNNER_TEMP/cf-functions-by-stage.txt"
+          : > "$OWNED_FILE"
+          for STATE in "$STATE_DIR"/*.json; do
+            [ -e "$STATE" ] || continue
+            STAGE=$(basename "$STATE" .json)
+            jq -r --arg stage "$STAGE" \
+              '.checkpoint.latest.resources[]? | select(.type == "aws:cloudfront/function:Function") | "\($stage)\t\(.outputs.name // .id)"' \
+              "$STATE" >> "$OWNED_FILE"
           done
 
-          # Function names keep only the first 19 characters of the stage.
-          KEEP_PREFIX_FILE="$RUNNER_TEMP/cf-keep-prefixes.txt"
-          cut -c1-19 "$RUNNER_TEMP/preview-sweeper-keep-stages.txt" | sort -u > "$KEEP_PREFIX_FILE"
+          USED_FILE="$RUNNER_TEMP/cf-functions-in-use.txt"
+          aws cloudfront list-distributions --output json \
+            | jq -r '.DistributionList.Items[]? | (.DefaultCacheBehavior.FunctionAssociations.Items[]?.FunctionARN), (.CacheBehaviors.Items[]?.FunctionAssociations.Items[]?.FunctionARN)' \
+            | sed 's#.*:function/##' | sort -u > "$USED_FILE"
 
           CUTOFF=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S)
-          CANDIDATES="$RUNNER_TEMP/cf-function-candidates.txt"
-          : > "$CANDIDATES"
-          MARKER=""
-          while :; do
-            if [ -n "$MARKER" ]; then
-              PAGE=$(aws cloudfront list-functions --marker "$MARKER" --output json)
-            else
-              PAGE=$(aws cloudfront list-functions --output json)
-            fi
-            echo "$PAGE" | jq -r '.FunctionList.Items[]? | "\(.Name)\t\(.FunctionMetadata.LastModifiedTime)"' >> "$CANDIDATES"
-            MARKER=$(echo "$PAGE" | jq -r '.FunctionList.NextMarker // empty')
-            [ -z "$MARKER" ] && break
-          done
-
           FAILED=0
-          # A function is listed once per stage (DEVELOPMENT and LIVE); use its newest time.
-          while IFS=$'\t' read -r NAME MODIFIED; do
-            case "$NAME" in
-              *-PreviewAppCloudfrontFunction*) ;;
-              *) continue ;;
+          while IFS=$'\t' read -r STAGE NAME; do
+            [ -z "$NAME" ] && continue
+            BASE_STAGE="${STAGE%-prod}"
+            case "$BASE_STAGE" in
+              production | staging | main) continue ;;
             esac
+            grep -Fxq "$STAGE" "$KEEP_FILE" && continue
             grep -Fxq "$NAME" "$USED_FILE" && continue
-            [[ "$MODIFIED" < "$CUTOFF" ]] || { echo "Keeping $NAME (changed $MODIFIED)"; continue; }
-            if grep -Fxq "${NAME:0:19}" "$KEEP_PREFIX_FILE"; then
-              echo "Keeping $NAME (prefix matches an open PR)"
+            if ! MODIFIED=$(aws cloudfront describe-function --name "$NAME" --query FunctionSummary.FunctionMetadata.LastModifiedTime --output text 2>/dev/null); then
+              continue # already gone; the state is stale
+            fi
+            if [[ ! "$MODIFIED" < "$CUTOFF" ]]; then
+              echo "Keeping $NAME (stage $STAGE, changed $MODIFIED)"
               continue
             fi
             ETAG=$(aws cloudfront describe-function --name "$NAME" --query ETag --output text)
             if aws cloudfront delete-function --name "$NAME" --if-match "$ETAG"; then
-              echo "Deleted orphaned function $NAME (changed $MODIFIED)"
+              echo "Deleted orphaned function $NAME (stage $STAGE, changed $MODIFIED)"
             else
-              echo "::error::Could not delete function $NAME"
+              echo "::error::Could not delete function $NAME (stage $STAGE)"
               FAILED=1
             fi
-          done < <(sort -t$'\t' -k1,1 -k2,2r "$CANDIDATES" | sort -t$'\t' -u -k1,1)
+          done < "$OWNED_FILE"
           exit $FAILED

@@ -192,14 +192,16 @@ jobs:
             esac
             grep -Fxq "$STAGE" "$KEEP_FILE" && continue
             grep -Fxq "$NAME" "$USED_FILE" && continue
-            if ! MODIFIED=$(aws cloudfront describe-function --name "$NAME" --query FunctionSummary.FunctionMetadata.LastModifiedTime --output text 2>/dev/null); then
+            # One call for both, so --if-match guards the version whose age we checked.
+            if ! DESC=$(aws cloudfront describe-function --name "$NAME" --output json 2>/dev/null); then
               continue # already gone; the state is stale
             fi
+            MODIFIED=$(echo "$DESC" | jq -r '.FunctionSummary.FunctionMetadata.LastModifiedTime')
+            ETAG=$(echo "$DESC" | jq -r '.ETag')
             if [[ ! "$MODIFIED" < "$CUTOFF" ]]; then
               echo "Keeping $NAME (stage $STAGE, changed $MODIFIED)"
               continue
             fi
-            ETAG=$(aws cloudfront describe-function --name "$NAME" --query ETag --output text)
             if aws cloudfront delete-function --name "$NAME" --if-match "$ETAG"; then
               echo "Deleted orphaned function $NAME (stage $STAGE, changed $MODIFIED)"
             else

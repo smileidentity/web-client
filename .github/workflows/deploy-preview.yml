@@ -165,18 +165,19 @@ jobs:
         if: github.event.pull_request.merged != true
         id: deploy_sst_app
         run: |
-          SST_OUTPUT=$(npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} 2>&1)
-          echo "$SST_OUTPUT"
-          SST_URL=$(echo "$SST_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
+          # tee, not $(...): a failed deploy must still print its error.
+          set -o pipefail
+          npm run sst deploy -- --stage ${{ steps.get_branch_name.outputs.SST_STAGE }} 2>&1 | tee "$RUNNER_TEMP/sst-deploy.log"
+          SST_URL=$(sed 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/sst-deploy.log" | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
           echo "SST_URL=$SST_URL" >> $GITHUB_OUTPUT
       - name: deploy sst app (prod)
         if: github.event.pull_request.merged != true
         id: deploy_sst_app_prod
         run: |
           PROD_STAGE="${{ steps.get_branch_name.outputs.SST_STAGE }}-prod"
-          SST_PROD_OUTPUT=$(npm run sst deploy -- --stage $PROD_STAGE 2>&1)
-          echo "$SST_PROD_OUTPUT"
-          SST_PROD_URL=$(echo "$SST_PROD_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
+          set -o pipefail
+          npm run sst deploy -- --stage "$PROD_STAGE" 2>&1 | tee "$RUNNER_TEMP/sst-deploy-prod.log"
+          SST_PROD_URL=$(sed 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/sst-deploy-prod.log" | sed -n 's/^.*site: //p' | head -1 | tr -d '\r\n')
           echo "SST_PROD_URL=$SST_PROD_URL" >> $GITHUB_OUTPUT
   share-preview-url:
     runs-on: ubuntu-latest

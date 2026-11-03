@@ -144,3 +144,71 @@ jobs:
           fi
 
           exit $FAILED
+      - name: delete orphaned preview CloudFront functions
+        # Stage removal above only finds stages that still have a distribution.
+        # A function whose distribution is gone, or whose deploy failed before
+        # creating one, is never removed, and the account limit is 100 functions
+        # shared with web-sdk's previews. An unattached function serves nothing,
+        # so delete preview functions that no distribution uses, that are older
+        # than 7 days, and that no open web-client PR's stage could own.
+        # CloudFront functions take no tags, so this covers both repos.
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+
+          USED_FILE="$RUNNER_TEMP/cf-functions-in-use.txt"
+          : > "$USED_FILE"
+          MARKER=""
+          while :; do
+            if [ -n "$MARKER" ]; then
+              PAGE=$(aws cloudfront list-distributions --marker "$MARKER" --output json)
+            else
+              PAGE=$(aws cloudfront list-distributions --output json)
+            fi
+            echo "$PAGE" | jq -r '.DistributionList.Items[]? | (.DefaultCacheBehavior.FunctionAssociations.Items[]?.FunctionARN), (.CacheBehaviors.Items[]?.FunctionAssociations.Items[]?.FunctionARN)' \
+              | sed 's#.*:function/##' >> "$USED_FILE"
+            MARKER=$(echo "$PAGE" | jq -r '.DistributionList.NextMarker // empty')
+            [ -z "$MARKER" ] && break
+          done
+
+          # Function names keep only the first 19 characters of the stage.
+          KEEP_PREFIX_FILE="$RUNNER_TEMP/cf-keep-prefixes.txt"
+          cut -c1-19 "$RUNNER_TEMP/preview-sweeper-keep-stages.txt" | sort -u > "$KEEP_PREFIX_FILE"
+
+          CUTOFF=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S)
+          CANDIDATES="$RUNNER_TEMP/cf-function-candidates.txt"
+          : > "$CANDIDATES"
+          MARKER=""
+          while :; do
+            if [ -n "$MARKER" ]; then
+              PAGE=$(aws cloudfront list-functions --marker "$MARKER" --output json)
+            else
+              PAGE=$(aws cloudfront list-functions --output json)
+            fi
+            echo "$PAGE" | jq -r '.FunctionList.Items[]? | "\(.Name)\t\(.FunctionMetadata.LastModifiedTime)"' >> "$CANDIDATES"
+            MARKER=$(echo "$PAGE" | jq -r '.FunctionList.NextMarker // empty')
+            [ -z "$MARKER" ] && break
+          done
+
+          FAILED=0
+          # A function is listed once per stage (DEVELOPMENT and LIVE); use its newest time.
+          while IFS=$'\t' read -r NAME MODIFIED; do
+            case "$NAME" in
+              *-PreviewAppCloudfrontFunction*) ;;
+              *) continue ;;
+            esac
+            grep -Fxq "$NAME" "$USED_FILE" && continue
+            [[ "$MODIFIED" < "$CUTOFF" ]] || { echo "Keeping $NAME (changed $MODIFIED)"; continue; }
+            if grep -Fxq "${NAME:0:19}" "$KEEP_PREFIX_FILE"; then
+              echo "Keeping $NAME (prefix matches an open PR)"
+              continue
+            fi
+            ETAG=$(aws cloudfront describe-function --name "$NAME" --query ETag --output text)
+            if aws cloudfront delete-function --name "$NAME" --if-match "$ETAG"; then
+              echo "Deleted orphaned function $NAME (changed $MODIFIED)"
+            else
+              echo "::error::Could not delete function $NAME"
+              FAILED=1
+            fi
+          done < <(sort -t$'\t' -k1,1 -k2,2r "$CANDIDATES" | sort -t$'\t' -u -k1,1)
+          exit $FAILED

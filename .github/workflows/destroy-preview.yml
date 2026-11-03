@@ -15,6 +15,8 @@ permissions:
   contents: read
 jobs:
   full-stack:
+    # Dependabot PRs never get a preview, so there is nothing to destroy.
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
     defaults:
       run:
         working-directory: ./previews

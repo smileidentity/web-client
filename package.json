@@ -32,7 +32,7 @@
     "check-dependency-version-consistency": "^4.1.0",
     "eslint": "^10.9.1",
     "prettier": "^3.3.3",
-    "storybook": "^8.6.17"
+    "storybook": "^8.6.19"
   },
   "dependencies": {
     "sst": "3.9.28"

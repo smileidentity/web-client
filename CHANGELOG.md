@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Embed: The SDK now ignores `SmileIdentity::` messages from any window other than its own iframe, including the host page, and sends its configuration only to the origin the script loads from (or the https form of that origin).
 - Embed: Each `SmileIdentity()` call now responds only to its own iframe, so callbacks from an earlier call on the same page no longer fire for a later flow, and `onClose` fires once per close, where before it could fire twice.
 
+## [11.6.3] - 2026-10-30
+
+### Fixed
+
+- Embed: Build for ES2015 and drop `Object.fromEntries`, so the SDK starts on Chrome 71 to 79, Safari 12.1 to 13.0 and Samsung Internet 11 to 12
+
 ## [11.6.2] - 2026-07-23
 
 ### Fixed

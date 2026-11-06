@@ -370,7 +370,8 @@ initIframeSentry('product-selection');
     ).contentWindow;
     config.source = 'SmileIdentity::Configuration';
 
-    targetWindow.postMessage(JSON.stringify(config), '*');
+    // Product pages share this page's origin.
+    targetWindow.postMessage(JSON.stringify(config), window.location.origin);
   }
 
   function setProductPage(selectedCountry, selectedIdType) {
@@ -390,15 +391,33 @@ initIframeSentry('product-selection');
     setProductPage(selectedCountry, selectedIdType);
   });
 
+  // The product iframe this page nests once an ID type is chosen, checked by
+  // window and origin.
+  const isFromProductFrame = (event) => {
+    const productWindow = document.querySelector(
+      "[name='smile-identity-hosted-web-integration-post-product-selection']",
+    )?.contentWindow;
+    return (
+      !!productWindow &&
+      event.source === productWindow &&
+      event.origin === window.location.origin
+    );
+  };
+
   window.addEventListener(
     'message',
     async (event) => {
+      // This page talks only to the host above and the product iframe below.
+      const fromHost = event.source === referenceWindow;
+      const fromProduct = isFromProductFrame(event);
+      if (!fromHost && !fromProduct) return;
+
       if (
         event.data &&
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity')
       ) {
-        if (event.data.includes('SmileIdentity::Configuration')) {
+        if (fromHost && event.data.includes('SmileIdentity::Configuration')) {
           config = JSON.parse(event.data);
           // Tag every Sentry event from this iframe context with partner_id
           // and environment. The parent script.js tags the parent window's
@@ -473,10 +492,14 @@ initIframeSentry('product-selection');
               '*',
             );
           }
-        } else if (event.data.includes('SmileIdentity::ChildPageReady')) {
+        } else if (
+          fromProduct &&
+          event.data.includes('SmileIdentity::ChildPageReady')
+        ) {
           publishMessage(config);
         }
-      } else {
+      } else if (fromProduct) {
+        // Anything else from the product page is forwarded up to the host.
         referenceWindow.postMessage(event.detail || event.data, '*');
       }
     },

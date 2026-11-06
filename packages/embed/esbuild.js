@@ -96,15 +96,22 @@ if (process.env.NODE_ENV === 'development') {
   prebuildDist();
 }
 
+// esbuild defaults to esnext, which ships optional chaining that Chrome before
+// 80 and Safari before 13.1 cannot parse, so the SDK never defines itself
+// there. Matches the smart-camera-web IIFE target.
+const target = 'es2015';
+
 const devOptions = {
   bundle: true,
   minify: process.env.MINIFY === 'true',
+  target,
   define,
 };
 
 const prodOptions = {
   bundle: true,
   minify: true,
+  target,
   define,
 };
 

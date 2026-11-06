@@ -72,6 +72,7 @@
     "lint": "eslint .",
     "start": "vite build --watch",
     "test": "npx cypress run",
+    "test:unit": "node --test lib/utils/*.test.mjs",
     "type-check": "tsc --noEmit"
   },
   "description": "A collection of Web Components used by SmileID",

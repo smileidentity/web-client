@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/browser';
+import { safeHttpUrl } from '@smileid/web-components/validate';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import { version as sdkVersion } from '../../package.json';
 
@@ -322,6 +323,10 @@ async function requestOidcAuthorizeUrl(config, { country }) {
     throw new Error(
       json.error || json.message || `authorize_url failed (${response.status})`,
     );
+  }
+  // The popup is opened from this page, so only follow an http(s) URL.
+  if (!safeHttpUrl(json.authorize_url)) {
+    throw new Error('authorize_url failed (invalid url)');
   }
   return json;
 }

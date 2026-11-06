@@ -207,13 +207,13 @@ export function validateLocale(locale) {
 }
 
 /**
- * Get translation for a key.
+ * Look up the translation for a key.
  * Supports nested keys with dot notation (e.g., 'camera.permission.description').
  * Fallback chain: current locale → default locale (English) → raw key.
  * @param {string} key - Translation key
  * @returns {string} Translated string or fallback
  */
-export function t(key) {
+function lookup(key) {
   // Try current locale first
   const resolvedLocale = resolveLocale(currentLocale);
   const currentLocaleData = locales[resolvedLocale];
@@ -237,6 +237,22 @@ export function t(key) {
 }
 
 /**
+ * Get translation for a key as plain text, replacing {{key}} placeholders
+ * with the given values as they are. Set the result with textContent, or use
+ * tHtml() to put a translation in markup.
+ * @param {string} key - Translation key
+ * @param {Object} [params] - Interpolation parameters
+ * @returns {string} Translated string or fallback
+ */
+export function t(key, params = {}) {
+  return Object.keys(params).reduce(
+    (text, paramKey) =>
+      text.split(`{{${paramKey}}}`).join(String(params[paramKey])),
+    lookup(key),
+  );
+}
+
+/**
  * Alias for t() function.
  * @see t
  */
@@ -254,16 +270,17 @@ const HTML_ENTITIES = {
 };
 
 /**
- * Escape HTML special characters to prevent XSS.
- * @param {string} str - String to escape
+ * Escape HTML special characters so a value renders as text in markup.
+ * @param {*} str - Value to escape; null and undefined become ''
  * @returns {string} Escaped string
  */
 export function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
+  return String(str ?? '').replace(/[&<>"']/g, (char) => HTML_ENTITIES[char]);
 }
 
 /**
- * Get translation with HTML interpolation for styled placeholders.
+ * Get translation as HTML for use in markup. The translation and every
+ * value are escaped, so they always render as text.
  * Placeholders in format {{key}} will be replaced with provided values.
  * Values can be plain strings or objects with {value, className} for styled spans.
  * @param {string} key - Translation key
@@ -279,7 +296,7 @@ export function escapeHtml(str) {
  * }) // "<span class="theme">Acme</span> wants to access..."
  */
 export function tHtml(key, params = {}) {
-  let text = t(key);
+  let text = escapeHtml(lookup(key));
 
   Object.keys(params).forEach((paramKey) => {
     const paramValue = params[paramKey];
@@ -432,8 +449,9 @@ export function setDocumentDir(lang) {
  * @returns {string} Direction ('ltr' or 'rtl'), defaults to 'ltr'
  */
 export function getDirection() {
-  const locale = locales[currentLocale];
-  return locale?.direction || 'ltr';
+  return String(locales[currentLocale]?.direction).toLowerCase() === 'rtl'
+    ? 'rtl'
+    : 'ltr';
 }
 
 export default {

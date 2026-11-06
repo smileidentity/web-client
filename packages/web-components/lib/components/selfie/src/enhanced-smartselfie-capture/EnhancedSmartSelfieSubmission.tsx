@@ -3,6 +3,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { safeCssColor } from '../../../../utils/safe-values';
 import { t } from '../../../../domain/localisation';
 import {
   SubmissionView,
@@ -69,7 +70,7 @@ const failureReasonToMessage = (
  *     the failure card.
  */
 const EnhancedSmartSelfieSubmission: FunctionComponent<Props> = ({
-  'theme-color': themeColor = '#001096',
+  'theme-color': themeColorProp,
   'hide-attribution': hideAttributionProp = false,
   'image-src': imageSrc = '',
   mirror: mirrorProp = false,
@@ -77,6 +78,7 @@ const EnhancedSmartSelfieSubmission: FunctionComponent<Props> = ({
   'submission-message': submissionMessage,
   'failure-reason': failureReason,
 }) => {
+  const themeColor = safeCssColor(themeColorProp) || '#001096';
   const hideAttribution = getBoolProp(hideAttributionProp);
   const mirror = getBoolProp(mirrorProp);
 

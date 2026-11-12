@@ -18,6 +18,7 @@ import {
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 import { createDocSubmission } from './doc-submission.js';
 
 initIframeSentry('enhanced-document-verification');
@@ -153,7 +154,7 @@ function applyPageTranslations() {
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         // Tag every Sentry event from this iframe context with partner_id and
         // environment. The parent script.js tags the parent window's Sentry
         // hub, but this iframe runs in its own JS context with its own hub —

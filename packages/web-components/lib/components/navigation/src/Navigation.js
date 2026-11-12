@@ -1,4 +1,5 @@
-import { t, getDirection } from '../../../domain/localisation';
+import { t, tHtml, getDirection } from '../../../domain/localisation';
+import { safeCssColor } from '../../../utils/safe-values';
 
 class Navigation extends HTMLElement {
   connectedCallback() {
@@ -112,7 +113,7 @@ button svg {
           stroke-linejoin="round"
         />
       </svg>
-      <span part="back-button-text" class="visually-hidden">${t('navigation.back')}</span>
+      <span part="back-button-text" class="visually-hidden">${tHtml('navigation.back')}</span>
     `;
 
     const closeButton = document.createElement('button');
@@ -186,11 +187,11 @@ button svg {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hasThemeColor() {
-    return this.getAttribute('theme-color')?.trim();
+    return safeCssColor(this.getAttribute('theme-color'));
   }
 }
 

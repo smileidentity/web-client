@@ -1,6 +1,12 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t, getDirection } from '../../../../domain/localisation';
+import {
+  t,
+  tHtml,
+  escapeHtml,
+  getDirection,
+} from '../../../../domain/localisation';
+import { safeCssColor } from '../../../../utils/safe-values';
 
 function templateString() {
   return `
@@ -56,10 +62,10 @@ function templateString() {
       }
     </style>
     ${styles(this.themeColor)}
-    <div id='selfie-capture-review-screen' class='center' dir='${this.direction}'>
+    <div id='selfie-capture-review-screen' class='center' dir='${escapeHtml(this.direction)}'>
    ${this.showNavigation ? `<smileid-navigation hide-back></smileid-navigation>` : ''}
     <h1 class="header-title title-color font-bold">
-      ${t('selfie.review.question')}
+      ${tHtml('selfie.review.question')}
     </h1>
     <div class='section | flow'>
       <div class='selfie-review-container ${this.isPortraitCaptureView ? 'portrait' : 'landscape'}'>
@@ -68,7 +74,7 @@ function templateString() {
             ? `<img
         alt='your ID card'
         id='document-capture-review-image'
-        src='${this.imageSrc}'
+        src='${escapeHtml(this.imageSrc)}'
         width='396'
         style='max-width: 90%;${this.shouldMirror ? ' transform: scaleX(-1);' : ''}'
       />`
@@ -77,10 +83,10 @@ function templateString() {
       </div>
       <div class='flow action-buttons'>
         <button data-variant='solid full-width' class='button' type='button' id='select-id-image'>
-          ${t('selfie.review.acceptButton')}
+          ${tHtml('selfie.review.acceptButton')}
         </button>
         <button data-variant='ghost full-width' class='button  retake-photo' type='button' id='re-capture-image'>
-          ${t('selfie.review.retakeButton')}
+          ${tHtml('selfie.review.retakeButton')}
         </button>
       </div>
       ${
@@ -130,7 +136,7 @@ class SelfieCaptureReview extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hideAttribution() {

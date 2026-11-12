@@ -1,5 +1,6 @@
 import validate from '../../../utils/validate';
-import { getDirection } from '../../../domain/localisation';
+import { escapeHtml, getDirection } from '../../../domain/localisation';
+import { safeCssColor } from '../../../utils/safe-values';
 
 function postData(url, data) {
   return fetch(url, {
@@ -285,7 +286,7 @@ function markup() {
             }
         </style>
 
-        <div class='flow center' id='id-entry' dir='${this.direction}'>
+        <div class='flow center' id='id-entry' dir='${escapeHtml(this.direction)}'>
             <div class="nav">
                 <div class="back-wrapper">
                     <button type='button' data-type='icon' id="back-button" class="back-button">
@@ -305,20 +306,20 @@ function markup() {
                 </button>
             </div>
             <h1>
-                Enter your ${this.idTypeLabel}
+                Enter your ${escapeHtml(this.idTypeLabel)}
             </h1>
 
             <form name='id-entry-form' class='flow' novalidate style='--flow-space: 5.5rem'>
                 <div id='id-number' class="input-group flow">
                     <label class='required' for="id_number">
-                        ${this.idTypeLabel}
+                        ${escapeHtml(this.idTypeLabel)}
                     </label>
 
                     <input aria-required='true' id="id_number" name="id_number"
                         maxlength='11' placeholder='' />
 
                     <p>
-                        <small>${this.idHint}</small>
+                        <small>${escapeHtml(this.idHint)}</small>
                     </p>
                 </div>
 
@@ -332,7 +333,7 @@ function markup() {
             </form>
         </div>
 
-        <div hidden class='flow center' id='select-mode' dir='${this.direction}'>
+        <div hidden class='flow center' id='select-mode' dir='${escapeHtml(this.direction)}'>
             <div class="nav">
                 <div class="back-wrapper">
                     <button type='button' data-type='icon' id="back-to-entry-button" class="back-button">
@@ -376,7 +377,7 @@ function markup() {
                             ? this.modes
                                 .map(
                                   (mode) => `<label class='input-radio'>
-                                <input type="radio" id="" name="mode" value="${Object.keys(mode)[0]}">
+                                <input type="radio" id="" name="mode" value="${escapeHtml(Object.keys(mode)[0])}">
                                 <div class='otp-mode'>
                                     ${
                                       Object.keys(mode)[0].includes('sms')
@@ -423,7 +424,7 @@ function markup() {
                                     }
                                     <div class='flow'>
                                         <p>
-                                            ${Object.values(mode)[0]}
+                                            ${escapeHtml(Object.values(mode)[0])}
                                         </p>
                                         <p>
                                             <small>
@@ -460,7 +461,7 @@ function markup() {
             </form>
         </div>
 
-        <div hidden class='flow center' id='otp-verification' dir='${this.direction}'>
+        <div hidden class='flow center' id='otp-verification' dir='${escapeHtml(this.direction)}'>
             <div class="nav justify-right">
                 <button data-type='icon' type='button' class='close-iframe'>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
@@ -477,9 +478,9 @@ function markup() {
             <div style='--flow-space: 4.25rem' id='otp-entry'>
                 <form name='otp-submission-form' novalidate style='--flow-space: 1.5rem' class='flow center'>
                     <label for='totp-token'>
-                        Enter the OTP sent to <span class='font-weight:bold'>${
-                          this.selectedOtpDeliveryMode
-                        }</span>
+                        Enter the OTP sent to <span class='font-weight:bold'>${escapeHtml(
+                          this.selectedOtpDeliveryMode,
+                        )}</span>
                     </label>
                     <input type='text' id='totp-token' maxlength='6' inputmode='numeric' autocomplete='one-time-code' />
 
@@ -487,7 +488,7 @@ function markup() {
                         Didn't receive the OTP${
                           !this.selectedOtpDeliveryMode
                             ? '?'
-                            : ` at <span class='font-weight:bold'>${this.selectedOtpDeliveryMode}</span>?`
+                            : ` at <span class='font-weight:bold'>${escapeHtml(this.selectedOtpDeliveryMode)}</span>?`
                         }
                     </p>
 
@@ -897,7 +898,7 @@ class TotpConsent extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get direction() {

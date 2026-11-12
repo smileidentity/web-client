@@ -4,6 +4,8 @@ import '@smileid/web-components/smart-camera-web';
 import {
   setCurrentLocale,
   t,
+  tHtml,
+  escapeHtml,
   getDirection,
   getCurrentLocale,
 } from '@smileid/web-components/localisation';
@@ -20,6 +22,7 @@ import {
 } from './id-info-utils.js';
 import { fetchWithTimeout } from './fetch-with-retry.js';
 import initIframeSentry from './sentry-iframe-init.js';
+import withCheckedPartnerDetails from './partner-details';
 import { createDocSubmission } from './doc-submission.js';
 
 initIframeSentry('doc-verification');
@@ -223,7 +226,7 @@ window.Sentry = Sentry;
         typeof event.data === 'string' &&
         event.data.includes('SmileIdentity::Configuration')
       ) {
-        config = JSON.parse(event.data);
+        config = withCheckedPartnerDetails(JSON.parse(event.data));
         // Tag every Sentry event from this iframe context with partner_id and
         // environment. The parent script.js tags the parent window's Sentry
         // hub, but this iframe runs in its own JS context with its own hub —
@@ -285,19 +288,19 @@ window.Sentry = Sentry;
     autocomplete.innerHTML = `
       <smileid-combobox-trigger
         ${isSingleCountry ? 'disabled' : ''}
-        ${isSingleCountry ? `value="${countries[0].name}"` : ''}
-        label="${t('pages.idSelection.searchCountry')}">
+        ${isSingleCountry ? `value="${escapeHtml(countries[0].name)}"` : ''}
+        label="${tHtml('pages.idSelection.searchCountry')}">
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noCountryFound')}">
+      <smileid-combobox-listbox empty-label="${tHtml('pages.idSelection.noCountryFound')}">
         ${countries
           .map(
             (country) =>
               `
             <smileid-combobox-option ${
               isSingleCountry ? 'aria-selected="true" ' : ''
-            }value="${country.code}" label="${country.name}">
-              ${country.name}
+            }value="${escapeHtml(country.code)}" label="${escapeHtml(country.name)}">
+              ${escapeHtml(country.name)}
             </smileid-combobox-option>
           `,
           )
@@ -323,28 +326,28 @@ window.Sentry = Sentry;
     combobox.innerHTML = `
       <smileid-combobox-trigger
         ${isSingleIdType ? 'disabled' : ''}
-        ${isSingleIdType ? `value="${idTypes[0].name}"` : ''}
-        label="${t('pages.idSelection.selectDocument')}"
+        ${isSingleIdType ? `value="${escapeHtml(idTypes[0].name)}"` : ''}
+        label="${tHtml('pages.idSelection.selectDocument')}"
         type="button"
       >
       </smileid-combobox-trigger>
 
-      <smileid-combobox-listbox empty-label="${t('pages.idSelection.noIdTypeFound')}">
+      <smileid-combobox-listbox empty-label="${tHtml('pages.idSelection.noIdTypeFound')}">
         ${idTypes
           .map(
             (idType) =>
               `
-            <smileid-combobox-option value="${idType.code}__${idType.name}" label="${
-              idType.name
-            }">
+            <smileid-combobox-option value="${escapeHtml(`${idType.code}__${idType.name}`)}" label="${escapeHtml(
+              idType.name,
+            )}">
               <div>
-                <p>${idType.name}</p>
+                <p>${escapeHtml(idType.name)}</p>
                 ${
                   idType.name === 'Others' ||
                   (idType.example && idType.example.length > 1)
                     ? `<small>${
                         idType.example.length > 1 ? 'e.g. ' : ''
-                      }${idType.example.join(', ')}</small>`
+                      }${escapeHtml(idType.example.join(', '))}</small>`
                     : ''
                 }
               </div>

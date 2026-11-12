@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Other origin page</title>
+  </head>
+  <body>
+    <!--
+      A page on another origin loaded into one of the SDK's frames. Tests load
+      it from 127.0.0.1, not localhost, so its origin differs from the SDK's.
+      It reports anything sent to it to the host page, then posts the flow's
+      messages.
+    -->
+    <script>
+      const host = location.hash === '#nested' ? parent.parent : parent;
+      const targets = host === parent ? [host] : [parent, host];
+
+      window.addEventListener('message', (event) => {
+        host.postMessage({ received: String(event.data) }, '*');
+      });
+      host.postMessage('other-page-loaded', '*');
+      parent.postMessage('SmileIdentity::ChildPageReady', '*');
+      parent.postMessage('relayed-from-other-page', '*');
+      targets.forEach((win) => {
+        win.postMessage('SmileIdentity::Success', '*');
+        win.postMessage('SmileIdentity::Error', '*');
+        win.postMessage('SmileIdentity::Close', '*');
+      });
+    </script>
+  </body>
+</html>

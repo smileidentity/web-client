@@ -1048,25 +1048,13 @@ window.Sentry = Sentry;
 
       uploadZip(fileToUpload, uploadURL);
     } catch (error) {
-      displayErrorMessage(translate('pages.error.generic'));
+      setActiveScreen(UploadFailureScreen);
       console.error(
         `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
       );
     } finally {
       if (event && event.target) event.target.disabled = false;
     }
-  }
-
-  function displayErrorMessage(message) {
-    const p = document.createElement('p');
-
-    p.textContent = message;
-    p.classList.add('validation-message');
-    p.style.fontSize = '1.5rem';
-    p.style.textAlign = 'center';
-
-    const main = document.querySelector('main');
-    main.prepend(p);
   }
 
   function oidcErrorCopy(result) {
@@ -1284,7 +1272,10 @@ window.Sentry = Sentry;
       const response = await postData(URL, payload, true);
       const json = await response.json();
 
-      if (json.error) throw new Error(json.error);
+      // A gateway 429 or 5xx can come without an `error` field.
+      if (!response.ok || json.error || !json.upload_url) {
+        throw new Error(json.error || `upload failed (${response.status})`);
+      }
 
       return json.upload_url;
     } catch (error) {
@@ -1341,10 +1332,22 @@ window.Sentry = Sentry;
     request.send(file);
   }
 
-  function retryUpload() {
-    const fileUploaded = uploadZip(fileToUpload, uploadURL);
-
-    return fileUploaded;
+  async function retryUpload() {
+    try {
+      // A failed upload-URL request leaves no URL to reuse, so ask for a new one.
+      if (!uploadURL) {
+        [uploadURL, fileToUpload] = await Promise.all([
+          getUploadURL(),
+          createZip(),
+        ]);
+      }
+      uploadZip(fileToUpload, uploadURL);
+    } catch (error) {
+      setActiveScreen(UploadFailureScreen);
+      console.error(
+        `SmileIdentity - ${error.name || error.message}: ${error.cause}`,
+      );
+    }
   }
 
   function closeWindow(userTriggered) {

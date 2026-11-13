@@ -1074,7 +1074,9 @@ initIframeSentry('basic-kyc');
     const response = await postData(URL, payload, true);
     const json = await response.json();
 
-    if (json.error) throw new Error(json.error);
+    if (!response.ok || json.error) {
+      throw new Error(json.error || `submission failed (${response.status})`);
+    }
   }
 
   function complete() {

@@ -74,4 +74,50 @@ describe('smartselfie authentication', () => {
       cy.wait('@failedUploadRequest');
     });
   });
+
+  describe('when the upload URL request is rate limited', () => {
+    beforeEach(() => {
+      cy.intercept(
+        {
+          method: 'POST',
+          url: '*upload*',
+          times: 1,
+        },
+        {
+          statusCode: 429,
+          body: { message: 'Too Many Requests' },
+        },
+      ).as('rateLimited');
+
+      cy.intercept(
+        {
+          method: 'PUT',
+          url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
+        },
+        {
+          statusCode: 200,
+        },
+      ).as('successfulUpload');
+
+      cy.intercept({ method: 'PUT', url: '**/undefined' }).as('undefinedPut');
+
+      cy.navigateThroughCameraScreens();
+    });
+
+    it('should get a new upload URL on retry and complete', () => {
+      cy.wait('@rateLimited');
+
+      cy.getIFrameBody().find('#upload-failure-screen').should('be.visible');
+
+      cy.getIFrameBody().find('#retry-upload').click();
+
+      cy.wait('@getUploadURL');
+
+      cy.wait('@successfulUpload');
+
+      cy.getIFrameBody().find('#complete-screen').should('be.visible');
+
+      cy.get('@undefinedPut.all').should('have.length', 0);
+    });
+  });
 });

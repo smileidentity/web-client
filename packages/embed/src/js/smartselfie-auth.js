@@ -493,6 +493,8 @@ window.Sentry = Sentry;
   }
 
   async function retryUpload() {
+    // Leave the Retry screen first so a second tap cannot start a second upload.
+    setActiveScreen(UploadProgressScreen);
     try {
       // A failed upload-URL request leaves no URL to reuse, so ask for a new one.
       if (!uploadURL) {

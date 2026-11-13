@@ -109,15 +109,38 @@ describe('smartselfie authentication', () => {
 
       cy.getIFrameBody().find('#upload-failure-screen').should('be.visible');
 
+      // Hold the retry's upload-URL response so a second tap could land.
+      cy.intercept(
+        {
+          method: 'POST',
+          url: '*upload*',
+        },
+        {
+          delay: 1500,
+          body: {
+            upload_url:
+              'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/smartselfie.zip',
+          },
+        },
+      ).as('retryUploadURL');
+
       cy.getIFrameBody().find('#retry-upload').click();
 
-      cy.wait('@getUploadURL');
+      // The Retry button must be gone before the URL arrives, or a double tap
+      // starts a second job.
+      cy.getIFrameBody()
+        .find('#retry-upload', { timeout: 500 })
+        .should('not.be.visible');
+
+      cy.wait('@retryUploadURL');
 
       cy.wait('@successfulUpload');
 
       cy.getIFrameBody().find('#complete-screen').should('be.visible');
 
       cy.get('@undefinedPut.all').should('have.length', 0);
+
+      cy.get('@retryUploadURL.all').should('have.length', 1);
     });
   });
 });

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Embed: Treat any non-2xx response to the upload URL or submission request as a failure, even when the body has no `error` field, and ask for a new upload URL when the user taps Retry, so a rate-limited (429) upload no longer loses the capture
+
 ## [11.6.3] - 2026-10-30
 
 ### Fixed

@@ -37,6 +37,29 @@ describe('enhanced kyc', () => {
     cy.wait('@submitEnhancedKYC');
   });
 
+  it('should not complete when the API answers 429 without an error field', () => {
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*v1/async_id_verification*',
+      },
+      {
+        statusCode: 429,
+        body: { message: 'Too Many Requests' },
+      },
+    ).as('rateLimited');
+
+    cy.getIFrameBody().find('#id_number').type('12345678901');
+
+    cy.getIFrameBody().find('#submitForm').click();
+    cy.wait('@rateLimited');
+
+    cy.getIFrameBody()
+      .find('.validation-message')
+      .should('contain', 'Something went wrong');
+    cy.getIFrameBody().find('#complete-screen').should('not.be.visible');
+  });
+
   it('should show consent screen for the required id type', () => {
     cy.visit('/ekyc-consent-required');
 

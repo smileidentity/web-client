@@ -539,7 +539,9 @@ function getHumanSize(numberOfBytes) {
       });
       const json = await response.json();
 
-      if (json.error) throw new Error(json.error);
+      if (!response.ok || json.error) {
+        throw new Error(json.error || `submission failed (${response.status})`);
+      }
 
       complete();
       return json;

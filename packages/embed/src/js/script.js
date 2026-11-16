@@ -202,14 +202,11 @@ window.SmileIdentity = (function () {
 			z-index: 999999;
 		`;
     document.body.prepend(iframe);
+    return iframe;
   }
 
-  function closeIFrame(config, userTriggered) {
-    const iframe = document.querySelector(
-      '#smile-identity-hosted-web-integration',
-    );
-
-    iframe?.remove();
+  function closeIFrame(config, iframe, userTriggered) {
+    iframe.remove();
 
     if (config.onClose && userTriggered) {
       config.onClose();
@@ -309,13 +306,11 @@ window.SmileIdentity = (function () {
     return true;
   }
 
-  function publishConfigToIFrame(config) {
-    const targetWindow = document.querySelector(
-      "[name='smile-identity-hosted-web-integration']",
-    ).contentWindow;
+  function publishConfigToIFrame(config, iframe, targetOrigin) {
     config.source = 'SmileIdentity::Configuration';
 
-    targetWindow.postMessage(JSON.stringify(config), '*');
+    // Send the config only to the SDK's origin.
+    iframe.contentWindow?.postMessage(JSON.stringify(config), targetOrigin);
   }
 
   function SmileIdentity(config) {
@@ -323,33 +318,80 @@ window.SmileIdentity = (function () {
       const configIsValid = isConfigValid(config);
       Sentry.setTag('environment', config.environment);
       if (configIsValid) {
-        createIframe(config.product);
+        const iframe = createIframe(config.product);
+        const sdkOrigin = new URL(innerConfig.siteURL, window.location.href)
+          .origin;
+        // The CDN redirects http to https, so a script loaded over http (or
+        // from a protocol-relative URL on an http page) gets iframe pages
+        // served from the https origin of the same host.
+        const sdkOrigins = [sdkOrigin, sdkOrigin.replace(/^http:/, 'https:')];
+        let reportedOriginMismatch = false;
 
-        window.addEventListener(
-          'message',
-          (event) => {
-            const tag = event.data.message || event.data;
+        // The callbacks follow only this flow's iframe, or the product iframe
+        // that product-selection nests inside it, from the SDK's origin.
+        const isFromFlow = (event) => {
+          const flowWindow = iframe.contentWindow;
+          if (
+            !flowWindow ||
+            (event.source !== flowWindow && event.source?.parent !== flowWindow)
+          ) {
+            return false;
+          }
+          if (sdkOrigins.includes(event.origin)) return true;
 
-            switch (tag) {
-              case 'SmileIdentity::ChildPageReady':
-                return publishConfigToIFrame(config);
-              case 'SmileIdentity::Close':
-                return closeIFrame(config, true);
-              case 'SmileIdentity::Close::System':
-                return closeIFrame(config, false);
-              case 'SmileIdentity::Success':
-                return handleSuccess(config);
-              case 'SmileIdentity::ConsentDenied':
-              case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
-                return handleConsentRejection(config, event.data);
-              case 'SmileIdentity::Error':
-                return handleError(config, event.data);
-              default:
-                return undefined;
-            }
-          },
-          false,
-        );
+          // Report once, so a page served from an unexpected origin shows up
+          // in Sentry rather than as a flow that silently never starts. Only
+          // SDK messages count: other frames inside the SDK pages may post too.
+          const data = event.data?.message || event.data;
+          const isSdkMessage =
+            typeof data === 'string' && data.startsWith('SmileIdentity::');
+          if (isSdkMessage && !reportedOriginMismatch) {
+            reportedOriginMismatch = true;
+            Sentry.captureMessage(
+              'SmileIdentity: ignored a message from the SDK iframe with an unexpected origin',
+              {
+                level: 'warning',
+                tags: { area: 'message_origin' },
+                extra: { expected: sdkOrigins, received: event.origin },
+              },
+            );
+          }
+          return false;
+        };
+
+        const onMessage = (event) => {
+          if (!isFromFlow(event)) return undefined;
+
+          const tag = event.data.message || event.data;
+
+          switch (tag) {
+            case 'SmileIdentity::ChildPageReady':
+              // event.origin has just passed isFromFlow.
+              return publishConfigToIFrame(config, iframe, event.origin);
+            case 'SmileIdentity::Close':
+            case 'SmileIdentity::Close::System':
+              // Product pages post Close to both their parent and its
+              // parent, which are the same window on a top-level host.
+              // Stop listening so each close runs once.
+              window.removeEventListener('message', onMessage);
+              return closeIFrame(
+                config,
+                iframe,
+                tag === 'SmileIdentity::Close',
+              );
+            case 'SmileIdentity::Success':
+              return handleSuccess(config);
+            case 'SmileIdentity::ConsentDenied':
+            case 'SmileIdentity::ConsentDenied::TOTP::ContactMethodsOutdated':
+              return handleConsentRejection(config, event.data);
+            case 'SmileIdentity::Error':
+              return handleError(config, event.data);
+            default:
+              return undefined;
+          }
+        };
+
+        window.addEventListener('message', onMessage, false);
       }
     } catch (error) {
       if (config.onError) {

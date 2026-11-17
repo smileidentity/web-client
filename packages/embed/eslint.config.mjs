@@ -20,7 +20,16 @@ export default [
     // back on once the stale eslint-disable comments are cleared out.
     linterOptions: { reportUnusedDisableDirectives: 'off' },
   },
-  { ignores: ['build/**', 'dist/**', 'libs/**', '**/node_modules/**'] },
+  {
+    ignores: [
+      'build/**',
+      'dist/**',
+      'libs/**',
+      '**/node_modules/**',
+      // Unit tests run under `node --test`, which the browser rules do not fit.
+      '**/*.test.mjs',
+    ],
+  },
   ...compat.config({
     env: {
       browser: true,

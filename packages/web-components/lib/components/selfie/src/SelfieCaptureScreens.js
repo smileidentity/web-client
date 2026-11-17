@@ -4,6 +4,7 @@ import './selfie-capture-wrapper/index.ts';
 import { getMediapipeInstance } from './smartselfie-capture/utils/mediapipeManager.ts';
 import SmartCamera from '../../../domain/camera/src/SmartCamera';
 import styles from '../../../styles/src/styles';
+import { safeCssColor } from '../../../utils/safe-values';
 import packageJson from '../../../../package.json';
 import { JPEG_QUALITY } from '../../../domain/constants/src/Constants';
 
@@ -499,7 +500,7 @@ class SelfieCaptureScreens extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   handleBackEvents() {

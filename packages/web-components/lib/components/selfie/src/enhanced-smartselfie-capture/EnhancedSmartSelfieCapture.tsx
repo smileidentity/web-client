@@ -4,6 +4,7 @@ import register from 'preact-custom-element';
 import type { FunctionComponent } from 'preact';
 
 import { getBoolProp } from '../../../../utils/props';
+import { safeCssColor } from '../../../../utils/safe-values';
 import { t } from '../../../../domain/localisation';
 import { useFaceCapture, useCamera } from './hooks';
 import { getMediapipeInstance } from './utils/mediapipeManager';
@@ -57,7 +58,7 @@ interface Props {
 const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   interval = 350,
   duration = 2800,
-  'theme-color': themeColor = '#001096',
+  'theme-color': themeColorProp,
   'show-navigation': showNavigationProp = false,
   'allow-agent-mode': allowAgentModeProp = false,
   'show-agent-mode-for-tests': showAgentModeForTestsProp = false,
@@ -65,6 +66,7 @@ const EnhancedSmartSelfieCapture: FunctionComponent<Props> = ({
   'hide-instructions': hideInstructionsProp = false,
   'show-back-on-guidelines': showBackOnGuidelinesProp = false,
 }) => {
+  const themeColor = safeCssColor(themeColorProp) || '#001096';
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const showNavigation = getBoolProp(showNavigationProp);

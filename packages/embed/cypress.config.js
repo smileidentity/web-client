@@ -3,6 +3,8 @@ import { defineConfig } from 'cypress';
 const config = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:8000',
+    // Keep test runs from sending error reports to Sentry.
+    blockHosts: ['*.sentry.io', '*.ingest.sentry.io'],
     specPattern: 'cypress/tests/**/*.cy.cjs',
     retries: {
       runMode: 2,

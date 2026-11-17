@@ -56,6 +56,6 @@
     "nyc": "18.0.0",
     "prettier": "^3.3.3",
     "resolve.exports": "^2.0.3",
-    "serve": "^14.2.6"
+    "serve": "^14.2.8"
   }
 }

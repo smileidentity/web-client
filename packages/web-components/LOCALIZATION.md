@@ -60,6 +60,8 @@ The SDK uses a 3-level fallback chain for translations:
 
 This ensures the UI always displays something meaningful, even if a translation is missing.
 
+Translations are shown as plain text. Markup and HTML entities such as `&nbsp;` in a translation appear as written.
+
 ---
 
 ## Available Languages
@@ -439,21 +441,26 @@ If you need to display translated strings in your own UI:
 ```javascript
 import { t, tHtml } from '@smileid/web-components/localisation';
 
-// Simple translation
+// Simple translation, as plain text for textContent
 const backButtonText = t('common.back'); // "Back" (or translation)
 
-// Translation with interpolation
-const errorMessage = tHtml('pages.error.countryNotSupported', {
+// Translation with interpolation, as plain text
+const errorMessage = t('pages.error.countryNotSupported', {
   country: 'Nigeria',
 }); // "Nigeria is not supported"
 
-// Translation with styled interpolation
+// Translation with styled interpolation, as HTML for innerHTML
 const consentMessage = tHtml('consent.accessRequest', {
   partnerName: { value: 'Acme Corp', className: 'highlight' },
   idTypeLabel: 'BVN',
 });
 // Returns: "<span class="highlight">Acme Corp</span> wants to access your BVN information"
 ```
+
+Translations are plain text. `t()` returns them as they are, for `textContent`
+or attributes set with `setAttribute`. `tHtml()` escapes the translation and
+every value, so any markup in them is shown as text, and adds only the `<span>`
+elements for styled values.
 
 ### Complete Web Components Example
 

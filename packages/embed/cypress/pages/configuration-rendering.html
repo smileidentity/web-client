@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        max-width: 100%;
+        min-height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script src="js/script.min.js"></script>
+
+    <script>
+      // Builds a configuration from the query string:
+      //   product   - the product to load, or `product_selection` for id_types
+      //   variant   - `markup` puts markup and quote characters in every
+      //               rendered configuration value; `plain` uses normal values
+      //   links     - with `markup`: `quoted` uses http(s) links that contain
+      //               quote characters; otherwise the links have other forms
+      //   logo, policy, theme - with `plain`: the logo URL, policy URL and
+      //               theme colour to use
+      //   language  - the translation language, `en-GB` by default
+      const params = new URLSearchParams(window.location.search);
+      const product = params.get('product');
+      const markup = params.get('variant') === 'markup';
+      const language = params.get('language') || 'en-GB';
+
+      // Any of these running sets localStorage.configMarker, which the
+      // spec checks for.
+      const run = 'localStorage.configMarker=1';
+      const tags = `<img src="x" onerror="${run}"><script>${run}<\/script><b class="config-markup">b</b>`;
+      const quotes = `x" onfocus="${run}" autofocus data-a="x' onfocus='${run}' autofocus data-b='`;
+      const text = markup ? `Acme ${tags} ${quotes}` : 'Allow & continue';
+
+      const partnerDetails = markup
+        ? {
+            name: `Acme ${tags} ${quotes}`,
+            ...(params.get('links') === 'quoted'
+              ? {
+                  logo_url: `https://example.com/logo' onerror='${run}' data-a='x`,
+                  policy_url: `https://example.com/policy' onfocus='${run}' autofocus data-a='x`,
+                }
+              : {
+                  logo_url: `data:text/html,<img src="x" onerror="${run}">`,
+                  policy_url: `JavaScript:${run}`,
+                }),
+            partner_id: '007',
+            theme_color: `#000' data-a='"></style><img src="x" onerror="${run}">`,
+          }
+        : {
+            name: "Test Org & Sons' Ltd",
+            logo_url:
+              params.get('logo') || 'https://portal.usesmileid.com/favicon.ico',
+            partner_id: '007',
+            policy_url:
+              params.get('policy') || 'https://usesmileid.com/privacy-policy',
+            theme_color: params.get('theme') || '#000',
+          };
+
+      const translation = {
+        language,
+        locales: {
+          [language]: {
+            ...(markup ? { direction: `ltr' data-a='${run}` } : {}),
+            camera: { permission: { description: text } },
+            common: { allow: text, back: text, cancel: text },
+            consent: {
+              accessRequest: `{{partnerName}} - ${text}`,
+              demoTip: text,
+              privacyPolicyLink: text,
+            },
+            document: { instructions: { followInstructions: text } },
+            navigation: { back: text },
+            pages: {
+              idInfo: { searchBank: text },
+              idSelection: {
+                searchCountry: text,
+                selectDocument: text,
+                title: text,
+              },
+            },
+            selfie: { instructions: { title: text } },
+          },
+        },
+      };
+
+      const tokens = {
+        authentication:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoid2ViLXRva2VuLXRlc3QtdXNlci0xMDEiLCJqb2JfaWQiOiJ3ZWItdG9rZW4tam9iLTIzMDEiLCJqb2JfdHlwZSI6Mn0sImNhbGxiYWNrX3VybCI6Imh0dHBzOi8vd2ViaG9vay5zaXRlLzFhYWE3YTdiLWFjY2ItNDBhYy04NjQzLWZkOGE4NzAzZTliZSIsImlhdCI6MTY0ODIzODM2NCwiZXhwIjoxNjQ5ODg2NTk1fQ.PXqtgX3m6XTbHfDkxz0Yc-Z1EoblkrOeq1UFQqM9ix4',
+        e_signature:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoid2ViLXRva2VuLXRlc3QtdXNlci0wMDEiLCJqb2JfaWQiOiJ3ZWItdG9rZW4tam9iLTEyMyIsImpvYl90eXBlIjo1fSwiY2FsbGJhY2tfdXJsIjoiaHR0cHM6Ly93ZWJob29rLnNpdGUvMWFhYTdhN2ItYWNjYi00MGFjLTg2NDMtZmQ4YTg3MDNlOWJlIiwiaWF0IjoxNjQ2OTQxNTQ5LCJleHAiOjE2NDg1ODg0ODN9.D83B4jSgQGJfSnQ5xALKea48okutLpbTcqojJTk4iGI',
+        default:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX3BhcmFtcyI6eyJ1c2VyX2lkIjoidXNlci1mZTIwY2JkYS1jMjJiLTRmZmUtOWRlZC05YjZhZGI2MDE1ZmIiLCJqb2JfaWQiOiJqb2ItNjYzY2VhNTUtZWIxYy00MjI2LWI1N2YtOGEwMTAwOTc4ZjViIiwiam9iX3R5cGUiOjF9LCJjYWxsYmFja191cmwiOiJodHRwczovL3dlYmhvb2suc2l0ZS9iZTM0YzkzZC1hOTFmLTQzZGItYWVmMi05MDZjNWNkOTVkNDciLCJpYXQiOjE2MzQyODE0MTAsImV4cCI6MTYzNTkxNTY4NH0.B4JaP4UWbNs38hV9nQ_9_Pnpos0fM3qu2nGG7Eymjs8',
+      };
+
+      const config = {
+        token: tokens[product] || tokens.default,
+        callback_url:
+          'https://portal.usesmileid.com/api/v2/007/postback/update_status',
+        environment: 'sandbox',
+        partner_details: partnerDetails,
+        translation,
+        consent_required: { NG: ['BVN'] },
+        onSuccess: () => {},
+        onClose: () => {},
+      };
+
+      if (product === 'product_selection') {
+        config.id_types = [
+          {
+            country: 'NG',
+            id_type: 'BVN',
+            verification_method: 'biometric_kyc',
+          },
+          // id_types outside the supported list stop product selection
+          // before anything renders, so both variants use supported ones.
+          {
+            country: 'GH',
+            id_type: 'PASSPORT',
+            verification_method: 'doc_verification',
+          },
+        ];
+      } else {
+        config.product = product;
+      }
+
+      if (product === 'e_signature') {
+        config.document_ids = ['07ef4595-aaed-4597-b6af-444986ae4565'];
+      }
+
+      SmileIdentity(config);
+    </script>
+  </body>
+</html>

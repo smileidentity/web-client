@@ -1,6 +1,11 @@
 import styles from '../../../../styles/src/styles';
 import '../../../navigation/src';
-import { t, getDirection } from '../../../../domain/localisation';
+import {
+  tHtml,
+  escapeHtml,
+  getDirection,
+} from '../../../../domain/localisation';
+import { safeCssColor } from '../../../../utils/safe-values';
 
 function templateString() {
   return `
@@ -340,7 +345,7 @@ function templateString() {
       }
     </style>
     ${styles(this.themeColor)}
-    <div id="selfie-capture-instruction-screen" class="center" dir="${this.direction}">
+    <div id="selfie-capture-instruction-screen" class="center" dir="${escapeHtml(this.direction)}">
     <div class="content-root">
       <div class="content-header">
         ${this.showNavigation ? `<smileid-navigation theme-color='${this.themeColor}' ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>` : ''}
@@ -371,7 +376,7 @@ function templateString() {
               </clipPath>
             </defs>
           </svg>
-          <h1 class='title-color font-bold'>${t('selfie.instructions.title')}</h1>
+          <h1 class='title-color font-bold'>${tHtml('selfie.instructions.title')}</h1>
         </header>
     <div class="instructions-wrapper">
       <div class="instructions">
@@ -450,9 +455,9 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.goodLight.header')}</p>
+          <p class="text-base title-color font-bold tip-header">${tHtml('selfie.instructions.tips.goodLight.header')}</p>
           <p class="tip-body">
-            ${t('selfie.instructions.tips.goodLight.body')}
+            ${tHtml('selfie.instructions.tips.goodLight.body')}
           </p>
         </div>
       </div>
@@ -538,9 +543,9 @@ function templateString() {
           </defs>
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.clearImage.header')}</p>
+          <p class="text-base title-color font-bold tip-header">${tHtml('selfie.instructions.tips.clearImage.header')}</p>
           <p class="tip-body">
-            ${t('selfie.instructions.tips.clearImage.body')}
+            ${tHtml('selfie.instructions.tips.clearImage.body')}
           </p>
         </div>
       </div>
@@ -570,25 +575,25 @@ function templateString() {
           />
         </svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.removeObstructions.header')}</p>
+          <p class="text-base title-color font-bold tip-header">${tHtml('selfie.instructions.tips.removeObstructions.header')}</p>
           <p class="tip-body">
-            ${t('selfie.instructions.tips.removeObstructions.body')}
+            ${tHtml('selfie.instructions.tips.removeObstructions.body')}
           </p>
         </div>
       </div>
       <div class="instructions">
         <svg  xmlns="http://www.w3.org/2000/svg"  width="38"  height="38"  viewBox="0 0 24 24"  fill="none"  stroke="${this.themeColor}"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-mood-happy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>
         <div class="instruction">
-          <p class="text-base title-color font-bold tip-header">${t('selfie.instructions.tips.wideSmile.header')}</p>
+          <p class="text-base title-color font-bold tip-header">${tHtml('selfie.instructions.tips.wideSmile.header')}</p>
           <p class="tip-body">
-            ${t('selfie.instructions.tips.wideSmile.body')}
+            ${tHtml('selfie.instructions.tips.wideSmile.body')}
           </p>
         </div>
       </div>
     </div>
     <section class="controls">
       <button id='allow' data-variant='solid full-width' class='button theme-background'>
-        ${t('selfie.instructions.allowButton')}
+        ${tHtml('selfie.instructions.allowButton')}
       </button>
     </section>
     ${
@@ -651,7 +656,7 @@ class SelfieCaptureInstructions extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hideAttribution() {

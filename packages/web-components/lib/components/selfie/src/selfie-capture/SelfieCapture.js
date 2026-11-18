@@ -6,7 +6,13 @@ import SmartCamera from '../../../../domain/camera/src/SmartCamera';
 import styles from '../../../../styles/src/styles';
 import packageJson from '../../../../../package.json';
 import '../../../navigation/src';
-import { t, tHtml, getDirection } from '../../../../domain/localisation';
+import {
+  t,
+  tHtml,
+  escapeHtml,
+  getDirection,
+} from '../../../../domain/localisation';
+import { safeCssColor } from '../../../../utils/safe-values';
 
 const COMPONENTS_VERSION = packageJson.version;
 
@@ -32,7 +38,7 @@ function getLivenessFramesIndices(
 
   if (totalNoOfFrames < numberOfFramesRequired) {
     throw new Error(
-      tHtml('selfie.capture.error.minFrames', {
+      t('selfie.capture.error.minFrames', {
         count: numberOfFramesRequired,
       }),
     );
@@ -514,13 +520,13 @@ function templateString() {
     margin-inline-start; 1em;
   }
   </style>
-  <div id='selfie-capture-screen' class='flow center' dir='${this.direction}'>
+  <div id='selfie-capture-screen' class='flow center' dir='${escapeHtml(this.direction)}'>
     <smileid-navigation theme-color='${this.themeColor}' ${this.showNavigation ? 'show-navigation' : ''} ${this.hideBack ? 'hide-back' : ''}></smileid-navigation>
 
-    <div class='tips'>${t('selfie.capture.tip.fitHead')}</div>
+    <div class='tips'>${tHtml('selfie.capture.tip.fitHead')}</div>
 
     <div className="error">
-      ${this.cameraError ? `<p class="color-red">${this.cameraError}</p>` : ''}
+      ${this.cameraError ? `<p class="color-red">${escapeHtml(this.cameraError)}</p>` : ''}
     </div>
     <div class='section | flow' ${this.cameraError ? 'hidden' : ''}>
       <div class='video-container'>
@@ -549,15 +555,15 @@ function templateString() {
             </svg>
           </div>
           <div>
-            <p id='smile-cta'>${t('selfie.capture.cta.smile')}</p>
+            <p id='smile-cta'>${tHtml('selfie.capture.cta.smile')}</p>
           </div>
         </div>
       </div>
 
-      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? t('selfie.capture.agentMode.on') : t('selfie.capture.agentMode.off')}</button>` : ''}
+      ${this.allowAgentMode ? `<button data-variant='outline small' id='switch-camera' class='button | center' type='button'>${this.inAgentMode ? tHtml('selfie.capture.agentMode.on') : tHtml('selfie.capture.agentMode.off')}</button>` : ''}
 
       <button data-variant='solid' id='start-image-capture' class='button | center' type='button'>
-        ${t('selfie.capture.button.takeSelfie')}
+        ${tHtml('selfie.capture.button.takeSelfie')}
       </button>
 
       ${this.hideAttribution ? '' : '<powered-by-smile-id></powered-by-smile-id>'}
@@ -966,7 +972,7 @@ class SelfieCaptureScreen extends HTMLElement {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 
   get hideAttribution() {

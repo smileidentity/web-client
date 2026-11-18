@@ -1,4 +1,7 @@
 import SignaturePadCore from 'signature_pad';
+// signature-pad is built as part of web-components, as in lib/main.ts.
+// eslint-disable-next-line import/no-relative-packages
+import { safeCssColor } from '../../../utils/safe-values';
 
 class SmartFileUpload {
   static memoryLimit = 2048000;
@@ -470,7 +473,7 @@ button:disabled {
   }
 
   get themeColor() {
-    return this.getAttribute('theme-color') || '#001096';
+    return safeCssColor(this.getAttribute('theme-color')) || '#001096';
   }
 }
 

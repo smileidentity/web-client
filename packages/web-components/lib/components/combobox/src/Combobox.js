@@ -1,4 +1,4 @@
-import { t } from '../../../domain/localisation';
+import { escapeHtml, tHtml } from '../../../domain/localisation';
 
 function generateId(prefix) {
   const id = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
@@ -111,17 +111,17 @@ class ComboboxTrigger extends HTMLElement {
       this.type === 'text'
         ? `
         <div>
-          <input ${this.value ? `value="${this.value}" ` : ''}${
+          <input ${this.value ? `value="${escapeHtml(this.value)}" ` : ''}${
             this.disabled ? ' disabled ' : ''
-          }type="text" placeholder="${this.label}" />
+          }type="text" placeholder="${escapeHtml(this.label)}" />
           <button ${this.disabled ? 'disabled ' : ''}tabindex='-1' type='button'>
-            <span class="visually-hidden">${t('common.toggle')}</span>
+            <span class="visually-hidden">${tHtml('common.toggle')}</span>
           </button>
         </div>
       `
-        : `<button ${this.disabled ? 'disabled ' : ''}type="button">${
-            this.value || this.label
-          }</button>`
+        : `<button ${this.disabled ? 'disabled ' : ''}type="button">${escapeHtml(
+            this.value || this.label,
+          )}</button>`
     }`;
 
     this.setAttribute('expanded', false);
@@ -340,7 +340,7 @@ class ComboboxListbox extends HTMLElement {
   get emptyState() {
     return `
       <p id='empty-state' style="text-align: center;">
-        ${this.emptyLabel || t('combobox.noItems')}
+        ${this.emptyLabel ? escapeHtml(this.emptyLabel) : tHtml('combobox.noItems')}
       </p>
     `;
   }

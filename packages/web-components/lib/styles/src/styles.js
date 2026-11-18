@@ -1,8 +1,9 @@
 import typography from './typography';
+import { safeCssColor } from '../../utils/safe-values';
 
-const styles = (
-  themeColor,
-) => `<link rel="preconnect" href="https://fonts.gstatic.com" />
+const styles = (color) => {
+  const themeColor = safeCssColor(color);
+  return `<link rel="preconnect" href="https://fonts.gstatic.com" />
 <link
   href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
@@ -334,7 +335,7 @@ ${typography}
   }
 
   .instruction-header {
-    color: ${themeColor};
+    color: ${themeColor || '#001096'};
   }
 
   .flex-column {
@@ -368,5 +369,6 @@ ${typography}
     }
 
 </style>`;
+};
 
 export default styles;

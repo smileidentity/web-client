@@ -17,7 +17,7 @@ jobs:
       - name: build application
         run: npm run build
       - name: run tests
-        uses: cypress-io/github-action@18016a55674bd02cabf197de5762a1710cb5577c # v6
+        uses: cypress-io/github-action@0ed14f5d30c4ad6e5e8ffb6f57dbb69150137a3f # v6
         with:
           install: false
           start: npm start
@@ -44,7 +44,7 @@ jobs:
       - name: run unit tests
         run: npm run test:unit
       - name: run tests
-        uses: cypress-io/github-action@18016a55674bd02cabf197de5762a1710cb5577c # v6
+        uses: cypress-io/github-action@0ed14f5d30c4ad6e5e8ffb6f57dbb69150137a3f # v6
         with:
           install: false
           start: npm start
@@ -73,7 +73,7 @@ jobs:
       - name: run unit tests
         run: npm run test:unit
       - name: run tests
-        uses: cypress-io/github-action@18016a55674bd02cabf197de5762a1710cb5577c # v6
+        uses: cypress-io/github-action@0ed14f5d30c4ad6e5e8ffb6f57dbb69150137a3f # v6
         with:
           install: false
           start: npm run dev

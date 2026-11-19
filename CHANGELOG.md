@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Embed: The SDK now ignores `SmileIdentity::` messages from any window other than its own iframe, including the host page, and sends its configuration only to the origin the script loads from (or the https form of that origin).
 - Embed: Each `SmileIdentity()` call now responds only to its own iframe, so callbacks from an earlier call on the same page no longer fire for a later flow, and `onClose` fires once per close, where before it could fire twice.
+- Embed: Treat any non-2xx response to the upload URL or submission request as a failure, even when the body has no `error` field, and ask for a new upload URL when the user taps Retry, so a rate-limited (429) upload no longer loses the capture
 - Embed and web components: Show translation strings and other configuration values as plain text, and accept only http(s) URLs for partner links, or a data: image URL for the logo, and CSS colours for the theme colour. The embed accepts only absolute or protocol-relative partner links, because its pages are served from the SDK host
 
 ## [11.6.3] - 2026-10-30

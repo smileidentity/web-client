@@ -140,6 +140,82 @@ describe('document verification', () => {
   });
 });
 
+describe('document verification upload URL rate limited', () => {
+  beforeEach(() => {
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+      },
+      {
+        upload_url:
+          'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+    ).as('getUploadURL');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '*upload*',
+        times: 1,
+      },
+      {
+        statusCode: 429,
+        body: { message: 'Too Many Requests' },
+      },
+    ).as('rateLimited');
+
+    cy.intercept(
+      {
+        method: 'PUT',
+        url: 'https://smile-uploads-development01.s3.us-west-2.amazonaws.com/videos/212/212-0000060103-0gdzke3mdtlco5k0sdfh6vifzcrd3n/ekyc_smartselfie.zip',
+      },
+      {
+        statusCode: 200,
+      },
+    ).as('successfulUpload');
+
+    cy.intercept({ method: 'PUT', url: '**/undefined' }).as('undefinedPut');
+
+    cy.loadIDOptions();
+
+    cy.visit('/document-verification');
+
+    cy.selectPASSPORTIDType();
+  });
+
+  it('should get a new upload URL on retry and complete', () => {
+    // Publish the capture directly: driving the document camera is flaky.
+    cy.getIFrameBody()
+      .find('smart-camera-web')
+      .then(($el) => {
+        const win = $el[0].ownerDocument.defaultView;
+        $el[0].dispatchEvent(
+          new win.CustomEvent('smart-camera-web.publish', {
+            detail: { images: [] },
+          }),
+        );
+      });
+
+    cy.wait('@rateLimited');
+
+    cy.getIFrameBody().find('#upload-failure-screen').should('be.visible');
+
+    cy.getIFrameBody().find('#retry-upload').click();
+
+    cy.wait('@getUploadURL');
+
+    cy.wait('@successfulUpload');
+
+    cy.getIFrameBody().find('#upload-progress-screen').should('be.visible');
+    cy.getIFrameBody()
+      .find('#doc-submission')
+      .should('have.attr', 'submission-state', 'success');
+
+    cy.get('@undefinedPut.all').should('have.length', 0);
+  });
+});
+
 describe('legacy support - preselected country / id_types', () => {
   beforeEach(() => {
     cy.intercept(

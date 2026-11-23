@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.7.0] - 2026-11-23
+
 ### Changed
 
-- Localisation: `tHtml()` and `translateHtml()` now escape the translation as well as the values, so markup in a custom translation shows as text and characters such as `'` and `&` come back as HTML entities. Use `t()` for `textContent` and `setAttribute`, and keep `tHtml()` for `innerHTML`
+- Breaking for custom translations that contain markup. Localisation: `tHtml()` and `translateHtml()` now escape the translation as well as the values, so markup in a custom translation shows as text and characters such as `'` and `&` come back as HTML entities. Use `t()` for `textContent` and `setAttribute`, and keep `tHtml()` for `innerHTML`
 
 ### Fixed
 
